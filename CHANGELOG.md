@@ -2,6 +2,27 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — v0.5 Phase A — 2026-05-18
+
+Inbox-first ingestion. Telegram puller no longer writes directly to bookmarks; it writes to a new `inbox_items` queue. A separate `enrich:inbox` CLI processes pending items into typed tables (bookmarks now; papers and slides in v0.5 Phases B + C). Decoupling guarantees the Telegram offset advances on inbox write — not on enrichment success — so transient enrichment failures don't lose source messages (codex amended-plan P0 #1).
+
+### Added
+
+- **`inbox_items` table**: per-target row keyed by `(telegram_msg_id, type, raw_target)` for idempotency. Tracks `enrichment_status`, `enrichment_attempts` (capped at 5), `enrichment_attempted_at`, `enriched_row_id` (FK to bookmarks/papers/slides), `enrichment_error`. Indexes on status, bookmark_date, telegram_msg_id.
+- **`src/lib/inbox-enrichment.ts`**: type-dispatched enrichment loop. Phase A handles `tweet` → bookmarks via oEmbed. `paper` and `slide` types are detected (when Phases B/C land) but currently return `deferred` so they sit in `pending` until their handlers ship.
+- **`build/enrich-inbox.ts` CLI** + `npm run enrich:inbox` script. Reads pending/failed items, dispatches, updates state. Idempotent.
+- **`scripts/daily-build.sh`** chains the new step: `pull:telegram → enrich:inbox → build:day → build → push`.
+
+### Changed
+
+- **`build/pull-telegram.ts`** writes to `inbox_items` instead of `bookmarks`. Same tweet URL detection logic; same offset semantics. The bookmark insert moves into the enrichment handler.
+
+### Engineering
+
+- 251 tests (was 240, +11 for inbox CRUD + dispatch behavior).
+- 0 type errors across 40 files.
+- Legacy bookmarks remain untouched; existing `pending` bookmarks still enrich on next build:day. New tweets route through the inbox.
+
 ## [0.4.4] — 2026-05-18
 
 Dedup hotfix. v0.4.3 introduced table captions but the LLM, given both caption-table and detail-table features, produced duplicate matrices for the same comparison (caption table showing IBTR/Local relapse/etc. + detail table showing the same six rows). Fix at both layers: the prompt forbids it, and a code-level backstop drops detail-tables whose columns overlap ≥2 with the caption-table.

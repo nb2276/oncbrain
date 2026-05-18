@@ -1,13 +1,15 @@
 #!/bin/bash
 # Daily oncbrain pipeline. Runs from launchd at 3am local (or manually).
 #
-# Pipeline:
-#   1. pull:telegram    — drain new bot messages into bookmark queue
-#   2. build:day        — regenerate yesterday's + today's digests
+# Pipeline (v0.5+):
+#   1. pull:telegram    — drain new bot messages into inbox_items queue
+#   2. enrich:inbox     — process pending items (tweets enrich now; papers
+#                         + slides land in v0.5 Phase B + C, deferred)
+#   3. build:day        — regenerate yesterday's + today's digests
 #                         (covers the late-evening-message case where a
 #                          tweet sent at 11pm local got dated to yesterday)
-#   3. astro build      — static site
-#   4. git commit/push  — DigitalOcean auto-deploys
+#   4. astro build      — static site
+#   5. git commit/push  — DigitalOcean auto-deploys
 #
 # All output goes to ~/Library/Logs/oncbrain-cron.log.
 # Exits 0 even on partial failure (logged) so the next day's run still fires.
@@ -49,8 +51,12 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   echo "════════════════════════════════════════════════════════════"
 
   echo ""
-  echo "→ Pulling Telegram"
+  echo "→ Pulling Telegram → inbox"
   npm run pull:telegram --silent || echo "  ⚠ pull:telegram exited non-zero (continuing)"
+
+  echo ""
+  echo "→ Enriching inbox items"
+  npm run enrich:inbox --silent || echo "  ⚠ enrich:inbox exited non-zero (continuing)"
 
   echo ""
   echo "→ Building digests for $YESTERDAY"

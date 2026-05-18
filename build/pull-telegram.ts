@@ -1,22 +1,29 @@
-// CLI: poll Telegram for new bot messages, extract tweet URLs, save as bookmarks.
+// CLI: poll Telegram for new bot messages, write each detected ingestable
+// (tweet URL, paper URL/citation, image attachment) to inbox_items.
+//
+// v0.5 split:
+//   - pull:telegram does ONLY inbox writes + offset advance. No enrichment.
+//   - enrich:inbox processes pending inbox_items into bookmarks/papers/slides.
+//
+// Why split: codex P0 #1 — if enrichment (NCBI fetch, OCR) is inline and
+// fails transiently, the Telegram offset advances and the message is lost.
+// Inbox-first decouples; failed enrichment retries on the next enrich run.
 //
 // Usage:
-//   npm run pull:telegram                  # poll once, save new bookmarks
-//   npm run pull:telegram -- --since-zero  # reset offset (re-process all history)
-//   npm run pull:telegram -- --dry-run     # print what would happen, do not write
+//   npm run pull:telegram                  # poll once, save new inbox items
+//   npm run pull:telegram -- --since-zero  # reset offset (re-process history)
+//   npm run pull:telegram -- --dry-run     # show what would be saved, no write
 
 import 'dotenv/config';
 import {
   openDb,
-  saveBookmark,
+  saveInboxItem,
   getSetting,
   setSetting,
-  todayIso,
 } from '../src/lib/db.ts';
 import {
   fetchUpdates,
   extractTweetUrls,
-  extractCuratorNote,
   messageOf,
   unixToLocalDate,
 } from '../src/lib/telegram-ingest.ts';
@@ -61,9 +68,9 @@ async function main() {
     return;
   }
 
-  let saved = 0;
-  let skippedNoUrl = 0;
+  let savedTweets = 0;
   let skippedDuplicate = 0;
+  let skippedNoTarget = 0;
   let maxUpdateId = offset ?? 0;
 
   for (const update of updates) {
@@ -73,37 +80,41 @@ async function main() {
 
     const text = msg.text ?? msg.caption ?? '';
     const entities = msg.entities ?? msg.caption_entities ?? [];
-    const urls = extractTweetUrls(text, entities);
+    const date = unixToLocalDate(msg.date);
 
-    if (urls.length === 0) {
-      skippedNoUrl++;
+    // Phase A: only tweet URL detection wired up. Papers + slides are
+    // detected and routed to inbox in Phases B + C (deferred per the
+    // locked plan at docs/plans/v0.5-multi-source-ingestion.md).
+    const tweetUrls = extractTweetUrls(text, entities);
+
+    if (tweetUrls.length === 0) {
+      skippedNoTarget++;
       continue;
     }
 
-    const date = unixToLocalDate(msg.date);
-    const note = extractCuratorNote(text, entities);
-
-    for (const url of urls) {
+    for (const url of tweetUrls) {
       if (args.dryRun) {
-        console.log(`  [dry-run] would save: ${date} ${url}${note ? ` (note: ${note})` : ''}`);
-        saved++;
+        console.log(`  [dry-run] would inbox: msg=${msg.message_id} type=tweet target=${url}`);
+        savedTweets++;
         continue;
       }
       try {
-        const r = saveBookmark(db, {
-          url,
+        const r = saveInboxItem(db, {
+          type: 'tweet',
+          raw_target: url,
+          raw_message_text: text || null,
+          telegram_msg_id: msg.message_id,
+          telegram_chat_id: msg.chat?.id ?? null,
           bookmark_date: date,
-          notes: note,
-          fetched_via: 'pending',
         });
         if (r.created) {
-          console.log(`  saved #${r.id}: ${date} ${url}`);
-          saved++;
+          console.log(`  inbox #${r.id}: tweet ${date} ${url}`);
+          savedTweets++;
         } else {
           skippedDuplicate++;
         }
       } catch (err) {
-        console.warn(`  failed to save ${url}: ${(err as Error).message}`);
+        console.warn(`  failed to inbox ${url}: ${(err as Error).message}`);
       }
     }
   }
@@ -113,9 +124,9 @@ async function main() {
   }
 
   console.log(
-    `Done. saved=${saved} duplicate=${skippedDuplicate} no-url=${skippedNoUrl} next-offset=${maxUpdateId}`,
+    `Done. inboxed-tweets=${savedTweets} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} next-offset=${maxUpdateId}`,
   );
-  console.log(`Next: run \`npm run build:day\` to publish today's digest (${todayIso()}).`);
+  console.log(`Next: \`npm run enrich:inbox\` to enrich pending items, then \`npm run build:day\`.`);
 }
 
 main().catch((err) => {

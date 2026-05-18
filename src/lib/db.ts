@@ -46,6 +46,42 @@ export type BookmarkListFilter = {
   date_to?: string; // YYYY-MM-DD inclusive
 };
 
+// v0.5: inbox-first ingestion. Telegram puller writes here immediately on
+// receipt; enrichment runs separately and writes to bookmarks/papers/slides.
+// One row per identifiable target (tweet URL, paper PMID/URL, image attachment),
+// NOT one row per Telegram message — a single message with 2 URLs + 1 photo
+// produces 3 rows, each enrichable independently. The UNIQUE constraint
+// (telegram_msg_id, type, raw_target) keeps re-runs idempotent.
+export type InboxItem = {
+  id: number;
+  type: 'tweet' | 'paper' | 'slide';
+  raw_target: string; // tweet/paper URL, or slide file_id from Telegram getFile
+  raw_message_text: string | null; // full message text for curator-note extraction
+  attachments_json: string | null; // JSON: any additional metadata (paper PMID, slide mime, etc.)
+  telegram_msg_id: number;
+  telegram_chat_id: number | null;
+  source_batch_key: string | null; // groups items from one Telegram message (e.g., multi-photo)
+  received_at: number; // unix ms
+  bookmark_date: string; // YYYY-MM-DD local at message receipt
+  enrichment_status: 'pending' | 'enriched' | 'failed' | 'deferred';
+  enrichment_attempts: number;
+  enrichment_attempted_at: number | null;
+  enrichment_error: string | null;
+  enriched_row_id: number | null;
+  created_at: number;
+};
+
+export type NewInboxItem = {
+  type: 'tweet' | 'paper' | 'slide';
+  raw_target: string;
+  raw_message_text?: string | null;
+  attachments_json?: string | null;
+  telegram_msg_id: number;
+  telegram_chat_id?: number | null;
+  source_batch_key?: string | null;
+  bookmark_date: string;
+};
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS bookmarks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,6 +116,29 @@ CREATE TABLE IF NOT EXISTS settings (
 CREATE INDEX IF NOT EXISTS idx_bookmarks_date ON bookmarks(bookmark_date);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_conf ON bookmarks(conference_slug);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_created ON bookmarks(created_at);
+
+CREATE TABLE IF NOT EXISTS inbox_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT NOT NULL,
+  raw_target TEXT NOT NULL,
+  raw_message_text TEXT,
+  attachments_json TEXT,
+  telegram_msg_id INTEGER NOT NULL,
+  telegram_chat_id INTEGER,
+  source_batch_key TEXT,
+  received_at INTEGER NOT NULL,
+  bookmark_date TEXT NOT NULL,
+  enrichment_status TEXT NOT NULL DEFAULT 'pending',
+  enrichment_attempts INTEGER NOT NULL DEFAULT 0,
+  enrichment_attempted_at INTEGER,
+  enrichment_error TEXT,
+  enriched_row_id INTEGER,
+  created_at INTEGER NOT NULL,
+  UNIQUE(telegram_msg_id, type, raw_target)
+);
+CREATE INDEX IF NOT EXISTS idx_inbox_status ON inbox_items(enrichment_status);
+CREATE INDEX IF NOT EXISTS idx_inbox_date ON inbox_items(bookmark_date);
+CREATE INDEX IF NOT EXISTS idx_inbox_msg ON inbox_items(telegram_msg_id);
 `;
 
 export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): Database.Database {
@@ -302,4 +361,130 @@ export function setSetting(db: Database.Database, key: string, value: string): v
     `INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
      ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
   ).run(key, value, Date.now());
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Inbox items (v0.5)
+// ────────────────────────────────────────────────────────────────────────────
+
+// Insert an inbox item. The UNIQUE(telegram_msg_id, type, raw_target) index
+// makes re-runs idempotent — a duplicate insert returns the existing row's id.
+// Returns {id, created} so the caller can log accurately.
+export function saveInboxItem(
+  db: Database.Database,
+  item: NewInboxItem,
+): { id: number; created: boolean } {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(item.bookmark_date)) {
+    throw new Error(`bookmark_date must be YYYY-MM-DD, got: ${item.bookmark_date}`);
+  }
+  // INSERT OR IGNORE returns 0 changes when the UNIQUE constraint blocks the
+  // insert. We then SELECT the existing row to return its id.
+  const result = db
+    .prepare(
+      `INSERT OR IGNORE INTO inbox_items
+       (type, raw_target, raw_message_text, attachments_json, telegram_msg_id,
+        telegram_chat_id, source_batch_key, received_at, bookmark_date, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      item.type,
+      item.raw_target,
+      item.raw_message_text ?? null,
+      item.attachments_json ?? null,
+      item.telegram_msg_id,
+      item.telegram_chat_id ?? null,
+      item.source_batch_key ?? null,
+      Date.now(),
+      item.bookmark_date,
+      Date.now(),
+    );
+  if (result.changes > 0) {
+    return { id: result.lastInsertRowid as number, created: true };
+  }
+  const existing = db
+    .prepare(
+      `SELECT id FROM inbox_items
+       WHERE telegram_msg_id = ? AND type = ? AND raw_target = ?`,
+    )
+    .get(item.telegram_msg_id, item.type, item.raw_target) as { id: number } | undefined;
+  if (!existing) {
+    // Shouldn't happen, but fail loud if it does.
+    throw new Error(
+      `INSERT OR IGNORE returned 0 changes but no existing row found for msg=${item.telegram_msg_id} type=${item.type}`,
+    );
+  }
+  return { id: existing.id, created: false };
+}
+
+// List inbox items needing enrichment (pending or previously failed but not
+// exhausted). max attempts default 5 — after that they need manual review.
+// Optional type filter for per-type enrichment workers.
+export function listInboxItemsForEnrichment(
+  db: Database.Database,
+  opts: { type?: InboxItem['type']; maxAttempts?: number } = {},
+): InboxItem[] {
+  const maxAttempts = opts.maxAttempts ?? 5;
+  const conds = [
+    "enrichment_status IN ('pending', 'failed')",
+    'enrichment_attempts < ?',
+  ];
+  const params: (string | number)[] = [maxAttempts];
+  if (opts.type) {
+    conds.push('type = ?');
+    params.push(opts.type);
+  }
+  return db
+    .prepare(
+      `SELECT * FROM inbox_items
+       WHERE ${conds.join(' AND ')}
+       ORDER BY received_at ASC, id ASC`,
+    )
+    .all(...params) as InboxItem[];
+}
+
+// Mark an inbox item as successfully enriched. Records the enriched row id
+// (FK into bookmarks/papers/slides) so reverse lookups work later.
+export function markInboxEnriched(
+  db: Database.Database,
+  id: number,
+  enrichedRowId: number,
+): void {
+  db.prepare(
+    `UPDATE inbox_items
+        SET enrichment_status = 'enriched',
+            enrichment_attempts = enrichment_attempts + 1,
+            enrichment_attempted_at = ?,
+            enrichment_error = NULL,
+            enriched_row_id = ?
+      WHERE id = ?`,
+  ).run(Date.now(), enrichedRowId, id);
+}
+
+// Mark an inbox item as failed. Bumps attempt counter; the next list call
+// excludes items past maxAttempts so the retry loop is bounded.
+export function markInboxFailed(db: Database.Database, id: number, error: string): void {
+  db.prepare(
+    `UPDATE inbox_items
+        SET enrichment_status = 'failed',
+            enrichment_attempts = enrichment_attempts + 1,
+            enrichment_attempted_at = ?,
+            enrichment_error = ?
+      WHERE id = ?`,
+  ).run(Date.now(), error.slice(0, 500), id);
+}
+
+export function countInboxByStatus(
+  db: Database.Database,
+): Record<InboxItem['enrichment_status'], number> {
+  const rows = db
+    .prepare('SELECT enrichment_status AS status, COUNT(*) AS n FROM inbox_items GROUP BY enrichment_status')
+    .all() as { status: InboxItem['enrichment_status']; n: number }[];
+  const out: Record<InboxItem['enrichment_status'], number> = {
+    pending: 0,
+    enriched: 0,
+    failed: 0,
+    deferred: 0,
+  };
+  for (const r of rows) out[r.status] = r.n;
+  return out;
 }
