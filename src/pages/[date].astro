@@ -157,39 +157,47 @@ const title = conference ? `${conference.name} — ${date}` : date;
     color: var(--fg-muted);
   }
 
-  /* ── Top line (the lede) ───────────────────────────────────── */
+  /* ── Top line (the lede) ────────────────────────────────────────
+     Hero treatment: large serif, no chrome. This is the headline
+     the reader screenshots and sends to a colleague. Should read
+     like a journal title, not a callout card. */
   .topline {
     margin-top: 2rem;
-    padding: 1.25rem 1.4rem;
-    background: linear-gradient(135deg, var(--accent-bg) 0%, transparent 100%);
-    border-left: 4px solid var(--accent);
-    border-radius: 6px;
+    padding: 0;
   }
   .topline-body {
-    font-size: 1.18rem;
+    font-family: var(--font-serif);
+    font-size: 1.65rem;
     font-weight: 600;
-    line-height: 1.45;
+    line-height: 1.25;
+    letter-spacing: -0.012em;
     color: var(--fg);
   }
 
-  /* ── TL;DR ─────────────────────────────────────────────────── */
+  /* ── TL;DR ──────────────────────────────────────────────────────
+     Subordinate to top_line but distinct from cluster bodies. Light
+     left rule, no full card. */
   .tldr {
     margin-top: 1.5rem;
-    padding: 1rem 1.25rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-  }
-  .section-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--fg-muted);
-    margin-bottom: 0.4rem;
+    padding: 0.25rem 0 0.25rem 1.1rem;
+    border-left: 3px solid var(--accent);
+    background: transparent;
   }
   .tldr > div:not(.section-label) {
     line-height: 1.55;
+    color: var(--fg-muted);
+  }
+  /* Universal label: small caps, sans, tracked. Used on TL;DR + every
+     cluster sub-section. Consistency removes one decision-point for
+     the scanning reader. */
+  .section-label {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 0.4rem;
   }
 
   /* ── Cluster card ──────────────────────────────────────────── */
