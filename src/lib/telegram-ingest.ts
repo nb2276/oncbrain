@@ -17,6 +17,14 @@ export type TelegramEntity = {
   url?: string; // present on text_link
 };
 
+export type TelegramPhotoSize = {
+  file_id: string;
+  file_unique_id: string;
+  width: number;
+  height: number;
+  file_size?: number;
+};
+
 export type TelegramMessage = {
   message_id: number;
   date: number; // unix seconds
@@ -24,6 +32,10 @@ export type TelegramMessage = {
   caption?: string;
   entities?: TelegramEntity[];
   caption_entities?: TelegramEntity[];
+  // photo[]: same image at different resolutions (smallest → largest).
+  // Always pick the LAST entry for OCR (highest resolution).
+  photo?: TelegramPhotoSize[];
+  media_group_id?: string; // present when multi-photo album
   chat?: { id: number; type: string; title?: string; username?: string };
   from?: { id: number; username?: string; first_name?: string };
 };
@@ -186,6 +198,15 @@ export function extractPaperPmids(
     }
   }
   return Array.from(found);
+}
+
+// v0.5 Phase C: extract slide photo attachment from a Telegram message.
+// Returns the HIGHEST-resolution photo if present, else null. Telegram
+// sends `photo[]` ordered smallest → largest, so we want the last entry
+// for OCR fidelity.
+export function extractSlidePhoto(msg: TelegramMessage): TelegramPhotoSize | null {
+  if (!msg.photo || msg.photo.length === 0) return null;
+  return msg.photo[msg.photo.length - 1] ?? null;
 }
 
 export function messageOf(update: TelegramUpdate): TelegramMessage | undefined {

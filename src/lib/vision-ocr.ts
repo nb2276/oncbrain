@@ -151,6 +151,38 @@ export async function ocrImageUrl(
   }
 }
 
+// OCR a local file directly (no download). Used by v0.5 Phase C for slide
+// photos already on disk. Computes content hash + runs Vision binary;
+// returns an OcrEntry compatible with the cache shape.
+export async function ocrFile(
+  filePath: string,
+  opts: { timeoutMs?: number } = {},
+): Promise<OcrResult> {
+  if (!isOcrAvailable()) {
+    if (!warnedBinaryMissing) {
+      warnedBinaryMissing = true;
+      console.warn(
+        '  [ocr] scripts/vision-ocr not found — skipping OCR layer. ' +
+          'Run `npm run setup:vision` to compile (macOS only).',
+      );
+    }
+    return { entry: FAILED_ENTRY(), status: 'skipped', reason: 'binary-missing' };
+  }
+  const timeoutMs = opts.timeoutMs ?? 10_000;
+  try {
+    const { readFileSync } = await import('node:fs');
+    const buffer = readFileSync(filePath);
+    const hash = createHash('sha256').update(buffer).digest('hex');
+    const text = await runBinary(filePath, timeoutMs);
+    return {
+      entry: { text: text.trim(), hash, version: OCR_VERSION },
+      status: 'ok',
+    };
+  } catch (err) {
+    return { entry: FAILED_ENTRY(), status: 'failed', reason: (err as Error).message };
+  }
+}
+
 // Batch OCR: process URLs sequentially. Vision is on-device and CPU-bound;
 // parallel spawns just thrash. Caller already iterates per-bookmark so any
 // outer parallelism is at that level. Returns OcrEntry[] aligned with input.

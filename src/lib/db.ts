@@ -123,6 +123,43 @@ export type NewPaper = {
   fetched_via?: 'pubmed_efetch' | 'pending' | 'failed';
 };
 
+// v0.5 Phase C: slide photos uploaded via Telegram bot. Stored as files
+// under data/slide-photos/<date>/<uuid>.<ext>; this table tracks metadata
+// and OCR. Rendering moves to Phase E.
+export type SlideUpload = {
+  id: number;
+  file_path: string; // data/slide-photos/YYYY-MM-DD/<uuid>.<ext>
+  file_hash: string; // sha256 of bytes (used for cache invalidation)
+  mime_type: string; // image/jpeg, image/png, etc.
+  width: number | null;
+  height: number | null;
+  source_label: string | null; // curator-supplied: "ASCO Day 2 plenary"
+  ocr_text: string | null;
+  ocr_version: string | null;
+  bookmark_date: string;
+  conference_slug: string | null;
+  curator_note: string | null;
+  source_batch_key: string | null; // groups multi-photo from one Telegram message
+  inbox_item_id: number | null;
+  created_at: number;
+};
+
+export type NewSlideUpload = {
+  file_path: string;
+  file_hash: string;
+  mime_type: string;
+  width?: number | null;
+  height?: number | null;
+  source_label?: string | null;
+  ocr_text?: string | null;
+  ocr_version?: string | null;
+  bookmark_date: string;
+  conference_slug?: string | null;
+  curator_note?: string | null;
+  source_batch_key?: string | null;
+  inbox_item_id?: number | null;
+};
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS bookmarks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -179,6 +216,28 @@ CREATE TABLE IF NOT EXISTS papers (
 );
 CREATE INDEX IF NOT EXISTS idx_papers_date ON papers(bookmark_date);
 CREATE INDEX IF NOT EXISTS idx_papers_inbox ON papers(inbox_item_id);
+
+CREATE TABLE IF NOT EXISTS slide_uploads (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  file_path TEXT NOT NULL UNIQUE,
+  file_hash TEXT NOT NULL,
+  mime_type TEXT NOT NULL,
+  width INTEGER,
+  height INTEGER,
+  source_label TEXT,
+  ocr_text TEXT,
+  ocr_version TEXT,
+  bookmark_date TEXT NOT NULL,
+  conference_slug TEXT,
+  curator_note TEXT,
+  source_batch_key TEXT,
+  inbox_item_id INTEGER,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_slides_date ON slide_uploads(bookmark_date);
+CREATE INDEX IF NOT EXISTS idx_slides_inbox ON slide_uploads(inbox_item_id);
+CREATE INDEX IF NOT EXISTS idx_slides_hash ON slide_uploads(file_hash);
+CREATE INDEX IF NOT EXISTS idx_slides_batch ON slide_uploads(source_batch_key);
 
 CREATE TABLE IF NOT EXISTS inbox_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -594,6 +653,62 @@ export function listPapers(
 
 export function getPaperByPmid(db: Database.Database, pmid: string): Paper | undefined {
   return db.prepare('SELECT * FROM papers WHERE pmid = ?').get(pmid) as Paper | undefined;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Slide uploads (v0.5 Phase C)
+// ────────────────────────────────────────────────────────────────────────────
+
+export function saveSlideUpload(
+  db: Database.Database,
+  s: NewSlideUpload,
+): { id: number; created: boolean } {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s.bookmark_date)) {
+    throw new Error(`bookmark_date must be YYYY-MM-DD, got: ${s.bookmark_date}`);
+  }
+  const existing = db
+    .prepare('SELECT id FROM slide_uploads WHERE file_path = ?')
+    .get(s.file_path) as { id: number } | undefined;
+  if (existing) return { id: existing.id, created: false };
+  const result = db
+    .prepare(
+      `INSERT INTO slide_uploads
+       (file_path, file_hash, mime_type, width, height, source_label, ocr_text,
+        ocr_version, bookmark_date, conference_slug, curator_note,
+        source_batch_key, inbox_item_id, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      s.file_path,
+      s.file_hash,
+      s.mime_type,
+      s.width ?? null,
+      s.height ?? null,
+      s.source_label ?? null,
+      s.ocr_text ?? null,
+      s.ocr_version ?? null,
+      s.bookmark_date,
+      s.conference_slug ?? null,
+      s.curator_note ?? null,
+      s.source_batch_key ?? null,
+      s.inbox_item_id ?? null,
+      Date.now(),
+    );
+  return { id: result.lastInsertRowid as number, created: true };
+}
+
+export function listSlideUploads(
+  db: Database.Database,
+  filter: { bookmark_date?: string } = {},
+): SlideUpload[] {
+  if (filter.bookmark_date) {
+    return db
+      .prepare('SELECT * FROM slide_uploads WHERE bookmark_date = ? ORDER BY created_at ASC')
+      .all(filter.bookmark_date) as SlideUpload[];
+  }
+  return db
+    .prepare('SELECT * FROM slide_uploads ORDER BY bookmark_date DESC, created_at DESC')
+    .all() as SlideUpload[];
 }
 
 export function countInboxByStatus(

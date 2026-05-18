@@ -2,6 +2,34 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — v0.5 Phase C — 2026-05-18
+
+Slide photos join the ingestion pipeline. Send a photo to @oncbrain_bot and it gets downloaded via the Telegram getFile API, saved to `data/slide-photos/<date>/<uuid>.<ext>`, OCR'd via Apple Vision, and stored in a new `slide_uploads` table. Photos are curator-private by default (gitignored); committing them to make them public is a per-deployment choice that Phase E will surface in the rendering layer.
+
+### Added
+
+- **`slide_uploads` table**: file_path (UNIQUE), file_hash (sha256 of bytes), mime_type, width, height, source_label, ocr_text, ocr_version, bookmark_date, conference_slug, curator_note, source_batch_key (for multi-photo Telegram messages), inbox_item_id (FK).
+- **`src/lib/slide-photo-storage.ts`**: Telegram `getFile` two-call flow (`getFile?file_id=X` → `file_path` → bytes), magic-byte sniffing (JPEG/PNG/GIF/WebP), path-traversal guarded write under `data/slide-photos/`. 25 MB hard cap rejects oversize documents masquerading as photos.
+- **`extractSlidePhoto()`** in telegram-ingest.ts: picks the highest-resolution variant from Telegram's `photo[]` array. Multi-photo album messages carry `media_group_id` which is stored on the inbox item as `source_batch_key` for later grouping.
+- **Slide enrichment handler** in inbox-enrichment.ts: download → save to disk → OCR via `ocrFile()` → insert slide_uploads row. OCR failure is non-fatal (slide ships uncaptioned; operator can re-OCR manually). Missing TELEGRAM_BOT_TOKEN or vision-ocr binary fail/defer cleanly.
+- **`ocrFile()`** in vision-ocr.ts: OCR a local path (no download). Sibling to `ocrImageUrl()`; used by Phase C for slides already on disk.
+
+### Changed
+
+- **`pull:telegram`** now detects photo attachments on incoming messages. One Telegram message can produce inbox items across tweet, paper, AND slide types (e.g., a curator text containing a PubMed URL with an attached slide photo).
+- **`.gitignore`** adds `data/slide-photos/` by default. Curator can comment out and commit explicitly to publish slides on the live site.
+
+### Engineering
+
+- 290 tests (was 279, +11 for Telegram getFile flow, magic-byte sniffing, path safety, and the slide-enrichment failure path).
+- 0 type errors across 42 files.
+- Vision OCR available on macOS only (existing v0.4 constraint). On Linux/CI, slide ingestion defers with a clear reason.
+
+### Not yet shipped
+
+- Slide photos don't render in the digest yet — Phase E adds the `/slides/[uuid]` static route + Astro source-attribution badges.
+- Documents (non-`photo[]` attachments like `image/heic` from iOS Photos sometimes) are not yet detected. v0.6+.
+
 ## [Unreleased] — v0.5 Phase B — 2026-05-18
 
 PubMed papers join the ingestion pipeline. Telegram bot now detects PMID URLs and inline "PMID: N" citations alongside tweet URLs; enrichment fetches metadata + abstract from NCBI E-utilities and, when the paper has a PMC ID, extracts Methods + Results sections capped at ~2000 tokens. Papers accumulate in a new `papers` table and will join the digest pipeline in Phase D.

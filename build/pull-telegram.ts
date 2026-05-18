@@ -25,6 +25,7 @@ import {
   fetchUpdates,
   extractTweetUrls,
   extractPaperPmids,
+  extractSlidePhoto,
   messageOf,
   unixToLocalDate,
 } from '../src/lib/telegram-ingest.ts';
@@ -71,6 +72,7 @@ async function main() {
 
   let savedTweets = 0;
   let savedPapers = 0;
+  let savedSlides = 0;
   let skippedDuplicate = 0;
   let skippedNoTarget = 0;
   let maxUpdateId = offset ?? 0;
@@ -84,12 +86,12 @@ async function main() {
     const entities = msg.entities ?? msg.caption_entities ?? [];
     const date = unixToLocalDate(msg.date);
 
-    // v0.5 Phase B: tweet URLs + PubMed PMIDs (URLs and citation blocks).
-    // Slides land in Phase C.
+    // v0.5 Phase C: tweet URLs + PubMed PMIDs + slide photo attachments.
     const tweetUrls = extractTweetUrls(text, entities);
     const paperPmids = extractPaperPmids(text, entities);
+    const slidePhoto = extractSlidePhoto(msg);
 
-    if (tweetUrls.length === 0 && paperPmids.length === 0) {
+    if (tweetUrls.length === 0 && paperPmids.length === 0 && !slidePhoto) {
       skippedNoTarget++;
       continue;
     }
@@ -145,6 +147,43 @@ async function main() {
         console.warn(`  failed to inbox PMID:${pmid}: ${(err as Error).message}`);
       }
     }
+
+    if (slidePhoto) {
+      if (args.dryRun) {
+        console.log(
+          `  [dry-run] would inbox: msg=${msg.message_id} type=slide file_id=${slidePhoto.file_id} ${slidePhoto.width}x${slidePhoto.height}`,
+        );
+        savedSlides++;
+      } else {
+        try {
+          const r = saveInboxItem(db, {
+            type: 'slide',
+            raw_target: slidePhoto.file_id,
+            raw_message_text: text || null,
+            attachments_json: JSON.stringify({
+              file_unique_id: slidePhoto.file_unique_id,
+              width: slidePhoto.width,
+              height: slidePhoto.height,
+              file_size: slidePhoto.file_size,
+            }),
+            telegram_msg_id: msg.message_id,
+            telegram_chat_id: msg.chat?.id ?? null,
+            // Multi-photo album messages share media_group_id — used in
+            // Phase E to render multiple slides under one source card.
+            source_batch_key: msg.media_group_id ?? null,
+            bookmark_date: date,
+          });
+          if (r.created) {
+            console.log(`  inbox #${r.id}: slide ${date} ${slidePhoto.width}x${slidePhoto.height}`);
+            savedSlides++;
+          } else {
+            skippedDuplicate++;
+          }
+        } catch (err) {
+          console.warn(`  failed to inbox slide ${slidePhoto.file_id}: ${(err as Error).message}`);
+        }
+      }
+    }
   }
 
   if (!args.dryRun && maxUpdateId > (offset ?? 0)) {
@@ -152,7 +191,7 @@ async function main() {
   }
 
   console.log(
-    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} next-offset=${maxUpdateId}`,
+    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} next-offset=${maxUpdateId}`,
   );
   console.log(`Next: \`npm run enrich:inbox\` to enrich pending items, then \`npm run build:day\`.`);
 }

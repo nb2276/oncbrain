@@ -169,7 +169,7 @@ describe('runEnrichmentLoop', () => {
     vi.resetAllMocks();
   });
 
-  it('defers slide items in Phase A/B (Phase C lands later)', async () => {
+  it('fails slide items when TELEGRAM_BOT_TOKEN is missing', async () => {
     const db = freshDb();
     saveInboxItem(db, {
       type: 'slide',
@@ -178,12 +178,16 @@ describe('runEnrichmentLoop', () => {
       bookmark_date: '2026-05-18',
     });
     const items = listInboxItemsForEnrichment(db);
-    const result = await runEnrichmentLoop(db, items);
-    expect(result.deferred).toBe(1);
-    expect(result.enriched).toBe(0);
-    // Status stays pending so Phase C can pick it up
-    const counts = countInboxByStatus(db);
-    expect(counts.pending).toBe(1);
-    expect(counts.deferred).toBe(0);
+    // Force-clear token so the handler short-circuits with a known reason
+    // (avoids real Telegram network calls in tests).
+    const prev = process.env.TELEGRAM_BOT_TOKEN;
+    delete process.env.TELEGRAM_BOT_TOKEN;
+    try {
+      const result = await runEnrichmentLoop(db, items);
+      expect(result.failed).toBe(1);
+      expect(result.enriched).toBe(0);
+    } finally {
+      if (prev) process.env.TELEGRAM_BOT_TOKEN = prev;
+    }
   });
 });

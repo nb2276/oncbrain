@@ -13,6 +13,7 @@
 import {
   saveBookmark,
   savePaper,
+  saveSlideUpload,
   markInboxEnriched,
   markInboxFailed,
   type InboxItem,
@@ -20,6 +21,12 @@ import {
 import { fetchTweet, TweetFetchError } from './twitter-fetch.ts';
 import { extractCuratorNote } from './telegram-ingest.ts';
 import { fetchPubMedPaper, PubMedClientError } from './pubmed-client.ts';
+import {
+  downloadTelegramFile,
+  saveSlidePhotoBytes,
+  TelegramFileError,
+} from './slide-photo-storage.ts';
+import { ocrFile, isOcrAvailable } from './vision-ocr.ts';
 import type Database from 'better-sqlite3';
 
 export type EnrichmentResult =
@@ -37,12 +44,96 @@ export async function enrichInboxItem(
     case 'paper':
       return enrichPaperItem(db, item);
     case 'slide':
-      return {
-        status: 'deferred',
-        reason: 'slide enrichment lands in v0.5 Phase C (not yet implemented)',
-      };
+      return enrichSlideItem(db, item);
     default:
       return { status: 'failed', reason: `unknown inbox item type: ${item.type}` };
+  }
+}
+
+async function enrichSlideItem(
+  db: Database.Database,
+  item: InboxItem,
+): Promise<EnrichmentResult> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    return {
+      status: 'failed',
+      reason: 'TELEGRAM_BOT_TOKEN missing — cannot download slide bytes',
+    };
+  }
+  if (!isOcrAvailable()) {
+    // Without OCR, the slide is just bytes — not useful for the pipeline.
+    // Defer so the next run on a macOS+vision machine picks it up.
+    return {
+      status: 'deferred',
+      reason: 'vision-ocr binary unavailable — defer slide enrichment until OCR is set up',
+    };
+  }
+  const fileId = item.raw_target;
+  const note = item.raw_message_text ? extractCuratorNote(item.raw_message_text) : null;
+
+  let downloaded;
+  try {
+    downloaded = await downloadTelegramFile(fileId, token);
+  } catch (err) {
+    if (err instanceof TelegramFileError) {
+      return { status: 'failed', reason: `${err.kind}: ${err.message}` };
+    }
+    return { status: 'failed', reason: `unexpected download error: ${(err as Error).message}` };
+  }
+
+  let saved;
+  try {
+    saved = saveSlidePhotoBytes({
+      buffer: downloaded.buffer,
+      ext: downloaded.ext,
+      bookmarkDate: item.bookmark_date,
+    });
+  } catch (err) {
+    return { status: 'failed', reason: `disk save failed: ${(err as Error).message}` };
+  }
+
+  // OCR the saved file. Failure here is non-fatal — slide ships without
+  // OCR text and the operator can manually re-OCR later via tooling.
+  let ocrResult;
+  try {
+    ocrResult = await ocrFile(saved.absPath);
+  } catch (err) {
+    console.warn(`  [enrich] slide OCR failed: ${(err as Error).message}`);
+    ocrResult = null;
+  }
+
+  // Parse dimensions from the inbox attachment metadata (the bot saw them
+  // pre-download; we trust those over re-decoding the bytes).
+  let width: number | null = null;
+  let height: number | null = null;
+  if (item.attachments_json) {
+    try {
+      const meta = JSON.parse(item.attachments_json) as { width?: number; height?: number };
+      width = typeof meta.width === 'number' ? meta.width : null;
+      height = typeof meta.height === 'number' ? meta.height : null;
+    } catch {
+      // Tolerate malformed metadata — width/height stay null
+    }
+  }
+
+  try {
+    const r = saveSlideUpload(db, {
+      file_path: saved.relPath,
+      file_hash: saved.hash,
+      mime_type: downloaded.mime_type,
+      width,
+      height,
+      ocr_text: ocrResult?.entry.text ?? null,
+      ocr_version: ocrResult?.entry.version ?? null,
+      bookmark_date: item.bookmark_date,
+      curator_note: note,
+      source_batch_key: null, // batched in pull-telegram; this column is set there
+      inbox_item_id: item.id,
+    });
+    return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
+  } catch (err) {
+    return { status: 'failed', reason: `slide row insert failed: ${(err as Error).message}` };
   }
 }
 
