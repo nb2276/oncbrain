@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   fetchUpdates,
   extractTweetUrls,
+  extractCuratorNote,
   messageOf,
   unixToLocalDate,
   TelegramApiError,
@@ -123,6 +124,61 @@ describe('extractTweetUrls', () => {
     expect(extractTweetUrls('https://X.com/foo/status/123')).toEqual([
       'https://X.com/foo/status/123',
     ]);
+  });
+});
+
+describe('extractCuratorNote', () => {
+  it('returns null when text is only a tweet URL', () => {
+    expect(extractCuratorNote('https://x.com/foo/status/123')).toBeNull();
+  });
+
+  it('returns null when text is a tweet URL with ?s=20 share param', () => {
+    expect(extractCuratorNote('https://x.com/foo/status/123?s=20')).toBeNull();
+  });
+
+  it('returns null when text is a tweet URL with ?s=2 (trimmed share param)', () => {
+    expect(extractCuratorNote('https://x.com/foo/status/123?s=2')).toBeNull();
+  });
+
+  it('extracts free text written before a URL', () => {
+    expect(
+      extractCuratorNote('practice-changing https://x.com/foo/status/123'),
+    ).toBe('practice-changing');
+  });
+
+  it('extracts free text written after a URL', () => {
+    expect(
+      extractCuratorNote('https://x.com/foo/status/123 worth a look'),
+    ).toBe('worth a look');
+  });
+
+  it('strips the share-tracker query when the URL is mid-sentence', () => {
+    expect(
+      extractCuratorNote(
+        'high impact https://x.com/foo/status/123?s=20 — read carefully',
+      ),
+    ).toBe('high impact — read carefully');
+  });
+
+  it('honors a leading /note prefix', () => {
+    expect(
+      extractCuratorNote('/note practice-changing https://x.com/foo/status/123'),
+    ).toBe('practice-changing');
+  });
+
+  it('returns null when there is no URL and no commentary', () => {
+    expect(extractCuratorNote('')).toBeNull();
+  });
+
+  it('handles undefined input', () => {
+    expect(extractCuratorNote(undefined)).toBeNull();
+  });
+
+  it('handles a message with two URLs surrounded by commentary', () => {
+    const note = extractCuratorNote(
+      'see https://x.com/a/status/1?s=20 and https://x.com/b/status/2 for context',
+    );
+    expect(note).toBe('see and for context');
   });
 });
 

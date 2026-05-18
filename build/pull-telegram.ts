@@ -16,6 +16,7 @@ import {
 import {
   fetchUpdates,
   extractTweetUrls,
+  extractCuratorNote,
   messageOf,
   unixToLocalDate,
 } from '../src/lib/telegram-ingest.ts';
@@ -80,8 +81,7 @@ async function main() {
     }
 
     const date = unixToLocalDate(msg.date);
-    const noteMatch = text.match(/^\/note\s+(.+)/i);
-    const note = noteMatch ? noteMatch[1]!.trim() : null;
+    const note = extractCuratorNote(text, entities);
 
     for (const url of urls) {
       if (args.dryRun) {

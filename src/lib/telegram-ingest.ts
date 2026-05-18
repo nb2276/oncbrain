@@ -93,9 +93,10 @@ export async function fetchUpdates(
 }
 
 // Matches X / Twitter status URLs: https://x.com/handle/status/12345 (with or
-// without query params). Group 0 is the full URL. We strip the query and
-// fragment to normalize for dedup.
-const TWEET_URL_RE = /https?:\/\/(?:www\.)?(?:twitter|x)\.com\/[A-Za-z0-9_]+\/status\/\d+(?:\/\S*)?/gi;
+// without query params or trailing path). Group 0 is the full URL — including
+// any ?s=20 share tracker — so a global replace cleanly strips it from text.
+// extractTweetUrls() normalizes after matching for canonical storage.
+export const TWEET_URL_RE = /https?:\/\/(?:www\.)?(?:twitter|x)\.com\/[A-Za-z0-9_]+\/status\/\d+(?:[?#\/][^\s]*)?/gi;
 
 export function extractTweetUrls(text: string | undefined, entities: TelegramEntity[] = []): string[] {
   const found = new Set<string>();
@@ -120,6 +121,20 @@ function normalizeTweetUrl(raw: string): string {
   const url = raw.split('?')[0]!.split('#')[0]!;
   // Trim trailing slash if present and no path remains beyond status/id.
   return url.replace(/\/+$/, '');
+}
+
+// Derive the curator's free-text note from a Telegram message: anything the
+// user wrote that isn't a tweet URL or a /note slash-command prefix.
+// Returns null if there's no commentary.
+export function extractCuratorNote(
+  text: string | undefined,
+  _entities: TelegramEntity[] = [],
+): string | null {
+  if (!text) return null;
+  let note = text.replace(TWEET_URL_RE, ' ');
+  note = note.replace(/^\s*\/note\s+/i, '');
+  note = note.replace(/\s+/g, ' ').trim();
+  return note.length > 0 ? note : null;
 }
 
 export function messageOf(update: TelegramUpdate): TelegramMessage | undefined {

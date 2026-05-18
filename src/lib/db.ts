@@ -104,10 +104,13 @@ function detectAndGuardOldSchema(db: Database.Database): void {
   }
 }
 
-// Today's date in YYYY-MM-DD form, in the local timezone.
-// Used by callers that want to default new bookmarks to "today".
+// Today's date in YYYY-MM-DD form, in the local timezone (en-CA conveniently
+// formats as YYYY-MM-DD). Used by callers that want to default new bookmarks
+// to "today" — and must match the local-date assignment used by Telegram
+// ingest (unixToLocalDate), otherwise the admin form's default date and
+// pull:telegram's date assignment drift across midnight UTC.
 export function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Date().toLocaleDateString('en-CA');
 }
 
 export function saveBookmark(db: Database.Database, b: NewBookmark): { id: number; created: boolean } {
