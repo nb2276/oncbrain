@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  oncbrain daily digest launchd job.
+  Templated at install time by scripts/launchd/install.sh — placeholders below
+  get replaced with absolute paths discovered on the installing machine.
+
+  Schedule: 3:00 AM local, every day.
+  Mac asleep at 3am? Pair with:
+    sudo pmset repeat wakeorpoweron MTWRFSU 02:55:00
+  That wakes the Mac 5 minutes before this fires.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.oncbrain.daily-digest</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__PROJECT_DIR__/scripts/daily-build.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__PROJECT_DIR__</string>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>3</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>__HOME__/Library/Logs/oncbrain-cron.log</string>
+    <key>StandardErrorPath</key>
+    <string>__HOME__/Library/Logs/oncbrain-cron.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>__NODE_DIR__:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>HOME</key>
+        <string>__HOME__</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>LowPriorityIO</key>
+    <true/>
+
+    <key>Nice</key>
+    <integer>10</integer>
+
+    <key>AbandonProcessGroup</key>
+    <true/>
+</dict>
+</plist>

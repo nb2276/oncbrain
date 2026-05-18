@@ -19,7 +19,7 @@
 //     during prompt iteration can eat into it.
 
 import Anthropic from '@anthropic-ai/sdk';
-import { spawn, type ChildProcess } from 'node:child_process';
+import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 
 export type LlmMessage = {
   role: 'user' | 'assistant';
@@ -65,7 +65,11 @@ function extractTextFromApiResponse(response: {
 }
 
 // Spawn signature compatible with node:child_process.spawn (kept loose for testability).
-export type SpawnFn = (command: string, args: readonly string[]) => ChildProcess;
+export type SpawnFn = (
+  command: string,
+  args: readonly string[],
+  options?: SpawnOptions,
+) => ChildProcess;
 
 export class ClaudeCliError extends Error {
   constructor(
@@ -98,10 +102,19 @@ export class ClaudeCliLlmClient implements LlmClient {
     const prompt = collapseMessagesToPrompt(messages);
     const args = ['-p', '--model', model];
 
+    // claude -p uses subscription auth by default, but if ANTHROPIC_API_KEY is
+    // present in the env it treats that as an external (metered) API key and
+    // routes the call there instead. We're explicitly on the subscription path
+    // — strip the env var so a stale or placeholder ANTHROPIC_API_KEY from .env
+    // can't hijack the call. Same goes for the alias ANTHROPIC_AUTH_TOKEN.
+    const childEnv: NodeJS.ProcessEnv = { ...process.env };
+    delete childEnv.ANTHROPIC_API_KEY;
+    delete childEnv.ANTHROPIC_AUTH_TOKEN;
+
     return new Promise<string>((resolve, reject) => {
       let proc: ChildProcess;
       try {
-        proc = spawnFn(binary, args);
+        proc = spawnFn(binary, args, { env: childEnv });
       } catch (err) {
         reject(
           new ClaudeCliError(`Failed to spawn ${binary}: ${(err as Error).message}`, null, ''),
@@ -147,9 +160,19 @@ export class ClaudeCliLlmClient implements LlmClient {
           if (code === 0) {
             resolve(stdout);
           } else {
+            // Surface whatever the CLI emitted on either stream — claude -p
+            // sometimes writes diagnostic JSON to stdout before exiting 1
+            // (e.g., on auth / rate-limit issues), so include both.
+            const diagnostic =
+              [
+                stderr && `stderr: ${stderr.trim()}`,
+                stdout && `stdout: ${stdout.trim()}`,
+              ]
+                .filter(Boolean)
+                .join(' | ') || 'no output';
             reject(
               new ClaudeCliError(
-                `claude -p exited with code ${code}${stderr ? `: ${stderr.trim()}` : ''}`,
+                `claude -p exited with code ${code}: ${diagnostic}`,
                 code,
                 stderr,
               ),

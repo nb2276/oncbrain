@@ -16,7 +16,10 @@
     "test:watch": "vitest",
     "eval": "tsx build/eval.ts",
     "seed:dev": "tsx build/seed-dev.ts",
-    "pull:telegram": "tsx build/pull-telegram.ts"
+    "pull:telegram": "tsx build/pull-telegram.ts",
+    "cron:install": "bash scripts/launchd/install.sh",
+    "cron:uninstall": "bash scripts/launchd/uninstall.sh",
+    "cron:test": "bash scripts/daily-build.sh && echo '---LOG TAIL---' && tail -30 ~/Library/Logs/oncbrain-cron.log"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.96.0",

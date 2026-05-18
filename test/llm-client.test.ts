@@ -168,7 +168,7 @@ describe('ClaudeCliLlmClient', () => {
     const spawnFn: SpawnFn = vi.fn(() => mock.proc);
     const client = new ClaudeCliLlmClient({ spawn: spawnFn });
     await client.complete([{ role: 'user', content: 'hi' }], { model: 'opus' });
-    expect(spawnFn).toHaveBeenCalledWith('claude', ['-p', '--model', 'opus']);
+    expect(spawnFn).toHaveBeenCalledWith('claude', ['-p', '--model', 'opus'], expect.any(Object));
   });
 
   it('defaults the model to "sonnet" when not provided', async () => {
@@ -176,7 +176,7 @@ describe('ClaudeCliLlmClient', () => {
     const spawnFn: SpawnFn = vi.fn(() => mock.proc);
     const client = new ClaudeCliLlmClient({ spawn: spawnFn });
     await client.complete([{ role: 'user', content: 'hi' }]);
-    expect(spawnFn).toHaveBeenCalledWith('claude', ['-p', '--model', 'sonnet']);
+    expect(spawnFn).toHaveBeenCalledWith('claude', ['-p', '--model', 'sonnet'], expect.any(Object));
   });
 
   it('uses a custom binary path if provided', async () => {
@@ -184,7 +184,27 @@ describe('ClaudeCliLlmClient', () => {
     const spawnFn: SpawnFn = vi.fn(() => mock.proc);
     const client = new ClaudeCliLlmClient({ spawn: spawnFn, binary: '/opt/claude' });
     await client.complete([{ role: 'user', content: 'hi' }]);
-    expect(spawnFn).toHaveBeenCalledWith('/opt/claude', expect.any(Array));
+    expect(spawnFn).toHaveBeenCalledWith('/opt/claude', expect.any(Array), expect.any(Object));
+  });
+
+  it('scrubs ANTHROPIC_API_KEY from the child env so subscription auth wins', async () => {
+    const original = process.env.ANTHROPIC_API_KEY;
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-placeholder';
+    try {
+      const mock = makeMockProcess({ stdout: 'ok', exitCode: 0 });
+      const spawnFn: SpawnFn = vi.fn(() => mock.proc);
+      const client = new ClaudeCliLlmClient({ spawn: spawnFn });
+      await client.complete([{ role: 'user', content: 'hi' }]);
+      // @ts-expect-error inspecting the mock
+      const opts = spawnFn.mock.calls[0][2];
+      expect(opts.env.ANTHROPIC_API_KEY).toBeUndefined();
+      expect(opts.env.ANTHROPIC_AUTH_TOKEN).toBeUndefined();
+      // Other env vars should still pass through
+      expect(opts.env.PATH).toBeDefined();
+    } finally {
+      if (original === undefined) delete process.env.ANTHROPIC_API_KEY;
+      else process.env.ANTHROPIC_API_KEY = original;
+    }
   });
 });
 
