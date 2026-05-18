@@ -1,43 +1,91 @@
-# Astro Starter Kit: Minimal
+# oncbrain
 
-```sh
-npm create astro@latest -- --template minimal
+Curated AI-summarized digest of oncology meeting tweets.
+
+## Architecture
+
+```
+LOCAL (laptop)                      GITHUB                DIGITALOCEAN
+─────────────────                   ──────                ────────────
+admin form @ localhost:3001           ▲                   App Platform
+  │                                   │                   (static site)
+  ├─▶ SQLite (~/oncbrain.db)          │                          │
+  │                                   │                          ▼
+build pipeline:                       │                   public reads
+  fetch tweets via oEmbed             │                   static HTML
+  call LLM (cluster, summarize,       │
+    extract NCT/PubMed)               │
+  write to /dist/*.html               │
+  │                                   │
+  └─▶ git commit + push ─────────────▶┘
+                                      │
+                                      └─▶ auto-deploy on push
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Admin and build pipeline run locally only. The public site is pure static HTML.
 
-## 🚀 Project Structure
+## Setup
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```bash
+cp .env.example .env
+# Add ANTHROPIC_API_KEY, set PUBLIC_CURATOR_NAME / _HANDLE / _SITE_NAME
+npm install
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Daily use
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+```bash
+# Start the admin form (localhost only)
+npm run admin
+# Visit http://localhost:3001 to add bookmarks during a meeting day
 
-Any static assets, like images, can be placed in the `public/` directory.
+# Build a day's digest
+npm run build:day -- --conf=asco2026 --day=2
 
-## 🧞 Commands
+# Build the static site
+npm run build
 
-All commands are run from the root of the project, from a terminal:
+# Preview locally
+npm run preview
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+# Commit + push → DigitalOcean auto-deploys
+git add data/digests dist
+git commit -m "asco2026 day 2"
+git push
+```
 
-## 👀 Want to learn more?
+## LLM backend
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Two paths via `LLM_BACKEND` env var:
+
+- `LLM_BACKEND=api` (default) — Anthropic API, `ANTHROPIC_API_KEY` required, pay per token
+- `LLM_BACKEND=claude-cli` — shells out to `claude -p`, billed to your Claude Code subscription
+
+## Tests
+
+```bash
+npm test           # all tests once
+npm run test:watch # watch mode
+```
+
+## Eval
+
+When iterating on `prompts/digest-v1.txt`, run the eval before shipping:
+
+```bash
+npm run eval                       # all fixtures
+npm run eval -- --save-baseline    # capture current as baseline
+npm run eval -- --compare-baseline # compare new run to baseline
+```
+
+## Takedown requests
+
+Email the curator handle in `.env`. 24-hour SLA. Procedure: delete the bookmark row from SQLite, rebuild the affected day, redeploy.
+
+## Disclaimer
+
+AI-generated summaries of public social media content. Not medical advice. Verify against primary sources (clinicaltrials.gov, PubMed, conference proceedings) before any clinical use.
+
+## License
+
+MIT.

@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+const curatorName = import.meta.env.PUBLIC_CURATOR_NAME || 'the curator';
+const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
+---
+
+<Base title="About" description="About this oncology meeting digest.">
+  <h2 style="margin-top:0">About this digest</h2>
+
+  <p>
+    This site publishes daily curated digests of the most impactful posts
+    from oncology conferences on X (Twitter). It is a personal project,
+    not affiliated with any conference or institution.
+  </p>
+
+  <h3>How it works</h3>
+  <p>
+    {curatorName} bookmarks the most clinically important tweets from each
+    conference day. An AI pipeline groups them by topic, summarizes the
+    discussion, and links to original sources. The site updates one or two
+    times per conference day during major meetings.
+  </p>
+
+  <h3>What you get</h3>
+  <ul>
+    <li><strong>Curated by a human.</strong> Algorithmic feeds are noisy;
+      a domain expert's bookmarks are the signal.</li>
+    <li><strong>AI-summarized.</strong> Clusters of tweets become 1-2
+      paragraph summaries with daily TL;DRs.</li>
+    <li><strong>Citation-aware.</strong> NCT trial numbers, PubMed IDs,
+      and DOIs auto-link to source records.</li>
+    <li><strong>Links back to originals.</strong> The summary is a
+      starting point. The original tweets are the source of truth.</li>
+  </ul>
+
+  <h3>What this is not</h3>
+  <p>
+    <strong>Not medical advice.</strong> AI summaries can paraphrase
+    incorrectly. Always verify against primary sources (clinicaltrials.gov,
+    PubMed, the conference proceedings) before clinical use.
+    <br /><br />
+    <strong>Not exhaustive.</strong> This is one curator's filter. Many
+    important findings will not appear here.
+    <br /><br />
+    <strong>Not affiliated</strong> with ASCO, ESMO, ASTRO, AACR, or any
+    other organization.
+  </p>
+
+  <h3>Takedown requests</h3>
+  <p>
+    If you posted a tweet referenced here and would like it removed,
+    contact {curatorHandle ? <a href={`https://x.com/${curatorHandle.replace(/^@/, '')}`} target="_blank" rel="noopener">{curatorHandle}</a> : 'the curator'} directly.
+    Takedowns are typically actioned within 24 hours.
+  </p>
+
+  <h3>Source</h3>
+  <p>
+    This site is open source. Code at <a href="#">github</a> (link TBD).
+  </p>
+</Base>

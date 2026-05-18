@@ -1,17 +1,36 @@
 ---
+import Base from '../layouts/Base.astro';
+import { listConferenceSummaries } from '../lib/digest-data.ts';
 
+const conferences = listConferenceSummaries();
+const siteName = import.meta.env.PUBLIC_SITE_NAME || 'Oncology Meeting Digest';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Base title={siteName} description="Curated AI-summarized digests of oncology conferences.">
+  <p style="font-size:1.05rem;color:var(--fg-muted);margin-top:0">
+    Daily curated digests of the most impactful posts from oncology
+    meetings on X, organized by topic and AI-summarized.
+  </p>
+
+  {conferences.length === 0 && (
+    <p style="margin-top:2rem;color:var(--fg-muted)">
+      No digests yet — check back during the next major meeting.
+    </p>
+  )}
+
+  {conferences.map((conf) => (
+    <section style="margin-top:2rem">
+      <h2 style="margin:0;font-size:1.15rem">{conf.name}</h2>
+      <ul style="list-style:none;padding:0;margin:0.75rem 0 0;display:flex;flex-wrap:wrap;gap:0.5rem">
+        {conf.days.map((day) => (
+          <li>
+            <a
+              href={`/${conf.slug}/day-${day}`}
+              style="display:inline-block;padding:0.4rem 0.9rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px"
+            >Day {day}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</Base>

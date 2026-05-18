@@ -1,17 +1,36 @@
 {
-  "name": "meetingsummary",
+  "name": "oncbrain",
   "type": "module",
   "version": "0.0.1",
   "engines": {
     "node": ">=22.12.0"
   },
   "scripts": {
+    "admin": "tsx admin/server.ts",
     "dev": "astro dev",
     "build": "astro build",
+    "build:day": "tsx build/digest-builder.ts",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "eval": "tsx build/eval.ts",
+    "seed:dev": "tsx build/seed-dev.ts"
   },
   "dependencies": {
-    "astro": "^6.3.3"
+    "@anthropic-ai/sdk": "^0.96.0",
+    "@hono/node-server": "^2.0.2",
+    "astro": "^6.3.3",
+    "better-sqlite3": "^12.10.0",
+    "dotenv": "^17.4.2",
+    "hono": "^4.12.19"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.8.0",
+    "tsx": "^4.22.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
   }
 }

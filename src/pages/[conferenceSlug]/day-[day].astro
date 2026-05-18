@@ -1,0 +1,80 @@
+---
+import Base from '../../layouts/Base.astro';
+import { listDigests, type DigestArtifact } from '../../lib/digest-data.ts';
+import { linkifyCitations } from '../../lib/extract.ts';
+
+export async function getStaticPaths() {
+  return listDigests().map((artifact) => ({
+    params: { conferenceSlug: artifact.conference.slug, day: String(artifact.conference.day) },
+    props: { artifact },
+  }));
+}
+
+interface Props {
+  artifact: DigestArtifact;
+}
+
+const { artifact } = Astro.props as Props;
+const { conference, digest, bookmarks, generated_at } = artifact;
+
+const bookmarksById = new Map(bookmarks.map((b) => [b.id, b]));
+const generatedDate = new Date(generated_at).toISOString().slice(0, 10);
+---
+
+<Base
+  title={`${conference.name} — Day ${conference.day}`}
+  description={digest.tldr}
+>
+  <p style="font-size:0.85rem;color:var(--fg-muted);margin-top:0">
+    <a href="/">← all conferences</a>
+  </p>
+  <h2 style="margin:0.5rem 0 0;font-size:1.4rem">{conference.name}</h2>
+  <p style="margin:0.25rem 0 0;color:var(--fg-muted);font-size:0.95rem">
+    Day {conference.day} · digest generated {generatedDate}
+  </p>
+
+  <section style="margin-top:2rem;padding:1.25rem;background:var(--accent-bg);border-radius:8px;border-left:3px solid var(--accent)">
+    <div style="font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem">
+      TL;DR
+    </div>
+    <div style="font-size:1.05rem" set:html={linkifyCitations(digest.tldr)} />
+  </section>
+
+  {digest.clusters.map((cluster) => (
+    <section style="margin-top:2.5rem">
+      <h3 style="margin:0 0 0.5rem;font-size:1.15rem">{cluster.topic}</h3>
+      <div style="white-space:pre-wrap" set:html={linkifyCitations(cluster.summary)} />
+
+      {cluster.tweet_ids.length > 0 && (
+        <details style="margin-top:1rem">
+          <summary style="cursor:pointer;color:var(--fg-muted);font-size:0.85rem">
+            Source tweets ({cluster.tweet_ids.length})
+          </summary>
+          <ul style="list-style:none;padding:0;margin:0.75rem 0 0">
+            {cluster.tweet_ids.map((id) => {
+              const b = bookmarksById.get(id);
+              if (!b) return null;
+              return (
+                <li style="margin:0 0 0.75rem;padding:0.75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;font-size:0.92rem">
+                  <div style="font-size:0.8rem;color:var(--fg-muted);margin-bottom:0.35rem">
+                    {b.author_name || b.author_handle || 'unknown'}
+                    {b.author_handle && b.author_name && ` · ${b.author_handle}`}
+                  </div>
+                  <div style="white-space:pre-wrap" set:html={linkifyCitations(b.text)} />
+                  {b.note && (
+                    <div style="margin-top:0.5rem;font-size:0.85rem;color:var(--fg-muted);font-style:italic">
+                      Curator's note: {b.note}
+                    </div>
+                  )}
+                  <div style="margin-top:0.5rem;font-size:0.8rem">
+                    <a href={b.url} target="_blank" rel="noopener">view original on X →</a>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      )}
+    </section>
+  ))}
+</Base>
