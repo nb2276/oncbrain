@@ -4,12 +4,12 @@ import { existsSync } from 'node:fs';
 export type Bookmark = {
   id: number;
   url: string;
-  conference_slug: string;
-  day: number;
+  bookmark_date: string; // YYYY-MM-DD
+  conference_slug: string | null;
   author_handle: string | null;
   author_name: string | null;
   tweet_text: string | null;
-  image_urls: string | null;
+  image_urls: string | null; // JSON-stringified array
   notes: string | null;
   fetched_via: 'oembed' | 'manual' | 'pending';
   created_at: number;
@@ -17,8 +17,8 @@ export type Bookmark = {
 
 export type NewBookmark = {
   url: string;
-  conference_slug: string;
-  day: number;
+  bookmark_date: string; // YYYY-MM-DD
+  conference_slug?: string | null;
   author_handle?: string | null;
   author_name?: string | null;
   tweet_text?: string | null;
@@ -35,12 +35,19 @@ export type Conference = {
   hashtag: string | null;
 };
 
+export type BookmarkListFilter = {
+  bookmark_date?: string; // exact YYYY-MM-DD
+  conference_slug?: string;
+  date_from?: string; // YYYY-MM-DD inclusive
+  date_to?: string; // YYYY-MM-DD inclusive
+};
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS bookmarks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   url TEXT NOT NULL UNIQUE,
-  conference_slug TEXT NOT NULL,
-  day INTEGER NOT NULL,
+  bookmark_date TEXT NOT NULL,
+  conference_slug TEXT,
   author_handle TEXT,
   author_name TEXT,
   tweet_text TEXT,
@@ -58,32 +65,67 @@ CREATE TABLE IF NOT EXISTS conferences (
   hashtag TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_bookmarks_conf_day ON bookmarks(conference_slug, day);
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_bookmarks_date ON bookmarks(bookmark_date);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_conf ON bookmarks(conference_slug);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_created ON bookmarks(created_at);
 `;
 
 export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): Database.Database {
-  const isNew = !existsSync(path);
+  const isNew = !existsSync(path) && path !== ':memory:';
   const db = new Database(path);
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
-  if (isNew) db.exec(SCHEMA);
-  else db.exec(SCHEMA); // idempotent IF NOT EXISTS
+  db.exec(SCHEMA);
+  if (!isNew) detectAndGuardOldSchema(db);
   return db;
 }
 
+// The v1 schema had `day INTEGER NOT NULL` and `conference_slug NOT NULL`.
+// v2 (this file) replaces them with `bookmark_date NOT NULL` and optional conference.
+// If we open a DB that still has the v1 shape, fail loud rather than silently
+// produce mixed-state rows. Since v1 was never deployed with real data, the
+// expected fix is `rm oncbrain.db && restart`.
+function detectAndGuardOldSchema(db: Database.Database): void {
+  const cols = db.prepare("PRAGMA table_info(bookmarks)").all() as { name: string; notnull: number }[];
+  const hasBookmarkDate = cols.some((c) => c.name === 'bookmark_date');
+  const hasOldDay = cols.some((c) => c.name === 'day');
+  if (!hasBookmarkDate || hasOldDay) {
+    throw new Error(
+      'oncbrain.db has the v1 schema (day INT, conference_slug NOT NULL). ' +
+        'No production migration path exists — delete oncbrain.db and re-add bookmarks. ' +
+        '(rm oncbrain.db oncbrain.db-wal oncbrain.db-shm)',
+    );
+  }
+}
+
+// Today's date in YYYY-MM-DD form, in the local timezone.
+// Used by callers that want to default new bookmarks to "today".
+export function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export function saveBookmark(db: Database.Database, b: NewBookmark): { id: number; created: boolean } {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(b.bookmark_date)) {
+    throw new Error(`bookmark_date must be YYYY-MM-DD, got: ${b.bookmark_date}`);
+  }
+
   const existing = db.prepare('SELECT id FROM bookmarks WHERE url = ?').get(b.url) as { id: number } | undefined;
   if (existing) return { id: existing.id, created: false };
 
   const stmt = db.prepare(`
-    INSERT INTO bookmarks (url, conference_slug, day, author_handle, author_name, tweet_text, image_urls, notes, fetched_via, created_at)
+    INSERT INTO bookmarks (url, bookmark_date, conference_slug, author_handle, author_name, tweet_text, image_urls, notes, fetched_via, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const result = stmt.run(
     b.url,
-    b.conference_slug,
-    b.day,
+    b.bookmark_date,
+    b.conference_slug ?? null,
     b.author_handle ?? null,
     b.author_name ?? null,
     b.tweet_text ?? null,
@@ -95,27 +137,63 @@ export function saveBookmark(db: Database.Database, b: NewBookmark): { id: numbe
   return { id: result.lastInsertRowid as number, created: true };
 }
 
-export function listBookmarks(
-  db: Database.Database,
-  filter: { conference_slug?: string; day?: number } = {},
-): Bookmark[] {
+export function listBookmarks(db: Database.Database, filter: BookmarkListFilter = {}): Bookmark[] {
   const where: string[] = [];
   const params: (string | number)[] = [];
+  if (filter.bookmark_date) {
+    where.push('bookmark_date = ?');
+    params.push(filter.bookmark_date);
+  }
   if (filter.conference_slug) {
     where.push('conference_slug = ?');
     params.push(filter.conference_slug);
   }
-  if (filter.day !== undefined) {
-    where.push('day = ?');
-    params.push(filter.day);
+  if (filter.date_from) {
+    where.push('bookmark_date >= ?');
+    params.push(filter.date_from);
   }
-  const sql = `SELECT * FROM bookmarks${where.length ? ' WHERE ' + where.join(' AND ') : ''} ORDER BY created_at DESC`;
+  if (filter.date_to) {
+    where.push('bookmark_date <= ?');
+    params.push(filter.date_to);
+  }
+  const sql = `SELECT * FROM bookmarks${where.length ? ' WHERE ' + where.join(' AND ') : ''} ORDER BY bookmark_date DESC, created_at DESC`;
   return db.prepare(sql).all(...params) as Bookmark[];
+}
+
+// Distinct dates that have at least one bookmark. Used by the homepage to
+// enumerate which days need digest pages. Reverse-chronological.
+export function listBookmarkDates(db: Database.Database): string[] {
+  const rows = db
+    .prepare('SELECT DISTINCT bookmark_date FROM bookmarks ORDER BY bookmark_date DESC')
+    .all() as { bookmark_date: string }[];
+  return rows.map((r) => r.bookmark_date);
+}
+
+// For a given date, which conference (if any) had ALL its bookmarks tagged?
+// Used by the digest builder to attach a conference badge when the day is
+// unambiguously about one meeting. Returns null when bookmarks span multiple
+// conferences (or none).
+export function dominantConferenceForDate(db: Database.Database, date: string): string | null {
+  const rows = db
+    .prepare('SELECT DISTINCT conference_slug FROM bookmarks WHERE bookmark_date = ? AND conference_slug IS NOT NULL')
+    .all(date) as { conference_slug: string }[];
+  if (rows.length !== 1) return null;
+  return rows[0]!.conference_slug;
 }
 
 export function deleteBookmark(db: Database.Database, id: number): boolean {
   const result = db.prepare('DELETE FROM bookmarks WHERE id = ?').run(id);
   return result.changes > 0;
+}
+
+export function updateBookmarkFetched(
+  db: Database.Database,
+  id: number,
+  data: { author_handle: string | null; author_name: string | null; tweet_text: string },
+): void {
+  db.prepare(
+    'UPDATE bookmarks SET author_handle = ?, author_name = ?, tweet_text = ?, fetched_via = ? WHERE id = ?',
+  ).run(data.author_handle, data.author_name, data.tweet_text, 'oembed', id);
 }
 
 export function upsertConference(db: Database.Database, c: Conference): void {
@@ -136,4 +214,19 @@ export function listConferences(db: Database.Database): Conference[] {
 
 export function getConference(db: Database.Database, slug: string): Conference | undefined {
   return db.prepare('SELECT * FROM conferences WHERE slug = ?').get(slug) as Conference | undefined;
+}
+
+// Settings (key-value store) — used by ingestion sources to persist state like
+// the Telegram getUpdates offset.
+
+export function getSetting(db: Database.Database, key: string): string | undefined {
+  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key) as { value: string } | undefined;
+  return row?.value;
+}
+
+export function setSetting(db: Database.Database, key: string, value: string): void {
+  db.prepare(
+    `INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+  ).run(key, value, Date.now());
 }

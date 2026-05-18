@@ -1,65 +1,109 @@
 # oncbrain
 
-Curated AI-summarized digest of oncology meeting tweets.
+Curated AI-summarized digest of oncology updates. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, etc.).
 
 ## Architecture
 
 ```
-LOCAL (laptop)                      GITHUB                DIGITALOCEAN
-─────────────────                   ──────                ────────────
-admin form @ localhost:3001           ▲                   App Platform
-  │                                   │                   (static site)
-  ├─▶ SQLite (~/oncbrain.db)          │                          │
-  │                                   │                          ▼
-build pipeline:                       │                   public reads
-  fetch tweets via oEmbed             │                   static HTML
-  call LLM (cluster, summarize,       │
-    extract NCT/PubMed)               │
-  write to /dist/*.html               │
-  │                                   │
-  └─▶ git commit + push ─────────────▶┘
-                                      │
-                                      └─▶ auto-deploy on push
+INGESTION                LOCAL (laptop)              GITHUB              DIGITALOCEAN
+─────────                ──────────────              ──────              ────────────
+Telegram bot ─────┐                                                       App Platform
+                  ├─▶ SQLite (oncbrain.db)            ▲                   (static site)
+admin form @ 3001 ┘     │                             │                          │
+                        │                             │                          ▼
+                        ▼                             │                   public reads
+                  build pipeline (npm run build:day): │                   static HTML at
+                    oEmbed fetch pending tweets       │                   oncbrain.oncologytoolkit.com
+                    LLM cluster + summarize           │
+                    write data/digests/<date>.json    │
+                    write data/obsidian/<date>.md     │
+                        │                             │
+                        └─▶ git push ─────────────────┘
+                                                      │
+                                                      └─▶ auto-deploy on push
 ```
 
-Admin and build pipeline run locally only. The public site is pure static HTML.
+Admin form, Telegram poller, and build pipeline run locally only. The public site is pure static HTML.
 
-## Setup
+## Setup (one time)
 
 ```bash
 cp .env.example .env
-# Add ANTHROPIC_API_KEY, set PUBLIC_CURATOR_NAME / _HANDLE / _SITE_NAME
+# Edit .env:
+#   ANTHROPIC_API_KEY=sk-ant-...                (or set LLM_BACKEND=claude-cli)
+#   TELEGRAM_BOT_TOKEN=...                       (from @BotFather — optional but recommended)
+#   PUBLIC_CURATOR_NAME=Your Name, MD
+#   PUBLIC_CURATOR_HANDLE=@yourhandle
+#   PUBLIC_SITE_NAME=Oncology Meeting Digest
+#   PUBLIC_SITE_URL=https://oncbrain.oncologytoolkit.com
 npm install
 ```
 
-## Daily use
+## Adding content
+
+Two ingestion paths, both write to the same SQLite queue. Use either or both.
+
+### Path A: Telegram bot (mobile-friendly, primary path)
+
+1. Open Telegram, find `@BotFather`, send `/newbot`. Get a token, paste it into `.env` as `TELEGRAM_BOT_TOKEN`.
+2. Optional: create a private Telegram channel and add the bot as admin.
+3. Throughout the day, DM tweet URLs to the bot (or post in your private channel).
+4. When ready to publish:
 
 ```bash
-# Start the admin form (localhost only)
-npm run admin
-# Visit http://localhost:3001 to add bookmarks during a meeting day
-
-# Build a day's digest
-npm run build:day -- --conf=asco2026 --day=2
-
-# Build the static site
-npm run build
-
-# Preview locally
-npm run preview
-
-# Commit + push → DigitalOcean auto-deploys
-git add data/digests dist
-git commit -m "asco2026 day 2"
-git push
+npm run pull:telegram   # fetches all new messages, saves URLs as today's bookmarks
 ```
+
+The bot also recognizes a `/note <text>` command on the same message to attach a curator note.
+
+### Path B: localhost admin form
+
+```bash
+npm run admin           # http://localhost:3001
+# Paste a tweet URL → date defaults to today → optional conference tag → optional note → save.
+```
+
+If oEmbed fails for a tweet, expand "Manual paste fallback" on the form and paste the tweet text directly.
+
+## Publishing a digest
+
+```bash
+npm run build:day                              # today's date
+npm run build:day -- --date=2026-05-18         # a specific date
+npm run build:day -- --backfill                # every date with bookmarks (re-run is idempotent)
+npm run build:day -- --dry-run                 # no LLM call, see what would happen
+
+npm run build                                  # Astro static build (preview locally with: npm run preview)
+
+git add data
+git commit -m "$(date +%Y-%m-%d)"
+git push                                       # DigitalOcean auto-deploys in ~40 sec
+```
+
+## URLs
+
+- `https://oncbrain.oncologytoolkit.com/` — recent dates, conference index, TL;DRs
+- `https://oncbrain.oncologytoolkit.com/2026-05-18/` — one day's digest
+- `https://oncbrain.oncologytoolkit.com/conferences/asco2026/` — all days tagged with a conference
+- `https://oncbrain.oncologytoolkit.com/about/` — disclaimer + curator info
+
+## Obsidian integration
+
+Every `npm run build:day` also writes Obsidian-flavored markdown to `data/obsidian/<date>[-<conf>].md`:
+
+- YAML frontmatter (date, conference, tags, source-count, url)
+- Wikilinks for NCT trial numbers, PMIDs, DOIs, conference notes, neighboring dates
+- Callout for TL;DR
+- Sources per cluster with curator notes
+
+Symlink `data/obsidian/` into your Obsidian vault, or open the repo as a vault directly. Backlinks across digests show up in Obsidian's graph view.
 
 ## LLM backend
 
 Two paths via `LLM_BACKEND` env var:
 
-- `LLM_BACKEND=api` (default) — Anthropic API, `ANTHROPIC_API_KEY` required, pay per token
-- `LLM_BACKEND=claude-cli` — shells out to `claude -p`, billed to your Claude Code subscription
+- `LLM_BACKEND=api` (default) — Anthropic API. `ANTHROPIC_API_KEY` required. Pay per token (~$0.05–0.10 per digest).
+- `LLM_BACKEND=claude-cli` — shells out to `claude -p`. Billed to your Claude Code subscription. Best for prompt-iteration loops.
 
 ## Tests
 
@@ -68,23 +112,31 @@ npm test           # all tests once
 npm run test:watch # watch mode
 ```
 
+165+ tests across DB, twitter-fetch, LLM pipeline, eval, Obsidian export, Telegram ingest, citation extraction, and LLM backend adapter.
+
 ## Eval
 
-When iterating on `prompts/digest-v1.txt`, run the eval before shipping:
+When iterating on `prompts/digest-v1.txt`, run the eval before shipping a change:
 
 ```bash
 npm run eval                       # all fixtures
 npm run eval -- --save-baseline    # capture current as baseline
-npm run eval -- --compare-baseline # compare new run to baseline
+npm run eval -- --compare-baseline # diff this run vs baseline
 ```
+
+The judge scores on factual accuracy, clinical relevance, citation correctness, clustering quality, and hallucinations (any hallucination caps overall at 5/10).
+
+## Conferences (optional)
+
+Conferences are an optional tag on bookmarks. When all bookmarks for a date share one conference, the published digest displays that conference's badge. Add conferences via `http://localhost:3001/conferences` (admin form).
 
 ## Takedown requests
 
-Email the curator handle in `.env`. 24-hour SLA. Procedure: delete the bookmark row from SQLite, rebuild the affected day, redeploy.
+Email the curator handle in `.env`. 24-hour SLA. Procedure: delete the bookmark row from the admin queue, re-run `npm run build:day --date=<affected date>`, push.
 
 ## Disclaimer
 
-AI-generated summaries of public social media content. Not medical advice. Verify against primary sources (clinicaltrials.gov, PubMed, conference proceedings) before any clinical use.
+AI-generated summaries of public social media content. **Not medical advice.** Verify against primary sources (clinicaltrials.gov, PubMed, conference proceedings) before any clinical use.
 
 ## License
 

@@ -1,36 +1,63 @@
 ---
 import Base from '../layouts/Base.astro';
-import { listConferenceSummaries } from '../lib/digest-data.ts';
+import { listDigests, listConferenceSummaries } from '../lib/digest-data.ts';
 
+const digests = listDigests();
 const conferences = listConferenceSummaries();
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'Oncology Meeting Digest';
 ---
 
-<Base title={siteName} description="Curated AI-summarized digests of oncology conferences.">
+<Base title={siteName} description="Curated AI-summarized digests of oncology updates.">
   <p style="font-size:1.05rem;color:var(--fg-muted);margin-top:0">
-    Daily curated digests of the most impactful posts from oncology
-    meetings on X, organized by topic and AI-summarized.
+    Daily curated digests of the most impactful oncology updates on X,
+    organized by topic and AI-summarized. More frequent during major meetings.
   </p>
 
-  {conferences.length === 0 && (
+  {digests.length === 0 && (
     <p style="margin-top:2rem;color:var(--fg-muted)">
-      No digests yet — check back during the next major meeting.
+      No digests yet — check back soon.
     </p>
   )}
 
-  {conferences.map((conf) => (
+  {conferences.length > 0 && (
     <section style="margin-top:2rem">
-      <h2 style="margin:0;font-size:1.15rem">{conf.name}</h2>
+      <h2 style="margin:0;font-size:1rem;color:var(--fg-muted);font-weight:600;letter-spacing:0.03em;text-transform:uppercase">Conferences</h2>
       <ul style="list-style:none;padding:0;margin:0.75rem 0 0;display:flex;flex-wrap:wrap;gap:0.5rem">
-        {conf.days.map((day) => (
+        {conferences.map((conf) => (
           <li>
             <a
-              href={`/${conf.slug}/day-${day}`}
-              style="display:inline-block;padding:0.4rem 0.9rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px"
-            >Day {day}</a>
+              href={`/conferences/${conf.slug}/`}
+              style="display:inline-block;padding:0.4rem 0.9rem;background:var(--accent-bg);border:1px solid var(--border);border-radius:999px;font-size:0.9rem"
+            >{conf.name} <span style="color:var(--fg-muted)">· {conf.dates.length}d</span></a>
           </li>
         ))}
       </ul>
     </section>
-  ))}
+  )}
+
+  {digests.length > 0 && (
+    <section style="margin-top:2.5rem">
+      <h2 style="margin:0 0 1rem;font-size:1rem;color:var(--fg-muted);font-weight:600;letter-spacing:0.03em;text-transform:uppercase">Recent</h2>
+      <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1rem">
+        {digests.map((d) => (
+          <li>
+            <a
+              href={`/${d.date}/`}
+              style="display:block;padding:1rem 1.25rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;text-decoration:none"
+            >
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:0.75rem;flex-wrap:wrap">
+                <strong style="color:var(--fg)">{d.date}</strong>
+                {d.conference && (
+                  <span style="color:var(--accent);font-size:0.85rem">{d.conference.name}</span>
+                )}
+              </div>
+              <div style="margin-top:0.5rem;color:var(--fg-muted);font-size:0.95rem;line-height:1.45">
+                {d.digest.tldr.slice(0, 240)}{d.digest.tldr.length > 240 ? '…' : ''}
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 </Base>

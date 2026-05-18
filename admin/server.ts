@@ -9,6 +9,7 @@ import {
   deleteBookmark,
   listConferences,
   upsertConference,
+  todayIso,
   type Bookmark,
   type Conference,
 } from '../src/lib/db.ts';
@@ -69,6 +70,9 @@ function layout(title: string, body: ReturnType<typeof html> | string) {
           }
           details summary { cursor: pointer; color: var(--muted); padding: 0.5rem 0; }
           .pill { display: inline-block; padding: 0.1rem 0.4rem; background: var(--border); border-radius: 999px; font-size: 0.75rem; margin-right: 0.25rem; }
+          .day-header { margin: 2rem 0 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: baseline; }
+          .day-header h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+          .day-header span { font-size: 0.85rem; color: var(--muted); }
         </style>
       </head>
       <body>
@@ -86,6 +90,7 @@ function layout(title: string, body: ReturnType<typeof html> | string) {
 app.get('/', (c) => {
   const flash = c.req.query('flash');
   const conferences = listConferences(db);
+  const today = todayIso();
   return c.html(
     layout(
       'Add bookmark',
@@ -98,15 +103,15 @@ app.get('/', (c) => {
           </div>
           <div class="row">
             <div>
-              <label for="conference_slug">Conference</label>
-              <select id="conference_slug" name="conference_slug" required>
-                <option value="">— select —</option>
-                ${raw(conferences.map((c) => `<option value="${c.slug}">${c.name}</option>`).join(''))}
-              </select>
+              <label for="bookmark_date">Date</label>
+              <input id="bookmark_date" name="bookmark_date" type="date" required value="${today}" />
             </div>
             <div>
-              <label for="day">Day</label>
-              <input id="day" name="day" type="number" min="1" max="14" required value="1" />
+              <label for="conference_slug">Conference (optional)</label>
+              <select id="conference_slug" name="conference_slug">
+                <option value="">— none —</option>
+                ${raw(conferences.map((c) => `<option value="${escapeAttr(c.slug)}">${escapeHtml(c.name)}</option>`).join(''))}
+              </select>
             </div>
           </div>
           <div>
@@ -134,15 +139,6 @@ app.get('/', (c) => {
           </details>
           <button type="submit">Add to queue</button>
         </form>
-        ${
-          conferences.length === 0
-            ? html`<p style="margin-top:2rem;color:var(--muted)">
-                No conferences yet —
-                <a href="/conferences">add one</a>
-                first.
-              </p>`
-            : ''
-        }
       `,
     ),
   );
@@ -151,69 +147,92 @@ app.get('/', (c) => {
 app.post('/bookmark', async (c) => {
   const form = await c.req.formData();
   const url = String(form.get('url') || '').trim();
-  const conference_slug = String(form.get('conference_slug') || '').trim();
-  const day = parseInt(String(form.get('day') || '0'), 10);
+  const bookmark_date = String(form.get('bookmark_date') || '').trim() || todayIso();
+  const conference_slug = String(form.get('conference_slug') || '').trim() || null;
   const notes = String(form.get('notes') || '').trim() || null;
   const author_handle = String(form.get('author_handle') || '').trim() || null;
   const author_name = String(form.get('author_name') || '').trim() || null;
   const tweet_text = String(form.get('tweet_text') || '').trim() || null;
 
-  if (!url || !conference_slug || !day) {
-    return c.redirect('/?flash=' + encodeURIComponent('Missing required fields'));
+  if (!url) {
+    return c.redirect('/?flash=' + encodeURIComponent('Missing tweet URL'));
   }
 
-  // If manual fields are provided, mark as 'manual'. Otherwise pending (fetched later by build pipeline).
   const fetched_via = tweet_text || author_handle ? 'manual' : 'pending';
 
-  const result = saveBookmark(db, {
-    url,
-    conference_slug,
-    day,
-    author_handle,
-    author_name,
-    tweet_text,
-    notes,
-    fetched_via,
-  });
-
-  const msg = result.created ? `Saved bookmark #${result.id}` : `Already saved (#${result.id}) — no duplicate created`;
-  return c.redirect('/?flash=' + encodeURIComponent(msg));
+  try {
+    const result = saveBookmark(db, {
+      url,
+      bookmark_date,
+      conference_slug,
+      author_handle,
+      author_name,
+      tweet_text,
+      notes,
+      fetched_via,
+    });
+    const msg = result.created
+      ? `Saved bookmark #${result.id} for ${bookmark_date}`
+      : `Already saved (#${result.id}) — no duplicate`;
+    return c.redirect('/?flash=' + encodeURIComponent(msg));
+  } catch (err) {
+    return c.redirect('/?flash=' + encodeURIComponent(`Error: ${(err as Error).message}`));
+  }
 });
 
 app.get('/bookmarks', (c) => {
   const bookmarks = listBookmarks(db);
   const conferenceMap = new Map(listConferences(db).map((c) => [c.slug, c]));
 
+  // Group bookmarks by date for a date-headed queue view.
+  const byDate = new Map<string, Bookmark[]>();
+  for (const b of bookmarks) {
+    const list = byDate.get(b.bookmark_date) ?? [];
+    list.push(b);
+    byDate.set(b.bookmark_date, list);
+  }
+
   return c.html(
     layout(
       'Queue',
       html`
-        <p style="color:var(--muted)">${bookmarks.length} bookmark${bookmarks.length === 1 ? '' : 's'} in queue.</p>
+        <p style="color:var(--muted)">${bookmarks.length} bookmark${bookmarks.length === 1 ? '' : 's'} total.</p>
         ${
           bookmarks.length === 0
             ? html`<p>Nothing yet. <a href="/">Add a bookmark</a>.</p>`
             : raw(
-                bookmarks
-                  .map(
-                    (b: Bookmark) => `
-            <div class="bookmark">
-              <div class="meta">
-                <span>
-                  <span class="pill">${conferenceMap.get(b.conference_slug)?.name ?? b.conference_slug}</span>
-                  <span class="pill">Day ${b.day}</span>
-                  <span class="pill">${b.fetched_via}</span>
-                  ${b.author_handle ? `<span style="color:var(--muted)">${b.author_handle}</span>` : ''}
-                </span>
-                <form method="post" action="/delete/${b.id}" style="display:inline" onsubmit="return confirm('Delete this bookmark?')">
-                  <button type="submit" class="danger">delete</button>
-                </form>
+                Array.from(byDate.entries())
+                  .map(([date, items]) => {
+                    const conf = items.find((b) => b.conference_slug)?.conference_slug;
+                    const confName = conf ? conferenceMap.get(conf)?.name : null;
+                    return `
+              <div class="day-header">
+                <h2>${date}${confName ? ` · ${escapeHtml(confName)}` : ''}</h2>
+                <span>${items.length} bookmark${items.length === 1 ? '' : 's'}</span>
               </div>
-              ${b.tweet_text ? `<div class="text">${escapeHtml(b.tweet_text)}</div>` : ''}
-              ${b.notes ? `<div class="text" style="margin-top:0.5rem;color:var(--muted);font-style:italic">Note: ${escapeHtml(b.notes)}</div>` : ''}
-              <div style="margin-top:0.5rem;font-size:0.8rem"><a href="${escapeAttr(b.url)}" target="_blank" rel="noopener">view original →</a></div>
-            </div>
-          `,
-                  )
+              ${items
+                .map(
+                  (b) => `
+                <div class="bookmark">
+                  <div class="meta">
+                    <span>
+                      ${b.conference_slug ? `<span class="pill">${escapeHtml(conferenceMap.get(b.conference_slug)?.name ?? b.conference_slug)}</span>` : ''}
+                      <span class="pill">${b.fetched_via}</span>
+                      ${b.author_handle ? `<span style="color:var(--muted)">${escapeHtml(b.author_handle)}</span>` : ''}
+                    </span>
+                    <form method="post" action="/delete/${b.id}" style="display:inline" onsubmit="return confirm('Delete this bookmark?')">
+                      <button type="submit" class="danger">delete</button>
+                    </form>
+                  </div>
+                  ${b.tweet_text ? `<div class="text">${escapeHtml(b.tweet_text)}</div>` : ''}
+                  ${b.notes ? `<div class="text" style="margin-top:0.5rem;color:var(--muted);font-style:italic">Note: ${escapeHtml(b.notes)}</div>` : ''}
+                  <div style="margin-top:0.5rem;font-size:0.8rem"><a href="${escapeAttr(b.url)}" target="_blank" rel="noopener">view original →</a></div>
+                </div>
+              `,
+                )
+                .join('')}
+            `;
+                  })
                   .join(''),
               )
         }
@@ -236,6 +255,10 @@ app.get('/conferences', (c) => {
       'Conferences',
       html`
         ${flash ? html`<div class="flash">${flash}</div>` : ''}
+        <p style="color:var(--muted);margin-top:0">
+          Optional. Tag bookmarks with a conference to get a conference badge on the published digest and an index page at
+          <code>/conferences/&lt;slug&gt;/</code>.
+        </p>
         <form method="post" action="/conferences">
           <div class="row">
             <div>
@@ -273,7 +296,7 @@ app.get('/conferences', (c) => {
                     (c: Conference) => `
             <div class="bookmark">
               <div class="meta">
-                <span><strong>${escapeHtml(c.name)}</strong> <span class="pill">${c.slug}</span></span>
+                <span><strong>${escapeHtml(c.name)}</strong> <span class="pill">${escapeHtml(c.slug)}</span></span>
               </div>
               <div style="color:var(--muted);font-size:0.85rem">
                 ${c.start_date || '?'} → ${c.end_date || '?'}

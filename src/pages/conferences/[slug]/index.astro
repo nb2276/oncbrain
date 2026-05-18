@@ -1,0 +1,38 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { listConferenceSummaries } from '../../../lib/digest-data.ts';
+
+export async function getStaticPaths() {
+  return listConferenceSummaries().map((conf) => ({
+    params: { slug: conf.slug },
+    props: { conf },
+  }));
+}
+
+interface Props {
+  conf: { slug: string; name: string; dates: string[] };
+}
+
+const { conf } = Astro.props as Props;
+---
+
+<Base title={conf.name} description={`Daily digests from ${conf.name}.`}>
+  <p style="font-size:0.85rem;color:var(--fg-muted);margin-top:0">
+    <a href="/">← all dates</a>
+  </p>
+  <h2 style="margin:0.5rem 0 0;font-size:1.4rem">{conf.name}</h2>
+  <p style="margin:0.25rem 0 0;color:var(--fg-muted);font-size:0.95rem">
+    {conf.dates.length} day{conf.dates.length === 1 ? '' : 's'} of digests
+  </p>
+
+  <ul style="list-style:none;padding:0;margin:1.5rem 0 0;display:flex;flex-direction:column;gap:0.5rem">
+    {conf.dates.map((date) => (
+      <li>
+        <a
+          href={`/${date}/`}
+          style="display:block;padding:0.75rem 1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px"
+        >{date}</a>
+      </li>
+    ))}
+  </ul>
+</Base>

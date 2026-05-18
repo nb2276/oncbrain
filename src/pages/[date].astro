@@ -1,11 +1,11 @@
 ---
-import Base from '../../layouts/Base.astro';
-import { listDigests, type DigestArtifact } from '../../lib/digest-data.ts';
-import { linkifyCitations } from '../../lib/extract.ts';
+import Base from '../layouts/Base.astro';
+import { listDigests, type DigestArtifact } from '../lib/digest-data.ts';
+import { linkifyCitations } from '../lib/extract.ts';
 
 export async function getStaticPaths() {
   return listDigests().map((artifact) => ({
-    params: { conferenceSlug: artifact.conference.slug, day: String(artifact.conference.day) },
+    params: { date: artifact.date },
     props: { artifact },
   }));
 }
@@ -15,22 +15,29 @@ interface Props {
 }
 
 const { artifact } = Astro.props as Props;
-const { conference, digest, bookmarks, generated_at } = artifact;
+const { date, conference, digest, bookmarks, generated_at } = artifact;
 
 const bookmarksById = new Map(bookmarks.map((b) => [b.id, b]));
 const generatedDate = new Date(generated_at).toISOString().slice(0, 10);
+const title = conference ? `${conference.name} — ${date}` : date;
 ---
 
-<Base
-  title={`${conference.name} — Day ${conference.day}`}
-  description={digest.tldr}
->
+<Base title={title} description={digest.tldr}>
   <p style="font-size:0.85rem;color:var(--fg-muted);margin-top:0">
-    <a href="/">← all conferences</a>
+    <a href="/">← all dates</a>
+    {conference && (
+      <>
+        {' · '}
+        <a href={`/conferences/${conference.slug}/`}>{conference.name}</a>
+      </>
+    )}
   </p>
-  <h2 style="margin:0.5rem 0 0;font-size:1.4rem">{conference.name}</h2>
-  <p style="margin:0.25rem 0 0;color:var(--fg-muted);font-size:0.95rem">
-    Day {conference.day} · digest generated {generatedDate}
+  <h2 style="margin:0.5rem 0 0;font-size:1.4rem">
+    {date}
+    {conference && <span style="font-size:0.9rem;color:var(--fg-muted);font-weight:normal"> · {conference.name}</span>}
+  </h2>
+  <p style="margin:0.25rem 0 0;color:var(--fg-muted);font-size:0.85rem">
+    digest generated {generatedDate}
   </p>
 
   <section style="margin-top:2rem;padding:1.25rem;background:var(--accent-bg);border-radius:8px;border-left:3px solid var(--accent)">
