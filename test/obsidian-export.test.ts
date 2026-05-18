@@ -72,7 +72,7 @@ describe('renderObsidian', () => {
 
   it('renders site heading with emoji + label', () => {
     const md = renderObsidian(sampleArtifact);
-    expect(md).toContain('## 🍇 Prostate');
+    expect(md).toContain('## 🌰 Prostate');
   });
 
   it('renders site intro (when present) and skips when null', () => {
