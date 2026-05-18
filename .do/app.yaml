@@ -1,13 +1,26 @@
+domains:
+- domain: oncbrain.oncologytoolkit.com
+  type: PRIMARY
+  zone: oncologytoolkit.com
+features:
+- buildpack-stack=ubuntu-22
+ingress:
+  rules:
+  - component:
+      name: web
+    match:
+      path:
+        prefix: /
 name: oncbrain
-region: nyc
+region: sfo
 static_sites:
-  - name: web
-    github:
-      repo: nb2276/oncbrain
-      branch: main
-      deploy_on_push: true
-    source_dir: /
-    build_command: npm run build
-    output_dir: dist
-    environment_slug: node-js
-    catchall_document: index.html
+- build_command: npm run build
+  catchall_document: index.html
+  environment_slug: node-js
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: nb2276/oncbrain
+  name: web
+  output_dir: dist
+  source_dir: /
