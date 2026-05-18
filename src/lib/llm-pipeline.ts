@@ -189,6 +189,10 @@ export type DigestStudy = {
   // papers (paper), or slide_uploads (slide). Older v0.4 artifacts won't
   // have this — consumers should fall back to tweet_ids.
   source_ids?: DigestSourceRef[];
+  // v0.6+: stable per-study slug from Phase 1 clustering. Used by the search
+  // index and as the anchor id on the [date] page. Older artifacts won't
+  // have this — consumers should fall back to deriveSlug(name).
+  slug?: string;
 };
 
 // Type guards used by parser, validator, and renderers.
@@ -820,6 +824,7 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     key_figure_caption,
     nct,
     tweet_ids: cluster.tweet_ids,
+    slug: cluster.slug,
   };
 }
 

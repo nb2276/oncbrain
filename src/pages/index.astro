@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import SearchBox from '../components/SearchBox.astro';
 import { listDigests, listConferenceSummaries } from '../lib/digest-data.ts';
 
 const digests = listDigests();
@@ -12,6 +13,8 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME || 'onc brain';
     Daily curated digests of the most impactful oncology updates on X,
     organized by topic and AI-summarized. More frequent during major meetings.
   </p>
+
+  {digests.length > 0 && <SearchBox />}
 
   {digests.length === 0 && (
     <p style="margin-top:2rem;color:var(--fg-muted)">

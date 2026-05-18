@@ -4,6 +4,7 @@ import { listDigests, type DigestArtifact } from '../lib/digest-data.ts';
 import { linkifyCitations } from '../lib/extract.ts';
 import { getDiseaseSite } from '../lib/disease-sites.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
+import { deriveSlug } from '../lib/slug.ts';
 
 export async function getStaticPaths() {
   return listDigests().map((artifact) => ({
@@ -81,7 +82,7 @@ function toSlideUrl(filePath: string): string {
         )}
 
         {site.studies.map((study) => (
-          <div class="study">
+          <div class="study" id={study.slug ?? deriveSlug(study.name)}>
             <h4 class="study-name">
               {study.name}
               {study.nct && (
@@ -411,6 +412,7 @@ function toSlideUrl(filePath: string): string {
     border: 1px solid var(--border);
     border-left: 3px solid var(--accent);
     border-radius: 4px;
+    scroll-margin-top: 1rem;
   }
   .study-name {
     margin: 0 0 0.35rem;

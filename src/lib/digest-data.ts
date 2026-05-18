@@ -34,6 +34,9 @@ export type DigestStudy = {
   // v0.4: synthetic ids. v0.5+ prefers source_ids for typed refs.
   tweet_ids: number[];
   source_ids?: DigestSourceRef[];
+  // v0.6+: stable per-study slug. Older artifacts won't have this — renderers
+  // should fall back to deriveSlug(name) from src/lib/slug.ts.
+  slug?: string;
 };
 
 export type DigestArtifactPaper = {

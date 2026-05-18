@@ -2,6 +2,30 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — live search
+
+Client-side live search on the home page. The curator scans across days; as the archive grows past ~10 dates, "browse by date" stops scaling.
+
+### Added
+
+- **`src/components/SearchBox.astro`** — single search input mounted above the recent-dates strip on `/`. Lazy-loads the index on first focus, filters as you type. Substring match (case-insensitive) across study `name`, `tldr`, `nct`, and disease-site label. Up to 20 results, sorted newest date first; if more match, shows "+N more — narrow your search". Keyboard: `/` focuses, `Esc` clears.
+- **`src/pages/search-index.json.ts`** — Astro endpoint emitting one `SearchEntry` per study across all published dates. ~250 bytes/entry; deferred to v0.6.x to switch to a real search engine (lunr/flexsearch) if typo tolerance becomes a real complaint.
+- **`src/lib/slug.ts`** — `deriveSlug(name)` helper, single source for slug derivation. Strips punctuation, normalizes diacritics, collapses separators, truncates to 64 chars, falls back to `study` for empty-after-strip input. Matches the `isSafeSlug()` shape used elsewhere.
+- **Per-study slug on `DigestStudy`.** Schema additive: new optional `slug` field carried from Phase 1 clustering through to the final artifact. Older v0.5 artifacts fall back to `deriveSlug(name)` at render time, so existing pages keep working.
+- **Anchor IDs on study cards in `[date].astro`.** Each `.study` div gets `id={study.slug ?? deriveSlug(study.name)}` + `scroll-margin-top: 1rem` so search-result clicks deep-link cleanly. Format: `/<date>/#<slug>`.
+
+### Engineering
+
+- 308 tests (was 298, +10 for slug derivation edge cases).
+- 0 new type errors. One pre-existing `source_ids` error in `obsidian-export.ts` carries over from v0.5.
+
+### Not yet shipped (deferred)
+
+- **Source-type filter** in search results (tweet/paper/slide). v0.6.x.
+- **Fuzzy / typo-tolerant match.** Defer until a real reader complaint. Substring covers known-name lookups.
+- **Keyboard navigation through results.** Arrow keys + Enter. Stretch.
+- **URL state** (`?q=foo`). Stretch — results live in JS state only for the MVP.
+
 ## [0.5.0] — 2026-05-18
 
 Multi-source ingestion. The digest pipeline now accepts three input types:
