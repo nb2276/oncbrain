@@ -20,8 +20,9 @@ export type DigestStudy = {
   details: DigestDetail[];
   // v0.4: optional promoted figure. Both fields are null when the per-study
   // agent abstains or when the post-hoc OCR validator rejects the caption.
+  // v0.4.3: caption may also be a DigestTable for comparison-chart figures.
   key_figure_url?: string | null;
-  key_figure_caption?: string | null;
+  key_figure_caption?: string | DigestTable | null;
   nct: string | null;
   tweet_ids: number[];
 };

@@ -66,9 +66,33 @@ const dates = Array.from(byDate.keys());
             <p class="study-tldr" set:html={linkifyCitations(occ.study.tldr)} />
             {occ.study.key_figure_url && isSafeImageUrl(occ.study.key_figure_url) && (
               <figure class="study-figure">
-                <img src={occ.study.key_figure_url} alt={occ.study.key_figure_caption ?? occ.study.name} loading="lazy" />
-                {occ.study.key_figure_caption && (
+                <img
+                  src={occ.study.key_figure_url}
+                  alt={typeof occ.study.key_figure_caption === 'string' ? occ.study.key_figure_caption : occ.study.name}
+                  loading="lazy"
+                />
+                {typeof occ.study.key_figure_caption === 'string' && (
                   <figcaption>{occ.study.key_figure_caption}</figcaption>
+                )}
+                {occ.study.key_figure_caption && typeof occ.study.key_figure_caption !== 'string' && (
+                  <figcaption>
+                    <div class="study-table-wrap caption-table-wrap">
+                      <table class="study-table">
+                        <thead>
+                          <tr>
+                            {occ.study.key_figure_caption.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {occ.study.key_figure_caption.rows.map((row) => (
+                            <tr>
+                              {row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </figcaption>
                 )}
               </figure>
             )}
@@ -309,6 +333,13 @@ const dates = Array.from(byDate.keys());
     font-size: 0.82rem;
     color: var(--fg-muted);
     line-height: 1.4;
+  }
+  .caption-table-wrap {
+    margin-top: 0.4rem;
+  }
+  .caption-table-wrap .study-table {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
   }
 
   .sources { margin-top: 0.85rem; }

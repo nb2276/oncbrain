@@ -45,9 +45,19 @@ Before writing, mentally cover:
 Then write 3-7 bullets. Effect sizes VERBATIM from tweets/images/OCR. If the tweets+images don't give a number, write "no effect size reported in source tweets" — never invent one.
 
 **Choose the right detail shape for the data:**
-- **Flat string** — a single statement. Most bullets are flat.
-- **`{text, subdetails}`** — 1D list under a shared concept (e.g., "Late G3+ AEs by organ system" with one bullet per organ). One dimension of variation.
-- **`{text, table}`** — 2D matrix: 2+ trials/arms/cohorts crossed with 2+ endpoints/timepoints/subgroups. The table has `columns` (header row) and `rows` (one array per data row). First column is conventionally the row label. Wall-of-semicolons strings are explicitly forbidden — use the table form whenever you would otherwise write multiple "X vs Y" comparisons in one sentence.
+- **Flat string** — a single statement, one data point or one observation. Most bullets are flat.
+- **`{text, subdetails}`** — 1D list under a shared concept (e.g., "Late G3+ AEs by organ system" with one bullet per organ). One dimension of variation, no aligned cross-comparison.
+- **`{text, table}`** — ANY comparison outcome: 2+ arms, 2+ trials, 2+ timepoints, 2+ subgroups crossed with 2+ data points. If a single-arm trial reports outcomes for multiple endpoints with shared columns (estimate, 95% CI, p-value), that's still a table.
+
+**Tables are required for comparison outcomes.** Examples that MUST be tables:
+- Experimental vs control arm × multiple endpoints
+- Multi-trial cross-comparison (POP-RT vs PEACE-2 across endpoints)
+- Outcomes by subgroup (HR by age/sex/biomarker)
+- Outcomes by timepoint (1yr / 3yr / 5yr LC across primaries)
+- Dose-escalation arms × toxicity grades
+- Forest-plot row data (subgroup × HR/CI)
+
+Wall-of-semicolons strings are explicitly forbidden when the data is a comparison. Use the table form.
 
 A downstream validator checks every numeric token in every table cell against the tweet text + image OCR of source tweets. Any cell number not traceable to source = the WHOLE table is replaced with a flat fallback string. Be conservative: only put numbers in tables that you can ground in source content.
 
@@ -58,7 +68,12 @@ A downstream validator checks every numeric token in every table cell against th
 - You can write a caption sourced ONLY from numeric text overlays on that specific image (HR, CI, p-value, medians, time points)
 - The OCR text for the image contains those numbers verbatim — if OCR didn't capture them, you cannot caption them
 
-A downstream validator rejects captions whose numeric tokens don't appear in the OCR for the selected image. If your caption fails validation, the figure is also dropped. So: when in doubt, abstain.
+**Caption form (v0.4.3): prefer table when the figure is a comparison.**
+- For comparison figures (KM curves with 2+ arms, forest plots, AE side-by-side tables), emit `key_figure_caption` as a TABLE: `{columns: [...], rows: [...]}`. Columns are typically the arms/trials being compared; rows are endpoints/timepoints/subgroups (or vice versa, whichever matches the figure's layout).
+- For figures that aren't comparisons (single-arm summary slide, schema, trial flow), emit a flat string caption.
+- For figures where you can't extract numeric structure cleanly, emit `null`.
+
+A downstream validator rejects caption numbers (in string or table cells) that aren't in the figure's OCR. Failed validation → caption dropped, figure kept. So: when in doubt, abstain.
 
 For `key_figure_caption`: **numeric-only, sourced strictly from OCR text overlays on the chosen figure**. Read the OCR text for that image. Include only what is literally printed on the figure: HR + CI, p-value, medians, time points, n-at-risk. Do NOT describe curve shape, plateau, or separation timing — those are visual interpretations that drift. If OCR doesn't contain these numbers, write just the endpoint label (e.g., "Overall survival") or set caption to null.
 
@@ -105,7 +120,13 @@ Examples of INVALID captions (interpretive, would hallucinate):
     "❓ optimal sequencing vs cabazitaxel still open"
   ],
   "key_figure_url": "https://pbs.twimg.com/media/...jpg or null",
-  "key_figure_caption": "OS: HR 0.62 (95% CI 0.48-0.79). Medians 14.2 vs 9.8 mo. or null",
+  "key_figure_caption": {
+    "columns": ["Arm", "Median OS", "HR (95% CI)", "p"],
+    "rows": [
+      ["Lu-PSMA", "14.2 mo", "0.62 (0.48-0.79)", "<0.001"],
+      ["Cabazitaxel", "9.8 mo", "—", "—"]
+    ]
+  },
   "nct": "NCT04855643 or null"
 }
 ```
@@ -117,7 +138,7 @@ Rules:
 - **Tables are required** when comparing 2+ trials/arms across 2+ endpoints/timepoints. Don't write "POP-RT HR 0.50; PEACE-2 HR 0.97; POP-RT cFFS HR 0.74..." as one string — emit a table.
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
 - `key_figure_url` must be EXACTLY one of the image URLs in the manifest below, or null. Don't invent URLs.
-- `key_figure_caption` numeric-only, from OCR overlays only. Null if no OCR numbers available.
+- `key_figure_caption` numeric-only, from OCR overlays only. Use the table form for comparison figures (2+ arms × multiple endpoints); flat string is acceptable only for non-comparison figures. Null if no OCR numbers available.
 - `nct` only if explicit in tweets/OCR. Format: "NCTxxxxxxxx" or null.
 
 ═══ TRUST BOUNDARY ═══

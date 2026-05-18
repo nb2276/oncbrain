@@ -770,6 +770,57 @@ describe('validateKeyFigure', () => {
     expect(r.caption).toBeNull();
     expect(r.figureUrl).toBeNull();
   });
+
+  // ── Table-form captions (v0.4.3) ──
+  it('passes a table caption whose cell numbers all appear in OCR', () => {
+    const r = validateKeyFigure(
+      {
+        columns: ['Arm', 'Median', 'HR'],
+        rows: [
+          ['Exp', '14.2', '0.62'],
+          ['Ctrl', '9.8', '—'],
+        ],
+      },
+      'https://pbs.twimg.com/media/a.jpg',
+      tweets, // OCR has "0.62", "0.48", "0.79", "14.2", "9.8"
+      true,
+    );
+    expect(r.caption).not.toBeNull();
+    expect(typeof r.caption).toBe('object');
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+  });
+
+  it('drops a table caption when any cell number not in OCR (keeps figure)', () => {
+    const r = validateKeyFigure(
+      {
+        columns: ['Arm', 'HR'],
+        rows: [
+          ['Exp', '0.62'],
+          ['Ctrl', '0.99'], // not in OCR
+        ],
+      },
+      'https://pbs.twimg.com/media/a.jpg',
+      tweets,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+    expect(r.reason).toContain('0.99');
+  });
+
+  it('drops a table caption with zero numeric tokens (all-text cells)', () => {
+    const r = validateKeyFigure(
+      {
+        columns: ['Arm', 'Direction'],
+        rows: [['Exp', 'favorable'], ['Ctrl', 'reference']],
+      },
+      'https://pbs.twimg.com/media/a.jpg',
+      tweets,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.reason).toContain('no numeric tokens');
+  });
 });
 
 describe('capStudyImages', () => {

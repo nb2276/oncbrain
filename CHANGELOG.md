@@ -2,6 +2,34 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.3] — 2026-05-18
+
+Tables become the default for any comparison outcome, including in figure captions. The prompt's "tables required" rule expands from multi-trial-only to any-comparison (arms, trials, timepoints, subgroups). Comparison figures now caption with a small table directly under the image instead of a single-line string.
+
+### Added
+
+- **`key_figure_caption` accepts table form**: `string | DigestTable | null`. Comparison figures (KM curves, forest plots, AE side-by-side) emit `{columns, rows}` captions instead of dense single-string CIs. Same per-cell numeric-token OCR validation as details tables; any unverified cell drops the whole caption.
+- **Astro renders caption tables** under the figure with monospace cell font and the sticky-first-column horizontal-scroll pattern shared with details tables. Caption-as-string path unchanged (back-compat).
+- **Obsidian export** writes caption tables as markdown immediately after the figure image. String captions still render as italic single line.
+
+### Changed
+
+- **Prompt rule broadens**: tables are now required for ANY comparison outcome — not just multi-trial. Multi-arm vs single-arm, multi-timepoint, multi-subgroup, forest-plot row data, dose-escalation × toxicity grade — all should use tables. Single-data-point bullets stay flat.
+- **Phase 2 prompt example** updated with a table-form caption for the canonical Lu-PSMA vs cabazitaxel case (was a single-string CI).
+
+### Engineering
+
+- 235 tests (was 232, +3 for table-caption parsing/validation/edge cases).
+- `validateKeyFigure` now accepts `string | DigestTable | null` for the caption parameter, branching to per-cell validation for tables.
+- 0 type errors across 37 files.
+
+### Migration
+
+- v0.4.0/4.1/4.2 artifacts with string captions render unchanged via the back-compat branch.
+- v0.4.3 rebuild populates new comparison-figure captions as tables where the LLM judges appropriate. Caption-failed-validation behavior identical: figure kept, caption dropped.
+
+[0.4.3]: https://github.com/nb2276/oncbrain/releases/tag/v0.4.3
+
 ## [0.4.2] — 2026-05-18
 
 Tables for 2D comparisons. v0.4.1 added subbullets (1D); v0.4.2 adds tables when a comparison is genuinely a matrix (2+ trials × 2+ endpoints, primaries × timepoints, etc.). POP-RT vs PEACE-2's HR comparison across bFFS/cFFS/MFS is the canonical case the v0.4.0 wall-of-semicolons rendering couldn't handle.

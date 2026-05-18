@@ -29,7 +29,8 @@ export type DigestArtifactForExport = {
           | { text: string; table: { columns: string[]; rows: string[][] } }
         >;
         key_figure_url?: string | null;
-        key_figure_caption?: string | null;
+        // v0.4.3: caption can be string or table form
+        key_figure_caption?: string | { columns: string[]; rows: string[][] } | null;
         nct: string | null;
         tweet_ids: number[];
       }>;
@@ -202,10 +203,21 @@ function renderBody(artifact: DigestArtifactForExport): string {
       lines.push(`> ${wikilinkify(study.tldr)}`, '');
 
       if (study.key_figure_url) {
-        const alt = study.key_figure_caption ?? study.name;
-        lines.push(`![${alt}](${study.key_figure_url})`);
-        if (study.key_figure_caption) {
-          lines.push(`*${study.key_figure_caption}*`);
+        const cap = study.key_figure_caption;
+        const altText = typeof cap === 'string' ? cap : study.name;
+        lines.push(`![${altText}](${study.key_figure_url})`);
+        if (typeof cap === 'string' && cap) {
+          lines.push(`*${cap}*`);
+        } else if (cap && typeof cap !== 'string') {
+          // Table caption: render as a small markdown table immediately
+          // after the figure. Same syntax as details-table rendering.
+          const escapeCell = (c: string) => wikilinkify(c).replace(/\|/g, '\\|');
+          lines.push('');
+          lines.push(`| ${cap.columns.map(escapeCell).join(' | ')} |`);
+          lines.push(`|${cap.columns.map(() => '---').join('|')}|`);
+          for (const row of cap.rows) {
+            lines.push(`| ${row.map(escapeCell).join(' | ')} |`);
+          }
         }
         lines.push('');
       }

@@ -63,7 +63,10 @@ export type DigestStudy = {
   tldr: string;
   details: DigestDetail[];
   key_figure_url: string | null;
-  key_figure_caption: string | null;
+  // v0.4.3: caption may be a flat string OR a table for comparison figures
+  // (KM curves, forest plots, AE comparisons). Table form is preferred when
+  // the figure has 2+ rows × 2+ columns of comparable data.
+  key_figure_caption: string | DigestTable | null;
   nct: string | null;
   tweet_ids: number[];
 };
@@ -604,10 +607,31 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     typeof root.key_figure_url === 'string' && root.key_figure_url.trim()
       ? root.key_figure_url.trim()
       : null;
-  const key_figure_caption =
-    typeof root.key_figure_caption === 'string' && root.key_figure_caption.trim()
-      ? root.key_figure_caption.trim()
-      : null;
+  // v0.4.3: caption can be flat string OR a {columns, rows} table for
+  // comparison figures. Parser collapses degenerate tables (<2 columns
+  // or 0 rows) by dropping caption entirely — the LLM signaled intent
+  // for a table but didn't fill it.
+  let key_figure_caption: string | DigestTable | null = null;
+  if (typeof root.key_figure_caption === 'string' && root.key_figure_caption.trim()) {
+    key_figure_caption = root.key_figure_caption.trim();
+  } else if (root.key_figure_caption && typeof root.key_figure_caption === 'object') {
+    const tbl = root.key_figure_caption as Record<string, unknown>;
+    const columns = Array.isArray(tbl.columns)
+      ? tbl.columns.filter((c): c is string => typeof c === 'string').map((c) => c.trim())
+      : [];
+    const rawRows = Array.isArray(tbl.rows) ? tbl.rows : [];
+    const rows: string[][] = [];
+    for (const r of rawRows) {
+      if (!Array.isArray(r)) continue;
+      const cells = r.filter((c): c is string => typeof c === 'string').map((c) => c.trim());
+      while (cells.length < columns.length) cells.push('');
+      if (cells.length > columns.length) cells.length = columns.length;
+      rows.push(cells);
+    }
+    if (columns.length >= 2 && rows.length >= 1) {
+      key_figure_caption = { columns, rows };
+    }
+  }
 
   return {
     name,
@@ -637,11 +661,15 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
 //   - Codex #2 / earlier: drop both fields when figure URL isn't in the
 //     cluster (model hallucinated).
 export function validateKeyFigure(
-  caption: string | null,
+  caption: string | DigestTable | null,
   figureUrl: string | null,
   tweets: DigestInputTweet[],
   ocrAvailable: boolean,
-): { caption: string | null; figureUrl: string | null; reason?: string } {
+): {
+  caption: string | DigestTable | null;
+  figureUrl: string | null;
+  reason?: string;
+} {
   if (!figureUrl) {
     return { caption: null, figureUrl: null };
   }
@@ -669,9 +697,7 @@ export function validateKeyFigure(
     return { caption: null, figureUrl: null, reason: 'figure URL not in cluster (hallucinated)' };
   }
   // When OCR is unavailable globally, captions can't be validated AT ALL.
-  // Drop the figure too: rendering an uncaptioned figure looks like editorial
-  // choice rather than a technical limit and over-weights model selection.
-  // Claude #26.
+  // Drop the figure too. Claude #26.
   if (!ocrAvailable) {
     return {
       caption: null,
@@ -694,17 +720,36 @@ export function validateKeyFigure(
   if (!caption) {
     return { caption: null, figureUrl };
   }
-  // Tokenize both sides into the same numeric grammar, then require set
-  // membership (not substring). "0.6" no longer matches "0.62" — they're
-  // distinct tokens. The pattern matches ".62" (Vision-style without leading
-  // zero), "0.62" (with leading zero), and "62" (integer) so OCR ↔ caption
-  // can canonicalize across either convention.
-  const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
-  const captionTokens = caption.match(tokenRe) ?? [];
 
-  // Claude #2: a caption with zero numeric anchors can't be validated.
-  // The validator's purpose is to check numbers, so a caption without any
-  // is rejected outright.
+  const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
+  const ocrTokenSet = new Set((ocrText.match(tokenRe) ?? []).map(normalizeNumericToken));
+
+  // Table-form caption: per-cell numeric token check. Any unverified
+  // number drops the whole caption. Stricter than string caption because
+  // tables imply higher-trust-than-prose data presentation.
+  if (typeof caption !== 'string') {
+    const cellTokens = caption.rows.flat().flatMap((c) => c.match(tokenRe) ?? []);
+    if (cellTokens.length === 0) {
+      return {
+        caption: null,
+        figureUrl,
+        reason: 'caption table has no numeric tokens to validate → dropping (figure kept)',
+      };
+    }
+    for (const tok of cellTokens) {
+      if (!numericTokenInSet(tok, ocrTokenSet)) {
+        return {
+          caption: null,
+          figureUrl,
+          reason: `caption-table cell number "${tok}" not in OCR token set → dropping caption (figure kept)`,
+        };
+      }
+    }
+    return { caption, figureUrl };
+  }
+
+  // String-form caption: existing v0.4 behavior.
+  const captionTokens = caption.match(tokenRe) ?? [];
   if (captionTokens.length === 0) {
     return {
       caption: null,
@@ -712,7 +757,6 @@ export function validateKeyFigure(
       reason: 'caption has no numeric tokens to validate → dropping (figure kept)',
     };
   }
-  const ocrTokenSet = new Set((ocrText.match(tokenRe) ?? []).map(normalizeNumericToken));
   for (const tok of captionTokens) {
     if (!numericTokenInSet(tok, ocrTokenSet)) {
       return {
