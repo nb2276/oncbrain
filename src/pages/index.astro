@@ -1,8 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
 import SearchBox from '../components/SearchBox.astro';
-import { listDigests, listConferenceSummaries } from '../lib/digest-data.ts';
+import {
+  listDigests,
+  listConferenceSummaries,
+  listRecentStudies,
+  listSiteSummaries,
+} from '../lib/digest-data.ts';
 import { linkifyCitations } from '../lib/extract.ts';
+import { DISEASE_SITES, getDiseaseSite } from '../lib/disease-sites.ts';
 
 const digests = listDigests();
 const conferences = listConferenceSummaries();
@@ -10,9 +16,55 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME || 'onc brain';
 // Latest digest takes over the hero spot — that's what a returning reader cares
 // about most. First-time framing lives on /about.
 const latest = digests[0];
+
+// Disease-site nav bar: all 22 sites in enum order. Populated ones link to
+// their site page; empty ones render as muted, non-clickable chips so the
+// reader sees the breadth of the taxonomy at a glance.
+const summaries = listSiteSummaries();
+const countBySlug = new Map(summaries.map((s) => [s.disease_site, s.occurrences.length]));
+const navSites = DISEASE_SITES.map((s) => ({
+  ...s,
+  count: countBySlug.get(s.slug) ?? 0,
+}));
+
+// Recent N studies as a flat list — replaces the previous "list of dates" so
+// the reader sees the last things added without one indirection layer.
+const RECENT_COUNT = 10;
+const recent = listRecentStudies(RECENT_COUNT);
+const totalDates = digests.length;
 ---
 
 <Base title={siteName} description="Curated AI-summarized digests of oncology updates.">
+  {digests.length > 0 && (
+    <nav class="site-nav" aria-label="Browse by disease site">
+      <ul>
+        {navSites.map((s) => (
+          <li>
+            {s.count > 0 ? (
+              <a
+                class="nav-chip"
+                href={`/sites/${s.slug}/`}
+                title={`${s.label}: ${s.rationale}`}
+              >
+                <span class="nav-emoji" aria-hidden="true">{s.emoji}</span>
+                <span class="nav-label">{s.label}</span>
+                <span class="nav-count">{s.count}</span>
+              </a>
+            ) : (
+              <span
+                class="nav-chip nav-chip-empty"
+                title={`${s.label}: ${s.rationale} (not yet covered)`}
+              >
+                <span class="nav-emoji" aria-hidden="true">{s.emoji}</span>
+                <span class="nav-label">{s.label}</span>
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+
   {latest ? (
     <section class="hero-tldr" aria-label="Latest digest summary">
       <div class="hero-meta">
@@ -42,51 +94,106 @@ const latest = digests[0];
     </p>
   )}
 
-  <section style="margin-top:2rem">
-    <h2 style="margin:0;font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-muted);font-family:var(--font-sans)">Browse</h2>
-    <ul style="list-style:none;padding:0;margin:0.75rem 0 0;display:flex;flex-wrap:wrap;gap:0.5rem">
-      <li>
-        <a href="/sites/" style="display:inline-block;padding:0.4rem 0.9rem;background:var(--accent-bg);border:1px solid var(--border);border-radius:999px;font-size:0.9rem;font-family:var(--font-sans);color:var(--accent);text-decoration:none">By disease site →</a>
-      </li>
-      {conferences.map((conf) => (
-        <li>
-          <a
-            href={`/conferences/${conf.slug}/`}
-            style="display:inline-block;padding:0.4rem 0.9rem;background:var(--bg-card);border:1px solid var(--border);border-radius:999px;font-size:0.9rem;font-family:var(--font-sans);text-decoration:none"
-          >{conf.name} <span style="color:var(--fg-muted)">· {conf.dates.length}d</span></a>
-        </li>
-      ))}
-    </ul>
-  </section>
-
-  {digests.length > 0 && (
-    <section style="margin-top:2.5rem">
-      <h2 style="margin:0 0 1rem;font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-muted)">Recent</h2>
-      <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.85rem">
-        {digests.map((d) => (
+  {conferences.length > 0 && (
+    <section class="conf-section">
+      <h2 class="section-label">Conferences</h2>
+      <ul class="conf-list">
+        {conferences.map((conf) => (
           <li>
-            <a
-              href={`/${d.date}/`}
-              style="display:block;padding:1rem 1.25rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;text-decoration:none"
-            >
-              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:0.75rem;flex-wrap:wrap">
-                <strong style="color:var(--fg)">{d.date}</strong>
-                {d.conference && (
-                  <span style="color:var(--accent);font-size:0.82rem;padding:0.1rem 0.5rem;background:var(--accent-bg);border-radius:999px">{d.conference.name}</span>
-                )}
-              </div>
-              <div style="margin-top:0.55rem;color:var(--fg);font-size:0.98rem;line-height:1.45;font-weight:500">
-                {(d.digest.top_line || d.digest.tldr).slice(0, 220)}{(d.digest.top_line || d.digest.tldr).length > 220 ? '…' : ''}
-              </div>
+            <a class="conf-chip" href={`/conferences/${conf.slug}/`}>
+              {conf.name} <span class="conf-meta">· {conf.dates.length}d</span>
             </a>
           </li>
         ))}
       </ul>
     </section>
   )}
+
+  {recent.length > 0 && (
+    <section class="recent-section">
+      <h2 class="section-label">Recent — last {recent.length} studies</h2>
+      <ul class="recent-list">
+        {recent.map((r) => {
+          const meta = getDiseaseSite(r.disease_site);
+          const teaser = r.study.tldr.length > 200
+            ? r.study.tldr.slice(0, 199).trimEnd() + '…'
+            : r.study.tldr;
+          return (
+            <li>
+              <a class="recent-card" href={`/${r.date}/#${r.slug}`}>
+                <div class="recent-meta">
+                  <span class="recent-emoji" aria-hidden="true" title={`${meta.label}: ${meta.rationale}`}>{meta.emoji}</span>
+                  <span class="recent-site">{meta.label}</span>
+                  <span class="recent-dot" aria-hidden="true">·</span>
+                  <span class="recent-date">{r.date}</span>
+                  {r.conference && (
+                    <span class="recent-conf">{r.conference.name}</span>
+                  )}
+                </div>
+                <div class="recent-name">{r.study.name}</div>
+                <div class="recent-tldr" set:html={linkifyCitations(teaser)} />
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+      {totalDates > 1 && (
+        <p class="recent-tail">
+          {recent.length === RECENT_COUNT && `Showing the latest ${RECENT_COUNT} studies across ${totalDates} day${totalDates === 1 ? '' : 's'}.`}
+          {' '}
+          <a href={`/${digests[digests.length - 1].date}/`}>browse older digests →</a>
+        </p>
+      )}
+    </section>
+  )}
 </Base>
 
 <style>
+  /* Disease-site nav bar — top of page. Wraps on overflow; empty sites render muted. */
+  .site-nav {
+    margin: 0 0 1.5rem;
+  }
+  .site-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .nav-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.32rem 0.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--fg);
+    text-decoration: none;
+    line-height: 1.2;
+  }
+  .nav-chip:hover {
+    border-color: var(--accent);
+  }
+  .nav-emoji { font-size: 0.95rem; line-height: 1; }
+  .nav-label { font-weight: 500; }
+  .nav-count {
+    color: var(--fg-muted);
+    font-size: 0.7rem;
+    margin-left: 0.15rem;
+  }
+  .nav-chip-empty {
+    color: var(--fg-muted);
+    opacity: 0.55;
+    cursor: default;
+  }
+  .nav-chip-empty:hover { border-color: var(--border); }
+  .nav-chip-empty .nav-label { font-weight: 400; }
+
+  /* Hero TL;DR callout — unchanged from previous version. */
   .hero-tldr {
     margin: 0 0 1.5rem;
     padding: 1.1rem 1.25rem 1rem;
@@ -139,4 +246,102 @@ const latest = digests[0];
     text-decoration: none;
   }
   .hero-cta:hover { text-decoration: underline; }
+
+  /* Section labels reused across conferences + recent. */
+  .section-label {
+    margin: 0 0 0.85rem;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  /* Conferences strip. */
+  .conf-section { margin-top: 2rem; }
+  .conf-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .conf-chip {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--fg);
+  }
+  .conf-chip:hover { border-color: var(--accent); }
+  .conf-meta { color: var(--fg-muted); }
+
+  /* Recent N studies list. */
+  .recent-section { margin-top: 2.5rem; }
+  .recent-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .recent-card {
+    display: block;
+    padding: 0.85rem 1.05rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+  }
+  .recent-card:hover { border-color: var(--accent); }
+  .recent-meta {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-family: var(--font-sans);
+    font-size: 0.76rem;
+    color: var(--fg-muted);
+    margin-bottom: 0.25rem;
+  }
+  .recent-emoji { font-size: 0.95rem; }
+  .recent-site { font-weight: 600; color: var(--fg); }
+  .recent-dot { opacity: 0.55; }
+  .recent-conf {
+    margin-left: auto;
+    padding: 0.05rem 0.45rem;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .recent-name {
+    font-weight: 600;
+    font-size: 1.02rem;
+    line-height: 1.35;
+    color: var(--fg);
+    margin-bottom: 0.2rem;
+  }
+  .recent-tldr {
+    color: var(--fg-muted);
+    font-size: 0.93rem;
+    line-height: 1.45;
+  }
+  .recent-tail {
+    margin-top: 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+  }
+  .recent-tail a { color: var(--accent); text-decoration: none; }
+  .recent-tail a:hover { text-decoration: underline; }
 </style>

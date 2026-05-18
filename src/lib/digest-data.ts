@@ -3,6 +3,7 @@
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
+import { assignSlugsForDate } from './slug-resolve.ts';
 
 // Detail union (v0.4.0 → v0.4.2):
 //   - flat string for single statements
@@ -201,6 +202,44 @@ export function listSiteSummaries(): SiteSummary[] {
     disease_site,
     occurrences: occurrences.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)),
   }));
+}
+
+export type RecentStudy = {
+  date: string;
+  conference: DigestArtifact['conference'];
+  disease_site: string;
+  study: DigestStudy;
+  // Per-date resolved slug (matches the anchor id on [date].astro). Always
+  // populated — falls back to deriveSlug(name) for old artifacts and
+  // suffixes -2/-3 for same-day collisions, exactly like the search index.
+  slug: string;
+};
+
+// Flat list of recently-added studies across all dates. Used by the homepage
+// hero strip so a returning reader sees the last N study additions, not a
+// list of dates. Iterates listDigests() (date-desc) and emits in render order
+// within each date; assignSlugsForDate() makes the slugs match the [date]
+// page anchors so /<date>/#<slug> deep-links resolve correctly.
+export function listRecentStudies(limit: number): RecentStudy[] {
+  const out: RecentStudy[] = [];
+  for (const artifact of listDigests()) {
+    const allStudiesOnDate = artifact.digest.sites.flatMap((s) => s.studies);
+    const slugs = assignSlugsForDate(allStudiesOnDate);
+    let i = 0;
+    for (const site of artifact.digest.sites) {
+      for (const study of site.studies) {
+        out.push({
+          date: artifact.date,
+          conference: artifact.conference,
+          disease_site: site.disease_site,
+          study,
+          slug: slugs[i++]!,
+        });
+        if (out.length >= limit) return out;
+      }
+    }
+  }
+  return out;
 }
 
 // Groups all conference-tagged digests by their conference slug.
