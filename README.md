@@ -2,6 +2,8 @@
 
 Curated AI-summarized digest of oncology updates. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, etc.).
 
+**Live:** https://oncbrain.oncologytoolkit.com · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.1.0
+
 ## Architecture
 
 ```
@@ -80,6 +82,32 @@ git commit -m "$(date +%Y-%m-%d)"
 git push                                       # DigitalOcean auto-deploys in ~40 sec
 ```
 
+## Digest format (IMRD)
+
+Each digest follows scientific paper structure for 90-second quick reference:
+
+- **Top line** — one-sentence lede with the headline number (e.g. "RCC SBRT achieves 100% local control at 5 years")
+- **TL;DR** — 2-3 sentence cross-topic synthesis
+- **Per cluster:** subspecialty emoji + topic name, then
+  - 🧪 Intro — clinical context, why this matters
+  - 📐 Methods — trial design (optional)
+  - 📊 Results — bullets with effect sizes verbatim from sources
+  - 💭 Discussion — implications, open questions (optional)
+  - 📚 Sources — collapsible, each linked back to the original X post
+
+Subspecialty emojis (the LLM picks): 🌸 breast · 🎯 SABR/precision · 🍇 GU · 📡 radonc · 💊 systemic · 🛡️ IO · 🧠 CNS · 🩸 heme · 🫁 lung · 🌽 GI · 🧬 molecular · 🔪 surgery · 🧒 peds · 🧓 supportive · ⚠️ safety.
+
+## Autopilot (optional)
+
+Run the full chain every day at 03:00 local without touching anything:
+
+```bash
+npm run cron:install                                          # registers macOS launchd job
+sudo pmset repeat wakeorpoweron MTWRFSU 02:55:00              # wake laptop 5 min before (sleep guard)
+```
+
+Each run: `pull:telegram → build:day yesterday + today → astro build → git push`. Idempotent — empty days are no-ops. Logs append to `~/Library/Logs/oncbrain-cron.log`. Uninstall with `npm run cron:uninstall`; test manually with `npm run cron:test`.
+
 ## URLs
 
 - `https://oncbrain.oncologytoolkit.com/` — recent dates, conference index, TL;DRs
@@ -112,11 +140,11 @@ npm test           # all tests once
 npm run test:watch # watch mode
 ```
 
-165+ tests across DB, twitter-fetch, LLM pipeline, eval, Obsidian export, Telegram ingest, citation extraction, and LLM backend adapter.
+184 tests across DB, twitter-fetch, LLM pipeline, eval, Obsidian export, Telegram ingest, citation extraction, and LLM backend adapter.
 
 ## Eval
 
-When iterating on `prompts/digest-v1.txt`, run the eval before shipping a change:
+When iterating on `prompts/digest-v2.txt`, run the eval before shipping a change:
 
 ```bash
 npm run eval                       # all fixtures
