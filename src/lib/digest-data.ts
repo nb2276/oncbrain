@@ -4,9 +4,15 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
-// v0.4.1 detail union: string for flat bullets, object for nested
-// comparison rows. Older v0.4.0 artifacts emit string-only; both render.
-export type DigestDetail = string | { text: string; subdetails: string[] };
+// Detail union (v0.4.0 → v0.4.2):
+//   - flat string for single statements
+//   - {text, subdetails[]} for 1D nested rows (v0.4.1)
+//   - {text, table:{columns, rows}} for 2D matrix comparisons (v0.4.2)
+export type DigestTable = { columns: string[]; rows: string[][] };
+export type DigestDetail =
+  | string
+  | { text: string; subdetails: string[] }
+  | { text: string; table: DigestTable };
 
 export type DigestStudy = {
   name: string;

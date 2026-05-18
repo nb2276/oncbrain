@@ -44,7 +44,12 @@ Before writing, mentally cover:
 
 Then write 3-7 bullets. Effect sizes VERBATIM from tweets/images/OCR. If the tweets+images don't give a number, write "no effect size reported in source tweets" — never invent one.
 
-**Use subdetails for comparisons.** When a single bullet would compare multiple trials, arms, or endpoints (e.g., "POP-RT HR 0.50 vs PEACE-2 HR 0.97"), DO NOT write a wall-of-semicolons string. Instead emit a structured bullet with a `text` parent (the shared concept like "Biochemical failure-free survival" or "Median PFS") and a `subdetails` array of one row per comparison cell. Format below. Flat strings are fine for non-comparison bullets.
+**Choose the right detail shape for the data:**
+- **Flat string** — a single statement. Most bullets are flat.
+- **`{text, subdetails}`** — 1D list under a shared concept (e.g., "Late G3+ AEs by organ system" with one bullet per organ). One dimension of variation.
+- **`{text, table}`** — 2D matrix: 2+ trials/arms/cohorts crossed with 2+ endpoints/timepoints/subgroups. The table has `columns` (header row) and `rows` (one array per data row). First column is conventionally the row label. Wall-of-semicolons strings are explicitly forbidden — use the table form whenever you would otherwise write multiple "X vs Y" comparisons in one sentence.
+
+A downstream validator checks every numeric token in every table cell against the tweet text + image OCR of source tweets. Any cell number not traceable to source = the WHOLE table is replaced with a flat fallback string. Be conservative: only put numbers in tables that you can ground in source content.
 
 ═══ KEY FIGURE ═══
 
@@ -77,10 +82,22 @@ Examples of INVALID captions (interpretive, would hallucinate):
     "📐 HR 0.62 (95% CI 0.48-0.79), p<0.001",
     "🔍 phase III open-label, N=831, stratified by prior taxane",
     {
-      "text": "📊 Biochemical failure-free survival (POP-RT vs PEACE-2)",
+      "text": "📊 Whole-pelvis RT efficacy by trial (HRs vs prostate-only)",
+      "table": {
+        "columns": ["Endpoint", "POP-RT", "PEACE-2"],
+        "rows": [
+          ["bFFS/bPFS", "HR 0.50 (0.42-0.61), p<0.001", "HR 0.97 (0.81-1.16), p=0.73"],
+          ["cFFS/cPFS", "HR 0.74 (0.61-0.90), p=0.002", "HR 0.81 (0.63-1.03), p=0.09"],
+          ["MFS", "HR 0.72 (0.58-0.89), p=0.002", "HR 0.93 (0.74-1.17), p=0.54"]
+        ]
+      }
+    },
+    {
+      "text": "📊 Late G3+ AEs by organ system",
       "subdetails": [
-        "POP-RT: HR 0.50 (95% CI 0.42-0.61), p<0.001",
-        "PEACE-2: HR 0.97 (95% CI 0.81-1.16), p=0.73"
+        "GU: 4.2% exp vs 3.1% control",
+        "GI: 2.8% exp vs 2.4% control",
+        "Heme: <1% both arms"
       ]
     },
     "🔗 vs VISION (NEJM 2021): similar HR but pre-treated heavier here",
@@ -96,7 +113,8 @@ Examples of INVALID captions (interpretive, would hallucinate):
 Rules:
 - `name` echoes back the study name. Don't rename.
 - `tldr` ≤25 words, headline number first.
-- `details` 3-7 bullets total, each ≤25 words. Mix flat strings and structured `{text, subdetails}` objects. Use subdetails when comparing 2+ trials/arms/endpoints on the same metric — readers scan rows, not run-on sentences.
+- `details` 3-7 bullets total. Mix flat strings, `{text, subdetails}`, and `{text, table}` based on dimensionality. Flat strings ≤25 words. Subdetails rows and table cells can each be ≤20 words.
+- **Tables are required** when comparing 2+ trials/arms across 2+ endpoints/timepoints. Don't write "POP-RT HR 0.50; PEACE-2 HR 0.97; POP-RT cFFS HR 0.74..." as one string — emit a table.
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
 - `key_figure_url` must be EXACTLY one of the image URLs in the manifest below, or null. Don't invent URLs.
 - `key_figure_caption` numeric-only, from OCR overlays only. Null if no OCR numbers available.

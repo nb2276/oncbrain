@@ -2,6 +2,35 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.2] — 2026-05-18
+
+Tables for 2D comparisons. v0.4.1 added subbullets (1D); v0.4.2 adds tables when a comparison is genuinely a matrix (2+ trials × 2+ endpoints, primaries × timepoints, etc.). POP-RT vs PEACE-2's HR comparison across bFFS/cFFS/MFS is the canonical case the v0.4.0 wall-of-semicolons rendering couldn't handle.
+
+### Added
+
+- **Table form for `DigestDetail`**: `{text, table: {columns: string[], rows: string[][]}}`. Sits alongside the v0.4.1 `{text, subdetails}` form. Parser pads short rows, truncates long rows, and rejects tables with <2 columns or 0 rows (falls back to flat string).
+- **`validateStudyTables`** runs after `validateKeyFigure` on every Phase 2 output. Every numeric token in every table cell must appear in the union of (a) tweet text and (b) image OCR text for the study's source tweets. Any cell number not verified = the whole table is replaced with `"<text> — comparison values omitted (cell number ... not verified in source)"`. Caption validator pattern extended to tables.
+- **Astro table rendering** with horizontal scroll + sticky first column on mobile (`@media (max-width: 600px)`). Row labels stay in view as the rest of the table scrolls. Cell font 0.88rem sans-serif. Header row in `--fg-muted` with subtle separator.
+- **Obsidian markdown tables** in `obsidian-export.ts`. Standard pipe syntax with separator row; cell text escapes `|` characters with `\|`. Renders correctly in Obsidian, GitHub markdown, and any standard markdown viewer.
+
+### Changed
+
+- **Phase 2 prompt** instructs the model to pick from three detail shapes by dimensionality: flat string (single statement), `subdetails` (1D list under shared concept), `table` (2D matrix). Explicit forbidden pattern: "POP-RT HR 0.50; PEACE-2 HR 0.97; POP-RT cFFS HR 0.74..." as one string.
+
+### Engineering
+
+- 232 tests (was 225, +7 for table parsing/validation/edge cases).
+- Type guards `isStringDetail`/`isSubdetailDetail`/`isTableDetail` exported for renderers.
+- `detailAllText()` helper walks all text fragments across all three detail forms for consumers that need the full text content uniformly.
+- 0 type errors across 37 files.
+
+### Caveats
+
+- Mobile tables with >3 columns require horizontal scroll. Acceptable trade-off — alternative was font shrinking or row-stacking, both inferior for clinical scanning.
+- The validator is per-cell-token strict. A table with one unverifiable number drops the ENTIRE table, not just the suspect cell. Conservative by design; clinical content punishes silent partial corruption.
+
+[0.4.2]: https://github.com/nb2276/oncbrain/releases/tag/v0.4.2
+
 ## [0.4.1] — 2026-05-18
 
 Readability hotfix. Detail bullets that compared multiple trials/arms/endpoints (e.g., the POP-RT vs PEACE-2 entry) rendered as a wall of semicolons. Replaced with structured subbullets: a parent label and a row per comparison cell. Scannable at meeting-tempo.

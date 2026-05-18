@@ -23,7 +23,11 @@ export type DigestArtifactForExport = {
       studies: Array<{
         name: string;
         tldr: string;
-        details: Array<string | { text: string; subdetails: string[] }>;
+        details: Array<
+          | string
+          | { text: string; subdetails: string[] }
+          | { text: string; table: { columns: string[]; rows: string[][] } }
+        >;
         key_figure_url?: string | null;
         key_figure_caption?: string | null;
         nct: string | null;
@@ -210,6 +214,18 @@ function renderBody(artifact: DigestArtifactForExport): string {
         for (const d of study.details) {
           if (typeof d === 'string') {
             lines.push(`- ${wikilinkify(d)}`);
+          } else if ('table' in d) {
+            lines.push(`- ${wikilinkify(d.text)}`);
+            // Markdown table — Obsidian and standard markdown viewers both render.
+            // Header row + separator + data rows. Cell text is wikilinkified.
+            const escapeCell = (c: string) => wikilinkify(c).replace(/\|/g, '\\|');
+            lines.push('');
+            lines.push(`  | ${d.table.columns.map(escapeCell).join(' | ')} |`);
+            lines.push(`  |${d.table.columns.map(() => '---').join('|')}|`);
+            for (const row of d.table.rows) {
+              lines.push(`  | ${row.map(escapeCell).join(' | ')} |`);
+            }
+            lines.push('');
           } else {
             lines.push(`- ${wikilinkify(d.text)}`);
             for (const sub of d.subdetails) {

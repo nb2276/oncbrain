@@ -44,11 +44,19 @@ export type DigestInputTweet = {
   image_ocr_texts?: string[];
 };
 
-// A detail bullet. v0.4.1: supports an optional `subdetails` array for
-// nested comparison rows (e.g., "MFS" parent with per-trial HR rows
-// underneath). Renderers must handle both forms — string-only for back-
-// compat with v0.4.0 artifacts, structured object for multi-row entries.
-export type DigestDetail = string | { text: string; subdetails: string[] };
+// A detail bullet. v0.4.x form evolves:
+//   - v0.4.0: flat string
+//   - v0.4.1: + `subdetails: string[]` for 1D nested comparison rows
+//   - v0.4.2: + `table: {columns, rows}` for 2D matrix comparisons
+//     (multi-trial × multi-endpoint). Renderers handle all three forms.
+export type DigestTable = {
+  columns: string[]; // header labels; first column is row label by convention
+  rows: string[][]; // each row matches columns.length cells
+};
+export type DigestDetail =
+  | string
+  | { text: string; subdetails: string[] }
+  | { text: string; table: DigestTable };
 
 export type DigestStudy = {
   name: string;
@@ -60,13 +68,29 @@ export type DigestStudy = {
   tweet_ids: number[];
 };
 
-// Helpers for renderers that need either the flat string OR all text within
-// a (possibly nested) detail entry. Keeps the union-handling logic centralized.
-export function detailText(d: DigestDetail): string {
-  return typeof d === 'string' ? d : d.text;
+// Type guards used by parser, validator, and renderers.
+export function isStringDetail(d: DigestDetail): d is string {
+  return typeof d === 'string';
 }
+export function isSubdetailDetail(
+  d: DigestDetail,
+): d is { text: string; subdetails: string[] } {
+  return typeof d === 'object' && Array.isArray((d as { subdetails?: unknown }).subdetails);
+}
+export function isTableDetail(
+  d: DigestDetail,
+): d is { text: string; table: DigestTable } {
+  return typeof d === 'object' && (d as { table?: unknown }).table !== undefined;
+}
+
+// Returns every text fragment inside a detail (header, subdetails, table
+// cells). Used by the OCR validator to walk numeric tokens across all
+// forms uniformly.
 export function detailAllText(d: DigestDetail): string[] {
-  if (typeof d === 'string') return [d];
+  if (isStringDetail(d)) return [d];
+  if (isTableDetail(d)) {
+    return [d.text, ...d.table.columns, ...d.table.rows.flat()];
+  }
   return [d.text, ...d.subdetails];
 }
 
@@ -437,11 +461,63 @@ async function runStudyAgent(
   if (validated.reason) {
     console.warn(`  [phase2:${cluster.slug}] key_figure: ${validated.reason}`);
   }
-  return {
-    ...study,
-    key_figure_url: validated.figureUrl,
-    key_figure_caption: validated.caption,
-  };
+
+  // v0.4.2: Numbers in table cells get the same OCR/source-text validation.
+  // Table is structurally regular (rows × columns), so cell-level validation
+  // is straightforward. If any cell has a number not present in the union
+  // of tweet text + image OCR, the whole table is replaced with a flat
+  // string noting the drop. Conservative: a half-validated table is more
+  // misleading than no table.
+  const detailsValidated = validateStudyTables(
+    { ...study, key_figure_url: validated.figureUrl, key_figure_caption: validated.caption },
+    tweets,
+    cluster.slug,
+  );
+
+  return detailsValidated;
+}
+
+// Validate numeric tokens in table cells against the study's source text
+// (union of tweet bodies + image OCR). Tables with any unverified number
+// are replaced with a flat-string fallback so the reader knows the
+// comparison was redacted, not silently corrupted.
+export function validateStudyTables(
+  study: DigestStudy,
+  tweets: DigestInputTweet[],
+  slug?: string,
+): DigestStudy {
+  const sourceText = collectStudySourceText(tweets);
+  const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
+  const sourceTokens = new Set(
+    (sourceText.match(tokenRe) ?? []).map(normalizeNumericToken),
+  );
+
+  let dropped = 0;
+  const newDetails: DigestDetail[] = study.details.map((d) => {
+    if (!isTableDetail(d)) return d;
+    const cellTokens = d.table.rows.flat().flatMap((cell) => cell.match(tokenRe) ?? []);
+    for (const t of cellTokens) {
+      if (!numericTokenInSet(t, sourceTokens)) {
+        dropped++;
+        return `${d.text} — comparison values omitted (cell number "${t}" not verified in source)`;
+      }
+    }
+    return d;
+  });
+
+  if (dropped > 0 && slug) {
+    console.warn(`  [phase2:${slug}] dropped ${dropped} table(s): unverified numeric token(s)`);
+  }
+  return { ...study, details: newDetails };
+}
+
+function collectStudySourceText(tweets: DigestInputTweet[]): string {
+  const parts: string[] = [];
+  for (const t of tweets) {
+    parts.push(t.text);
+    for (const ocr of t.image_ocr_texts ?? []) parts.push(ocr);
+  }
+  return parts.join(' ');
 }
 
 export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): DigestStudy {
@@ -460,9 +536,10 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
   const name = typeof root.name === 'string' && root.name.trim() ? root.name.trim() : cluster.name;
   const tldr = typeof root.tldr === 'string' ? root.tldr.trim() : '';
   if (!tldr) throw new DigestParseError('Phase 2 missing tldr', raw);
-  // v0.4.1: accept either flat strings or {text, subdetails[]} objects.
-  // Strings stay as-is. Objects with empty/missing text are dropped.
-  // Subdetails arrays are filtered to non-empty strings.
+  // v0.4.2: accept flat strings, {text, subdetails[]} objects, OR
+  // {text, table:{columns, rows}} for 2D matrix comparisons. The parser
+  // collapses degenerate cases (empty subdetails, empty table, mismatched
+  // row width) back to the simpler form so renderers can trust shape.
   const details: DigestDetail[] = Array.isArray(root.details)
     ? root.details
         .map((d): DigestDetail | null => {
@@ -474,13 +551,41 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
             const obj = d as Record<string, unknown>;
             const text = typeof obj.text === 'string' ? obj.text.trim() : '';
             if (!text) return null;
+
+            // Table form takes priority if present and well-shaped.
+            if (obj.table && typeof obj.table === 'object') {
+              const tbl = obj.table as Record<string, unknown>;
+              const columns = Array.isArray(tbl.columns)
+                ? tbl.columns
+                    .filter((c): c is string => typeof c === 'string')
+                    .map((c) => c.trim())
+                : [];
+              const rawRows = Array.isArray(tbl.rows) ? tbl.rows : [];
+              const rows: string[][] = [];
+              for (const r of rawRows) {
+                if (!Array.isArray(r)) continue;
+                const cells = r
+                  .filter((c): c is string => typeof c === 'string')
+                  .map((c) => c.trim());
+                // Pad short rows with empty strings; truncate long ones to
+                // column count. Better than dropping malformed rows.
+                while (cells.length < columns.length) cells.push('');
+                if (cells.length > columns.length) cells.length = columns.length;
+                rows.push(cells);
+              }
+              // Need at least 2 columns and 1 row for a table to be useful.
+              // Otherwise fall through and treat as flat or subdetails.
+              if (columns.length >= 2 && rows.length >= 1) {
+                return { text, table: { columns, rows } };
+              }
+            }
+
             const subdetails = Array.isArray(obj.subdetails)
               ? obj.subdetails
                   .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
                   .map((s) => s.trim())
               : [];
-            // If the object has no subdetails, collapse to a flat string —
-            // keeps the artifact tidy and matches simple cases.
+            // If neither table nor subdetails, collapse to flat string.
             return subdetails.length === 0 ? text : { text, subdetails };
           }
           return null;

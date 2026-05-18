@@ -5,10 +5,12 @@ import {
   parseStudyAgentResponse,
   parseSynthesisResponse,
   validateKeyFigure,
+  validateStudyTables,
   capStudyImages,
   detectClusterCollisions,
   DigestParseError,
   type DigestInputTweet,
+  type DigestStudy,
 } from '../src/lib/llm-pipeline.ts';
 import type { LlmClient } from '../src/lib/llm-client.ts';
 
@@ -400,9 +402,155 @@ describe('parseStudyAgentResponse', () => {
     expect(bullet.subdetails).toEqual(['ok', 'also']);
   });
 
+  // ── Table form (v0.4.2) ──
+  it('parses a well-shaped table detail', () => {
+    const raw = JSON.stringify({
+      name: 'POP-RT vs PEACE-2',
+      tldr: 'y',
+      details: [{
+        text: 'WPRT HR by trial',
+        table: {
+          columns: ['Endpoint', 'POP-RT', 'PEACE-2'],
+          rows: [
+            ['bFFS', 'HR 0.50', 'HR 0.97'],
+            ['MFS', 'HR 0.72', 'HR 0.93'],
+          ],
+        },
+      }],
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    const d = out.details[0] as { text: string; table: { columns: string[]; rows: string[][] } };
+    expect(d.text).toBe('WPRT HR by trial');
+    expect(d.table.columns).toEqual(['Endpoint', 'POP-RT', 'PEACE-2']);
+    expect(d.table.rows).toHaveLength(2);
+    expect(d.table.rows[0]).toEqual(['bFFS', 'HR 0.50', 'HR 0.97']);
+  });
+
+  it('pads short rows and truncates long rows to match column count', () => {
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [{
+        text: 'parent',
+        table: {
+          columns: ['A', 'B', 'C'],
+          rows: [
+            ['1'],            // too short
+            ['1', '2', '3', '4'], // too long
+            ['1', '2', '3'],  // exact
+          ],
+        },
+      }],
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    const d = out.details[0] as { text: string; table: { columns: string[]; rows: string[][] } };
+    expect(d.table.rows[0]).toEqual(['1', '', '']);
+    expect(d.table.rows[1]).toEqual(['1', '2', '3']);
+    expect(d.table.rows[2]).toEqual(['1', '2', '3']);
+  });
+
+  it('rejects tables with <2 columns (falls back to flat or subdetails)', () => {
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [{
+        text: 'parent',
+        table: { columns: ['only-one'], rows: [['v']] },
+      }],
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    expect(out.details[0]).toBe('parent'); // collapsed to flat string
+  });
+
+  it('rejects tables with 0 rows', () => {
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [{
+        text: 'empty-table',
+        table: { columns: ['A', 'B'], rows: [] },
+      }],
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    expect(out.details[0]).toBe('empty-table');
+  });
+});
+
+describe('validateStudyTables', () => {
+  const baseStudy: DigestStudy = {
+    name: 'POP-RT vs PEACE-2',
+    tldr: 'y',
+    details: [],
+    key_figure_url: null,
+    key_figure_caption: null,
+    nct: null,
+    tweet_ids: [1, 2],
+  };
+
+  const tweets: DigestInputTweet[] = [
+    {
+      id: 1, author: '@a', text: 'POP-RT bFFS HR 0.50 0.42-0.61 p<0.001',
+      image_ocr_texts: ['MFS POP-RT 0.72 0.58-0.89 0.002'],
+      image_urls: ['https://pbs.twimg.com/media/x.jpg'],
+    },
+    {
+      id: 2, author: '@b', text: 'PEACE-2 bFFS HR 0.97 0.81-1.16 p=0.73 MFS 0.93 0.74-1.17',
+      image_ocr_texts: [''],
+      image_urls: [],
+    },
+  ];
+
+  it('preserves a table whose cell numbers all appear in source text/OCR', () => {
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [{
+        text: 'HRs',
+        table: {
+          columns: ['Endpoint', 'POP-RT', 'PEACE-2'],
+          rows: [
+            ['bFFS', 'HR 0.50 (0.42-0.61) p<0.001', 'HR 0.97 (0.81-1.16) p=0.73'],
+            ['MFS', 'HR 0.72 (0.58-0.89) p=0.002', 'HR 0.93 (0.74-1.17)'],
+          ],
+        },
+      }],
+    };
+    const out = validateStudyTables(study, tweets);
+    expect(out.details[0]).toEqual(study.details[0]);
+  });
+
+  it('drops a table when any cell has an unverified number', () => {
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [{
+        text: 'HRs',
+        table: {
+          columns: ['Endpoint', 'POP-RT'],
+          rows: [['bFFS', 'HR 0.50 (0.42-0.61)'], ['fake-EP', 'HR 0.99 (0.88-1.11)']],
+        },
+      }],
+    };
+    const out = validateStudyTables(study, tweets);
+    expect(typeof out.details[0]).toBe('string');
+    expect(out.details[0] as string).toContain('comparison values omitted');
+    expect(out.details[0] as string).toContain('0.99');
+  });
+
+  it('passes through non-table details unchanged', () => {
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [
+        'flat bullet',
+        { text: 'sub', subdetails: ['a', 'b'] },
+      ],
+    };
+    const out = validateStudyTables(study, tweets);
+    expect(out.details).toEqual(study.details);
+  });
+
   it('falls back to cluster name if model omits name', () => {
+    const localCluster = { slug: 'foo', name: 'PRESTIGE-PSMA', disease_site: 'prostate', tweet_ids: [1] };
     const raw = JSON.stringify({ tldr: 'y', details: [] });
-    expect(parseStudyAgentResponse(raw, cluster).name).toBe('PRESTIGE-PSMA');
+    expect(parseStudyAgentResponse(raw, localCluster).name).toBe('PRESTIGE-PSMA');
   });
 });
 

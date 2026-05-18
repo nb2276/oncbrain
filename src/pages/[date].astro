@@ -81,20 +81,44 @@ const title = conference ? `${conference.name} — ${date}` : date;
             )}
             {study.details.length > 0 && (
               <ul class="study-details">
-                {study.details.map((d) => (
-                  typeof d === 'string'
-                    ? <li set:html={linkifyCitations(d)} />
-                    : (
+                {study.details.map((d) => {
+                  if (typeof d === 'string') {
+                    return <li set:html={linkifyCitations(d)} />;
+                  }
+                  if ('table' in d) {
+                    return (
                       <li>
                         <span set:html={linkifyCitations(d.text)} />
-                        {d.subdetails.length > 0 && (
-                          <ul class="study-subdetails">
-                            {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
-                          </ul>
-                        )}
+                        <div class="study-table-wrap">
+                          <table class="study-table">
+                            <thead>
+                              <tr>
+                                {d.table.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {d.table.rows.map((row) => (
+                                <tr>
+                                  {row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </li>
-                    )
-                ))}
+                    );
+                  }
+                  return (
+                    <li>
+                      <span set:html={linkifyCitations(d.text)} />
+                      {d.subdetails.length > 0 && (
+                        <ul class="study-subdetails">
+                          {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
             {study.tweet_ids.length > 0 && (
@@ -311,6 +335,49 @@ const title = conference ? `${conference.name} — ${date}` : date;
     left: 0;
     color: var(--accent);
     font-weight: 700;
+  }
+
+  /* ── Comparison tables ─────────────────────────────────── */
+  .study-table-wrap {
+    margin: 0.4rem 0 0.6rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg-card);
+  }
+  .study-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.88rem;
+    font-family: var(--font-sans);
+    line-height: 1.4;
+  }
+  .study-table th,
+  .study-table td {
+    padding: 0.45rem 0.7rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .study-table tbody tr:last-child td { border-bottom: none; }
+  .study-table th {
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    color: var(--fg-muted);
+    background: var(--bg-card);
+  }
+  /* Sticky first column on mobile so row labels stay visible when scrolling */
+  @media (max-width: 600px) {
+    .study-table th:first-child,
+    .study-table td:first-child {
+      position: sticky;
+      left: 0;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      z-index: 1;
+    }
   }
 
   /* ── Sources (collapsed) + Twitter widgets ─────────────── */
