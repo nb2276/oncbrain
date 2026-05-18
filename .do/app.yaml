@@ -1,0 +1,13 @@
+name: oncbrain
+region: nyc
+static_sites:
+  - name: web
+    github:
+      repo: nb2276/oncbrain
+      branch: main
+      deploy_on_push: true
+    source_dir: /
+    build_command: npm run build
+    output_dir: dist
+    environment_slug: node-js
+    catchall_document: index.html
