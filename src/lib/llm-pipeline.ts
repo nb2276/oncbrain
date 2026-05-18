@@ -477,7 +477,41 @@ async function runStudyAgent(
     cluster.slug,
   );
 
-  return detailsValidated;
+  // v0.4.4 backstop: if the LLM emitted both a table caption AND a detail
+  // table covering the same columns, drop the detail-table. Prompt-level
+  // rule asks for non-duplication; this is the safety net.
+  return dedupTablesAgainstCaption(detailsValidated, cluster.slug);
+}
+
+// If the caption is a table, drop any detail-table whose column set
+// overlaps ≥2 headers with the caption. Replaces the detail-table with a
+// flat string of just its `text` label so the reader still sees the bullet
+// concept but not the duplicate matrix.
+export function dedupTablesAgainstCaption(
+  study: DigestStudy,
+  slug?: string,
+): DigestStudy {
+  const cap = study.key_figure_caption;
+  if (!cap || typeof cap === 'string') return study;
+  const capCols = new Set(cap.columns.map((c) => c.trim().toLowerCase()));
+  let dropped = 0;
+  const newDetails: DigestDetail[] = study.details.map((d) => {
+    if (!isTableDetail(d)) return d;
+    const detailCols = d.table.columns.map((c) => c.trim().toLowerCase());
+    let shared = 0;
+    for (const c of detailCols) if (capCols.has(c)) shared++;
+    if (shared >= 2) {
+      dropped++;
+      return d.text; // keep the parent label, drop the duplicate matrix
+    }
+    return d;
+  });
+  if (dropped > 0 && slug) {
+    console.warn(
+      `  [phase2:${slug}] dropped ${dropped} detail-table(s): duplicates caption-table columns`,
+    );
+  }
+  return { ...study, details: newDetails };
 }
 
 // Validate numeric tokens in table cells against the study's source text

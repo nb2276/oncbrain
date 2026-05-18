@@ -2,6 +2,25 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.4] — 2026-05-18
+
+Dedup hotfix. v0.4.3 introduced table captions but the LLM, given both caption-table and detail-table features, produced duplicate matrices for the same comparison (caption table showing IBTR/Local relapse/etc. + detail table showing the same six rows). Fix at both layers: the prompt forbids it, and a code-level backstop drops detail-tables whose columns overlap ≥2 with the caption-table.
+
+### Added
+
+- **`dedupTablesAgainstCaption()`** runs after `validateStudyTables` per study. If `key_figure_caption` is a table and any detail in `details` is a table with ≥2 column-header overlap (case-insensitive, trimmed), the detail-table is collapsed to its `text` label only. Reader keeps the bullet's concept; the duplicate matrix is removed.
+
+### Changed
+
+- **Phase 2 prompt rule**: explicit "no duplication between caption and details." If caption is a table summarizing the figure, details must NOT include a detail-table covering the same axis. Detail bullets must complement the caption: methodology, subgroups beyond caption, cross-trial comparisons, critique, open questions.
+
+### Engineering
+
+- 240 tests (was 235, +5 for dedup behavior across overlap thresholds and caption-form variations).
+- 0 type errors across 37 files.
+
+[0.4.4]: https://github.com/nb2276/oncbrain/releases/tag/v0.4.4
+
 ## [0.4.3] — 2026-05-18
 
 Tables become the default for any comparison outcome, including in figure captions. The prompt's "tables required" rule expands from multi-trial-only to any-comparison (arms, trials, timepoints, subgroups). Comparison figures now caption with a small table directly under the image instead of a single-line string.

@@ -75,6 +75,20 @@ A downstream validator checks every numeric token in every table cell against th
 
 A downstream validator rejects caption numbers (in string or table cells) that aren't in the figure's OCR. Failed validation → caption dropped, figure kept. So: when in doubt, abstain.
 
+**(v0.4.4) No duplication between caption and details.**
+If you emit a TABLE-form `key_figure_caption`, then `details` MUST NOT contain a detail-table covering the same comparison (same columns / same axis). The caption already shows that breakdown — don't restate it.
+
+Details should COMPLEMENT the caption, not duplicate it:
+- ✅ Methodology / trial design (phase, N, eligibility, dose/fractionation)
+- ✅ Subgroups not in the caption table
+- ✅ Cross-trial comparisons (vs prior landmark, vs concurrent trial)
+- ✅ Methodological critique (open-label, post-hoc, era effects)
+- ✅ Open questions / unresolved issues
+- ❌ Re-emitting the same comparison axes/values as a detail table
+- ❌ A first detail bullet that just restates one row of the caption table
+
+If the caption table already shows "Prostate 2.7%/8.1%, NSCLC 6.0%/9.8%...", the detail bullets should pivot to WHY (methodology, biology, comparison) — not list those same numbers again in a second table.
+
 For `key_figure_caption`: **numeric-only, sourced strictly from OCR text overlays on the chosen figure**. Read the OCR text for that image. Include only what is literally printed on the figure: HR + CI, p-value, medians, time points, n-at-risk. Do NOT describe curve shape, plateau, or separation timing — those are visual interpretations that drift. If OCR doesn't contain these numbers, write just the endpoint label (e.g., "Overall survival") or set caption to null.
 
 Examples of valid captions (numeric-only, from OCR):

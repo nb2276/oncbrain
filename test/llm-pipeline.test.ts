@@ -6,6 +6,7 @@ import {
   parseSynthesisResponse,
   validateKeyFigure,
   validateStudyTables,
+  dedupTablesAgainstCaption,
   capStudyImages,
   detectClusterCollisions,
   DigestParseError,
@@ -820,6 +821,92 @@ describe('validateKeyFigure', () => {
     );
     expect(r.caption).toBeNull();
     expect(r.reason).toContain('no numeric tokens');
+  });
+});
+
+describe('dedupTablesAgainstCaption', () => {
+  const base: DigestStudy = {
+    name: 'X',
+    tldr: 'y',
+    details: [],
+    key_figure_url: 'https://pbs.twimg.com/media/a.jpg',
+    key_figure_caption: {
+      columns: ['Primary', '1-year LF', '3-year LF'],
+      rows: [['Prostate', '2.7%', '8.1%'], ['NSCLC', '6.0%', '9.8%']],
+    },
+    nct: null,
+    tweet_ids: [1],
+  };
+
+  it('drops a detail-table that has identical columns to caption-table', () => {
+    const study: DigestStudy = {
+      ...base,
+      details: [
+        'flat methodology bullet',
+        {
+          text: '📊 LF by primary',
+          table: {
+            columns: ['Primary', '1-year LF', '3-year LF'],
+            rows: [['Prostate', '2.7%', '8.1%']],
+          },
+        },
+      ],
+    };
+    const out = dedupTablesAgainstCaption(study);
+    expect(out.details).toEqual(['flat methodology bullet', '📊 LF by primary']);
+  });
+
+  it('drops with 2-column overlap (partial column match)', () => {
+    const study: DigestStudy = {
+      ...base,
+      details: [{
+        text: 'shared 2 of 3',
+        table: {
+          columns: ['Primary', '1-year LF', 'note'], // 2/3 overlap
+          rows: [['Prostate', '2.7%', '—']],
+        },
+      }],
+    };
+    const out = dedupTablesAgainstCaption(study);
+    expect(out.details[0]).toBe('shared 2 of 3');
+  });
+
+  it('keeps a detail-table with <2 column overlap (different comparison)', () => {
+    const study: DigestStudy = {
+      ...base,
+      details: [{
+        text: 'AE table',
+        table: {
+          columns: ['Toxicity', 'Grade 2+'],
+          rows: [['GU', '5%'], ['GI', '3%']],
+        },
+      }],
+    };
+    const out = dedupTablesAgainstCaption(study);
+    expect(typeof out.details[0]).toBe('object');
+  });
+
+  it('is a no-op when caption is a string (only table↔table dedup)', () => {
+    const study: DigestStudy = {
+      ...base,
+      key_figure_caption: 'flat caption',
+      details: [{
+        text: 't',
+        table: { columns: ['Primary', '1-year LF'], rows: [['Prostate', '2.7%']] },
+      }],
+    };
+    const out = dedupTablesAgainstCaption(study);
+    expect(typeof out.details[0]).toBe('object');
+  });
+
+  it('is a no-op when caption is null', () => {
+    const study: DigestStudy = {
+      ...base,
+      key_figure_caption: null,
+      details: [{ text: 't', table: { columns: ['A', 'B'], rows: [['1', '2']] } }],
+    };
+    const out = dedupTablesAgainstCaption(study);
+    expect(typeof out.details[0]).toBe('object');
   });
 });
 
