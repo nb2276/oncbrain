@@ -24,6 +24,7 @@ import {
 import {
   fetchUpdates,
   extractTweetUrls,
+  extractPaperPmids,
   messageOf,
   unixToLocalDate,
 } from '../src/lib/telegram-ingest.ts';
@@ -69,6 +70,7 @@ async function main() {
   }
 
   let savedTweets = 0;
+  let savedPapers = 0;
   let skippedDuplicate = 0;
   let skippedNoTarget = 0;
   let maxUpdateId = offset ?? 0;
@@ -82,12 +84,12 @@ async function main() {
     const entities = msg.entities ?? msg.caption_entities ?? [];
     const date = unixToLocalDate(msg.date);
 
-    // Phase A: only tweet URL detection wired up. Papers + slides are
-    // detected and routed to inbox in Phases B + C (deferred per the
-    // locked plan at docs/plans/v0.5-multi-source-ingestion.md).
+    // v0.5 Phase B: tweet URLs + PubMed PMIDs (URLs and citation blocks).
+    // Slides land in Phase C.
     const tweetUrls = extractTweetUrls(text, entities);
+    const paperPmids = extractPaperPmids(text, entities);
 
-    if (tweetUrls.length === 0) {
+    if (tweetUrls.length === 0 && paperPmids.length === 0) {
       skippedNoTarget++;
       continue;
     }
@@ -117,6 +119,32 @@ async function main() {
         console.warn(`  failed to inbox ${url}: ${(err as Error).message}`);
       }
     }
+
+    for (const pmid of paperPmids) {
+      if (args.dryRun) {
+        console.log(`  [dry-run] would inbox: msg=${msg.message_id} type=paper pmid=${pmid}`);
+        savedPapers++;
+        continue;
+      }
+      try {
+        const r = saveInboxItem(db, {
+          type: 'paper',
+          raw_target: pmid,
+          raw_message_text: text || null,
+          telegram_msg_id: msg.message_id,
+          telegram_chat_id: msg.chat?.id ?? null,
+          bookmark_date: date,
+        });
+        if (r.created) {
+          console.log(`  inbox #${r.id}: paper ${date} PMID:${pmid}`);
+          savedPapers++;
+        } else {
+          skippedDuplicate++;
+        }
+      } catch (err) {
+        console.warn(`  failed to inbox PMID:${pmid}: ${(err as Error).message}`);
+      }
+    }
   }
 
   if (!args.dryRun && maxUpdateId > (offset ?? 0)) {
@@ -124,7 +152,7 @@ async function main() {
   }
 
   console.log(
-    `Done. inboxed-tweets=${savedTweets} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} next-offset=${maxUpdateId}`,
+    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} next-offset=${maxUpdateId}`,
   );
   console.log(`Next: \`npm run enrich:inbox\` to enrich pending items, then \`npm run build:day\`.`);
 }

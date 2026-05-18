@@ -12,12 +12,14 @@
 
 import {
   saveBookmark,
+  savePaper,
   markInboxEnriched,
   markInboxFailed,
   type InboxItem,
 } from './db.ts';
 import { fetchTweet, TweetFetchError } from './twitter-fetch.ts';
 import { extractCuratorNote } from './telegram-ingest.ts';
+import { fetchPubMedPaper, PubMedClientError } from './pubmed-client.ts';
 import type Database from 'better-sqlite3';
 
 export type EnrichmentResult =
@@ -33,10 +35,7 @@ export async function enrichInboxItem(
     case 'tweet':
       return enrichTweetItem(db, item);
     case 'paper':
-      return {
-        status: 'deferred',
-        reason: 'paper enrichment lands in v0.5 Phase B (not yet implemented)',
-      };
+      return enrichPaperItem(db, item);
     case 'slide':
       return {
         status: 'deferred',
@@ -44,6 +43,49 @@ export async function enrichInboxItem(
       };
     default:
       return { status: 'failed', reason: `unknown inbox item type: ${item.type}` };
+  }
+}
+
+async function enrichPaperItem(
+  db: Database.Database,
+  item: InboxItem,
+): Promise<EnrichmentResult> {
+  const pmid = item.raw_target;
+  const note = item.raw_message_text ? extractCuratorNote(item.raw_message_text) : null;
+
+  let fetched;
+  try {
+    fetched = await fetchPubMedPaper(pmid);
+  } catch (err) {
+    if (err instanceof PubMedClientError) {
+      // Retryable kinds (rate_limit, network) leave the inbox item to retry
+      // on next enrich:inbox call. Permanent kinds (not_found, parse) still
+      // mark failed — there's no recoverable path.
+      return { status: 'failed', reason: `${err.kind}: ${err.message}` };
+    }
+    return { status: 'failed', reason: `unexpected pubmed error: ${(err as Error).message}` };
+  }
+
+  try {
+    const r = savePaper(db, {
+      pmid: fetched.metadata.pmid,
+      doi: fetched.metadata.doi,
+      pmc_id: fetched.metadata.pmc_id,
+      title: fetched.metadata.title,
+      authors_json: JSON.stringify(fetched.metadata.authors),
+      journal: fetched.metadata.journal,
+      pub_date: fetched.metadata.pub_date,
+      abstract: fetched.abstract,
+      fulltext_excerpt_md: fetched.fulltext_excerpt_md,
+      mesh_terms_json: JSON.stringify(fetched.metadata.mesh_terms),
+      bookmark_date: item.bookmark_date,
+      curator_note: note,
+      inbox_item_id: item.id,
+      fetched_via: 'pubmed_efetch',
+    });
+    return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
+  } catch (err) {
+    return { status: 'failed', reason: `paper insert failed: ${(err as Error).message}` };
   }
 }
 

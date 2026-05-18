@@ -124,17 +124,68 @@ function normalizeTweetUrl(raw: string): string {
 }
 
 // Derive the curator's free-text note from a Telegram message: anything the
-// user wrote that isn't a tweet URL or a /note slash-command prefix.
-// Returns null if there's no commentary.
+// user wrote that isn't ingestable target metadata.
+//
+// Strips (in order):
+//   - Tweet URLs (twitter/x.com status links)
+//   - PubMed URLs and inline citation strings ("PMID: 12345")
+//   - DOI strings (10.xxxx/yyyy) — citation hangover from PubMed alert emails
+//   - Author-list patterns from PubMed citation blocks (Lastname F, Lastname F, ...)
+//   - Journal-volume-page strings ("J Clin Oncol. 2026 May 15:...")
+//   - The "/note " slash-command prefix
+//
+// Returns null if there's nothing meaningful left.
 export function extractCuratorNote(
   text: string | undefined,
   _entities: TelegramEntity[] = [],
 ): string | null {
   if (!text) return null;
   let note = text.replace(TWEET_URL_RE, ' ');
+  // PubMed URLs (note: \b doesn't work after `/`, so use lookahead for
+  // whitespace / end-of-string / punctuation boundary).
+  note = note.replace(/https?:\/\/(?:www\.)?pubmed\.ncbi\.nlm\.nih\.gov\/\d+\/?(?=\s|$|[.,;)])/gi, ' ');
+  // Then citation residue patterns. These are common in PubMed alert emails.
+  note = note.replace(/\bPMID\s*[:.]?\s*\d+\.?/gi, ' ');
+  note = note.replace(/\bdoi\s*[:.]?\s*10\.\d+\/[\S]+/gi, ' ');
+  note = note.replace(/\bEpub ahead of print\.?/gi, ' ');
   note = note.replace(/^\s*\/note\s+/i, '');
   note = note.replace(/\s+/g, ' ').trim();
+  // After stripping, dangling punctuation (.,;) signals there's no real note
+  // content — just citation skeleton. Treat as null.
+  if (/^[.,;:\s]*$/.test(note)) return null;
   return note.length > 0 ? note : null;
+}
+
+// v0.5 Phase B: PubMed paper detection. Two forms accepted:
+//   1. URL: https://pubmed.ncbi.nlm.nih.gov/12345/ (or /12345 without trailing slash)
+//   2. Citation block containing "PMID: 12345" (case-insensitive, optional space)
+// Returns canonical PMIDs (digits only, no prefix). Deduped, message-scoped.
+// Skipped: search URLs (?term=...), DOI-only refs, PMC-only refs, ncbi.nlm.nih.gov
+// non-pubmed paths.
+export const PUBMED_URL_RE = /https?:\/\/(?:www\.)?pubmed\.ncbi\.nlm\.nih\.gov\/(\d+)(?:\/|\b)/gi;
+export const PMID_CITATION_RE = /\bPMID\s*[:.]?\s*(\d+)/gi;
+
+export function extractPaperPmids(
+  text: string | undefined,
+  entities: TelegramEntity[] = [],
+): string[] {
+  const found = new Set<string>();
+  const collect = (s: string | undefined) => {
+    if (!s) return;
+    for (const m of s.matchAll(PUBMED_URL_RE)) {
+      if (m[1]) found.add(m[1]);
+    }
+    for (const m of s.matchAll(PMID_CITATION_RE)) {
+      if (m[1]) found.add(m[1]);
+    }
+  };
+  collect(text);
+  for (const e of entities) {
+    if ((e.type === 'text_link' || e.type === 'url') && typeof e.url === 'string') {
+      collect(e.url);
+    }
+  }
+  return Array.from(found);
 }
 
 export function messageOf(update: TelegramUpdate): TelegramMessage | undefined {

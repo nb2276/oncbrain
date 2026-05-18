@@ -3,6 +3,7 @@ import {
   fetchUpdates,
   extractTweetUrls,
   extractCuratorNote,
+  extractPaperPmids,
   messageOf,
   unixToLocalDate,
   TelegramApiError,
@@ -211,5 +212,86 @@ describe('unixToLocalDate', () => {
   it('respects injected now()', () => {
     const fixed = new Date('2026-05-18T12:00:00Z');
     expect(unixToLocalDate(0, () => fixed)).toBe('2026-05-18');
+  });
+});
+
+describe('extractPaperPmids', () => {
+  it('extracts a PMID from a pubmed.ncbi URL', () => {
+    expect(extractPaperPmids('see https://pubmed.ncbi.nlm.nih.gov/42139645/')).toEqual([
+      '42139645',
+    ]);
+  });
+
+  it('extracts a PMID from inline citation "PMID: N"', () => {
+    expect(
+      extractPaperPmids(
+        'Moon AM, et al. J Clin Oncol. 2026 May 15. doi: 10.1200/JCO-25-02399. PMID: 42139645.',
+      ),
+    ).toEqual(['42139645']);
+  });
+
+  it('extracts a PMID from a citation with no space after colon', () => {
+    expect(extractPaperPmids('PMID:42139645')).toEqual(['42139645']);
+  });
+
+  it('dedupes when same PMID appears as URL AND citation', () => {
+    expect(
+      extractPaperPmids(
+        'see https://pubmed.ncbi.nlm.nih.gov/42139645/ — PMID: 42139645',
+      ),
+    ).toEqual(['42139645']);
+  });
+
+  it('extracts multiple distinct PMIDs from one message', () => {
+    const out = extractPaperPmids('PMID: 11111111 and PMID: 22222222');
+    expect(out.sort()).toEqual(['11111111', '22222222']);
+  });
+
+  it('extracts from text_link entities', () => {
+    const out = extractPaperPmids('click', [
+      { type: 'text_link', offset: 0, length: 5, url: 'https://pubmed.ncbi.nlm.nih.gov/42139645/' },
+    ]);
+    expect(out).toEqual(['42139645']);
+  });
+
+  it('returns empty for non-PubMed content', () => {
+    expect(extractPaperPmids('just some text and a https://x.com/foo/status/1')).toEqual([]);
+  });
+
+  it('returns empty for empty/undefined input', () => {
+    expect(extractPaperPmids('')).toEqual([]);
+    expect(extractPaperPmids(undefined)).toEqual([]);
+  });
+
+  it('ignores PubMed search URLs (no numeric path)', () => {
+    expect(
+      extractPaperPmids('https://pubmed.ncbi.nlm.nih.gov/?term=hepatocellular'),
+    ).toEqual([]);
+  });
+});
+
+describe('extractCuratorNote (paper citations)', () => {
+  it('strips a PubMed URL', () => {
+    expect(extractCuratorNote('great paper https://pubmed.ncbi.nlm.nih.gov/42139645/ worth reading')).toBe(
+      'great paper worth reading',
+    );
+  });
+
+  it('strips "PMID: N" residue', () => {
+    expect(extractCuratorNote('practice-changing PMID: 42139645')).toBe('practice-changing');
+  });
+
+  it('strips DOI residue', () => {
+    expect(extractCuratorNote('see this: doi: 10.1200/JCO-25-02399')).toBe('see this:');
+  });
+
+  it('strips "Epub ahead of print" hangover including the trailing period', () => {
+    expect(extractCuratorNote('notable. Epub ahead of print.')).toBe('notable.');
+  });
+
+  it('returns null when only citation residue remains', () => {
+    expect(
+      extractCuratorNote('PMID: 42139645. doi: 10.1200/JCO-25-02399. Epub ahead of print.'),
+    ).toBeNull();
   });
 });

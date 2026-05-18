@@ -82,6 +82,47 @@ export type NewInboxItem = {
   bookmark_date: string;
 };
 
+// v0.5 Phase B: PubMed paper metadata. Stored alongside bookmarks. The
+// build pipeline picks these up in Phase D when DigestInputItem becomes
+// a union. Until then, papers accumulate but aren't rendered.
+export type Paper = {
+  id: number;
+  pmid: string; // canonical: digits only, no "PMID:" prefix
+  doi: string | null;
+  pmc_id: string | null; // e.g., "PMC1234567"; nullable when no OA fulltext
+  title: string;
+  authors_json: string | null; // JSON array of {name, affiliation?}
+  journal: string | null;
+  pub_date: string | null; // YYYY-MM-DD when known
+  abstract: string | null;
+  fulltext_excerpt_md: string | null; // section-filtered Methods + Results, ≤2000 tokens
+  mesh_terms_json: string | null;
+  bookmark_date: string;
+  conference_slug: string | null;
+  curator_note: string | null;
+  inbox_item_id: number | null;
+  fetched_via: 'pubmed_efetch' | 'pending' | 'failed';
+  created_at: number;
+};
+
+export type NewPaper = {
+  pmid: string;
+  doi?: string | null;
+  pmc_id?: string | null;
+  title: string;
+  authors_json?: string | null;
+  journal?: string | null;
+  pub_date?: string | null;
+  abstract?: string | null;
+  fulltext_excerpt_md?: string | null;
+  mesh_terms_json?: string | null;
+  bookmark_date: string;
+  conference_slug?: string | null;
+  curator_note?: string | null;
+  inbox_item_id?: number | null;
+  fetched_via?: 'pubmed_efetch' | 'pending' | 'failed';
+};
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS bookmarks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,6 +157,28 @@ CREATE TABLE IF NOT EXISTS settings (
 CREATE INDEX IF NOT EXISTS idx_bookmarks_date ON bookmarks(bookmark_date);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_conf ON bookmarks(conference_slug);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_created ON bookmarks(created_at);
+
+CREATE TABLE IF NOT EXISTS papers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  pmid TEXT NOT NULL UNIQUE,
+  doi TEXT,
+  pmc_id TEXT,
+  title TEXT NOT NULL,
+  authors_json TEXT,
+  journal TEXT,
+  pub_date TEXT,
+  abstract TEXT,
+  fulltext_excerpt_md TEXT,
+  mesh_terms_json TEXT,
+  bookmark_date TEXT NOT NULL,
+  conference_slug TEXT,
+  curator_note TEXT,
+  inbox_item_id INTEGER,
+  fetched_via TEXT NOT NULL DEFAULT 'pending',
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_papers_date ON papers(bookmark_date);
+CREATE INDEX IF NOT EXISTS idx_papers_inbox ON papers(inbox_item_id);
 
 CREATE TABLE IF NOT EXISTS inbox_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -471,6 +534,66 @@ export function markInboxFailed(db: Database.Database, id: number, error: string
             enrichment_error = ?
       WHERE id = ?`,
   ).run(Date.now(), error.slice(0, 500), id);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Papers (v0.5 Phase B)
+// ────────────────────────────────────────────────────────────────────────────
+
+export function savePaper(
+  db: Database.Database,
+  p: NewPaper,
+): { id: number; created: boolean } {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(p.bookmark_date)) {
+    throw new Error(`bookmark_date must be YYYY-MM-DD, got: ${p.bookmark_date}`);
+  }
+  const existing = db.prepare('SELECT id FROM papers WHERE pmid = ?').get(p.pmid) as
+    | { id: number }
+    | undefined;
+  if (existing) return { id: existing.id, created: false };
+  const result = db
+    .prepare(
+      `INSERT INTO papers
+       (pmid, doi, pmc_id, title, authors_json, journal, pub_date, abstract,
+        fulltext_excerpt_md, mesh_terms_json, bookmark_date, conference_slug,
+        curator_note, inbox_item_id, fetched_via, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      p.pmid,
+      p.doi ?? null,
+      p.pmc_id ?? null,
+      p.title,
+      p.authors_json ?? null,
+      p.journal ?? null,
+      p.pub_date ?? null,
+      p.abstract ?? null,
+      p.fulltext_excerpt_md ?? null,
+      p.mesh_terms_json ?? null,
+      p.bookmark_date,
+      p.conference_slug ?? null,
+      p.curator_note ?? null,
+      p.inbox_item_id ?? null,
+      p.fetched_via ?? 'pending',
+      Date.now(),
+    );
+  return { id: result.lastInsertRowid as number, created: true };
+}
+
+export function listPapers(
+  db: Database.Database,
+  filter: { bookmark_date?: string } = {},
+): Paper[] {
+  if (filter.bookmark_date) {
+    return db
+      .prepare('SELECT * FROM papers WHERE bookmark_date = ? ORDER BY created_at DESC')
+      .all(filter.bookmark_date) as Paper[];
+  }
+  return db.prepare('SELECT * FROM papers ORDER BY bookmark_date DESC, created_at DESC').all() as Paper[];
+}
+
+export function getPaperByPmid(db: Database.Database, pmid: string): Paper | undefined {
+  return db.prepare('SELECT * FROM papers WHERE pmid = ?').get(pmid) as Paper | undefined;
 }
 
 export function countInboxByStatus(

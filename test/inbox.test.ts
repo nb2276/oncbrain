@@ -169,25 +169,7 @@ describe('runEnrichmentLoop', () => {
     vi.resetAllMocks();
   });
 
-  it('defers paper items in Phase A (not yet implemented)', async () => {
-    const db = freshDb();
-    saveInboxItem(db, {
-      type: 'paper',
-      raw_target: 'PMID:12345',
-      telegram_msg_id: 1,
-      bookmark_date: '2026-05-18',
-    });
-    const items = listInboxItemsForEnrichment(db);
-    const result = await runEnrichmentLoop(db, items);
-    expect(result.deferred).toBe(1);
-    expect(result.enriched).toBe(0);
-    // Status stays pending so a future phase can pick it up
-    const counts = countInboxByStatus(db);
-    expect(counts.pending).toBe(1);
-    expect(counts.deferred).toBe(0);
-  });
-
-  it('defers slide items in Phase A', async () => {
+  it('defers slide items in Phase A/B (Phase C lands later)', async () => {
     const db = freshDb();
     saveInboxItem(db, {
       type: 'slide',
@@ -198,5 +180,10 @@ describe('runEnrichmentLoop', () => {
     const items = listInboxItemsForEnrichment(db);
     const result = await runEnrichmentLoop(db, items);
     expect(result.deferred).toBe(1);
+    expect(result.enriched).toBe(0);
+    // Status stays pending so Phase C can pick it up
+    const counts = countInboxByStatus(db);
+    expect(counts.pending).toBe(1);
+    expect(counts.deferred).toBe(0);
   });
 });

@@ -2,6 +2,33 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — v0.5 Phase B — 2026-05-18
+
+PubMed papers join the ingestion pipeline. Telegram bot now detects PMID URLs and inline "PMID: N" citations alongside tweet URLs; enrichment fetches metadata + abstract from NCBI E-utilities and, when the paper has a PMC ID, extracts Methods + Results sections capped at ~2000 tokens. Papers accumulate in a new `papers` table and will join the digest pipeline in Phase D.
+
+### Added
+
+- **`papers` table**: PMID-keyed metadata storage. Columns: doi, pmc_id, title, authors_json, journal, pub_date, abstract, fulltext_excerpt_md (section-filtered Methods + Results), mesh_terms_json, bookmark_date, conference_slug, curator_note, inbox_item_id (FK), fetched_via.
+- **`src/lib/pubmed-client.ts`**: NCBI E-utilities client. `fetchPubMedPaper(pmid)` calls efetch on db=pubmed for metadata + abstract, then efetch on db=pmc for Methods + Results when PMC ID present. Section filter pulls `sec[sec-type="methods|results"]` or falls back to title-based detection. PMC fetch failure is non-fatal (paper still ships with abstract). Char-cap 8000 (~2000 tokens) per codex P0 revision down from 8000 tokens.
+- **`extractPaperPmids()`** in telegram-ingest.ts: detects PMID URLs (`pubmed.ncbi.nlm.nih.gov/N`) and inline citation strings (`PMID: N`). Deduped per-message.
+- **Paper enrichment handler** in inbox-enrichment.ts: dispatches paper inbox items to PubMed client, inserts into papers table. Network errors return retry-eligible failure; not_found and parse errors fail permanently.
+
+### Changed
+
+- **`pull:telegram`** detects paper targets alongside tweet URLs. One message can produce multiple inbox items across types.
+- **`extractCuratorNote()`** strips PubMed URLs, PMID citations, DOIs, and "Epub ahead of print" residue so a curator's note is only the actual free-form commentary (not the forwarded citation block).
+
+### Engineering
+
+- 279 tests (was 251, +28 for PubMed XML parsing, section filtering, paper detection, citation-residue stripping).
+- 0 type errors across 41 files.
+- Rate limit safe: 3 req/sec NCBI cap; solo-curator volume well within. Add `NCBI_API_KEY` to `.env` to bump to 10/sec when needed.
+
+### Not yet shipped
+
+- Papers don't appear in digests yet — that's Phase D (pipeline becomes type-aware and renders source-attribution badges).
+- DOI-only references and PMC URLs are not detected (PMID required). v0.6+.
+
 ## [Unreleased] — v0.5 Phase A — 2026-05-18
 
 Inbox-first ingestion. Telegram puller no longer writes directly to bookmarks; it writes to a new `inbox_items` queue. A separate `enrich:inbox` CLI processes pending items into typed tables (bookmarks now; papers and slides in v0.5 Phases B + C). Decoupling guarantees the Telegram offset advances on inbox write — not on enrichment success — so transient enrichment failures don't lose source messages (codex amended-plan P0 #1).
