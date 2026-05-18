@@ -24,11 +24,19 @@ export type DigestArtifactForExport = {
         name: string;
         tldr: string;
         details: string[];
+        key_figure_url?: string | null;
+        key_figure_caption?: string | null;
         nct: string | null;
         tweet_ids: number[];
       }>;
       open_questions: string[] | null;
     }>;
+    meta?: {
+      clusters_total: number;
+      studies_analyzed: number;
+      dropped: Array<{ slug: string; name: string; reason: string }>;
+      ocr_available: boolean;
+    };
   };
   bookmarks: Array<{
     id: number;
@@ -189,6 +197,15 @@ function renderBody(artifact: DigestArtifactForExport): string {
       lines.push(`### ${study.name}${nctSuffix}`, '');
       lines.push(`> ${wikilinkify(study.tldr)}`, '');
 
+      if (study.key_figure_url) {
+        const alt = study.key_figure_caption ?? study.name;
+        lines.push(`![${alt}](${study.key_figure_url})`);
+        if (study.key_figure_caption) {
+          lines.push(`*${study.key_figure_caption}*`);
+        }
+        lines.push('');
+      }
+
       if (study.details.length > 0) {
         for (const d of study.details) lines.push(`- ${wikilinkify(d)}`);
         lines.push('');
@@ -223,6 +240,26 @@ function renderBody(artifact: DigestArtifactForExport): string {
   const next = shiftDate(date, +1);
   seeAlso.push(`[[${prev}]]`);
   seeAlso.push(`[[${next}]]`);
+
+  // v0.4: surface build disclosures (dropped clusters, OCR availability) so
+  // the reader can audit what was excluded rather than silently inferring
+  // completeness.
+  if (digest.meta && (digest.meta.dropped.length > 0 || !digest.meta.ocr_available)) {
+    lines.push('---', '', '## Build disclosures', '');
+    lines.push(
+      `${digest.meta.studies_analyzed}/${digest.meta.clusters_total} study cluster${digest.meta.clusters_total === 1 ? '' : 's'} analyzed successfully.`,
+    );
+    if (!digest.meta.ocr_available) {
+      lines.push('On-device OCR was unavailable — figure captions omitted.');
+    }
+    if (digest.meta.dropped.length > 0) {
+      lines.push('', '**Dropped clusters:**', '');
+      for (const d of digest.meta.dropped) {
+        lines.push(`- **${d.name}** (\`${d.slug}\`): ${d.reason}`);
+      }
+    }
+    lines.push('');
+  }
 
   lines.push('---', '', '## See also', '');
   for (const s of seeAlso) lines.push(`- ${s}`);

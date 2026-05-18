@@ -2,6 +2,62 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.0] — 2026-05-18
+
+The LLM call splits into three phases: cluster, per-study deep-analysis, and synthesis. Each study gets its own agent that can read attached images and on-device-OCR'd text. A promoted "key figure" (typically a KM curve) renders prominently in the study card with a numeric-only caption verified against OCR. Adversarial review (codex) shaped the failure-mode handling.
+
+### Added
+
+- **Three-pass orchestration** (`src/lib/llm-pipeline.ts`). Phase 1 groups tweets into study clusters by disease site. Phase 2 spawns one LLM agent per cluster (bounded concurrency 4), each producing TL;DR + analysis bullets + a chosen key figure. Phase 3 synthesizes top_line + tldr + site-level open questions over only the successful Phase 2 outputs. Failed studies drop from the output entirely rather than placeholder.
+- **Apple Vision OCR layer** (`scripts/vision-ocr.swift` + `src/lib/vision-ocr.ts`). On-device text extraction via `VNRecognizeTextRequest .accurate`. Pulls trial IDs, HRs, CI's, p-values, and slide titles from `pbs.twimg.com` images. Runs locally, zero API cost, ~200ms/image. macOS-only; pipelines gracefully skip on other platforms. Compile once with `npm run setup:vision`.
+- **Key-figure promotion**. Phase 2 agents pick the most informative image (KM > forest > endpoint chart > schema > AE table) per study and write a caption sourced strictly from OCR text overlays. Astro renders the figure prominently above the study's detail bullets.
+- **Caption validator** (`validateKeyFigure`). Post-hoc check: every numeric token in the caption must appear verbatim in the OCR for the chosen image. Otherwise the caption is dropped. If the model hallucinates a figure URL not present in the cluster, both fields are dropped. Defaults toward abstention.
+- **Read-only study retrieval** (`src/lib/study-retrieval.ts`). Optional per-study anchoring context loaded from hand-curated `data/studies/<slug>.md` files. Read-only by design — the build pipeline never writes back. Avoids the "self-licking ice cream" failure mode where model output becomes model input.
+- **Twitter-onc shorthand register** (`prompts/digest-v5-study-agent.txt`). Subspecialist-to-subspecialist abbreviations (mOS, mPFS, HR, ORR), emoji prefixes (📊 result, 🔍 method, ⚠️ counter, 🔗 comparison, ❓ open question), and inline adversarial bullets — no separate counter[] schema.
+- **Disclosure metadata** (`digest.meta`). Surfaces `clusters_total`, `studies_analyzed`, dropped clusters with reasons, and OCR availability. Astro renders a "Build disclosures" footer when relevant. Silent omission of dropped clinical findings would be worse than no result.
+- **Cluster-collision warnings**. After Phase 1, the pipeline detects when 2+ clusters reference the same NCT — a likely over-split that the operator should review.
+
+### Changed
+
+- **Prompt: v4 → v5 (split across three files).** `prompts/digest-v5-grouping.txt` (clustering only, no analysis), `prompts/digest-v5-study-agent.txt` (per-study deep dive in shorthand register), `prompts/digest-v5-synthesis.txt` (final top_line/tldr/open_questions).
+- **OCR cache hardened by version pinning.** `image_ocr_texts` now stores `{text, hash, version}[]` aligned to `image_urls`. Re-OCR triggered on version mismatch (catches OCR engine upgrades) or array-length mismatch. Old length-equality cache was too weak per the adversarial review.
+- **Schema-repair retry on parse failure.** Phase 1/2/3 each retries once with "your last response was malformed JSON, re-emit only the JSON" on parse error — not just network errors as in v0.3. Cheap and beats dropping a study.
+- **Per-study image cap.** Default 6 images per Phase 2 agent (`maxImagesPerStudy` option). Controls token cost on big meeting days; concurrency cap alone only paces, doesn't bound spend.
+- **DigestOutput schema additive only.** `meta` field added; `key_figure_url`/`key_figure_caption` are optional on DigestStudy. v0.3 artifacts continue to render without modification.
+- **DigestStudy now carries the chosen figure.** Astro `[date].astro` and `sites/[site].astro` render the figure with numeric caption above the detail bullets when present.
+- **Obsidian export** writes the figure as `![caption](url)` followed by italic caption, and a "Build disclosures" section when clusters were dropped or OCR was unavailable.
+
+### Engineering
+
+- 205 unit tests across 9 files (was 185). New: 3-pass orchestration (`buildDigest` happy path, failed-study handling, all-fail rejection, schema-repair retry, code-fence handling), `validateKeyFigure` (6 cases including unverified-numbers and missing-OCR drops), `capStudyImages`, `detectClusterCollisions`, `parseGroupingResponse`/`parseStudyAgentResponse`/`parseSynthesisResponse`, OCR cache freshness.
+- Non-destructive DB ALTER for `image_ocr_texts` column. Existing v0.3 rows remain functional; OCR will populate on next build:day pass.
+- TypeScript strict, 0 errors across 36 files (`npx astro check`).
+
+### Process
+
+- Plan reviewed twice by codex (independent adversarial). Initial v0.4 plan attracted 10 substantive critiques; 7 incorporated directly (failure-mode handling, no append-only dossier, retrieval as read-only, etc.). Amended plan reviewed again after key-figure scope was added — 8 additional findings, all 5 clinical-safety blockers and 3 cheap mitigations folded into this release. Casual register (codex flagged as auditability regression) was retained per product call with acknowledged trade-off.
+- Code reviewed by `/review` pipeline (codex code-review + Claude adversarial subagent + 4 specialist subagents: testing, security, data-migration, maintainability). 13 additional findings folded into this release as hardenings (below). Remaining findings deferred to v0.5+ with documented rationale.
+
+### Hardenings folded from /review (post-implementation)
+
+- **Caption validator no longer accepts substring matches.** Previous code used `String.includes()` so caption "0.6" passed against OCR "0.62". Replaced with tokenized OCR + set-membership equality. `validateKeyFigure` now also (a) requires at least one numeric anchor — captions of pure prose are rejected; (b) handles leading-zero variants (".62" ↔ "0.62") so Vision's locale quirks don't drop legitimate captions; (c) drops BOTH figure and caption when OCR is unavailable globally (uncaptioned figures looked editorial under the old behavior).
+- **Phase 1 partition enforcement.** `parseGroupingResponse` now verifies every input tweet id appears in exactly one cluster — no orphans, no duplicates. Violations throw, triggering the schema-repair retry. Closes a silent-omission gap where the model could drop clinically important source tweets with no disclosure.
+- **Phase 2 ordering is deterministic.** Results stored at fixed indices keyed by Phase 1 cluster position rather than worker completion order. Two builds over identical input now produce byte-identical artifacts; git history stops churning on parallel-completion-order noise.
+- **OCR failure no longer cached as fresh.** Previously a transient download or Vision error wrote a zero-text entry with the current `OCR_VERSION` and `isOcrEntryFresh()` happily kept it forever. Failed/skipped OCR now writes an empty-version sentinel that the freshness check rejects, so the next build retries naturally.
+- **pbs.twimg.com host allowlist** in OCR fetcher and Astro figure rendering. Refuses non-HTTPS URLs, non-pbs.twimg.com hostnames, `javascript:` / `data:` / `file:` URLs, link-local (169.254.x), and localhost — defense against SSRF, image-decoder CVE exposure, and reader-IP tracking via arbitrary CDNs. `redirect: 'error'` on fetch prevents redirect-based bypass.
+- **Empty Phase 1 returns a degraded digest** instead of crashing the build. Curator day with no cluster-worthy bookmarks now produces a "no analyzable studies surfaced" digest with all tweets listed in `meta.dropped` rather than a hard build failure.
+- **Single source of truth for `DigestStudy` / `DigestSite` / `DigestMeta` types.** `src/lib/digest-data.ts` re-exports from `src/lib/llm-pipeline.ts` so producer (build pipeline) and consumers (Astro pages, Obsidian export) stay in lockstep. Removing a field on one side now breaks the type check on the other.
+- **Prompt-injection defense.** Phase 1 and Phase 2 prompts now include a `═══ TRUST BOUNDARY ═══` block instructing the model that tweet text, author, note, and image OCR text are user-generated data and not instructions. Doesn't eliminate the risk (well-known limitation of LLM safety) but raises the bar for casual hostile-bookmark scenarios.
+- **`dropped[].reason` field is categorized.** Previously stored raw error messages which could leak SDK request IDs or internal endpoint URLs to the public-committed `data/digests/<date>.json`. Now stored as one of `network-timeout`, `rate-limit`, `network-error`, `parse-error`, `auth-error`, or `unknown-error`. Full error message still goes to launchd log.
+
+### Caveats
+
+- The figure caption validator can only verify numeric tokens — it cannot catch mis-labeled axes or wrong-arm attribution. Captions remain advisory; readers should cross-reference the original tweet image when a number drives clinical reasoning.
+- Slug-based retrieval has no entity resolution. A trial that gets a different slug across days (e.g., "PRESTIGE" vs "prestige-psma") will miss its own prior context. Deferred to v0.5+.
+- OCR is macOS-only. On Linux/CI, figure captions are uniformly null — env-portable but no caption layer. To produce captions, builds must run on a Mac with `npm run setup:vision` completed.
+
+[0.4.0]: https://github.com/nb2276/oncbrain/releases/tag/v0.4.0
+
 ## [0.3.0] — 2026-05-17
 
 The model becomes an analyst, not a summarizer. Comparative literature context, historic benchmarks, and methodological critique now show up in per-study bullets. Source-tweet images get extracted from Twitter's syndication CDN and are passed to the LLM as vision content on the API path.

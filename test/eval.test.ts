@@ -45,6 +45,8 @@ const sampleDigest: DigestOutput = {
           name: 'PRESTIGE-PSMA',
           tldr: 'NCT12345678 hit primary endpoint.',
           details: ['Primary endpoint met'],
+          key_figure_url: null,
+          key_figure_caption: null,
           nct: 'NCT12345678',
           tweet_ids: [1],
         },
@@ -52,6 +54,12 @@ const sampleDigest: DigestOutput = {
       open_questions: null,
     },
   ],
+  meta: {
+    clusters_total: 1,
+    studies_analyzed: 1,
+    dropped: [],
+    ocr_available: false,
+  },
 };
 
 describe('parseEvalResult', () => {

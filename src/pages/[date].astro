@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import { listDigests, type DigestArtifact } from '../lib/digest-data.ts';
 import { linkifyCitations } from '../lib/extract.ts';
 import { getDiseaseSite } from '../lib/disease-sites.ts';
+import { isSafeImageUrl } from '../lib/vision-ocr.ts';
 
 export async function getStaticPaths() {
   return listDigests().map((artifact) => ({
@@ -70,6 +71,14 @@ const title = conference ? `${conference.name} — ${date}` : date;
               )}
             </h4>
             <p class="study-tldr" set:html={linkifyCitations(study.tldr)} />
+            {study.key_figure_url && isSafeImageUrl(study.key_figure_url) && (
+              <figure class="study-figure">
+                <img src={study.key_figure_url} alt={study.key_figure_caption ?? study.name} loading="lazy" />
+                {study.key_figure_caption && (
+                  <figcaption>{study.key_figure_caption}</figcaption>
+                )}
+              </figure>
+            )}
             {study.details.length > 0 && (
               <ul class="study-details">
                 {study.details.map((d) => (<li set:html={linkifyCitations(d)} />))}
@@ -121,6 +130,26 @@ const title = conference ? `${conference.name} — ${date}` : date;
       </article>
     );
   })}
+
+  {digest.meta && (digest.meta.dropped.length > 0 || !digest.meta.ocr_available) && (
+    <section class="disclosure" aria-label="Build disclosures">
+      <div class="section-label">Build disclosures</div>
+      <p>
+        {digest.meta.studies_analyzed} of {digest.meta.clusters_total} study cluster{digest.meta.clusters_total === 1 ? '' : 's'} analyzed successfully.
+        {!digest.meta.ocr_available && ' On-device OCR was unavailable for this build — figure captions omitted.'}
+      </p>
+      {digest.meta.dropped.length > 0 && (
+        <details class="dropped">
+          <summary>{digest.meta.dropped.length} cluster{digest.meta.dropped.length === 1 ? '' : 's'} dropped</summary>
+          <ul>
+            {digest.meta.dropped.map((d) => (
+              <li><strong>{d.name}</strong> <span class="dropped-slug">({d.slug})</span><br /><span class="dropped-reason">{d.reason}</span></li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </section>
+  )}
 </Base>
 
 <style>
@@ -296,6 +325,51 @@ const title = conference ? `${conference.name} — ${date}` : date;
     color: var(--fg-muted);
     font-style: italic;
   }
+
+  /* ── Promoted figure ───────────────────────────────────── */
+  .study-figure {
+    margin: 0.6rem 0 0.8rem;
+    padding: 0;
+  }
+  .study-figure img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .study-figure figcaption {
+    margin-top: 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+    line-height: 1.4;
+  }
+
+  /* ── Disclosure (dropped clusters / OCR availability) ──── */
+  .disclosure {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed var(--border);
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+    line-height: 1.55;
+  }
+  .disclosure .section-label { margin-bottom: 0.4rem; }
+  .disclosure p { margin: 0; }
+  .dropped {
+    margin-top: 0.6rem;
+  }
+  .dropped summary {
+    cursor: pointer;
+    padding: 0.25rem 0;
+  }
+  .dropped summary:hover { color: var(--accent); }
+  .dropped ul { margin: 0.5rem 0 0; padding-left: 1.2rem; }
+  .dropped li { margin: 0.4rem 0; }
+  .dropped-slug { color: var(--border); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; }
+  .dropped-reason { font-style: italic; }
 
   /* ── Open questions ────────────────────────────────────── */
   .open-questions {

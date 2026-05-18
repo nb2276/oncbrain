@@ -22,6 +22,7 @@ import {
   listBookmarks,
   listBookmarkDates,
   updateBookmarkFetched,
+  updateBookmarkOcrTexts,
   dominantConferenceForDate,
   getConference,
   todayIso,
@@ -30,6 +31,12 @@ import {
 import { fetchTweet, TweetFetchError } from '../src/lib/twitter-fetch.ts';
 import { buildDigest, type DigestInputTweet, type DigestOutput } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
+import {
+  isOcrAvailable,
+  ocrImageUrls,
+  isOcrEntryFresh,
+  type OcrEntry,
+} from '../src/lib/vision-ocr.ts';
 import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 
@@ -116,16 +123,74 @@ function toDigestInput(bookmarks: Bookmark[]): DigestInputTweet[] {
       text: b.tweet_text!,
       note: b.notes,
       image_urls: parseImageUrls(b.image_urls),
+      // Pipeline consumes just .text aligned to image_urls. Cache metadata
+      // (hash, version) stays in the DB layer; the LLM doesn't need it.
+      image_ocr_texts: parseOcrEntries(b.image_ocr_texts).map((e) => e.text),
     }));
 }
 
 function parseImageUrls(raw: string | null): string[] {
+  return parseStringArray(raw);
+}
+
+function parseStringArray(raw: string | null): string[] {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed.filter((u): u is string => typeof u === 'string') : [];
   } catch {
     return [];
+  }
+}
+
+// Parse the JSON-encoded OcrEntry[] from bookmarks.image_ocr_texts. Tolerant
+// of legacy shapes — if a row was written before the entry struct existed
+// (string[] only), each string becomes an entry with empty hash/version so
+// the freshness check will reject it and trigger re-OCR.
+function parseOcrEntries(raw: string | null): OcrEntry[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item) => {
+      if (typeof item === 'string') return { text: item, hash: '', version: '' };
+      if (item && typeof item === 'object') {
+        const o = item as Record<string, unknown>;
+        return {
+          text: typeof o.text === 'string' ? o.text : '',
+          hash: typeof o.hash === 'string' ? o.hash : '',
+          version: typeof o.version === 'string' ? o.version : '',
+        };
+      }
+      return { text: '', hash: '', version: '' };
+    });
+  } catch {
+    return [];
+  }
+}
+
+// OCR every image whose bookmark has missing or stale OcrEntry. Stale =
+// version mismatch (per isOcrEntryFresh) or array length mismatch with
+// image_urls. Codex amended-plan finding #4 motivates version pinning over
+// the old length-equality check.
+async function ensureOcrTexts(db: ReturnType<typeof openDb>, bookmarks: Bookmark[]): Promise<void> {
+  if (!isOcrAvailable()) return; // graceful skip — wrapper prints warn-once on first call
+  const needOcr = bookmarks.filter((b) => {
+    const urls = parseImageUrls(b.image_urls);
+    if (urls.length === 0) return false;
+    const existing = parseOcrEntries(b.image_ocr_texts);
+    if (existing.length !== urls.length) return true;
+    return !existing.every((e) => isOcrEntryFresh(e));
+  });
+  if (needOcr.length === 0) return;
+  const totalImages = needOcr.reduce((sum, b) => sum + parseImageUrls(b.image_urls).length, 0);
+  console.log(`  running on-device OCR on ${totalImages} image(s) from ${needOcr.length} bookmark(s)...`);
+  for (const b of needOcr) {
+    const urls = parseImageUrls(b.image_urls);
+    const entries = await ocrImageUrls(urls);
+    updateBookmarkOcrTexts(db, b.id, entries);
+    const recognized = entries.filter((e) => e.text.length > 0).length;
+    console.log(`    [ocr] #${b.id} ${recognized}/${urls.length} image(s) recognized`);
   }
 }
 
@@ -169,6 +234,7 @@ function buildArtifact(
       text: b.tweet_text!,
       html: b.tweet_html,
       image_urls: parseImageUrls(b.image_urls),
+      image_ocr_texts: parseOcrEntries(b.image_ocr_texts).map((e) => e.text),
       note: b.notes,
       fetched_via: b.fetched_via,
       conference_slug: b.conference_slug,
@@ -202,6 +268,12 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
   // the oEmbed HTML stored. One-shot backfill on the next build for that date.
   await ensureTweetData(db, allForDate, args.skipFetch, true);
 
+  // v0.4: OCR newly-fetched images via Apple Vision before the LLM call.
+  // Reads from the freshly-updated bookmarks. Idempotent — skips bookmarks
+  // whose ocr is already aligned with image_urls length.
+  const afterFetch = listBookmarks(db, { bookmark_date: date });
+  await ensureOcrTexts(db, afterFetch);
+
   // Re-read after the fetch step may have updated rows.
   const bookmarks = listBookmarks(db, { bookmark_date: date }).filter(
     (b) => (b.tweet_text || '').trim().length > 0,
@@ -234,6 +306,8 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
               name: '[dry-run] placeholder study',
               tldr: `${inputs.length} bookmarks would be processed.`,
               details: [],
+              key_figure_url: null,
+              key_figure_caption: null,
               nct: null,
               tweet_ids: inputs.map((t) => t.id),
             },
@@ -241,6 +315,12 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
           open_questions: null,
         },
       ],
+      meta: {
+        clusters_total: 0,
+        studies_analyzed: 0,
+        dropped: [],
+        ocr_available: false,
+      },
     };
   } else {
     digest = await buildDigest(inputs, {

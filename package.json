@@ -1,7 +1,7 @@
 {
   "name": "oncbrain",
   "type": "module",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -17,6 +17,7 @@
     "eval": "tsx build/eval.ts",
     "seed:dev": "tsx build/seed-dev.ts",
     "pull:telegram": "tsx build/pull-telegram.ts",
+    "setup:vision": "bash scripts/build-vision-ocr.sh",
     "cron:install": "bash scripts/launchd/install.sh",
     "cron:uninstall": "bash scripts/launchd/uninstall.sh",
     "cron:test": "bash scripts/daily-build.sh && echo '---LOG TAIL---' && tail -30 ~/Library/Logs/oncbrain-cron.log"

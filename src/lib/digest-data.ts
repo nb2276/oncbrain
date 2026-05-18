@@ -8,6 +8,10 @@ export type DigestStudy = {
   name: string;
   tldr: string;
   details: string[];
+  // v0.4: optional promoted figure. Both fields are null when the per-study
+  // agent abstains or when the post-hoc OCR validator rejects the caption.
+  key_figure_url?: string | null;
+  key_figure_caption?: string | null;
   nct: string | null;
   tweet_ids: number[];
 };
@@ -19,6 +23,16 @@ export type DigestSite = {
   open_questions: string[] | null;
 };
 
+// Disclosure: surfaces incompleteness rather than silently omitting. Older
+// (v0.3) artifacts don't carry this field; consumers should treat absence
+// as "no disclosure data available."
+export type DigestMeta = {
+  clusters_total: number;
+  studies_analyzed: number;
+  dropped: Array<{ slug: string; name: string; reason: string }>;
+  ocr_available: boolean;
+};
+
 export type DigestArtifact = {
   date: string; // YYYY-MM-DD
   conference: { slug: string; name: string } | null;
@@ -27,6 +41,7 @@ export type DigestArtifact = {
     top_line: string;
     tldr: string;
     sites: DigestSite[];
+    meta?: DigestMeta; // v0.4+
   };
   bookmarks: Array<{
     id: number;
@@ -37,6 +52,7 @@ export type DigestArtifact = {
     text: string;
     html: string | null;
     image_urls: string[];
+    image_ocr_texts?: string[]; // v0.4+, aligned with image_urls
     note: string | null;
     fetched_via: string;
     conference_slug: string | null;

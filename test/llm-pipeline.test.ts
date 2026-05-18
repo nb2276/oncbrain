@@ -1,94 +1,174 @@
 import { describe, it, expect, vi } from 'vitest';
-import { buildDigest, parseDigest, DigestParseError } from '../src/lib/llm-pipeline.ts';
+import {
+  buildDigest,
+  parseGroupingResponse,
+  parseStudyAgentResponse,
+  parseSynthesisResponse,
+  validateKeyFigure,
+  capStudyImages,
+  detectClusterCollisions,
+  DigestParseError,
+  type DigestInputTweet,
+} from '../src/lib/llm-pipeline.ts';
 import type { LlmClient } from '../src/lib/llm-client.ts';
 
-function mockLlmClient(responseText: string | string[]): LlmClient {
-  const queue = Array.isArray(responseText) ? [...responseText] : [responseText];
-  const complete = vi.fn(async () => queue.shift() ?? queue[queue.length - 1] ?? '');
+// Returns a mock client that consumes responses from a queue, one per
+// .complete() call. v0.4 makes 1 + N + 1 calls per build (grouping → N
+// per-study agents → synthesis), so most tests need 3+ queued responses.
+function mockLlmClient(responses: string[]): LlmClient {
+  const queue = [...responses];
+  const complete = vi.fn(async () => {
+    if (queue.length === 0) throw new Error('mock client ran out of queued responses');
+    return queue.shift()!;
+  });
   return { complete };
 }
 
-const sampleTweets = [
+const sampleTweets: DigestInputTweet[] = [
   { id: 1, author: '@drfoo', text: 'NCT04567890 OS HR 0.62 in mCRPC.', note: null },
   { id: 2, author: '@drbar', text: 'ARANOTE rPFS 21mo with enza+ADT.', note: null },
   { id: 3, author: '@drbaz', text: 'Datopotamab TNBC ORR 41% 2L.', note: null },
 ];
 
-const goodResponse = JSON.stringify({
-  top_line: 'NCT04567890 delivers OS HR 0.62 in mCRPC.',
-  tldr: 'mCRPC OS endpoint hit. TROP2 ADC momentum in TNBC.',
-  sites: [
+// Phase 1 — clusters the 3 tweets into 2 studies (prostate trial covers tweets
+// 1+2; breast Dato covers tweet 3). Mirrors how the model would actually group.
+const groupingResponse = JSON.stringify({
+  studies: [
+    {
+      slug: 'prestige-psma',
+      name: 'PRESTIGE-PSMA',
+      disease_site: 'prostate',
+      tweet_ids: [1, 2],
+    },
+    {
+      slug: 'datopotamab-tnbc',
+      name: 'Datopotamab in 2L TNBC',
+      disease_site: 'breast',
+      tweet_ids: [3],
+    },
+  ],
+});
+
+const studyAgent1 = JSON.stringify({
+  name: 'PRESTIGE-PSMA',
+  tldr: 'PRESTIGE-PSMA: OS HR 0.62 in mCRPC, primary endpoint met.',
+  details: ['📊 HR 0.62 (95% CI 0.45-0.85)', '🔍 phase III open-label'],
+  key_figure_url: null,
+  key_figure_caption: null,
+  nct: 'NCT04567890',
+});
+
+const studyAgent2 = JSON.stringify({
+  name: 'Datopotamab in 2L TNBC',
+  tldr: 'Dato-DXd: ORR 41% in 2L TNBC.',
+  details: ['📊 ORR 41%, durable responses'],
+  key_figure_url: null,
+  key_figure_caption: null,
+  nct: null,
+});
+
+const synthesisResponse = JSON.stringify({
+  top_line: 'PRESTIGE-PSMA: OS HR 0.62 cements Lu-PSMA in 2L mCRPC.',
+  tldr: 'Prostate Lu-PSMA primary endpoint hit; TROP2 ADC momentum continues in TNBC.',
+  site_meta: [
     {
       disease_site: 'prostate',
-      intro: 'Two trials reported new prostate data.',
-      studies: [
-        {
-          name: 'PRESTIGE-PSMA',
-          tldr: 'OS HR 0.62 in mCRPC, primary endpoint met.',
-          details: ['HR 0.62 (95% CI 0.45-0.85)', 'Median OS not yet reached'],
-          nct: 'NCT04567890',
-          tweet_ids: [1],
-        },
-        {
-          name: 'ARANOTE',
-          tldr: 'rPFS improvement of 21 months with enzalutamide + ADT.',
-          details: ['rPFS gain 21 months vs placebo'],
-          nct: null,
-          tweet_ids: [2],
-        },
-      ],
+      intro: 'One pivotal prostate trial reported.',
       open_questions: ['Sequencing vs taxanes'],
     },
     {
       disease_site: 'breast',
       intro: null,
-      studies: [
-        {
-          name: 'Datopotamab in 2L TNBC',
-          tldr: 'ORR 41% in second-line triple-negative breast cancer.',
-          details: ['ORR 41%, durable responses ongoing'],
-          nct: null,
-          tweet_ids: [3],
-        },
-      ],
       open_questions: null,
     },
   ],
 });
 
-describe('buildDigest', () => {
-  it('returns parsed digest on a clean LLM response', async () => {
+describe('buildDigest (v0.4 3-pass)', () => {
+  it('orchestrates grouping → per-study → synthesis on a clean run', async () => {
+    const client = mockLlmClient([groupingResponse, studyAgent1, studyAgent2, synthesisResponse]);
     const result = await buildDigest(sampleTweets, {
       conferenceName: 'ASCO 2026',
       conferenceDay: 2,
-      client: mockLlmClient(goodResponse),
+      client,
     });
-    expect(result.top_line).toContain('NCT04567890');
-    expect(result.tldr).toContain('mCRPC');
+    expect(result.top_line).toContain('PRESTIGE-PSMA');
+    expect(result.tldr).toContain('TROP2');
     expect(result.sites).toHaveLength(2);
-    expect(result.sites[0]!.disease_site).toBe('prostate');
-    expect(result.sites[0]!.studies).toHaveLength(2);
-    expect(result.sites[0]!.studies[0]!.tldr).toContain('HR 0.62');
-    expect(result.sites[0]!.studies[0]!.nct).toBe('NCT04567890');
-    expect(result.sites[1]!.disease_site).toBe('breast');
-    expect(result.sites[1]!.studies[0]!.nct).toBeNull();
+    const prostate = result.sites.find((s) => s.disease_site === 'prostate')!;
+    expect(prostate.studies).toHaveLength(1);
+    expect(prostate.studies[0]!.tldr).toContain('HR 0.62');
+    expect(prostate.studies[0]!.nct).toBe('NCT04567890');
+    expect(prostate.intro).toContain('prostate trial');
+    expect(prostate.open_questions).toEqual(['Sequencing vs taxanes']);
+    expect(result.meta.clusters_total).toBe(2);
+    expect(result.meta.studies_analyzed).toBe(2);
+    expect(result.meta.dropped).toEqual([]);
+    // 1 grouping + 2 agents + 1 synthesis
+    // @ts-expect-error inspecting the mock
+    expect(client.complete.mock.calls).toHaveLength(4);
   });
 
   it('returns empty digest for zero tweets without calling LLM', async () => {
-    const client = mockLlmClient('SHOULD NOT BE CALLED');
+    const client = mockLlmClient([]);
     const result = await buildDigest([], {
       conferenceName: 'ASCO 2026',
       conferenceDay: 1,
       client,
     });
     expect(result.sites).toEqual([]);
-    expect(result.tldr).toMatch(/no bookmarks/i);
     expect(result.top_line).toMatch(/no bookmarks/i);
+    expect(result.meta.clusters_total).toBe(0);
     expect(client.complete).not.toHaveBeenCalled();
   });
 
-  it('retries once on malformed JSON and succeeds', async () => {
-    const client = mockLlmClient(['not valid json {{', goodResponse]);
+  it('drops a failed Phase 2 study and continues', async () => {
+    const client = mockLlmClient([
+      groupingResponse,
+      'totally not json',
+      'still not json', // schema-repair retry also fails
+      studyAgent2,
+      synthesisResponse,
+    ]);
+    const result = await buildDigest(sampleTweets, {
+      conferenceName: 'ASCO 2026',
+      conferenceDay: 2,
+      client,
+      studyAgentConcurrency: 1, // serialize so the queue order is deterministic
+    });
+    expect(result.sites).toHaveLength(1);
+    expect(result.sites[0]!.disease_site).toBe('breast');
+    expect(result.meta.clusters_total).toBe(2);
+    expect(result.meta.studies_analyzed).toBe(1);
+    expect(result.meta.dropped).toHaveLength(1);
+    expect(result.meta.dropped[0]!.slug).toBe('prestige-psma');
+    expect(result.meta.dropped[0]!.reason).toContain('JSON');
+  });
+
+  it('throws when ALL Phase 2 studies fail', async () => {
+    const client = mockLlmClient([
+      groupingResponse,
+      'bad', 'bad', // study 1: parse fail + repair retry fail
+      'bad', 'bad', // study 2: parse fail + repair retry fail
+    ]);
+    await expect(
+      buildDigest(sampleTweets, {
+        conferenceName: 'ASCO 2026',
+        conferenceDay: 2,
+        client,
+        studyAgentConcurrency: 1,
+      }),
+    ).rejects.toBeInstanceOf(DigestParseError);
+  });
+
+  it('retries Phase 1 on malformed JSON', async () => {
+    const client = mockLlmClient([
+      'not valid json',
+      groupingResponse,
+      studyAgent1,
+      studyAgent2,
+      synthesisResponse,
+    ]);
     const result = await buildDigest(sampleTweets, {
       conferenceName: 'ASCO 2026',
       conferenceDay: 2,
@@ -96,33 +176,26 @@ describe('buildDigest', () => {
       maxRetries: 1,
     });
     expect(result.sites).toHaveLength(2);
-    expect(client.complete).toHaveBeenCalledTimes(2);
   });
 
-  it('throws DigestParseError after exhausting retries', async () => {
-    const client = mockLlmClient(['garbage 1', 'garbage 2']);
-    await expect(
-      buildDigest(sampleTweets, {
-        conferenceName: 'ASCO 2026',
-        conferenceDay: 2,
-        client,
-        maxRetries: 1,
-      }),
-    ).rejects.toBeInstanceOf(DigestParseError);
-  });
-
-  it('handles code-fence-wrapped JSON', async () => {
-    const wrapped = '```json\n' + goodResponse + '\n```';
+  it('handles code-fence-wrapped JSON in all phases', async () => {
+    const wrap = (s: string) => '```json\n' + s + '\n```';
+    const client = mockLlmClient([
+      wrap(groupingResponse),
+      wrap(studyAgent1),
+      wrap(studyAgent2),
+      wrap(synthesisResponse),
+    ]);
     const result = await buildDigest(sampleTweets, {
       conferenceName: 'ASCO 2026',
       conferenceDay: 2,
-      client: mockLlmClient(wrapped),
+      client,
     });
     expect(result.sites).toHaveLength(2);
   });
 
-  it('passes temperature=0 and requested model to the client', async () => {
-    const client = mockLlmClient(goodResponse);
+  it('passes temperature=0 to every LLM call', async () => {
+    const client = mockLlmClient([groupingResponse, studyAgent1, studyAgent2, synthesisResponse]);
     await buildDigest(sampleTweets, {
       conferenceName: 'ASCO 2026',
       conferenceDay: 2,
@@ -130,195 +203,439 @@ describe('buildDigest', () => {
       model: 'claude-test-model',
     });
     // @ts-expect-error inspecting the mock
-    const opts = client.complete.mock.calls[0][1];
-    expect(opts.temperature).toBe(0);
-    expect(opts.model).toBe('claude-test-model');
-    expect(opts.maxTokens).toBe(4096);
+    for (const call of client.complete.mock.calls) {
+      expect(call[1].temperature).toBe(0);
+      expect(call[1].model).toBe('claude-test-model');
+    }
   });
 });
 
-describe('parseDigest', () => {
-  it('parses well-formed JSON with sites/studies schema', () => {
-    const result = parseDigest(goodResponse);
-    expect(result.top_line).toContain('NCT04567890');
-    expect(result.sites).toHaveLength(2);
-    expect(result.sites[0]!.studies).toHaveLength(2);
-  });
-
-  it('strips code fences', () => {
-    const result = parseDigest('```json\n' + goodResponse + '\n```');
-    expect(result.sites).toHaveLength(2);
-  });
-
-  it('throws on empty input', () => {
-    expect(() => parseDigest('')).toThrow(DigestParseError);
+describe('parseGroupingResponse', () => {
+  it('parses a valid clustering response', () => {
+    const result = parseGroupingResponse(groupingResponse, sampleTweets);
+    expect(result).toHaveLength(2);
+    expect(result[0]!.slug).toBe('prestige-psma');
+    expect(result[0]!.disease_site).toBe('prostate');
+    expect(result[0]!.tweet_ids).toEqual([1, 2]);
   });
 
   it('throws on invalid JSON', () => {
-    expect(() => parseDigest('{not json}')).toThrow(DigestParseError);
+    expect(() => parseGroupingResponse('{not json}', sampleTweets)).toThrow(DigestParseError);
   });
 
-  it('throws when top_line is missing', () => {
-    const broken = JSON.parse(goodResponse);
-    delete broken.top_line;
-    expect(() => parseDigest(JSON.stringify(broken))).toThrow(/top_line/);
+  it('strips code fences', () => {
+    const wrapped = '```json\n' + groupingResponse + '\n```';
+    expect(parseGroupingResponse(wrapped, sampleTweets)).toHaveLength(2);
   });
 
-  it('throws when tldr is missing', () => {
-    const broken = JSON.parse(goodResponse);
-    delete broken.tldr;
-    expect(() => parseDigest(JSON.stringify(broken))).toThrow(/tldr/);
-  });
-
-  it('throws when sites is missing', () => {
-    expect(() =>
-      parseDigest(JSON.stringify({ top_line: 'x', tldr: 'y' })),
-    ).toThrow(/sites/);
-  });
-
-  it('throws when no sites have valid studies', () => {
-    expect(() =>
-      parseDigest(
-        JSON.stringify({
-          top_line: 'x',
-          tldr: 'y',
-          sites: [{ disease_site: 'breast', studies: [] }],
-        }),
-      ),
-    ).toThrow(/no valid sites/i);
-  });
-
-  it('maps unknown disease_site slugs to "other"', () => {
-    const wonky = JSON.stringify({
-      top_line: 'x',
-      tldr: 'y',
-      sites: [
-        {
-          disease_site: 'nasal-cavity-superhero',
-          studies: [
-            { name: 'X', tldr: 'y', details: [], nct: null, tweet_ids: [1] },
-          ],
-        },
-      ],
-    });
-    const result = parseDigest(wonky);
-    expect(result.sites[0]!.disease_site).toBe('other');
-  });
-
-  it('drops studies missing name/tldr/tweet_ids', () => {
-    const mixed = JSON.stringify({
-      top_line: 'x',
-      tldr: 'y',
-      sites: [
-        {
-          disease_site: 'breast',
-          studies: [
-            { name: 'valid', tldr: 'has all required', details: [], nct: null, tweet_ids: [1] },
-            { name: '', tldr: 'no name', tweet_ids: [1] },
-            { name: 'no tweets', tldr: 'no tweets attached', tweet_ids: [] },
-            { name: 'no tldr', tldr: '', tweet_ids: [1] },
-          ],
-        },
-      ],
-    });
-    const result = parseDigest(mixed);
-    expect(result.sites[0]!.studies).toHaveLength(1);
-    expect(result.sites[0]!.studies[0]!.name).toBe('valid');
-  });
-
-  it('drops sites whose studies are all invalid', () => {
-    const broken = JSON.stringify({
-      top_line: 'x',
-      tldr: 'y',
-      sites: [
-        {
-          disease_site: 'breast',
-          studies: [{ name: '', tldr: '', tweet_ids: [] }],
-        },
-        {
-          disease_site: 'prostate',
-          studies: [
-            { name: 'valid', tldr: 'OK', details: [], nct: null, tweet_ids: [1] },
-          ],
-        },
-      ],
-    });
-    const result = parseDigest(broken);
-    expect(result.sites).toHaveLength(1);
-    expect(result.sites[0]!.disease_site).toBe('prostate');
-  });
-
-  it('accepts bare 8-digit nct and normalizes to NCT-prefixed form', () => {
+  it('drops clusters with no valid tweet_ids (single-tweet partition)', () => {
+    // Use a 1-tweet input so the partition is satisfied with one cluster.
+    const oneTweet = [sampleTweets[0]!];
     const raw = JSON.stringify({
-      top_line: 'x',
-      tldr: 'y',
-      sites: [
-        {
-          disease_site: 'breast',
-          studies: [
-            { name: 'X', tldr: 'y', details: [], nct: '04567890', tweet_ids: [1] },
-          ],
-        },
+      studies: [
+        { slug: 'a', name: 'A', disease_site: 'breast', tweet_ids: [] },
+        { slug: 'b', name: 'B', disease_site: 'breast', tweet_ids: [99] }, // nonexistent
+        { slug: 'c', name: 'C', disease_site: 'breast', tweet_ids: [1] },
       ],
     });
-    const result = parseDigest(raw);
-    expect(result.sites[0]!.studies[0]!.nct).toBe('NCT04567890');
+    const result = parseGroupingResponse(raw, oneTweet);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.slug).toBe('c');
   });
 
-  it('discards malformed nct strings (not 8 digits)', () => {
+  it('deduplicates clusters with the same slug (uses 1-tweet partition)', () => {
+    const oneTweet = [sampleTweets[0]!];
     const raw = JSON.stringify({
-      top_line: 'x',
-      tldr: 'y',
-      sites: [
-        {
-          disease_site: 'breast',
-          studies: [
-            { name: 'X', tldr: 'y', details: [], nct: 'NCT123', tweet_ids: [1] },
-          ],
-        },
+      studies: [
+        { slug: 'dup', name: 'first', disease_site: 'breast', tweet_ids: [1] },
+        { slug: 'dup', name: 'second', disease_site: 'prostate', tweet_ids: [1] },
       ],
     });
-    const result = parseDigest(raw);
-    expect(result.sites[0]!.studies[0]!.nct).toBeNull();
+    // The first cluster wins; partition-wise tweet 1 appears in only one
+    // cluster after dedup, so the partition rule is satisfied.
+    const result = parseGroupingResponse(raw, oneTweet);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.name).toBe('first');
   });
 
-  it('normalizes empty open_questions array to null', () => {
+  it('rejects unsafe slugs (path traversal) — partition violation surfaces', () => {
+    // With unsafe slug rejected and no other cluster, tweet 1 is orphaned.
+    // The partition check throws — that's the right surface for an
+    // adversarial input.
+    const oneTweet = [sampleTweets[0]!];
     const raw = JSON.stringify({
-      top_line: 'x',
-      tldr: 'y',
-      sites: [
-        {
-          disease_site: 'breast',
-          intro: null,
-          studies: [{ name: 'X', tldr: 'y', details: [], nct: null, tweet_ids: [1] }],
-          open_questions: [],
-        },
+      studies: [
+        { slug: '../etc/passwd', name: 'evil', disease_site: 'breast', tweet_ids: [1] },
       ],
     });
-    const result = parseDigest(raw);
-    expect(result.sites[0]!.open_questions).toBeNull();
+    expect(() => parseGroupingResponse(raw, oneTweet)).toThrow(/partition violation|unassigned/);
+  });
+
+  it('maps unknown disease_site to "other" (uses 1-tweet partition)', () => {
+    const oneTweet = [sampleTweets[0]!];
+    const raw = JSON.stringify({
+      studies: [
+        { slug: 'x', name: 'X', disease_site: 'fictional-tumor', tweet_ids: [1] },
+      ],
+    });
+    const result = parseGroupingResponse(raw, oneTweet);
+    expect(result[0]!.disease_site).toBe('other');
+  });
+
+  // Partition enforcement: explicit tests for the new invariant.
+  it('throws when a tweet id is dropped from all clusters (unassigned)', () => {
+    const raw = JSON.stringify({
+      studies: [
+        { slug: 'a', name: 'A', disease_site: 'breast', tweet_ids: [1] },
+        // Tweet ids 2 and 3 missing → unassigned
+      ],
+    });
+    expect(() => parseGroupingResponse(raw, sampleTweets)).toThrow(/partition violation|unassigned/);
+  });
+
+  it('throws when a tweet id appears in two clusters (duplicate)', () => {
+    const raw = JSON.stringify({
+      studies: [
+        { slug: 'a', name: 'A', disease_site: 'breast', tweet_ids: [1, 2] },
+        { slug: 'b', name: 'B', disease_site: 'prostate', tweet_ids: [1, 3] }, // 1 duplicated
+      ],
+    });
+    expect(() => parseGroupingResponse(raw, sampleTweets)).toThrow(/partition violation|duplicated/);
+  });
+});
+
+describe('parseStudyAgentResponse', () => {
+  const cluster = {
+    slug: 'prestige-psma',
+    name: 'PRESTIGE-PSMA',
+    disease_site: 'prostate',
+    tweet_ids: [1, 2],
+  };
+
+  it('parses a valid response', () => {
+    const result = parseStudyAgentResponse(studyAgent1, cluster);
+    expect(result.name).toBe('PRESTIGE-PSMA');
+    expect(result.tldr).toContain('HR 0.62');
+    expect(result.nct).toBe('NCT04567890');
+    expect(result.tweet_ids).toEqual([1, 2]);
+  });
+
+  it('throws if tldr missing', () => {
+    const broken = JSON.stringify({ name: 'X', details: [] });
+    expect(() => parseStudyAgentResponse(broken, cluster)).toThrow(/tldr/);
+  });
+
+  it('normalizes bare 8-digit nct', () => {
+    const raw = JSON.stringify({ name: 'X', tldr: 'y', details: [], nct: '04567890' });
+    expect(parseStudyAgentResponse(raw, cluster).nct).toBe('NCT04567890');
+  });
+
+  it('rejects malformed nct', () => {
+    const raw = JSON.stringify({ name: 'X', tldr: 'y', details: [], nct: 'NCT123' });
+    expect(parseStudyAgentResponse(raw, cluster).nct).toBeNull();
   });
 
   it('filters non-string details', () => {
-    const noisy = JSON.stringify({
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: ['real', 42, null, '  ', 'another'],
+    });
+    expect(parseStudyAgentResponse(raw, cluster).details).toEqual(['real', 'another']);
+  });
+
+  it('falls back to cluster name if model omits name', () => {
+    const raw = JSON.stringify({ tldr: 'y', details: [] });
+    expect(parseStudyAgentResponse(raw, cluster).name).toBe('PRESTIGE-PSMA');
+  });
+});
+
+describe('parseSynthesisResponse', () => {
+  it('parses a valid response', () => {
+    const result = parseSynthesisResponse(synthesisResponse);
+    expect(result.top_line).toContain('PRESTIGE-PSMA');
+    expect(result.site_meta).toHaveLength(2);
+    expect(result.site_meta[0]!.open_questions).toEqual(['Sequencing vs taxanes']);
+  });
+
+  it('throws if top_line missing', () => {
+    const broken = JSON.stringify({ tldr: 'y', site_meta: [] });
+    expect(() => parseSynthesisResponse(broken)).toThrow(/top_line/);
+  });
+
+  it('normalizes empty open_questions to null', () => {
+    const raw = JSON.stringify({
       top_line: 'x',
       tldr: 'y',
-      sites: [
-        {
-          disease_site: 'breast',
-          studies: [
-            {
-              name: 'X',
-              tldr: 'y',
-              details: ['real bullet', 42, null, '  ', 'another'],
-              nct: null,
-              tweet_ids: [1],
-            },
-          ],
-        },
-      ],
+      site_meta: [{ disease_site: 'breast', open_questions: [] }],
     });
-    const result = parseDigest(noisy);
-    expect(result.sites[0]!.studies[0]!.details).toEqual(['real bullet', 'another']);
+    expect(parseSynthesisResponse(raw).site_meta[0]!.open_questions).toBeNull();
+  });
+});
+
+describe('validateKeyFigure', () => {
+  const tweets: DigestInputTweet[] = [
+    {
+      id: 1,
+      author: '@drfoo',
+      text: 'PRESTIGE results',
+      image_urls: ['https://pbs.twimg.com/media/a.jpg', 'https://pbs.twimg.com/media/b.jpg'],
+      image_ocr_texts: [
+        'PRESTIGE-PSMA Overall Survival HR 0.62 95% CI 0.48 0.79 Median 14.2 vs 9.8 mo',
+        'study schema phase III randomization',
+      ],
+    },
+  ];
+
+  it('passes a caption whose numbers all appear in OCR', () => {
+    const r = validateKeyFigure(
+      'OS: HR 0.62 (95% CI 0.48-0.79). Medians 14.2 vs 9.8 mo.',
+      'https://pbs.twimg.com/media/a.jpg',
+      tweets,
+      true,
+    );
+    expect(r.caption).toBe('OS: HR 0.62 (95% CI 0.48-0.79). Medians 14.2 vs 9.8 mo.');
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+  });
+
+  it('drops caption when a number is absent from OCR (keeps figure)', () => {
+    const r = validateKeyFigure(
+      'OS HR 0.42 — hallucinated number!',
+      'https://pbs.twimg.com/media/a.jpg',
+      tweets,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+    expect(r.reason).toContain('0.42');
+  });
+
+  it('drops both fields when figure URL not in any cluster tweet', () => {
+    const r = validateKeyFigure(
+      'HR 0.62',
+      'https://pbs.twimg.com/media/HALLUCINATED.jpg',
+      tweets,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBeNull();
+    expect(r.reason).toContain('hallucinated');
+  });
+
+  it('drops BOTH figure and caption when OCR is unavailable globally (Claude #26)', () => {
+    const r = validateKeyFigure(
+      'HR 0.62 (95% CI 0.48-0.79)',
+      'https://pbs.twimg.com/media/a.jpg',
+      tweets,
+      false, // OCR unavailable env
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBeNull(); // figure also dropped to prevent uncaptioned-figure-looks-editorial
+    expect(r.reason).toContain('OCR unavailable');
+  });
+
+  it('drops caption when target image has empty OCR text', () => {
+    const tweetsEmptyOcr: DigestInputTweet[] = [
+      {
+        id: 1,
+        author: null,
+        text: 't',
+        image_urls: ['https://pbs.twimg.com/media/a.jpg'],
+        image_ocr_texts: [''],
+      },
+    ];
+    const r = validateKeyFigure('HR 0.62', 'https://pbs.twimg.com/media/a.jpg', tweetsEmptyOcr, true);
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+  });
+
+  it('allows abstention (caption null) without complaint', () => {
+    const r = validateKeyFigure(null, 'https://pbs.twimg.com/media/a.jpg', tweets, true);
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+    expect(r.reason).toBeUndefined();
+  });
+
+  it('returns null/null when no figure was selected', () => {
+    const r = validateKeyFigure('HR 0.62', null, tweets, true);
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBeNull();
+  });
+
+  // ── Substring false-positive prevention (Testing Gap 1 / Claude #1) ──
+  it('rejects substring-only match: caption "0.6" should NOT pass against OCR "0.62"', () => {
+    const r = validateKeyFigure(
+      'HR 0.6 (rounded down)',
+      'https://pbs.twimg.com/media/a.jpg',
+      tweets, // OCR for image a has "0.62", "0.48", "0.79", "14.2", "9.8"
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+  });
+
+  // ── Zero numeric token rejection (Claude #2) ──
+  it('rejects caption with zero numeric anchors', () => {
+    const r = validateKeyFigure(
+      'Overall survival favoring experimental arm with sustained separation',
+      'https://pbs.twimg.com/media/a.jpg',
+      tweets,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+    expect(r.reason).toContain('no numeric tokens');
+  });
+
+  // ── Leading-zero variants (Claude #3) ──
+  it('accepts caption "0.62" against OCR ".62" (leading zero stripped by Vision)', () => {
+    const tweetsLeadZero: DigestInputTweet[] = [
+      {
+        id: 1, author: null, text: 't',
+        image_urls: ['https://pbs.twimg.com/media/a.jpg'],
+        image_ocr_texts: ['HR .62 95% CI .48-.79'], // Vision-style without leading zeros
+      },
+    ];
+    const r = validateKeyFigure(
+      'HR 0.62 (95% CI 0.48-0.79)',
+      'https://pbs.twimg.com/media/a.jpg',
+      tweetsLeadZero,
+      true,
+    );
+    expect(r.caption).toBe('HR 0.62 (95% CI 0.48-0.79)');
+  });
+
+  it('accepts caption ".62" against OCR "0.62" (reverse direction)', () => {
+    const r = validateKeyFigure(
+      'HR .62',
+      'https://pbs.twimg.com/media/a.jpg',
+      tweets, // OCR has "0.62"
+      true,
+    );
+    expect(r.caption).toBe('HR .62');
+  });
+
+  // ── Host allowlist (Security P1-2) ──
+  it('drops both fields when figure URL is not on the host allowlist', () => {
+    const tweetsHostile: DigestInputTweet[] = [
+      {
+        id: 1, author: null, text: 't',
+        image_urls: ['https://attacker.example.com/x.jpg'],
+        image_ocr_texts: ['some text'],
+      },
+    ];
+    const r = validateKeyFigure(
+      'HR 0.62',
+      'https://attacker.example.com/x.jpg',
+      tweetsHostile,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBeNull();
+    expect(r.reason).toContain('host allowlist');
+  });
+
+  it('drops both fields when figure URL uses http:// scheme', () => {
+    const tweetsInsecure: DigestInputTweet[] = [
+      {
+        id: 1, author: null, text: 't',
+        image_urls: ['http://pbs.twimg.com/media/a.jpg'],
+        image_ocr_texts: ['some text'],
+      },
+    ];
+    const r = validateKeyFigure(
+      'HR 0.62',
+      'http://pbs.twimg.com/media/a.jpg',
+      tweetsInsecure,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBeNull();
+    expect(r.reason).toContain('host allowlist');
+  });
+
+  it('drops both fields when figure URL is unparseable', () => {
+    const tweetsBroken: DigestInputTweet[] = [
+      {
+        id: 1, author: null, text: 't',
+        image_urls: ['not a url'],
+        image_ocr_texts: ['text'],
+      },
+    ];
+    const r = validateKeyFigure('HR 0.62', 'not a url', tweetsBroken, true);
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBeNull();
+  });
+});
+
+describe('capStudyImages', () => {
+  const t = (id: number, urls: string[]): DigestInputTweet => ({
+    id,
+    author: null,
+    text: 't',
+    image_urls: urls,
+    image_ocr_texts: urls.map(() => ''),
+  });
+
+  it('returns input unchanged when total images under cap', () => {
+    const tweets = [t(1, ['a', 'b']), t(2, ['c'])];
+    const out = capStudyImages(tweets, 6);
+    expect(out[0]!.image_urls).toEqual(['a', 'b']);
+    expect(out[1]!.image_urls).toEqual(['c']);
+  });
+
+  it('truncates first tweet that exceeds the cap', () => {
+    const tweets = [t(1, ['a', 'b', 'c', 'd']), t(2, ['e', 'f'])];
+    const out = capStudyImages(tweets, 3);
+    expect(out[0]!.image_urls).toEqual(['a', 'b', 'c']);
+    expect(out[1]!.image_urls).toEqual([]);
+  });
+
+  it('handles cap = 0 by returning empty images for all', () => {
+    const tweets = [t(1, ['a', 'b'])];
+    const out = capStudyImages(tweets, 0);
+    expect(out[0]!.image_urls).toEqual([]);
+  });
+
+  it('preserves ocr text alignment when truncating', () => {
+    const tweets = [
+      { id: 1, author: null, text: 't', image_urls: ['a', 'b', 'c'], image_ocr_texts: ['A', 'B', 'C'] },
+    ];
+    const out = capStudyImages(tweets, 2);
+    expect(out[0]!.image_urls).toEqual(['a', 'b']);
+    expect(out[0]!.image_ocr_texts).toEqual(['A', 'B']);
+  });
+});
+
+describe('detectClusterCollisions', () => {
+  it('warns when 2+ clusters share an NCT', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const tweets: DigestInputTweet[] = [
+      { id: 1, author: null, text: 'first half NCT04567890 result A', note: null },
+      { id: 2, author: null, text: 'second half NCT04567890 result B', note: null },
+    ];
+    detectClusterCollisions(
+      [
+        { slug: 'a', name: 'TrialA', disease_site: 'prostate', tweet_ids: [1] },
+        { slug: 'b', name: 'TrialB', disease_site: 'prostate', tweet_ids: [2] },
+      ],
+      tweets,
+    );
+    expect(warn).toHaveBeenCalled();
+    const msg = warn.mock.calls[0]![0] as string;
+    expect(msg).toContain('NCT04567890');
+    warn.mockRestore();
+  });
+
+  it('does not warn when each NCT belongs to a single cluster', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    detectClusterCollisions(
+      [
+        { slug: 'a', name: 'TrialA', disease_site: 'prostate', tweet_ids: [1] },
+      ],
+      [{ id: 1, author: null, text: 'NCT04567890 result', note: null }],
+    );
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 });

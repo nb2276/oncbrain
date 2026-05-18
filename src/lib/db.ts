@@ -11,6 +11,7 @@ export type Bookmark = {
   tweet_text: string | null;
   tweet_html: string | null; // raw oEmbed blockquote — fed to Twitter widgets.js for image-rich rendering
   image_urls: string | null; // JSON-stringified array
+  image_ocr_texts: string | null; // JSON-stringified array of OCR strings, aligned to image_urls index. v0.4+.
   notes: string | null;
   fetched_via: 'oembed' | 'manual' | 'pending';
   created_at: number;
@@ -25,6 +26,7 @@ export type NewBookmark = {
   tweet_text?: string | null;
   tweet_html?: string | null;
   image_urls?: string[] | null;
+  image_ocr_texts?: string[] | null;
   notes?: string | null;
   fetched_via?: 'oembed' | 'manual' | 'pending';
 };
@@ -55,6 +57,7 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   tweet_text TEXT,
   tweet_html TEXT,
   image_urls TEXT,
+  image_ocr_texts TEXT,
   notes TEXT,
   fetched_via TEXT NOT NULL DEFAULT 'pending',
   created_at INTEGER NOT NULL
@@ -87,6 +90,7 @@ export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): D
   db.exec(SCHEMA);
   if (!isNew) detectAndGuardOldSchema(db);
   migrateAddTweetHtml(db);
+  migrateAddImageOcrTexts(db);
   return db;
 }
 
@@ -98,6 +102,15 @@ function migrateAddTweetHtml(db: Database.Database): void {
   const cols = db.prepare("PRAGMA table_info(bookmarks)").all() as { name: string }[];
   if (!cols.some((c) => c.name === 'tweet_html')) {
     db.exec('ALTER TABLE bookmarks ADD COLUMN tweet_html TEXT');
+  }
+}
+
+// Non-destructive ALTER for v0.4.0: image_ocr_texts holds Apple Vision OCR
+// output per image, aligned to image_urls. Same idempotency pattern.
+function migrateAddImageOcrTexts(db: Database.Database): void {
+  const cols = db.prepare("PRAGMA table_info(bookmarks)").all() as { name: string }[];
+  if (!cols.some((c) => c.name === 'image_ocr_texts')) {
+    db.exec('ALTER TABLE bookmarks ADD COLUMN image_ocr_texts TEXT');
   }
 }
 
@@ -137,8 +150,8 @@ export function saveBookmark(db: Database.Database, b: NewBookmark): { id: numbe
   if (existing) return { id: existing.id, created: false };
 
   const stmt = db.prepare(`
-    INSERT INTO bookmarks (url, bookmark_date, conference_slug, author_handle, author_name, tweet_text, tweet_html, image_urls, notes, fetched_via, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO bookmarks (url, bookmark_date, conference_slug, author_handle, author_name, tweet_text, tweet_html, image_urls, image_ocr_texts, notes, fetched_via, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const result = stmt.run(
     b.url,
@@ -149,6 +162,7 @@ export function saveBookmark(db: Database.Database, b: NewBookmark): { id: numbe
     b.tweet_text ?? null,
     b.tweet_html ?? null,
     b.image_urls ? JSON.stringify(b.image_urls) : null,
+    b.image_ocr_texts ? JSON.stringify(b.image_ocr_texts) : null,
     b.notes ?? null,
     b.fetched_via ?? 'pending',
     Date.now(),
@@ -234,6 +248,23 @@ export function updateBookmarkFetched(
     data.tweet_html ?? null,
     data.image_urls ? JSON.stringify(data.image_urls) : null,
     'oembed',
+    id,
+  );
+}
+
+// Separate update for OCR results because OCR happens AFTER the oEmbed
+// fetch (sequentially in the builder), and we want re-OCR to be possible
+// without re-fetching the tweet text.
+// Stored shape: JSON-encoded `Array<{text, hash, version}>` aligned with
+// image_urls. The caller is expected to pass OcrEntry-shaped objects; we
+// don't enforce the shape here, just stringify.
+export function updateBookmarkOcrTexts(
+  db: Database.Database,
+  id: number,
+  entries: Array<{ text: string; hash: string; version: string }>,
+): void {
+  db.prepare(`UPDATE bookmarks SET image_ocr_texts = ? WHERE id = ?`).run(
+    JSON.stringify(entries),
     id,
   );
 }
