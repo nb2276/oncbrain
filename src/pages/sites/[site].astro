@@ -138,33 +138,91 @@ const dates = Array.from(byDate.keys());
                 })}
               </ul>
             )}
-            {occ.bookmarks.length > 0 && (
-              <details class="sources">
-                <summary>📚 Sources ({occ.bookmarks.length})</summary>
-                <div class="source-stack">
-                  {occ.bookmarks.map((b) => {
-                    if (b.html) {
+            {(() => {
+              const papersList = occ.papers ?? [];
+              const slidesList = occ.slides ?? [];
+              const total = occ.bookmarks.length + papersList.length + slidesList.length;
+              if (total === 0) return null;
+              const badges: string[] = [];
+              if (occ.bookmarks.length > 0) badges.push(`🐦 ${occ.bookmarks.length} tweet${occ.bookmarks.length === 1 ? '' : 's'}`);
+              if (papersList.length > 0) badges.push(`📄 ${papersList.length} paper${papersList.length === 1 ? '' : 's'}`);
+              if (slidesList.length > 0) badges.push(`🩻 ${slidesList.length} slide${slidesList.length === 1 ? '' : 's'}`);
+              const toSlideUrl = (fp: string) =>
+                fp.startsWith('data/slide-photos/') ? '/slides/' + fp.slice('data/slide-photos/'.length) : fp;
+              return (
+                <details class="sources">
+                  <summary>📚 Sources · {badges.join(' · ')}</summary>
+                  <div class="source-stack">
+                    {occ.bookmarks.map((b) => {
+                      if (b.html) {
+                        return (
+                          <div class="tw-wrap">
+                            <Fragment set:html={b.html} />
+                            {b.note && <div class="source-note">📝 {b.note}</div>}
+                          </div>
+                        );
+                      }
                       return (
-                        <div class="tw-wrap">
-                          <Fragment set:html={b.html} />
+                        <div class="source-fallback">
+                          <div class="source-meta">
+                            <span>{b.author_name || b.author_handle || 'unknown'}</span>
+                            <a href={b.url} target="_blank" rel="noopener">view on X →</a>
+                          </div>
+                          <div class="source-text" set:html={linkifyCitations(b.text)} />
                           {b.note && <div class="source-note">📝 {b.note}</div>}
                         </div>
                       );
-                    }
-                    return (
-                      <div class="source-fallback">
+                    })}
+                    {papersList.map((p) => (
+                      <div class="source-paper">
                         <div class="source-meta">
-                          <span>{b.author_name || b.author_handle || 'unknown'}</span>
-                          <a href={b.url} target="_blank" rel="noopener">view on X →</a>
+                          <span class="source-type-pill">📄 PAPER</span>
+                          <span>{p.authors.slice(0, 3).join('; ')}{p.authors.length > 3 ? ' et al.' : ''}</span>
+                          {p.journal && (
+                            <span class="paper-journal">
+                              · <em>{p.journal}</em>{p.pub_date ? ` (${p.pub_date.slice(0, 7)})` : ''}
+                            </span>
+                          )}
                         </div>
-                        <div class="source-text" set:html={linkifyCitations(b.text)} />
-                        {b.note && <div class="source-note">📝 {b.note}</div>}
+                        <div class="paper-title">{p.title}</div>
+                        <div class="paper-links">
+                          <a href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`} target="_blank" rel="noopener">PMID {p.pmid} →</a>
+                          {p.doi && <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener">doi</a>}
+                          {p.pmc_id && (
+                            <a href={`https://www.ncbi.nlm.nih.gov/pmc/articles/${p.pmc_id}/`} target="_blank" rel="noopener">full text (PMC)</a>
+                          )}
+                        </div>
+                        {p.abstract && (
+                          <details class="paper-abstract">
+                            <summary>Abstract</summary>
+                            <div class="paper-abstract-body" set:html={linkifyCitations(p.abstract.replace(/\n/g, '<br/>'))} />
+                          </details>
+                        )}
+                        {p.note && <div class="source-note">📝 {p.note}</div>}
                       </div>
-                    );
-                  })}
-                </div>
-              </details>
-            )}
+                    ))}
+                    {slidesList.map((slide) => (
+                      <div class="source-slide">
+                        <div class="source-meta">
+                          <span class="source-type-pill">🩻 SLIDE</span>
+                          {slide.source_label && <span>{slide.source_label}</span>}
+                        </div>
+                        <img
+                          src={toSlideUrl(slide.file_path)}
+                          alt={slide.source_label ?? 'Slide photograph'}
+                          loading="lazy"
+                          onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+                        />
+                        <div class="slide-fallback" style="display:none">
+                          (Slide image not published — curator-private.)
+                        </div>
+                        {slide.note && <div class="source-note">📝 {slide.note}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              );
+            })()}
           </div>
         ))}
       </section>
@@ -379,6 +437,66 @@ const dates = Array.from(byDate.keys());
     font-size: 0.85rem;
     color: var(--fg-muted);
     font-style: italic;
+  }
+  .source-paper {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+    font-size: 0.92rem;
+  }
+  .source-type-pill {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 3px;
+    margin-right: 0.4rem;
+    vertical-align: 1px;
+  }
+  .paper-title {
+    margin: 0.35rem 0 0.4rem;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .paper-journal { color: var(--fg-muted); font-family: var(--font-sans); font-size: 0.82rem; }
+  .paper-links {
+    display: flex; flex-wrap: wrap; gap: 0.8rem;
+    font-family: var(--font-sans); font-size: 0.82rem; margin-bottom: 0.4rem;
+  }
+  .paper-links a { color: var(--accent); }
+  .paper-abstract { margin-top: 0.4rem; }
+  .paper-abstract summary {
+    cursor: pointer; font-family: var(--font-sans); font-size: 0.82rem;
+    color: var(--fg-muted); padding: 0.25rem 0;
+  }
+  .paper-abstract summary:hover { color: var(--accent); }
+  .paper-abstract-body { margin-top: 0.4rem; line-height: 1.5; color: var(--fg); }
+  .source-slide {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.92rem;
+  }
+  .source-slide img {
+    display: block; max-width: 100%; height: auto;
+    border-radius: 4px; border: 1px solid var(--border);
+    margin-top: 0.5rem;
+  }
+  .slide-fallback {
+    margin-top: 0.5rem; padding: 0.5rem 0.7rem;
+    background: var(--bg); border: 1px dashed var(--border);
+    border-radius: 4px;
+    font-family: var(--font-sans); font-size: 0.82rem;
+    color: var(--fg-muted); text-align: center;
   }
 
   @media (max-width: 600px) {

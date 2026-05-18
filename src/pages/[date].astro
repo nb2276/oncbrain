@@ -20,8 +20,26 @@ const { artifact } = Astro.props as Props;
 const { date, conference, digest, bookmarks, generated_at } = artifact;
 
 const bookmarksById = new Map(bookmarks.map((b) => [b.id, b]));
+const papersById = new Map((artifact.papers ?? []).map((p) => [p.id, p]));
+const slidesById = new Map((artifact.slides ?? []).map((s) => [s.id, s]));
 const generatedDate = new Date(generated_at).toISOString().slice(0, 10);
 const title = conference ? `${conference.name} — ${date}` : date;
+
+// v0.5: resolve a study's source list. Prefer source_ids (typed) when present;
+// fall back to tweet_ids (legacy v0.4 artifacts).
+type SourceRef = { type: 'tweet' | 'paper' | 'slide'; id: number };
+function resolveSources(study: typeof digest.sites[number]['studies'][number]): SourceRef[] {
+  if (study.source_ids && study.source_ids.length > 0) return study.source_ids;
+  return study.tweet_ids.map((id) => ({ type: 'tweet' as const, id }));
+}
+
+// "data/slide-photos/<date>/<uuid>.jpg" → "/slides/<date>/<uuid>.jpg"
+function toSlideUrl(filePath: string): string {
+  if (filePath.startsWith('data/slide-photos/')) {
+    return '/slides/' + filePath.slice('data/slide-photos/'.length);
+  }
+  return filePath;
+}
 ---
 
 <Base title={title} description={digest.top_line || digest.tldr}>
@@ -145,38 +163,117 @@ const title = conference ? `${conference.name} — ${date}` : date;
                 })}
               </ul>
             )}
-            {study.tweet_ids.length > 0 && (
-              <details class="sources">
-                <summary>📚 Sources ({study.tweet_ids.length})</summary>
-                <div class="source-stack">
-                  {study.tweet_ids.map((id) => {
-                    const b = bookmarksById.get(id);
-                    if (!b) return null;
-                    if (b.html) {
-                      // Twitter widget — widgets.js (loaded in Base.astro) replaces
-                      // this blockquote with the rich rendered card (images and all).
+            {(() => {
+              const sources = resolveSources(study);
+              const tweetSrcs = sources.filter((s) => s.type === 'tweet');
+              const paperSrcs = sources.filter((s) => s.type === 'paper');
+              const slideSrcs = sources.filter((s) => s.type === 'slide');
+              const total = tweetSrcs.length + paperSrcs.length + slideSrcs.length;
+              if (total === 0) return null;
+              const badges: string[] = [];
+              if (tweetSrcs.length > 0) badges.push(`🐦 ${tweetSrcs.length} tweet${tweetSrcs.length === 1 ? '' : 's'}`);
+              if (paperSrcs.length > 0) badges.push(`📄 ${paperSrcs.length} paper${paperSrcs.length === 1 ? '' : 's'}`);
+              if (slideSrcs.length > 0) badges.push(`🩻 ${slideSrcs.length} slide${slideSrcs.length === 1 ? '' : 's'}`);
+              return (
+                <details class="sources">
+                  <summary>📚 Sources · {badges.join(' · ')}</summary>
+                  <div class="source-stack">
+                    {tweetSrcs.map((s) => {
+                      const b = bookmarksById.get(s.id);
+                      if (!b) return null;
+                      if (b.html) {
+                        return (
+                          <div class="tw-wrap">
+                            <Fragment set:html={b.html} />
+                            {b.note && <div class="source-note">📝 {b.note}</div>}
+                          </div>
+                        );
+                      }
                       return (
-                        <div class="tw-wrap">
-                          <Fragment set:html={b.html} />
+                        <div class="source-fallback">
+                          <div class="source-meta">
+                            <span>{b.author_name || b.author_handle || 'unknown'}</span>
+                            <a href={b.url} target="_blank" rel="noopener">view on X →</a>
+                          </div>
+                          <div class="source-text" set:html={linkifyCitations(b.text)} />
                           {b.note && <div class="source-note">📝 {b.note}</div>}
                         </div>
                       );
-                    }
-                    // Manual-paste fallback: no oEmbed HTML available.
-                    return (
-                      <div class="source-fallback">
-                        <div class="source-meta">
-                          <span>{b.author_name || b.author_handle || 'unknown'}</span>
-                          <a href={b.url} target="_blank" rel="noopener">view on X →</a>
+                    })}
+                    {paperSrcs.map((s) => {
+                      const p = papersById.get(s.id);
+                      if (!p) return null;
+                      return (
+                        <div class="source-paper">
+                          <div class="source-meta">
+                            <span class="source-type-pill">📄 PAPER</span>
+                            <span>
+                              {p.authors.slice(0, 3).join('; ')}
+                              {p.authors.length > 3 ? ' et al.' : ''}
+                            </span>
+                            {p.journal && (
+                              <span class="paper-journal">
+                                · <em>{p.journal}</em>{p.pub_date ? ` (${p.pub_date.slice(0, 7)})` : ''}
+                              </span>
+                            )}
+                          </div>
+                          <div class="paper-title">{p.title}</div>
+                          <div class="paper-links">
+                            <a href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`} target="_blank" rel="noopener">
+                              PMID {p.pmid} →
+                            </a>
+                            {p.doi && (
+                              <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener">
+                                doi
+                              </a>
+                            )}
+                            {p.pmc_id && (
+                              <a
+                                href={`https://www.ncbi.nlm.nih.gov/pmc/articles/${p.pmc_id}/`}
+                                target="_blank"
+                                rel="noopener"
+                              >
+                                full text (PMC)
+                              </a>
+                            )}
+                          </div>
+                          {p.abstract && (
+                            <details class="paper-abstract">
+                              <summary>Abstract</summary>
+                              <div class="paper-abstract-body" set:html={linkifyCitations(p.abstract.replace(/\n/g, '<br/>'))} />
+                            </details>
+                          )}
+                          {p.note && <div class="source-note">📝 {p.note}</div>}
                         </div>
-                        <div class="source-text" set:html={linkifyCitations(b.text)} />
-                        {b.note && <div class="source-note">📝 {b.note}</div>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </details>
-            )}
+                      );
+                    })}
+                    {slideSrcs.map((s) => {
+                      const slide = slidesById.get(s.id);
+                      if (!slide) return null;
+                      const url = toSlideUrl(slide.file_path);
+                      return (
+                        <div class="source-slide">
+                          <div class="source-meta">
+                            <span class="source-type-pill">🩻 SLIDE</span>
+                            {slide.source_label && <span>{slide.source_label}</span>}
+                          </div>
+                          <img
+                            src={url}
+                            alt={slide.source_label ?? 'Slide photograph'}
+                            loading="lazy"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+                          />
+                          <div class="slide-fallback" style="display:none">
+                            (Slide image not published — curator-private.)
+                          </div>
+                          {slide.note && <div class="source-note">📝 {slide.note}</div>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </details>
+              );
+            })()}
           </div>
         ))}
 
@@ -447,6 +544,86 @@ const title = conference ? `${conference.name} — ${date}` : date;
     font-size: 0.85rem;
     color: var(--fg-muted);
     font-style: italic;
+  }
+  /* ── Paper sources ─────────────────────────────────────── */
+  .source-paper {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+    font-size: 0.92rem;
+  }
+  .source-type-pill {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 3px;
+    margin-right: 0.4rem;
+    vertical-align: 1px;
+  }
+  .paper-title {
+    margin: 0.35rem 0 0.4rem;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .paper-journal { color: var(--fg-muted); font-family: var(--font-sans); font-size: 0.82rem; }
+  .paper-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    margin-bottom: 0.4rem;
+  }
+  .paper-links a { color: var(--accent); }
+  .paper-abstract { margin-top: 0.4rem; }
+  .paper-abstract summary {
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+    padding: 0.25rem 0;
+  }
+  .paper-abstract summary:hover { color: var(--accent); }
+  .paper-abstract-body {
+    margin-top: 0.4rem;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+  /* ── Slide sources ─────────────────────────────────────── */
+  .source-slide {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.92rem;
+  }
+  .source-slide img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    margin-top: 0.5rem;
+  }
+  .slide-fallback {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+    text-align: center;
   }
 
   /* ── Promoted figure ───────────────────────────────────── */

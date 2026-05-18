@@ -149,7 +149,9 @@ export type SiteStudyOccurrence = {
   date: string; // YYYY-MM-DD
   conference: { slug: string; name: string } | null;
   study: DigestStudy;
-  bookmarks: DigestArtifact['bookmarks']; // bookmarks referenced by this study's tweet_ids
+  bookmarks: DigestArtifact['bookmarks']; // bookmarks referenced by this study
+  papers?: DigestArtifactPaper[]; // v0.5+: papers referenced by this study
+  slides?: DigestArtifactSlide[]; // v0.5+: slides referenced by this study
 };
 
 export type SiteSummary = {
@@ -161,18 +163,33 @@ export function listSiteSummaries(): SiteSummary[] {
   const bySite = new Map<string, SiteStudyOccurrence[]>();
   for (const artifact of listDigests()) {
     const bookmarkById = new Map(artifact.bookmarks.map((b) => [b.id, b]));
+    const papersById = new Map((artifact.papers ?? []).map((p) => [p.id, p]));
+    const slidesById = new Map((artifact.slides ?? []).map((s) => [s.id, s]));
     for (const site of artifact.digest.sites) {
       if (!bySite.has(site.disease_site)) bySite.set(site.disease_site, []);
       const list = bySite.get(site.disease_site)!;
       for (const study of site.studies) {
-        const studyBookmarks = study.tweet_ids
-          .map((id) => bookmarkById.get(id))
+        // v0.5: typed refs preferred; tweet_ids is the back-compat fallback.
+        const refs: DigestSourceRef[] = study.source_ids ?? study.tweet_ids.map((id) => ({ type: 'tweet' as const, id }));
+        const studyBookmarks = refs
+          .filter((r) => r.type === 'tweet')
+          .map((r) => bookmarkById.get(r.id))
           .filter((b): b is NonNullable<typeof b> => Boolean(b));
+        const studyPapers = refs
+          .filter((r) => r.type === 'paper')
+          .map((r) => papersById.get(r.id))
+          .filter((p): p is DigestArtifactPaper => Boolean(p));
+        const studySlides = refs
+          .filter((r) => r.type === 'slide')
+          .map((r) => slidesById.get(r.id))
+          .filter((s): s is DigestArtifactSlide => Boolean(s));
         list.push({
           date: artifact.date,
           conference: artifact.conference,
           study,
           bookmarks: studyBookmarks,
+          papers: studyPapers.length > 0 ? studyPapers : undefined,
+          slides: studySlides.length > 0 ? studySlides : undefined,
         });
       }
     }

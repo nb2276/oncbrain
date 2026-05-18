@@ -53,6 +53,25 @@ export type DigestArtifactForExport = {
     fetched_via: string;
     conference_slug: string | null;
   }>;
+  papers?: Array<{
+    id: number;
+    pmid: string;
+    doi: string | null;
+    pmc_id: string | null;
+    title: string;
+    authors: string[];
+    journal: string | null;
+    pub_date: string | null;
+    abstract: string | null;
+    note: string | null;
+  }>;
+  slides?: Array<{
+    id: number;
+    file_path: string;
+    source_label: string | null;
+    ocr_text: string | null;
+    note: string | null;
+  }>;
 };
 
 export type ObsidianRenderOptions = {
@@ -174,6 +193,8 @@ function siteHeader(slug: string): { label: string; emoji: string } {
 function renderBody(artifact: DigestArtifactForExport): string {
   const { date, conference, digest, bookmarks } = artifact;
   const bookmarksById = new Map(bookmarks.map((b) => [b.id, b]));
+  const papersById = new Map((artifact.papers ?? []).map((p) => [p.id, p]));
+  const slidesById = new Map((artifact.slides ?? []).map((s) => [s.id, s]));
   const titleSuffix = conference ? ` — ${conference.name}` : '';
 
   const lines: string[] = [];
@@ -248,17 +269,47 @@ function renderBody(artifact: DigestArtifactForExport): string {
         lines.push('');
       }
 
-      const sources = study.tweet_ids
-        .map((id) => bookmarksById.get(id))
-        .filter((b): b is NonNullable<typeof b> => Boolean(b));
-      if (sources.length > 0) {
+      // v0.5: walk source_ids (typed); fall back to tweet_ids for v0.4
+      // artifacts. Tweet sources render as inline blockquotes; papers and
+      // slides get their own line format with source-type pills.
+      const refs: Array<{ type: 'tweet' | 'paper' | 'slide'; id: number }> =
+        study.source_ids ?? study.tweet_ids.map((id) => ({ type: 'tweet' as const, id }));
+      if (refs.length > 0) {
         lines.push('**Sources:**');
-        for (const b of sources) {
-          const who = b.author_name ?? b.author_handle ?? 'unknown';
-          const handleSuffix = b.author_handle && b.author_name ? ` (${b.author_handle})` : '';
-          lines.push(`- [${who}${handleSuffix}](${b.url})`);
-          lines.push(`  > ${wikilinkify(b.text).replace(/\n/g, '\n  > ')}`);
-          if (b.note) lines.push(`  - 📝 *Curator note:* ${b.note}`);
+        for (const ref of refs) {
+          if (ref.type === 'tweet') {
+            const b = bookmarksById.get(ref.id);
+            if (!b) continue;
+            const who = b.author_name ?? b.author_handle ?? 'unknown';
+            const handleSuffix = b.author_handle && b.author_name ? ` (${b.author_handle})` : '';
+            lines.push(`- 🐦 [${who}${handleSuffix}](${b.url})`);
+            lines.push(`  > ${wikilinkify(b.text).replace(/\n/g, '\n  > ')}`);
+            if (b.note) lines.push(`  - 📝 *Curator note:* ${b.note}`);
+          } else if (ref.type === 'paper') {
+            const p = papersById.get(ref.id);
+            if (!p) continue;
+            const authorList = p.authors.slice(0, 3).join('; ') + (p.authors.length > 3 ? ' et al.' : '');
+            lines.push(
+              `- 📄 [[PMID ${p.pmid}]] **${p.title}** — ${authorList}${
+                p.journal ? `. *${p.journal}*` : ''
+              }${p.pub_date ? ` (${p.pub_date.slice(0, 7)})` : ''}${p.doi ? `. [doi:${p.doi}](https://doi.org/${p.doi})` : ''}`,
+            );
+            if (p.abstract) {
+              lines.push(`  > ${wikilinkify(p.abstract).replace(/\n+/g, '\n  > ')}`);
+            }
+            if (p.note) lines.push(`  - 📝 *Curator note:* ${p.note}`);
+          } else {
+            const s = slidesById.get(ref.id);
+            if (!s) continue;
+            const label = s.source_label ? ` — ${s.source_label}` : '';
+            lines.push(`- 🩻 Slide photo${label}`);
+            lines.push(`  - ![slide](${s.file_path})`);
+            if (s.ocr_text) {
+              const trimmed = s.ocr_text.length > 400 ? s.ocr_text.slice(0, 400) + '…' : s.ocr_text;
+              lines.push(`  > OCR: ${trimmed.replace(/\n+/g, ' ')}`);
+            }
+            if (s.note) lines.push(`  - 📝 *Curator note:* ${s.note}`);
+          }
         }
         lines.push('');
       }

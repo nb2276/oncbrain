@@ -2,6 +2,45 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.0] — 2026-05-18
+
+Multi-source ingestion. The digest pipeline now accepts three input types:
+
+- **Tweets** (existing) — bookmarked via Telegram bot
+- **Papers** — PMID URLs or `PMID: N` citation blocks DM'd to the bot. Metadata + abstract + section-filtered PMC body via NCBI E-utilities.
+- **Slide photos** — image attachments DM'd to the bot. Downloaded via Telegram getFile, saved under `data/slide-photos/`, Apple Vision OCR'd, magic-byte sniffed.
+
+All three flow through an inbox queue that decouples message receipt from enrichment, so transient NCBI/Telegram/OCR failures don't lose source messages (codex amended-plan P0 #1). A weighted source-association layer (NCT strong, trial acronym medium with a blacklist filter) gives Phase 1 soft clustering hints so cross-source items about the same trial cluster together — without forcing the model to preserve bad merges (codex P0 #2/#3).
+
+### Phase E rendering (this release)
+
+- **Source-attribution badges** in each study's Sources summary: `📚 Sources · 🐦 3 tweets · 📄 1 paper · 🩻 2 slides`. Expands to show each source rendered in a type-specific card.
+- **Paper card**: PMID/DOI/PMC links, journal + date, author list, expandable Abstract section.
+- **Slide card**: image rendered with onerror fallback; source_label and curator note.
+- **`/slides/[date]/[uuid].<ext>`** static asset path served via `public/slides` symlink to `data/slide-photos`. Pre-build hook (`scripts/link-slides.sh`) creates the symlink idempotently.
+- **Obsidian export** writes source-type pills (🐦/📄/🩻) inline with markdown source list. Papers include linked PMID + DOI + truncated abstract; slides include image embed + OCR snippet.
+- **Site aggregation pages** (`/sites/<slug>/`) also resolve paper + slide refs per study occurrence, same rendering pattern.
+
+### Engineering
+
+- 298 tests across 13 files. 0 type errors across 45+ files.
+- 5 commits land in this release (one per phase): A → B → C → D → E.
+
+### Privacy / publishing
+
+- `data/slide-photos/` is **gitignored by default** — slides stay curator-private. Astro renders them locally via the symlink, but DO prod builds see no slides unless explicitly committed (`git add -f data/slide-photos/<date>/<uuid>.jpg`).
+- Papers always render publicly — their content is PubMed-sourced and already public.
+
+### Not yet shipped (deferred)
+
+- **Source-tagged Phase 2 claims** (codex amended-plan P1 #6 mixed-source hallucination guard) — will land as v0.5.1 hardening.
+- **DOI-only paper references** (PMID required for v0.5 ingestion).
+- **PMC URLs as ingestion targets** (must include PMID).
+- **Non-photo image attachments** (HEIC documents from iOS Photos sometimes).
+- **Gmail OAuth polling** for PubMed alerts (manual forward-to-bot is the v0.5 workflow).
+
+[0.5.0]: https://github.com/nb2276/oncbrain/releases/tag/v0.5.0
+
 ## [Unreleased] — v0.5 Phase D — 2026-05-18
 
 Papers and slides reach the LLM pipeline. `buildDigest` now accepts a `DigestInputItem` union (tweet | paper | slide); `digest-builder` gathers all three source types for the date and assembles them. A new source-association layer builds NCT + trial-acronym weighted hints that Phase 1 receives as a soft addendum (codex P0 #2, #3 — soft hints only; model can override on content contradiction).
