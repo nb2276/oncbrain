@@ -485,6 +485,20 @@ export function setSetting(db: Database.Database, key: string, value: string): v
   ).run(key, value, Date.now());
 }
 
+// Most-recent chat that DM'd the bot. Used by notify-curator to address the
+// build-done message; the bot is single-curator in practice, so the latest
+// inbox row's chat_id is the curator.
+export function getCuratorChatId(db: Database.Database): number | null {
+  const row = db
+    .prepare(
+      `SELECT telegram_chat_id FROM inbox_items
+       WHERE telegram_chat_id IS NOT NULL
+       ORDER BY id DESC LIMIT 1`,
+    )
+    .get() as { telegram_chat_id: number } | undefined;
+  return row?.telegram_chat_id ?? null;
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Inbox items (v0.5)
 // ────────────────────────────────────────────────────────────────────────────

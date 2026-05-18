@@ -36,7 +36,7 @@ cp .env.example .env
 #   TELEGRAM_BOT_TOKEN=...                       (from @BotFather — optional but recommended)
 #   PUBLIC_CURATOR_NAME=Your Name, MD
 #   PUBLIC_CURATOR_HANDLE=@yourhandle
-#   PUBLIC_SITE_NAME=Oncology Meeting Digest
+#   PUBLIC_SITE_NAME=onc brain
 #   PUBLIC_SITE_URL=https://oncbrain.oncologytoolkit.com
 npm install
 ```

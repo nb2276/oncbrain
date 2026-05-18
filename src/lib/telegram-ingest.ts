@@ -104,6 +104,45 @@ export async function fetchUpdates(
   return body.result ?? [];
 }
 
+// Outbound DM to a known chat. Used by notify-curator after a daily build to
+// ping the curator with a "✓ built — here's what shipped" summary.
+export async function sendMessage(
+  token: string,
+  chatId: number,
+  text: string,
+  opts: { fetchImpl?: typeof fetch; disableWebPagePreview?: boolean } = {},
+): Promise<void> {
+  if (!token) throw new TelegramApiError('Missing TELEGRAM_BOT_TOKEN');
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  const url = `${API_BASE}/bot${token}/sendMessage`;
+  let response: Response;
+  try {
+    response = await fetchImpl(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        disable_web_page_preview: opts.disableWebPagePreview ?? false,
+      }),
+    });
+  } catch (err) {
+    throw new TelegramApiError(`Network error: ${(err as Error).message}`);
+  }
+  if (!response.ok) {
+    throw new TelegramApiError(`sendMessage returned ${response.status}`, response.status);
+  }
+  let body: { ok: boolean; description?: string };
+  try {
+    body = (await response.json()) as { ok: boolean; description?: string };
+  } catch (err) {
+    throw new TelegramApiError(`Failed to parse response: ${(err as Error).message}`);
+  }
+  if (!body.ok) {
+    throw new TelegramApiError(body.description || 'Telegram API returned ok=false');
+  }
+}
+
 // Matches X / Twitter status URLs: https://x.com/handle/status/12345 (with or
 // without query params or trailing path). Group 0 is the full URL — including
 // any ?s=20 share tracker — so a global replace cleanly strips it from text.

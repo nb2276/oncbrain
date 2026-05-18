@@ -76,7 +76,7 @@ function layout(title: string, body: ReturnType<typeof html> | string) {
         </style>
       </head>
       <body>
-        <h1>Oncology Meeting Digest — Admin</h1>
+        <h1>onc brain — Admin</h1>
         <nav>
           <a href="/">Add bookmark</a>
           <a href="/bookmarks">Queue</a>

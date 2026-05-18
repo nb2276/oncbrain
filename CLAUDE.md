@@ -37,7 +37,7 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 - **Admin server**: Hono 4 (localhost only, on port 3001)
 - **DB**: better-sqlite3 (synchronous), file at `./oncbrain.db`
 - **LLM**: Anthropic Claude Sonnet via `@anthropic-ai/sdk` OR via `claude -p` (subscription path)
-- **Tests**: Vitest (185 tests as of v0.3)
+- **Tests**: Vitest (298 tests as of v0.5)
 - **Deploy**: DigitalOcean App Platform, static-site free tier, GitHub auto-deploy from `main`
 
 ## Conventions
@@ -114,16 +114,20 @@ DigestStudy {
 ```
 src/
   lib/
-    db.ts                  SQLite schema + queries (bookmarks, conferences, settings)
+    db.ts                  SQLite schema + queries (bookmarks, papers, slide_uploads, inbox_items, conferences, settings)
     twitter-fetch.ts       oEmbed (text + html) + syndication (images), parallel
     tweet-syndication.ts   Twitter syndication CDN client (token formula derivation)
+    pubmed-client.ts       NCBI E-utilities client: efetch pubmed metadata + abstract, efetch PMC for Methods/Results
+    source-association.ts  NCT + trial-acronym weighted graph; soft Phase 1 clustering hints
+    inbox-enrichment.ts    Type-dispatched enrichment loop (tweet → bookmark, paper → papers, slide → slide_uploads)
     extract.ts             NCT / PMID / DOI regex + auto-link
     llm-client.ts          AnthropicLlmClient + ClaudeCliLlmClient + multimodal blocks
-    llm-pipeline.ts        buildDigest + parseDigest (sites/studies schema)
-    obsidian-export.ts     Markdown export with YAML frontmatter + wikilinks
+    llm-pipeline.ts        Three-phase pipeline (group → per-study agent → synthesis); DigestInputItem union
+    image-ocr.ts           Apple Vision OCR (macOS-only); pbs.twimg.com fetch + caption validator
+    obsidian-export.ts     Markdown export with YAML frontmatter + wikilinks + source-type pills
     digest-data.ts         Astro page data loaders (listDigests, listSiteSummaries)
-    disease-sites.ts       22-site enum
-    telegram-ingest.ts     Telegram Bot API client + extractTweetUrls + extractCuratorNote
+    disease-sites.ts       22-site enum (slug → label + emoji; see DESIGN.md)
+    telegram-ingest.ts     Telegram Bot API client + extractTweetUrls + extractPaperPmids + slide download
   pages/
     index.astro            recent dates + browse strip
     about.astro            disclaimer + curator info
@@ -133,22 +137,34 @@ src/
     conferences/[slug]/    conference index (all days tagged with a conference)
   layouts/Base.astro       shell: Newsreader font, widgets.js, disclaimer footer
 prompts/
-  digest-v4.txt            CURRENT analyst prompt (comparative + critique + vision)
-  digest-v1/v2/v3.txt      retained for diff / rollback
-  eval-judge-v1.txt        LLM-as-judge rubric
+  digest-v5-grouping.txt     CURRENT Phase 1: cluster sources into studies
+  digest-v5-study-agent.txt  CURRENT Phase 2: per-study deep-analysis (parallel)
+  digest-v5-synthesis.txt    CURRENT Phase 3: lede + cross-site TL;DR + open questions
+  digest-v1..v4.txt          retained for diff / rollback
+  eval-judge-v1.txt          LLM-as-judge rubric
 build/
-  digest-builder.ts        CLI: pull pending tweets → build sites/studies → write JSON + Obsidian
-  pull-telegram.ts         CLI: poll Telegram bot, save URLs as bookmarks
+  digest-builder.ts        CLI: pull pending sources → build sites/studies → write JSON + Obsidian
+  pull-telegram.ts         CLI: poll Telegram bot, write inbox_items
+  enrich-inbox.ts          CLI: drain pending inbox_items into typed source tables
   eval.ts                  CLI: run eval, score against rubric
   seed-dev.ts              dev fixture
 admin/server.ts            Hono server, localhost only, port 3001
 scripts/
-  daily-build.sh           3am autopilot script
+  daily-build.sh           3am autopilot: pull → enrich → build:day → build → push
+  link-slides.sh           pre-build hook: ensures public/slides symlink → data/slide-photos
   launchd/                 plist template + install/uninstall
 test/                      vitest unit tests
+docs/
+  plans/                   per-release planning artifacts (e.g. v0.5-multi-source-ingestion.md, v0.6-pwa.md)
 data/
-  digests/<date>.json      committed digest artifacts (consumed by Astro getStaticPaths)
+  digests/<date>.json           committed digest artifacts (consumed by Astro getStaticPaths)
   obsidian/<date>[-<conf>].md   committed Obsidian markdown twin
+  slide-photos/<date>/<uuid>.<ext>  curator slide uploads (gitignored by default — see CHANGELOG v0.5)
+public/
+  favicon.svg / favicon.ico
+  slides -> ../data/slide-photos  symlink for Astro static asset serving
+DESIGN.md                  design system source-of-truth (type, color, voice, emoji vocab)
+TODOS.md                   deferred work tracker (seeded from CHANGELOG "Not yet shipped" sections)
 .do/app.yaml               DigitalOcean App Platform spec
 ```
 
@@ -193,7 +209,13 @@ Tests live in `test/`. Each lib module has a corresponding test file. Naming con
 
 ## Versioning
 
-Single source of truth: `package.json` `"version"` field. CHANGELOG.md gets a new section per minor. Currently v0.3.0 (post-deploy: IMRD restructure → continual cadence → disease-site organization → comparative analysis + image extraction).
+Single source of truth: `package.json` `"version"` field. CHANGELOG.md gets a new section per minor. Currently v0.5.0 (multi-source ingestion: tweets + PubMed papers + slide photos through an inbox queue, with source-attribution badges and weighted Phase 1 clustering hints).
+
+## Planning artifacts
+
+- **`DESIGN.md`** — design system source-of-truth (type, color, voice, emoji vocabulary, layout principles). Read before any visual change.
+- **`TODOS.md`** — deferred work tracker. Seeded from CHANGELOG "Not yet shipped" sections; grouped by target milestone (v0.5.1, v0.6, v0.7+).
+- **`docs/plans/<version>-*.md`** — per-release implementation plans. Phased breakdowns, file touchpoints, test plans, codex review history.
 
 ## Don't
 

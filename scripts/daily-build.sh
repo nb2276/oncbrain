@@ -86,5 +86,9 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   fi
 
   echo ""
+  echo "→ Notifying curator"
+  npm run notify:curator --silent -- --date="$TODAY" || echo "  ⚠ notify:curator exited non-zero (continuing)"
+
+  echo ""
   echo "✓ Done at $(date '+%Y-%m-%d %H:%M:%S %Z')"
 } >>"$LOG_FILE" 2>&1
