@@ -44,15 +44,31 @@ export type DigestInputTweet = {
   image_ocr_texts?: string[];
 };
 
+// A detail bullet. v0.4.1: supports an optional `subdetails` array for
+// nested comparison rows (e.g., "MFS" parent with per-trial HR rows
+// underneath). Renderers must handle both forms — string-only for back-
+// compat with v0.4.0 artifacts, structured object for multi-row entries.
+export type DigestDetail = string | { text: string; subdetails: string[] };
+
 export type DigestStudy = {
   name: string;
   tldr: string;
-  details: string[];
+  details: DigestDetail[];
   key_figure_url: string | null;
   key_figure_caption: string | null;
   nct: string | null;
   tweet_ids: number[];
 };
+
+// Helpers for renderers that need either the flat string OR all text within
+// a (possibly nested) detail entry. Keeps the union-handling logic centralized.
+export function detailText(d: DigestDetail): string {
+  return typeof d === 'string' ? d : d.text;
+}
+export function detailAllText(d: DigestDetail): string[] {
+  if (typeof d === 'string') return [d];
+  return [d.text, ...d.subdetails];
+}
 
 export type DigestSite = {
   disease_site: string;
@@ -444,10 +460,32 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
   const name = typeof root.name === 'string' && root.name.trim() ? root.name.trim() : cluster.name;
   const tldr = typeof root.tldr === 'string' ? root.tldr.trim() : '';
   if (!tldr) throw new DigestParseError('Phase 2 missing tldr', raw);
-  const details = Array.isArray(root.details)
+  // v0.4.1: accept either flat strings or {text, subdetails[]} objects.
+  // Strings stay as-is. Objects with empty/missing text are dropped.
+  // Subdetails arrays are filtered to non-empty strings.
+  const details: DigestDetail[] = Array.isArray(root.details)
     ? root.details
-        .filter((d): d is string => typeof d === 'string' && d.trim().length > 0)
-        .map((d) => d.trim())
+        .map((d): DigestDetail | null => {
+          if (typeof d === 'string') {
+            const trimmed = d.trim();
+            return trimmed.length > 0 ? trimmed : null;
+          }
+          if (d && typeof d === 'object') {
+            const obj = d as Record<string, unknown>;
+            const text = typeof obj.text === 'string' ? obj.text.trim() : '';
+            if (!text) return null;
+            const subdetails = Array.isArray(obj.subdetails)
+              ? obj.subdetails
+                  .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+                  .map((s) => s.trim())
+              : [];
+            // If the object has no subdetails, collapse to a flat string —
+            // keeps the artifact tidy and matches simple cases.
+            return subdetails.length === 0 ? text : { text, subdetails };
+          }
+          return null;
+        })
+        .filter((d): d is DigestDetail => d !== null)
     : [];
   const nctRaw =
     typeof root.nct === 'string' && root.nct.trim() ? root.nct.trim().toUpperCase() : null;

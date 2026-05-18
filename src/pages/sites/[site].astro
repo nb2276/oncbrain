@@ -74,7 +74,20 @@ const dates = Array.from(byDate.keys());
             )}
             {occ.study.details.length > 0 && (
               <ul class="study-details">
-                {occ.study.details.map((d) => (<li set:html={linkifyCitations(d)} />))}
+                {occ.study.details.map((d) => (
+                  typeof d === 'string'
+                    ? <li set:html={linkifyCitations(d)} />
+                    : (
+                      <li>
+                        <span set:html={linkifyCitations(d.text)} />
+                        {d.subdetails.length > 0 && (
+                          <ul class="study-subdetails">
+                            {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
+                          </ul>
+                        )}
+                      </li>
+                    )
+                ))}
               </ul>
             )}
             {occ.bookmarks.length > 0 && (
@@ -198,6 +211,24 @@ const dates = Array.from(byDate.keys());
     font-size: 0.95rem;
   }
   .study-details li { margin: 0.25rem 0; }
+  .study-subdetails {
+    margin: 0.2rem 0 0.4rem;
+    padding-left: 1.1rem;
+    list-style: none;
+  }
+  .study-subdetails li {
+    margin: 0.15rem 0;
+    font-size: 0.92rem;
+    position: relative;
+    padding-left: 0.7rem;
+  }
+  .study-subdetails li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
 
   .study-figure { margin: 0.55rem 0 0.75rem; padding: 0; }
   .study-figure img {

@@ -344,6 +344,62 @@ describe('parseStudyAgentResponse', () => {
     expect(parseStudyAgentResponse(raw, cluster).details).toEqual(['real', 'another']);
   });
 
+  it('preserves structured {text, subdetails} bullets (v0.4.1 hotfix)', () => {
+    const raw = JSON.stringify({
+      name: 'POP-RT vs PEACE-2',
+      tldr: 'WPRT divergence by PSMA staging',
+      details: [
+        '🔍 retrospective comparison',
+        {
+          text: '📊 bFFS/bPFS comparison',
+          subdetails: [
+            'POP-RT: HR 0.50 (0.42-0.61), p<0.001',
+            'PEACE-2: HR 0.97 (0.81-1.16), p=0.73',
+          ],
+        },
+        '⚠️ counter: era of enrollment differs (2018 vs 2024)',
+      ],
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    expect(out.details).toHaveLength(3);
+    expect(out.details[0]).toBe('🔍 retrospective comparison');
+    expect(typeof out.details[1]).toBe('object');
+    const bullet = out.details[1] as { text: string; subdetails: string[] };
+    expect(bullet.text).toContain('bFFS/bPFS');
+    expect(bullet.subdetails).toHaveLength(2);
+    expect(bullet.subdetails[0]).toContain('POP-RT');
+  });
+
+  it('collapses structured bullet with empty subdetails to flat string', () => {
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [{ text: 'simple bullet', subdetails: [] }],
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    expect(out.details).toEqual(['simple bullet']);
+  });
+
+  it('drops structured bullets with empty text', () => {
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [{ text: '', subdetails: ['sub'] }, 'kept'],
+    });
+    expect(parseStudyAgentResponse(raw, cluster).details).toEqual(['kept']);
+  });
+
+  it('filters non-string entries from subdetails array', () => {
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [{ text: 'parent', subdetails: ['ok', 99, null, '  ', 'also'] }],
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    const bullet = out.details[0] as { text: string; subdetails: string[] };
+    expect(bullet.subdetails).toEqual(['ok', 'also']);
+  });
+
   it('falls back to cluster name if model omits name', () => {
     const raw = JSON.stringify({ tldr: 'y', details: [] });
     expect(parseStudyAgentResponse(raw, cluster).name).toBe('PRESTIGE-PSMA');

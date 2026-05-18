@@ -44,6 +44,8 @@ Before writing, mentally cover:
 
 Then write 3-7 bullets. Effect sizes VERBATIM from tweets/images/OCR. If the tweets+images don't give a number, write "no effect size reported in source tweets" — never invent one.
 
+**Use subdetails for comparisons.** When a single bullet would compare multiple trials, arms, or endpoints (e.g., "POP-RT HR 0.50 vs PEACE-2 HR 0.97"), DO NOT write a wall-of-semicolons string. Instead emit a structured bullet with a `text` parent (the shared concept like "Biochemical failure-free survival" or "Median PFS") and a `subdetails` array of one row per comparison cell. Format below. Flat strings are fine for non-comparison bullets.
+
 ═══ KEY FIGURE ═══
 
 **Default to abstaining.** Promoting the wrong image as a study's headline figure is worse than no figure at all — the reader will give it disproportionate weight. Set both `key_figure_url` and `key_figure_caption` to `null` UNLESS you can satisfy ALL of:
@@ -74,6 +76,13 @@ Examples of INVALID captions (interpretive, would hallucinate):
     "📊 1° EP: ...",
     "📐 HR 0.62 (95% CI 0.48-0.79), p<0.001",
     "🔍 phase III open-label, N=831, stratified by prior taxane",
+    {
+      "text": "📊 Biochemical failure-free survival (POP-RT vs PEACE-2)",
+      "subdetails": [
+        "POP-RT: HR 0.50 (95% CI 0.42-0.61), p<0.001",
+        "PEACE-2: HR 0.97 (95% CI 0.81-1.16), p=0.73"
+      ]
+    },
     "🔗 vs VISION (NEJM 2021): similar HR but pre-treated heavier here",
     "⚠️ counter: 1° EP was composite (rPFS not OS); OS HR 0.87 not significant",
     "❓ optimal sequencing vs cabazitaxel still open"
@@ -87,7 +96,7 @@ Examples of INVALID captions (interpretive, would hallucinate):
 Rules:
 - `name` echoes back the study name. Don't rename.
 - `tldr` ≤25 words, headline number first.
-- `details` 3-7 bullets, each ≤25 words.
+- `details` 3-7 bullets total, each ≤25 words. Mix flat strings and structured `{text, subdetails}` objects. Use subdetails when comparing 2+ trials/arms/endpoints on the same metric — readers scan rows, not run-on sentences.
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
 - `key_figure_url` must be EXACTLY one of the image URLs in the manifest below, or null. Don't invent URLs.
 - `key_figure_caption` numeric-only, from OCR overlays only. Null if no OCR numbers available.

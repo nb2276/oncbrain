@@ -2,6 +2,26 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.1] — 2026-05-18
+
+Readability hotfix. Detail bullets that compared multiple trials/arms/endpoints (e.g., the POP-RT vs PEACE-2 entry) rendered as a wall of semicolons. Replaced with structured subbullets: a parent label and a row per comparison cell. Scannable at meeting-tempo.
+
+### Changed
+
+- **`DigestStudy.details` is now `Array<string | {text, subdetails: string[]}>`** instead of `string[]`. Flat strings still work for non-comparison bullets; comparison bullets emit the structured form. Existing v0.4.0 artifacts continue to render unchanged.
+- **Phase 2 prompt instructs**: when comparing 2+ trials/arms/endpoints on the same metric, emit a structured bullet with `text` parent (the shared concept) and `subdetails[]` (one row per comparison cell). Wall-of-semicolons strings are explicitly discouraged.
+- **Astro renders nested `<ul class="study-subdetails">`** under parent bullets with a subtle `·` marker and 0.92rem font size. Visual hierarchy preserved on mobile.
+- **Obsidian export** writes parent bullets at indent 0, subdetails at indent 2 — standard markdown nested list. Renders correctly in Obsidian and any other markdown viewer.
+
+### Engineering
+
+- 225 tests (was 221, +4 for subdetails parser behavior).
+- TypeScript: `DigestDetail = string | { text: string; subdetails: string[] }` union exported from `src/lib/llm-pipeline.ts` and re-exposed in `digest-data.ts`.
+- Parser collapses `{text: 'x', subdetails: []}` to flat `'x'` to keep artifacts tidy.
+- 0 type errors across 37 files.
+
+[0.4.1]: https://github.com/nb2276/oncbrain/releases/tag/v0.4.1
+
 ## [0.4.0] — 2026-05-18
 
 The LLM call splits into three phases: cluster, per-study deep-analysis, and synthesis. Each study gets its own agent that can read attached images and on-device-OCR'd text. A promoted "key figure" (typically a KM curve) renders prominently in the study card with a numeric-only caption verified against OCR. Adversarial review (codex) shaped the failure-mode handling.

@@ -81,7 +81,20 @@ const title = conference ? `${conference.name} — ${date}` : date;
             )}
             {study.details.length > 0 && (
               <ul class="study-details">
-                {study.details.map((d) => (<li set:html={linkifyCitations(d)} />))}
+                {study.details.map((d) => (
+                  typeof d === 'string'
+                    ? <li set:html={linkifyCitations(d)} />
+                    : (
+                      <li>
+                        <span set:html={linkifyCitations(d.text)} />
+                        {d.subdetails.length > 0 && (
+                          <ul class="study-subdetails">
+                            {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
+                          </ul>
+                        )}
+                      </li>
+                    )
+                ))}
               </ul>
             )}
             {study.tweet_ids.length > 0 && (
@@ -280,6 +293,25 @@ const title = conference ? `${conference.name} — ${date}` : date;
     font-size: 0.95rem;
   }
   .study-details li { margin: 0.25rem 0; }
+  .study-subdetails {
+    margin: 0.2rem 0 0.4rem;
+    padding-left: 1.1rem;
+    list-style: none;
+  }
+  .study-subdetails li {
+    margin: 0.15rem 0;
+    font-size: 0.92rem;
+    color: var(--fg);
+    position: relative;
+    padding-left: 0.7rem;
+  }
+  .study-subdetails li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
 
   /* ── Sources (collapsed) + Twitter widgets ─────────────── */
   .sources { margin-top: 0.85rem; }

@@ -4,10 +4,14 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
+// v0.4.1 detail union: string for flat bullets, object for nested
+// comparison rows. Older v0.4.0 artifacts emit string-only; both render.
+export type DigestDetail = string | { text: string; subdetails: string[] };
+
 export type DigestStudy = {
   name: string;
   tldr: string;
-  details: string[];
+  details: DigestDetail[];
   // v0.4: optional promoted figure. Both fields are null when the per-study
   // agent abstains or when the post-hoc OCR validator rejects the caption.
   key_figure_url?: string | null;

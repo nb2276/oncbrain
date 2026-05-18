@@ -23,7 +23,7 @@ export type DigestArtifactForExport = {
       studies: Array<{
         name: string;
         tldr: string;
-        details: string[];
+        details: Array<string | { text: string; subdetails: string[] }>;
         key_figure_url?: string | null;
         key_figure_caption?: string | null;
         nct: string | null;
@@ -207,7 +207,16 @@ function renderBody(artifact: DigestArtifactForExport): string {
       }
 
       if (study.details.length > 0) {
-        for (const d of study.details) lines.push(`- ${wikilinkify(d)}`);
+        for (const d of study.details) {
+          if (typeof d === 'string') {
+            lines.push(`- ${wikilinkify(d)}`);
+          } else {
+            lines.push(`- ${wikilinkify(d.text)}`);
+            for (const sub of d.subdetails) {
+              lines.push(`  - ${wikilinkify(sub)}`);
+            }
+          }
+        }
         lines.push('');
       }
 
