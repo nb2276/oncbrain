@@ -22,66 +22,304 @@ const generatedDate = new Date(generated_at).toISOString().slice(0, 10);
 const title = conference ? `${conference.name} — ${date}` : date;
 ---
 
-<Base title={title} description={digest.tldr}>
-  <p style="font-size:0.85rem;color:var(--fg-muted);margin-top:0">
+<Base title={title} description={digest.top_line || digest.tldr}>
+  <nav class="crumb">
     <a href="/">← all dates</a>
-    {conference && (
-      <>
-        {' · '}
-        <a href={`/conferences/${conference.slug}/`}>{conference.name}</a>
-      </>
-    )}
-  </p>
-  <h2 style="margin:0.5rem 0 0;font-size:1.4rem">
-    {date}
-    {conference && <span style="font-size:0.9rem;color:var(--fg-muted);font-weight:normal"> · {conference.name}</span>}
-  </h2>
-  <p style="margin:0.25rem 0 0;color:var(--fg-muted);font-size:0.85rem">
-    digest generated {generatedDate}
-  </p>
+    {conference && <a href={`/conferences/${conference.slug}/`}>{conference.name}</a>}
+  </nav>
 
-  <section style="margin-top:2rem;padding:1.25rem;background:var(--accent-bg);border-radius:8px;border-left:3px solid var(--accent)">
-    <div style="font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem">
-      TL;DR
-    </div>
-    <div style="font-size:1.05rem" set:html={linkifyCitations(digest.tldr)} />
+  <header class="day-header">
+    <h2>
+      {date}
+      {conference && <span class="conf-pill">{conference.name}</span>}
+    </h2>
+    <p class="meta">digest generated {generatedDate}</p>
+  </header>
+
+  <section class="topline" aria-label="Top line">
+    <div class="topline-body" set:html={linkifyCitations(digest.top_line)} />
+  </section>
+
+  <section class="tldr">
+    <div class="section-label">TL;DR</div>
+    <div set:html={linkifyCitations(digest.tldr)} />
   </section>
 
   {digest.clusters.map((cluster) => (
-    <section style="margin-top:2.5rem">
-      <h3 style="margin:0 0 0.5rem;font-size:1.15rem">{cluster.topic}</h3>
-      <div style="white-space:pre-wrap" set:html={linkifyCitations(cluster.summary)} />
+    <article class="cluster">
+      <h3>
+        <span class="cluster-emoji" aria-hidden="true">{cluster.emoji}</span>
+        <span class="cluster-topic">{cluster.topic}</span>
+      </h3>
+
+      <div class="imrd">
+        <div class="block intro">
+          <div class="block-label">🧪 Intro</div>
+          <div set:html={linkifyCitations(cluster.intro)} />
+        </div>
+
+        {cluster.methods && (
+          <div class="block methods">
+            <div class="block-label">📐 Methods</div>
+            <div set:html={linkifyCitations(cluster.methods)} />
+          </div>
+        )}
+
+        <div class="block results">
+          <div class="block-label">📊 Results</div>
+          <ul>
+            {cluster.results.map((r) => (
+              <li set:html={linkifyCitations(r)} />
+            ))}
+          </ul>
+        </div>
+
+        {cluster.discussion && cluster.discussion.length > 0 && (
+          <div class="block discussion">
+            <div class="block-label">💭 Discussion</div>
+            <ul>
+              {cluster.discussion.map((d) => (
+                <li set:html={linkifyCitations(d)} />
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
 
       {cluster.tweet_ids.length > 0 && (
-        <details style="margin-top:1rem">
-          <summary style="cursor:pointer;color:var(--fg-muted);font-size:0.85rem">
-            Source tweets ({cluster.tweet_ids.length})
-          </summary>
-          <ul style="list-style:none;padding:0;margin:0.75rem 0 0">
+        <details class="sources">
+          <summary>📚 Sources ({cluster.tweet_ids.length})</summary>
+          <ul class="source-list">
             {cluster.tweet_ids.map((id) => {
               const b = bookmarksById.get(id);
               if (!b) return null;
               return (
-                <li style="margin:0 0 0.75rem;padding:0.75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;font-size:0.92rem">
-                  <div style="font-size:0.8rem;color:var(--fg-muted);margin-bottom:0.35rem">
-                    {b.author_name || b.author_handle || 'unknown'}
-                    {b.author_handle && b.author_name && ` · ${b.author_handle}`}
+                <li class="source-card">
+                  <div class="source-meta">
+                    <span class="source-who">
+                      {b.author_name || b.author_handle || 'unknown'}
+                      {b.author_handle && b.author_name && <span class="source-handle"> · {b.author_handle}</span>}
+                    </span>
+                    <a href={b.url} target="_blank" rel="noopener" class="source-link">view on X →</a>
                   </div>
-                  <div style="white-space:pre-wrap" set:html={linkifyCitations(b.text)} />
-                  {b.note && (
-                    <div style="margin-top:0.5rem;font-size:0.85rem;color:var(--fg-muted);font-style:italic">
-                      Curator's note: {b.note}
-                    </div>
-                  )}
-                  <div style="margin-top:0.5rem;font-size:0.8rem">
-                    <a href={b.url} target="_blank" rel="noopener">view original on X →</a>
-                  </div>
+                  <div class="source-text" set:html={linkifyCitations(b.text)} />
+                  {b.note && <div class="source-note">📝 {b.note}</div>}
                 </li>
               );
             })}
           </ul>
         </details>
       )}
-    </section>
+    </article>
   ))}
 </Base>
+
+<style>
+  /* ── Breadcrumb / header ───────────────────────────────────── */
+  .crumb {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+  }
+  .crumb a {
+    color: var(--fg-muted);
+    text-decoration: none;
+    margin-right: 0.5rem;
+  }
+  .crumb a + a::before {
+    content: '· ';
+    color: var(--border);
+    margin-right: 0.25rem;
+  }
+  .crumb a:hover {
+    color: var(--accent);
+  }
+  .day-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+  .conf-pill {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.15rem 0.55rem;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 999px;
+  }
+  .meta {
+    margin: 0.35rem 0 0;
+    font-size: 0.825rem;
+    color: var(--fg-muted);
+  }
+
+  /* ── Top line (the lede) ───────────────────────────────────── */
+  .topline {
+    margin-top: 2rem;
+    padding: 1.25rem 1.4rem;
+    background: linear-gradient(135deg, var(--accent-bg) 0%, transparent 100%);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+  }
+  .topline-body {
+    font-size: 1.18rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--fg);
+  }
+
+  /* ── TL;DR ─────────────────────────────────────────────────── */
+  .tldr {
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 0.4rem;
+  }
+  .tldr > div:not(.section-label) {
+    line-height: 1.55;
+  }
+
+  /* ── Cluster card ──────────────────────────────────────────── */
+  .cluster {
+    margin-top: 2.25rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .cluster h3 {
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    font-size: 1.18rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .cluster-emoji {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+  .cluster-topic {
+    flex: 1;
+  }
+
+  /* ── IMRD blocks ───────────────────────────────────────────── */
+  .imrd {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  .block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+  }
+  .block-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--fg-muted);
+    margin-bottom: 0.4rem;
+  }
+  .block > div:not(.block-label),
+  .block > ul {
+    line-height: 1.5;
+    color: var(--fg);
+    margin: 0;
+  }
+  .block ul {
+    padding-left: 1.15rem;
+  }
+  .block li {
+    margin: 0.25rem 0;
+  }
+  /* Results gets a subtle highlight — the most important block visually. */
+  .block.results {
+    background: var(--accent-bg);
+    border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+  }
+  .block.results .block-label {
+    color: var(--accent);
+  }
+
+  /* ── Sources (collapsed by default) ────────────────────────── */
+  .sources {
+    margin-top: 1rem;
+  }
+  .sources summary {
+    cursor: pointer;
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+    padding: 0.4rem 0;
+  }
+  .sources summary:hover {
+    color: var(--accent);
+  }
+  .source-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .source-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.92rem;
+  }
+  .source-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    margin-bottom: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .source-who {
+    font-weight: 500;
+  }
+  .source-handle {
+    color: var(--fg-muted);
+    font-weight: 400;
+  }
+  .source-link {
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .source-text {
+    white-space: pre-wrap;
+    line-height: 1.5;
+  }
+  .source-note {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+
+  /* ── Mobile ───────────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    .topline-body { font-size: 1.08rem; }
+    .cluster h3 { font-size: 1.08rem; }
+    .cluster-emoji { font-size: 1.35rem; }
+    .block { padding: 0.75rem 0.85rem; }
+  }
+</style>

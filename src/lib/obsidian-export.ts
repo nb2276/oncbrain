@@ -15,10 +15,15 @@ export type DigestArtifactForExport = {
   conference: { slug: string; name: string } | null;
   generated_at: number;
   digest: {
+    top_line: string;
     tldr: string;
     clusters: Array<{
       topic: string;
-      summary: string;
+      emoji: string;
+      intro: string;
+      methods: string | null;
+      results: string[];
+      discussion: string[] | null;
       tweet_ids: number[];
     }>;
   };
@@ -125,6 +130,12 @@ function renderBody(artifact: DigestArtifactForExport): string {
   const lines: string[] = [];
   lines.push('', `# ${date}${titleSuffix}`, '');
 
+  // Top line — the lede. Bolded paragraph above the TL;DR callout so it's the
+  // first thing the eye hits when scanning the note in Obsidian.
+  if (digest.top_line) {
+    lines.push(`**${wikilinkify(digest.top_line)}**`, '');
+  }
+
   lines.push('> [!summary] TL;DR');
   for (const line of wikilinkify(digest.tldr).split('\n')) {
     lines.push(`> ${line}`);
@@ -132,15 +143,34 @@ function renderBody(artifact: DigestArtifactForExport): string {
   lines.push('');
 
   for (const cluster of digest.clusters) {
-    lines.push(`## ${cluster.topic}`, '');
-    lines.push(wikilinkify(cluster.summary), '');
+    lines.push(`## ${cluster.emoji} ${cluster.topic}`, '');
+
+    lines.push(`> [!info] 🧪 Intro`);
+    for (const ln of wikilinkify(cluster.intro).split('\n')) lines.push(`> ${ln}`);
+    lines.push('');
+
+    if (cluster.methods) {
+      lines.push(`> [!example] 📐 Methods`);
+      for (const ln of wikilinkify(cluster.methods).split('\n')) lines.push(`> ${ln}`);
+      lines.push('');
+    }
+
+    lines.push(`### 📊 Results`, '');
+    for (const r of cluster.results) lines.push(`- ${wikilinkify(r)}`);
+    lines.push('');
+
+    if (cluster.discussion && cluster.discussion.length > 0) {
+      lines.push(`### 💭 Discussion`, '');
+      for (const d of cluster.discussion) lines.push(`- ${wikilinkify(d)}`);
+      lines.push('');
+    }
 
     const sources = cluster.tweet_ids
       .map((id) => bookmarksById.get(id))
       .filter((b): b is NonNullable<typeof b> => Boolean(b));
 
     if (sources.length > 0) {
-      lines.push('### Sources', '');
+      lines.push(`### 📚 Sources`, '');
       for (const b of sources) {
         const who = b.author_name ?? b.author_handle ?? 'unknown';
         const handleSuffix =

@@ -34,9 +34,18 @@ const sampleFixture: EvalFixture = {
 };
 
 const sampleDigest: DigestOutput = {
+  top_line: 'NCT12345678 hit primary endpoint in mCRPC.',
   tldr: 'NCT12345678 hit primary endpoint.',
   clusters: [
-    { topic: 'mCRPC', summary: 'NCT12345678 met primary endpoint.', tweet_ids: [1] },
+    {
+      topic: 'mCRPC',
+      emoji: '🍇',
+      intro: 'mCRPC remains a high-need setting.',
+      methods: null,
+      results: ['NCT12345678 met primary endpoint'],
+      discussion: null,
+      tweet_ids: [1],
+    },
   ],
 };
 

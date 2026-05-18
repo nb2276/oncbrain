@@ -6,12 +6,20 @@ const sampleArtifact: DigestArtifactForExport = {
   conference: { slug: 'asco2026', name: 'ASCO Annual Meeting 2026' },
   generated_at: 1717000000000,
   digest: {
+    top_line: 'NCT04567890 delivers OS HR 0.62 in mCRPC.',
     tldr:
       'NCT04567890 met primary OS endpoint in mCRPC (HR 0.62). doi:10.1056/NEJMoa2024999 expected soon.',
     clusters: [
       {
         topic: 'Metastatic Castration-Resistant Prostate Cancer',
-        summary: 'NCT04567890 hit primary endpoint. See PMID: 36912345 for context.',
+        emoji: '🍇',
+        intro: 'mCRPC remains a setting of significant unmet need for OS-prolonging therapy.',
+        methods: 'NCT04567890: phase III, ARPI + agent X vs ARPI alone, primary OS.',
+        results: [
+          'NCT04567890 met primary OS endpoint, HR 0.62',
+          'See PMID: 36912345 for prior context',
+        ],
+        discussion: ['Sequencing vs taxanes remains open', 'Awaiting full QoL data'],
         tweet_ids: [1, 2],
       },
     ],
@@ -53,22 +61,58 @@ describe('renderObsidian', () => {
     expect(md).toContain('  - year/2026');
   });
 
-  it('includes a TL;DR callout with wikilinks', () => {
+  it('renders top_line bold above the TL;DR callout', () => {
     const md = renderObsidian(sampleArtifact);
+    expect(md).toContain('**[[NCT04567890]] delivers OS HR 0.62 in mCRPC.**');
     expect(md).toContain('> [!summary] TL;DR');
-    expect(md).toContain('[[NCT04567890]]');
-    expect(md).toContain('[[doi:10.1056/NEJMoa2024999]]');
   });
 
-  it('renders cluster headings and summaries with wikilinks', () => {
+  it('renders cluster heading with emoji prefix', () => {
     const md = renderObsidian(sampleArtifact);
-    expect(md).toContain('## Metastatic Castration-Resistant Prostate Cancer');
-    expect(md).toContain('[[PMID 36912345]]');
+    expect(md).toContain('## 🍇 Metastatic Castration-Resistant Prostate Cancer');
+  });
+
+  it('emits Intro / Methods / Results / Discussion sections with emoji headings', () => {
+    const md = renderObsidian(sampleArtifact);
+    expect(md).toContain('> [!info] 🧪 Intro');
+    expect(md).toContain('> [!example] 📐 Methods');
+    expect(md).toContain('### 📊 Results');
+    expect(md).toContain('### 💭 Discussion');
+  });
+
+  it('renders results bullets with wikilinks', () => {
+    const md = renderObsidian(sampleArtifact);
+    expect(md).toContain('- [[NCT04567890]] met primary OS endpoint, HR 0.62');
+    expect(md).toContain('- See [[PMID 36912345]] for prior context');
+  });
+
+  it('omits Methods section when cluster.methods is null', () => {
+    const noMethods: DigestArtifactForExport = {
+      ...sampleArtifact,
+      digest: {
+        ...sampleArtifact.digest,
+        clusters: [{ ...sampleArtifact.digest.clusters[0]!, methods: null }],
+      },
+    };
+    const md = renderObsidian(noMethods);
+    expect(md).not.toContain('📐 Methods');
+  });
+
+  it('omits Discussion section when cluster.discussion is null or empty', () => {
+    const noDisc: DigestArtifactForExport = {
+      ...sampleArtifact,
+      digest: {
+        ...sampleArtifact.digest,
+        clusters: [{ ...sampleArtifact.digest.clusters[0]!, discussion: null }],
+      },
+    };
+    const md = renderObsidian(noDisc);
+    expect(md).not.toContain('💭 Discussion');
   });
 
   it('renders sources with author + URL + curator note', () => {
     const md = renderObsidian(sampleArtifact);
-    expect(md).toContain('### Sources');
+    expect(md).toContain('### 📚 Sources');
     expect(md).toContain('[Dr Foo, MD (@drfoo)](https://x.com/drfoo/status/1)');
     expect(md).toContain("📝 *Curator note:* practice-changing");
   });

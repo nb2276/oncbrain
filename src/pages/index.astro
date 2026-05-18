@@ -37,8 +37,8 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME || 'Oncology Meeting Digest';
 
   {digests.length > 0 && (
     <section style="margin-top:2.5rem">
-      <h2 style="margin:0 0 1rem;font-size:1rem;color:var(--fg-muted);font-weight:600;letter-spacing:0.03em;text-transform:uppercase">Recent</h2>
-      <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1rem">
+      <h2 style="margin:0 0 1rem;font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-muted)">Recent</h2>
+      <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.85rem">
         {digests.map((d) => (
           <li>
             <a
@@ -48,11 +48,11 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME || 'Oncology Meeting Digest';
               <div style="display:flex;justify-content:space-between;align-items:baseline;gap:0.75rem;flex-wrap:wrap">
                 <strong style="color:var(--fg)">{d.date}</strong>
                 {d.conference && (
-                  <span style="color:var(--accent);font-size:0.85rem">{d.conference.name}</span>
+                  <span style="color:var(--accent);font-size:0.82rem;padding:0.1rem 0.5rem;background:var(--accent-bg);border-radius:999px">{d.conference.name}</span>
                 )}
               </div>
-              <div style="margin-top:0.5rem;color:var(--fg-muted);font-size:0.95rem;line-height:1.45">
-                {d.digest.tldr.slice(0, 240)}{d.digest.tldr.length > 240 ? '…' : ''}
+              <div style="margin-top:0.55rem;color:var(--fg);font-size:0.98rem;line-height:1.45;font-weight:500">
+                {(d.digest.top_line || d.digest.tldr).slice(0, 220)}{(d.digest.top_line || d.digest.tldr).length > 220 ? '…' : ''}
               </div>
             </a>
           </li>

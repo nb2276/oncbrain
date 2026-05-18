@@ -193,11 +193,16 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
   let digest: DigestOutput;
   if (args.dryRun) {
     digest = {
+      top_line: '[dry-run] LLM not called',
       tldr: '[dry-run] LLM not called',
       clusters: [
         {
           topic: '[dry-run]',
-          summary: `${inputs.length} bookmarks would be processed.`,
+          emoji: '🧪',
+          intro: '[dry-run] no LLM call was made.',
+          methods: null,
+          results: [`${inputs.length} bookmarks would be processed.`],
+          discussion: null,
           tweet_ids: inputs.map((t) => t.id),
         },
       ],

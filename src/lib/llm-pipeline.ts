@@ -26,12 +26,17 @@ export type DigestInputTweet = {
 
 export type DigestCluster = {
   topic: string;
-  summary: string;
+  emoji: string; // one emoji prefix from the prompt's emoji guide
+  intro: string; // clinical context — 1-2 sentences
+  methods: string | null; // trial design — 1-2 sentences when applicable
+  results: string[]; // short bullets, effect sizes verbatim
+  discussion: string[] | null; // implications/open questions, bullets
   tweet_ids: number[];
 };
 
 export type DigestOutput = {
-  tldr: string;
+  top_line: string; // one-sentence lede — the single most impactful finding
+  tldr: string; // 2-3 sentence synthesis across topics
   clusters: DigestCluster[];
 };
 
@@ -44,14 +49,18 @@ export type BuildOptions = {
   maxRetries?: number;
 };
 
-const DEFAULT_PROMPT_PATH = resolve(__dirname, '../../prompts/digest-v1.txt');
+const DEFAULT_PROMPT_PATH = resolve(__dirname, '../../prompts/digest-v2.txt');
 
 export async function buildDigest(
   tweets: DigestInputTweet[],
   opts: BuildOptions,
 ): Promise<DigestOutput> {
   if (tweets.length === 0) {
-    return { tldr: 'No bookmarks for this day.', clusters: [] };
+    return {
+      top_line: 'No bookmarks for this day.',
+      tldr: 'No bookmarks for this day.',
+      clusters: [],
+    };
   }
 
   const promptTemplate = readFileSync(opts.promptPath ?? DEFAULT_PROMPT_PATH, 'utf-8');
@@ -128,6 +137,9 @@ export function parseDigest(raw: string): DigestOutput {
   }
   const obj = parsed as Record<string, unknown>;
 
+  const top_line = typeof obj.top_line === 'string' ? obj.top_line.trim() : '';
+  if (!top_line) throw new DigestParseError('Missing or empty top_line', raw);
+
   const tldr = typeof obj.tldr === 'string' ? obj.tldr.trim() : '';
   if (!tldr) throw new DigestParseError('Missing or empty tldr', raw);
 
@@ -140,17 +152,32 @@ export function parseDigest(raw: string): DigestOutput {
     if (!c || typeof c !== 'object') continue;
     const cluster = c as Record<string, unknown>;
     const topic = typeof cluster.topic === 'string' ? cluster.topic.trim() : '';
-    const summary = typeof cluster.summary === 'string' ? cluster.summary.trim() : '';
+    const intro = typeof cluster.intro === 'string' ? cluster.intro.trim() : '';
+    const emoji = typeof cluster.emoji === 'string' ? cluster.emoji.trim() : '🩺';
+    const methods =
+      typeof cluster.methods === 'string' && cluster.methods.trim() ? cluster.methods.trim() : null;
+    const results = Array.isArray(cluster.results)
+      ? cluster.results
+          .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+          .map((s) => s.trim())
+      : [];
+    const discussion =
+      Array.isArray(cluster.discussion) && cluster.discussion.length > 0
+        ? cluster.discussion
+            .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+            .map((s) => s.trim())
+        : null;
     const tweet_ids = Array.isArray(cluster.tweet_ids)
       ? cluster.tweet_ids.filter((n): n is number => typeof n === 'number' && Number.isFinite(n))
       : [];
-    if (!topic || !summary) continue;
-    clusters.push({ topic, summary, tweet_ids });
+    // A cluster needs topic + intro + at least one results bullet to be useful.
+    if (!topic || !intro || results.length === 0) continue;
+    clusters.push({ topic, emoji, intro, methods, results, discussion, tweet_ids });
   }
 
   if (clusters.length === 0) {
     throw new DigestParseError('No valid clusters in response', raw);
   }
 
-  return { tldr, clusters };
+  return { top_line, tldr, clusters };
 }
