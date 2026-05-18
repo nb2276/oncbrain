@@ -81,7 +81,7 @@ allStudiesOnDate.forEach((s, i) => slugByStudy.set(s, resolvedSlugs[i]!));
       <article class="site">
         <h3 class="site-heading">
           <a href={`/sites/${meta.slug}/`} class="site-anchor">
-            <span class="site-emoji" aria-hidden="true">{meta.emoji}</span>
+            <span class="site-emoji" aria-hidden="true" title={`${meta.label}: ${meta.rationale}`}>{meta.emoji}</span>
             <span class="site-label">{meta.label}</span>
           </a>
         </h3>

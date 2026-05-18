@@ -9,31 +9,35 @@ export type DiseaseSite = {
   slug: string;
   label: string;
   emoji: string;
+  // Short one-liner explaining the why of the emoji choice. Surfaced as a
+  // hover tooltip on the emoji wherever it renders. See DESIGN.md for the
+  // full selection principles.
+  rationale: string;
 };
 
 export const DISEASE_SITES: readonly DiseaseSite[] = [
-  { slug: 'cns', label: 'CNS', emoji: '🧠' },
-  { slug: 'head-neck', label: 'Head & Neck', emoji: '👄' },
-  { slug: 'thoracic', label: 'Thoracic / Lung', emoji: '🫁' },
-  { slug: 'breast', label: 'Breast', emoji: '🎀' },
-  { slug: 'upper-gi', label: 'Upper GI', emoji: '🍽️' },
-  { slug: 'hepatobiliary', label: 'Hepatobiliary', emoji: '🟡' },
-  { slug: 'lower-gi', label: 'Lower GI', emoji: '🌀' },
-  { slug: 'gyn', label: 'Gynecologic', emoji: '🌷' },
-  { slug: 'prostate', label: 'Prostate', emoji: '🌰' },
-  { slug: 'bladder', label: 'Bladder', emoji: '💧' },
-  { slug: 'kidney', label: 'Kidney', emoji: '🫘' },
-  { slug: 'gu-other', label: 'Germ Cell / Other GU', emoji: '♂️' },
-  { slug: 'skin', label: 'Skin / Melanoma', emoji: '🌞' },
-  { slug: 'sarcoma', label: 'Sarcoma', emoji: '🦴' },
-  { slug: 'leukemia', label: 'Leukemia', emoji: '🩸' },
-  { slug: 'lymphoma', label: 'Lymphoma', emoji: '🌐' },
-  { slug: 'myeloma', label: 'Myeloma / Plasma Cell', emoji: '🩹' },
-  { slug: 'oligo-mets', label: 'Oligometastatic / Mets', emoji: '🎯' },
-  { slug: 'supportive', label: 'Supportive / QoL', emoji: '🤝' },
-  { slug: 'safety', label: 'Safety / Regulatory', emoji: '⚠️' },
-  { slug: 'multi-site', label: 'Cross-cutting', emoji: '📊' },
-  { slug: 'other', label: 'Other', emoji: '📋' },
+  { slug: 'cns', label: 'CNS', emoji: '🧠', rationale: 'brain — direct anatomical anchor' },
+  { slug: 'head-neck', label: 'Head & Neck', emoji: '👄', rationale: 'mouth — captures oral, pharyngeal, laryngeal scope' },
+  { slug: 'thoracic', label: 'Thoracic / Lung', emoji: '🫁', rationale: 'lungs — direct anatomical anchor' },
+  { slug: 'breast', label: 'Breast', emoji: '🎀', rationale: 'pink ribbon — canonical breast-cancer awareness symbol' },
+  { slug: 'upper-gi', label: 'Upper GI', emoji: '🍽️', rationale: 'plate — entry to the GI tract (no stomach/esophagus emoji exists)' },
+  { slug: 'hepatobiliary', label: 'Hepatobiliary', emoji: '🟡', rationale: 'yellow — jaundice/bilirubin, the clinical signal not the etiology' },
+  { slug: 'lower-gi', label: 'Lower GI', emoji: '🌀', rationale: 'spiral — intestinal coil' },
+  { slug: 'gyn', label: 'Gynecologic', emoji: '🌷', rationale: 'tulip — distinct from breast pink ribbon' },
+  { slug: 'prostate', label: 'Prostate', emoji: '🌰', rationale: 'chestnut ≈ walnut, the classic prostate-size analogy' },
+  { slug: 'bladder', label: 'Bladder', emoji: '💧', rationale: 'water drop — urology anchor' },
+  { slug: 'kidney', label: 'Kidney', emoji: '🫘', rationale: 'kidney bean — literally named for the shape' },
+  { slug: 'gu-other', label: 'Germ Cell / Other GU', emoji: '♂️', rationale: 'male symbol — testicular / germ-cell GU' },
+  { slug: 'skin', label: 'Skin / Melanoma', emoji: '🌞', rationale: 'sun — UV exposure is the dominant etiology' },
+  { slug: 'sarcoma', label: 'Sarcoma', emoji: '🦴', rationale: 'bone — established sarcoma anchor (imperfect for soft tissue)' },
+  { slug: 'leukemia', label: 'Leukemia', emoji: '🩸', rationale: 'blood drop — hematologic malignancy' },
+  { slug: 'lymphoma', label: 'Lymphoma', emoji: '🌐', rationale: 'network — lymphatic system spread across the body' },
+  { slug: 'myeloma', label: 'Myeloma / Plasma Cell', emoji: '🩹', rationale: 'bandage — lytic lesions on bone' },
+  { slug: 'oligo-mets', label: 'Oligometastatic / Mets', emoji: '🎯', rationale: 'target — SBRT / metastasis-directed therapy' },
+  { slug: 'supportive', label: 'Supportive / QoL', emoji: '🤝', rationale: 'handshake — patient-centered care' },
+  { slug: 'safety', label: 'Safety / Regulatory', emoji: '⚠️', rationale: 'warning — safety / regulatory signal' },
+  { slug: 'multi-site', label: 'Cross-cutting', emoji: '📊', rationale: 'chart — cross-cutting analyses across multiple sites' },
+  { slug: 'other', label: 'Other', emoji: '📋', rationale: 'clipboard — catch-all for unclassified topics' },
 ] as const;
 
 const SITE_BY_SLUG = new Map(DISEASE_SITES.map((s) => [s.slug, s]));

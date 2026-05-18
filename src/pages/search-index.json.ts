@@ -16,6 +16,7 @@ export type SearchEntry = {
   site: string;
   site_label: string;
   site_emoji: string;
+  site_rationale: string;
   name: string;
   slug: string;
   tldr: string;
@@ -46,6 +47,7 @@ export const GET: APIRoute = () => {
           site: meta.slug,
           site_label: meta.label,
           site_emoji: meta.emoji,
+          site_rationale: meta.rationale,
           name: study.name,
           slug: resolvedSlugs[i++]!,
           tldr: trimTldr(study.tldr),

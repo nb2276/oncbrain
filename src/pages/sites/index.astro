@@ -35,7 +35,7 @@ const empty = sites.filter((s) => s.count === 0);
       {populated.map((s) => (
         <li>
           <a href={`/sites/${s.slug}/`} class="site-card">
-            <span class="site-card-emoji" aria-hidden="true">{s.emoji}</span>
+            <span class="site-card-emoji" aria-hidden="true" title={`${s.label}: ${s.rationale}`}>{s.emoji}</span>
             <span class="site-card-label">{s.label}</span>
             <span class="site-card-count">{s.count}</span>
           </a>
@@ -51,7 +51,7 @@ const empty = sites.filter((s) => s.count === 0);
         {empty.map((s) => (
           <li>
             <span class="site-card empty">
-              <span class="site-card-emoji" aria-hidden="true">{s.emoji}</span>
+              <span class="site-card-emoji" aria-hidden="true" title={`${s.label}: ${s.rationale}`}>{s.emoji}</span>
               <span class="site-card-label">{s.label}</span>
               <span class="site-card-count">0</span>
             </span>

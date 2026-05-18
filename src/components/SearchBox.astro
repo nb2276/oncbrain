@@ -158,6 +158,7 @@
     site: string;
     site_label: string;
     site_emoji: string;
+    site_rationale: string;
     name: string;
     slug: string;
     tldr: string;
@@ -182,6 +183,7 @@
       typeof e.site === 'string' &&
       typeof e.site_label === 'string' &&
       typeof e.site_emoji === 'string' &&
+      typeof e.site_rationale === 'string' &&
       typeof e.name === 'string' &&
       typeof e.slug === 'string' &&
       typeof e.tldr === 'string' &&
@@ -281,7 +283,7 @@
         <li>
           <a href="${escapeHtml(href)}">
             <div class="result-meta">
-              <span class="result-emoji" aria-hidden="true">${escapeHtml(e.site_emoji)}</span>
+              <span class="result-emoji" aria-hidden="true" title="${escapeHtml(`${e.site_label}: ${e.site_rationale}`)}">${escapeHtml(e.site_emoji)}</span>
               <span>${escapeHtml(e.site_label)}</span>
               <span aria-hidden="true">·</span>
               <span>${escapeHtml(e.date)}</span>

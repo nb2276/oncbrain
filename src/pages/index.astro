@@ -2,17 +2,37 @@
 import Base from '../layouts/Base.astro';
 import SearchBox from '../components/SearchBox.astro';
 import { listDigests, listConferenceSummaries } from '../lib/digest-data.ts';
+import { linkifyCitations } from '../lib/extract.ts';
 
 const digests = listDigests();
 const conferences = listConferenceSummaries();
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'onc brain';
+// Latest digest takes over the hero spot — that's what a returning reader cares
+// about most. First-time framing lives on /about.
+const latest = digests[0];
 ---
 
 <Base title={siteName} description="Curated AI-summarized digests of oncology updates.">
-  <p style="font-size:1.05rem;color:var(--fg-muted);margin-top:0">
-    Daily curated digests of the most impactful oncology updates on X,
-    organized by topic and AI-summarized. More frequent during major meetings.
-  </p>
+  {latest ? (
+    <section class="hero-tldr" aria-label="Latest digest summary">
+      <div class="hero-meta">
+        <span class="hero-date">{latest.date}</span>
+        {latest.conference && (
+          <span class="hero-conf">{latest.conference.name}</span>
+        )}
+      </div>
+      {latest.digest.top_line && (
+        <p class="hero-topline" set:html={linkifyCitations(latest.digest.top_line)} />
+      )}
+      <p class="hero-body" set:html={linkifyCitations(latest.digest.tldr)} />
+      <a class="hero-cta" href={`/${latest.date}/`}>read the full digest →</a>
+    </section>
+  ) : (
+    <p style="font-size:1.05rem;color:var(--fg-muted);margin-top:0">
+      Daily curated digests of the most impactful oncology updates on X,
+      organized by topic and AI-summarized. More frequent during major meetings.
+    </p>
+  )}
 
   {digests.length > 0 && <SearchBox />}
 
@@ -65,3 +85,58 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME || 'onc brain';
     </section>
   )}
 </Base>
+
+<style>
+  .hero-tldr {
+    margin: 0 0 1.5rem;
+    padding: 1.1rem 1.25rem 1rem;
+    background: var(--accent-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+  }
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.55rem;
+  }
+  .hero-date { font-weight: 700; }
+  .hero-conf {
+    padding: 0.05rem 0.45rem;
+    background: var(--bg-card);
+    border-radius: 999px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .hero-topline {
+    margin: 0 0 0.55rem;
+    font-size: 1.12rem;
+    line-height: 1.4;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .hero-body {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: var(--fg);
+  }
+  .hero-cta {
+    display: inline-block;
+    margin-top: 0.85rem;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .hero-cta:hover { text-decoration: underline; }
+</style>
