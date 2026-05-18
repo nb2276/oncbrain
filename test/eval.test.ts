@@ -36,15 +36,20 @@ const sampleFixture: EvalFixture = {
 const sampleDigest: DigestOutput = {
   top_line: 'NCT12345678 hit primary endpoint in mCRPC.',
   tldr: 'NCT12345678 hit primary endpoint.',
-  clusters: [
+  sites: [
     {
-      topic: 'mCRPC',
-      emoji: '🍇',
+      disease_site: 'prostate',
       intro: 'mCRPC remains a high-need setting.',
-      methods: null,
-      results: ['NCT12345678 met primary endpoint'],
-      discussion: null,
-      tweet_ids: [1],
+      studies: [
+        {
+          name: 'PRESTIGE-PSMA',
+          tldr: 'NCT12345678 hit primary endpoint.',
+          details: ['Primary endpoint met'],
+          nct: 'NCT12345678',
+          tweet_ids: [1],
+        },
+      ],
+      open_questions: null,
     },
   ],
 };

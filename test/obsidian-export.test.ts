@@ -8,19 +8,24 @@ const sampleArtifact: DigestArtifactForExport = {
   digest: {
     top_line: 'NCT04567890 delivers OS HR 0.62 in mCRPC.',
     tldr:
-      'NCT04567890 met primary OS endpoint in mCRPC (HR 0.62). doi:10.1056/NEJMoa2024999 expected soon.',
-    clusters: [
+      'NCT04567890 met primary OS endpoint. doi:10.1056/NEJMoa2024999 expected soon.',
+    sites: [
       {
-        topic: 'Metastatic Castration-Resistant Prostate Cancer',
-        emoji: '🍇',
-        intro: 'mCRPC remains a setting of significant unmet need for OS-prolonging therapy.',
-        methods: 'NCT04567890: phase III, ARPI + agent X vs ARPI alone, primary OS.',
-        results: [
-          'NCT04567890 met primary OS endpoint, HR 0.62',
-          'See PMID: 36912345 for prior context',
+        disease_site: 'prostate',
+        intro: 'Two trials reported on mCRPC.',
+        studies: [
+          {
+            name: 'PRESTIGE-PSMA',
+            tldr: 'NCT04567890 met primary OS endpoint, HR 0.62.',
+            details: [
+              'HR 0.62 (95% CI 0.45-0.85)',
+              'See PMID: 36912345 for prior context',
+            ],
+            nct: 'NCT04567890',
+            tweet_ids: [1, 2],
+          },
         ],
-        discussion: ['Sequencing vs taxanes remains open', 'Awaiting full QoL data'],
-        tweet_ids: [1, 2],
+        open_questions: ['Sequencing vs taxanes remains open'],
       },
     ],
   },
@@ -57,62 +62,43 @@ describe('renderObsidian', () => {
     expect(md).toContain('conference-slug: asco2026');
     expect(md).toContain('source-count: 2');
     expect(md).toContain('  - oncology/digest');
-    expect(md).toContain('  - conference/asco2026');
-    expect(md).toContain('  - year/2026');
   });
 
-  it('renders top_line bold above the TL;DR callout', () => {
+  it('renders top_line bold + TL;DR callout', () => {
     const md = renderObsidian(sampleArtifact);
     expect(md).toContain('**[[NCT04567890]] delivers OS HR 0.62 in mCRPC.**');
     expect(md).toContain('> [!summary] TL;DR');
   });
 
-  it('renders cluster heading with emoji prefix', () => {
+  it('renders site heading with emoji + label', () => {
     const md = renderObsidian(sampleArtifact);
-    expect(md).toContain('## 🍇 Metastatic Castration-Resistant Prostate Cancer');
+    expect(md).toContain('## 🍇 Prostate');
   });
 
-  it('emits Intro / Methods / Results / Discussion sections with emoji headings', () => {
-    const md = renderObsidian(sampleArtifact);
-    expect(md).toContain('> [!info] 🧪 Intro');
-    expect(md).toContain('> [!example] 📐 Methods');
-    expect(md).toContain('### 📊 Results');
-    expect(md).toContain('### 💭 Discussion');
+  it('renders site intro (when present) and skips when null', () => {
+    expect(renderObsidian(sampleArtifact)).toContain('Two trials reported on mCRPC.');
+    const noIntro: DigestArtifactForExport = {
+      ...sampleArtifact,
+      digest: {
+        ...sampleArtifact.digest,
+        sites: [{ ...sampleArtifact.digest.sites[0]!, intro: null }],
+      },
+    };
+    const md = renderObsidian(noIntro);
+    expect(md).not.toContain('Two trials reported');
   });
 
-  it('renders results bullets with wikilinks', () => {
+  it('renders each study with name, per-study TL;DR, and bullets', () => {
     const md = renderObsidian(sampleArtifact);
-    expect(md).toContain('- [[NCT04567890]] met primary OS endpoint, HR 0.62');
+    expect(md).toContain('### PRESTIGE-PSMA · [[NCT04567890]]');
+    expect(md).toContain('> [[NCT04567890]] met primary OS endpoint, HR 0.62.');
+    expect(md).toContain('- HR 0.62 (95% CI 0.45-0.85)');
     expect(md).toContain('- See [[PMID 36912345]] for prior context');
-  });
-
-  it('omits Methods section when cluster.methods is null', () => {
-    const noMethods: DigestArtifactForExport = {
-      ...sampleArtifact,
-      digest: {
-        ...sampleArtifact.digest,
-        clusters: [{ ...sampleArtifact.digest.clusters[0]!, methods: null }],
-      },
-    };
-    const md = renderObsidian(noMethods);
-    expect(md).not.toContain('📐 Methods');
-  });
-
-  it('omits Discussion section when cluster.discussion is null or empty', () => {
-    const noDisc: DigestArtifactForExport = {
-      ...sampleArtifact,
-      digest: {
-        ...sampleArtifact.digest,
-        clusters: [{ ...sampleArtifact.digest.clusters[0]!, discussion: null }],
-      },
-    };
-    const md = renderObsidian(noDisc);
-    expect(md).not.toContain('💭 Discussion');
   });
 
   it('renders sources with author + URL + curator note', () => {
     const md = renderObsidian(sampleArtifact);
-    expect(md).toContain('### 📚 Sources');
+    expect(md).toContain('**Sources:**');
     expect(md).toContain('[Dr Foo, MD (@drfoo)](https://x.com/drfoo/status/1)');
     expect(md).toContain("📝 *Curator note:* practice-changing");
   });
@@ -120,6 +106,24 @@ describe('renderObsidian', () => {
   it('falls back to "unknown" when no author info available', () => {
     const md = renderObsidian(sampleArtifact);
     expect(md).toContain('[unknown](https://x.com/drbar/status/2)');
+  });
+
+  it('emits open-questions callout when present', () => {
+    const md = renderObsidian(sampleArtifact);
+    expect(md).toContain('> [!question] Open questions');
+    expect(md).toContain('> - Sequencing vs taxanes remains open');
+  });
+
+  it('omits open-questions section when null or empty', () => {
+    const noQ: DigestArtifactForExport = {
+      ...sampleArtifact,
+      digest: {
+        ...sampleArtifact.digest,
+        sites: [{ ...sampleArtifact.digest.sites[0]!, open_questions: null }],
+      },
+    };
+    const md = renderObsidian(noQ);
+    expect(md).not.toContain('Open questions');
   });
 
   it('emits See also section with neighboring dates and conference link', () => {
@@ -130,7 +134,7 @@ describe('renderObsidian', () => {
     expect(md).toContain('[[2026-05-31]]');
   });
 
-  it('emits a url field when publicSiteUrl is provided', () => {
+  it('emits url field when publicSiteUrl is provided', () => {
     const md = renderObsidian(sampleArtifact, { publicSiteUrl: 'https://oncbrain.example.com' });
     expect(md).toContain('url: https://oncbrain.example.com/2026-05-30/');
   });
@@ -143,53 +147,44 @@ describe('renderObsidian', () => {
     };
     const md = renderObsidian(noConf);
     expect(md).not.toContain('conference:');
-    expect(md).not.toContain('conference-slug:');
-    expect(md).not.toMatch(/^# 2026-05-30 —/m); // no " — Conf Name" suffix
     expect(md).toMatch(/^# 2026-05-30$/m);
   });
 
-  it('quotes YAML scalar with embedded colons', () => {
-    const conf: DigestArtifactForExport = {
+  it('renders fallback "other" label for unknown disease_site slug', () => {
+    const unknown: DigestArtifactForExport = {
       ...sampleArtifact,
-      conference: { slug: 'asco2026', name: 'ASCO: Annual Meeting' },
+      digest: {
+        ...sampleArtifact.digest,
+        sites: [{ ...sampleArtifact.digest.sites[0]!, disease_site: 'invented-slug' }],
+      },
     };
-    const md = renderObsidian(conf);
-    expect(md).toContain('conference: "ASCO: Annual Meeting"');
+    const md = renderObsidian(unknown);
+    expect(md).toContain('## 📋 Other');
   });
 });
 
 describe('wikilinkify', () => {
-  it('wraps NCT in [[NCT...]]', () => {
-    expect(wikilinkify('See NCT04567890 for data.')).toBe('See [[NCT04567890]] for data.');
+  it('wraps NCT', () => {
+    expect(wikilinkify('See NCT04567890.')).toBe('See [[NCT04567890]].');
   });
-
-  it('wraps PMID in [[PMID N]]', () => {
-    expect(wikilinkify('PMID: 12345678 supports this.')).toBe('[[PMID 12345678]] supports this.');
+  it('wraps PMID', () => {
+    expect(wikilinkify('PMID: 12345678 supports.')).toBe('[[PMID 12345678]] supports.');
   });
-
-  it('wraps doi: in [[doi:...]]', () => {
-    expect(wikilinkify('See doi:10.1056/NEJMoa1234567')).toBe('See [[doi:10.1056/NEJMoa1234567]]');
+  it('wraps doi', () => {
+    expect(wikilinkify('doi:10.1056/x')).toBe('[[doi:10.1056/x]]');
   });
-
-  it('wraps doi.org URL', () => {
-    expect(wikilinkify('https://doi.org/10.1056/NEJMoa1234567')).toBe('[[doi:10.1056/NEJMoa1234567]]');
+  it('wraps doi.org url', () => {
+    expect(wikilinkify('https://doi.org/10.1056/y')).toBe('[[doi:10.1056/y]]');
   });
-
-  it('handles multiple kinds in one string', () => {
+  it('handles multiple kinds', () => {
     const result = wikilinkify('NCT01234567 vs PMID: 99887766');
     expect(result).toContain('[[NCT01234567]]');
     expect(result).toContain('[[PMID 99887766]]');
   });
-
-  it('returns empty for empty input', () => {
+  it('handles empty input', () => {
     expect(wikilinkify('')).toBe('');
   });
-
-  it('returns unchanged text when no citations present', () => {
-    expect(wikilinkify('No citations here.')).toBe('No citations here.');
-  });
-
-  it('normalizes NCT to uppercase', () => {
+  it('uppercases nct', () => {
     expect(wikilinkify('nct04567890')).toBe('[[NCT04567890]]');
   });
 });

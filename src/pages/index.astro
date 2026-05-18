@@ -19,21 +19,22 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME || 'Oncology Meeting Digest';
     </p>
   )}
 
-  {conferences.length > 0 && (
-    <section style="margin-top:2rem">
-      <h2 style="margin:0;font-size:1rem;color:var(--fg-muted);font-weight:600;letter-spacing:0.03em;text-transform:uppercase">Conferences</h2>
-      <ul style="list-style:none;padding:0;margin:0.75rem 0 0;display:flex;flex-wrap:wrap;gap:0.5rem">
-        {conferences.map((conf) => (
-          <li>
-            <a
-              href={`/conferences/${conf.slug}/`}
-              style="display:inline-block;padding:0.4rem 0.9rem;background:var(--accent-bg);border:1px solid var(--border);border-radius:999px;font-size:0.9rem"
-            >{conf.name} <span style="color:var(--fg-muted)">· {conf.dates.length}d</span></a>
-          </li>
-        ))}
-      </ul>
-    </section>
-  )}
+  <section style="margin-top:2rem">
+    <h2 style="margin:0;font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-muted);font-family:var(--font-sans)">Browse</h2>
+    <ul style="list-style:none;padding:0;margin:0.75rem 0 0;display:flex;flex-wrap:wrap;gap:0.5rem">
+      <li>
+        <a href="/sites/" style="display:inline-block;padding:0.4rem 0.9rem;background:var(--accent-bg);border:1px solid var(--border);border-radius:999px;font-size:0.9rem;font-family:var(--font-sans);color:var(--accent);text-decoration:none">By disease site →</a>
+      </li>
+      {conferences.map((conf) => (
+        <li>
+          <a
+            href={`/conferences/${conf.slug}/`}
+            style="display:inline-block;padding:0.4rem 0.9rem;background:var(--bg-card);border:1px solid var(--border);border-radius:999px;font-size:0.9rem;font-family:var(--font-sans);text-decoration:none"
+          >{conf.name} <span style="color:var(--fg-muted)">· {conf.dates.length}d</span></a>
+        </li>
+      ))}
+    </ul>
+  </section>
 
   {digests.length > 0 && (
     <section style="margin-top:2.5rem">

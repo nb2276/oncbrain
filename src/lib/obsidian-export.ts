@@ -17,14 +17,17 @@ export type DigestArtifactForExport = {
   digest: {
     top_line: string;
     tldr: string;
-    clusters: Array<{
-      topic: string;
-      emoji: string;
-      intro: string;
-      methods: string | null;
-      results: string[];
-      discussion: string[] | null;
-      tweet_ids: number[];
+    sites: Array<{
+      disease_site: string;
+      intro: string | null;
+      studies: Array<{
+        name: string;
+        tldr: string;
+        details: string[];
+        nct: string | null;
+        tweet_ids: number[];
+      }>;
+      open_questions: string[] | null;
     }>;
   };
   bookmarks: Array<{
@@ -122,6 +125,39 @@ function renderFrontmatter(artifact: DigestArtifactForExport, opts: ObsidianRend
   return lines.join('\n');
 }
 
+// Disease-site label/emoji map. Duplicated from disease-sites.ts to keep
+// obsidian-export.ts importable in test/runtime contexts without pulling the
+// full Astro graph; the source of truth is src/lib/disease-sites.ts and these
+// strings should match it.
+const SITE_LABEL: Record<string, { label: string; emoji: string }> = {
+  cns: { label: 'CNS', emoji: '🧠' },
+  'head-neck': { label: 'Head & Neck', emoji: '🦷' },
+  thoracic: { label: 'Thoracic / Lung', emoji: '🫁' },
+  breast: { label: 'Breast', emoji: '🌸' },
+  'upper-gi': { label: 'Upper GI', emoji: '🍽️' },
+  hepatobiliary: { label: 'Hepatobiliary', emoji: '🍷' },
+  'lower-gi': { label: 'Lower GI', emoji: '🌽' },
+  gyn: { label: 'Gynecologic', emoji: '🌷' },
+  prostate: { label: 'Prostate', emoji: '🍇' },
+  bladder: { label: 'Bladder', emoji: '💧' },
+  kidney: { label: 'Kidney', emoji: '🥑' },
+  'gu-other': { label: 'Germ Cell / Other GU', emoji: '🍒' },
+  skin: { label: 'Skin / Melanoma', emoji: '🌞' },
+  sarcoma: { label: 'Sarcoma', emoji: '🦴' },
+  leukemia: { label: 'Leukemia', emoji: '🩸' },
+  lymphoma: { label: 'Lymphoma', emoji: '🪷' },
+  myeloma: { label: 'Myeloma / Plasma Cell', emoji: '🩹' },
+  'oligo-mets': { label: 'Oligometastatic / Mets', emoji: '🎯' },
+  supportive: { label: 'Supportive / QoL', emoji: '🤝' },
+  safety: { label: 'Safety / Regulatory', emoji: '⚠️' },
+  'multi-site': { label: 'Cross-cutting', emoji: '📊' },
+  other: { label: 'Other', emoji: '📋' },
+};
+
+function siteHeader(slug: string): { label: string; emoji: string } {
+  return SITE_LABEL[slug] ?? SITE_LABEL['other']!;
+}
+
 function renderBody(artifact: DigestArtifactForExport): string {
   const { date, conference, digest, bookmarks } = artifact;
   const bookmarksById = new Map(bookmarks.map((b) => [b.id, b]));
@@ -130,8 +166,6 @@ function renderBody(artifact: DigestArtifactForExport): string {
   const lines: string[] = [];
   lines.push('', `# ${date}${titleSuffix}`, '');
 
-  // Top line — the lede. Bolded paragraph above the TL;DR callout so it's the
-  // first thing the eye hits when scanning the note in Obsidian.
   if (digest.top_line) {
     lines.push(`**${wikilinkify(digest.top_line)}**`, '');
   }
@@ -142,48 +176,47 @@ function renderBody(artifact: DigestArtifactForExport): string {
   }
   lines.push('');
 
-  for (const cluster of digest.clusters) {
-    lines.push(`## ${cluster.emoji} ${cluster.topic}`, '');
+  for (const site of digest.sites) {
+    const header = siteHeader(site.disease_site);
+    lines.push(`## ${header.emoji} ${header.label}`, '');
 
-    lines.push(`> [!info] 🧪 Intro`);
-    for (const ln of wikilinkify(cluster.intro).split('\n')) lines.push(`> ${ln}`);
-    lines.push('');
-
-    if (cluster.methods) {
-      lines.push(`> [!example] 📐 Methods`);
-      for (const ln of wikilinkify(cluster.methods).split('\n')) lines.push(`> ${ln}`);
-      lines.push('');
+    if (site.intro) {
+      lines.push(wikilinkify(site.intro), '');
     }
 
-    lines.push(`### 📊 Results`, '');
-    for (const r of cluster.results) lines.push(`- ${wikilinkify(r)}`);
-    lines.push('');
+    for (const study of site.studies) {
+      const nctSuffix = study.nct ? ` · [[${study.nct}]]` : '';
+      lines.push(`### ${study.name}${nctSuffix}`, '');
+      lines.push(`> ${wikilinkify(study.tldr)}`, '');
 
-    if (cluster.discussion && cluster.discussion.length > 0) {
-      lines.push(`### 💭 Discussion`, '');
-      for (const d of cluster.discussion) lines.push(`- ${wikilinkify(d)}`);
-      lines.push('');
-    }
-
-    const sources = cluster.tweet_ids
-      .map((id) => bookmarksById.get(id))
-      .filter((b): b is NonNullable<typeof b> => Boolean(b));
-
-    if (sources.length > 0) {
-      lines.push(`### 📚 Sources`, '');
-      for (const b of sources) {
-        const who = b.author_name ?? b.author_handle ?? 'unknown';
-        const handleSuffix =
-          b.author_handle && b.author_name ? ` (${b.author_handle})` : '';
-        lines.push(`- [${who}${handleSuffix}](${b.url})`);
-        lines.push(`  > ${wikilinkify(b.text).replace(/\n/g, '\n  > ')}`);
-        if (b.note) lines.push(`  - 📝 *Curator note:* ${b.note}`);
+      if (study.details.length > 0) {
+        for (const d of study.details) lines.push(`- ${wikilinkify(d)}`);
+        lines.push('');
       }
+
+      const sources = study.tweet_ids
+        .map((id) => bookmarksById.get(id))
+        .filter((b): b is NonNullable<typeof b> => Boolean(b));
+      if (sources.length > 0) {
+        lines.push('**Sources:**');
+        for (const b of sources) {
+          const who = b.author_name ?? b.author_handle ?? 'unknown';
+          const handleSuffix = b.author_handle && b.author_name ? ` (${b.author_handle})` : '';
+          lines.push(`- [${who}${handleSuffix}](${b.url})`);
+          lines.push(`  > ${wikilinkify(b.text).replace(/\n/g, '\n  > ')}`);
+          if (b.note) lines.push(`  - 📝 *Curator note:* ${b.note}`);
+        }
+        lines.push('');
+      }
+    }
+
+    if (site.open_questions && site.open_questions.length > 0) {
+      lines.push(`> [!question] Open questions`);
+      for (const q of site.open_questions) lines.push(`> - ${wikilinkify(q)}`);
       lines.push('');
     }
   }
 
-  // See also: link to neighboring dates and (if applicable) the conference note.
   const seeAlso: string[] = [];
   if (conference) seeAlso.push(`[[${conference.name}]]`);
   const prev = shiftDate(date, -1);

@@ -13,6 +13,7 @@ export type FetchedTweet = {
   text: string;
   author_name: string | null;
   author_handle: string | null;
+  html: string; // raw oEmbed blockquote — fed to widgets.js for image-rich rendering
 };
 
 export class TweetFetchError extends Error {
@@ -97,6 +98,7 @@ export async function fetchTweet(url: string, opts: FetchOptions = {}): Promise<
     text,
     author_name: authorName,
     author_handle: deriveHandleFromUrl(authorUrl),
+    html: htmlField,
   };
 }
 

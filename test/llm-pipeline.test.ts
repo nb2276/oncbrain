@@ -15,29 +15,43 @@ const sampleTweets = [
 ];
 
 const goodResponse = JSON.stringify({
-  top_line: 'NCT04567890 delivers OS HR 0.62 in mCRPC — first-line indication imminent.',
-  tldr: 'mCRPC OS endpoint hit. mHSPC ADT intensification supported. TROP2 ADC momentum in TNBC.',
-  clusters: [
+  top_line: 'NCT04567890 delivers OS HR 0.62 in mCRPC.',
+  tldr: 'mCRPC OS endpoint hit. TROP2 ADC momentum in TNBC.',
+  sites: [
     {
-      topic: 'Metastatic Castration-Resistant Prostate Cancer',
-      emoji: '🍇',
-      intro: 'mCRPC remains a setting with significant unmet need for OS-prolonging therapies.',
-      methods: 'NCT04567890: phase III, randomized, ARPI + agent X vs ARPI alone, primary endpoint OS.',
-      results: [
-        'NCT04567890 met primary OS endpoint, HR 0.62',
-        'Median OS not yet reached in experimental arm',
+      disease_site: 'prostate',
+      intro: 'Two trials reported new prostate data.',
+      studies: [
+        {
+          name: 'PRESTIGE-PSMA',
+          tldr: 'OS HR 0.62 in mCRPC, primary endpoint met.',
+          details: ['HR 0.62 (95% CI 0.45-0.85)', 'Median OS not yet reached'],
+          nct: 'NCT04567890',
+          tweet_ids: [1],
+        },
+        {
+          name: 'ARANOTE',
+          tldr: 'rPFS improvement of 21 months with enzalutamide + ADT.',
+          details: ['rPFS gain 21 months vs placebo'],
+          nct: null,
+          tweet_ids: [2],
+        },
       ],
-      discussion: ['Sequencing vs taxanes remains open', 'Awaiting full publication for QoL data'],
-      tweet_ids: [1],
+      open_questions: ['Sequencing vs taxanes'],
     },
     {
-      topic: 'TROP2-Directed ADCs in Triple-Negative Breast Cancer',
-      emoji: '🎯',
-      intro: 'TROP2-targeted ADCs continue to mature as a second-line option in mTNBC.',
-      methods: null,
-      results: ['Datopotamab deruxtecan ORR 41% in 2L mTNBC'],
-      discussion: null,
-      tweet_ids: [3],
+      disease_site: 'breast',
+      intro: null,
+      studies: [
+        {
+          name: 'Datopotamab in 2L TNBC',
+          tldr: 'ORR 41% in second-line triple-negative breast cancer.',
+          details: ['ORR 41%, durable responses ongoing'],
+          nct: null,
+          tweet_ids: [3],
+        },
+      ],
+      open_questions: null,
     },
   ],
 });
@@ -51,11 +65,13 @@ describe('buildDigest', () => {
     });
     expect(result.top_line).toContain('NCT04567890');
     expect(result.tldr).toContain('mCRPC');
-    expect(result.clusters).toHaveLength(2);
-    expect(result.clusters[0]!.emoji).toBe('🍇');
-    expect(result.clusters[0]!.results).toHaveLength(2);
-    expect(result.clusters[1]!.methods).toBeNull();
-    expect(result.clusters[1]!.discussion).toBeNull();
+    expect(result.sites).toHaveLength(2);
+    expect(result.sites[0]!.disease_site).toBe('prostate');
+    expect(result.sites[0]!.studies).toHaveLength(2);
+    expect(result.sites[0]!.studies[0]!.tldr).toContain('HR 0.62');
+    expect(result.sites[0]!.studies[0]!.nct).toBe('NCT04567890');
+    expect(result.sites[1]!.disease_site).toBe('breast');
+    expect(result.sites[1]!.studies[0]!.nct).toBeNull();
   });
 
   it('returns empty digest for zero tweets without calling LLM', async () => {
@@ -65,7 +81,7 @@ describe('buildDigest', () => {
       conferenceDay: 1,
       client,
     });
-    expect(result.clusters).toEqual([]);
+    expect(result.sites).toEqual([]);
     expect(result.tldr).toMatch(/no bookmarks/i);
     expect(result.top_line).toMatch(/no bookmarks/i);
     expect(client.complete).not.toHaveBeenCalled();
@@ -79,7 +95,7 @@ describe('buildDigest', () => {
       client,
       maxRetries: 1,
     });
-    expect(result.clusters).toHaveLength(2);
+    expect(result.sites).toHaveLength(2);
     expect(client.complete).toHaveBeenCalledTimes(2);
   });
 
@@ -102,10 +118,10 @@ describe('buildDigest', () => {
       conferenceDay: 2,
       client: mockLlmClient(wrapped),
     });
-    expect(result.clusters).toHaveLength(2);
+    expect(result.sites).toHaveLength(2);
   });
 
-  it('passes temperature=0 and the requested model to the client', async () => {
+  it('passes temperature=0 and requested model to the client', async () => {
     const client = mockLlmClient(goodResponse);
     await buildDigest(sampleTweets, {
       conferenceName: 'ASCO 2026',
@@ -122,23 +138,16 @@ describe('buildDigest', () => {
 });
 
 describe('parseDigest', () => {
-  it('parses well-formed JSON with IMRD schema', () => {
+  it('parses well-formed JSON with sites/studies schema', () => {
     const result = parseDigest(goodResponse);
     expect(result.top_line).toContain('NCT04567890');
-    expect(result.tldr).toContain('mCRPC');
-    expect(result.clusters).toHaveLength(2);
+    expect(result.sites).toHaveLength(2);
+    expect(result.sites[0]!.studies).toHaveLength(2);
   });
 
-  it('strips code fences before parsing', () => {
-    const wrapped = '```json\n' + goodResponse + '\n```';
-    const result = parseDigest(wrapped);
-    expect(result.clusters).toHaveLength(2);
-  });
-
-  it('strips bare code fences', () => {
-    const wrapped = '```\n' + goodResponse + '\n```';
-    const result = parseDigest(wrapped);
-    expect(result.clusters).toHaveLength(2);
+  it('strips code fences', () => {
+    const result = parseDigest('```json\n' + goodResponse + '\n```');
+    expect(result.sites).toHaveLength(2);
   });
 
   it('throws on empty input', () => {
@@ -161,86 +170,155 @@ describe('parseDigest', () => {
     expect(() => parseDigest(JSON.stringify(broken))).toThrow(/tldr/);
   });
 
-  it('throws when clusters is missing', () => {
+  it('throws when sites is missing', () => {
     expect(() =>
       parseDigest(JSON.stringify({ top_line: 'x', tldr: 'y' })),
-    ).toThrow(/clusters/);
+    ).toThrow(/sites/);
   });
 
-  it('throws when clusters array yields no valid cluster', () => {
+  it('throws when no sites have valid studies', () => {
     expect(() =>
       parseDigest(
         JSON.stringify({
           top_line: 'x',
           tldr: 'y',
-          clusters: [{ topic: '', intro: 'has intro', results: ['r'] }],
+          sites: [{ disease_site: 'breast', studies: [] }],
         }),
       ),
-    ).toThrow(/no valid clusters/i);
+    ).toThrow(/no valid sites/i);
   });
 
-  it('drops clusters with missing intro or empty results', () => {
+  it('maps unknown disease_site slugs to "other"', () => {
+    const wonky = JSON.stringify({
+      top_line: 'x',
+      tldr: 'y',
+      sites: [
+        {
+          disease_site: 'nasal-cavity-superhero',
+          studies: [
+            { name: 'X', tldr: 'y', details: [], nct: null, tweet_ids: [1] },
+          ],
+        },
+      ],
+    });
+    const result = parseDigest(wonky);
+    expect(result.sites[0]!.disease_site).toBe('other');
+  });
+
+  it('drops studies missing name/tldr/tweet_ids', () => {
     const mixed = JSON.stringify({
       top_line: 'x',
       tldr: 'y',
-      clusters: [
+      sites: [
         {
-          topic: 'valid',
-          emoji: '🎯',
-          intro: 'has all required fields',
-          methods: null,
-          results: ['effect size N'],
-          discussion: null,
-          tweet_ids: [1],
+          disease_site: 'breast',
+          studies: [
+            { name: 'valid', tldr: 'has all required', details: [], nct: null, tweet_ids: [1] },
+            { name: '', tldr: 'no name', tweet_ids: [1] },
+            { name: 'no tweets', tldr: 'no tweets attached', tweet_ids: [] },
+            { name: 'no tldr', tldr: '', tweet_ids: [1] },
+          ],
         },
-        { topic: 'no intro', intro: '', results: ['r1'] },
-        { topic: 'empty results', intro: 'x', results: [] },
       ],
     });
     const result = parseDigest(mixed);
-    expect(result.clusters).toHaveLength(1);
-    expect(result.clusters[0]!.topic).toBe('valid');
+    expect(result.sites[0]!.studies).toHaveLength(1);
+    expect(result.sites[0]!.studies[0]!.name).toBe('valid');
   });
 
-  it('defaults emoji to 🩺 when missing', () => {
-    const noEmoji = JSON.stringify({
+  it('drops sites whose studies are all invalid', () => {
+    const broken = JSON.stringify({
       top_line: 'x',
       tldr: 'y',
-      clusters: [
-        { topic: 't', intro: 'i', results: ['r'], tweet_ids: [1] },
+      sites: [
+        {
+          disease_site: 'breast',
+          studies: [{ name: '', tldr: '', tweet_ids: [] }],
+        },
+        {
+          disease_site: 'prostate',
+          studies: [
+            { name: 'valid', tldr: 'OK', details: [], nct: null, tweet_ids: [1] },
+          ],
+        },
       ],
     });
-    const result = parseDigest(noEmoji);
-    expect(result.clusters[0]!.emoji).toBe('🩺');
+    const result = parseDigest(broken);
+    expect(result.sites).toHaveLength(1);
+    expect(result.sites[0]!.disease_site).toBe('prostate');
   });
 
-  it('normalizes methods="" to null', () => {
-    const empty = JSON.stringify({
+  it('accepts bare 8-digit nct and normalizes to NCT-prefixed form', () => {
+    const raw = JSON.stringify({
       top_line: 'x',
       tldr: 'y',
-      clusters: [
-        { topic: 't', emoji: '🩺', intro: 'i', methods: '', results: ['r'], tweet_ids: [1] },
+      sites: [
+        {
+          disease_site: 'breast',
+          studies: [
+            { name: 'X', tldr: 'y', details: [], nct: '04567890', tweet_ids: [1] },
+          ],
+        },
       ],
     });
-    const result = parseDigest(empty);
-    expect(result.clusters[0]!.methods).toBeNull();
+    const result = parseDigest(raw);
+    expect(result.sites[0]!.studies[0]!.nct).toBe('NCT04567890');
   });
 
-  it('filters non-string entries from results array', () => {
+  it('discards malformed nct strings (not 8 digits)', () => {
+    const raw = JSON.stringify({
+      top_line: 'x',
+      tldr: 'y',
+      sites: [
+        {
+          disease_site: 'breast',
+          studies: [
+            { name: 'X', tldr: 'y', details: [], nct: 'NCT123', tweet_ids: [1] },
+          ],
+        },
+      ],
+    });
+    const result = parseDigest(raw);
+    expect(result.sites[0]!.studies[0]!.nct).toBeNull();
+  });
+
+  it('normalizes empty open_questions array to null', () => {
+    const raw = JSON.stringify({
+      top_line: 'x',
+      tldr: 'y',
+      sites: [
+        {
+          disease_site: 'breast',
+          intro: null,
+          studies: [{ name: 'X', tldr: 'y', details: [], nct: null, tweet_ids: [1] }],
+          open_questions: [],
+        },
+      ],
+    });
+    const result = parseDigest(raw);
+    expect(result.sites[0]!.open_questions).toBeNull();
+  });
+
+  it('filters non-string details', () => {
     const noisy = JSON.stringify({
       top_line: 'x',
       tldr: 'y',
-      clusters: [
+      sites: [
         {
-          topic: 't',
-          emoji: '🩺',
-          intro: 'i',
-          results: ['real bullet', 42, null, '  ', 'another'],
-          tweet_ids: [1],
+          disease_site: 'breast',
+          studies: [
+            {
+              name: 'X',
+              tldr: 'y',
+              details: ['real bullet', 42, null, '  ', 'another'],
+              nct: null,
+              tweet_ids: [1],
+            },
+          ],
         },
       ],
     });
     const result = parseDigest(noisy);
-    expect(result.clusters[0]!.results).toEqual(['real bullet', 'another']);
+    expect(result.sites[0]!.studies[0]!.details).toEqual(['real bullet', 'another']);
   });
 });

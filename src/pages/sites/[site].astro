@@ -1,0 +1,237 @@
+---
+import Base from '../../layouts/Base.astro';
+import { listSiteSummaries, type SiteSummary } from '../../lib/digest-data.ts';
+import { getDiseaseSite } from '../../lib/disease-sites.ts';
+import { linkifyCitations } from '../../lib/extract.ts';
+
+export async function getStaticPaths() {
+  return listSiteSummaries().map((s) => ({
+    params: { site: s.disease_site },
+    props: { summary: s },
+  }));
+}
+
+interface Props {
+  summary: SiteSummary;
+}
+
+const { summary } = Astro.props as Props;
+const meta = getDiseaseSite(summary.disease_site);
+
+// Group occurrences by date so the page reads as a reverse-chronological
+// stack with date headers, like a per-site journal.
+const byDate = new Map<string, typeof summary.occurrences>();
+for (const occ of summary.occurrences) {
+  if (!byDate.has(occ.date)) byDate.set(occ.date, []);
+  byDate.get(occ.date)!.push(occ);
+}
+const dates = Array.from(byDate.keys());
+---
+
+<Base title={`${meta.label} — oncbrain`} description={`Studies aggregated for ${meta.label} across all digest dates.`}>
+  <nav class="crumb">
+    <a href="/">← all dates</a>
+    <a href="/sites/">browse by site</a>
+  </nav>
+
+  <header class="site-header">
+    <h2>
+      <span class="emoji" aria-hidden="true">{meta.emoji}</span>
+      {meta.label}
+    </h2>
+    <p class="meta">
+      {summary.occurrences.length} stud{summary.occurrences.length === 1 ? 'y' : 'ies'} across
+      {dates.length} date{dates.length === 1 ? '' : 's'}
+    </p>
+  </header>
+
+  {dates.map((date) => {
+    const occurrences = byDate.get(date)!;
+    const conf = occurrences[0]!.conference;
+    return (
+      <section class="date-block">
+        <h3 class="date-heading">
+          <a href={`/${date}/`}>{date}</a>
+          {conf && <span class="conf-pill">{conf.name}</span>}
+        </h3>
+        {occurrences.map((occ) => (
+          <div class="study">
+            <h4 class="study-name">
+              {occ.study.name}
+              {occ.study.nct && (
+                <a class="citation study-nct" href={`https://clinicaltrials.gov/study/${occ.study.nct}`} target="_blank" rel="noopener">{occ.study.nct}</a>
+              )}
+            </h4>
+            <p class="study-tldr" set:html={linkifyCitations(occ.study.tldr)} />
+            {occ.study.details.length > 0 && (
+              <ul class="study-details">
+                {occ.study.details.map((d) => (<li set:html={linkifyCitations(d)} />))}
+              </ul>
+            )}
+            {occ.bookmarks.length > 0 && (
+              <details class="sources">
+                <summary>📚 Sources ({occ.bookmarks.length})</summary>
+                <div class="source-stack">
+                  {occ.bookmarks.map((b) => {
+                    if (b.html) {
+                      return (
+                        <div class="tw-wrap">
+                          <Fragment set:html={b.html} />
+                          {b.note && <div class="source-note">📝 {b.note}</div>}
+                        </div>
+                      );
+                    }
+                    return (
+                      <div class="source-fallback">
+                        <div class="source-meta">
+                          <span>{b.author_name || b.author_handle || 'unknown'}</span>
+                          <a href={b.url} target="_blank" rel="noopener">view on X →</a>
+                        </div>
+                        <div class="source-text" set:html={linkifyCitations(b.text)} />
+                        {b.note && <div class="source-note">📝 {b.note}</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+            )}
+          </div>
+        ))}
+      </section>
+    );
+  })}
+</Base>
+
+<style>
+  .crumb {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    color: var(--fg-muted);
+  }
+  .crumb a { color: var(--fg-muted); text-decoration: none; margin-right: 0.5rem; }
+  .crumb a + a::before { content: '· '; margin-right: 0.25rem; color: var(--border); }
+  .crumb a:hover { color: var(--accent); }
+
+  .site-header h2 {
+    margin: 0;
+    font-size: 1.55rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    display: flex; align-items: baseline; gap: 0.55rem;
+  }
+  .emoji { font-size: 1.8rem; }
+  .meta {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+  }
+
+  .date-block {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+  .date-heading {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.55rem;
+  }
+  .date-heading a {
+    color: inherit;
+    text-decoration: none;
+    font-family: var(--font-sans);
+    letter-spacing: 0.01em;
+  }
+  .date-heading a:hover { color: var(--accent); }
+  .conf-pill {
+    font-family: var(--font-sans);
+    font-size: 0.74rem;
+    font-weight: 500;
+    padding: 0.12rem 0.55rem;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 999px;
+  }
+
+  /* Per-study card — shared with [date].astro visually but inlined here for
+     section scope. */
+  .study {
+    margin: 0 0 1.1rem;
+    padding: 0.95rem 1.1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+  }
+  .study-name {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-weight: 600;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem;
+  }
+  .study-nct {
+    font-size: 0.75rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .study-tldr {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+  .study-details {
+    margin: 0;
+    padding-left: 1.2rem;
+    line-height: 1.5;
+    font-size: 0.95rem;
+  }
+  .study-details li { margin: 0.25rem 0; }
+
+  .sources { margin-top: 0.85rem; }
+  .sources summary {
+    cursor: pointer;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    padding: 0.3rem 0;
+  }
+  .source-stack {
+    margin-top: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .tw-wrap :global(.twitter-tweet) { margin: 0 !important; }
+  .tw-wrap :global(iframe) { max-width: 100% !important; }
+  .source-fallback {
+    background: var(--citation-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.92rem;
+  }
+  .source-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--fg-muted);
+    margin-bottom: 0.4rem;
+  }
+  .source-text { line-height: 1.5; white-space: pre-wrap; }
+  .source-note {
+    margin-top: 0.45rem;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+
+  @media (max-width: 600px) {
+    .site-header h2 { font-size: 1.25rem; }
+    .emoji { font-size: 1.5rem; }
+    .study { padding: 0.8rem 0.9rem; }
+  }
+</style>

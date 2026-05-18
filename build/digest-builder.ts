@@ -69,19 +69,27 @@ async function ensureTweetData(
   db: ReturnType<typeof openDb>,
   bookmarks: Bookmark[],
   skipFetch: boolean,
+  refetchHtml: boolean,
 ): Promise<void> {
   if (skipFetch) return;
-  const pending = bookmarks.filter((b) => b.fetched_via === 'pending');
-  if (pending.length === 0) return;
+  // Targets:
+  //   - any bookmark still in `pending` state (never fetched)
+  //   - if refetchHtml=true, any oembed-fetched bookmark missing tweet_html
+  //     (carries-over from v0.1 — these were fetched before the column existed)
+  const needFetch = bookmarks.filter(
+    (b) => b.fetched_via === 'pending' || (refetchHtml && b.fetched_via === 'oembed' && !b.tweet_html),
+  );
+  if (needFetch.length === 0) return;
 
-  console.log(`  fetching ${pending.length} pending tweet(s) via oEmbed...`);
-  for (const b of pending) {
+  console.log(`  fetching ${needFetch.length} tweet(s) via oEmbed...`);
+  for (const b of needFetch) {
     try {
       const tweet = await fetchTweet(b.url);
       updateBookmarkFetched(db, b.id, {
         author_handle: tweet.author_handle,
         author_name: tweet.author_name,
         tweet_text: tweet.text,
+        tweet_html: tweet.html,
       });
       console.log(`    [oembed] #${b.id} ${b.url}`);
     } catch (err) {
@@ -117,6 +125,7 @@ type DigestArtifact = {
     author_handle: string | null;
     author_name: string | null;
     text: string;
+    html: string | null;
     note: string | null;
     fetched_via: string;
     conference_slug: string | null;
@@ -141,6 +150,7 @@ function buildArtifact(
       author_handle: b.author_handle,
       author_name: b.author_name,
       text: b.tweet_text!,
+      html: b.tweet_html,
       note: b.notes,
       fetched_via: b.fetched_via,
       conference_slug: b.conference_slug,
@@ -170,7 +180,9 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
     return;
   }
 
-  await ensureTweetData(db, allForDate, args.skipFetch);
+  // refetchHtml: pick up bookmarks that were saved with v0.1 and never got
+  // the oEmbed HTML stored. One-shot backfill on the next build for that date.
+  await ensureTweetData(db, allForDate, args.skipFetch, true);
 
   // Re-read after the fetch step may have updated rows.
   const bookmarks = listBookmarks(db, { bookmark_date: date }).filter(
@@ -195,15 +207,20 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
     digest = {
       top_line: '[dry-run] LLM not called',
       tldr: '[dry-run] LLM not called',
-      clusters: [
+      sites: [
         {
-          topic: '[dry-run]',
-          emoji: '🧪',
+          disease_site: 'other',
           intro: '[dry-run] no LLM call was made.',
-          methods: null,
-          results: [`${inputs.length} bookmarks would be processed.`],
-          discussion: null,
-          tweet_ids: inputs.map((t) => t.id),
+          studies: [
+            {
+              name: '[dry-run] placeholder study',
+              tldr: `${inputs.length} bookmarks would be processed.`,
+              details: [],
+              nct: null,
+              tweet_ids: inputs.map((t) => t.id),
+            },
+          ],
+          open_questions: null,
         },
       ],
     };

@@ -34,6 +34,8 @@ describe('fetchTweet', () => {
     expect(result.text).toContain('Practice-changing data');
     expect(result.text).toContain('NCT04567890');
     expect(result.text).toContain('NEJM');
+    // html field carries the raw oEmbed blockquote for widgets.js rendering
+    expect(result.html).toContain('twitter-tweet');
   });
 
   it('throws not_found on 404', async () => {

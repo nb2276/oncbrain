@@ -1,0 +1,129 @@
+---
+import Base from '../../layouts/Base.astro';
+import { listSiteSummaries } from '../../lib/digest-data.ts';
+import { DISEASE_SITES, getDiseaseSite } from '../../lib/disease-sites.ts';
+
+const summaries = listSiteSummaries();
+const summaryBySlug = new Map(summaries.map((s) => [s.disease_site, s]));
+
+// Enum order is the canonical display order (roughly head-to-toe then liquid then
+// cross-cutting). Sites with no studies yet still render — greyed out — so a
+// returning reader can scan the full taxonomy and see what's empty.
+const sites = DISEASE_SITES.map((s) => {
+  const summary = summaryBySlug.get(s.slug);
+  return {
+    ...s,
+    count: summary?.occurrences.length ?? 0,
+  };
+});
+const populated = sites.filter((s) => s.count > 0);
+const empty = sites.filter((s) => s.count === 0);
+---
+
+<Base title="Browse by disease site" description="Every study aggregated by disease site.">
+  <nav class="crumb">
+    <a href="/">← all dates</a>
+  </nav>
+  <h2 class="page-title">Browse by site</h2>
+  <p class="page-meta">
+    {populated.length} site{populated.length === 1 ? '' : 's'} with studies ·
+    {empty.length} not yet covered
+  </p>
+
+  {populated.length > 0 && (
+    <ul class="site-grid">
+      {populated.map((s) => (
+        <li>
+          <a href={`/sites/${s.slug}/`} class="site-card">
+            <span class="site-card-emoji" aria-hidden="true">{s.emoji}</span>
+            <span class="site-card-label">{s.label}</span>
+            <span class="site-card-count">{s.count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+
+  {empty.length > 0 && (
+    <details style="margin-top: 2rem">
+      <summary>Sites with no studies yet ({empty.length})</summary>
+      <ul class="site-grid muted">
+        {empty.map((s) => (
+          <li>
+            <span class="site-card empty">
+              <span class="site-card-emoji" aria-hidden="true">{s.emoji}</span>
+              <span class="site-card-label">{s.label}</span>
+              <span class="site-card-count">0</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )}
+</Base>
+
+<style>
+  .crumb {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    color: var(--fg-muted);
+  }
+  .crumb a { color: var(--fg-muted); text-decoration: none; }
+  .crumb a:hover { color: var(--accent); }
+  .page-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .page-meta {
+    margin: 0.35rem 0 1.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+  }
+  .site-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.65rem;
+  }
+  .site-grid.muted { opacity: 0.6; margin-top: 0.75rem; }
+  .site-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--fg);
+  }
+  a.site-card:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .site-card.empty { cursor: default; color: var(--fg-muted); }
+  .site-card-emoji { font-size: 1.2rem; }
+  .site-card-label {
+    font-family: var(--font-serif);
+    font-size: 0.98rem;
+    font-weight: 500;
+  }
+  .site-card-count {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--fg-muted);
+    background: var(--citation-bg);
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    min-width: 1.5rem;
+    text-align: center;
+  }
+</style>

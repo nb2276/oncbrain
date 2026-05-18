@@ -9,6 +9,7 @@ export type Bookmark = {
   author_handle: string | null;
   author_name: string | null;
   tweet_text: string | null;
+  tweet_html: string | null; // raw oEmbed blockquote — fed to Twitter widgets.js for image-rich rendering
   image_urls: string | null; // JSON-stringified array
   notes: string | null;
   fetched_via: 'oembed' | 'manual' | 'pending';
@@ -22,6 +23,7 @@ export type NewBookmark = {
   author_handle?: string | null;
   author_name?: string | null;
   tweet_text?: string | null;
+  tweet_html?: string | null;
   image_urls?: string[] | null;
   notes?: string | null;
   fetched_via?: 'oembed' | 'manual' | 'pending';
@@ -51,6 +53,7 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   author_handle TEXT,
   author_name TEXT,
   tweet_text TEXT,
+  tweet_html TEXT,
   image_urls TEXT,
   notes TEXT,
   fetched_via TEXT NOT NULL DEFAULT 'pending',
@@ -83,7 +86,19 @@ export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): D
   db.pragma('foreign_keys = ON');
   db.exec(SCHEMA);
   if (!isNew) detectAndGuardOldSchema(db);
+  migrateAddTweetHtml(db);
   return db;
+}
+
+// Non-destructive ALTER for v0.2.0: existing oncbrain.db files predate the
+// tweet_html column. SQLite ALTER TABLE ADD COLUMN is idempotent only via the
+// PRAGMA check — calling it twice errors. Skip silently if the column is
+// already there.
+function migrateAddTweetHtml(db: Database.Database): void {
+  const cols = db.prepare("PRAGMA table_info(bookmarks)").all() as { name: string }[];
+  if (!cols.some((c) => c.name === 'tweet_html')) {
+    db.exec('ALTER TABLE bookmarks ADD COLUMN tweet_html TEXT');
+  }
 }
 
 // The v1 schema had `day INTEGER NOT NULL` and `conference_slug NOT NULL`.
@@ -122,8 +137,8 @@ export function saveBookmark(db: Database.Database, b: NewBookmark): { id: numbe
   if (existing) return { id: existing.id, created: false };
 
   const stmt = db.prepare(`
-    INSERT INTO bookmarks (url, bookmark_date, conference_slug, author_handle, author_name, tweet_text, image_urls, notes, fetched_via, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO bookmarks (url, bookmark_date, conference_slug, author_handle, author_name, tweet_text, tweet_html, image_urls, notes, fetched_via, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const result = stmt.run(
     b.url,
@@ -132,6 +147,7 @@ export function saveBookmark(db: Database.Database, b: NewBookmark): { id: numbe
     b.author_handle ?? null,
     b.author_name ?? null,
     b.tweet_text ?? null,
+    b.tweet_html ?? null,
     b.image_urls ? JSON.stringify(b.image_urls) : null,
     b.notes ?? null,
     b.fetched_via ?? 'pending',
@@ -192,11 +208,23 @@ export function deleteBookmark(db: Database.Database, id: number): boolean {
 export function updateBookmarkFetched(
   db: Database.Database,
   id: number,
-  data: { author_handle: string | null; author_name: string | null; tweet_text: string },
+  data: {
+    author_handle: string | null;
+    author_name: string | null;
+    tweet_text: string;
+    tweet_html?: string | null;
+  },
 ): void {
   db.prepare(
-    'UPDATE bookmarks SET author_handle = ?, author_name = ?, tweet_text = ?, fetched_via = ? WHERE id = ?',
-  ).run(data.author_handle, data.author_name, data.tweet_text, 'oembed', id);
+    'UPDATE bookmarks SET author_handle = ?, author_name = ?, tweet_text = ?, tweet_html = COALESCE(?, tweet_html), fetched_via = ? WHERE id = ?',
+  ).run(
+    data.author_handle,
+    data.author_name,
+    data.tweet_text,
+    data.tweet_html ?? null,
+    'oembed',
+    id,
+  );
 }
 
 export function upsertConference(db: Database.Database, c: Conference): void {

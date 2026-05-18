@@ -14,6 +14,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createLlmClient, type LlmClient } from './llm-client.ts';
+import { diseaseSiteSlugList, isValidDiseaseSiteSlug } from './disease-sites.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -24,20 +25,30 @@ export type DigestInputTweet = {
   note?: string | null;
 };
 
-export type DigestCluster = {
-  topic: string;
-  emoji: string; // one emoji prefix from the prompt's emoji guide
-  intro: string; // clinical context — 1-2 sentences
-  methods: string | null; // trial design — 1-2 sentences when applicable
-  results: string[]; // short bullets, effect sizes verbatim
-  discussion: string[] | null; // implications/open questions, bullets
+// One specific finding/trial discussed in tweets. Each gets its own
+// one-sentence TL;DR plus bulleted details with effect sizes verbatim.
+export type DigestStudy = {
+  name: string; // trial name or specific topic ("PRESTIGE-PSMA", "RCC SBRT case series")
+  tldr: string; // single-sentence headline with primary effect size
+  details: string[]; // bullets — secondary endpoints, subgroup signals, methodology
+  nct: string | null; // primary NCT id if explicit in tweets
   tweet_ids: number[];
+};
+
+// Disease-site grouping — the curator's organizing axis. Studies for a site
+// are listed together; the site itself can carry one-line intro context and
+// site-level open questions.
+export type DigestSite = {
+  disease_site: string; // enum slug from disease-sites.ts
+  intro: string | null;
+  studies: DigestStudy[];
+  open_questions: string[] | null;
 };
 
 export type DigestOutput = {
   top_line: string; // one-sentence lede — the single most impactful finding
-  tldr: string; // 2-3 sentence synthesis across topics
-  clusters: DigestCluster[];
+  tldr: string; // 2-3 sentence synthesis across the day
+  sites: DigestSite[]; // grouped by disease site
 };
 
 export type BuildOptions = {
@@ -49,7 +60,7 @@ export type BuildOptions = {
   maxRetries?: number;
 };
 
-const DEFAULT_PROMPT_PATH = resolve(__dirname, '../../prompts/digest-v2.txt');
+const DEFAULT_PROMPT_PATH = resolve(__dirname, '../../prompts/digest-v3.txt');
 
 export async function buildDigest(
   tweets: DigestInputTweet[],
@@ -59,7 +70,7 @@ export async function buildDigest(
     return {
       top_line: 'No bookmarks for this day.',
       tldr: 'No bookmarks for this day.',
-      clusters: [],
+      sites: [],
     };
   }
 
@@ -67,6 +78,7 @@ export async function buildDigest(
   const prompt = promptTemplate
     .replace('{{CONFERENCE_NAME}}', opts.conferenceName)
     .replace('{{CONFERENCE_DAY}}', `Day ${opts.conferenceDay}`)
+    .replace('{{SITE_SLUGS}}', diseaseSiteSlugList())
     .replace('{{TWEETS_JSON}}', JSON.stringify(tweets, null, 2));
 
   const client = opts.client ?? createLlmClient();
@@ -143,41 +155,67 @@ export function parseDigest(raw: string): DigestOutput {
   const tldr = typeof obj.tldr === 'string' ? obj.tldr.trim() : '';
   if (!tldr) throw new DigestParseError('Missing or empty tldr', raw);
 
-  if (!Array.isArray(obj.clusters)) {
-    throw new DigestParseError('Missing or non-array clusters', raw);
+  if (!Array.isArray(obj.sites)) {
+    throw new DigestParseError('Missing or non-array sites', raw);
   }
 
-  const clusters: DigestCluster[] = [];
-  for (const c of obj.clusters) {
-    if (!c || typeof c !== 'object') continue;
-    const cluster = c as Record<string, unknown>;
-    const topic = typeof cluster.topic === 'string' ? cluster.topic.trim() : '';
-    const intro = typeof cluster.intro === 'string' ? cluster.intro.trim() : '';
-    const emoji = typeof cluster.emoji === 'string' ? cluster.emoji.trim() : '🩺';
-    const methods =
-      typeof cluster.methods === 'string' && cluster.methods.trim() ? cluster.methods.trim() : null;
-    const results = Array.isArray(cluster.results)
-      ? cluster.results
-          .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
-          .map((s) => s.trim())
-      : [];
-    const discussion =
-      Array.isArray(cluster.discussion) && cluster.discussion.length > 0
-        ? cluster.discussion
-            .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
-            .map((s) => s.trim())
+  const sites: DigestSite[] = [];
+  for (const s of obj.sites) {
+    if (!s || typeof s !== 'object') continue;
+    const site = s as Record<string, unknown>;
+    const slugRaw = typeof site.disease_site === 'string' ? site.disease_site.trim() : '';
+    if (!slugRaw) continue;
+    // Unknown slugs map to 'other' rather than dropping the whole site —
+    // the curator still has data worth showing.
+    const disease_site = isValidDiseaseSiteSlug(slugRaw) ? slugRaw : 'other';
+    const intro =
+      typeof site.intro === 'string' && site.intro.trim() ? site.intro.trim() : null;
+    const open_questions =
+      Array.isArray(site.open_questions) && site.open_questions.length > 0
+        ? site.open_questions
+            .filter((q): q is string => typeof q === 'string' && q.trim().length > 0)
+            .map((q) => q.trim())
         : null;
-    const tweet_ids = Array.isArray(cluster.tweet_ids)
-      ? cluster.tweet_ids.filter((n): n is number => typeof n === 'number' && Number.isFinite(n))
+    const studies = parseStudies(Array.isArray(site.studies) ? site.studies : []);
+    if (studies.length === 0) continue; // a site without studies has nothing to display
+    sites.push({ disease_site, intro, studies, open_questions });
+  }
+
+  if (sites.length === 0) {
+    throw new DigestParseError('No valid sites in response', raw);
+  }
+
+  return { top_line, tldr, sites };
+}
+
+function parseStudies(input: unknown[]): DigestStudy[] {
+  const out: DigestStudy[] = [];
+  for (const s of input) {
+    if (!s || typeof s !== 'object') continue;
+    const study = s as Record<string, unknown>;
+    const name = typeof study.name === 'string' ? study.name.trim() : '';
+    const studyTldr = typeof study.tldr === 'string' ? study.tldr.trim() : '';
+    const details = Array.isArray(study.details)
+      ? study.details
+          .filter((d): d is string => typeof d === 'string' && d.trim().length > 0)
+          .map((d) => d.trim())
       : [];
-    // A cluster needs topic + intro + at least one results bullet to be useful.
-    if (!topic || !intro || results.length === 0) continue;
-    clusters.push({ topic, emoji, intro, methods, results, discussion, tweet_ids });
+    const nctRaw =
+      typeof study.nct === 'string' && study.nct.trim() ? study.nct.trim().toUpperCase() : null;
+    // Normalize: accept "NCT12345678" or bare "12345678"; emit canonical form
+    // or null on failure to match.
+    const nct =
+      nctRaw && /^NCT\d{8}$/.test(nctRaw)
+        ? nctRaw
+        : nctRaw && /^\d{8}$/.test(nctRaw)
+          ? `NCT${nctRaw}`
+          : null;
+    const tweet_ids = Array.isArray(study.tweet_ids)
+      ? study.tweet_ids.filter((n): n is number => typeof n === 'number' && Number.isFinite(n))
+      : [];
+    // A study needs a name + tldr + at least one source tweet to be useful.
+    if (!name || !studyTldr || tweet_ids.length === 0) continue;
+    out.push({ name, tldr: studyTldr, details, nct, tweet_ids });
   }
-
-  if (clusters.length === 0) {
-    throw new DigestParseError('No valid clusters in response', raw);
-  }
-
-  return { top_line, tldr, clusters };
+  return out;
 }

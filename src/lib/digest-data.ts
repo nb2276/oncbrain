@@ -4,17 +4,29 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
+export type DigestStudy = {
+  name: string;
+  tldr: string;
+  details: string[];
+  nct: string | null;
+  tweet_ids: number[];
+};
+
+export type DigestSite = {
+  disease_site: string;
+  intro: string | null;
+  studies: DigestStudy[];
+  open_questions: string[] | null;
+};
+
 export type DigestArtifact = {
   date: string; // YYYY-MM-DD
   conference: { slug: string; name: string } | null;
   generated_at: number;
   digest: {
+    top_line: string;
     tldr: string;
-    clusters: Array<{
-      topic: string;
-      summary: string;
-      tweet_ids: number[];
-    }>;
+    sites: DigestSite[];
   };
   bookmarks: Array<{
     id: number;
@@ -23,6 +35,7 @@ export type DigestArtifact = {
     author_handle: string | null;
     author_name: string | null;
     text: string;
+    html: string | null;
     note: string | null;
     fetched_via: string;
     conference_slug: string | null;
@@ -64,6 +77,46 @@ export type ConferenceSummary = {
   name: string;
   dates: string[]; // YYYY-MM-DD, newest first
 };
+
+// Aggregation by disease site: every study from every digest that's tagged with
+// the given site, newest first. Used by /sites/[site]/ pages.
+export type SiteStudyOccurrence = {
+  date: string; // YYYY-MM-DD
+  conference: { slug: string; name: string } | null;
+  study: DigestStudy;
+  bookmarks: DigestArtifact['bookmarks']; // bookmarks referenced by this study's tweet_ids
+};
+
+export type SiteSummary = {
+  disease_site: string;
+  occurrences: SiteStudyOccurrence[];
+};
+
+export function listSiteSummaries(): SiteSummary[] {
+  const bySite = new Map<string, SiteStudyOccurrence[]>();
+  for (const artifact of listDigests()) {
+    const bookmarkById = new Map(artifact.bookmarks.map((b) => [b.id, b]));
+    for (const site of artifact.digest.sites) {
+      if (!bySite.has(site.disease_site)) bySite.set(site.disease_site, []);
+      const list = bySite.get(site.disease_site)!;
+      for (const study of site.studies) {
+        const studyBookmarks = study.tweet_ids
+          .map((id) => bookmarkById.get(id))
+          .filter((b): b is NonNullable<typeof b> => Boolean(b));
+        list.push({
+          date: artifact.date,
+          conference: artifact.conference,
+          study,
+          bookmarks: studyBookmarks,
+        });
+      }
+    }
+  }
+  return Array.from(bySite.entries()).map(([disease_site, occurrences]) => ({
+    disease_site,
+    occurrences: occurrences.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)),
+  }));
+}
 
 // Groups all conference-tagged digests by their conference slug.
 // Used for the conference index pages and for the homepage badges.
