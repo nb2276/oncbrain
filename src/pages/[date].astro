@@ -215,42 +215,49 @@ const title = conference ? `${conference.name} — ${date}` : date;
     flex: 1;
   }
 
-  /* ── IMRD blocks ───────────────────────────────────────────── */
+  /* ── IMRD blocks ───────────────────────────────────────────────────
+     Intent: Results is THE block that needs a card (it carries the
+     effect sizes the reader is scanning for). Intro / Methods /
+     Discussion read as prose with a small uppercase label, so the
+     cluster flows top-to-bottom like a journal paragraph instead of
+     a 4-card dashboard. */
   .imrd {
-    margin-top: 1rem;
+    margin-top: 1.1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
+    gap: 1.1rem;
   }
   .block {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0.85rem 1rem;
+    /* Default: no card chrome. Just label + content. */
+    padding: 0;
   }
   .block-label {
-    font-size: 0.78rem;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--fg-muted);
     margin-bottom: 0.4rem;
   }
   .block > div:not(.block-label),
   .block > ul {
-    line-height: 1.5;
+    line-height: 1.55;
     color: var(--fg);
     margin: 0;
   }
   .block ul {
-    padding-left: 1.15rem;
+    padding-left: 1.25rem;
   }
   .block li {
-    margin: 0.25rem 0;
+    margin: 0.4rem 0;
   }
-  /* Results gets a subtle highlight — the most important block visually. */
+  /* Results is THE block. Carded, accent-tinted, slightly heavier label. */
   .block.results {
     background: var(--accent-bg);
-    border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 0.9rem 1.1rem;
   }
   .block.results .block-label {
     color: var(--accent);
