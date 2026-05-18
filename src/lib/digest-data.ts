@@ -14,6 +14,13 @@ export type DigestDetail =
   | { text: string; subdetails: string[] }
   | { text: string; table: DigestTable };
 
+// v0.5+: typed source reference. Resolves to bookmarks/papers/slides
+// in the rendered page. Older v0.4 artifacts use tweet_ids only.
+export type DigestSourceRef =
+  | { type: 'tweet'; id: number }
+  | { type: 'paper'; id: number }
+  | { type: 'slide'; id: number };
+
 export type DigestStudy = {
   name: string;
   tldr: string;
@@ -24,7 +31,35 @@ export type DigestStudy = {
   key_figure_url?: string | null;
   key_figure_caption?: string | DigestTable | null;
   nct: string | null;
+  // v0.4: synthetic ids. v0.5+ prefers source_ids for typed refs.
   tweet_ids: number[];
+  source_ids?: DigestSourceRef[];
+};
+
+export type DigestArtifactPaper = {
+  id: number;
+  pmid: string;
+  doi: string | null;
+  pmc_id: string | null;
+  title: string;
+  authors: string[];
+  journal: string | null;
+  pub_date: string | null;
+  abstract: string | null;
+  fulltext_excerpt_md: string | null;
+  note: string | null;
+};
+
+export type DigestArtifactSlide = {
+  id: number;
+  file_path: string;
+  mime_type: string;
+  width: number | null;
+  height: number | null;
+  source_label: string | null;
+  ocr_text: string | null;
+  note: string | null;
+  source_batch_key: string | null;
 };
 
 export type DigestSite = {
@@ -68,6 +103,8 @@ export type DigestArtifact = {
     fetched_via: string;
     conference_slug: string | null;
   }>;
+  papers?: DigestArtifactPaper[]; // v0.5+
+  slides?: DigestArtifactSlide[]; // v0.5+
 };
 
 const DIGEST_ROOT = resolve(process.cwd(), 'data/digests');

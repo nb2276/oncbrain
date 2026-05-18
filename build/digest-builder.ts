@@ -21,15 +21,26 @@ import {
   openDb,
   listBookmarks,
   listBookmarkDates,
+  listPapers,
+  listSlideUploads,
   updateBookmarkFetched,
   updateBookmarkOcrTexts,
   dominantConferenceForDate,
   getConference,
   todayIso,
   type Bookmark,
+  type Paper,
+  type SlideUpload,
 } from '../src/lib/db.ts';
 import { fetchTweet, TweetFetchError } from '../src/lib/twitter-fetch.ts';
-import { buildDigest, type DigestInputTweet, type DigestOutput } from '../src/lib/llm-pipeline.ts';
+import {
+  buildDigest,
+  type DigestInputItem,
+  type DigestInputTweet,
+  type DigestInputPaper,
+  type DigestInputSlide,
+  type DigestOutput,
+} from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import {
   isOcrAvailable,
@@ -118,6 +129,7 @@ function toDigestInput(bookmarks: Bookmark[]): DigestInputTweet[] {
   return bookmarks
     .filter((b) => (b.tweet_text || '').trim().length > 0)
     .map((b) => ({
+      source_type: 'tweet' as const,
       id: b.id,
       author: b.author_handle ?? b.author_name ?? null,
       text: b.tweet_text!,
@@ -127,6 +139,60 @@ function toDigestInput(bookmarks: Bookmark[]): DigestInputTweet[] {
       // (hash, version) stays in the DB layer; the LLM doesn't need it.
       image_ocr_texts: parseOcrEntries(b.image_ocr_texts).map((e) => e.text),
     }));
+}
+
+function papersToDigestInput(papers: Paper[]): DigestInputPaper[] {
+  return papers.map((p) => ({
+    source_type: 'paper' as const,
+    id: p.id,
+    pmid: p.pmid,
+    title: p.title,
+    authors: parseJsonStringArray(p.authors_json, 'name'),
+    journal: p.journal,
+    pub_date: p.pub_date,
+    abstract: p.abstract,
+    fulltext_excerpt_md: p.fulltext_excerpt_md,
+    doi: p.doi,
+    mesh_terms: parseJsonStringArray(p.mesh_terms_json),
+    note: p.curator_note,
+  }));
+}
+
+function slidesToDigestInput(slides: SlideUpload[]): DigestInputSlide[] {
+  return slides
+    .filter((s) => (s.ocr_text || '').trim().length > 0 || (s.source_label || '').trim().length > 0)
+    .map((s) => ({
+      source_type: 'slide' as const,
+      id: s.id,
+      file_path: s.file_path,
+      source_label: s.source_label,
+      ocr_text: s.ocr_text,
+      note: s.curator_note,
+      width: s.width,
+      height: s.height,
+    }));
+}
+
+// papers.authors_json is stored as [{name, affiliation?}]; mesh_terms_json
+// is stored as [string]. Both need tolerant parsing.
+function parseJsonStringArray(raw: string | null, field?: string): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    if (field) {
+      return parsed
+        .map((item) =>
+          item && typeof item === 'object' && typeof (item as Record<string, unknown>)[field] === 'string'
+            ? ((item as Record<string, unknown>)[field] as string)
+            : null,
+        )
+        .filter((x): x is string => Boolean(x));
+    }
+    return parsed.filter((x): x is string => typeof x === 'string');
+  } catch {
+    return [];
+  }
 }
 
 function parseImageUrls(raw: string | null): string[] {
@@ -208,9 +274,34 @@ type DigestArtifact = {
     text: string;
     html: string | null;
     image_urls: string[];
+    image_ocr_texts?: string[];
     note: string | null;
     fetched_via: string;
     conference_slug: string | null;
+  }>;
+  papers?: Array<{
+    id: number;
+    pmid: string;
+    doi: string | null;
+    pmc_id: string | null;
+    title: string;
+    authors: string[];
+    journal: string | null;
+    pub_date: string | null;
+    abstract: string | null;
+    fulltext_excerpt_md: string | null;
+    note: string | null;
+  }>;
+  slides?: Array<{
+    id: number;
+    file_path: string;
+    mime_type: string;
+    width: number | null;
+    height: number | null;
+    source_label: string | null;
+    ocr_text: string | null;
+    note: string | null;
+    source_batch_key: string | null;
   }>;
 };
 
@@ -218,6 +309,8 @@ function buildArtifact(
   date: string,
   conference: { slug: string; name: string } | null,
   bookmarks: Bookmark[],
+  papers: Paper[],
+  slides: SlideUpload[],
   digest: DigestOutput,
 ): DigestArtifact {
   return {
@@ -239,6 +332,34 @@ function buildArtifact(
       fetched_via: b.fetched_via,
       conference_slug: b.conference_slug,
     })),
+    papers: papers.length > 0
+      ? papers.map((p) => ({
+          id: p.id,
+          pmid: p.pmid,
+          doi: p.doi,
+          pmc_id: p.pmc_id,
+          title: p.title,
+          authors: parseJsonStringArray(p.authors_json, 'name'),
+          journal: p.journal,
+          pub_date: p.pub_date,
+          abstract: p.abstract,
+          fulltext_excerpt_md: p.fulltext_excerpt_md,
+          note: p.curator_note,
+        }))
+      : undefined,
+    slides: slides.length > 0
+      ? slides.map((s) => ({
+          id: s.id,
+          file_path: s.file_path,
+          mime_type: s.mime_type,
+          width: s.width,
+          height: s.height,
+          source_label: s.source_label,
+          ocr_text: s.ocr_text,
+          note: s.curator_note,
+          source_batch_key: s.source_batch_key,
+        }))
+      : undefined,
   };
 }
 
@@ -259,8 +380,11 @@ function writeArtifact(args: Args, artifact: DigestArtifact): { json: string; ob
 
 async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: string): Promise<void> {
   const allForDate = listBookmarks(db, { bookmark_date: date });
-  if (allForDate.length === 0) {
-    console.log(`${date}: no bookmarks, skipping.`);
+  const papersForDate = listPapers(db, { bookmark_date: date });
+  const slidesForDate = listSlideUploads(db, { bookmark_date: date });
+
+  if (allForDate.length === 0 && papersForDate.length === 0 && slidesForDate.length === 0) {
+    console.log(`${date}: no bookmarks/papers/slides, skipping.`);
     return;
   }
 
@@ -278,8 +402,8 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
   const bookmarks = listBookmarks(db, { bookmark_date: date }).filter(
     (b) => (b.tweet_text || '').trim().length > 0,
   );
-  if (bookmarks.length === 0) {
-    console.warn(`${date}: no bookmarks with usable text after fetch; skipping.`);
+  if (bookmarks.length === 0 && papersForDate.length === 0 && slidesForDate.length === 0) {
+    console.warn(`${date}: no usable items after fetch; skipping.`);
     return;
   }
 
@@ -288,10 +412,13 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
   const confMeta = conference ? { slug: conference.slug, name: conference.name } : null;
 
   console.log(
-    `${date}${confMeta ? ` · ${confMeta.name}` : ''}: ${bookmarks.length} bookmark(s) → digest`,
+    `${date}${confMeta ? ` · ${confMeta.name}` : ''}: ${bookmarks.length} tweet(s), ${papersForDate.length} paper(s), ${slidesForDate.length} slide(s) → digest`,
   );
 
-  const inputs = toDigestInput(bookmarks);
+  const tweetInputs = toDigestInput(bookmarks);
+  const paperInputs = papersToDigestInput(papersForDate);
+  const slideInputs = slidesToDigestInput(slidesForDate);
+  const inputs: DigestInputItem[] = [...tweetInputs, ...paperInputs, ...slideInputs];
   let digest: DigestOutput;
   if (args.dryRun) {
     digest = {
@@ -329,7 +456,7 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
     });
   }
 
-  const artifact = buildArtifact(date, confMeta, bookmarks, digest);
+  const artifact = buildArtifact(date, confMeta, bookmarks, papersForDate, slidesForDate, digest);
   const paths = writeArtifact(args, artifact);
   console.log(`  wrote ${paths.json}`);
   console.log(`  wrote ${paths.obsidian}`);

@@ -30,10 +30,17 @@ import { createLlmClient, type LlmClient, type LlmContentBlock } from './llm-cli
 import { diseaseSiteSlugList, isValidDiseaseSiteSlug } from './disease-sites.ts';
 import { loadStudyContext, isSafeSlug } from './study-retrieval.ts';
 import { isOcrAvailable, isSafeImageUrl } from './vision-ocr.ts';
+import { buildAssociationGraph, renderGroupsForPrompt } from './source-association.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// v0.5 Phase D: pipeline accepts a union of source types. Tweets keep their
+// existing shape (with source_type discriminator added for type narrowing);
+// papers carry abstract + fulltext excerpt; slides carry OCR text + source
+// label. Phase 1-3 prompts know about source_type and treat each item
+// appropriately. Back-compat: callers that only pass tweets continue to work.
 export type DigestInputTweet = {
+  source_type?: 'tweet'; // default; optional for v0.4 callers
   id: number;
   author: string | null;
   text: string;
@@ -43,6 +50,113 @@ export type DigestInputTweet = {
   // Empty string = OCR not available / failed for that image.
   image_ocr_texts?: string[];
 };
+
+export type DigestInputPaper = {
+  source_type: 'paper';
+  id: number; // papers.id
+  pmid: string;
+  title: string;
+  authors?: string[] | null;
+  journal?: string | null;
+  pub_date?: string | null;
+  abstract?: string | null;
+  fulltext_excerpt_md?: string | null;
+  doi?: string | null;
+  mesh_terms?: string[];
+  note?: string | null;
+};
+
+export type DigestInputSlide = {
+  source_type: 'slide';
+  id: number; // slide_uploads.id
+  file_path: string;
+  source_label?: string | null;
+  ocr_text?: string | null;
+  note?: string | null;
+  width?: number | null;
+  height?: number | null;
+};
+
+export type DigestInputItem = DigestInputTweet | DigestInputPaper | DigestInputSlide;
+
+// Reference to a source for rendering. The Astro layer (Phase E) resolves
+// these back to bookmarks / papers / slide_uploads rows via the artifact.
+export type DigestSourceRef =
+  | { type: 'tweet'; id: number }
+  | { type: 'paper'; id: number }
+  | { type: 'slide'; id: number };
+
+function isTweet(i: DigestInputItem): i is DigestInputTweet {
+  return !i.source_type || i.source_type === 'tweet';
+}
+function isPaper(i: DigestInputItem): i is DigestInputPaper {
+  return i.source_type === 'paper';
+}
+function isSlide(i: DigestInputItem): i is DigestInputSlide {
+  return i.source_type === 'slide';
+}
+
+// Normalize any DigestInputItem to a "tweet-shaped" payload for the
+// existing pipeline machinery (image_urls + image_ocr_texts arrays,
+// text-only body). The pipeline doesn't care about deep type differences;
+// the prompt is what reads source_type for editorial framing.
+function itemToTweetShape(item: DigestInputItem): DigestInputTweet {
+  if (isTweet(item)) return { ...item, source_type: 'tweet' };
+  if (isPaper(item)) {
+    const parts: string[] = [];
+    parts.push(`[PAPER ${item.pmid}${item.doi ? ` doi:${item.doi}` : ''}]`);
+    parts.push(`Title: ${item.title}`);
+    if (item.authors && item.authors.length > 0) {
+      parts.push(`Authors: ${item.authors.slice(0, 6).join('; ')}${item.authors.length > 6 ? ' et al.' : ''}`);
+    }
+    if (item.journal) parts.push(`Journal: ${item.journal}${item.pub_date ? ` (${item.pub_date})` : ''}`);
+    if (item.abstract) parts.push(`\nAbstract:\n${item.abstract}`);
+    if (item.fulltext_excerpt_md)
+      parts.push(`\nMethods/Results excerpt:\n${item.fulltext_excerpt_md}`);
+    if (item.mesh_terms && item.mesh_terms.length > 0)
+      parts.push(`\nMeSH: ${item.mesh_terms.slice(0, 8).join(', ')}`);
+    return {
+      source_type: 'tweet', // pipeline plumbing treats it as text
+      id: paperIdToSyntheticTweetId(item.id),
+      author: item.authors?.[0] ?? null,
+      text: parts.join('\n'),
+      note: item.note ?? null,
+      image_urls: [],
+      image_ocr_texts: [],
+    };
+  }
+  // slide
+  const slideParts: string[] = [];
+  slideParts.push(`[SLIDE${item.source_label ? ` — ${item.source_label}` : ''}]`);
+  if (item.ocr_text) slideParts.push(`OCR text:\n${item.ocr_text}`);
+  else slideParts.push('(no OCR text available)');
+  return {
+    source_type: 'tweet',
+    id: slideIdToSyntheticTweetId(item.id),
+    author: item.source_label ?? null,
+    text: slideParts.join('\n'),
+    note: item.note ?? null,
+    image_urls: [],
+    image_ocr_texts: [],
+  };
+}
+
+// Synthetic id namespacing so paper/slide ids don't collide with tweet ids
+// inside the pipeline's internal maps. Reverse-mapped at render time.
+// Tweet ids stay as-is. Papers occupy 1e9-2e9. Slides occupy 2e9-3e9.
+const PAPER_ID_OFFSET = 1_000_000_000;
+const SLIDE_ID_OFFSET = 2_000_000_000;
+export function paperIdToSyntheticTweetId(id: number): number {
+  return PAPER_ID_OFFSET + id;
+}
+export function slideIdToSyntheticTweetId(id: number): number {
+  return SLIDE_ID_OFFSET + id;
+}
+export function syntheticIdToSourceRef(id: number): DigestSourceRef {
+  if (id >= SLIDE_ID_OFFSET) return { type: 'slide', id: id - SLIDE_ID_OFFSET };
+  if (id >= PAPER_ID_OFFSET) return { type: 'paper', id: id - PAPER_ID_OFFSET };
+  return { type: 'tweet', id };
+}
 
 // A detail bullet. v0.4.x form evolves:
 //   - v0.4.0: flat string
@@ -68,7 +182,13 @@ export type DigestStudy = {
   // the figure has 2+ rows × 2+ columns of comparable data.
   key_figure_caption: string | DigestTable | null;
   nct: string | null;
+  // Back-compat: synthetic ids the pipeline uses internally. Renderers MAY
+  // use this directly (v0.4 path), or prefer source_ids for typed refs.
   tweet_ids: number[];
+  // v0.5+: typed references to source items. Resolves to bookmarks (tweet),
+  // papers (paper), or slide_uploads (slide). Older v0.4 artifacts won't
+  // have this — consumers should fall back to tweet_ids.
+  source_ids?: DigestSourceRef[];
 };
 
 // Type guards used by parser, validator, and renderers.
@@ -156,10 +276,19 @@ type SiteMeta = {
 };
 
 export async function buildDigest(
-  tweets: DigestInputTweet[],
+  items: DigestInputItem[],
   opts: BuildOptions,
 ): Promise<DigestOutput> {
   const ocrAvailable = isOcrAvailable();
+
+  // v0.5 Phase D: accept the typed union. Internal pipeline still operates
+  // on tweet-shaped items (text + image arrays); papers and slides are
+  // converted to tweet-shape with synthetic ids that round-trip to typed
+  // source refs on output.
+  const tweets: DigestInputTweet[] = items.map(itemToTweetShape);
+  // Association hints from NCT + acronym matching across original items.
+  // Passed to Phase 1 as a soft prompt addendum.
+  const associationGroups = buildAssociationGraph(items);
 
   if (tweets.length === 0) {
     return {
@@ -179,7 +308,7 @@ export async function buildDigest(
   const maxRetries = opts.maxRetries ?? 1;
 
   // Phase 1
-  const clusters = await runGroupingPhase(client, tweets, opts, maxRetries);
+  const clusters = await runGroupingPhase(client, tweets, opts, maxRetries, associationGroups);
   if (clusters.length === 0) {
     throw new DigestParseError('Phase 1 produced no clusters. Cannot continue.');
   }
@@ -239,10 +368,22 @@ export async function buildDigest(
     }
   }
 
+  // v0.5 Phase D: attach typed source_ids to each study by reverse-mapping
+  // synthetic tweet_ids back to {type, id} refs. Older v0.4 artifacts still
+  // get rendered via tweet_ids fallback; new ones prefer source_ids.
+  const attachSourceIds = (study: DigestStudy): DigestStudy => ({
+    ...study,
+    source_ids: study.tweet_ids.map((id) => syntheticIdToSourceRef(id)),
+  });
+  const sitesWithSourceIds = Array.from(sitesMap.values()).map((site) => ({
+    ...site,
+    studies: site.studies.map(attachSourceIds),
+  }));
+
   return {
     top_line: synthesis.top_line,
     tldr: synthesis.tldr,
-    sites: Array.from(sitesMap.values()),
+    sites: sitesWithSourceIds,
     meta: {
       clusters_total: clusters.length,
       studies_analyzed: successful.length,
@@ -261,6 +402,7 @@ async function runGroupingPhase(
   tweets: DigestInputTweet[],
   opts: BuildOptions,
   maxRetries: number,
+  associationGroups: ReturnType<typeof buildAssociationGraph> = [],
 ): Promise<StudyCluster[]> {
   const promptPath = opts.promptPaths?.grouping ?? DEFAULT_PROMPTS.grouping;
   const template = readFileSync(promptPath, 'utf-8');
@@ -273,11 +415,14 @@ async function runGroupingPhase(
     note: t.note ?? null,
   }));
 
+  const associationHints = renderGroupsForPrompt(associationGroups);
+
   const prompt = template
     .replace('{{CONFERENCE_NAME}}', opts.conferenceName)
     .replace('{{CONFERENCE_DAY}}', `Day ${opts.conferenceDay}`)
     .replace('{{SITE_SLUGS}}', diseaseSiteSlugList())
     .replace('{{IMAGE_MANIFEST}}', manifest.text)
+    .replace('{{ASSOCIATION_HINTS}}', associationHints)
     .replace('{{TWEETS_JSON}}', JSON.stringify(tweetsForPrompt, null, 2));
 
   const content: LlmContentBlock[] = [];

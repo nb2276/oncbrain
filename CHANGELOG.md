@@ -2,6 +2,36 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — v0.5 Phase D — 2026-05-18
+
+Papers and slides reach the LLM pipeline. `buildDigest` now accepts a `DigestInputItem` union (tweet | paper | slide); `digest-builder` gathers all three source types for the date and assembles them. A new source-association layer builds NCT + trial-acronym weighted hints that Phase 1 receives as a soft addendum (codex P0 #2, #3 — soft hints only; model can override on content contradiction).
+
+### Added
+
+- **`DigestInputItem` union** in `src/lib/llm-pipeline.ts`: discriminated by `source_type` ('tweet' | 'paper' | 'slide'). Tweets stay shape-compatible with v0.4 callers (source_type optional). Papers carry pmid + title + authors + abstract + Methods/Results excerpt + MeSH. Slides carry file_path + ocr_text + source_label.
+- **`src/lib/source-association.ts`** with `buildAssociationGraph()`: NCT match = strength 10, multi-occurrence trial acronym = strength 3, single-occurrence acronym ignored. Acronym blacklist filters genes (TP53, BRCA, HER2, EGFR), endpoints (OS, PFS, HR, CI), and disease shorthand (mCRPC, NSCLC, etc.) so over-merge is bounded. Hints render into the Phase 1 prompt as `STRONG`/`medium` labeled lines.
+- **`{{ASSOCIATION_HINTS}}` placeholder** in `prompts/digest-v5-grouping.txt`. Soft hints only — the model has final say on clustering.
+- **`DigestStudy.source_ids`**: typed source references `Array<{type, id}>` alongside the back-compat `tweet_ids`. Renderers prefer `source_ids` when present.
+- **Artifact JSON gains `papers[]` and `slides[]`** alongside existing `bookmarks[]`. Optional — only emitted when papers/slides exist for the date.
+- **Synthetic id namespacing**: papers occupy `1_000_000_000+`, slides `2_000_000_000+` inside the pipeline's tweet-shape plumbing. Reverse-mapped to typed refs on output via `syntheticIdToSourceRef`.
+
+### Changed
+
+- **`buildDigest(items, opts)`** signature now `DigestInputItem[]`. v0.4 callers passing `DigestInputTweet[]` continue to work — the union accepts tweet shapes.
+- **Phase 1 prompt** acknowledges the three source types and instructs the model to read `[PAPER ...]` / `[SLIDE ...]` markers at the start of each item's text payload.
+- **`buildArtifact`** signature: now accepts bookmarks + papers + slides (was bookmarks only).
+
+### Engineering
+
+- 298 tests (was 290, +8 for source-association weighted edges and acronym blacklist).
+- 0 type errors across 45 files.
+- Existing 2026-05-17 artifact (v0.4.4) continues to render unchanged via the back-compat fallback paths.
+
+### Not yet shipped
+
+- Astro doesn't render the new paper/slide sources yet — Phase E adds source-attribution badges, abstract toggles, and the `/slides/[uuid]` static route.
+- Source-tagged Phase 2 claims (codex P1 #6 mixed-source hallucination guard) deferred to a v0.5.1 hardening hotfix.
+
 ## [Unreleased] — v0.5 Phase C — 2026-05-18
 
 Slide photos join the ingestion pipeline. Send a photo to @oncbrain_bot and it gets downloaded via the Telegram getFile API, saved to `data/slide-photos/<date>/<uuid>.<ext>`, OCR'd via Apple Vision, and stored in a new `slide_uploads` table. Photos are curator-private by default (gitignored); committing them to make them public is a per-deployment choice that Phase E will surface in the rendering layer.
