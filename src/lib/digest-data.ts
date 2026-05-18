@@ -36,6 +36,7 @@ export type DigestArtifact = {
     author_name: string | null;
     text: string;
     html: string | null;
+    image_urls: string[];
     note: string | null;
     fetched_via: string;
     conference_slug: string | null;

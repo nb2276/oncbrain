@@ -14,6 +14,7 @@ export type FetchedTweet = {
   author_name: string | null;
   author_handle: string | null;
   html: string; // raw oEmbed blockquote — fed to widgets.js for image-rich rendering
+  image_urls: string[]; // direct pbs.twimg.com URLs (from syndication CDN)
 };
 
 export class TweetFetchError extends Error {
@@ -31,6 +32,8 @@ export type FetchOptions = {
   timeoutMs?: number;
   fetchImpl?: typeof fetch; // injected for tests
 };
+
+import { fetchTweetSyndication, TweetSyndicationError } from './tweet-syndication.ts';
 
 const OEMBED_BASE = 'https://publish.twitter.com/oembed';
 
@@ -94,11 +97,28 @@ export async function fetchTweet(url: string, opts: FetchOptions = {}): Promise<
     throw new TweetFetchError('Could not extract tweet text from oEmbed html', 'parse');
   }
 
+  // Parallel: ask the syndication CDN for direct image URLs. Failures here
+  // are non-fatal — we still return the tweet with image_urls=[] so the
+  // caller can render text + the twitter widget (the widget loads images via
+  // its own path).
+  let image_urls: string[] = [];
+  try {
+    const syn = await fetchTweetSyndication(url, { fetchImpl: opts.fetchImpl, timeoutMs });
+    image_urls = syn.photos.map((p) => p.url);
+  } catch (err) {
+    if (err instanceof TweetSyndicationError) {
+      // Quiet — caller usually doesn't care if syndication path is unavailable.
+    } else {
+      throw err;
+    }
+  }
+
   return {
     text,
     author_name: authorName,
     author_handle: deriveHandleFromUrl(authorUrl),
     html: htmlField,
+    image_urls,
   };
 }
 

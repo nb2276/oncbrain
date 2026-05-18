@@ -13,7 +13,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { createLlmClient, type LlmClient } from './llm-client.ts';
+import { createLlmClient, type LlmClient, type LlmContentBlock } from './llm-client.ts';
 import { diseaseSiteSlugList, isValidDiseaseSiteSlug } from './disease-sites.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -23,6 +23,10 @@ export type DigestInputTweet = {
   author: string | null;
   text: string;
   note?: string | null;
+  // Direct pbs.twimg.com URLs for photos attached to the tweet.
+  // The pipeline attaches these as image content blocks so the LLM can
+  // read slide screenshots, KM curves, study schemas, etc.
+  image_urls?: string[];
 };
 
 // One specific finding/trial discussed in tweets. Each gets its own
@@ -60,7 +64,7 @@ export type BuildOptions = {
   maxRetries?: number;
 };
 
-const DEFAULT_PROMPT_PATH = resolve(__dirname, '../../prompts/digest-v3.txt');
+const DEFAULT_PROMPT_PATH = resolve(__dirname, '../../prompts/digest-v4.txt');
 
 export async function buildDigest(
   tweets: DigestInputTweet[],
@@ -75,10 +79,32 @@ export async function buildDigest(
   }
 
   const promptTemplate = readFileSync(opts.promptPath ?? DEFAULT_PROMPT_PATH, 'utf-8');
+
+  // Build an image manifest so the LLM can map attached image blocks back to
+  // their source tweets. Images are listed in attachment order (tweet 1's
+  // images first, then tweet 2's, etc.) — the same order they appear as
+  // LlmImageBlocks in the user message below.
+  const imageManifest: { tweet_id: number; image_index: number; global_index: number }[] = [];
+  let globalIdx = 0;
+  for (const t of tweets) {
+    const urls = t.image_urls ?? [];
+    urls.forEach((_, idx) => {
+      globalIdx++;
+      imageManifest.push({ tweet_id: t.id, image_index: idx + 1, global_index: globalIdx });
+    });
+  }
+  const imageManifestText =
+    imageManifest.length === 0
+      ? 'No images attached.'
+      : imageManifest
+          .map((m) => `  Image ${m.global_index}: tweet id ${m.tweet_id}, attached image #${m.image_index}`)
+          .join('\n');
+
   const prompt = promptTemplate
     .replace('{{CONFERENCE_NAME}}', opts.conferenceName)
     .replace('{{CONFERENCE_DAY}}', `Day ${opts.conferenceDay}`)
     .replace('{{SITE_SLUGS}}', diseaseSiteSlugList())
+    .replace('{{IMAGE_MANIFEST}}', imageManifestText)
     .replace('{{TWEETS_JSON}}', JSON.stringify(tweets, null, 2));
 
   const client = opts.client ?? createLlmClient();
@@ -93,11 +119,23 @@ export async function buildDigest(
         ? prompt
         : `${prompt}\n\nYour previous response could not be parsed as JSON. Re-emit ONLY the JSON object, no other text. Previous response was:\n${lastRaw}`;
 
+    // Build multimodal message: image content blocks (in manifest order) then
+    // the text prompt. Anthropic API ignores order within a user message but
+    // we keep images-first for the LLM's "context-loading" pattern.
+    const content: LlmContentBlock[] = [];
+    for (const t of tweets) {
+      for (const url of t.image_urls ?? []) content.push({ type: 'image', url });
+    }
+    content.push({ type: 'text', text: userPrompt });
+
     let raw: string;
     try {
-      raw = await client.complete([{ role: 'user', content: userPrompt }], {
+      raw = await client.complete([{ role: 'user', content }], {
         model: opts.model,
-        maxTokens: 4096,
+        // v4 outputs are longer (per-study bullets including comparison +
+        // critique). Headroom matters more than tight budgeting for a side
+        // project digest.
+        maxTokens: 8192,
         temperature: 0,
       });
     } catch (err) {

@@ -2,7 +2,7 @@
 
 Curated AI-summarized digest of oncology updates. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, etc.).
 
-**Live:** https://oncbrain.oncologytoolkit.com · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.2.0
+**Live:** https://oncbrain.oncologytoolkit.com · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.3.0
 
 ## Architecture
 

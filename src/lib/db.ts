@@ -213,15 +213,26 @@ export function updateBookmarkFetched(
     author_name: string | null;
     tweet_text: string;
     tweet_html?: string | null;
+    image_urls?: string[] | null;
   },
 ): void {
+  // COALESCE patterns mean: if the new fetch didn't return a value, leave
+  // any pre-existing column value in place rather than nulling it out.
   db.prepare(
-    'UPDATE bookmarks SET author_handle = ?, author_name = ?, tweet_text = ?, tweet_html = COALESCE(?, tweet_html), fetched_via = ? WHERE id = ?',
+    `UPDATE bookmarks
+        SET author_handle = ?,
+            author_name = ?,
+            tweet_text = ?,
+            tweet_html = COALESCE(?, tweet_html),
+            image_urls = COALESCE(?, image_urls),
+            fetched_via = ?
+      WHERE id = ?`,
   ).run(
     data.author_handle,
     data.author_name,
     data.tweet_text,
     data.tweet_html ?? null,
+    data.image_urls ? JSON.stringify(data.image_urls) : null,
     'oembed',
     id,
   );

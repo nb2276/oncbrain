@@ -21,9 +21,15 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 
+export type LlmTextBlock = { type: 'text'; text: string };
+export type LlmImageBlock = { type: 'image'; url: string };
+export type LlmContentBlock = LlmTextBlock | LlmImageBlock;
+
 export type LlmMessage = {
   role: 'user' | 'assistant';
-  content: string;
+  // string for simple text-only messages; LlmContentBlock[] for multimodal
+  // (e.g., image + text in one user turn).
+  content: string | LlmContentBlock[];
 };
 
 export type LlmCompleteOptions = {
@@ -49,10 +55,22 @@ export class AnthropicLlmClient implements LlmClient {
       model: opts.model ?? DEFAULT_API_MODEL,
       max_tokens: opts.maxTokens ?? DEFAULT_MAX_TOKENS,
       temperature: opts.temperature ?? 0,
-      messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      messages: messages.map((m) => ({
+        role: m.role,
+        content: typeof m.content === 'string' ? m.content : m.content.map(toAnthropicBlock),
+      })),
     });
     return extractTextFromApiResponse(response);
   }
+}
+
+// Map our portable content blocks to Anthropic's SDK shape.
+function toAnthropicBlock(block: LlmContentBlock) {
+  if (block.type === 'text') return { type: 'text' as const, text: block.text };
+  return {
+    type: 'image' as const,
+    source: { type: 'url' as const, url: block.url },
+  };
 }
 
 function extractTextFromApiResponse(response: {
@@ -96,7 +114,10 @@ export class ClaudeCliLlmClient implements LlmClient {
   async complete(messages: LlmMessage[], opts: LlmCompleteOptions = {}): Promise<string> {
     const binary = this.opts.binary ?? 'claude';
     const spawnFn = this.opts.spawn ?? (spawn as SpawnFn);
-    const timeoutMs = this.opts.timeoutMs ?? 120_000;
+    // 10-minute default — the v4 digest prompt with comparative analysis on
+    // a full day of tweets can take 2-5 minutes on the subscription path,
+    // especially during high-load periods. Headroom > tight budget.
+    const timeoutMs = this.opts.timeoutMs ?? 600_000;
     const model = opts.model ?? DEFAULT_CLI_MODEL;
 
     const prompt = collapseMessagesToPrompt(messages);
@@ -198,10 +219,26 @@ export class ClaudeCliLlmClient implements LlmClient {
 // The pipeline currently builds a single user-prompt string. If we ever support
 // multi-turn, the API path gets it for free; the CLI path concatenates with role
 // markers because `claude -p` accepts a single prompt buffer, not a turn list.
+// Multimodal content blocks are degraded to text — the CLI path can't yet
+// surface image URLs to claude -p, so images are listed by URL with a note
+// telling the model they exist but can't be inspected.
 export function collapseMessagesToPrompt(messages: LlmMessage[]): string {
-  if (messages.length === 1 && messages[0]!.role === 'user') return messages[0]!.content;
+  const stringify = (m: LlmMessage): string => {
+    if (typeof m.content === 'string') return m.content;
+    const parts: string[] = [];
+    let imageCount = 0;
+    for (const block of m.content) {
+      if (block.type === 'text') parts.push(block.text);
+      else {
+        imageCount++;
+        parts.push(`[image #${imageCount}: ${block.url} — image content not available to claude -p backend]`);
+      }
+    }
+    return parts.join('\n\n');
+  };
+  if (messages.length === 1 && messages[0]!.role === 'user') return stringify(messages[0]!);
   return messages
-    .map((m) => (m.role === 'user' ? `USER:\n${m.content}` : `ASSISTANT:\n${m.content}`))
+    .map((m) => (m.role === 'user' ? `USER:\n${stringify(m)}` : `ASSISTANT:\n${stringify(m)}`))
     .join('\n\n');
 }
 

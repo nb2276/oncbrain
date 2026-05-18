@@ -2,6 +2,36 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.0] — 2026-05-17
+
+The model becomes an analyst, not a summarizer. Comparative literature context, historic benchmarks, and methodological critique now show up in per-study bullets. Source-tweet images get extracted from Twitter's syndication CDN and are passed to the LLM as vision content on the API path.
+
+### Added
+
+- **Comparative analysis + critique.** Prompt v4 asks the model to ground every study in recent (last 2-5 years) and historic literature, and to flag methodological concerns when warranted. Output stays terse — depth shows in WHICH bullets are included. Example from a real ESTRO26 EORTC 22922 study: "Prior 10-year data (Poortmans et al., NEJM 2015) showed borderline OS benefit; era of enrollment (1996-2004) predates aromatase inhibitors and CDK4/6 inhibitors; absolute RT benefit may be attenuated in contemporary luminal patients on extended ET."
+- **Image extraction from Twitter syndication CDN.** New `src/lib/tweet-syndication.ts` fetches direct `pbs.twimg.com` URLs via the no-auth syndication endpoint (same one Twitter's embed widget calls). Each bookmark now stores its photo URLs alongside text+HTML.
+- **Multimodal LLM calls.** `LlmContentBlock` types (`text` / `image`) extend the client interface. `AnthropicLlmClient` passes images directly to Claude's vision API. The LLM reads slide screenshots, KM curves, study schemas, and forest plots — extracting effect sizes that tweet text doesn't repeat. Requires `LLM_BACKEND=api` with a real `ANTHROPIC_API_KEY`. The `claude-cli` path falls back to text-only with a clear marker in the bullets ("Images not accessible").
+
+### Changed
+
+- **Strict one-study-per-group.** v4 prompt: "if multiple tweets discuss the same trial (schema, OS curve, subgroup, commentary), collapse into one `study` whose `tweet_ids` lists all of them. Pure-commentary tweets join the study they comment on."
+- **CLI timeout 120s → 600s.** v4's deep-analysis prompt with a full day of tweets needs 2-5 minutes on the subscription path. Headroom matters more than tight budget.
+- **Max tokens 4096 → 8192.** Per-study bullets including comparison + critique need more room.
+- **Daily digest + per-site page** now also carry `image_urls` per bookmark in the artifact JSON, so the rendered page has all the information needed even without the Twitter widget running.
+
+### Engineering
+
+- 185 unit tests, 0 type errors across 35 files.
+- Non-destructive DB column-add for `image_urls` JSON (already present from v0.1 but unpopulated until now).
+- Syndication token derivation uses the published formula: `((tweet_id / 1e15) * π).toFixed(18)` decimal-part with trailing zeros stripped. Stable since ~2023.
+
+### Caveats
+
+- Vision analysis only activates when `LLM_BACKEND=api`. `claude -p` doesn't accept `--image` in `-p` mode, so subscription users get text-only analysis with the v4 comparative prompt. Switch to API for full multimodal.
+- Comparative claims are subject to the model's training knowledge. The prompt instructs "if uncertain a comparator trial is real, omit the comparison rather than hallucinate one" — but reader verification against primary sources remains essential.
+
+[0.3.0]: https://github.com/nb2276/oncbrain/releases/tag/v0.3.0
+
 ## [0.2.0] — 2026-05-17
 
 Organizing axis flips from date to disease site. Each study now carries its own TL;DR. Source tweets render as native Twitter cards with images.

@@ -74,14 +74,17 @@ async function ensureTweetData(
   if (skipFetch) return;
   // Targets:
   //   - any bookmark still in `pending` state (never fetched)
-  //   - if refetchHtml=true, any oembed-fetched bookmark missing tweet_html
-  //     (carries-over from v0.1 — these were fetched before the column existed)
+  //   - if refetchHtml=true: any oembed-fetched bookmark missing either
+  //     tweet_html (carry-over from v0.1) or image_urls (carry-over from
+  //     v0.2 — added syndication-CDN image extraction in v0.3)
   const needFetch = bookmarks.filter(
-    (b) => b.fetched_via === 'pending' || (refetchHtml && b.fetched_via === 'oembed' && !b.tweet_html),
+    (b) =>
+      b.fetched_via === 'pending' ||
+      (refetchHtml && b.fetched_via === 'oembed' && (!b.tweet_html || !b.image_urls)),
   );
   if (needFetch.length === 0) return;
 
-  console.log(`  fetching ${needFetch.length} tweet(s) via oEmbed...`);
+  console.log(`  fetching ${needFetch.length} tweet(s) via oEmbed + syndication...`);
   for (const b of needFetch) {
     try {
       const tweet = await fetchTweet(b.url);
@@ -90,8 +93,10 @@ async function ensureTweetData(
         author_name: tweet.author_name,
         tweet_text: tweet.text,
         tweet_html: tweet.html,
+        image_urls: tweet.image_urls,
       });
-      console.log(`    [oembed] #${b.id} ${b.url}`);
+      const imgInfo = tweet.image_urls.length > 0 ? ` (${tweet.image_urls.length} image${tweet.image_urls.length === 1 ? '' : 's'})` : '';
+      console.log(`    [fetched] #${b.id}${imgInfo} ${b.url}`);
     } catch (err) {
       if (err instanceof TweetFetchError) {
         console.warn(`    [skip] #${b.id} ${err.kind}: ${b.url}`);
@@ -110,7 +115,18 @@ function toDigestInput(bookmarks: Bookmark[]): DigestInputTweet[] {
       author: b.author_handle ?? b.author_name ?? null,
       text: b.tweet_text!,
       note: b.notes,
+      image_urls: parseImageUrls(b.image_urls),
     }));
+}
+
+function parseImageUrls(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((u): u is string => typeof u === 'string') : [];
+  } catch {
+    return [];
+  }
 }
 
 type DigestArtifact = {
@@ -126,6 +142,7 @@ type DigestArtifact = {
     author_name: string | null;
     text: string;
     html: string | null;
+    image_urls: string[];
     note: string | null;
     fetched_via: string;
     conference_slug: string | null;
@@ -151,6 +168,7 @@ function buildArtifact(
       author_name: b.author_name,
       text: b.tweet_text!,
       html: b.tweet_html,
+      image_urls: parseImageUrls(b.image_urls),
       note: b.notes,
       fetched_via: b.fetched_via,
       conference_slug: b.conference_slug,
