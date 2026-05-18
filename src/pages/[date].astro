@@ -4,7 +4,7 @@ import { listDigests, type DigestArtifact } from '../lib/digest-data.ts';
 import { linkifyCitations } from '../lib/extract.ts';
 import { getDiseaseSite } from '../lib/disease-sites.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
-import { deriveSlug } from '../lib/slug.ts';
+import { assignSlugsForDate } from '../lib/slug-resolve.ts';
 
 export async function getStaticPaths() {
   return listDigests().map((artifact) => ({
@@ -41,6 +41,14 @@ function toSlideUrl(filePath: string): string {
   }
   return filePath;
 }
+
+// Per-date slug resolution: walk every study on this date in render order
+// and disambiguate collisions from the deriveSlug() fallback. Indexed by
+// study reference identity (the same DigestStudy object is rendered below).
+const allStudiesOnDate = digest.sites.flatMap((s) => s.studies);
+const resolvedSlugs = assignSlugsForDate(allStudiesOnDate);
+const slugByStudy = new Map<typeof allStudiesOnDate[number], string>();
+allStudiesOnDate.forEach((s, i) => slugByStudy.set(s, resolvedSlugs[i]!));
 ---
 
 <Base title={title} description={digest.top_line || digest.tldr}>
@@ -82,7 +90,7 @@ function toSlideUrl(filePath: string): string {
         )}
 
         {site.studies.map((study) => (
-          <div class="study" id={study.slug ?? deriveSlug(study.name)}>
+          <div class="study" id={slugByStudy.get(study)}>
             <h4 class="study-name">
               {study.name}
               {study.nct && (

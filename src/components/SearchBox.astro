@@ -10,7 +10,8 @@
 ---
 
 <section class="search-box">
-  <label class="search-label" for="study-search">
+  <label class="visually-hidden" for="study-search">Search studies, trials, or NCT identifiers</label>
+  <div class="search-label">
     <span class="search-icon" aria-hidden="true">🔍</span>
     <input
       id="study-search"
@@ -20,12 +21,13 @@
       autocapitalize="off"
       spellcheck="false"
       enterkeyhint="search"
+      aria-controls="search-results"
     />
     <button type="button" class="search-clear" aria-label="Clear search" hidden>×</button>
-  </label>
+  </div>
 
-  <div class="search-results" data-state="empty" aria-live="polite">
-    <p class="search-status"></p>
+  <div id="search-results" class="search-results" data-state="empty">
+    <p class="search-status" aria-live="polite"></p>
     <ul class="search-list"></ul>
   </div>
 </section>
@@ -33,6 +35,17 @@
 <style>
   .search-box {
     margin: 0 0 1.5rem;
+  }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
   .search-label {
     display: flex;
@@ -152,8 +165,29 @@
   };
 
   const MAX_RESULTS = 20;
+  const DEBOUNCE_MS = 80;
+  // Only ASCII letters, digits, and dashes are safe to interpolate into the
+  // anchor fragment without escaping; everything else gets URI-encoded.
+  // dates are YYYY-MM-DD so they pass trivially.
+  const SAFE_ANCHOR = /^[a-zA-Z0-9-]+$/;
+
   let cache: SearchEntry[] | null = null;
   let inflight: Promise<SearchEntry[]> | null = null;
+
+  function isSearchEntry(x: unknown): x is SearchEntry {
+    if (!x || typeof x !== 'object') return false;
+    const e = x as Record<string, unknown>;
+    return (
+      typeof e.date === 'string' &&
+      typeof e.site === 'string' &&
+      typeof e.site_label === 'string' &&
+      typeof e.site_emoji === 'string' &&
+      typeof e.name === 'string' &&
+      typeof e.slug === 'string' &&
+      typeof e.tldr === 'string' &&
+      (e.nct === null || typeof e.nct === 'string')
+    );
+  }
 
   function loadIndex(): Promise<SearchEntry[]> {
     if (cache) return Promise.resolve(cache);
@@ -163,14 +197,22 @@
         if (!r.ok) throw new Error(`search-index ${r.status}`);
         return r.json();
       })
-      .then((data: SearchEntry[]) => {
-        cache = data;
-        return data;
+      .then((data: unknown) => {
+        // Validate shape — a malformed or hostile payload should not brick
+        // the component or feed unchecked input into the renderer.
+        if (!Array.isArray(data)) {
+          throw new Error('search-index: payload is not an array');
+        }
+        const valid = data.filter(isSearchEntry);
+        cache = valid;
+        return valid;
       })
       .catch((err) => {
+        // Reset inflight so the next call retries, and DO NOT memoize an
+        // empty cache — that would make the failure permanent.
         console.warn('search index load failed', err);
-        cache = [];
-        return cache;
+        inflight = null;
+        return [] as SearchEntry[];
       });
     return inflight;
   }
@@ -179,6 +221,13 @@
     return s.replace(/[&<>"']/g, (c) =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string),
     );
+  }
+
+  // Anchor-fragment escape. `date` is always YYYY-MM-DD and `slug` is
+  // safe-slug-shaped from the index emitter, but defense-in-depth — if a
+  // malformed entry slipped past the shape check, URI-encode it.
+  function anchorEscape(s: string): string {
+    return SAFE_ANCHOR.test(s) ? s : encodeURIComponent(s);
   }
 
   function filter(query: string, entries: SearchEntry[]): SearchEntry[] {
@@ -222,23 +271,27 @@
         ? `${results.length} results · showing ${shown.length} (+${overflow} more — narrow your search)`
         : `${results.length} result${results.length === 1 ? '' : 's'}`;
 
+    // EVERY interpolated field gets escaped — including date, slug, emoji.
+    // The emoji comes from disease-sites.ts (trusted constant), but uniform
+    // escaping protects against future drift if that source is ever widened.
     list.innerHTML = shown
-      .map(
-        (e) => `
+      .map((e) => {
+        const href = `/${anchorEscape(e.date)}/#${anchorEscape(e.slug)}`;
+        return `
         <li>
-          <a href="/${e.date}/#${e.slug}">
+          <a href="${escapeHtml(href)}">
             <div class="result-meta">
-              <span class="result-emoji" aria-hidden="true">${e.site_emoji}</span>
+              <span class="result-emoji" aria-hidden="true">${escapeHtml(e.site_emoji)}</span>
               <span>${escapeHtml(e.site_label)}</span>
               <span aria-hidden="true">·</span>
-              <span>${e.date}</span>
+              <span>${escapeHtml(e.date)}</span>
             </div>
             <div class="result-name">${escapeHtml(e.name)}</div>
             <div class="result-tldr">${escapeHtml(e.tldr)}</div>
           </a>
         </li>
-      `,
-      )
+      `;
+      })
       .join('');
   }
 
@@ -252,16 +305,32 @@
       void loadIndex();
     });
 
-    input.addEventListener('input', async () => {
-      const q = input.value;
-      clear.hidden = q.length === 0;
-      const all = await loadIndex();
-      render(q, all);
+    // Debounce + stale-q guard: capture the input value at the moment we're
+    // about to render, not at event time, so a fast typer + slow first fetch
+    // doesn't repaint stale results into a cleared box.
+    let debounceTimer: number | null = null;
+    const scheduleRender = () => {
+      if (debounceTimer !== null) window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(async () => {
+        debounceTimer = null;
+        const all = await loadIndex();
+        const q = input.value;
+        render(q, all);
+      }, DEBOUNCE_MS);
+    };
+
+    input.addEventListener('input', () => {
+      clear.hidden = input.value.length === 0;
+      scheduleRender();
     });
 
     clear.addEventListener('click', () => {
       input.value = '';
       clear.hidden = true;
+      if (debounceTimer !== null) {
+        window.clearTimeout(debounceTimer);
+        debounceTimer = null;
+      }
       render('', cache ?? []);
       input.focus();
     });
@@ -281,6 +350,10 @@
       if (e.key === 'Escape') {
         input.value = '';
         clear.hidden = true;
+        if (debounceTimer !== null) {
+          window.clearTimeout(debounceTimer);
+          debounceTimer = null;
+        }
         render('', cache ?? []);
         input.blur();
       }

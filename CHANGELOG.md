@@ -19,12 +19,24 @@ Client-side live search on the home page. The curator scans across days; as the 
 - 308 tests (was 298, +10 for slug derivation edge cases).
 - 0 new type errors. One pre-existing `source_ids` error in `obsidian-export.ts` carries over from v0.5.
 
+### Hardenings folded from codex review/challenge (pre-merge)
+
+- **All interpolated fields HTML-escaped, not just name/tldr.** Codex challenge #1 caught that `date`, `slug`, and `site_emoji` were injected raw into `innerHTML`. Even though those sources are tightly controlled today (date is YYYY-MM-DD; slug is safe-slug-shaped from the resolver; emoji from `disease-sites.ts` constants), the uniform escape protects against future drift.
+- **Search-index payload shape validation.** `loadIndex()` now rejects non-array payloads and filters out entries that don't match the `SearchEntry` shape. A malformed `/search-index.json` no longer bricks the component on first keystroke.
+- **Anchor-fragment encoding.** URL fragments built from `date` + `slug` go through `anchorEscape()` (URI-encode if not safe-slug-shaped) before being put into the `href`. Defense-in-depth — should be a no-op for current well-formed entries.
+- **Per-date slug collision resolver.** New `src/lib/slug-resolve.ts` walks each date's studies in render order and suffixes `-2`, `-3` to fallback-slug collisions. Used by both `[date].astro` (anchor `id`) and `search-index.json.ts` (deep-link target) so the two paths stay in sync. Codex challenge #2 surfaced real-world collisions: distinct names like "研究" + "🧪" both derive to `"study"`, "Trial — α" + "Trial" both derive to `"trial"`, and 64-char names truncate to the same prefix. 11 new tests in `test/slug-resolve.test.ts`.
+- **Cache-on-error no longer permanent.** Codex review's only P2 + challenge #3: previously, a transient `/search-index.json` failure cached `[]` and resolved `inflight`, making search silently broken until reload. Now the catch path resets `inflight = null` so the next call retries.
+- **Stale-query guard via debounce.** 80ms debounce on input + the awaited render reads `input.value` after the await (not the captured-at-event-time value), so a fast typer who clears the box mid-fetch no longer sees stale results painted.
+- **`tldr` capped at 240 chars in the search index.** Bounds per-keystroke filter cost and DOM render size. Full `tldr` still rendered on the per-date page; this is search-only. Codex challenge #4.
+- **Accessibility:** explicit visually-hidden `<label>` on the search input, `aria-controls` on the input pointing to the results region. Codex challenge #5.
+
 ### Not yet shipped (deferred)
 
 - **Source-type filter** in search results (tweet/paper/slide). v0.6.x.
 - **Fuzzy / typo-tolerant match.** Defer until a real reader complaint. Substring covers known-name lookups.
 - **Keyboard navigation through results.** Arrow keys + Enter. Stretch.
 - **URL state** (`?q=foo`). Stretch — results live in JS state only for the MVP.
+- **Publication filter on `listDigests()`.** `/search-index.json` and the build pipeline read every JSON file under `data/digests/`. Codex challenge residual note — not a v0.6 ship blocker (no draft artifacts live there in practice), but worth a `published: boolean` field if drafts ever land beside published ones.
 
 ## [0.5.0] — 2026-05-18
 
