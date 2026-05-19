@@ -17,15 +17,18 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME || 'onc brain';
 // about most. First-time framing lives on /about.
 const latest = digests[0];
 
-// Disease-site nav bar: all 22 sites in enum order. Populated ones link to
-// their site page; empty ones render as muted, non-clickable chips so the
-// reader sees the breadth of the taxonomy at a glance.
+// Disease-site nav bar. Populated chips lead so a phone reader sees the
+// covered sites above the fold (the 9-row chip cloud pushed the hero TL;DR
+// below the fold on iPhone SE); empty chips collapse under a <details> so
+// the full taxonomy stays one click away.
 const summaries = listSiteSummaries();
 const countBySlug = new Map(summaries.map((s) => [s.disease_site, s.occurrences.length]));
 const navSites = DISEASE_SITES.map((s) => ({
   ...s,
   count: countBySlug.get(s.slug) ?? 0,
 }));
+const navPopulated = navSites.filter((s) => s.count > 0);
+const navEmpty = navSites.filter((s) => s.count === 0);
 
 // Recent N studies as a flat list — replaces the previous "list of dates" so
 // the reader sees the last things added without one indirection layer.
@@ -37,10 +40,10 @@ const totalDates = digests.length;
 <Base title={siteName} description="Curated AI-summarized digests of oncology updates.">
   {digests.length > 0 && (
     <nav class="site-nav" aria-label="Browse by disease site">
-      <ul>
-        {navSites.map((s) => (
-          <li>
-            {s.count > 0 ? (
+      {navPopulated.length > 0 && (
+        <ul class="nav-row">
+          {navPopulated.map((s) => (
+            <li>
               <a
                 class="nav-chip"
                 href={`/sites/${s.slug}/`}
@@ -50,18 +53,28 @@ const totalDates = digests.length;
                 <span class="nav-label">{s.label}</span>
                 <span class="nav-count">{s.count}</span>
               </a>
-            ) : (
-              <span
-                class="nav-chip nav-chip-empty"
-                title={`${s.label}: ${s.rationale} (not yet covered)`}
-              >
-                <span class="nav-emoji" aria-hidden="true">{s.emoji}</span>
-                <span class="nav-label">{s.label}</span>
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
+      {navEmpty.length > 0 && (
+        <details class="nav-empty-toggle">
+          <summary>+{navEmpty.length} sites not yet covered</summary>
+          <ul class="nav-row nav-row-empty">
+            {navEmpty.map((s) => (
+              <li>
+                <span
+                  class="nav-chip nav-chip-empty"
+                  title={`${s.label}: ${s.rationale} (not yet covered)`}
+                >
+                  <span class="nav-emoji" aria-hidden="true">{s.emoji}</span>
+                  <span class="nav-label">{s.label}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </nav>
   )}
 
@@ -149,11 +162,13 @@ const totalDates = digests.length;
 </Base>
 
 <style>
-  /* Disease-site nav bar — top of page. Wraps on overflow; empty sites render muted. */
+  /* Disease-site nav bar — top of page. Populated chips lead; empty chips
+     hidden behind a <details> so mobile fold isn't dominated by greyed-out
+     inventory. Touch targets meet the 44px iOS HIG floor. */
   .site-nav {
     margin: 0 0 1.5rem;
   }
-  .site-nav ul {
+  .nav-row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
@@ -164,34 +179,61 @@ const totalDates = digests.length;
   .nav-chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.32rem 0.6rem;
+    gap: 0.35rem;
+    min-height: 44px;
+    padding: 0.45rem 0.85rem;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 999px;
     font-family: var(--font-sans);
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     color: var(--fg);
     text-decoration: none;
     line-height: 1.2;
   }
-  .nav-chip:hover {
-    border-color: var(--accent);
-  }
-  .nav-emoji { font-size: 0.95rem; line-height: 1; }
+  .nav-chip:hover { border-color: var(--accent); }
+  .nav-emoji { font-size: 1.05rem; line-height: 1; }
   .nav-label { font-weight: 500; }
   .nav-count {
     color: var(--fg-muted);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     margin-left: 0.15rem;
   }
   .nav-chip-empty {
     color: var(--fg-muted);
-    opacity: 0.55;
+    opacity: 0.6;
     cursor: default;
   }
   .nav-chip-empty:hover { border-color: var(--border); }
   .nav-chip-empty .nav-label { font-weight: 400; }
+  /* Desaturate the emoji on muted chips so the populated/empty split reads
+     instantly at scanning speed. */
+  .nav-chip-empty .nav-emoji {
+    filter: saturate(0.25) grayscale(0.55);
+  }
+
+  /* Collapsible empty-sites section. */
+  .nav-empty-toggle {
+    margin-top: 0.5rem;
+  }
+  .nav-empty-toggle summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0.35rem 0.7rem;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    cursor: pointer;
+    list-style: none;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    user-select: none;
+  }
+  .nav-empty-toggle summary::-webkit-details-marker { display: none; }
+  .nav-empty-toggle summary:hover { color: var(--fg); border-color: var(--accent); }
+  .nav-empty-toggle[open] summary { color: var(--fg); }
+  .nav-row-empty { margin-top: 0.5rem; }
 
   /* Hero TL;DR callout — unchanged from previous version. */
   .hero-tldr {
@@ -237,10 +279,13 @@ const totalDates = digests.length;
     color: var(--fg);
   }
   .hero-cta {
-    display: inline-block;
-    margin-top: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.55rem 1rem;
+    margin: 0.85rem -1rem -0.4rem;
     font-family: var(--font-sans);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--accent);
     text-decoration: none;
@@ -294,7 +339,8 @@ const totalDates = digests.length;
   }
   .recent-card {
     display: block;
-    padding: 0.85rem 1.05rem;
+    min-height: 44px;
+    padding: 0.9rem 1.05rem;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 8px;
