@@ -124,7 +124,7 @@ const totalDates = digests.length;
 
   {recent.length > 0 && (
     <section class="recent-section">
-      <h2 class="section-label">Recent — last {recent.length} studies</h2>
+      <h2 class="section-label">Recent · {recent.length} latest studies</h2>
       <ul class="recent-list">
         {recent.map((r) => {
           const meta = getDiseaseSite(r.disease_site);
@@ -244,21 +244,24 @@ const totalDates = digests.length;
     border-left: 4px solid var(--accent);
     border-radius: 6px;
   }
+  /* Hero meta is supporting metadata — date + optional conference badge.
+     Headline is the top_line below; meta should not compete with it. */
   .hero-meta {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-family: var(--font-sans);
     font-size: 0.72rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--fg-muted);
     margin-bottom: 0.55rem;
   }
-  .hero-date { font-weight: 700; }
+  .hero-date { font-weight: 500; }
   .hero-conf {
     padding: 0.05rem 0.45rem;
     background: var(--bg-card);
+    color: var(--accent);
     border-radius: 999px;
     text-transform: none;
     letter-spacing: 0;
