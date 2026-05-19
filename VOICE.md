@@ -109,6 +109,112 @@ These principles describe what the emoji vocabulary already covers. They are
 not a new required output schema; each phase has its own JSON schema. When the
 source data supports a framing, use it; when it doesn't, don't fabricate one.
 
+## SOC-implication verdict (Phase 2)
+
+Every per-study output emits a `verdict` object. The verdict is the
+single most useful 5-second triage signal for a subspecialist scanning the
+day's data. Assignment requires honest judgment about what the trial does
+and doesn't establish for the population studied.
+
+### Taxonomy: `soc_implication`
+
+- 🚀 `practice-changing`. Rare. On its own, this study may shift the
+  standard of care for the population studied. Requires ALL of: adequately
+  powered, prospective, primary endpoint hit, sufficient follow-up,
+  applicable patient population, no major methodological caveats. Most
+  trials don't clear this bar. Reserve.
+- ↔️ `challenges-soc`. Result diverges from current practice for the
+  studied population. May not warrant immediate change, but the reader
+  needs to know the field is contested. (E.g., a randomised trial of
+  pelvic RT that's null when prior evidence suggested benefit.)
+- 🔄 `confirmatory`. Adds to existing evidence; consistent with current
+  practice. Most common verdict for high-quality studies.
+- 🧪 `early-signal`. **Maturity issue.** The trial hasn't reached the
+  point where you can draw a conclusion. Phase I/II, single-arm, small N,
+  short follow-up, interim analysis. Worth knowing, not worth changing
+  practice yet.
+- ⚠️ `methodologically-limited`. **Design issue.** The trial's design or
+  reporting prevents you from drawing the conclusion the headline claims.
+  Post-hoc subgroup, biased endpoint (HR-QoL standing in for clinical
+  efficacy), open-label with subjective endpoint, high control crossover,
+  sponsor-funded with selection bias, primary endpoint not reported in
+  source.
+- `unclear`. Source content does not give enough to classify. Default
+  when uncertain.
+
+### Default to honesty
+
+When uncertain between two verdicts, pick the more conservative one.
+"Practice-changing" is the most-overclaimed label in clinical media;
+reserve it. A confirmatory phase III is `confirmatory`, not
+`practice-changing`, even if the headline is positive. When in doubt
+between `early-signal` and `confirmatory`: pick `early-signal`.
+When in real doubt: prefer `unclear` over a wrong guess.
+
+### Choosing between `early-signal` and `methodologically-limited`
+
+These two verdicts both communicate "can't draw a conclusion from this
+trial alone," but they describe different gaps. Use them honestly; don't
+collapse design issues into maturity issues:
+
+- Is the gap that the trial hasn't matured enough? Phase I/II, single-arm,
+  small N, short follow-up, interim analysis → `early-signal`.
+- Is the gap that the trial design or reporting doesn't support the
+  conclusion being drawn? Post-hoc subgroup, HR-QoL endpoint standing in
+  for clinical efficacy, open-label with subjective outcome, primary
+  endpoint not reported, high control crossover → `methodologically-
+  limited`.
+- A phase III with a biased endpoint is `methodologically-limited`, not
+  `early-signal`. A phase II with a clean design but small N is
+  `early-signal`, not `methodologically-limited`.
+- When both apply, name the LARGER concern. A small phase 2 with selection
+  bias is usually `early-signal` (maturity dominates), but a phase 3
+  post-hoc subgroup of a definitive trial is `methodologically-limited`
+  (design dominates).
+
+### `rationale`: explain the verdict, not the trial
+
+`rationale` is a ≤ 30-word string explaining the VERDICT CHOICE. It tells
+the reader WHY the verdict was assigned, by naming the specific design
+features or comparator gaps that drove the choice. It must NOT restate
+the trial result; the `tldr` field already does that.
+
+❌ Bad: "This is an important phase 2 trial showing benefit for SBRT in
+RCC, with 100% local control over 84 months."
+
+✅ Good: "Single-arm phase 2 in inoperable pts only; no randomised
+comparator vs partial nephrectomy. Consistent with prior SAFIR /
+STAR-TRK signals."
+
+### `audience`: one-line eligibility gate
+
+`audience` is a ≤ 80-char string (or null) that lets a reader gate
+applicability before reading deeper. **Patient facts only.** Surface
+disease + stage + biomarker (if applicable) + prior therapy line.
+
+`audience` is NOT:
+- the trial's clinical question ("organ preservation intent" describes
+  treatment goal, not patient)
+- treatment intent or rationale
+- the verdict in disguise ("basket trial; pancreas/prostate strongest
+  signals")
+- a population summary of subgroups
+
+If the trial enrolled a defined population, name it. If the population
+is too heterogeneous to compress without losing signal: emit `null`.
+
+✅ Good: "Inoperable primary RCC, T1b-dominant, median age 77"
+✅ Good: "HER2-low metastatic breast, ≥ 1 prior endocrine line"
+✅ Good: "Localised intermediate-risk prostate, post-RP biochemical
+failure"
+✅ Good: "Stage III NSCLC, post-CRT consolidation"
+✅ Good: "Locally advanced rectal cancer, post-NAT"
+
+❌ Bad: "Locally advanced rectal cancer, organ preservation intent,
+post-NAT response assessment" (mixes patient facts with trial intent)
+❌ Bad: "Oligometastatic solid tumors, 1-5 mets, multiple histologies
+(pancreas/prostate strongest)" (verdict-in-disguise parenthetical)
+
 ## Examples: good vs. bad bullets
 
 ❌ Bad: "📊 The study shows that PRESTIGE-PSMA had a notable and robust

@@ -38,6 +38,23 @@ export type DigestStudy = {
   // v0.6+: stable per-study slug. Older artifacts won't have this — renderers
   // should fall back to deriveSlug(name) from src/lib/slug.ts.
   slug?: string;
+  // v0.7+ analyst verdict (see VOICE.md "SOC-implication verdict").
+  // Optional — older artifacts won't have it.
+  verdict?: StudyVerdict;
+};
+
+export type SocImplication =
+  | 'practice-changing'
+  | 'challenges-soc'
+  | 'confirmatory'
+  | 'early-signal'
+  | 'methodologically-limited'
+  | 'unclear';
+
+export type StudyVerdict = {
+  soc_implication: SocImplication;
+  rationale: string;
+  audience: string | null;
 };
 
 export type DigestArtifactPaper = {

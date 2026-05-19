@@ -123,10 +123,15 @@ Examples of INVALID captions (interpretive, would hallucinate):
     "columns": ["Arm", "Median OS", "HR (95% CI)", "p"],
     "rows": [
       ["Lu-PSMA", "14.2 mo", "0.62 (0.48-0.79)", "<0.001"],
-      ["Cabazitaxel", "9.8 mo", "—", "—"]
+      ["Cabazitaxel", "9.8 mo", "n/a", "n/a"]
     ]
   },
-  "nct": "NCT04855643 or null"
+  "nct": "NCT04855643 or null",
+  "verdict": {
+    "soc_implication": "confirmatory",
+    "rationale": "Single-arm phase 2 in inoperable pts only; no randomised comparator vs partial nephrectomy. Consistent with prior SAFIR / STAR-TRK signals.",
+    "audience": "Inoperable primary RCC, T1b-dominant, median age 77"
+  }
 }
 ```
 
@@ -134,9 +139,10 @@ Rules:
 - `name` echoes back the study name. Don't rename.
 - `tldr` ≤25 words, headline number first.
 - `details` 3-7 bullets total. Mix flat strings, `{text, subdetails}`, and `{text, table}` based on dimensionality. Flat strings ≤25 words. Subdetails rows and table cells can each be ≤20 words.
-- **Tables are required** when comparing 2+ trials/arms across 2+ endpoints/timepoints. Don't write "POP-RT HR 0.50; PEACE-2 HR 0.97; POP-RT cFFS HR 0.74..." as one string — emit a table.
+- **Tables are required** when comparing 2+ trials/arms across 2+ endpoints/timepoints. Don't write "POP-RT HR 0.50; PEACE-2 HR 0.97; POP-RT cFFS HR 0.74..." as one string; emit a table.
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
 - `key_figure_url` must be EXACTLY one of the image URLs in the manifest below, or null. Don't invent URLs.
+- `verdict` is REQUIRED. Pick `soc_implication` from the taxonomy in the VOICE block above (6 enums). When uncertain, default conservatively (prefer `unclear` over guessing; prefer `early-signal` or `confirmatory` over `practice-changing`). `rationale` ≤30 words and explains the VERDICT CHOICE (not the trial result). `audience` ≤80 chars, one-line eligibility gate, or null when applicability is too broad to compress.
 - `key_figure_caption` numeric-only, from OCR overlays only. Use the table form for comparison figures (2+ arms × multiple endpoints); flat string is acceptable only for non-comparison figures. Null if no OCR numbers available.
 - `nct` only if explicit in tweets/OCR. Format: "NCTxxxxxxxx" or null.
 

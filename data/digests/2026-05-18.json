@@ -1,33 +1,59 @@
 {
   "date": "2026-05-18",
   "conference": null,
-  "generated_at": 1779136733069,
+  "generated_at": 1779157272295,
   "digest": {
-    "top_line": "EXTEND: MDT+SOC vs SOC in oligomets, PFS HR 0.54 (0.41-0.72) at 53-month f/u — ablative therapy hardens its cross-histology case.",
-    "tldr": "Oligomets and prostate dominated today. EXTEND phase II confirms durable PFS benefit from MDT across solid tumors (HR 0.54); PEACE 2 finds pelvic RT non-significant in very high-risk localized PCa (cPFS HR 0.81, p=0.088), diverging from POP-RT. Head-neck data (TORPEdO, INRT pooled) add RCT-level null for IMPT QoL advantage and prospective signal for ENI omission safety.",
+    "top_line": "EXTEND: MDT+SOC vs SOC, HR 0.54 (0.41-0.72), p<0.001 · PFS benefit confirmed across oligomets baskets at 53mo.",
+    "tldr": "RT across disease sites dominates: EXTEND's mature phase II (HR 0.54, 53mo) is the day's sharpest signal for oligomets. PEACE 2's null on pelvic irradiation in high-risk prostate and TORPEdO's null on protons continue a theme of escalation trials not delivering on dosimetric promise.",
     "sites": [
       {
         "disease_site": "lower-gi",
-        "intro": null,
+        "intro": "W14 clinical assessment emerging as an actionable W&W decision point in rectal cancer, 10 weeks earlier than standard W24.",
         "studies": [
           {
             "name": "OPERA Trial (5-year rectal preservation)",
-            "tldr": "OPERA post-hoc: W14 clinical exam (DRE+rectoscopy) reliably identifies cCR, supporting earlier watch-and-wait eligibility assessment.",
+            "tldr": "OPERA post-hoc: W14 clinical exam (DRE+rectoscopy) reliably identifies cCR, enabling safe W&W with 5-yr OP rates 75-83%.",
             "details": [
-              "🔍 Post-hoc analysis of OPERA RCT; N=141 evaluable at W14; response assessed by DRE + rectoscopy (CTRE) ± MRI at week 14, prior to standard W24 assessment",
-              "📊 W14 CTRE: 87% (122/141) assessable; 76% achieved good response (cCR+nCR), 24% PR",
-              "📊 Good response rate by arm: Arm B 88% vs Arm A 65%, p=0.004",
-              "📊 MRI concordance: TRG1-2 in 98% (80/82) of pts with CR at W14",
-              "📊 5-yr organ preservation: 75% Arm A vs 83% Arm B, p=0.24 (not significant); cCR vs nCR OP rates 81% vs 77% (similar)",
-              "⚠️ Post-hoc design limits causal inference; W14 assessment not prospectively powered; OP rates not statistically different between arms at 5y",
-              "❓ Whether W14 CTRE can replace W24 as primary decision point in prospective setting remains unanswered; nCR group should not trigger surgery per authors"
+              "🔍 Post-hoc analysis of OPERA trial; W14 CTRE (DRE+rectoscopy±MRI) evaluated in 122/141 pts (87%); response categories: cCR, nCR, PR",
+              "📊 W14 good response (cCR+nCR): Arm B 88% vs Arm A 65% (p=0.004); MRI TRG1-2 concordance in 98% (80/82) of CR pts",
+              "📊 5-yr organ preservation: Arm A 75% vs Arm B 83% (p=0.24); cCR vs nCR similar (81% vs 77%)",
+              "🔗 Validates W14 as feasible decision point, 10 weeks earlier than standard W24 assessment used in original OPERA protocol",
+              "⚠️ Post-hoc analysis; W14 CTRE available in only 87% of pts; nCR partly reflects radiation side-effects, not true residual tumor",
+              "❓ Whether W14 W&W selection changes long-term OP rates vs W24-only selection remains to be confirmed in prospective design"
             ],
             "key_figure_url": "https://pbs.twimg.com/media/HIm49InWMAAbrtG.jpg",
-            "key_figure_caption": "W14 good response: Arm B 88% vs Arm A 65%, p=0.004. 5-yr OP: 75% (A) vs 83% (B), p=0.24. cCR vs nCR 5-yr OP: 81% vs 77%.",
+            "key_figure_caption": {
+              "columns": [
+                "Outcome",
+                "Arm A",
+                "Arm B",
+                "p"
+              ],
+              "rows": [
+                [
+                  "W14 good response (cCR+nCR)",
+                  "65%",
+                  "88%",
+                  "0.004"
+                ],
+                [
+                  "5-yr organ preservation",
+                  "75%",
+                  "83%",
+                  "0.24"
+                ]
+              ]
+            },
             "nct": null,
             "tweet_ids": [
               30
             ],
+            "slug": "opera-rectal-5y",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Post-hoc analysis of a trial not powered for W14 subgroup; no prospective randomisation to early vs standard assessment timing.",
+              "audience": "Locally advanced rectal cancer, post-NAT, organ preservation candidate"
+            },
             "source_ids": [
               {
                 "type": "tweet",
@@ -37,32 +63,75 @@
           }
         ],
         "open_questions": [
-          "Can W14 clinical exam (DRE+rectoscopy) replace W24 as the primary watch-and-wait decision point in a prospective RCT, particularly for the nCR subgroup?"
+          "Does W14-based W&W selection change long-term organ preservation rates vs W24-only protocols in a prospective trial?"
         ]
       },
       {
         "disease_site": "head-neck",
-        "intro": "TORPEdO provides the first phase III RCT PRO data for IMPT vs IMRT in OPSCC; INRT pooled analysis adds prospective ENI omission safety data.",
+        "intro": "Two competing questions today: proton vs photon QoL (null at 24mo), and ENI omission safety (reassuring but single-arm).",
         "studies": [
           {
-            "name": "TORPEdO (CRUK/18/010)",
-            "tldr": "TORPEdO phase III: IMPT vs IMRT shows similar HR-QoL trajectories in OPSCC from 6 weeks post-CRT through 24 months.",
+            "name": "INRT-AIR & DARTBOARD pooled (ENI omission in HNSCC)",
+            "tldr": "Pooled prospective INRT: 5-yr solitary elective nodal recurrence 0%, OS 87%, PFS 74% in 117 HNSCC pts.",
             "details": [
-              "🔍 Phase III RCT, N=205, OPSCC requiring concurrent chemo-RT with bilateral neck treatment; 2:1 randomisation IMPT vs IMRT; 70 Gy/56 Gy in 33 fractions + cisplatin 100 mg/m² D1+D22",
-              "📊 Co-primary patient-reported EP: UW-QoL physical composite (saliva, taste, chewing, swallowing, appearance, speech) at 12 months — no difference between arms at 3, 12, or 24 months post-RT",
-              "📊 Co-primary clinician EP: CTCAE G3 weight loss (≥20% from baseline) or gastrostomy dependence at 12 months — no effect size reported in source tweets",
-              "UW-QoL scores decline at end of treatment with subsequent recovery; most stabilise from 12 months post-CRT; some pts have meaningful deterioration up to 2 years; HR-QoL f/u ongoing to 5 years",
-              "⚠️ Commentator (@AmadeoWals) notes identical planning constraints and use of novice UK proton centres likely limited IMPT's differential potential; centres with high IMPT experience still show clinical advantages — institutional learning curve may have compressed the gap",
-              "🔗 vs prior single-arm and retrospective IMPT series in H&N: those suggested xerostomia/dysphagia benefit; TORPEdO's null PRO result in a rigorous RCT challenges extrapolation from non-randomised data",
-              "❓ whether high-volume IMPT centres with optimised dose-painting constraints would show QoL separation remains unresolved; 5-year PRO and late-effects data still pending"
+              "📊 5-yr solitary elective nodal recurrence 0%; 5-yr OS 87%, PFS 74%; median f/u 3.4 yrs",
+              {
+                "text": "📊 3-yr cumulative incidence",
+                "subdetails": [
+                  "Local recurrence: 9.5%",
+                  "Regional recurrence: 4.3%",
+                  "Distant metastasis: 11%"
+                ]
+              },
+              "🔍 Patient-level pooled analysis of 2 prospective trials (INRT-AIR + DARTBOARD); N=117; oropharynx/larynx/hypopharynx stage I-IVB (excl T1-2N0 larynx); AI-assisted suspicious LN identification; required PET/CT + neck CT",
+              "💊 INRT omits ENI; AI model guides involved-node target delineation; definitive CRT backbone",
+              "📊 Mean composite MDADI score 84.9 at 12 months, no significant decline post-treatment",
+              "⚠️ N=117, pooled not randomised, no ENI control arm; cannot formally attribute toxicity/QoL benefit to ENI omission without comparator; authors explicitly state randomised evidence required before non-trial implementation",
+              "🔗 vs standard ENI-inclusive CRT: elective nodal recurrence rates with ENI historically ~2-5%; 0% here is reassuring but single-arm, short f/u for definitive conclusions"
             ],
-            "key_figure_url": null,
+            "key_figure_url": "https://pbs.twimg.com/media/HIl3v12W4AAZgD4.jpg",
+            "key_figure_caption": "5-yr OS 87%, PFS 74%; 3-yr LR 9.5%, RR 4.3%, DM 11%; 5-yr solitary ENI recurrence 0%; median f/u 3.4 yrs; N=117",
+            "nct": null,
+            "tweet_ids": [
+              24
+            ],
+            "slug": "hnscc-eni-omission-inrt",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Pooled single-arm prospective data, N=117, no randomised ENI comparator; authors explicitly require RCT before adoption outside trials.",
+              "audience": "HNSCC (oropharynx/larynx/hypopharynx), stage I-IVB excl T1-2N0 larynx, definitive CRT candidates"
+            },
+            "source_ids": [
+              {
+                "type": "tweet",
+                "id": 24
+              }
+            ]
+          },
+          {
+            "name": "TORPEdO",
+            "tldr": "TORPEdO (N=205): IMPT vs IMRT, no UW-QoL composite difference at 3/12/24 months in oropharyngeal SCC.",
+            "details": [
+              "🔍 Phase III RCT, N=205, 2:1 IMPT:IMRT; oropharyngeal SCC + bilateral neck RT; cisplatin 100mg/m² D1+D22; 70/56 Gy in 33 fractions over 6.5 wks",
+              "📊 Patient-reported co-primary (UW-QoL physical composite: saliva, taste, chewing, swallowing, appearance, speech): no differences between arms at 3, 12, 24 months post-RT; similar trajectories throughout",
+              "📊 Clinician-reported co-primary (CTCAE G3 weight loss ≥20% or gastrostomy dependence at 12 months) not reported in source tweets",
+              "⚠️ Identical planning constraints across centers regardless of IMPT institutional experience; peer commentary notes that dosimetric advantage of protons is center-volume-dependent and UK novice-center mix may have blunted separation",
+              "🔗 Consistent with prior multi-institutional null signals (e.g., MD Anderson proton vs photon cohort, Blanchard series): dosimetric gain does not reliably translate to patient-reported QoL benefit across populations",
+              "❓ Clinician co-primary results not presented here; 5-yr HRQoL f/u ongoing; center-experience subgroup analysis warranted"
+            ],
+            "key_figure_url": "https://pbs.twimg.com/media/HImrQwvWMAA-Laf.jpg",
             "key_figure_caption": null,
             "nct": null,
             "tweet_ids": [
               26,
               27
             ],
+            "slug": "torpedo-oropharynx-proton",
+            "verdict": {
+              "soc_implication": "challenges-soc",
+              "rationale": "Phase III null on patient-reported HRQoL undermines the dosimetric rationale for IMPT over IMRT in OPSCC; clinician-reported co-primary still outstanding.",
+              "audience": "Locally advanced oropharyngeal SCC, bilateral neck RT, concurrent cisplatin"
+            },
             "source_ids": [
               {
                 "type": "tweet",
@@ -73,122 +142,141 @@
                 "id": 27
               }
             ]
-          },
+          }
+        ],
+        "open_questions": [
+          "TORPEdO: does IMPT QoL benefit emerge in center-volume subgroup analysis at established expert proton centers?",
+          "INRT: is 0% elective nodal recurrence durable past 5yr, and does ENI omission hold without a randomised control arm?"
+        ]
+      },
+      {
+        "disease_site": "hepatobiliary",
+        "intro": null,
+        "studies": [
           {
-            "name": "INRT-AIR & DARTBOARD (ENI omission in HNSCC)",
-            "tldr": "Pooled INRT analysis (N=117): 5-yr solitary ENI recurrence 0%, 5-yr OS 87%, PFS 74% with preserved swallowing function.",
+            "name": "HCC EBRT multinational IPD cohort",
+            "tldr": "EBRT for early-stage HCC (N=4,913): mOS 5.4yr for treatment-naive BCLC-A, comparable to resection and ablation.",
             "details": [
-              "📊 5-yr risk of solitary elective nodal recurrence: 0% (primary safety endpoint)",
-              {
-                "text": "📊 3-yr cumulative incidence outcomes",
-                "subdetails": [
-                  "Local recurrence: 9.5%",
-                  "Regional recurrence: 4.3%",
-                  "Distant metastasis: 11%"
-                ]
-              },
-              "📊 5-yr OS 87%, PFS 74%; median f/u 3.4 yrs",
-              "💊 Mean MDADI composite score at 12 mo: 84.9, no significant decline post-treatment",
-              "🔍 Patient-level pooled analysis of 2 prospective trials (INRT-AIR + DARTBOARD); oropharynx/larynx/hypopharynx, stage I-IVB excl T1-2N0 larynx; all had PET/CT + neck CT; AI model used to identify suspicious nodes",
-              "⚠️ Single-arm pooled analysis, N=117 — no randomized comparison; 3.4 yr median f/u modest for 5-yr OS/PFS estimates; authors explicitly note randomized evidence required before non-trial adoption",
-              "❓ How does AI-assisted suspicious node identification perform vs conventional imaging alone — false-negative rate in omitted nodal stations not reported"
+              "📊 mOS by BCLC stage: BCLC-0 6.8yr (95% CI 5.7-8.7), BCLC-A 4.6yr (95% CI 4.1-5.1); treatment-naive BCLC-0 mOS not reached (95% CI 8.6-NR), naive BCLC-A 5.4yr (95% CI 4.5-6.7)",
+              "🔍 IPD systematic review, N=4,913, 5.0yr median f/u, random-effects Cox modeling; search date Dec 2022, invited authors submitted individual pt data",
+              "📊 Multivariable: advanced BCLC stage, higher tumor burden, worse PS, Child-Pugh B/C all associated with higher mortality; ablative dose and more recent tx year associated with reduced death risk",
+              "🔗 Authors conclude OS comparable to resection, thermal ablation, and other ablative locoregional therapies for BCLC-0/A — no head-to-head randomized data presented; comparison is cross-cohort",
+              "⚠️ Non-randomized IPD meta-analysis; no comparator arm within the study. Cross-study comparisons to resection/ablation carry selection bias (who gets EBRT vs surgery differs by era, comorbidity, tumor location). Era effects explicitly noted as a covariate.",
+              "❓ Direct RCT vs resection or thermal ablation still absent; optimal candidacy criteria (size, location, Child-Pugh, portal hypertension) within BCLC-0/A not defined by this dataset"
             ],
-            "key_figure_url": "https://pbs.twimg.com/media/HIl3v12W4AAZgD4.jpg",
-            "key_figure_caption": "5-yr OS 87%, PFS 74%; 3-yr LR 9.5%, RR 4.3%, DM 11%; solitary ENI recurrence 0%; MDADI 84.9 at 12 mo; median f/u 3.4 yrs; N=117",
+            "key_figure_url": null,
+            "key_figure_caption": null,
             "nct": null,
             "tweet_ids": [
-              24
+              1000000003
             ],
+            "slug": "hcc-ebrt-ipd-cohort",
+            "verdict": {
+              "soc_implication": "confirmatory",
+              "rationale": "Largest IPD cohort to date supports EBRT inclusion in BCLC decision-making, consistent with emerging guideline recognition; non-randomized design prevents practice-changing designation.",
+              "audience": "HCC BCLC-0/A, treatment-naive or experienced, eligible for locoregional therapy"
+            },
             "source_ids": [
               {
-                "type": "tweet",
-                "id": 24
+                "type": "paper",
+                "id": 3
               }
             ]
           }
         ],
         "open_questions": [
-          "Does institutional IMPT experience and dose-constraint optimization explain the null QoL result in TORPEdO vs retrospective series showing xerostomia benefit?",
-          "What is the false-negative rate of AI-assisted suspicious node identification in omitted nodal stations in the INRT/DARTBOARD cohort?"
+          "Direct RCT of EBRT vs resection or thermal ablation in BCLC-0/A HCC still absent; cross-cohort OS comparisons are hypothesis-generating, not practice-defining."
+        ]
+      },
+      {
+        "disease_site": "oligo-mets",
+        "intro": "EXTEND is the largest and most mature basket-trial evidence yet for MDT across solid tumor histologies.",
+        "studies": [
+          {
+            "name": "EXTEND Trial",
+            "tldr": "EXTEND phase II: MDT+SOC vs SOC in oligomets, HR 0.54 (0.41-0.72), p<0.001 for PFS across all baskets.",
+            "details": [
+              "📊 1° EP PFS: HR 0.54 (95% CI 0.41-0.72), p<0.001 (per-protocol, all baskets); excluding prostate baskets HR 0.60 (0.40-0.89)",
+              "🔍 Phase II randomized, N=334 per protocol; 1-5 mets, 6 baskets (breast, pancreas, kidney, 2 prostate, Other); MDT was RT in 98% of mets; median f/u 53mo",
+              {
+                "text": "📊 Basket-level PFS signals",
+                "subdetails": [
+                  "Superiority: pancreas, prostate (both baskets), Other",
+                  "Inconclusive: breast, kidney"
+                ]
+              },
+              "🔗 vs ORIOLE (JCO 2020) and STOMP (Lancet Oncol 2018): EXTEND is the largest basket trial and first to show consistent PFS benefit across histologies with mature 53mo f/u; prior trials were prostate-only or smaller",
+              "⚠️ Phase II, not powered for OS; basket-level N small, PFS superiority in only 3/6 baskets; prostate-dominant enrollment may inflate overall HR; no OS data reported in abstract",
+              "❓ ctDNA clearance at 3mo correlated with survival: can it select pts most likely to benefit from MDT? Phase III basket designs needed for breast and kidney"
+            ],
+            "key_figure_url": null,
+            "key_figure_caption": null,
+            "nct": null,
+            "tweet_ids": [
+              1000000002
+            ],
+            "slug": "extend-oligo-mdt",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Phase II basket trial; not powered for OS; inconclusive in breast and kidney; phase III validation still needed for most histologies.",
+              "audience": "Oligometastatic solid tumors, 1-5 mets, multiple histologies, receiving SOC systemic therapy"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 2
+              }
+            ]
+          }
+        ],
+        "open_questions": [
+          "Can ctDNA clearance at 3mo reliably select pts most likely to benefit from MDT?",
+          "Phase III basket designs needed for breast and kidney, where EXTEND PFS superiority was inconclusive."
         ]
       },
       {
         "disease_site": "prostate",
-        "intro": "Two datasets today split on field irradiation: HEAT confirms SBRT NI at interim; PEACE 2 finds no benefit from pelvic RT in N0 very high-risk disease.",
+        "intro": "Fractionation (HEAT interim) and pelvic field (PEACE 2 phase III) examined in the same day, with provisional and null results respectively.",
         "studies": [
           {
-            "name": "PEACE 2",
-            "tldr": "PEACE 2: pelvic RT did not improve cPFS, MFS, OS, or PCSS vs prostate-only RT in very high-risk localized PCa.",
+            "name": "HEAT Trial",
+            "tldr": "HEAT trial: AHRT non-inferior to EHRT for biochemical failure at 4.25y (7% vs 7.4%, p=0.007) in localized PCa.",
             "details": [
-              "📊 1° EP cPFS: HR 0.81 (95% CI 0.63-1.03), p=0.088 — non-significant; 7-yr cPFS 67.1% pelvic vs 62.9% prostate-only RT",
-              "🔍 Phase III RCT, 2x2 factorial (±pelvic RT, ±cabazitaxel), N=761 (Arm A+B vs C+D); very high-risk localized CaP (Gleason ≥8, T3-T4, or PSA ≥20), N0M0 on conventional imaging or choline PET/CT; ADT x3 yrs in all arms",
-              "📊 No effect of pelvic RT on MFS, PCSS, or OS per slide 4 conclusion — no effect sizes reported in source tweets for these endpoints",
-              "🔗 vs POP-RT (Lancet 2021): pelvic RT improved bFFS (HR 0.50) and MFS (HR 0.72) in high-risk pts; PEACE 2 population similarly staged but POP-RT used chemo-naïve arms — divergent results across trials in ostensibly similar settings raises question of era effects, imaging selection, or dose/fractionation differences",
-              "⚠️ Staging by conventional imaging (or choline PET/CT, not PSMA-PET) — occult nodal disease may have been present but undetected, diluting any pelvic RT benefit; PSMA-PET era would stratify this differently",
-              "⚠️ Trend in cPFS (4.2% absolute at 7 yrs) is non-significant but not trivially small; trial may be underpowered for modest effects given composite endpoint composition",
-              "❓ Whether PSMA-PET-selected node-positive pts would benefit from pelvic RT remains open — PEACE 2 excludes detectable nodal disease, so this is a different clinical question"
+              "🔍 Phase III RCT; n=156 randomized, 142 analyzed (interim; accrual goal 456); 82.4% intermediate-risk; median FU 59.7 months; 28% ADT",
+              "💊 AHRT: 36.25 Gy/5 fx (GTV SIB 40 Gy) vs EHRT: 70.2 Gy/26 fx IMRT; ADT ≤6 months permitted both arms",
+              "📊 Acute G2+ GI toxicity lower with AHRT; late G2+ GI and acute/late G2+ GU comparable between arms",
+              "🔗 Prior SBRT trials (HYPO-RT-PC, PACE-B, NRG-GU005) excluded ADT and used heterogeneous EHRT controls; HEAT first 1:1 with modern IMRT + ADT in both arms",
+              "⚠️ Interim analysis (156 of 456 planned); 12% NI margin is wide; full-cohort results needed before adoption",
+              "❓ Whether ADT interacts with fractionation schedule on long-term BF or late toxicity remains open"
             ],
-            "key_figure_url": "https://pbs.twimg.com/media/HIl8Pa0XQAAYLXz.jpg",
+            "key_figure_url": "https://pbs.twimg.com/media/HInfJedWwAAReWC.jpg",
             "key_figure_caption": {
               "columns": [
-                "",
-                "Prostate-only RT",
-                "Pelvic RT"
+                "Endpoint",
+                "AHRT",
+                "EHRT",
+                "p (non-inf)"
               ],
               "rows": [
                 [
-                  "7-yr cPFS",
-                  "62.9% [57.4; 68.1]",
-                  "67.1% [61.6; 72.2]"
-                ],
-                [
-                  "HR (95% CI)",
-                  "ref",
-                  "0.81 [0.63; 1.03]"
-                ],
-                [
-                  "p",
-                  "—",
-                  "0.088"
+                  "BF at 4.25y",
+                  "7%",
+                  "7.4%",
+                  "0.007"
                 ]
               ]
             },
-            "nct": null,
-            "tweet_ids": [
-              25
-            ],
-            "source_ids": [
-              {
-                "type": "tweet",
-                "id": 25
-              }
-            ]
-          },
-          {
-            "name": "HEAT Trial",
-            "tldr": "HEAT: SBRT (36.25 Gy/5 fx) non-inferior to EHRT for biochemical failure at 4.25y (7% vs 7.4%, P-NI=0.007) in localized PCa.",
-            "details": [
-              "📊 1° EP (BF by Phoenix definition) at 4.25y: AHRT 7% vs EHRT 7.4%; P non-inferiority = 0.007; NI margin 12% -- met",
-              "🔍 Phase III RCT (interim analysis); n=156 randomized, n=142 analyzed; 82.4% intermediate-risk, 28% received ADT, median FU 59.7 mo; trial design target n=456, n=420 evaluable enrolled",
-              "💊 AHRT: 36.25 Gy/5 fx (7.25 Gy/fx) + GTV SIB to 40 Gy; EHRT: 70.2 Gy/26 fx (2.7 Gy/fx) IMRT; ADT ≤6 mo permitted both arms",
-              {
-                "text": "📊 Toxicity (clinician-reported)",
-                "subdetails": [
-                  "Acute G2+ GI: lower with AHRT (no arm-level rates in source tweets)",
-                  "Late G2+ GI: no significant difference",
-                  "Acute/late G2+ GU: no significant difference"
-                ]
-              },
-              "🔗 Prior AHRT NI trials (HYPO-RT-PC, PACE-B, NRG-GU005) excluded ADT or used non-IMRT control arms; HEAT is first 1:1 AHRT vs EHRT with modern IMRT + ADT allowed in both",
-              "⚠️ Interim analysis only -- NI conclusion at 4.25y from n=142 of ~420 evaluable enrolled; full dataset and longer FU needed to confirm"
-            ],
-            "key_figure_url": "https://pbs.twimg.com/media/HInfJedWwAAReWC.jpg",
-            "key_figure_caption": "BF rate (Phoenix) at 4.25y: AHRT 7% vs EHRT 7.4%; P non-inferiority = 0.007; n=142 analyzed, median FU 59.7 mo",
             "nct": "NCT01794403",
             "tweet_ids": [
               29,
               28
             ],
+            "slug": "heat-prostate-hypofractionation",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Interim analysis at 1/3 planned accrual; 12% NI margin is wide; final-analysis data needed before practice adoption.",
+              "audience": "Localized low-to-intermediate risk PCa, IPSS <12"
+            },
             "source_ids": [
               {
                 "type": "tweet",
@@ -199,80 +287,61 @@
                 "id": 28
               }
             ]
-          }
-        ],
-        "open_questions": [
-          "Would PSMA-PET-selected node-positive patients show pelvic RT benefit not captured in PEACE 2's conventionally staged cohort?",
-          "Does HEAT's NI hold at full accrual and beyond 5-year f/u given the 12% NI margin used?"
-        ]
-      },
-      {
-        "disease_site": "hepatobiliary",
-        "intro": null,
-        "studies": [
+          },
           {
-            "name": "HCC EBRT multinational IPD cohort",
-            "tldr": "Largest multinational EBRT IPD cohort (N=4,913 HCC): mOS 4.6 yr BCLC-A, 6.8 yr BCLC-0; treatment-naive BCLC-A mOS 5.4 yr.",
+            "name": "PEACE 2",
+            "tldr": "PEACE 2: pelvic RT cPFS HR 0.81 [0.63-1.03] p=0.088; null for MFS, OS, PCSS in very high-risk localized CaP.",
             "details": [
-              "📊 mOS by BCLC stage: 6.8 yr (95% CI 5.7-8.7) for BCLC-0; 4.6 yr (95% CI 4.1-5.1) for BCLC-A",
-              "📊 Treatment-naive subgroup: mOS not reached (95% CI 8.6-NR) for BCLC-0; 5.4 yr (95% CI 4.5-6.7) for BCLC-A",
-              "🔍 IPD meta-analysis, N=4,913, systematic review methodology, median f/u 5.0 yr, stratified by BCLC stage and treatment-naive vs experienced",
-              "📊 Multivariable Cox: ablative RT dose and more recent treatment year associated with reduced mortality risk; advanced BCLC, higher tumor burden, worse PS, Child-Pugh B/C associated with increased mortality",
-              "🔗 Authors conclude EBRT OS for BCLC-0/A appears comparable to resection, thermal ablation, and other ablative locoregional therapies — supports EBRT inclusion in BCLC decision pathway",
-              "⚠️ No randomized comparator arm; cross-modality OS comparisons are observational and subject to selection bias by era, institution, and candidacy",
-              "❓ Whether ablative EBRT (SBRT) achieves equivalent local control to resection in BCLC-A pts with preserved liver function — and how to define candidacy — remains the operative question for guideline uptake"
+              "🔍 Phase III 4-arm factorial (± pelvic RT, ± cabazitaxel x4); N=761; very high-risk ≥2 of Gleason ≥8/T3-T4/PSA ≥20; N0M0; ADT 3yr",
+              "⚠️ No benefit on any secondary endpoint: MFS, OS, PCSS all null per presenter conclusions",
+              "🔗 vs POP-RT (Lancet Oncol 2021): pelvic RT improved cFFS and MFS in similar high-risk pts; PEACE 2 null across same endpoints diverges from that signal",
+              "⚠️ N0M0 staging by conventional imaging; choline PET/CT permitted in subset; true nodal burden likely underestimated, diluting pelvic RT signal in occult N+ pts",
+              "❓ Whether PSMA PET-staged node-negative high-risk pts benefit from pelvic RT, and optimal RT dose/volumes, remain open"
             ],
-            "key_figure_url": null,
-            "key_figure_caption": null,
+            "key_figure_url": "https://pbs.twimg.com/media/HIl8Pa0XQAAYLXz.jpg",
+            "key_figure_caption": {
+              "columns": [
+                "Arm",
+                "7-yr cPFS",
+                "HR (95% CI)",
+                "p"
+              ],
+              "rows": [
+                [
+                  "Prostate-only RT",
+                  "62.9% [57.4; 68.1]",
+                  "ref",
+                  "—"
+                ],
+                [
+                  "Pelvic RT",
+                  "67.1% [61.6; 72.2]",
+                  "0.81 [0.63; 1.03]",
+                  "0.088"
+                ]
+              ]
+            },
             "nct": null,
             "tweet_ids": [
-              1000000003
+              25
             ],
+            "slug": "peace2-pelvic-rt",
+            "verdict": {
+              "soc_implication": "challenges-soc",
+              "rationale": "Phase III null result for cPFS, MFS, OS, PCSS; diverges from POP-RT benefit signal. Authors conclude pelvic RT cannot be SOC even in high nodal-risk pts.",
+              "audience": "Very high-risk localized CaP (≥2: Gleason ≥8, T3-T4, PSA ≥20), N0M0 on imaging"
+            },
             "source_ids": [
               {
-                "type": "paper",
-                "id": 3
+                "type": "tweet",
+                "id": 25
               }
             ]
           }
         ],
         "open_questions": [
-          "Does ablative EBRT achieve equivalent local control to resection in BCLC-A patients with preserved liver function, and what candidacy criteria should define guideline uptake?"
-        ]
-      },
-      {
-        "disease_site": "oligo-mets",
-        "intro": "Phase II RCT-level evidence for MDT now spans 53-month median f/u across six histologic baskets.",
-        "studies": [
-          {
-            "name": "EXTEND Trial",
-            "tldr": "EXTEND phase II: MDT+SOC vs SOC in oligometastatic solid tumors, PFS HR 0.54 (0.41-0.72), p<0.001 at 53-month follow-up.",
-            "details": [
-              "📊 1° EP (PFS, per-protocol, all baskets): HR 0.54 (95% CI 0.41-0.72), p<0.001",
-              "📊 PFS excluding prostate baskets: HR 0.60 (95% CI 0.40-0.89) — benefit maintained across histologies",
-              "🔍 Phase II multicenter RCT; N=334 analyzed per protocol (MDT+SOC n=166, SOC n=168); 1-5 mets; 6 baskets (breast, pancreas, kidney, 2 prostate, 'Other'); median f/u 53 mo; RT used as MDT for 98% of mets",
-              "📊 Basket-level PFS: superiority in pancreas, prostate, and 'Other'; breast and kidney inconclusive — no effect sizes reported in source tweets",
-              "🔗 Translational: baseline detectable ctDNA correlated with shorter PFS/OS; ctDNA clearance at 3 mo post-enrollment correlated with improved survival; MDT+SOC-induced systemic immune activation most pronounced in PFS-superior baskets",
-              "⚠️ Phase II, basket design — individual baskets underpowered; breast and kidney signals null/inconclusive; heterogeneous histology mix limits effect-size interpretability across-basket; no OS benefit reported in source tweets",
-              "❓ Which histologies warrant phase III? ctDNA as prospective eligibility/stratification tool? Immune activation mechanistically causal or epiphenomenal?"
-            ],
-            "key_figure_url": null,
-            "key_figure_caption": null,
-            "nct": null,
-            "tweet_ids": [
-              1000000002
-            ],
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 2
-              }
-            ]
-          }
-        ],
-        "open_questions": [
-          "Which histologies (breast, kidney basket signals null) warrant dedicated phase III vs being folded into pooled analyses?",
-          "Can ctDNA clearance at 3 months serve as a prospective eligibility or stratification biomarker in future MDT trials?"
+          "Does pelvic RT benefit PSMA PET-staged cN0 very high-risk CaP, where subclinical nodal burden is better characterized than with conventional imaging?",
+          "Does ADT interact with SBRT fractionation schedule on long-term biochemical failure or late GU/GI toxicity?"
         ]
       },
       {
@@ -281,24 +350,15 @@
         "studies": [
           {
             "name": "FASTRACK II (TROG 15.03)",
-            "tldr": "FASTRACK II: 100% local control at 36/60/84mo with SABR for inoperable primary RCC, median f/u 62mo, N=70.",
+            "tldr": "FASTRACK II: 100% local control at 36, 60, and 84 months with SABR for primary RCC in non-surgical pts (N=70, median f/u 62mo).",
             "details": [
-              "📊 1° EP (freedom from local progression): 100% LC at 36, 60, and 84 months — no local recurrences observed",
-              "🔍 phase 2 non-randomised, N=70 (71 enrolled, 1 withdrew pre-treatment), 8 sites AU/NL; median age 77 yrs, 70% male; median tumour 46mm; 56% T1b, 34% T1a, 9% T2a, 1% T3a; 1% N1",
-              "💊 dose: single 26 Gy for tumours ≤4cm; 42 Gy/3fx (48h apart) for >4cm",
-              {
-                "text": "⚠️ G3 AEs within 9mo (possibly/probably/definitely related), N=7 (10%)",
-                "subdetails": [
-                  "Nausea/vomiting: 3 events (4%)",
-                  "Abdominal/flank/tumour pain: 4 events (6%)",
-                  "Colonic obstruction: 2 events (3%)",
-                  "Diarrhoea: 1 event (1%)",
-                  "No G4 events, no treatment-related deaths, no new long-term safety signals"
-                ]
-              },
-              "⚠️ single-arm phase 2, no comparator arm — LC rates vs partial nephrectomy or RFA not directly tested; selection bias toward medically inoperable/high surgical risk pts skews toxicity profile favorably",
-              "🔗 vs SAFIR (single-arm SBRT series) and STAR-TRK registry data: consistent LC signal, FASTRACK II adds longest median f/u (62mo) in prospective phase 2 setting for primary RCC SABR",
-              "❓ OS and CSS not yet mature enough to displace surgery in operable candidates; randomised data (vs partial nephrectomy) still absent"
+              "📊 1° EP (freedom from local progression): 100% LC at 36mo, 60mo, and 84mo; no local recurrences observed",
+              "🔍 Phase 2 non-randomised, N=70 (1 withdrew pre-treatment), 8 centres Australia/Netherlands; median f/u 62mo (IQR 60-72)",
+              "🔍 Dose: 26 Gy single fraction for tumours ≤4cm; 42 Gy/3fr (48h apart) for >4cm; ITT analysis",
+              "📊 G3 AEs within 9mo: 10% pts; nausea/vomiting 4%, pain 6%, colonic obstruction 3%, diarrhoea 1%; no G4 events, no treatment-related deaths",
+              "⚠️ Single-arm, no randomised comparator vs partial nephrectomy or thermal ablation; predominately T1b (56%) and medically inoperable/high-risk pts, median age 77 — limits generalisability to operable pts",
+              "🔗 Consistent with STAR-TRK and prior SABR series; 100% LC durable to 7yr is the longest follow-up reported for SABR in primary RCC to date",
+              "❓ No OS benefit or QoL data vs surgery/ablation; optimal candidate selection (T2a, younger operable pts) and sequencing with systemic IO therapy remain open"
             ],
             "key_figure_url": null,
             "key_figure_caption": null,
@@ -306,6 +366,12 @@
             "tweet_ids": [
               1000000001
             ],
+            "slug": "fastrack2-rcc-sabr",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Single-arm phase 2, no randomised comparator vs nephrectomy or ablation. Durable LC signal in inoperable pts; insufficient to shift guidelines.",
+              "audience": "Primary RCC, medically inoperable or surgery-declined, tumours ≤10cm, N0-N1, median age 77"
+            },
             "source_ids": [
               {
                 "type": "paper",
@@ -315,7 +381,7 @@
           }
         ],
         "open_questions": [
-          "Is SABR ready for operable RCC candidates, or does the absence of randomized data vs partial nephrectomy limit FASTRACK II's impact to the inoperable setting only?"
+          "Does SABR benefit operable T2a or younger RCC pts vs partial nephrectomy? Optimal sequencing with adjuvant IO therapy remains undefined."
         ]
       }
     ],

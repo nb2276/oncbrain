@@ -193,6 +193,34 @@ export type DigestStudy = {
   // index and as the anchor id on the [date] page. Older artifacts won't
   // have this — consumers should fall back to deriveSlug(name).
   slug?: string;
+  // v0.7+ analyst verdict: 5-second SOC-implication triage signal at top
+  // of each rendered study card. See VOICE.md "SOC-implication verdict"
+  // section for taxonomy and assignment rules. Older artifacts won't have
+  // this; renderers should fall back to the bullet-only layout.
+  verdict?: StudyVerdict;
+};
+
+export type SocImplication =
+  | 'practice-changing'
+  | 'challenges-soc'
+  | 'confirmatory'
+  | 'early-signal'
+  | 'methodologically-limited'
+  | 'unclear';
+
+export const SOC_IMPLICATIONS: readonly SocImplication[] = [
+  'practice-changing',
+  'challenges-soc',
+  'confirmatory',
+  'early-signal',
+  'methodologically-limited',
+  'unclear',
+] as const;
+
+export type StudyVerdict = {
+  soc_implication: SocImplication;
+  rationale: string; // ≤ 30 words, explains the verdict choice (not the trial)
+  audience: string | null; // ≤ 80 chars eligibility gate, or null when too broad
 };
 
 // Type guards used by parser, validator, and renderers.
@@ -839,7 +867,37 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     nct,
     tweet_ids: cluster.tweet_ids,
     slug: cluster.slug,
+    verdict: parseVerdict(root.verdict),
   };
+}
+
+// Parses the optional verdict block emitted by Phase 2. Forgiving: if the
+// field is missing or malformed, return undefined and the renderer falls
+// back to the bullet-only layout (graceful for older artifacts).
+//   - soc_implication: validated against the enum; invalid/missing → 'unclear'
+//   - rationale: trimmed; capped at 40 words (prompt asks for 30, allow slop)
+//   - audience: trimmed string or null; capped at 120 chars (prompt asks 80)
+export function parseVerdict(raw: unknown): StudyVerdict | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const obj = raw as Record<string, unknown>;
+  const rawSoc = typeof obj.soc_implication === 'string' ? obj.soc_implication.trim() : '';
+  const soc: SocImplication = (SOC_IMPLICATIONS as readonly string[]).includes(rawSoc)
+    ? (rawSoc as SocImplication)
+    : 'unclear';
+  const rationaleRaw = typeof obj.rationale === 'string' ? obj.rationale.trim() : '';
+  if (!rationaleRaw) return undefined; // verdict without rationale isn't useful
+  const rationaleWords = rationaleRaw.split(/\s+/);
+  const rationale =
+    rationaleWords.length > 40
+      ? rationaleWords.slice(0, 40).join(' ') + '…'
+      : rationaleRaw;
+  const audienceRaw = typeof obj.audience === 'string' ? obj.audience.trim() : '';
+  const audience: string | null = audienceRaw.length === 0
+    ? null
+    : audienceRaw.length > 120
+      ? audienceRaw.slice(0, 119) + '…'
+      : audienceRaw;
+  return { soc_implication: soc, rationale, audience };
 }
 
 // Caption validator. Multiple findings shape this:
