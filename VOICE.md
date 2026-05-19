@@ -127,8 +127,13 @@ and doesn't establish for the population studied.
   studied population. May not warrant immediate change, but the reader
   needs to know the field is contested. (E.g., a randomised trial of
   pelvic RT that's null when prior evidence suggested benefit.)
-- 🔄 `confirmatory`. Adds to existing evidence; consistent with current
-  practice. Most common verdict for high-quality studies.
+- 🔄 `confirmatory`. Adds to existing evidence; consistent with current or
+  emerging-but-recognized practice. Covers BOTH literal current SOC (the
+  trial reinforces what most people already do) AND emerging-recognized
+  practice (the trial supports a guideline-listed but not-yet-universal
+  option, e.g., a non-randomised cohort backing an emerging modality).
+  Most common verdict for high-quality studies whose results align with
+  the field's direction.
 - 🧪 `early-signal`. **Maturity issue.** The trial hasn't reached the
   point where you can draw a conclusion. Phase I/II, single-arm, small N,
   short follow-up, interim analysis. Worth knowing, not worth changing
@@ -147,9 +152,58 @@ and doesn't establish for the population studied.
 When uncertain between two verdicts, pick the more conservative one.
 "Practice-changing" is the most-overclaimed label in clinical media;
 reserve it. A confirmatory phase III is `confirmatory`, not
-`practice-changing`, even if the headline is positive. When in doubt
-between `early-signal` and `confirmatory`: pick `early-signal`.
+`practice-changing`, even if the headline is positive.
+
+The "pick conservative" rule applies to UNCERTAINTY, not to STRENGTH.
+If a trial has a clear positive signal (randomised, prespecified
+primary endpoint hit, adequate follow-up, named comparator), the
+question is which strength bucket to choose, not whether to downgrade
+to a weaker one. A randomised phase II that hits its primary endpoint
+with adequate follow-up and a named comparator is `confirmatory` (or
+`practice-changing`), not `early-signal`. `early-signal` is for trials
+where the data hasn't matured (phase I, single-arm, small N, short
+f/u, interim analysis); it is not a place to hide strong results
+because the phase number is small.
+
+**Hard maturity gates that always trump strength.** Three patterns
+are `early-signal` regardless of follow-up, consistency with prior
+data, or how clean the design otherwise looks:
+
+1. **Single-arm trials are `early-signal`.** No amount of follow-up
+   or pooled consistency with prior single-arm data elevates a
+   single-arm trial to `confirmatory`. `confirmatory` requires
+   randomised evidence OR a large prospective non-randomised IPD
+   cohort with multiple sites and explicit comparator analyses.
+   FASTRACK II is `early-signal` (single-arm, even with 62-mo f/u).
+2. **Interim analyses are `early-signal` until the prespecified
+   final primary analysis.** Hitting a primary endpoint at partial
+   accrual or before the planned cutoff does not promote to
+   `confirmatory`. The full pre-specified analysis is the gate.
+3. **Post-hoc analyses (subgroups, alternate timepoints, salvage
+   analyses) are `methodologically-limited`,** regardless of the
+   parent trial's strength. The post-hoc design dominates the read
+   even if the parent trial was definitive.
+
 When in real doubt: prefer `unclear` over a wrong guess.
+
+### Choosing between `challenges-soc` and `methodologically-limited`
+
+When a trial produces a divergent result AND has a design issue, the
+verdict hinges on whether the design issue undermines the divergence:
+
+- If the trial design is internally valid for the divergence claim
+  (randomised, prespecified primary endpoint, adequate power,
+  completed analysis), and the divergent result is the headline: pick
+  `challenges-soc`. The design issue is secondary and goes in a ⚠️
+  bullet, not the verdict.
+- If the design issue is large enough to make the divergent result
+  unreliable (post-hoc subgroup driving the divergence, biased
+  endpoint, missing primary endpoint, high control crossover): pick
+  `methodologically-limited`. The divergence isn't trustworthy
+  enough to count as a real challenge to SOC.
+- When in doubt: pick `methodologically-limited`. A weakly-grounded
+  challenge to SOC is more dangerous to the reader than a flagged-
+  design caveat.
 
 ### Choosing between `early-signal` and `methodologically-limited`
 

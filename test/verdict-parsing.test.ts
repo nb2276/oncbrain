@@ -83,15 +83,21 @@ describe('parseVerdict', () => {
     expect(v?.audience).toBeNull();
   });
 
-  it('truncates audience > 120 chars', () => {
+  it('truncates audience > 80 chars (no ellipsis at 80)', () => {
     const longAudience = 'a'.repeat(150);
     const v = parseVerdict({
       soc_implication: 'confirmatory',
       rationale: 'r',
       audience: longAudience,
     });
-    expect(v?.audience?.length).toBeLessThanOrEqual(120);
-    expect(v?.audience?.endsWith('…')).toBe(true);
+    expect(v?.audience?.length).toBeLessThanOrEqual(80);
+    expect(v?.audience?.endsWith('…')).toBe(false);
+  });
+
+  it('keeps audience ≤ 80 chars intact', () => {
+    const a = 'Localized intermediate-risk prostate, post-RP biochemical failure';
+    const v = parseVerdict({ soc_implication: 'confirmatory', rationale: 'r', audience: a });
+    expect(v?.audience).toBe(a);
   });
 
   it('coerces missing audience to null', () => {

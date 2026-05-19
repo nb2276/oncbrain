@@ -79,8 +79,13 @@ allStudiesOnDate.forEach((s, i) => slugByStudy.set(s, resolvedSlugs[i]!));
 // bodies inside JSX expressions): unique source authors, comparator
 // bullets lifted out of details for the "vs leading data" callout, the
 // rest of the bullets, and the verdict metadata.
+// Authors carry their source type so the renderer can style tweet
+// handles (monospace) differently from paper attributions (italic
+// surname). Codex review P2: "Siva et al." in code-font reads as a
+// code identifier; only @handles belong in monospace.
+type StudyAuthor = { name: string; kind: 'tweet' | 'paper' };
 type StudyMeta = {
-  authors: string[];
+  authors: StudyAuthor[];
   comparatorBullets: DigestDetail[];
   otherBullets: DigestDetail[];
   verdictMeta: { emoji: string; label: string } | null;
@@ -88,23 +93,27 @@ type StudyMeta = {
 const studyMeta = new Map<typeof allStudiesOnDate[number], StudyMeta>();
 for (const study of allStudiesOnDate) {
   const refs = study.source_ids ?? study.tweet_ids.map((id) => ({ type: 'tweet' as const, id }));
-  const authors: string[] = [];
+  const authors: StudyAuthor[] = [];
   const seen = new Set<string>();
   for (const ref of refs) {
-    let candidate: string | null = null;
+    let candidate: StudyAuthor | null = null;
     if (ref.type === 'tweet') {
       const b = bookmarksById.get(ref.id);
-      candidate = b?.author_handle ?? b?.author_name ?? null;
+      const name = b?.author_handle ?? b?.author_name ?? null;
+      if (name) candidate = { name, kind: 'tweet' };
     } else if (ref.type === 'paper') {
       const p = papersById.get(ref.id);
       const first = p?.authors?.[0];
       // "Siva" reads as a partial citation; "Siva et al." reads as a
       // proper attribution. Append the suffix when there's more than
       // one author on the paper.
-      if (first) candidate = (p?.authors?.length ?? 0) > 1 ? `${first} et al.` : first;
+      if (first) {
+        const name = (p?.authors?.length ?? 0) > 1 ? `${first} et al.` : first;
+        candidate = { name, kind: 'paper' };
+      }
     }
-    if (candidate && !seen.has(candidate)) {
-      seen.add(candidate);
+    if (candidate && !seen.has(candidate.name)) {
+      seen.add(candidate.name);
       authors.push(candidate);
     }
   }
@@ -166,7 +175,7 @@ for (const study of allStudiesOnDate) {
             {(studyMeta.get(study)?.authors.length ?? 0) > 0 && (
               <p class="study-authors">
                 Sourced from {studyMeta.get(study)!.authors.slice(0, 3).map((a, i) => (
-                  <Fragment>{i > 0 && ', '}<span class="author-handle">{a}</span></Fragment>
+                  <Fragment>{i > 0 && ', '}<span class:list={['author-name', `author-${a.kind}`]}>{a.name}</span></Fragment>
                 ))}
                 {studyMeta.get(study)!.authors.length > 3 && (
                   <span class="author-more"> · +{studyMeta.get(study)!.authors.length - 3}</span>
@@ -176,7 +185,7 @@ for (const study of allStudiesOnDate) {
             {study.verdict?.audience && (
               <p class="study-audience"><span class="audience-label">For</span>{study.verdict.audience}</p>
             )}
-            {study.verdict && studyMeta.get(study)?.verdictMeta && (
+            {study.verdict?.rationale && studyMeta.get(study)?.verdictMeta && (
               <aside class:list={['verdict-block', `verdict-${study.verdict.soc_implication}`]}>
                 <div class="verdict-pill">
                   <span class="verdict-emoji" aria-hidden="true">{studyMeta.get(study)!.verdictMeta!.emoji}</span>
@@ -186,6 +195,22 @@ for (const study of allStudiesOnDate) {
               </aside>
             )}
             <p class="study-tldr" set:html={linkifyCitations(study.tldr)} />
+            {/* Comparator before figure: codex review P2 caught the order
+                drift. A rad onc scanning wants "how does this compare to
+                current practice" before the visual detour into KM curves
+                or forest plots. */}
+            {(studyMeta.get(study)?.comparatorBullets.length ?? 0) > 0 && (
+              <section class="comparator-block">
+                <div class="comparator-label">vs leading data</div>
+                <ul class="comparator-list">
+                  {studyMeta.get(study)!.comparatorBullets.map((d) => (
+                    typeof d === 'string'
+                      ? <li set:html={linkifyCitations(stripComparatorEmoji(d))} />
+                      : <li set:html={linkifyCitations(stripComparatorEmoji(d.text))} />
+                  ))}
+                </ul>
+              </section>
+            )}
             {study.key_figure_url && isSafeImageUrl(study.key_figure_url) && (
               <figure class="study-figure">
                 <img
@@ -217,18 +242,6 @@ for (const study of allStudiesOnDate) {
                   </figcaption>
                 )}
               </figure>
-            )}
-            {(studyMeta.get(study)?.comparatorBullets.length ?? 0) > 0 && (
-              <section class="comparator-block">
-                <div class="comparator-label">vs leading data</div>
-                <ul class="comparator-list">
-                  {studyMeta.get(study)!.comparatorBullets.map((d) => (
-                    typeof d === 'string'
-                      ? <li set:html={linkifyCitations(stripComparatorEmoji(d))} />
-                      : <li set:html={linkifyCitations(stripComparatorEmoji(d.text))} />
-                  ))}
-                </ul>
-              </section>
             )}
             {(studyMeta.get(study)?.otherBullets.length ?? 0) > 0 && (
               <ul class="study-details">
@@ -544,10 +557,17 @@ for (const study of allStudiesOnDate) {
     color: var(--fg-muted);
     line-height: 1.4;
   }
-  .author-handle {
+  .author-name { color: var(--fg); }
+  /* Tweet @handles read as code identifiers — monospace. */
+  .author-tweet {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.78rem;
-    color: var(--fg);
+  }
+  /* Paper attributions ("Siva et al.") read as bibliographic
+     entries — italic surname style. Codex P2: monospace was wrong. */
+  .author-paper {
+    font-style: italic;
+    font-size: 0.82rem;
   }
   .author-more { color: var(--fg-muted); }
 
