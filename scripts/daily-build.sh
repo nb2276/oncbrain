@@ -1,5 +1,5 @@
 #!/bin/bash
-# Daily oncbrain pipeline. Runs from launchd at 3am local (or manually).
+# Daily oncbrain pipeline. Runs from launchd at 6am local (or manually).
 #
 # Pipeline (v0.5+):
 #   1. pull:telegram    — drain new bot messages into inbox_items queue
@@ -77,7 +77,7 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   if git diff --cached --quiet -- data; then
     echo "  (no new digest content — nothing to commit)"
   else
-    git commit -m "auto: $TODAY 3am pull"
+    git commit -m "auto: $TODAY 6am pull"
     if git push 2>&1; then
       echo "  pushed → DigitalOcean will auto-deploy"
     else

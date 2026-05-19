@@ -66,7 +66,7 @@ npm run eval                    # LLM-as-judge eval (score: factual / clinical /
 
 # Autopilot
 npm run cron:install            # macOS launchd job at 03:00 local daily
-sudo pmset repeat wakeorpoweron MTWRFSU 02:55:00   # wake laptop 5min before (sleep guard)
+sudo pmset repeat wakeorpoweron MTWRFSU 05:55:00   # wake laptop 5min before 6am cron (sleep guard)
 
 # Local preview
 npm run preview                 # Astro preview (after npm run build)
@@ -149,7 +149,7 @@ build/
   seed-dev.ts              dev fixture
 admin/server.ts            Hono server, localhost only, port 3001
 scripts/
-  daily-build.sh           3am autopilot: pull → enrich → build:day → build → push
+  daily-build.sh           6am autopilot: pull → enrich → build:day → build → push
   link-slides.sh           pre-build hook: ensures public/slides symlink → data/slide-photos
   launchd/                 plist template + install/uninstall
 test/                      vitest unit tests
@@ -180,7 +180,7 @@ TODOS.md                   deferred work tracker (seeded from CHANGELOG "Not yet
 
 - **Working dir is in Dropbox** (`/Users/nboehling/Library/CloudStorage/Dropbox/dev/MeetingSummary`). `node_modules` and `dist` are `xattr com.dropbox.ignored` to avoid sync churn. Reapply if reinstalling.
 - **Local DB** (`oncbrain.db`) is gitignored. Phone-bookmarking is via Telegram bot, NOT remote DB — admin runs locally only.
-- **Cron** at 3am Pacific via launchd. If Mac is asleep, pmset wake at 2:55 is required.
+- **Cron** at 6am Pacific via launchd. If Mac is asleep, pmset wake at 5:55 is required.
 - **Curator name** (`PUBLIC_CURATOR_NAME`, `PUBLIC_CURATOR_HANDLE`) is local-only — DO's build doesn't see `.env`. Set these as DO app env vars to attribute on the live site.
 
 ## Skill routing
