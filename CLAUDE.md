@@ -43,9 +43,8 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 ## Conventions
 
 - **Never `git add -A`** in this repo. There are publish-on-push data files (`data/digests/*.json`, `data/obsidian/*.md`) that mix code commits with content publishes. Stage explicit paths. (See `~/.claude/projects/.../memory/feedback_staging.md`.)
-- **Effect sizes verbatim from sources.** Prompts at `prompts/digest-v4.txt` instruct the LLM: "if tweets don't give a number, write 'no effect size reported in source tweets'." Hallucinated numbers are the worst possible failure mode for clinical content. Never relax this.
-- **Subspecialist register.** No patient-facing language, no AI-isms ("delve", "crucial", "robust", "comprehensive", "nuanced", "notably"), no em dashes.
-- **Mobile-first.** Newsreader serif body, warm off-white (#f7f5f0) background. Viewport-responsive. Designed for 90-second scanning by a busy subspecialist.
+- **Voice + framing rules live in `VOICE.md`.** Read that before writing UI copy, error messages, button labels, commit messages, or editing the Phase 1/2/3 prompts. VOICE.md covers: audience, register, approved/banned vocabulary, the em-dash ban, effect-size-verbatim rule, bullet emoji vocabulary, source-type pills, framing principles. Build-time analyst LLM reads it too via `{{VOICE}}` substitution in `prompts/digest-v5-*.txt`.
+- **Mobile-first.** Newsreader serif body, warm off-white (#f7f5f0) background. Viewport-responsive. Designed for 90-second scanning by a busy subspecialist. Visual design details in `DESIGN.md`.
 
 ## Key commands
 

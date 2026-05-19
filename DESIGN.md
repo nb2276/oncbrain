@@ -1,60 +1,24 @@
-# DESIGN.md — oncbrain design system
+# DESIGN.md — oncbrain visual design system
 
-Source-of-truth for visual + voice decisions. The shipped site is authoritative for layout; this file captures the *why* so future changes don't drift.
+Source-of-truth for visual decisions: typography, color, layout, disease-site emoji anchors. The shipped site is authoritative for live state; this file captures the *why* so changes don't drift.
 
-Read before any change that touches type, color, copy register, or the disease-site emoji set.
+For **voice + framing rules** (audience, register, banned vocab, em-dash ban, per-study bullet emoji vocabulary, source-type pills, framing principles), see **`VOICE.md`**. Both Claude Code and the build-time analyst LLM read VOICE.md as the single source of truth.
+
+Read this file before any change that touches type, color, layout, or the disease-site emoji set.
 
 ## Audience
 
-Oncology subspecialists. Reading on a phone, in 90 seconds, between scans or in a conference hallway. They already know the abbreviations and the comparator trials.
+Oncology subspecialists. Reading on a phone, in 60-90 seconds, between cases or in a conference hallway. They already know the abbreviations and the comparator trials.
 
-**This shapes everything below.** The reader is busy and well-trained; the digest is dense and assumes context.
+**This shapes everything below.** The reader is busy and well-trained; the design is dense and assumes context.
 
-## Voice
+## Disease-site emoji anchors
 
-Subspecialist-to-subspecialist. Peer-review register. Terse.
+The per-site visual anchor in the digest header (`[date].astro`), the sites grid (`sites/index.astro`), and the home nav bar. Source: `src/lib/disease-sites.ts` (primary, includes `rationale` field for the hover tooltip) + `src/lib/obsidian-export.ts` (duplicate map kept in sync — see in-file comment for the duplication rationale).
 
-**Use:**
-- Abbreviations: mOS, mPFS, HR, OR, ORR, DCR, AE, IO, ADT, ARSI, SBRT, EBRT, RP, ADC, BCR-FS.
-- Arrows: `→`.
-- Casual asides where they sharpen the point ("looks promising tho short f/u").
+See the [full emoji set + selection principles](#disease-site-emoji-set) below.
 
-**Don't use:**
-- AI vocabulary: *delve, crucial, robust, comprehensive, nuanced, notably, of note, interestingly.*
-- Em dashes. Anywhere. Code comments, prose, prompts, commit messages.
-- Patient-facing language ("patients" → "pts", or "men/women" when relevant).
-- Promotional tone ("game-changing", "practice-changing" without qualifier).
-- Fabricated numbers. Effect sizes are verbatim from sources or omitted.
-
-## Emoji vocabulary
-
-Emojis carry semantic load — not decoration. Use the right one or none.
-
-### Per-study bullet anchors (in `details[]`)
-
-| Emoji | Meaning |
-|---|---|
-| 📊 | Primary results / effect sizes |
-| 🔍 | Methodology / trial design |
-| 💊 | Systemic / regimen |
-| 📐 | Stat detail (CI, p, HR) |
-| ⚠️ | Counter / critique / methodological concern |
-| 🔗 | Comparison to prior data (recent or historic landmark) |
-| ❓ | Open question |
-
-A bullet without an emoji is fine — don't force them.
-
-### Source-type pills (renderer)
-
-| Emoji | Source |
-|---|---|
-| 🐦 | Tweet |
-| 📄 | Paper (PubMed) |
-| 🩻 | Slide (curator photo) |
-
-### Disease-site anchors
-
-See [Disease-site emoji set](#disease-site-emoji-set) below. Source: `src/lib/disease-sites.ts` (primary) + `src/lib/obsidian-export.ts` (duplicate map; keep in sync — see the in-file comment for why it's duplicated).
+(Per-study bullet emojis 📊 🔍 💊 📐 ⚠️ 🔗 ❓ and source-type pills 🐦 📄 🩻 are voice concerns — see `VOICE.md`.)
 
 ## Typography
 
@@ -132,4 +96,4 @@ When in doubt about a visual change:
 - The IMRD/sites schema. Astro pages + Obsidian export + LLM prompts all depend on it.
 - Newsreader as the body face.
 - The warm off-white background.
-- The "subspecialist-to-subspecialist" register. If you find yourself softening the tone for a broader audience, you've drifted off-product.
+- The subspecialist register (defined in `VOICE.md`). If you find yourself softening tone for a broader audience, you've drifted off-product.

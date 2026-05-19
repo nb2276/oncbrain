@@ -127,7 +127,7 @@ function itemToTweetShape(item: DigestInputItem): DigestInputTweet {
   }
   // slide
   const slideParts: string[] = [];
-  slideParts.push(`[SLIDE${item.source_label ? ` — ${item.source_label}` : ''}]`);
+  slideParts.push(`[SLIDE${item.source_label ? `: ${item.source_label}` : ''}]`);
   if (item.ocr_text) slideParts.push(`OCR text:\n${item.ocr_text}`);
   else slideParts.push('(no OCR text available)');
   return {
@@ -265,6 +265,18 @@ const DEFAULT_PROMPTS = {
   studyAgent: resolve(PROMPTS_DIR, 'digest-v5-study-agent.txt'),
   synthesis: resolve(PROMPTS_DIR, 'digest-v5-synthesis.txt'),
 };
+
+// VOICE.md is the canonical voice + framing doc, substituted into every phase
+// prompt's {{VOICE}} block at build time. Both Claude Code (when writing UI
+// copy) and the analyst LLM (here) read the same file — edit one place, both
+// follow. Lazy-loaded + cached so each digest build reads from disk once.
+const VOICE_PATH = resolve(__dirname, '../../VOICE.md');
+let _voiceCached: string | null = null;
+export function loadVoice(): string {
+  if (_voiceCached !== null) return _voiceCached;
+  _voiceCached = readFileSync(VOICE_PATH, 'utf-8').trim();
+  return _voiceCached;
+}
 
 type StudyCluster = {
   slug: string;
@@ -422,6 +434,7 @@ async function runGroupingPhase(
   const associationHints = renderGroupsForPrompt(associationGroups);
 
   const prompt = template
+    .replace('{{VOICE}}', loadVoice())
     .replace('{{CONFERENCE_NAME}}', opts.conferenceName)
     .replace('{{CONFERENCE_DAY}}', `Day ${opts.conferenceDay}`)
     .replace('{{SITE_SLUGS}}', diseaseSiteSlugList())
@@ -581,6 +594,7 @@ async function runStudyAgent(
     : '';
 
   const prompt = template
+    .replace('{{VOICE}}', loadVoice())
     .replace('{{STUDY_NAME}}', cluster.name)
     .replace('{{STUDY_SLUG}}', cluster.slug)
     .replace('{{DISEASE_SITE}}', cluster.disease_site)
@@ -1034,7 +1048,9 @@ async function runSynthesisPhase(
     key_figure_caption: study.key_figure_caption,
   }));
 
-  const prompt = template.replace('{{STUDIES_JSON}}', JSON.stringify(studiesForPrompt, null, 2));
+  const prompt = template
+    .replace('{{VOICE}}', loadVoice())
+    .replace('{{STUDIES_JSON}}', JSON.stringify(studiesForPrompt, null, 2));
 
   const content: LlmContentBlock[] = [{ type: 'text', text: prompt }];
 
