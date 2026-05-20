@@ -81,6 +81,12 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
         letter-spacing: 0.02em;
       }
       header .curator a { color: inherit; }
+      header .topnav {
+        margin-top: 0.4rem;
+        font-family: var(--font-sans);
+        font-size: 0.825rem;
+        letter-spacing: 0.02em;
+      }
       h1, h2, h3 { line-height: 1.25; font-family: var(--font-serif); }
       a { color: var(--accent); text-decoration: none; }
       a:hover { text-decoration: underline; }
@@ -122,6 +128,7 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
   <body>
     <header>
       <h1><a href="/">{siteName}</a></h1>
+      <nav class="topnav"><a href="/about">About</a></nav>
       {curatorName && (
         <div class="curator">
           curated by {curatorName}
@@ -131,8 +138,6 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
               <a href={`https://x.com/${curatorHandle.replace(/^@/, '')}`} target="_blank" rel="noopener">{curatorHandle}</a>
             </>
           )}
-          {' · '}
-          <a href="/about">about</a>
         </div>
       )}
     </header>
@@ -153,8 +158,6 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
         contact the curator{curatorHandle ? <> at <a href={`https://x.com/${curatorHandle.replace(/^@/, '')}`} target="_blank" rel="noopener">{curatorHandle}</a></> : ''}.
       </p>
       <p>
-        <a href="/about">About</a>
-        {' · '}
         <a href="/api">API &amp; RSS</a>
         {' · '}
         <a href="/feed.xml">RSS feed</a>
