@@ -74,6 +74,12 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   echo "→ Staging data/ for commit"
   git add data 2>/dev/null || true
 
+  # Which digest dates actually changed this run? A late-evening tweet can land
+  # on yesterday's date, so notifying only $TODAY would miss it. Derive the
+  # changed dates from the staged digest files (capture before the commit).
+  CHANGED_DATES="$(git diff --cached --name-only -- data/digests 2>/dev/null \
+    | sed -nE 's|.*/([0-9]{4}-[0-9]{2}-[0-9]{2})\.json$|\1|p' | sort -u)"
+
   if git diff --cached --quiet -- data; then
     echo "  (no new digest content — nothing to commit)"
   else
@@ -87,7 +93,14 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
 
   echo ""
   echo "→ Notifying curator"
-  npm run notify:curator --silent -- --date="$TODAY" || echo "  ⚠ notify:curator exited non-zero (continuing)"
+  if [ -z "$CHANGED_DATES" ]; then
+    echo "  (no digest changed — nothing to notify)"
+  else
+    for d in $CHANGED_DATES; do
+      echo "  → $d"
+      npm run notify:curator --silent -- --date="$d" || echo "  ⚠ notify:curator $d exited non-zero (continuing)"
+    done
+  fi
 
   echo ""
   echo "✓ Done at $(date '+%Y-%m-%d %H:%M:%S %Z')"
