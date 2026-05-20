@@ -134,10 +134,134 @@ describe('savePaper DOI key + merge', () => {
     expect(count.n).toBe(1);
   });
 
-  it('rejects a paper with neither pmid nor doi', () => {
+  it('rejects a paper with neither pmid, doi, nor content_hash', () => {
     const db = openDb(':memory:');
     expect(() => savePaper(db, { title: 'orphan', bookmark_date: '2026-05-18' })).toThrow(
-      /at least one of pmid or doi/,
+      /at least one of pmid, doi, or content_hash/,
     );
+  });
+});
+
+describe('migratePapersAddPdfColumns (content_hash + pdf_path)', () => {
+  it('a fresh openDb has content_hash + pdf_path columns', () => {
+    const db = openDb(':memory:');
+    const cols = db.prepare('PRAGMA table_info(papers)').all() as { name: string }[];
+    expect(cols.some((c) => c.name === 'content_hash')).toBe(true);
+    expect(cols.some((c) => c.name === 'pdf_path')).toBe(true);
+  });
+
+  it('upgrades an ORIGINAL-shape DB through both migrations, preserving rows', () => {
+    const path = `/tmp/oncbrain-pdfmig-${Date.now()}.db`;
+    const seed = new Database(path);
+    seed.exec(`
+      CREATE TABLE papers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pmid TEXT NOT NULL UNIQUE, doi TEXT, pmc_id TEXT, title TEXT NOT NULL,
+        authors_json TEXT, journal TEXT, pub_date TEXT, abstract TEXT,
+        fulltext_excerpt_md TEXT, mesh_terms_json TEXT, bookmark_date TEXT NOT NULL,
+        conference_slug TEXT, curator_note TEXT, inbox_item_id INTEGER,
+        fetched_via TEXT NOT NULL DEFAULT 'pending', created_at INTEGER NOT NULL
+      );
+    `);
+    seed
+      .prepare(
+        `INSERT INTO papers (pmid, doi, title, bookmark_date, fetched_via, created_at)
+         VALUES ('42144018', '10.1016/x', 'FASTRACK II', '2026-05-18', 'pubmed_efetch', 1)`,
+      )
+      .run();
+    seed.close();
+
+    const db = openDb(path); // runs allowDoiOnly THEN addPdfColumns
+    const cols = db.prepare('PRAGMA table_info(papers)').all() as { name: string; notnull: number }[];
+    expect(cols.some((c) => c.name === 'content_hash')).toBe(true);
+    expect(cols.some((c) => c.name === 'pdf_path')).toBe(true);
+    expect(cols.find((c) => c.name === 'pmid')?.notnull).toBe(0); // nullable
+    const row = db.prepare('SELECT title FROM papers WHERE pmid = ?').get('42144018') as
+      | { title: string }
+      | undefined;
+    expect(row?.title).toBe('FASTRACK II'); // row survived both rebuilds
+
+    // Relaxed CHECK now accepts an identifier-less (content_hash-only) paper.
+    const r = savePaper(db, {
+      content_hash: 'deadbeef',
+      title: 'Scanned manuscript',
+      bookmark_date: '2026-05-18',
+      fetched_via: 'pdf_ocr',
+    });
+    expect(r.created).toBe(true);
+    db.close();
+  });
+
+  it('is idempotent — a second openDb is a no-op and preserves data', () => {
+    const path = `/tmp/oncbrain-pdfmig-idem-${Date.now()}.db`;
+    const db1 = openDb(path);
+    savePaper(db1, { content_hash: 'h1', title: 'PDFOnly', bookmark_date: '2026-05-18' });
+    db1.close();
+    const db2 = openDb(path);
+    const row = db2.prepare('SELECT title FROM papers WHERE content_hash = ?').get('h1') as {
+      title: string;
+    };
+    expect(row.title).toBe('PDFOnly');
+    db2.close();
+  });
+});
+
+describe('savePaper content_hash key + PDF merge', () => {
+  it('inserts and dedupes a content-hash-only paper', () => {
+    const db = openDb(':memory:');
+    const r1 = savePaper(db, { content_hash: 'abc', title: 'A', bookmark_date: '2026-05-18' });
+    expect(r1.created).toBe(true);
+    const r2 = savePaper(db, { content_hash: 'abc', title: 'A again', bookmark_date: '2026-05-18' });
+    expect(r2.created).toBe(false);
+    expect(r2.id).toBe(r1.id);
+    const count = db.prepare('SELECT COUNT(*) AS n FROM papers').get() as { n: number };
+    expect(count.n).toBe(1);
+  });
+
+  it('attaches content_hash + pdf_path + full text onto an existing DOI row', () => {
+    const db = openDb(':memory:');
+    const first = savePaper(db, {
+      doi: '10.1056/merge',
+      title: 'X',
+      bookmark_date: '2026-05-18',
+      fetched_via: 'crossref',
+    });
+    const second = savePaper(db, {
+      doi: 'https://doi.org/10.1056/MERGE', // same paper, now as a PDF
+      content_hash: 'pdfhash',
+      pdf_path: 'data/obsidian/papers/prostate/x.pdf',
+      fulltext_excerpt_md: 'Methods and Results full text',
+      title: 'X',
+      bookmark_date: '2026-05-18',
+      fetched_via: 'pdf',
+    });
+    expect(second.id).toBe(first.id);
+    expect(second.created).toBe(false);
+    const row = db
+      .prepare('SELECT content_hash, pdf_path, fulltext_excerpt_md FROM papers WHERE id = ?')
+      .get(first.id) as { content_hash: string; pdf_path: string; fulltext_excerpt_md: string };
+    expect(row.content_hash).toBe('pdfhash');
+    expect(row.pdf_path).toContain('x.pdf');
+    expect(row.fulltext_excerpt_md).toContain('Methods');
+  });
+
+  it('does not clobber an existing full-text excerpt on merge', () => {
+    const db = openDb(':memory:');
+    const first = savePaper(db, {
+      doi: '10.1056/clobber',
+      title: 'X',
+      fulltext_excerpt_md: 'ORIGINAL',
+      bookmark_date: '2026-05-18',
+    });
+    savePaper(db, {
+      doi: '10.1056/clobber',
+      fulltext_excerpt_md: 'NEWER',
+      title: 'X',
+      bookmark_date: '2026-05-18',
+    });
+    const row = db.prepare('SELECT fulltext_excerpt_md FROM papers WHERE id = ?').get(first.id) as {
+      fulltext_excerpt_md: string;
+    };
+    expect(row.fulltext_excerpt_md).toBe('ORIGINAL');
   });
 });

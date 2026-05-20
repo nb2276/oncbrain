@@ -32,6 +32,14 @@ import {
   TelegramFileError,
 } from './slide-photo-storage.ts';
 import { ocrFile, isOcrAvailable } from './vision-ocr.ts';
+import { extractPdfText, PdfToolError } from './pdf-text.ts';
+import { extractPaperMetaFromText } from './pdf-meta.ts';
+import { isPdfBuffer, filePdfToVault, filePdfUnfiled } from './pdf-storage.ts';
+import { deriveSlug } from './slug.ts';
+import { writeFileSync, unlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createHash, randomBytes } from 'node:crypto';
 import type Database from 'better-sqlite3';
 
 export type EnrichmentResult =
@@ -154,6 +162,13 @@ async function enrichPaperItem(
   item: InboxItem,
 ): Promise<EnrichmentResult> {
   const note = item.raw_message_text ? extractCuratorNote(item.raw_message_text) : null;
+
+  // v0.8 PR2: PDF documents are tagged kind:'pdf' in attachments_json by
+  // pull-telegram (raw_target is the Telegram file_id, not a URL/PMID).
+  if (isPdfInboxItem(item)) {
+    return enrichPdfPaper(db, item, note);
+  }
+
   const target = classifyPaperTarget(item.raw_target);
   if (!target) {
     await replyToCurator(item, `Couldn't recognize a paper in: ${item.raw_target.slice(0, 80)}`);
@@ -193,6 +208,148 @@ async function enrichPaperItem(
     return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
   } catch (err) {
     return { status: 'failed', reason: `paper insert failed: ${(err as Error).message}` };
+  }
+}
+
+function isPdfInboxItem(item: InboxItem): boolean {
+  if (!item.attachments_json) return false;
+  try {
+    const meta = JSON.parse(item.attachments_json) as { kind?: string };
+    return meta.kind === 'pdf';
+  } catch {
+    return false;
+  }
+}
+
+// Cap stored full text so a long PDF doesn't bloat the artifact; ~2000 tokens.
+const MAX_FULLTEXT_CHARS = 8000;
+
+// v0.8 PR2: download a PDF, extract its text (poppler text layer, or Apple
+// Vision OCR for scanned PDFs), pull metadata via the LLM, file the PDF into
+// the curator's gitignored Obsidian vault, and store the paper. The full text
+// becomes fulltext_excerpt_md so the build-time study agent reads real
+// Methods/Results, not just an abstract.
+async function enrichPdfPaper(
+  db: Database.Database,
+  item: InboxItem,
+  note: string | null,
+): Promise<EnrichmentResult> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    return { status: 'failed', reason: 'TELEGRAM_BOT_TOKEN missing — cannot download PDF' };
+  }
+
+  // 1. Download bytes.
+  let buffer: Buffer;
+  try {
+    buffer = (await downloadTelegramFile(item.raw_target, token)).buffer;
+  } catch (err) {
+    if (err instanceof TelegramFileError) {
+      const retryable = err.kind === 'network';
+      if (!retryable) {
+        await replyToCurator(item, `Couldn't fetch that PDF: ${friendlyDownloadReason(err.kind)}`);
+      }
+      return { status: 'failed', reason: `pdf download ${err.kind}: ${err.message}` };
+    }
+    return { status: 'failed', reason: `pdf download error: ${(err as Error).message}` };
+  }
+
+  // 2. Verify the bytes really are a PDF.
+  if (!isPdfBuffer(buffer)) {
+    await replyToCurator(item, "That file isn't a PDF (failed the magic-byte check).");
+    return { status: 'failed', reason: 'not a PDF (magic-byte check failed)' };
+  }
+  const contentHash = createHash('sha256').update(buffer).digest('hex');
+
+  // 3. Extract text (poppler writes need a file path; OCR fallback is internal).
+  const tmpPdf = join(tmpdir(), `oncbrain-pdf-${randomBytes(8).toString('hex')}.pdf`);
+  let extracted: { text: string; via: 'text' | 'ocr' };
+  try {
+    writeFileSync(tmpPdf, buffer);
+    extracted = await extractPdfText(tmpPdf);
+  } catch (err) {
+    if (err instanceof PdfToolError) {
+      // Keep the unreadable PDF for the curator under _unsorted.
+      let filedNote = '';
+      try {
+        const filed = filePdfUnfiled({ buffer, contentHash });
+        filedNote = ` Filed to ${filed.relPath} for manual review.`;
+      } catch {
+        // ignore filing failure on the error path
+      }
+      const retryable = err.kind === 'extract-failed'; // transient poppler hiccup only
+      if (!retryable) {
+        await replyToCurator(item, `Couldn't read that PDF (${err.kind}).${filedNote}`);
+      }
+      return { status: 'failed', reason: `pdf ${err.kind}: ${err.message}` };
+    }
+    return { status: 'failed', reason: `pdf extract error: ${(err as Error).message}` };
+  } finally {
+    try {
+      unlinkSync(tmpPdf);
+    } catch {
+      // tmp file may not exist if writeFileSync threw
+    }
+  }
+
+  // 4. LLM metadata extraction. A call failure (network/backend) is retryable;
+  // a malformed response degrades to a text-derived title inside the helper.
+  let meta;
+  try {
+    meta = await extractPaperMetaFromText(extracted.text);
+  } catch (err) {
+    return { status: 'failed', reason: `pdf metadata LLM error: ${(err as Error).message}` };
+  }
+
+  // 5. File the PDF into the vault by its provisional disease site.
+  const slug = deriveSlug(meta.title);
+  let filedRelPath: string;
+  try {
+    filedRelPath = filePdfToVault({ buffer, site: meta.disease_site, slug }).relPath;
+  } catch (err) {
+    await replyToCurator(item, `Couldn't file the PDF to the vault: ${(err as Error).message}`);
+    return { status: 'failed', reason: `pdf filing failed: ${(err as Error).message}` };
+  }
+
+  // 6. Save the paper (content_hash keys identifier-less PDFs; merges onto an
+  // existing DOI/PMID row when the same paper arrived earlier via URL).
+  try {
+    const r = savePaper(db, {
+      pmid: meta.pmid,
+      doi: meta.doi,
+      content_hash: contentHash,
+      pdf_path: filedRelPath,
+      title: meta.title,
+      authors_json: JSON.stringify(meta.authors.map((name) => ({ name }))),
+      journal: meta.journal,
+      pub_date: meta.pub_date,
+      abstract: meta.abstract,
+      fulltext_excerpt_md: extracted.text.slice(0, MAX_FULLTEXT_CHARS),
+      bookmark_date: item.bookmark_date,
+      curator_note: note,
+      inbox_item_id: item.id,
+      fetched_via: extracted.via === 'ocr' ? 'pdf_ocr' : 'pdf',
+    });
+    await replyToCurator(
+      item,
+      `Got it: ${meta.title} (filed to your vault${extracted.via === 'ocr' ? ', via OCR' : ''}). Appears in the next digest.`,
+    );
+    return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
+  } catch (err) {
+    return { status: 'failed', reason: `paper insert failed: ${(err as Error).message}` };
+  }
+}
+
+function friendlyDownloadReason(kind: TelegramFileError['kind']): string {
+  switch (kind) {
+    case 'too_large':
+      return 'PDF too large (Telegram caps file download at 20MB)';
+    case 'not_found':
+      return 'the file link expired — re-send the PDF';
+    case 'auth':
+      return 'bot auth problem';
+    default:
+      return kind;
   }
 }
 

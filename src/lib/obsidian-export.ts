@@ -33,6 +33,8 @@ export type DigestArtifactForExport = {
         key_figure_caption?: string | { columns: string[]; rows: string[][] } | null;
         nct: string | null;
         tweet_ids: number[];
+        // v0.5+: typed source refs; renderer falls back to tweet_ids when absent.
+        source_ids?: Array<{ type: 'tweet' | 'paper' | 'slide'; id: number }>;
       }>;
       open_questions: string[] | null;
     }>;
@@ -55,7 +57,7 @@ export type DigestArtifactForExport = {
   }>;
   papers?: Array<{
     id: number;
-    pmid: string;
+    pmid: string | null; // v0.8: DOI-only / PDF-only papers have no PMID
     doi: string | null;
     pmc_id: string | null;
     title: string;
@@ -63,6 +65,7 @@ export type DigestArtifactForExport = {
     journal: string | null;
     pub_date: string | null;
     abstract: string | null;
+    pdf_path?: string | null; // v0.8 PR2: filed full-text PDF (local vault)
     note: string | null;
   }>;
   slides?: Array<{
@@ -289,13 +292,23 @@ function renderBody(artifact: DigestArtifactForExport): string {
             const p = papersById.get(ref.id);
             if (!p) continue;
             const authorList = p.authors.slice(0, 3).join('; ') + (p.authors.length > 3 ? ' et al.' : '');
+            // v0.8: pmid may be null (DOI-only / PDF-only paper) — lead with
+            // the PMID wikilink only when present.
+            const idTag = p.pmid ? `[[PMID ${p.pmid}]] ` : '';
+            const doiSuffix = p.doi ? `. [doi:${p.doi}](https://doi.org/${p.doi})` : '';
             lines.push(
-              `- 📄 [[PMID ${p.pmid}]] **${p.title}** — ${authorList}${
+              `- 📄 ${idTag}**${p.title}** — ${authorList}${
                 p.journal ? `. *${p.journal}*` : ''
-              }${p.pub_date ? ` (${p.pub_date.slice(0, 7)})` : ''}${p.doi ? `. [doi:${p.doi}](https://doi.org/${p.doi})` : ''}`,
+              }${p.pub_date ? ` (${p.pub_date.slice(0, 7)})` : ''}${doiSuffix}`,
             );
             if (p.abstract) {
               lines.push(`  > ${wikilinkify(p.abstract).replace(/\n+/g, '\n  > ')}`);
+            }
+            // v0.8 PR2: link the filed full-text PDF. Vault-local only — the
+            // path is under the gitignored papers/ subtree and never published.
+            if (p.pdf_path) {
+              const vaultRel = p.pdf_path.replace(/^data\/obsidian\//, '');
+              lines.push(`  - 📎 [[${vaultRel}|${study.name} (full text)]]`);
             }
             if (p.note) lines.push(`  - 📝 *Curator note:* ${p.note}`);
           } else {

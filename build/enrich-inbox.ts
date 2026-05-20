@@ -20,6 +20,7 @@ import {
   type InboxItem,
 } from '../src/lib/db.ts';
 import { runEnrichmentLoop } from '../src/lib/inbox-enrichment.ts';
+import { sweepOrphanedOcrTmpDirs } from '../src/lib/pdf-text.ts';
 
 type Args = {
   type?: InboxItem['type'];
@@ -49,6 +50,9 @@ function parseArgs(argv: string[]): Args {
 
 async function main() {
   const args = parseArgs(process.argv);
+  // Clear any OCR page-image temp dirs orphaned by a crashed prior run.
+  const swept = sweepOrphanedOcrTmpDirs();
+  if (swept > 0) console.log(`Swept ${swept} orphaned OCR temp dir(s).`);
   const db = openDb();
 
   const before = countInboxByStatus(db);

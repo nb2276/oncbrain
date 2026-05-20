@@ -4,9 +4,11 @@ import {
   extractTweetUrls,
   extractCuratorNote,
   extractPaperPmids,
+  extractPdfDocument,
   messageOf,
   unixToLocalDate,
   TelegramApiError,
+  type TelegramMessage,
 } from '../src/lib/telegram-ingest.ts';
 
 function mockFetch(payload: unknown, opts: { ok?: boolean; status?: number } = {}) {
@@ -267,6 +269,36 @@ describe('extractPaperPmids', () => {
     expect(
       extractPaperPmids('https://pubmed.ncbi.nlm.nih.gov/?term=hepatocellular'),
     ).toEqual([]);
+  });
+});
+
+describe('extractPdfDocument', () => {
+  const msg = (document?: TelegramMessage['document']): TelegramMessage => ({
+    message_id: 1,
+    date: 0,
+    document,
+  });
+
+  it('detects a PDF by application/pdf MIME type', () => {
+    const doc = extractPdfDocument(
+      msg({ file_id: 'F1', file_unique_id: 'U1', mime_type: 'application/pdf', file_name: 'paper.pdf' }),
+    );
+    expect(doc?.file_id).toBe('F1');
+  });
+
+  it('detects a PDF by .pdf filename when MIME is missing', () => {
+    const doc = extractPdfDocument(msg({ file_id: 'F2', file_unique_id: 'U2', file_name: 'scan.PDF' }));
+    expect(doc?.file_id).toBe('F2');
+  });
+
+  it('returns null for a non-PDF document (image-as-file)', () => {
+    expect(
+      extractPdfDocument(msg({ file_id: 'F3', file_unique_id: 'U3', mime_type: 'image/png', file_name: 'fig.png' })),
+    ).toBeNull();
+  });
+
+  it('returns null when there is no document', () => {
+    expect(extractPdfDocument({ message_id: 1, date: 0, text: 'hi' })).toBeNull();
   });
 });
 

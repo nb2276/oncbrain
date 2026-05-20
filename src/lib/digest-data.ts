@@ -68,6 +68,7 @@ export type DigestArtifactPaper = {
   pub_date: string | null;
   abstract: string | null;
   fulltext_excerpt_md: string | null;
+  pdf_path?: string | null; // v0.8 PR2: local vault path; never rendered on the public site
   note: string | null;
 };
 

@@ -86,12 +86,27 @@ export type NewInboxItem = {
 // v0.5 Phase B: PubMed paper metadata. Stored alongside bookmarks. The
 // build pipeline picks these up in Phase D when DigestInputItem becomes
 // a union. Until then, papers accumulate but aren't rendered.
+// v0.8 PR2: papers may also enter via PDF. content_hash (sha256 of the PDF
+// bytes) is a third dedup key so an identifier-less PDF (author manuscript,
+// old scanned paper predating DOIs) can still be stored; pdf_path records
+// where the PDF was filed in the curator's gitignored Obsidian vault.
+export type FetchedVia =
+  | 'pubmed_efetch'
+  | 'crossref'
+  | 'html_meta'
+  | 'pdf' // PDF with a text layer
+  | 'pdf_ocr' // scanned PDF, text recovered via Apple Vision OCR
+  | 'pending'
+  | 'failed';
+
 export type Paper = {
   id: number;
   pmid: string | null; // v0.8: nullable — DOI-only papers have no PMID
   doi: string | null;
   pmc_id: string | null; // e.g., "PMC1234567"; nullable when no OA fulltext
   source_url: string | null; // v0.8: the URL the curator submitted (audit trail)
+  content_hash: string | null; // v0.8 PR2: sha256 of PDF bytes; dedup key for identifier-less PDFs
+  pdf_path: string | null; // v0.8 PR2: data/obsidian/papers/<site>/<slug>.pdf (gitignored, never published)
   title: string;
   authors_json: string | null; // JSON array of {name, affiliation?}
   journal: string | null;
@@ -103,15 +118,17 @@ export type Paper = {
   conference_slug: string | null;
   curator_note: string | null;
   inbox_item_id: number | null;
-  fetched_via: 'pubmed_efetch' | 'crossref' | 'html_meta' | 'pending' | 'failed';
+  fetched_via: FetchedVia;
   created_at: number;
 };
 
 export type NewPaper = {
-  pmid?: string | null; // v0.8: nullable — at least one of pmid/doi required
+  pmid?: string | null; // v0.8: nullable — at least one of pmid/doi/content_hash required
   doi?: string | null;
   pmc_id?: string | null;
   source_url?: string | null;
+  content_hash?: string | null;
+  pdf_path?: string | null;
   title: string;
   authors_json?: string | null;
   journal?: string | null;
@@ -123,7 +140,7 @@ export type NewPaper = {
   conference_slug?: string | null;
   curator_note?: string | null;
   inbox_item_id?: number | null;
-  fetched_via?: 'pubmed_efetch' | 'crossref' | 'html_meta' | 'pending' | 'failed';
+  fetched_via?: FetchedVia;
 };
 
 // v0.5 Phase C: slide photos uploaded via Telegram bot. Stored as files
@@ -199,15 +216,19 @@ CREATE INDEX IF NOT EXISTS idx_bookmarks_conf ON bookmarks(conference_slug);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_created ON bookmarks(created_at);
 
 -- v0.8: pmid is nullable (DOI-only papers exist). Uniqueness moved from an
--- inline pmid UNIQUE to two partial unique indexes (pmid, lower(doi)), and a
--- CHECK guarantees at least one identifier. New DBs are born in this shape;
--- existing DBs are rebuilt by migratePapersAllowDoiOnly().
+-- inline pmid UNIQUE to partial unique indexes (pmid, lower(doi), content_hash),
+-- and a CHECK guarantees at least one identifier. v0.8 PR2 adds content_hash
+-- (a third key so identifier-less PDFs can be stored) + pdf_path (vault file
+-- location). New DBs are born in this shape; existing DBs are rebuilt by
+-- migratePapersAllowDoiOnly() then migratePapersAddPdfColumns().
 CREATE TABLE IF NOT EXISTS papers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   pmid TEXT,
   doi TEXT,
   pmc_id TEXT,
   source_url TEXT,
+  content_hash TEXT,
+  pdf_path TEXT,
   title TEXT NOT NULL,
   authors_json TEXT,
   journal TEXT,
@@ -221,12 +242,16 @@ CREATE TABLE IF NOT EXISTS papers (
   inbox_item_id INTEGER,
   fetched_via TEXT NOT NULL DEFAULT 'pending',
   created_at INTEGER NOT NULL,
-  CHECK (pmid IS NOT NULL OR doi IS NOT NULL)
+  CHECK (pmid IS NOT NULL OR doi IS NOT NULL OR content_hash IS NOT NULL)
 );
 CREATE INDEX IF NOT EXISTS idx_papers_date ON papers(bookmark_date);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_papers_pmid ON papers(pmid) WHERE pmid IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_papers_doi ON papers(lower(doi)) WHERE doi IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_papers_inbox ON papers(inbox_item_id);
+-- NOTE: the content_hash unique index is created after migrations run (see
+-- openDb), not here — an old-shape papers table predates the content_hash
+-- column, so SCHEMA's CREATE INDEX would fail on "no such column" before
+-- migratePapersAddPdfColumns gets a chance to add it.
 
 CREATE TABLE IF NOT EXISTS slide_uploads (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -284,7 +309,93 @@ export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): D
   migrateAddTweetHtml(db);
   migrateAddImageOcrTexts(db);
   migratePapersAllowDoiOnly(db, path);
+  migratePapersAddPdfColumns(db, path);
+  // content_hash column is guaranteed to exist now (fresh SCHEMA or migration);
+  // create its partial unique index here rather than in SCHEMA so an old-shape
+  // DB doesn't error on the missing column before the migration runs.
+  db.exec(
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_papers_content_hash ON papers(content_hash) WHERE content_hash IS NOT NULL;',
+  );
   return db;
+}
+
+// v0.8 PR2: PDF ingestion needs two new papers columns and a relaxed CHECK:
+//   - content_hash: sha256 of the PDF bytes — a third dedup key so an
+//     identifier-less PDF (author manuscript, scanned pre-DOI paper) can be
+//     stored. CHECK becomes (pmid OR doi OR content_hash).
+//   - pdf_path: where the PDF was filed in the curator's Obsidian vault.
+//
+// Relaxing the CHECK and adding a partial unique index require a table
+// rebuild (SQLite can't ALTER a CHECK in place). Detection: the table lacks
+// a content_hash column. Idempotent: once rebuilt, the column exists so it
+// no-ops. Runs AFTER migratePapersAllowDoiOnly so a legacy DB upgrades
+// original → nullable-pmid → +pdf-columns; a backup is written once per day
+// without clobbering the earlier migration's same-day backup.
+function migratePapersAddPdfColumns(db: Database.Database, dbPath: string): void {
+  const cols = db.prepare('PRAGMA table_info(papers)').all() as { name: string }[];
+  if (cols.length === 0) return; // table absent (shouldn't happen after SCHEMA)
+  if (cols.some((c) => c.name === 'content_hash')) return; // already migrated
+
+  // Back up before a destructive rebuild, but don't overwrite a backup the
+  // earlier migration already wrote today (that one captures the older shape).
+  if (dbPath !== ':memory:' && existsSync(dbPath)) {
+    const stamp = new Date().toISOString().slice(0, 10);
+    const backup = `${dbPath}.bak-${stamp}`;
+    if (!existsSync(backup)) {
+      try {
+        copyFileSync(dbPath, backup);
+      } catch {
+        // Backup is best-effort; the rebuild itself is transactional.
+      }
+    }
+  }
+
+  const tx = db.transaction(() => {
+    db.exec(`
+      CREATE TABLE papers_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pmid TEXT,
+        doi TEXT,
+        pmc_id TEXT,
+        source_url TEXT,
+        content_hash TEXT,
+        pdf_path TEXT,
+        title TEXT NOT NULL,
+        authors_json TEXT,
+        journal TEXT,
+        pub_date TEXT,
+        abstract TEXT,
+        fulltext_excerpt_md TEXT,
+        mesh_terms_json TEXT,
+        bookmark_date TEXT NOT NULL,
+        conference_slug TEXT,
+        curator_note TEXT,
+        inbox_item_id INTEGER,
+        fetched_via TEXT NOT NULL DEFAULT 'pending',
+        created_at INTEGER NOT NULL,
+        CHECK (pmid IS NOT NULL OR doi IS NOT NULL OR content_hash IS NOT NULL)
+      );
+      INSERT INTO papers_new
+        (id, pmid, doi, pmc_id, source_url, content_hash, pdf_path, title,
+         authors_json, journal, pub_date, abstract, fulltext_excerpt_md,
+         mesh_terms_json, bookmark_date, conference_slug, curator_note,
+         inbox_item_id, fetched_via, created_at)
+      SELECT
+        id, pmid, doi, pmc_id, source_url, NULL, NULL, title,
+        authors_json, journal, pub_date, abstract, fulltext_excerpt_md,
+        mesh_terms_json, bookmark_date, conference_slug, curator_note,
+        inbox_item_id, fetched_via, created_at
+      FROM papers;
+      DROP TABLE papers;
+      ALTER TABLE papers_new RENAME TO papers;
+      CREATE INDEX idx_papers_date ON papers(bookmark_date);
+      CREATE INDEX idx_papers_inbox ON papers(inbox_item_id);
+      CREATE UNIQUE INDEX idx_papers_pmid ON papers(pmid) WHERE pmid IS NOT NULL;
+      CREATE UNIQUE INDEX idx_papers_doi ON papers(lower(doi)) WHERE doi IS NOT NULL;
+      CREATE UNIQUE INDEX idx_papers_content_hash ON papers(content_hash) WHERE content_hash IS NOT NULL;
+    `);
+  });
+  tx();
 }
 
 // v0.8: the papers table moves from `pmid TEXT NOT NULL UNIQUE` to a
@@ -701,14 +812,23 @@ export function markInboxFailed(db: Database.Database, id: number, error: string
 // Papers (v0.5 Phase B)
 // ────────────────────────────────────────────────────────────────────────────
 
-// v0.8: papers are keyed on PMID OR normalized DOI. Dedup + merge:
-//   - existing row with same PMID → no-op (return it)
-//   - existing row with same normalized DOI → if the incoming paper carries
-//     a PMID the existing row lacks, UPDATE to attach it (DOI-only row that
-//     later gained a PMID); otherwise no-op
+// v0.8: papers are keyed on PMID, normalized DOI, OR (PR2) content_hash.
+// Dedup + merge against the first existing row matched (in that key order):
+//   - attach a PMID / content_hash / pdf_path / full-text the existing row
+//     lacks — e.g., a DOI-ingested paper later forwarded as a PDF gains its
+//     content_hash + pdf_path + full text instead of duplicating
 //   - else INSERT
 // DOI normalization MUST go through normalizeDoi so the lookup matches the
-// lower(doi) unique index (eng-review decision 3).
+// lower(doi) unique index (eng-review decision 3). PMID/content_hash attaches
+// are guarded against colliding with a different row's unique index.
+type PaperMatch = {
+  id: number;
+  pmid: string | null;
+  content_hash: string | null;
+  pdf_path: string | null;
+  fulltext_excerpt_md: string | null;
+};
+
 export function savePaper(
   db: Database.Database,
   p: NewPaper,
@@ -718,45 +838,67 @@ export function savePaper(
   }
   const pmid = p.pmid ?? null;
   const doi = normalizeDoi(p.doi);
-  if (!pmid && !doi) {
-    throw new Error('savePaper requires at least one of pmid or doi');
+  const contentHash = p.content_hash ?? null;
+  if (!pmid && !doi && !contentHash) {
+    throw new Error('savePaper requires at least one of pmid, doi, or content_hash');
   }
 
-  // 1. Match on PMID.
-  if (pmid) {
-    const byPmid = db.prepare('SELECT id FROM papers WHERE pmid = ?').get(pmid) as
-      | { id: number }
-      | undefined;
-    if (byPmid) return { id: byPmid.id, created: false };
-  }
+  const matchBy = (clause: string, value: string): PaperMatch | undefined =>
+    db
+      .prepare(
+        `SELECT id, pmid, content_hash, pdf_path, fulltext_excerpt_md FROM papers WHERE ${clause}`,
+      )
+      .get(value) as PaperMatch | undefined;
 
-  // 2. Match on normalized DOI. Merge a newly-arrived PMID onto the row.
-  if (doi) {
-    const byDoi = db
-      .prepare('SELECT id, pmid FROM papers WHERE lower(doi) = ?')
-      .get(doi) as { id: number; pmid: string | null } | undefined;
-    if (byDoi) {
-      if (pmid && !byDoi.pmid) {
-        db.prepare('UPDATE papers SET pmid = ? WHERE id = ?').run(pmid, byDoi.id);
-      }
-      return { id: byDoi.id, created: false };
+  const existing =
+    (pmid ? matchBy('pmid = ?', pmid) : undefined) ??
+    (doi ? matchBy('lower(doi) = ?', doi) : undefined) ??
+    (contentHash ? matchBy('content_hash = ?', contentHash) : undefined);
+
+  if (existing) {
+    const sets: string[] = [];
+    const vals: (string | number)[] = [];
+    // Guard unique-index columns: only attach if no different row holds the
+    // value (a clash means two rows describe the same paper — leave both
+    // rather than crash on the unique index; a rare manual-merge case).
+    if (pmid && !existing.pmid && !matchBy('pmid = ?', pmid)) {
+      sets.push('pmid = ?');
+      vals.push(pmid);
     }
+    if (contentHash && !existing.content_hash && !matchBy('content_hash = ?', contentHash)) {
+      sets.push('content_hash = ?');
+      vals.push(contentHash);
+    }
+    if (p.pdf_path && !existing.pdf_path) {
+      sets.push('pdf_path = ?');
+      vals.push(p.pdf_path);
+    }
+    if (p.fulltext_excerpt_md && !existing.fulltext_excerpt_md) {
+      sets.push('fulltext_excerpt_md = ?');
+      vals.push(p.fulltext_excerpt_md);
+    }
+    if (sets.length > 0) {
+      vals.push(existing.id);
+      db.prepare(`UPDATE papers SET ${sets.join(', ')} WHERE id = ?`).run(...vals);
+    }
+    return { id: existing.id, created: false };
   }
 
-  // 3. Insert.
   const result = db
     .prepare(
       `INSERT INTO papers
-       (pmid, doi, pmc_id, source_url, title, authors_json, journal, pub_date,
-        abstract, fulltext_excerpt_md, mesh_terms_json, bookmark_date,
-        conference_slug, curator_note, inbox_item_id, fetched_via, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (pmid, doi, pmc_id, source_url, content_hash, pdf_path, title, authors_json,
+        journal, pub_date, abstract, fulltext_excerpt_md, mesh_terms_json,
+        bookmark_date, conference_slug, curator_note, inbox_item_id, fetched_via, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       pmid,
       doi,
       p.pmc_id ?? null,
       p.source_url ?? null,
+      contentHash,
+      p.pdf_path ?? null,
       p.title,
       p.authors_json ?? null,
       p.journal ?? null,

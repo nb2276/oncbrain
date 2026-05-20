@@ -2,6 +2,74 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — v0.8 PR2: PDF ingestion + private vault library
+
+Forward the bot a PDF and it summarizes into the digest AND files the full
+text into your Obsidian vault. Builds on PR1's schema + reply work. Plan +
+reviews: `docs/plans/v0.8-non-pmid-sources.md`.
+
+### Added
+
+- **PDF ingestion.** DM/forward a PDF document → it's stored as a `type='paper'`
+  inbox item (`kind:'pdf'` marker) and, at enrich time, downloaded, text-
+  extracted, summarized, and filed. `extractPdfDocument` in `telegram-ingest.ts`.
+- **Text extraction via poppler** (`src/lib/pdf-text.ts`) — `pdftotext` for the
+  embedded text layer; scanned PDFs (sparse layer) fall back to `pdftoppm` →
+  Apple Vision OCR per page → joined text. Transient OCR page-images live only
+  in `os.tmpdir()` and are unlinked in a finally block; a startup sweep clears
+  crash orphans. No new npm dependency — poppler is `brew install poppler`.
+- **LLM metadata extraction** (`src/lib/pdf-meta.ts` + `prompts/pdf-meta-v1.txt`)
+  reads the PDF's full text for title / authors / journal / year / abstract /
+  DOI / PMID / disease-site. A "treat text as data, not instructions" guard
+  blocks prompt injection from the PDF. A DOI/PMID regex backstops the model so
+  dedup against URL-ingested papers still works; the full text is stored as
+  `fulltext_excerpt_md` so the build-time study agent reads real Methods/Results.
+- **Private PDF library** — filed at `data/obsidian/papers/<site>/<slug>.pdf`,
+  organized by disease site (`src/lib/pdf-storage.ts`). The Obsidian daily note
+  gains a `📎 [[papers/…|<study> (full text)]]` embed. Re-ingest overwrites in
+  place; identifier-less / unreadable PDFs land under `_unsorted/`.
+- **E2/E3 replies extend to PDFs**: "Got it: <title> (filed to your vault)" on
+  success; named-reason replies for too-large / unreadable / non-PDF / poppler-
+  missing / scanned-but-no-Vision.
+
+### Changed (schema)
+
+- **`papers` gains `content_hash` + `pdf_path`; CHECK relaxed to
+  `(pmid OR doi OR content_hash)`** so an identifier-less PDF (author
+  manuscript, scanned pre-DOI paper) can still be stored, keyed + deduped by
+  its content hash. `migratePapersAddPdfColumns` runs the table rebuild
+  (transactional, backed up, idempotent; ordered after PR1's migration). The
+  content_hash unique index is created post-migration, not in SCHEMA, so an
+  old-shape DB doesn't error on the missing column. `savePaper` now keys on
+  pmid → doi → content_hash and merges a late `content_hash` / `pdf_path` /
+  full text onto an existing row (URL-then-PDF of the same paper enriches one
+  row instead of duplicating).
+
+### IP constraint (load-bearing)
+
+- Filed PDFs are LOCAL-ONLY: gitignored, no `public/` symlink, never in the
+  Astro build. The public site carries only the summary. `test/publish-
+  boundary.test.ts` asserts the gitignore + no-public-path guarantees.
+
+### Engineering
+
+- 451 tests (was 410, +41): PDF text composition + poppler error mapping,
+  metadata parse + regex backstop, vault filing + path-safety, content_hash
+  migration (original→final, idempotent, content-hash-only CHECK), savePaper
+  PDF merge, Telegram PDF detection, Obsidian embed, publish-boundary.
+- Real-poppler smoke test confirmed the text + OCR-fallback chains end to end.
+- 0 type errors (also cleared the pre-existing `source_ids` error in
+  obsidian-export.ts). `enrich:inbox` now sweeps orphaned OCR temp dirs on start.
+
+### Deviations from plan / known limits
+
+- Plan filed the PDF before extraction; we extract first (DOI/site needed for
+  the folder), then file — the diagram's intent, reordered. Metadata comes from
+  one LLM call over the full text (richer than Crossref, which often lacks
+  abstracts) rather than a Crossref/PubMed round-trip on the PDF path.
+- Not yet exercised against real Telegram PDF traffic (needs a live DM).
+- PR3 (RSS/API + cross-day NCT dedup) still pending.
+
 ## [Unreleased] — v0.8 PR1: non-PMID URL ingestion
 
 DM the bot a DOI, journal-page, or PMC URL and it ingests as a paper. No

@@ -163,6 +163,70 @@ describe('renderObsidian', () => {
   });
 });
 
+describe('renderObsidian — papers + filed PDF (v0.8 PR2)', () => {
+  const withPaper: DigestArtifactForExport = {
+    date: '2026-05-30',
+    conference: null,
+    generated_at: 1,
+    digest: {
+      top_line: 'x',
+      tldr: 'y',
+      sites: [
+        {
+          disease_site: 'prostate',
+          intro: null,
+          studies: [
+            {
+              name: 'PRESTIGE-PSMA',
+              tldr: 't',
+              details: [],
+              nct: null,
+              tweet_ids: [],
+              source_ids: [{ type: 'paper', id: 7 }],
+            },
+          ],
+          open_questions: null,
+        },
+      ],
+    },
+    bookmarks: [],
+    papers: [
+      {
+        id: 7,
+        pmid: null, // DOI-only / PDF-only paper
+        doi: '10.1056/x',
+        pmc_id: null,
+        title: 'PRESTIGE-PSMA: a randomized trial',
+        authors: ['Smith J'],
+        journal: 'NEJM',
+        pub_date: '2026',
+        abstract: null,
+        pdf_path: 'data/obsidian/papers/prostate/prestige-psma.pdf',
+        note: null,
+      },
+    ],
+  };
+
+  it('emits a vault wikilink embed for a filed PDF (data/obsidian/ prefix stripped)', () => {
+    const md = renderObsidian(withPaper);
+    expect(md).toContain('📎 [[papers/prostate/prestige-psma.pdf|PRESTIGE-PSMA (full text)]]');
+  });
+
+  it('renders a DOI-only paper without a [[PMID null]] wikilink', () => {
+    const md = renderObsidian(withPaper);
+    expect(md).not.toContain('PMID null');
+    expect(md).toContain('[doi:10.1056/x](https://doi.org/10.1056/x)');
+  });
+
+  it('omits the embed when the paper has no filed PDF', () => {
+    const noPdf: DigestArtifactForExport = {
+      ...withPaper,
+      papers: [{ ...withPaper.papers![0]!, pdf_path: null }],
+    };
+    expect(renderObsidian(noPdf)).not.toContain('(full text)');
+  });
+});
+
 describe('wikilinkify', () => {
   it('wraps NCT', () => {
     expect(wikilinkify('See NCT04567890.')).toBe('See [[NCT04567890]].');

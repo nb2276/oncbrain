@@ -25,6 +25,16 @@ export type TelegramPhotoSize = {
   file_size?: number;
 };
 
+// A file attachment (PDF, etc.) sent as a Telegram document rather than a
+// compressed photo. v0.8 PR2 ingests PDFs from this field.
+export type TelegramDocument = {
+  file_id: string;
+  file_unique_id: string;
+  file_name?: string;
+  mime_type?: string;
+  file_size?: number;
+};
+
 export type TelegramMessage = {
   message_id: number;
   date: number; // unix seconds
@@ -35,6 +45,7 @@ export type TelegramMessage = {
   // photo[]: same image at different resolutions (smallest → largest).
   // Always pick the LAST entry for OCR (highest resolution).
   photo?: TelegramPhotoSize[];
+  document?: TelegramDocument; // file attachment (PDF for v0.8 PR2)
   media_group_id?: string; // present when multi-photo album
   chat?: { id: number; type: string; title?: string; username?: string };
   from?: { id: number; username?: string; first_name?: string };
@@ -246,6 +257,18 @@ export function extractPaperPmids(
 export function extractSlidePhoto(msg: TelegramMessage): TelegramPhotoSize | null {
   if (!msg.photo || msg.photo.length === 0) return null;
   return msg.photo[msg.photo.length - 1] ?? null;
+}
+
+// v0.8 PR2: extract a PDF document attachment from a Telegram message.
+// Matches on the application/pdf MIME type or a .pdf filename (Telegram
+// occasionally omits or mislabels mime_type for forwarded files). Returns
+// null for non-PDF documents (images-as-files, .docx, etc.).
+export function extractPdfDocument(msg: TelegramMessage): TelegramDocument | null {
+  const doc = msg.document;
+  if (!doc || !doc.file_id) return null;
+  const isPdfMime = (doc.mime_type ?? '').toLowerCase() === 'application/pdf';
+  const isPdfName = /\.pdf$/i.test(doc.file_name ?? '');
+  return isPdfMime || isPdfName ? doc : null;
 }
 
 export function messageOf(update: TelegramUpdate): TelegramMessage | undefined {

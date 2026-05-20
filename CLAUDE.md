@@ -36,8 +36,9 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 - **Static SSG**: Astro 6.3 (TypeScript strict)
 - **Admin server**: Hono 4 (localhost only, on port 3001)
 - **DB**: better-sqlite3 (synchronous), file at `./oncbrain.db`
-- **LLM**: Anthropic Claude Sonnet via `@anthropic-ai/sdk` OR via `claude -p` (subscription path)
+- **LLM**: Anthropic Claude Sonnet via `@anthropic-ai/sdk` OR via `claude -p` (subscription path). v0.8 PR2: also called at *enrichment* time (not just build) to extract metadata from PDF text.
 - **Tests**: Vitest (298 tests as of v0.5)
+- **PDF ingestion** (v0.8 PR2): poppler (`brew install poppler`) provides `pdftotext` (text layer) + `pdftoppm` (rasterize scanned pages for Apple Vision OCR). No npm dep. A missing binary yields a clear Telegram reply, not a crash.
 - **Deploy**: DigitalOcean App Platform, static-site free tier, GitHub auto-deploy from `main`
 
 ## Conventions
@@ -182,6 +183,7 @@ TODOS.md                   deferred work tracker (seeded from CHANGELOG "Not yet
 - **Local DB** (`oncbrain.db`) is gitignored. Phone-bookmarking is via Telegram bot, NOT remote DB — admin runs locally only.
 - **Cron** at 6am Pacific via launchd. If Mac is asleep, pmset wake at 5:55 is required.
 - **Curator name** (`PUBLIC_CURATOR_NAME`, `PUBLIC_CURATOR_HANDLE`) is local-only — DO's build doesn't see `.env`. Set these as DO app env vars to attribute on the live site.
+- **Filed PDFs are local-only** (v0.8 PR2). Full-text PDFs forwarded to the bot are filed under `data/obsidian/papers/<site>/<slug>.pdf` (gitignored, no `public/` symlink, never in the Astro build) and embedded in the Obsidian daily note. The public site carries only the summary. This is a hard IP constraint — never publish the PDFs (a test in `test/publish-boundary.test.ts` guards it).
 
 ## Skill routing
 

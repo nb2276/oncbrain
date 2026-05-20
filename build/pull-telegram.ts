@@ -26,6 +26,7 @@ import {
   extractTweetUrls,
   extractPaperPmids,
   extractSlidePhoto,
+  extractPdfDocument,
   messageOf,
   unixToLocalDate,
 } from '../src/lib/telegram-ingest.ts';
@@ -88,17 +89,20 @@ async function main() {
     const date = unixToLocalDate(msg.date);
 
     // v0.5: tweet URLs + PubMed PMIDs + slide photos.
-    // v0.8: also DOI/journal/PMC URLs (resolved at enrichment, not here).
+    // v0.8: also DOI/journal/PMC URLs (PR1) + PDF documents (PR2), both
+    // resolved at enrichment, not here.
     const tweetUrls = extractTweetUrls(text, entities);
     const paperPmids = extractPaperPmids(text, entities);
     const paperUrls = extractPaperUrls(text, entities);
     const slidePhoto = extractSlidePhoto(msg);
+    const pdfDoc = extractPdfDocument(msg);
 
     if (
       tweetUrls.length === 0 &&
       paperPmids.length === 0 &&
       paperUrls.length === 0 &&
-      !slidePhoto
+      !slidePhoto &&
+      !pdfDoc
     ) {
       skippedNoTarget++;
       continue;
@@ -181,6 +185,44 @@ async function main() {
         }
       } catch (err) {
         console.warn(`  failed to inbox ${url}: ${(err as Error).message}`);
+      }
+    }
+
+    // v0.8 PR2: PDF documents. Stored raw as type=paper with a kind:'pdf'
+    // marker in attachments_json; downloaded + text-extracted + filed to the
+    // Obsidian vault at enrich:inbox time.
+    if (pdfDoc) {
+      if (args.dryRun) {
+        console.log(
+          `  [dry-run] would inbox: msg=${msg.message_id} type=paper pdf=${pdfDoc.file_name ?? pdfDoc.file_id}`,
+        );
+        savedPapers++;
+      } else {
+        try {
+          const r = saveInboxItem(db, {
+            type: 'paper',
+            raw_target: pdfDoc.file_id,
+            raw_message_text: text || null,
+            attachments_json: JSON.stringify({
+              kind: 'pdf',
+              file_name: pdfDoc.file_name ?? null,
+              mime_type: pdfDoc.mime_type ?? null,
+              file_size: pdfDoc.file_size ?? null,
+              file_unique_id: pdfDoc.file_unique_id,
+            }),
+            telegram_msg_id: msg.message_id,
+            telegram_chat_id: msg.chat?.id ?? null,
+            bookmark_date: date,
+          });
+          if (r.created) {
+            console.log(`  inbox #${r.id}: paper(pdf) ${date} ${pdfDoc.file_name ?? pdfDoc.file_id}`);
+            savedPapers++;
+          } else {
+            skippedDuplicate++;
+          }
+        } catch (err) {
+          console.warn(`  failed to inbox PDF ${pdfDoc.file_id}: ${(err as Error).message}`);
+        }
       }
     }
 
