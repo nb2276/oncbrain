@@ -32,6 +32,13 @@ import {
   TelegramFileError,
 } from './slide-photo-storage.ts';
 import { ocrFile, isOcrAvailable } from './vision-ocr.ts';
+import { listDigests } from './digest-data.ts';
+import { extractCitations } from './extract.ts';
+import {
+  buildNctCoverageIndex,
+  findPriorCoverage,
+  type NctCoverageIndex,
+} from './nct-coverage.ts';
 import { extractPdfText, PdfToolError } from './pdf-text.ts';
 import { extractPaperMetaFromText } from './pdf-meta.ts';
 import { isPdfBuffer, filePdfToVault, filePdfUnfiled } from './pdf-storage.ts';
@@ -463,6 +470,61 @@ function classifyResolveError(err: unknown): { retryable: boolean; message: stri
   return { retryable: false, message: `unexpected: ${(err as Error).message}` };
 }
 
+// The searchable text of a freshly-enriched row, for NCT extraction.
+function getEnrichedText(
+  db: Database.Database,
+  type: InboxItem['type'],
+  rowId: number,
+): string {
+  if (type === 'tweet') {
+    const r = db.prepare('SELECT tweet_text, notes FROM bookmarks WHERE id = ?').get(rowId) as
+      | { tweet_text: string | null; notes: string | null }
+      | undefined;
+    return [r?.tweet_text, r?.notes].filter(Boolean).join(' ');
+  }
+  if (type === 'paper') {
+    const r = db
+      .prepare('SELECT title, abstract, fulltext_excerpt_md, curator_note FROM papers WHERE id = ?')
+      .get(rowId) as
+      | { title: string | null; abstract: string | null; fulltext_excerpt_md: string | null; curator_note: string | null }
+      | undefined;
+    return [r?.title, r?.abstract, r?.fulltext_excerpt_md, r?.curator_note].filter(Boolean).join(' ');
+  }
+  const r = db.prepare('SELECT ocr_text, curator_note FROM slide_uploads WHERE id = ?').get(rowId) as
+    | { ocr_text: string | null; curator_note: string | null }
+    | undefined;
+  return [r?.ocr_text, r?.curator_note].filter(Boolean).join(' ');
+}
+
+// E6: if the just-enriched source references an NCT a prior digest already
+// covered, send a one-off "previously covered" nudge. Best-effort and silent
+// when there's no match (no new noise for normal bookmarks).
+async function notifyPriorCoverage(
+  db: Database.Database,
+  item: InboxItem,
+  rowId: number,
+  index: NctCoverageIndex,
+): Promise<void> {
+  if (index.size === 0) return;
+  try {
+    const text = getEnrichedText(db, item.type, rowId);
+    if (!text) return;
+    const ncts = extractCitations(text)
+      .filter((c) => c.kind === 'nct')
+      .map((c) => c.id);
+    if (ncts.length === 0) return;
+    const prior = findPriorCoverage(index, ncts, item.bookmark_date);
+    if (prior.length === 0) return;
+    const lines = prior.map((p) => `• ${p.nct} — covered ${p.date} (${p.name})`);
+    await replyToCurator(
+      item,
+      `Heads up — previously covered ${prior.length > 1 ? 'trials' : 'trial'}:\n${lines.join('\n')}`,
+    );
+  } catch {
+    // a courtesy nudge must never fail enrichment
+  }
+}
+
 // Best-effort E2/E3 reply to the curator's Telegram chat. Never throws — a
 // failed reply must not fail the enrichment.
 async function replyToCurator(item: InboxItem, text: string): Promise<void> {
@@ -550,6 +612,16 @@ export async function runEnrichmentLoop(
   let deferred = 0;
   let bookmarksCreated = 0;
 
+  // E6: index which NCTs prior digests already covered, so we can nudge the
+  // curator when they bookmark a source for an already-covered trial. Built
+  // once per run; best-effort (an empty/failed index just means no nudges).
+  let coverageIndex: NctCoverageIndex = new Map();
+  try {
+    coverageIndex = buildNctCoverageIndex(listDigests());
+  } catch {
+    // no prior artifacts / unreadable — skip the nudge feature this run
+  }
+
   for (const item of items) {
     const result = await enrichInboxItem(db, item);
     switch (result.status) {
@@ -557,6 +629,7 @@ export async function runEnrichmentLoop(
         markInboxEnriched(db, item.id, result.enrichedRowId);
         enriched++;
         if (result.bookmarkCreated) bookmarksCreated++;
+        await notifyPriorCoverage(db, item, result.enrichedRowId, coverageIndex);
         break;
       case 'failed':
         markInboxFailed(db, item.id, result.reason);

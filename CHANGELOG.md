@@ -2,6 +2,61 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — v0.8 PR3: RSS feed + JSON API + cross-day NCT dedup
+
+The digest becomes a content backbone other apps can consume, and the bot
+nudges you when you re-bookmark an already-covered trial. Completes the v0.8
+plan (`docs/plans/v0.8-non-pmid-sources.md`). All output is static — generated
+at Astro build time, same deploy pipeline.
+
+### Added — output (E1)
+
+- **`/feed.xml`** — RSS 2.0, latest 30 study additions newest-first. Each item
+  is one study: name, analyst verdict + eligibility audience + TL;DR, deep-
+  linked to `/<date>/#<slug>`. Hand-rolled (`src/lib/feed.ts`), no new dep.
+- **`/api/v1/digests.json`** — index of published days with study/site counts.
+- **`/api/v1/digest/<date>.json`** — one day's full artifact.
+- **`/api/v1/study/<slug>.json`** — one study, every date it was covered
+  (cross-date resolved by the same slug the page anchors + search index use).
+- `/api/v1/` is a versioned namespace from day one so the contract can evolve
+  additively. `site` is now set in `astro.config.mjs` for absolute links.
+
+### Added — cross-day NCT dedup (E6)
+
+- **"Previously covered" nudge.** `src/lib/nct-coverage.ts` indexes which NCT
+  appeared in which prior digest; at enrich time, if a newly-ingested source
+  (tweet / paper / PDF) references a trial covered in a *strictly earlier*
+  digest, the bot replies "previously covered <date> (<study>)". Low-noise:
+  silent unless there's a match. Reuses the existing NCT extractor + reply path.
+
+### Fixed (IP) — PR2 follow-up
+
+- **Copyrighted PDF full text no longer reaches git or the API.**
+  `fulltext_excerpt_md` was being written into the committed `data/digests/*.json`
+  even though nothing renders it (the build LLM reads it from the DB). Removed
+  it from the artifact, and `sanitizeArtifactForApi` allowlists paper fields
+  (drops `pdf_path` + any historical full text) before `/api/v1/digest/<date>`
+  serves it. `test/api-output.test.ts` + a build-time leak scan assert no
+  `fulltext_excerpt_md` / `pdf_path` appears in any served API file.
+
+### Engineering
+
+- 469 tests (was 451, +18): RSS shape + XML escaping, API index/study/sanitize
+  shapers, NCT coverage index + strictly-prior lookup.
+- `npm run build` verified to emit `dist/feed.xml` + `dist/api/v1/**` (one file
+  per date + per slug); served JSON confirmed leak-free on real artifacts.
+- 0 type errors.
+
+### Notes / not done
+
+- CORS headers (`Access-Control-Allow-Origin: *`) aren't set — DigitalOcean's
+  static tier doesn't do per-file headers. RSS readers + server-side fetchers
+  don't need it; add via DO config if browser cross-origin access is wanted.
+- The NCT nudge keys on a study's resolved `nct`; a tweet whose oEmbed text
+  hasn't loaded yet at enrich time won't trigger it (best-effort courtesy).
+- v0.8 is now feature-complete across PR1–PR3; `package.json` still reads 0.5.0
+  pending a release bump (handled via the ship workflow).
+
 ## [Unreleased] — v0.8 PR2: PDF ingestion + private vault library
 
 Forward the bot a PDF and it summarizes into the digest AND files the full

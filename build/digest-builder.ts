@@ -289,7 +289,6 @@ type DigestArtifact = {
     journal: string | null;
     pub_date: string | null;
     abstract: string | null;
-    fulltext_excerpt_md: string | null;
     pdf_path: string | null; // v0.8 PR2: vault location (gitignored, never published)
     note: string | null;
   }>;
@@ -344,7 +343,12 @@ function buildArtifact(
           journal: p.journal,
           pub_date: p.pub_date,
           abstract: p.abstract,
-          fulltext_excerpt_md: p.fulltext_excerpt_md,
+          // NOTE: fulltext_excerpt_md is deliberately NOT written to the
+          // committed artifact — for PDFs it's copyrighted full text, and the
+          // build-time LLM reads it from the DB (not the artifact), so it has
+          // no consumer here. Keeping it out of data/digests keeps copyrighted
+          // text out of git (v0.8 IP constraint). pdf_path is a vault path
+          // string (file itself stays gitignored) used by the Obsidian embed.
           pdf_path: p.pdf_path,
           note: p.curator_note,
         }))

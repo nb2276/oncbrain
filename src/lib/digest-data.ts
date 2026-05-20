@@ -67,8 +67,10 @@ export type DigestArtifactPaper = {
   journal: string | null;
   pub_date: string | null;
   abstract: string | null;
-  fulltext_excerpt_md: string | null;
-  pdf_path?: string | null; // v0.8 PR2: local vault path; never rendered on the public site
+  // fulltext_excerpt_md is intentionally absent from the artifact type: it's
+  // not written to data/digests (kept out of git for copyright) and nothing
+  // renders it. The build-time LLM reads it from the DB instead.
+  pdf_path?: string | null; // v0.8 PR2: local vault path; never rendered on the public site, stripped from the API
   note: string | null;
 };
 
