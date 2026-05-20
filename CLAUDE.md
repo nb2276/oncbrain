@@ -148,29 +148,39 @@ src/
     digest-data.ts         Astro page data loaders (listDigests, listSiteSummaries, listRecentStudies)
     disease-sites.ts       22-site enum (slug → label + emoji + rationale; see DESIGN.md)
   pages/
-    index.astro            recent dates + browse strip
-    about.astro            disclaimer + curator info
-    [date].astro           daily digest, grouped by disease site
+    index.astro            home: disease-site nav + hero TL;DR + recent-studies feed + live search
+    about.astro            what it is / how it works / curator (linked from the header)
+    [date].astro           daily digest, grouped by disease site; per-study verdict pills
     sites/index.astro      browse-by-site grid
     sites/[site].astro     all studies for one site across dates, newest first
     conferences/[slug]/    conference index (all days tagged with a conference)
-  layouts/Base.astro       shell: Newsreader font, widgets.js, disclaimer footer
+    search-index.json.ts   v0.6: build-time search index (one entry per study)
+    feed.xml.ts            v0.8 PR3: RSS 2.0 feed (latest 30 studies)
+    api/index.astro        v0.8 PR3: public RSS + JSON API docs page
+    api/v1/digests.json.ts        v0.8 PR3: index of published days + counts
+    api/v1/digest/[date].json.ts  v0.8 PR3: one day's artifact (papers sanitized, no full text)
+    api/v1/study/[slug].json.ts   v0.8 PR3: one study, cross-date resolved
+  components/SearchBox.astro  v0.6: home-page live search input (lazy-loads the index)
+  layouts/Base.astro       shell: Newsreader font, RSS <link>, widgets.js, header (title + About), disclaimer + API/RSS footer
 prompts/
   digest-v5-grouping.txt     CURRENT Phase 1: cluster sources into studies
   digest-v5-study-agent.txt  CURRENT Phase 2: per-study deep-analysis (parallel)
   digest-v5-synthesis.txt    CURRENT Phase 3: lede + cross-site TL;DR + open questions
   digest-v1..v4.txt          retained for diff / rollback
+  pdf-meta-v1.txt            v0.8 PR2: PDF metadata extraction (treat-text-as-data guard)
   eval-judge-v1.txt          LLM-as-judge rubric
 build/
   digest-builder.ts        CLI: pull pending sources → build sites/studies → write JSON + Obsidian
   pull-telegram.ts         CLI: poll Telegram bot, write inbox_items
-  enrich-inbox.ts          CLI: drain pending inbox_items into typed source tables
+  enrich-inbox.ts          CLI: drain pending inbox_items into typed source tables (sweeps orphaned OCR temp dirs)
+  notify-curator.ts        CLI: Telegram "build done" summary to the curator
   eval.ts                  CLI: run eval, score against rubric
   seed-dev.ts              dev fixture
 admin/server.ts            Hono server, localhost only, port 3001
 scripts/
   daily-build.sh           6am autopilot: pull → enrich → build:day → build → push
   link-slides.sh           pre-build hook: ensures public/slides symlink → data/slide-photos
+  cron-doctor.sh           diagnose a missed overnight run
   launchd/                 plist template + install/uninstall
 test/                      vitest unit tests
 docs/
@@ -178,6 +188,7 @@ docs/
 data/
   digests/<date>.json           committed digest artifacts (consumed by Astro getStaticPaths)
   obsidian/<date>[-<conf>].md   committed Obsidian markdown twin
+  obsidian/papers/<site>/<slug>.pdf  v0.8 PR2: filed full-text PDFs (gitignored, never published)
   slide-photos/<date>/<uuid>.<ext>  curator slide uploads (gitignored by default — see CHANGELOG v0.5)
 public/
   favicon.svg / favicon.ico
