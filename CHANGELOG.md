@@ -2,6 +2,34 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added — durable digest overrides
+
+The 3-phase LLM regenerates the whole digest on every `build:day`, so hand-edits
+to `data/digests/<date>.json` don't survive a rebuild. A per-date sidecar fixes
+that.
+
+- **`data/overrides/<date>.json`** — committed override file applied as the last
+  build step (`src/lib/digest-overrides.ts`, pure `applyOverrides`). Suppress a
+  study, override study text (tldr / name / bullets / verdict / open_questions),
+  or override the cross-site top_line/tldr. Studies are matched by their stable
+  per-study slug; identity/citation fields (slug, source refs) can't be clobbered.
+- **`npm run override`** CLI to manage the sidecar without hand-writing JSON:
+  `--list` (current studies + slugs), `--suppress`/`--unsuppress`,
+  `--edit=<slug> --tldr=.. --name=.. --nct=..`, `--top-line`/`--digest-tldr`,
+  `--clear`. Complex edits (bullets, tables) are hand-edited in the JSON file.
+
+### Fixed — paper ingestion
+
+- Bot-blocked publisher pages (Elsevier/ScienceDirect 403, surfaced as
+  `SsrfError`) now retry via a DOI or PMID embedded in the URL or curator
+  message — Crossref/PubMed don't bot-block — before giving up.
+- Unrecoverable failures (paywall/403 with no usable identifier, non-PDF file,
+  unrecognized target) are parked as `failed_permanent`: excluded from the
+  enrichment queue so they aren't retried, and the curator stops getting
+  re-pinged the same error on every enrich run.
+
 ## [0.8.0] — 2026-05-19
 
 First release cut since 0.5.0. Everything below shipped to `main` and went live

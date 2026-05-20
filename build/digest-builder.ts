@@ -42,6 +42,7 @@ import {
   type DigestOutput,
 } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
+import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
 import {
   isOcrAvailable,
   ocrImageUrls,
@@ -59,6 +60,7 @@ type Args = {
   skipFetch: boolean;
   outDir: string;
   obsidianDir: string;
+  overridesDir: string;
 };
 
 function parseArgs(argv: string[]): Args {
@@ -80,6 +82,7 @@ function parseArgs(argv: string[]): Args {
     skipFetch: !!args['skip-fetch'],
     outDir: typeof args.out === 'string' ? args.out : 'data/digests',
     obsidianDir: typeof args.obsidian === 'string' ? args.obsidian : 'data/obsidian',
+    overridesDir: typeof args.overrides === 'string' ? args.overrides : 'data/overrides',
   };
 }
 
@@ -460,6 +463,15 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
       conferenceName: confMeta?.name ?? `Day digest — ${date}`,
       conferenceDay: date,
     });
+  }
+
+  // Apply durable curator overrides last, so suppressed/edited studies survive
+  // every rebuild (the LLM regenerates the digest from scratch each run).
+  const overrides = loadOverrides(date, args.overridesDir);
+  if (overrides) {
+    const applied = applyOverrides(digest, overrides);
+    digest = applied.digest;
+    console.log(`  applied overrides: ${formatOverrideSummary(applied.summary)}`);
   }
 
   const artifact = buildArtifact(date, confMeta, bookmarks, papersForDate, slidesForDate, digest);

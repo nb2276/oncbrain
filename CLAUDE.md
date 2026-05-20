@@ -64,6 +64,11 @@ npm run build:day -- --backfill # rebuild every date that has bookmarks
 npm run build:day -- --dry-run  # no LLM call, see what would happen
 npm run build                   # Astro static build
 
+# Durable digest overrides (survive build:day regeneration)
+npm run override -- --date=2026-05-20 --list                 # show studies + slugs
+npm run override -- --date=2026-05-20 --suppress=<slug>      # drop a study
+npm run override -- --date=2026-05-20 --edit=<slug> --tldr="..."  # override text
+
 # Tests + eval
 npm test                        # vitest run (469 tests)
 npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations)
@@ -146,6 +151,7 @@ src/
     feed.ts                v0.8 PR3: RSS 2.0 builder
     api-output.ts          v0.8 PR3: JSON API shapers (digests index, per-study, sanitized per-date)
     digest-data.ts         Astro page data loaders (listDigests, listSiteSummaries, listRecentStudies)
+    digest-overrides.ts    durable per-date overrides: suppress/edit studies, applied at build time (pure applyOverrides)
     disease-sites.ts       22-site enum (slug → label + emoji + rationale; see DESIGN.md)
   pages/
     index.astro            home: disease-site nav + hero TL;DR + recent-studies feed + live search
@@ -171,6 +177,7 @@ prompts/
   eval-judge-v1.txt          LLM-as-judge rubric
 build/
   digest-builder.ts        CLI: pull pending sources → build sites/studies → write JSON + Obsidian
+  manage-overrides.ts      CLI (npm run override): edit data/overrides/<date>.json (suppress/edit studies)
   pull-telegram.ts         CLI: poll Telegram bot, write inbox_items
   enrich-inbox.ts          CLI: drain pending inbox_items into typed source tables (sweeps orphaned OCR temp dirs)
   notify-curator.ts        CLI: Telegram "build done" summary to the curator
@@ -187,6 +194,7 @@ docs/
   plans/                   per-release planning artifacts (e.g. v0.5-multi-source-ingestion.md, v0.6-pwa.md)
 data/
   digests/<date>.json           committed digest artifacts (consumed by Astro getStaticPaths)
+  overrides/<date>.json         committed curator overrides applied at build (suppress/edit studies)
   obsidian/<date>[-<conf>].md   committed Obsidian markdown twin
   obsidian/papers/<site>/<slug>.pdf  v0.8 PR2: filed full-text PDFs (gitignored, never published)
   slide-photos/<date>/<uuid>.<ext>  curator slide uploads (gitignored by default — see CHANGELOG v0.5)
