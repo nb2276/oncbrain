@@ -2,7 +2,7 @@
 
 Curated AI-summarized digest of oncology updates. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, etc.).
 
-**Live:** https://oncbrain.oncologytoolkit.com · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.3.0
+**Live:** https://oncbrain.oncologytoolkit.com · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.8.0
 
 ## Architecture
 
@@ -49,7 +49,7 @@ Two ingestion paths, both write to the same SQLite queue. Use either or both.
 
 1. Open Telegram, find `@BotFather`, send `/newbot`. Get a token, paste it into `.env` as `TELEGRAM_BOT_TOKEN`.
 2. Optional: create a private Telegram channel and add the bot as admin.
-3. Throughout the day, DM tweet URLs to the bot (or post in your private channel).
+3. Throughout the day, DM the bot: tweet URLs, paper links (DOI / PubMed / journal pages), full-text PDFs, or slide photos (or post them in your private channel).
 4. When ready to publish:
 
 ```bash
@@ -99,21 +99,24 @@ Subspecialty emojis (the LLM picks): 🌸 breast · 🎯 SABR/precision · 🍇 
 
 ## Autopilot (optional)
 
-Run the full chain every day at 03:00 local without touching anything:
+Run the full chain every day at 06:00 local without touching anything:
 
 ```bash
 npm run cron:install                                          # registers macOS launchd job
-sudo pmset repeat wakeorpoweron MTWRFSU 02:55:00              # wake laptop 5 min before (sleep guard)
+sudo pmset repeat wakeorpoweron MTWRFSU 05:55:00              # wake laptop 5 min before (sleep guard)
 ```
 
 Each run: `pull:telegram → build:day yesterday + today → astro build → git push`. Idempotent — empty days are no-ops. Logs append to `~/Library/Logs/oncbrain-cron.log`. Uninstall with `npm run cron:uninstall`; test manually with `npm run cron:test`.
 
 ## URLs
 
-- `https://oncbrain.oncologytoolkit.com/` — recent dates, conference index, TL;DRs
+- `https://oncbrain.oncologytoolkit.com/` — recent studies, disease-site nav, live search
 - `https://oncbrain.oncologytoolkit.com/2026-05-18/` — one day's digest
+- `https://oncbrain.oncologytoolkit.com/sites/breast/` — all studies for one disease site
 - `https://oncbrain.oncologytoolkit.com/conferences/asco2026/` — all days tagged with a conference
 - `https://oncbrain.oncologytoolkit.com/about/` — disclaimer + curator info
+- `https://oncbrain.oncologytoolkit.com/api` — RSS feed + JSON API docs
+- `https://oncbrain.oncologytoolkit.com/feed.xml` — RSS feed (latest 30 studies)
 
 ## Obsidian integration
 
@@ -140,7 +143,7 @@ npm test           # all tests once
 npm run test:watch # watch mode
 ```
 
-184 tests across DB, twitter-fetch, LLM pipeline, eval, Obsidian export, Telegram ingest, citation extraction, and LLM backend adapter.
+469 tests across DB + schema migrations, ingestion (Telegram, PubMed, Crossref, PDF text + OCR), the three-phase LLM pipeline, SSRF / DOI / paper-URL / HTML-meta helpers, Obsidian export, RSS + JSON API output, NCT coverage dedup, and citation extraction.
 
 ## Eval
 

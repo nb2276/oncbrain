@@ -37,7 +37,7 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 - **Admin server**: Hono 4 (localhost only, on port 3001)
 - **DB**: better-sqlite3 (synchronous), file at `./oncbrain.db`
 - **LLM**: Anthropic Claude Sonnet via `@anthropic-ai/sdk` OR via `claude -p` (subscription path). v0.8 PR2: also called at *enrichment* time (not just build) to extract metadata from PDF text.
-- **Tests**: Vitest (298 tests as of v0.5)
+- **Tests**: Vitest (469 tests as of v0.8)
 - **PDF ingestion** (v0.8 PR2): poppler (`brew install poppler`) provides `pdftotext` (text layer) + `pdftoppm` (rasterize scanned pages for Apple Vision OCR). No npm dep. A missing binary yields a clear Telegram reply, not a crash.
 - **Deploy**: DigitalOcean App Platform, static-site free tier, GitHub auto-deploy from `main`
 
@@ -62,7 +62,7 @@ npm run build:day -- --dry-run  # no LLM call, see what would happen
 npm run build                   # Astro static build
 
 # Tests + eval
-npm test                        # vitest run (185 tests)
+npm test                        # vitest run (469 tests)
 npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations)
 
 # Autopilot
@@ -201,7 +201,7 @@ When a user request matches a gstack skill, invoke via the Skill tool:
 ## Testing
 
 ```
-npm test                   # 185 tests, all should pass
+npm test                   # 469 tests, all should pass
 npm run test:watch         # vitest watch mode
 npx astro check            # type check (0 errors expected)
 ```
@@ -210,7 +210,7 @@ Tests live in `test/`. Each lib module has a corresponding test file. Naming con
 
 ## Versioning
 
-Single source of truth: `package.json` `"version"` field. CHANGELOG.md gets a new section per minor. Currently v0.5.0 (multi-source ingestion: tweets + PubMed papers + slide photos through an inbox queue, with source-attribution badges and weighted Phase 1 clustering hints).
+Single source of truth: `package.json` `"version"` field. CHANGELOG.md gets a new section per release. Currently v0.8.0 (non-PMID + PDF source ingestion: DOI/journal/PMC URLs and full-text PDFs filed to a private Obsidian vault, plus an RSS feed and versioned JSON API; bundles the v0.6 live search and the v0.7 standard-of-care verdict).
 
 ## Planning artifacts
 
