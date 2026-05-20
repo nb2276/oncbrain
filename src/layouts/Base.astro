@@ -16,6 +16,7 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <link rel="alternate" type="application/rss+xml" title={`${siteName} RSS feed`} href="/feed.xml" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -150,6 +151,13 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
         Content quoted/referenced under fair use for educational summary
         purposes. To request removal of any item,
         contact the curator{curatorHandle ? <> at <a href={`https://x.com/${curatorHandle.replace(/^@/, '')}`} target="_blank" rel="noopener">{curatorHandle}</a></> : ''}.
+      </p>
+      <p>
+        <a href="/about">About</a>
+        {' · '}
+        <a href="/api">API &amp; RSS</a>
+        {' · '}
+        <a href="/feed.xml">RSS feed</a>
       </p>
     </footer>
   </body>

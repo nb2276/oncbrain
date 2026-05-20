@@ -1,0 +1,95 @@
+---
+import Base from '../../layouts/Base.astro';
+import { listDigests } from '../../lib/digest-data.ts';
+import { collectStudyOccurrencesBySlug } from '../../lib/api-output.ts';
+
+// Pull real, current examples so the docs links always resolve.
+const digests = listDigests();
+const latestDate = digests[0]?.date ?? '2026-05-19';
+const sampleSlug = Array.from(collectStudyOccurrencesBySlug(digests).keys())[0] ?? 'study-slug';
+const feedUrl = new URL('/feed.xml', Astro.site).href;
+---
+
+<Base title="API & RSS" description="Public RSS feed and JSON API for the oncology meeting digest.">
+  <h2 style="margin-top:0">API &amp; RSS</h2>
+  <p>
+    Every digest is published as a feed and a small JSON API so other apps and
+    colleagues can read it. Everything here is public: no account, no API key,
+    no rate limit.
+  </p>
+
+  <h3>RSS feed</h3>
+  <p>Paste this into any reader (Feedly, NetNewsWire, Inoreader, Reeder):</p>
+  <pre><code>{feedUrl}</code></pre>
+  <p>
+    One item per study, newest first (latest 30). Each item carries the study
+    name, the standard-of-care verdict, the eligibility audience, and the
+    one-line TL;DR, linked back to its day on this site.
+  </p>
+
+  <h3>JSON API</h3>
+  <p>
+    Versioned under <code>/api/v1/</code> so the response shape stays stable.
+    Every payload includes an <code>api_version</code> field. Start at the index
+    and follow links from there.
+  </p>
+  <ul>
+    <li>
+      <a href="/api/v1/digests.json"><code>/api/v1/digests.json</code></a>
+      <br />Index of every published day, with study and site counts.
+    </li>
+    <li>
+      <a href={`/api/v1/digest/${latestDate}.json`}><code>/api/v1/digest/&lt;date&gt;.json</code></a>
+      <br />One full day. Studies, sources, and per-study verdicts. Example:
+      <a href={`/api/v1/digest/${latestDate}.json`}><code>{latestDate}</code></a>.
+    </li>
+    <li>
+      <a href={`/api/v1/study/${sampleSlug}.json`}><code>/api/v1/study/&lt;slug&gt;.json</code></a>
+      <br />One study across every date it was covered. Example:
+      <a href={`/api/v1/study/${sampleSlug}.json`}><code>{sampleSlug}</code></a>.
+    </li>
+  </ul>
+
+  <h3>Notes for developers</h3>
+  <ul>
+    <li>
+      <strong>No CORS header yet.</strong> Server-side fetches, scripts, and
+      feed readers work from anywhere. A browser app on another domain calling
+      <code>fetch()</code> will be blocked until a cross-origin header is added.
+      Ask the curator if you need it.
+    </li>
+    <li>
+      <strong>Summaries only.</strong> The API serves titles, abstracts, and AI
+      summaries. It never serves full-text PDFs or other copyrighted source
+      material.
+    </li>
+    <li>
+      <strong>Static and cached.</strong> Files regenerate when the digest
+      rebuilds (daily during meetings), so expect a short edge-cache delay after
+      a new day publishes.
+    </li>
+  </ul>
+
+  <p style="margin-top:2rem"><a href="/">&larr; Back to the digest</a></p>
+
+  <style>
+    pre {
+      background: var(--citation-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85em;
+    }
+    pre code {
+      font-size: inherit;
+    }
+    li {
+      margin: 0.6rem 0;
+    }
+  </style>
+</Base>
