@@ -35,6 +35,18 @@ if [ -z "$NODE_BIN" ]; then
 fi
 NODE_DIR="$(dirname "$NODE_BIN")"
 
+# Prefer a Homebrew bash to run the job. The system /bin/bash lives on the
+# read-only system volume and usually can't be added to Full Disk Access via the
+# picker; a Homebrew bash (/opt/homebrew or /usr/local) is selectable, so the
+# launchd job can be granted the disk access it needs for a CloudStorage repo.
+if [ -x /opt/homebrew/bin/bash ]; then
+  BASH_BIN=/opt/homebrew/bin/bash
+elif [ -x /usr/local/bin/bash ]; then
+  BASH_BIN=/usr/local/bin/bash
+else
+  BASH_BIN=/bin/bash
+fi
+
 mkdir -p "$HOME/Library/LaunchAgents"
 mkdir -p "$HOME/Library/Logs"
 
@@ -43,6 +55,7 @@ sed \
   -e "s|__PROJECT_DIR__|$PROJECT_DIR|g" \
   -e "s|__HOME__|$HOME|g" \
   -e "s|__NODE_DIR__|$NODE_DIR|g" \
+  -e "s|__BASH__|$BASH_BIN|g" \
   "$TEMPLATE" >"$TARGET"
 
 # Make the runner script executable. (Idempotent.)
@@ -56,6 +69,7 @@ echo "✓ Installed: $TARGET"
 echo "  - Schedule: 6:00 AM local time daily"
 echo "  - Project:  $PROJECT_DIR"
 echo "  - Node:     $NODE_BIN"
+echo "  - Bash:     $BASH_BIN"
 echo "  - Log:      $HOME/Library/Logs/oncbrain-cron.log"
 echo ""
 echo "Verify it's loaded:"
