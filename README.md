@@ -1,31 +1,38 @@
 # oncbrain
 
-Curated AI-summarized digest of oncology updates. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, etc.).
+Curated, AI-summarized digest of oncology meeting research. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets). One oncologist curates the sources; an AI pipeline summarizes each study with comparative-literature context and a standard-of-care verdict.
 
 **Live:** https://oncbrain.oncologytoolkit.com · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.8.0
 
 ## Architecture
 
 ```
-INGESTION                LOCAL (laptop)              GITHUB              DIGITALOCEAN
-─────────                ──────────────              ──────              ────────────
-Telegram bot ─────┐                                                       App Platform
-                  ├─▶ SQLite (oncbrain.db)            ▲                   (static site)
-admin form @ 3001 ┘     │                             │                          │
-                        │                             │                          ▼
-                        ▼                             │                   public reads
-                  build pipeline (npm run build:day): │                   static HTML at
-                    oEmbed fetch pending tweets       │                   oncbrain.oncologytoolkit.com
-                    LLM cluster + summarize           │
-                    write data/digests/<date>.json    │
-                    write data/obsidian/<date>.md     │
-                        │                             │
-                        └─▶ git push ─────────────────┘
-                                                      │
-                                                      └─▶ auto-deploy on push
+INGESTION                LOCAL (laptop only)                       GITHUB        DIGITALOCEAN
+─────────                ───────────────────                       ──────        ────────────
+Telegram bot ─────┐      pull:telegram ─▶ inbox_items queue                      App Platform
+  tweets,         │                          │                      ▲           (static site)
+  paper URLs /    ├──▶   enrich:inbox  ◀──────┘                      │                  │
+  DOIs / PMIDs,   │        oEmbed · PubMed · Crossref ·              │                  ▼
+  PDFs, slides    │        PDF text + Apple Vision OCR               │           public reads
+admin form @ 3001 ┘                       ▼                          │           static HTML +
+                         SQLite (oncbrain.db): bookmarks /           │           RSS + JSON API
+                         papers / slide_uploads                      │           at oncbrain.
+                                          │                          │           oncologytoolkit.com
+                         build:day ─▶ 3-phase LLM (group →           │
+                           per-study agent → synthesis) +            │
+                           SOC verdict + literature comparison       │
+                                          │                          │
+                         data/digests/<date>.json     (committed)    │
+                         data/obsidian/<date>.md       (committed)   │
+                         data/obsidian/papers/<site>/  (gitignored)  │
+                                          │                          │
+                         astro build ─▶ HTML + /feed.xml +           │
+                           /api/v1/*.json  ──▶ git push ─────────────┘
+                                                                     │
+                                                                     └─▶ auto-deploy on push
 ```
 
-Admin form, Telegram poller, and build pipeline run locally only. The public site is pure static HTML.
+Admin form, Telegram poller, enrichment, and build pipeline run locally only. The public site is pure static HTML (plus the RSS feed and JSON API, also static). Full-text PDFs are filed into a gitignored Obsidian vault and never published.
 
 ## Setup (one time)
 
@@ -39,24 +46,29 @@ cp .env.example .env
 #   PUBLIC_SITE_NAME=onc brain
 #   PUBLIC_SITE_URL=https://oncbrain.oncologytoolkit.com
 npm install
+brew install poppler                            # PDF text + scanned-page rasterize (for PDF ingestion)
+npm run setup:vision                            # compile the Apple Vision OCR binary (macOS only)
 ```
+
+`poppler` and the Vision binary are only needed for PDF + slide ingestion; the rest runs without them (a missing binary yields a clear Telegram reply, not a crash).
 
 ## Adding content
 
-Two ingestion paths, both write to the same SQLite queue. Use either or both.
+Two ingestion paths, both write to the same SQLite inbox queue. Use either or both.
 
 ### Path A: Telegram bot (mobile-friendly, primary path)
 
 1. Open Telegram, find `@BotFather`, send `/newbot`. Get a token, paste it into `.env` as `TELEGRAM_BOT_TOKEN`.
 2. Optional: create a private Telegram channel and add the bot as admin.
 3. Throughout the day, DM the bot: tweet URLs, paper links (DOI / PubMed / journal pages), full-text PDFs, or slide photos (or post them in your private channel).
-4. When ready to publish:
+4. Drain the queue and enrich the items into bookmarks / papers / slides:
 
 ```bash
-npm run pull:telegram   # fetches all new messages, saves URLs as today's bookmarks
+npm run pull:telegram   # writes each new message to the inbox_items queue (offset-safe, no enrichment)
+npm run enrich:inbox    # tweets → oEmbed, papers → PubMed/Crossref, PDFs → text/OCR + vault filing
 ```
 
-The bot also recognizes a `/note <text>` command on the same message to attach a curator note.
+The bot also recognizes a `/note <text>` command on the same message to attach a curator note, and replies with what it ingested (or a named reason if it could not).
 
 ### Path B: localhost admin form
 
@@ -70,32 +82,35 @@ If oEmbed fails for a tweet, expand "Manual paste fallback" on the form and past
 ## Publishing a digest
 
 ```bash
+# 1. Ingest first (see "Adding content"):
+npm run pull:telegram && npm run enrich:inbox
+
+# 2. Build one date's digest:
 npm run build:day                              # today's date
 npm run build:day -- --date=2026-05-18         # a specific date
-npm run build:day -- --backfill                # every date with bookmarks (re-run is idempotent)
+npm run build:day -- --backfill                # every date with sources (re-run is idempotent)
 npm run build:day -- --dry-run                 # no LLM call, see what would happen
 
+# 3. Static build + publish:
 npm run build                                  # Astro static build (preview locally with: npm run preview)
-
-git add data
+git add data/digests data/obsidian             # explicit paths — papers/ is gitignored, never staged
 git commit -m "$(date +%Y-%m-%d)"
-git push                                       # DigitalOcean auto-deploys in ~40 sec
+git push                                        # DigitalOcean auto-deploys in ~40 sec
 ```
 
-## Digest format (IMRD)
+## Digest format
 
-Each digest follows scientific paper structure for 90-second quick reference:
+Organized by **disease site** (22-slug enum, see `DESIGN.md`), newest date first. Built for 90-second scanning:
 
-- **Top line** — one-sentence lede with the headline number (e.g. "RCC SBRT achieves 100% local control at 5 years")
-- **TL;DR** — 2-3 sentence cross-topic synthesis
-- **Per cluster:** subspecialty emoji + topic name, then
-  - 🧪 Intro — clinical context, why this matters
-  - 📐 Methods — trial design (optional)
-  - 📊 Results — bullets with effect sizes verbatim from sources
-  - 💭 Discussion — implications, open questions (optional)
-  - 📚 Sources — collapsible, each linked back to the original X post
+- **Top line** — one-sentence lede with the headline number.
+- **TL;DR** — 2-3 sentence cross-site synthesis (also the home-page hero).
+- **Per study card:**
+  - a **standard-of-care verdict** pill (practice-changing / challenges-SOC / confirmatory / early-signal / caveats-dominate / unclear) plus the eligible population, for instant triage;
+  - a one-line **TL;DR** with effect sizes quoted verbatim from the source;
+  - bullets: endpoints, comparisons to recent and historical trials (🔗 "vs leading data"), and methodology critique when warranted;
+  - **sources** — each tweet / paper / slide linked back, with source-type pills (🐦 📄 🩻).
 
-Subspecialty emojis (the LLM picks): 🌸 breast · 🎯 SABR/precision · 🍇 GU · 📡 radonc · 💊 systemic · 🛡️ IO · 🧠 CNS · 🩸 heme · 🫁 lung · 🌽 GI · 🧬 molecular · 🔪 surgery · 🧒 peds · 🧓 supportive · ⚠️ safety.
+Disease-site emoji anchors live in `DESIGN.md`; the per-study bullet + verdict emoji vocabulary and voice rules live in `VOICE.md`.
 
 ## Autopilot (optional)
 
@@ -106,7 +121,7 @@ npm run cron:install                                          # registers macOS 
 sudo pmset repeat wakeorpoweron MTWRFSU 05:55:00              # wake laptop 5 min before (sleep guard)
 ```
 
-Each run: `pull:telegram → build:day yesterday + today → astro build → git push`. Idempotent — empty days are no-ops. Logs append to `~/Library/Logs/oncbrain-cron.log`. Uninstall with `npm run cron:uninstall`; test manually with `npm run cron:test`.
+Each run: `pull:telegram → enrich:inbox → build:day (yesterday + today) → astro build → git push`. Idempotent — empty days are no-ops. Logs append to `~/Library/Logs/oncbrain-cron.log`. Uninstall with `npm run cron:uninstall`; test manually with `npm run cron:test`; diagnose a missed run with `npm run cron:doctor`.
 
 ## URLs
 
@@ -114,9 +129,20 @@ Each run: `pull:telegram → build:day yesterday + today → astro build → git
 - `https://oncbrain.oncologytoolkit.com/2026-05-18/` — one day's digest
 - `https://oncbrain.oncologytoolkit.com/sites/breast/` — all studies for one disease site
 - `https://oncbrain.oncologytoolkit.com/conferences/asco2026/` — all days tagged with a conference
-- `https://oncbrain.oncologytoolkit.com/about/` — disclaimer + curator info
+- `https://oncbrain.oncologytoolkit.com/about/` — what it is, how it works, curator
 - `https://oncbrain.oncologytoolkit.com/api` — RSS feed + JSON API docs
 - `https://oncbrain.oncologytoolkit.com/feed.xml` — RSS feed (latest 30 studies)
+
+## Output feeds (RSS + JSON API)
+
+Every build emits a public, static, no-auth feed and API so other apps can read the digest:
+
+- `/feed.xml` — RSS 2.0, latest 30 studies (name + verdict + audience + TL;DR, deep-linked).
+- `/api/v1/digests.json` — index of published days with counts.
+- `/api/v1/digest/<date>.json` — one day's digest (summaries only; no copyrighted full text).
+- `/api/v1/study/<slug>.json` — one study across every date it was covered.
+
+No CORS header yet, so browser cross-origin `fetch()` is blocked; readers and server-side consumers work. See `/api` for the full rundown.
 
 ## Obsidian integration
 
@@ -125,7 +151,8 @@ Every `npm run build:day` also writes Obsidian-flavored markdown to `data/obsidi
 - YAML frontmatter (date, conference, tags, source-count, url)
 - Wikilinks for NCT trial numbers, PMIDs, DOIs, conference notes, neighboring dates
 - Callout for TL;DR
-- Sources per cluster with curator notes
+- Sources per study with curator notes
+- Filed full-text PDFs at `data/obsidian/papers/<site>/<slug>.pdf` (gitignored, local-only), embedded into the daily note as a `[[wikilink]]` — the vault doubles as a private research library
 
 Symlink `data/obsidian/` into your Obsidian vault, or open the repo as a vault directly. Backlinks across digests show up in Obsidian's graph view.
 
@@ -141,13 +168,14 @@ Two paths via `LLM_BACKEND` env var:
 ```bash
 npm test           # all tests once
 npm run test:watch # watch mode
+npx astro check    # type check (0 errors expected)
 ```
 
 469 tests across DB + schema migrations, ingestion (Telegram, PubMed, Crossref, PDF text + OCR), the three-phase LLM pipeline, SSRF / DOI / paper-URL / HTML-meta helpers, Obsidian export, RSS + JSON API output, NCT coverage dedup, and citation extraction.
 
 ## Eval
 
-When iterating on `prompts/digest-v2.txt`, run the eval before shipping a change:
+When iterating on the digest prompts (`prompts/digest-v5-*.txt`), run the eval before shipping a change:
 
 ```bash
 npm run eval                       # all fixtures
@@ -167,7 +195,7 @@ Email the curator handle in `.env`. 24-hour SLA. Procedure: delete the bookmark 
 
 ## Disclaimer
 
-AI-generated summaries of public social media content. **Not medical advice.** Verify against primary sources (clinicaltrials.gov, PubMed, conference proceedings) before any clinical use.
+AI-generated summaries of public research and social-media content. **Not medical advice.** Verify against primary sources (clinicaltrials.gov, PubMed, conference proceedings) before any clinical use.
 
 ## License
 

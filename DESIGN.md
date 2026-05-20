@@ -39,6 +39,27 @@ See the [full emoji set + selection principles](#disease-site-emoji-set) below.
 - **Brevity beats completeness in output.** Depth shows in *which* bullets are included, not in adding more.
 - **One column. Always.** Two-column reading on a phone is a footgun.
 
+## Study card
+
+The unit of the digest. Top to bottom:
+
+1. **Verdict pill** (v0.7): a 5-second standard-of-care triage signal at the top of each card. Six buckets, each an emoji plus a short label.
+   - 🚀 Practice-changing · ↔️ Challenges SOC · 🔄 Confirmatory · 🧪 Early signal · ⚠️ Caveats dominate · ❔ Unclear
+   - The pill also carries a one-line rationale and the eligible population. Assignment rules and maturity gates (single-arm / interim / post-hoc caps) are a voice concern (see `VOICE.md`). The six emojis here are the *visual* vocabulary; do not reuse them elsewhere.
+2. **Study TL;DR:** one line, headline number verbatim.
+3. **"vs leading data" callout** (v0.7): comparator (🔗) bullets are lifted out of the main list into their own callout, so the reader sees how the result sits against prior evidence before the methodology bullets.
+4. **Detail bullets:** endpoints, comparisons, critique. A 2D comparison renders as an inline table.
+5. **Sources:** collapsible, each linked back, with source-type pills (🐦 tweet · 📄 paper · 🩻 slide; see `VOICE.md`).
+
+## Home page
+
+Built for a returning reader, not a first-time browser:
+
+- **Disease-site nav bar:** the emoji chips fan out across the top; tap to jump to that site's page. The primary wayfinding.
+- **Hero TL;DR:** the latest digest's TL;DR in a prominent box directly under the title, so the freshest synthesis is the first thing read.
+- **Recent studies feed:** the last ~10 studies as a flat feed (not grouped by date), newest first, so a returning reader sees what is new at a glance.
+- **Live search:** a single box below the nav that filters studies as you type (substring over name / TL;DR / NCT / disease-site label). `/` focuses it, `Esc` clears.
+
 ## Disease-site emoji set
 
 Twenty-two slugs, ordered roughly head-to-toe for solid tumors, then liquid tumors, then cross-cutting categories. The emoji is the per-site visual anchor in the digest header (`[date].astro`) and the sites grid (`sites/index.astro`).
@@ -93,7 +114,7 @@ When in doubt about a visual change:
 - Anything that gives an emoji or icon a meaning inconsistent with the vocabulary above.
 
 **Leave alone:**
-- The IMRD/sites schema. Astro pages + Obsidian export + LLM prompts all depend on it.
+- The study-card + disease-site schema (DigestStudy / DigestSite). Astro pages, Obsidian export, and the LLM prompts all depend on its shape.
 - Newsreader as the body face.
 - The warm off-white background.
 - The subspecialist register (defined in `VOICE.md`). If you find yourself softening tone for a broader audience, you've drifted off-product.

@@ -4,7 +4,7 @@ Project-level context for AI agents (Claude Code and others) working on this cod
 
 ## What this is
 
-**oncbrain** is a curated AI-summarized digest of oncology meeting tweets. A single oncologist bookmarks tweets from major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets), an AI pipeline analyzes them with comparative literature context, and the output ships as a static site at **https://oncbrain.oncologytoolkit.com**.
+**oncbrain** is a curated AI-summarized digest of oncology meeting research. A single oncologist sends sources from major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets): conference tweets, paper links (DOI/PubMed/journal pages), full-text PDFs, and slide photos. An AI pipeline analyzes them with comparative literature context and a standard-of-care verdict, and the output ships as a static site (plus an RSS feed + JSON API) at **https://oncbrain.oncologytoolkit.com**.
 
 The site is organized by disease site (`/sites/breast/`, `/sites/prostate/`, etc.) and by date (`/2026-05-17/`). Each study gets a per-study TL;DR with effect sizes verbatim, then bullets that include comparisons to recent / historic literature and methodological critique when warranted.
 
@@ -13,19 +13,21 @@ Audience: oncology subspecialists. Tone: subspecialist-to-subspecialist, peer-re
 ## Pipeline at a glance
 
 ```
-Telegram bot  ─┐
-               ├─▶ SQLite (oncbrain.db) ─▶ digest-builder
-admin form  ───┘                              │
-                                              ├─▶ oEmbed fetch (text + html)
-                                              ├─▶ syndication CDN (image URLs)
-                                              ├─▶ LLM (claude-sonnet-4-6) with vision
+Telegram bot ─┐  pull:telegram        enrich:inbox
+ tweets,      ├─▶ inbox_items queue ─▶  oEmbed · PubMed · Crossref ·  ─▶ SQLite (oncbrain.db)
+ papers,      │                         PDF text + Apple Vision OCR      bookmarks / papers / slides
+ PDFs, slides │
+admin form ───┘                               │
                                               ▼
-                              data/digests/<date>.json    ─┐
-                              data/obsidian/<date>.md      ├─▶ git push ─▶ DO deploy
-                              data/digests/<date>.json     ┘    (~40s)
+                              build:day ─▶ 3-phase LLM (group → study agent →
+                                synthesis) + SOC verdict + literature comparison
                                               │
-                                              ▼
-                              Astro static site → oncbrain.oncologytoolkit.com
+                              data/digests/<date>.json    (committed)   ─┐
+                              data/obsidian/<date>.md      (committed)    ├─▶ git push ─▶ DO (~40s)
+                              data/obsidian/papers/...     (gitignored)   ┘
+                                              │
+                              astro build ─▶ HTML + /feed.xml + /api/v1/*.json
+                                              → oncbrain.oncologytoolkit.com
 ```
 
 Admin + Telegram poller + build run locally only. The deployed site is pure static HTML.
@@ -51,7 +53,8 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 
 ```bash
 # Ingestion
-npm run pull:telegram           # drain @oncbrain_bot DMs into SQLite
+npm run pull:telegram           # drain @oncbrain_bot DMs into the inbox_items queue (offset-safe, no enrichment)
+npm run enrich:inbox            # process the queue: tweet→oEmbed, paper→PubMed/Crossref, PDF→text/OCR + vault filing
 npm run admin                   # localhost:3001 admin form (date picker, conference tag, manual paste fallback)
 
 # Build
@@ -66,7 +69,7 @@ npm test                        # vitest run (469 tests)
 npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations)
 
 # Autopilot
-npm run cron:install            # macOS launchd job at 03:00 local daily
+npm run cron:install            # macOS launchd job at 06:00 local daily
 sudo pmset repeat wakeorpoweron MTWRFSU 05:55:00   # wake laptop 5min before 6am cron (sleep guard)
 
 # Local preview
@@ -82,7 +85,7 @@ npm run preview                 # Astro preview (after npm run build)
 
 The CLI client (`src/lib/llm-client.ts`) scrubs `ANTHROPIC_API_KEY` from the child process env so a stale or placeholder key can't hijack subscription auth.
 
-## Schema (v0.3)
+## Schema (digest output, v0.7+ study shape)
 
 ```ts
 DigestOutput {
@@ -101,9 +104,12 @@ DigestSite {
 DigestStudy {
   name: string             // specific trial name (PRESTIGE-PSMA, ARANOTE)
   tldr: string             // ONE sentence with headline number
-  details: string[]        // bullets: endpoints, comparisons, critique
+  details: DigestDetail[]  // bullets: string | {text, subdetails} | {text, table}
   nct: string | null
-  tweet_ids: number[]      // multiple tweets per study = collapsed group
+  slug?: string            // v0.6: stable per-study anchor + search id (deriveSlug fallback)
+  tweet_ids: number[]      // back-compat synthetic ids
+  source_ids?: SourceRef[] // v0.5: typed refs → bookmarks / papers / slide_uploads
+  verdict?: StudyVerdict   // v0.7: {soc_implication, rationale, audience} SOC-triage pill
 }
 ```
 
@@ -114,20 +120,33 @@ DigestStudy {
 ```
 src/
   lib/
-    db.ts                  SQLite schema + queries (bookmarks, papers, slide_uploads, inbox_items, conferences, settings)
+    db.ts                  SQLite schema + queries + migrations (bookmarks, papers, slide_uploads, inbox_items, conferences, settings)
+    telegram-ingest.ts     Telegram Bot API: extractTweetUrls / extractPaperPmids / extractPaperUrls / extractPdfDocument / extractSlidePhoto + sendMessage
+    inbox-enrichment.ts    Type-dispatched enrichment loop (tweet→bookmark, paper→papers, slide→slides, PDF→papers); E2/E3 replies; cross-day NCT nudge
     twitter-fetch.ts       oEmbed (text + html) + syndication (images), parallel
     tweet-syndication.ts   Twitter syndication CDN client (token formula derivation)
-    pubmed-client.ts       NCBI E-utilities client: efetch pubmed metadata + abstract, efetch PMC for Methods/Results
+    pubmed-client.ts       NCBI E-utilities: efetch PubMed metadata + abstract, PMC for Methods/Results
+    crossref-client.ts     v0.8 PR1: DOI-keyed metadata via Crossref REST (polite pool)
+    paper-url.ts           v0.8 PR1: classify + extract DOI / journal / PMC paper URLs
+    html-meta.ts           v0.8 PR1: Highwire + OpenGraph meta extraction from journal pages
+    doi.ts                 v0.8 PR1: normalizeDoi (single canonicalization) + extractDois
+    ssrf-fetch.ts          v0.8 PR1: SSRF-safe HTTPS fetch (private-IP block, per-hop redirect revalidation)
+    pdf-text.ts            v0.8 PR2: pdftotext + pdftoppm→Vision OCR fallback (poppler)
+    pdf-meta.ts            v0.8 PR2: LLM metadata extraction from PDF text (+ DOI/PMID regex backstop)
+    pdf-storage.ts         v0.8 PR2: file PDFs to the gitignored Obsidian vault (papers/<site>/<slug>.pdf)
+    slide-photo-storage.ts Telegram getFile download + magic-byte sniff + disk save
+    vision-ocr.ts          Apple Vision OCR (macOS-only); image fetch + caption validator
+    nct-coverage.ts        v0.8 PR3: cross-day NCT coverage index + prior-coverage lookup
     source-association.ts  NCT + trial-acronym weighted graph; soft Phase 1 clustering hints
-    inbox-enrichment.ts    Type-dispatched enrichment loop (tweet → bookmark, paper → papers, slide → slide_uploads)
     extract.ts             NCT / PMID / DOI regex + auto-link
+    slug.ts / slug-resolve.ts  deriveSlug + per-date slug disambiguation (anchors, search, API)
     llm-client.ts          AnthropicLlmClient + ClaudeCliLlmClient + multimodal blocks
-    llm-pipeline.ts        Three-phase pipeline (group → per-study agent → synthesis); DigestInputItem union
-    image-ocr.ts           Apple Vision OCR (macOS-only); pbs.twimg.com fetch + caption validator
-    obsidian-export.ts     Markdown export with YAML frontmatter + wikilinks + source-type pills
-    digest-data.ts         Astro page data loaders (listDigests, listSiteSummaries)
-    disease-sites.ts       22-site enum (slug → label + emoji; see DESIGN.md)
-    telegram-ingest.ts     Telegram Bot API client + extractTweetUrls + extractPaperPmids + slide download
+    llm-pipeline.ts        Three-phase pipeline (group → per-study agent → synthesis); DigestInputItem union; verdict parse
+    obsidian-export.ts     Markdown export: YAML frontmatter + wikilinks + source-type pills + filed-PDF embed
+    feed.ts                v0.8 PR3: RSS 2.0 builder
+    api-output.ts          v0.8 PR3: JSON API shapers (digests index, per-study, sanitized per-date)
+    digest-data.ts         Astro page data loaders (listDigests, listSiteSummaries, listRecentStudies)
+    disease-sites.ts       22-site enum (slug → label + emoji + rationale; see DESIGN.md)
   pages/
     index.astro            recent dates + browse strip
     about.astro            disclaimer + curator info

@@ -7,7 +7,6 @@ Format: `- [scope] description (source)`
 ## Now — highest priority
 
 - **Preprint detection + badge + verdict cap (E5).** Detect medRxiv / bioRxiv / Research Square + DOI prefix `10.1101`; set `is_preprint`; render a "PREPRINT — not peer-reviewed" badge; cap preprint verdicts at `early-signal` in VOICE.md. **Promoted to top priority:** v0.8 PR1/PR2 made preprint ingestion live (`paper-url.ts` allowlists those hosts; the DOI path resolves `10.1101`), but nothing flags them, so a preprint can currently earn a confident standard-of-care verdict with no peer-review warning. Clinical-safety. (v0.8 CEO review — `docs/plans/v0.8-non-pmid-sources.md:30`)
-- **Cut the release / fix the version gap.** package.json reads `0.5.0` but v0.6 (live search), v0.7 (SOC verdict), and v0.8 (PR1-3) are all live; the CHANGELOG has stacked `[Unreleased]` blocks and v0.7 has no header at all. Run `/ship` to bump + consolidate the CHANGELOG + tag. (this session)
 - **Live end-to-end test of v0.8 ingestion.** PR1/2/3 pass unit + build tests but have never run against real Telegram traffic. DM the bot a journal URL + a PDF, run `pull:telegram → enrich:inbox → build:day`, confirm vault filing + E2/E3 replies + digest output. (this session)
 
 ## v0.5.1 — hardening hotfix
@@ -22,7 +21,6 @@ Format: `- [scope] description (source)`
 - **Per-paper figure extraction from PMC XML.** Figures are linked but not pulled in. (`docs/plans/v0.5-multi-source-ingestion.md:286`)
 - **Slide deck grouping.** Use `source_batch_key` (already populated for multi-photo messages) to render a deck as a unit. (`docs/plans/v0.5-multi-source-ingestion.md:288`)
 - **Slide cropping / auto-rotation / EXIF stripping.** Quality pass before slides ship. (`docs/plans/v0.5-multi-source-ingestion.md:289`)
-- **README modernization.** The v0.8 cut refreshed front-page facts (version, test count, cron time, URLs, multi-source bot line), but the architecture diagram, the "Publishing a digest" flow (omits `pull:telegram → enrich:inbox`), the subspecialty-emoji list (predates the 22-site enum), and the IMRD digest-format section still describe the v0.3 app. Deeper structural rewrite deferred. (this session)
 
 ## v0.8 deferred (surfaced in CEO review; not in PR1-3)
 
@@ -44,8 +42,10 @@ Format: `- [scope] description (source)`
 - **Figure caption validator checks numeric tokens only.** Can't catch mislabeled axes or wrong-arm attribution.
 - **Disease-site classification uses MeSH terms / keywords, not author affiliations.** Explicit product decision, not a deferred item.
 
-## Completed (in CHANGELOG under [Unreleased]; pending a tagged release)
+## Completed (released in v0.8.0, 2026-05-19)
 
+- **Release v0.8.0:** package.json bump, CHANGELOG consolidated into a dated `[0.8.0]`, git tag `v0.8.0`.
+- **Docs modernization:** README (architecture diagram, multi-source pipeline, digest-format, Obsidian PDF vault, RSS/API), CLAUDE (pipeline diagram, schema, lib file-map, key commands), DESIGN (verdict-pill + home-page sections) refreshed for v0.8.
 - **Live search** (v0.6) — `SearchBox.astro` + `search-index.json.ts`.
 - **SOC-implication verdict + comparator promotion** (v0.7).
 - **DOI-only paper references + PMC URLs as ingestion targets** (v0.8 PR1).
