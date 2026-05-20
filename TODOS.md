@@ -12,15 +12,26 @@ Format: `- [scope] description (source)`
 
 - **Live search.** Client-side search box on the home page (and possibly `/sites/`) that filters digests + studies as you type. Indexes study `name`, `tldr`, NCT IDs, and disease-site labels. Static-site appropriate: precompute a small JSON index at build time, ship as one file, do the matching in the browser. Tradeoff to settle at implementation time: lightweight substring filter (~5KB JSON, instant, no fuzzy match) vs. a real client-side index like `lunr`/`flexsearch` (~15-30KB, ranked + tolerant of typos, better for "PRESTIGE" → finds "PRESTIGE-PSMA"). Lean toward the lighter option first.
 - **PWA + push notifications.** Manifest, installability, offline-cache of the latest digest. Push notifications scoped as optional follow-on. Plan: `docs/plans/v0.6-pwa.md`. (`docs/plans/v0.5-multi-source-ingestion.md:291`)
-- **DOI-only paper references.** Currently PMID required for ingestion. (`CHANGELOG.md:37`)
-- **PMC URLs as ingestion targets.** Bot should accept `www.ncbi.nlm.nih.gov/pmc/articles/PMCx/` links and resolve to PMID. (`CHANGELOG.md:38`, `CHANGELOG.md:127`)
+- **DOI-only paper references** → now planned in v0.8 PR1. (`docs/plans/v0.8-non-pmid-sources.md`)
+- **PMC URLs as ingestion targets** → now planned in v0.8 PR1. (`docs/plans/v0.8-non-pmid-sources.md`)
 - **Non-photo image attachments.** Detect HEIC `document[]` attachments that iOS Photos sometimes sends instead of `photo[]`. (`CHANGELOG.md:39`, `CHANGELOG.md:100`)
-- **Gmail OAuth polling for PubMed alerts.** Replace manual forward-to-bot workflow with direct Gmail polling. (`CHANGELOG.md:40`, `docs/plans/v0.5-multi-source-ingestion.md:285`)
-- **PDF attachments.** Telegram `document[]` PDFs (paper preprints, conference abstract booklets). (codex P2 #8 — `docs/plans/v0.5-multi-source-ingestion.md:283`)
+- **PDF attachments** → now planned in v0.8 PR2 (summarize-and-discard). (`docs/plans/v0.8-non-pmid-sources.md`)
 - **iCloud shared album watcher.** Curator drops a slide into a shared album, oncbrain pulls it. (`docs/plans/v0.5-multi-source-ingestion.md:285`)
 - **Per-paper figure extraction from PMC XML.** Today: figures are linked but not pulled in. (`docs/plans/v0.5-multi-source-ingestion.md:286`)
 - **Slide deck grouping.** Use `source_batch_key` (already populated for multi-photo Telegram messages) to render a deck as a unit. (`docs/plans/v0.5-multi-source-ingestion.md:288`)
 - **Slide cropping / auto-rotation / EXIF stripping.** Quality pass before slides ship in published digests. (`docs/plans/v0.5-multi-source-ingestion.md:289`)
+
+## v0.8 — non-PMID source ingestion (planned)
+
+Full plan: `docs/plans/v0.8-non-pmid-sources.md` (CEO-reviewed + codex-reviewed 2026-05-19). Phased into 3 PRs: PR1 URL/DOI/PMC ingest + schema rebuild + Telegram replies; PR2 PDF text + scanned-PDF Vision OCR; PR3 RSS/JSON API + cross-day NCT dedup. Hard constraint: summarize and discard, never store PDFs or copyrighted figures.
+
+Deferred sub-items surfaced during CEO review (not in the v0.8 PRs):
+
+- **Preprint detection + badge + verdict cap (E5).** Detect medRxiv/bioRxiv/Research Square + DOI prefix 10.1101; set `is_preprint`; render a "PREPRINT — not peer-reviewed" badge; cap preprint verdicts at `early-signal` in VOICE.md. Clinical-safety: a subspecialist must never mistake a preprint for peer-reviewed. (S effort, P2)
+- **Email-forwarding from PubMed alerts.** Curator forwards alert emails; bot polls via Gmail OAuth, extracts paper URLs, runs them through v0.8 ingestion. The 10-star "curator does nothing" version. Supersedes the old "Gmail OAuth polling" v0.6 item. (XL effort, P3)
+- **Conference URL auto-detect.** Recognize ASCO/ESMO/ASTRO/AACR URL patterns and auto-apply the conference tag on ingest. (S effort, P3)
+- **Per-source rate-limit messaging.** Tell the curator via Telegram when an ingest is stuck on an upstream rate limit (NCBI, Crossref). (S effort, P3)
+- **Multi-curator mode.** Reserve `curator_id` on bookmarks/papers so multiple curators can DM the same bot and their sources aggregate. (M effort, P3)
 
 ## v0.7+ — entity resolution
 
