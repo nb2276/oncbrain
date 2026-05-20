@@ -2,12 +2,28 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] — v0.8 PR3: RSS feed + JSON API + cross-day NCT dedup
+## [0.8.0] — 2026-05-19
+
+First release cut since 0.5.0. Everything below shipped to `main` and went live
+incrementally; this stamps the version. Three feature lines: live search
+(v0.6), the standard-of-care verdict (v0.7), and non-PMID + PDF source
+ingestion with an RSS/JSON API (v0.8, built as PR1-3). Grouped by feature,
+newest first.
+
+### Discoverability + docs (post-v0.8)
+
+- RSS auto-discovery `<link>` in every page `<head>`, so a reader finds
+  `/feed.xml` from the site URL. New public `/api` docs page covering the feed +
+  JSON endpoints.
+- About page rewritten for the current multi-source app, with curator
+  attribution (Nick Boehling, MD, @nb2276) moved up to the header by the title.
+
+### RSS feed + JSON API + cross-day NCT dedup (v0.8 PR3)
 
 The digest becomes a content backbone other apps can consume, and the bot
 nudges you when you re-bookmark an already-covered trial. Completes the v0.8
-plan (`docs/plans/v0.8-non-pmid-sources.md`). All output is static — generated
-at Astro build time, same deploy pipeline.
+plan (`docs/plans/v0.8-non-pmid-sources.md`). All output is static, generated
+at Astro build time.
 
 ### Added — output (E1)
 
@@ -57,7 +73,7 @@ at Astro build time, same deploy pipeline.
 - v0.8 is now feature-complete across PR1–PR3; `package.json` still reads 0.5.0
   pending a release bump (handled via the ship workflow).
 
-## [Unreleased] — v0.8 PR2: PDF ingestion + private vault library
+### PDF ingestion + private vault library (v0.8 PR2)
 
 Forward the bot a PDF and it summarizes into the digest AND files the full
 text into your Obsidian vault. Builds on PR1's schema + reply work. Plan +
@@ -125,7 +141,7 @@ reviews: `docs/plans/v0.8-non-pmid-sources.md`.
 - Not yet exercised against real Telegram PDF traffic (needs a live DM).
 - PR3 (RSS/API + cross-day NCT dedup) still pending.
 
-## [Unreleased] — v0.8 PR1: non-PMID URL ingestion
+### Non-PMID URL ingestion (v0.8 PR1)
 
 DM the bot a DOI, journal-page, or PMC URL and it ingests as a paper. No
 more PubMed-detour to find a PMID first. Plan + reviews:
@@ -180,7 +196,17 @@ more PubMed-detour to find a PMID first. Plan + reviews:
 - PDF ingestion + scanned-PDF OCR (PR2); RSS/API + cross-day dedup (PR3).
 - Conference URL auto-detect, preprint badge, email-forwarding — TODOS.
 
-## [Unreleased] — live search
+### Analyst verdict + comparator promotion (v0.7)
+
+- Per-study standard-of-care verdict pill at the top of each study card
+  (practice-changing / challenges-soc / confirmatory / early-signal /
+  methodologically-limited / unclear) with a one-line rationale and the
+  eligibility audience, for 60-second triage. Comparator (🔗) bullets promoted
+  into a dedicated "vs leading data" callout. Author name/handle surfaced on
+  source cards. Verdict calibration hardened with VOICE.md maturity gates
+  (single-arm / interim / post-hoc caps) after codex review.
+
+### Live search (v0.6)
 
 Client-side live search on the home page. The curator scans across days; as the archive grows past ~10 dates, "browse by date" stops scaling.
 
