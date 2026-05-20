@@ -2,8 +2,11 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   openDb,
   saveBookmark,
+  savePaper,
+  saveSlideUpload,
   listBookmarks,
   listBookmarkDates,
+  listAllSourceDates,
   dominantConferenceForDate,
   deleteBookmark,
   updateBookmarkFetched,
@@ -140,6 +143,26 @@ describe('db', () => {
 
     it('returns empty array when no bookmarks', () => {
       expect(listBookmarkDates(db)).toEqual([]);
+    });
+  });
+
+  describe('listAllSourceDates', () => {
+    it('unions distinct dates across tweets, papers, and slides (reverse-chron)', () => {
+      saveBookmark(db, { url: 'https://x.com/a/status/1', bookmark_date: '2026-05-18' });
+      savePaper(db, { doi: '10.1056/clobber', title: 'A paper', bookmark_date: '2026-05-20' });
+      saveSlideUpload(db, {
+        file_path: 'data/slide-photos/2026-05-19/x.jpg',
+        file_hash: 'deadbeef',
+        mime_type: 'image/jpeg',
+        bookmark_date: '2026-05-19',
+      });
+      // A paper-only / slide-only day must appear, unlike listBookmarkDates.
+      expect(listAllSourceDates(db)).toEqual(['2026-05-20', '2026-05-19', '2026-05-18']);
+      expect(listBookmarkDates(db)).toEqual(['2026-05-18']);
+    });
+
+    it('returns empty array when there are no sources', () => {
+      expect(listAllSourceDates(db)).toEqual([]);
     });
   });
 

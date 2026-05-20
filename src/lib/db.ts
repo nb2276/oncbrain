@@ -582,6 +582,21 @@ export function listBookmarkDates(db: Database.Database): string[] {
   return rows.map((r) => r.bookmark_date);
 }
 
+// All distinct dates that have ANY source (tweet, paper, or slide). backfill
+// uses this so paper-only / slide-only days (v0.5+ multi-source) aren't skipped
+// the way listBookmarkDates (tweets only) would skip them.
+export function listAllSourceDates(db: Database.Database): string[] {
+  const rows = db
+    .prepare(
+      `SELECT bookmark_date AS d FROM bookmarks
+       UNION SELECT bookmark_date AS d FROM papers
+       UNION SELECT bookmark_date AS d FROM slide_uploads
+       ORDER BY d DESC`,
+    )
+    .all() as { d: string }[];
+  return rows.map((r) => r.d);
+}
+
 // For a given date, which conference (if any) had ALL its bookmarks tagged?
 // Used by the digest builder to attach a conference badge when the day is
 // unambiguously about one meeting. Returns null when bookmarks span multiple

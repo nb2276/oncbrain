@@ -20,15 +20,29 @@ that.
   `--edit=<slug> --tldr=.. --name=.. --nct=..`, `--top-line`/`--digest-tldr`,
   `--clear`. Complex edits (bullets, tables) are hand-edited in the JSON file.
 
+### Changed — study bullet density (less wall-of-text)
+
+- VOICE.md + the Phase 2 study-agent prompt now favor several short bullets over
+  dense ones: one idea per bullet, typically 4-9 bullets, flat strings ≤20 words,
+  related facts grouped under `{text, subdetails}`. This decomposes the facts the
+  source already gives; it does not pad or fabricate (the no-fabrication rule
+  still wins). All committed digests reprocessed.
+
 ### Fixed — paper ingestion
 
 - Bot-blocked publisher pages (Elsevier/ScienceDirect 403, surfaced as
   `SsrfError`) now retry via a DOI or PMID embedded in the URL or curator
-  message — Crossref/PubMed don't bot-block — before giving up.
+  message (Crossref/PubMed don't bot-block) before giving up.
 - Unrecoverable failures (paywall/403 with no usable identifier, non-PDF file,
   unrecognized target) are parked as `failed_permanent`: excluded from the
   enrichment queue so they aren't retried, and the curator stops getting
   re-pinged the same error on every enrich run.
+
+### Fixed — backfill skipped paper/slide-only days
+
+- `build:day --backfill` now unions dates across bookmarks, papers, and slides
+  (`listAllSourceDates`), so a paper-only or slide-only day (v0.5+ multi-source)
+  is reprocessed instead of silently skipped.
 
 ## [0.8.0] — 2026-05-19
 

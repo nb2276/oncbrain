@@ -21,6 +21,7 @@ import {
   openDb,
   listBookmarks,
   listBookmarkDates,
+  listAllSourceDates,
   listPapers,
   listSlideUploads,
   updateBookmarkFetched,
@@ -482,7 +483,7 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
 
 function pickDatesToBuild(db: ReturnType<typeof openDb>, args: Args): string[] {
   if (args.backfill) {
-    const dates = listBookmarkDates(db);
+    const dates = listAllSourceDates(db);
     if (args.conferenceSlug) {
       return dates.filter((d) => dominantConferenceForDate(db, d) === args.conferenceSlug);
     }

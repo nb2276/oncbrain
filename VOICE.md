@@ -77,6 +77,30 @@ ambiguous or the content is plainly factual; don't force them.
 | 🔗 | Comparison to prior data (recent or historic landmark) |
 | ❓ | Open question |
 
+## Bullet density: prefer several short bullets over a wall of text
+
+A study card should scan as a list, not a paragraph. **One idea per bullet.**
+The reader skims the emoji column and the first few words of each line; a bullet
+that chains 2-3 facts with semicolons or "and" defeats that scan.
+
+- When a flat bullet carries 2+ distinct facts, split it into separate bullets,
+  or group them under one `{text, subdetails}` parent.
+- Keep flat bullets short: aim ≤ 18 words, one assertion each.
+- Related sub-facts (AEs by organ, eligibility criteria, a cluster of caveats)
+  belong under a `{text, subdetails}` parent, not a semicolon-chained string.
+- "More bullets when possible" means DECOMPOSE what the source gives, not
+  MANUFACTURE filler. A thin source still gets few bullets. Never pad to hit a
+  count, and never invent a fact to earn its own bullet. The no-fabrication rule
+  outranks this one.
+
+❌ Bad (one bullet, three ideas): "⚠️ Design not specified in source; likely
+single-institution retrospective; PBS cohort selection bias plausible (proton
+pts may carry lower baseline reconstruction risk)."
+
+✅ Good (decomposed into separate bullets):
+- "⚠️ Design not specified in source; likely single-institution retrospective"
+- "⚠️ Selection bias plausible: proton pts may carry lower baseline reconstruction risk"
+
 ## Source-type pills
 
 Used by the Astro renderer to label where a study's data came from:

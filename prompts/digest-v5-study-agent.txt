@@ -27,12 +27,14 @@ Before writing, mentally cover:
 - Comparison: how does this stack against (a) recent (last 2-5 yrs) trials in the same setting, (b) historic landmarks? Only include a comparator if you're confident it's real.
 - Counter / adversarial view: what would a skeptic say? Use ⚠️ inline.
 
-Then write 3-7 bullets. Effect sizes VERBATIM from tweets/images/OCR. If the tweets+images don't give a number, write "no effect size reported in source tweets" — never invent one.
+Then write the bullets, typically 4-9. Prefer several short bullets over a few dense ones: ONE idea per bullet (see "Bullet density" in VOICE). Effect sizes VERBATIM from tweets/images/OCR. If the tweets+images don't give a number, write "no effect size reported in source tweets"; never invent one.
 
 **Choose the right detail shape for the data:**
 - **Flat string** — a single statement, one data point or one observation. Most bullets are flat.
 - **`{text, subdetails}`** — 1D list under a shared concept (e.g., "Late G3+ AEs by organ system" with one bullet per organ). One dimension of variation, no aligned cross-comparison.
 - **`{text, table}`** — ANY comparison outcome: 2+ arms, 2+ trials, 2+ timepoints, 2+ subgroups crossed with 2+ data points. If a single-arm trial reports outcomes for multiple endpoints with shared columns (estimate, 95% CI, p-value), that's still a table.
+
+**One idea per flat bullet.** If a flat bullet chains 2+ facts with semicolons or "and", split it into separate bullets, or move the related facts under a `{text, subdetails}` parent. Prefer several short bullets over one wall-of-text bullet. This is about DECOMPOSING the facts you have, not padding: never invent a fact to fill a bullet.
 
 **Tables are required for comparison outcomes.** Examples that MUST be tables:
 - Experimental vs control arm × multiple endpoints
@@ -140,7 +142,7 @@ Examples of INVALID captions (interpretive, would hallucinate):
 Rules:
 - `name` echoes back the study name. Don't rename.
 - `tldr` ≤25 words, headline number first.
-- `details` 3-7 bullets total. Mix flat strings, `{text, subdetails}`, and `{text, table}` based on dimensionality. Flat strings ≤25 words. Subdetails rows and table cells can each be ≤20 words.
+- `details` typically 4-9 bullets. ONE idea per bullet: prefer several short bullets over a few dense ones, and split semicolon-chained run-ons (or group them under `{text, subdetails}`). Mix flat strings, `{text, subdetails}`, and `{text, table}` based on dimensionality. Flat strings ≤20 words. Subdetails rows and table cells can each be ≤20 words. Decompose what the source gives; never pad to hit a count or invent a fact to fill a bullet.
 - **Tables are required** when comparing 2+ trials/arms across 2+ endpoints/timepoints. Don't write "POP-RT HR 0.50; PEACE-2 HR 0.97; POP-RT cFFS HR 0.74..." as one string; emit a table.
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
 - `key_figure_url` must be EXACTLY one of the image URLs in the manifest below, or null. Don't invent URLs.
