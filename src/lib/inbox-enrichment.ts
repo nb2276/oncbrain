@@ -19,8 +19,13 @@ import {
   type InboxItem,
 } from './db.ts';
 import { fetchTweet, TweetFetchError } from './twitter-fetch.ts';
-import { extractCuratorNote } from './telegram-ingest.ts';
+import { extractCuratorNote, sendMessage } from './telegram-ingest.ts';
 import { fetchPubMedPaper, PubMedClientError } from './pubmed-client.ts';
+import { classifyPaperTarget } from './paper-url.ts';
+import { ssrfSafeFetchText, SsrfError } from './ssrf-fetch.ts';
+import { extractPaperMeta, MetaNotFoundError } from './html-meta.ts';
+import { fetchCrossrefPaper, CrossrefError } from './crossref-client.ts';
+import type { NewPaper } from './db.ts';
 import {
   downloadTelegramFile,
   saveSlidePhotoBytes,
@@ -137,46 +142,179 @@ async function enrichSlideItem(
   }
 }
 
+// v0.8: raw_target can be a bare PMID (legacy ingest), a DOI, a PMC/journal
+// URL, or a bare DOI. Resolution runs HERE (at enrichment) so HTTP failures
+// retry instead of dropping the message (eng-review decision 1). Branches:
+//   PMID → PubMed efetch (existing)
+//   DOI  → Crossref (abstract often null)
+//   URL  → SSRF-safe fetch → Highwire meta → PMID? PubMed : DOI? Crossref :
+//          save from meta alone
 async function enrichPaperItem(
   db: Database.Database,
   item: InboxItem,
 ): Promise<EnrichmentResult> {
-  const pmid = item.raw_target;
   const note = item.raw_message_text ? extractCuratorNote(item.raw_message_text) : null;
+  const target = classifyPaperTarget(item.raw_target);
+  if (!target) {
+    await replyToCurator(item, `Couldn't recognize a paper in: ${item.raw_target.slice(0, 80)}`);
+    return { status: 'failed', reason: `unrecognized paper target: ${item.raw_target}` };
+  }
 
-  let fetched;
+  let saveInput: NewPaper;
   try {
-    fetched = await fetchPubMedPaper(pmid);
+    saveInput =
+      target.kind === 'pmid'
+        ? await resolveFromPubMed(target.value, item, note)
+        : target.kind === 'doi'
+          ? await resolveFromDoi(target.value, item, note)
+          : await resolveFromUrl(
+              target.kind === 'pmc'
+                ? `https://www.ncbi.nlm.nih.gov/pmc/articles/${target.value}/`
+                : target.value,
+              item,
+              note,
+            );
   } catch (err) {
-    if (err instanceof PubMedClientError) {
-      // Retryable kinds (rate_limit, network) leave the inbox item to retry
-      // on next enrich:inbox call. Permanent kinds (not_found, parse) still
-      // mark failed — there's no recoverable path.
-      return { status: 'failed', reason: `${err.kind}: ${err.message}` };
+    const { retryable, message } = classifyResolveError(err);
+    // Only reply on a PERMANENT failure — a transient network blip retries
+    // silently, and double-replying on every retry would spam the curator.
+    if (!retryable) {
+      await replyToCurator(item, `Couldn't ingest that paper: ${message}`);
     }
-    return { status: 'failed', reason: `unexpected pubmed error: ${(err as Error).message}` };
+    return { status: 'failed', reason: message };
   }
 
   try {
-    const r = savePaper(db, {
-      pmid: fetched.metadata.pmid,
-      doi: fetched.metadata.doi,
-      pmc_id: fetched.metadata.pmc_id,
-      title: fetched.metadata.title,
-      authors_json: JSON.stringify(fetched.metadata.authors),
-      journal: fetched.metadata.journal,
-      pub_date: fetched.metadata.pub_date,
-      abstract: fetched.abstract,
-      fulltext_excerpt_md: fetched.fulltext_excerpt_md,
-      mesh_terms_json: JSON.stringify(fetched.metadata.mesh_terms),
-      bookmark_date: item.bookmark_date,
-      curator_note: note,
-      inbox_item_id: item.id,
-      fetched_via: 'pubmed_efetch',
-    });
+    const r = savePaper(db, saveInput);
+    await replyToCurator(
+      item,
+      `Got it: ${saveInput.title}${saveInput.abstract ? '' : ' (no abstract available)'}. Appears in the next digest.`,
+    );
     return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
   } catch (err) {
     return { status: 'failed', reason: `paper insert failed: ${(err as Error).message}` };
+  }
+}
+
+async function resolveFromPubMed(
+  pmid: string,
+  item: InboxItem,
+  note: string | null,
+): Promise<NewPaper> {
+  const fetched = await fetchPubMedPaper(pmid);
+  return {
+    pmid: fetched.metadata.pmid,
+    doi: fetched.metadata.doi,
+    pmc_id: fetched.metadata.pmc_id,
+    source_url: item.raw_target.startsWith('http') ? item.raw_target : null,
+    title: fetched.metadata.title,
+    authors_json: JSON.stringify(fetched.metadata.authors),
+    journal: fetched.metadata.journal,
+    pub_date: fetched.metadata.pub_date,
+    abstract: fetched.abstract,
+    fulltext_excerpt_md: fetched.fulltext_excerpt_md,
+    mesh_terms_json: JSON.stringify(fetched.metadata.mesh_terms),
+    bookmark_date: item.bookmark_date,
+    curator_note: note,
+    inbox_item_id: item.id,
+    fetched_via: 'pubmed_efetch',
+  };
+}
+
+async function resolveFromDoi(
+  doi: string,
+  item: InboxItem,
+  note: string | null,
+): Promise<NewPaper> {
+  const p = await fetchCrossrefPaper(doi);
+  if (!p.title) throw new CrossrefError('Crossref returned no title', 'parse');
+  return {
+    doi: p.doi,
+    source_url: item.raw_target.startsWith('http') ? item.raw_target : null,
+    title: p.title,
+    authors_json: JSON.stringify(p.authors.map((a) => ({ name: a.name }))),
+    journal: p.journal,
+    pub_date: p.pub_date,
+    abstract: p.abstract, // often null — handled downstream
+    bookmark_date: item.bookmark_date,
+    curator_note: note,
+    inbox_item_id: item.id,
+    fetched_via: 'crossref',
+  };
+}
+
+async function resolveFromUrl(
+  url: string,
+  item: InboxItem,
+  note: string | null,
+): Promise<NewPaper> {
+  const html = await ssrfSafeFetchText(url);
+  const meta = extractPaperMeta(html); // throws MetaNotFoundError if no anchor
+  // Prefer PubMed (richest) when the page exposed a PMID, then Crossref for a
+  // DOI, then fall back to the page's own meta tags.
+  if (meta.pmid) {
+    try {
+      return { ...(await resolveFromPubMed(meta.pmid, item, note)), source_url: url };
+    } catch {
+      // PubMed failed but we still have page meta — fall through.
+    }
+  }
+  if (meta.doi) {
+    try {
+      return { ...(await resolveFromDoi(meta.doi, item, note)), source_url: url };
+    } catch {
+      // Crossref failed but we still have page meta — fall through.
+    }
+  }
+  if (!meta.doi && !meta.pmid) {
+    // Need at least one identifier for the papers CHECK + dedup key.
+    throw new MetaNotFoundError('page had a title but no DOI or PMID to key on');
+  }
+  return {
+    pmid: meta.pmid,
+    doi: meta.doi,
+    source_url: url,
+    title: meta.title ?? '(untitled)',
+    authors_json: JSON.stringify(meta.authors.map((name) => ({ name }))),
+    journal: meta.journal,
+    pub_date: meta.pub_date,
+    abstract: null,
+    bookmark_date: item.bookmark_date,
+    curator_note: note,
+    inbox_item_id: item.id,
+    fetched_via: 'html_meta',
+  };
+}
+
+// Map a resolution error to {retryable, message}. Network/rate-limit kinds
+// retry on the next enrich:inbox run; everything else is permanent and earns
+// a curator-facing E3 reply.
+function classifyResolveError(err: unknown): { retryable: boolean; message: string } {
+  if (err instanceof PubMedClientError) {
+    return { retryable: err.kind === 'network' || err.kind === 'rate_limit', message: `${err.kind}: ${err.message}` };
+  }
+  if (err instanceof CrossrefError) {
+    return { retryable: err.kind === 'network' || err.kind === 'rate_limit', message: `crossref ${err.kind}: ${err.message}` };
+  }
+  if (err instanceof SsrfError) {
+    // A blocked/refused fetch won't get better on retry — permanent.
+    return { retryable: false, message: `fetch refused: ${err.message}` };
+  }
+  if (err instanceof MetaNotFoundError) {
+    return { retryable: false, message: 'no paper metadata on that page (paywall or non-article URL?)' };
+  }
+  return { retryable: false, message: `unexpected: ${(err as Error).message}` };
+}
+
+// Best-effort E2/E3 reply to the curator's Telegram chat. Never throws — a
+// failed reply must not fail the enrichment.
+async function replyToCurator(item: InboxItem, text: string): Promise<void> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token || item.telegram_chat_id == null) return;
+  try {
+    await sendMessage(token, item.telegram_chat_id, text);
+  } catch {
+    // swallow — the digest still gets the paper; the reply is a courtesy
   }
 }
 

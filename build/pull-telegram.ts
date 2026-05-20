@@ -29,6 +29,7 @@ import {
   messageOf,
   unixToLocalDate,
 } from '../src/lib/telegram-ingest.ts';
+import { extractPaperUrls } from '../src/lib/paper-url.ts';
 
 const OFFSET_KEY = 'telegram_offset';
 
@@ -86,12 +87,19 @@ async function main() {
     const entities = msg.entities ?? msg.caption_entities ?? [];
     const date = unixToLocalDate(msg.date);
 
-    // v0.5 Phase C: tweet URLs + PubMed PMIDs + slide photo attachments.
+    // v0.5: tweet URLs + PubMed PMIDs + slide photos.
+    // v0.8: also DOI/journal/PMC URLs (resolved at enrichment, not here).
     const tweetUrls = extractTweetUrls(text, entities);
     const paperPmids = extractPaperPmids(text, entities);
+    const paperUrls = extractPaperUrls(text, entities);
     const slidePhoto = extractSlidePhoto(msg);
 
-    if (tweetUrls.length === 0 && paperPmids.length === 0 && !slidePhoto) {
+    if (
+      tweetUrls.length === 0 &&
+      paperPmids.length === 0 &&
+      paperUrls.length === 0 &&
+      !slidePhoto
+    ) {
       skippedNoTarget++;
       continue;
     }
@@ -145,6 +153,34 @@ async function main() {
         }
       } catch (err) {
         console.warn(`  failed to inbox PMID:${pmid}: ${(err as Error).message}`);
+      }
+    }
+
+    // v0.8: DOI/journal/PMC URLs. Stored raw as type=paper; classified +
+    // resolved (fetch + meta + PubMed/Crossref) at enrich:inbox time.
+    for (const url of paperUrls) {
+      if (args.dryRun) {
+        console.log(`  [dry-run] would inbox: msg=${msg.message_id} type=paper url=${url}`);
+        savedPapers++;
+        continue;
+      }
+      try {
+        const r = saveInboxItem(db, {
+          type: 'paper',
+          raw_target: url,
+          raw_message_text: text || null,
+          telegram_msg_id: msg.message_id,
+          telegram_chat_id: msg.chat?.id ?? null,
+          bookmark_date: date,
+        });
+        if (r.created) {
+          console.log(`  inbox #${r.id}: paper ${date} ${url}`);
+          savedPapers++;
+        } else {
+          skippedDuplicate++;
+        }
+      } catch (err) {
+        console.warn(`  failed to inbox ${url}: ${(err as Error).message}`);
       }
     }
 

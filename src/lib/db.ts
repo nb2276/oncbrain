@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
-import { existsSync } from 'node:fs';
+import { existsSync, copyFileSync } from 'node:fs';
+import { normalizeDoi } from './doi.ts';
 
 export type Bookmark = {
   id: number;
@@ -87,9 +88,10 @@ export type NewInboxItem = {
 // a union. Until then, papers accumulate but aren't rendered.
 export type Paper = {
   id: number;
-  pmid: string; // canonical: digits only, no "PMID:" prefix
+  pmid: string | null; // v0.8: nullable — DOI-only papers have no PMID
   doi: string | null;
   pmc_id: string | null; // e.g., "PMC1234567"; nullable when no OA fulltext
+  source_url: string | null; // v0.8: the URL the curator submitted (audit trail)
   title: string;
   authors_json: string | null; // JSON array of {name, affiliation?}
   journal: string | null;
@@ -101,14 +103,15 @@ export type Paper = {
   conference_slug: string | null;
   curator_note: string | null;
   inbox_item_id: number | null;
-  fetched_via: 'pubmed_efetch' | 'pending' | 'failed';
+  fetched_via: 'pubmed_efetch' | 'crossref' | 'html_meta' | 'pending' | 'failed';
   created_at: number;
 };
 
 export type NewPaper = {
-  pmid: string;
+  pmid?: string | null; // v0.8: nullable — at least one of pmid/doi required
   doi?: string | null;
   pmc_id?: string | null;
+  source_url?: string | null;
   title: string;
   authors_json?: string | null;
   journal?: string | null;
@@ -120,7 +123,7 @@ export type NewPaper = {
   conference_slug?: string | null;
   curator_note?: string | null;
   inbox_item_id?: number | null;
-  fetched_via?: 'pubmed_efetch' | 'pending' | 'failed';
+  fetched_via?: 'pubmed_efetch' | 'crossref' | 'html_meta' | 'pending' | 'failed';
 };
 
 // v0.5 Phase C: slide photos uploaded via Telegram bot. Stored as files
@@ -195,11 +198,16 @@ CREATE INDEX IF NOT EXISTS idx_bookmarks_date ON bookmarks(bookmark_date);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_conf ON bookmarks(conference_slug);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_created ON bookmarks(created_at);
 
+-- v0.8: pmid is nullable (DOI-only papers exist). Uniqueness moved from an
+-- inline pmid UNIQUE to two partial unique indexes (pmid, lower(doi)), and a
+-- CHECK guarantees at least one identifier. New DBs are born in this shape;
+-- existing DBs are rebuilt by migratePapersAllowDoiOnly().
 CREATE TABLE IF NOT EXISTS papers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  pmid TEXT NOT NULL UNIQUE,
+  pmid TEXT,
   doi TEXT,
   pmc_id TEXT,
+  source_url TEXT,
   title TEXT NOT NULL,
   authors_json TEXT,
   journal TEXT,
@@ -212,9 +220,12 @@ CREATE TABLE IF NOT EXISTS papers (
   curator_note TEXT,
   inbox_item_id INTEGER,
   fetched_via TEXT NOT NULL DEFAULT 'pending',
-  created_at INTEGER NOT NULL
+  created_at INTEGER NOT NULL,
+  CHECK (pmid IS NOT NULL OR doi IS NOT NULL)
 );
 CREATE INDEX IF NOT EXISTS idx_papers_date ON papers(bookmark_date);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_papers_pmid ON papers(pmid) WHERE pmid IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_papers_doi ON papers(lower(doi)) WHERE doi IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_papers_inbox ON papers(inbox_item_id);
 
 CREATE TABLE IF NOT EXISTS slide_uploads (
@@ -272,7 +283,84 @@ export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): D
   if (!isNew) detectAndGuardOldSchema(db);
   migrateAddTweetHtml(db);
   migrateAddImageOcrTexts(db);
+  migratePapersAllowDoiOnly(db, path);
   return db;
+}
+
+// v0.8: the papers table moves from `pmid TEXT NOT NULL UNIQUE` to a
+// nullable pmid + partial unique indexes on pmid and lower(doi) + a CHECK,
+// so DOI-only papers (preprints, non-MEDLINE journals) can be stored.
+//
+// SQLite can't ALTER away NOT NULL/UNIQUE in place, so this is a table
+// rebuild (the documented SQLite procedure). Detection: the old table has
+// pmid with notnull=1. Idempotent: once rebuilt, pmid notnull=0 so it
+// no-ops. A backup is written first because DROP TABLE is destructive and
+// the DB holds the only copy of un-built source data.
+//
+// No SQL foreign keys reference papers (inbox_item_id is a plain column), so
+// there's no cascade dance — but we still wrap the rebuild in a transaction.
+function migratePapersAllowDoiOnly(db: Database.Database, dbPath: string): void {
+  const cols = db.prepare('PRAGMA table_info(papers)').all() as {
+    name: string;
+    notnull: number;
+  }[];
+  const pmidCol = cols.find((c) => c.name === 'pmid');
+  // Already migrated (pmid nullable) or table somehow absent → nothing to do.
+  if (!pmidCol || pmidCol.notnull === 0) return;
+
+  // Back up the DB before a destructive rebuild (skip for in-memory tests).
+  if (dbPath !== ':memory:' && existsSync(dbPath)) {
+    const stamp = new Date().toISOString().slice(0, 10);
+    try {
+      copyFileSync(dbPath, `${dbPath}.bak-${stamp}`);
+    } catch {
+      // Backup is best-effort; the rebuild itself is transactional.
+    }
+  }
+
+  const tx = db.transaction(() => {
+    db.exec(`
+      CREATE TABLE papers_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pmid TEXT,
+        doi TEXT,
+        pmc_id TEXT,
+        source_url TEXT,
+        title TEXT NOT NULL,
+        authors_json TEXT,
+        journal TEXT,
+        pub_date TEXT,
+        abstract TEXT,
+        fulltext_excerpt_md TEXT,
+        mesh_terms_json TEXT,
+        bookmark_date TEXT NOT NULL,
+        conference_slug TEXT,
+        curator_note TEXT,
+        inbox_item_id INTEGER,
+        fetched_via TEXT NOT NULL DEFAULT 'pending',
+        created_at INTEGER NOT NULL,
+        CHECK (pmid IS NOT NULL OR doi IS NOT NULL)
+      );
+      INSERT INTO papers_new
+        (id, pmid, doi, pmc_id, source_url, title, authors_json, journal,
+         pub_date, abstract, fulltext_excerpt_md, mesh_terms_json,
+         bookmark_date, conference_slug, curator_note, inbox_item_id,
+         fetched_via, created_at)
+      SELECT
+        id, pmid, doi, pmc_id, NULL, title, authors_json, journal,
+        pub_date, abstract, fulltext_excerpt_md, mesh_terms_json,
+        bookmark_date, conference_slug, curator_note, inbox_item_id,
+        fetched_via, created_at
+      FROM papers;
+      DROP TABLE papers;
+      ALTER TABLE papers_new RENAME TO papers;
+      CREATE INDEX idx_papers_date ON papers(bookmark_date);
+      CREATE INDEX idx_papers_inbox ON papers(inbox_item_id);
+      CREATE UNIQUE INDEX idx_papers_pmid ON papers(pmid) WHERE pmid IS NOT NULL;
+      CREATE UNIQUE INDEX idx_papers_doi ON papers(lower(doi)) WHERE doi IS NOT NULL;
+    `);
+  });
+  tx();
 }
 
 // Non-destructive ALTER for v0.2.0: existing oncbrain.db files predate the
@@ -613,6 +701,14 @@ export function markInboxFailed(db: Database.Database, id: number, error: string
 // Papers (v0.5 Phase B)
 // ────────────────────────────────────────────────────────────────────────────
 
+// v0.8: papers are keyed on PMID OR normalized DOI. Dedup + merge:
+//   - existing row with same PMID → no-op (return it)
+//   - existing row with same normalized DOI → if the incoming paper carries
+//     a PMID the existing row lacks, UPDATE to attach it (DOI-only row that
+//     later gained a PMID); otherwise no-op
+//   - else INSERT
+// DOI normalization MUST go through normalizeDoi so the lookup matches the
+// lower(doi) unique index (eng-review decision 3).
 export function savePaper(
   db: Database.Database,
   p: NewPaper,
@@ -620,22 +716,47 @@ export function savePaper(
   if (!/^\d{4}-\d{2}-\d{2}$/.test(p.bookmark_date)) {
     throw new Error(`bookmark_date must be YYYY-MM-DD, got: ${p.bookmark_date}`);
   }
-  const existing = db.prepare('SELECT id FROM papers WHERE pmid = ?').get(p.pmid) as
-    | { id: number }
-    | undefined;
-  if (existing) return { id: existing.id, created: false };
+  const pmid = p.pmid ?? null;
+  const doi = normalizeDoi(p.doi);
+  if (!pmid && !doi) {
+    throw new Error('savePaper requires at least one of pmid or doi');
+  }
+
+  // 1. Match on PMID.
+  if (pmid) {
+    const byPmid = db.prepare('SELECT id FROM papers WHERE pmid = ?').get(pmid) as
+      | { id: number }
+      | undefined;
+    if (byPmid) return { id: byPmid.id, created: false };
+  }
+
+  // 2. Match on normalized DOI. Merge a newly-arrived PMID onto the row.
+  if (doi) {
+    const byDoi = db
+      .prepare('SELECT id, pmid FROM papers WHERE lower(doi) = ?')
+      .get(doi) as { id: number; pmid: string | null } | undefined;
+    if (byDoi) {
+      if (pmid && !byDoi.pmid) {
+        db.prepare('UPDATE papers SET pmid = ? WHERE id = ?').run(pmid, byDoi.id);
+      }
+      return { id: byDoi.id, created: false };
+    }
+  }
+
+  // 3. Insert.
   const result = db
     .prepare(
       `INSERT INTO papers
-       (pmid, doi, pmc_id, title, authors_json, journal, pub_date, abstract,
-        fulltext_excerpt_md, mesh_terms_json, bookmark_date, conference_slug,
-        curator_note, inbox_item_id, fetched_via, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (pmid, doi, pmc_id, source_url, title, authors_json, journal, pub_date,
+        abstract, fulltext_excerpt_md, mesh_terms_json, bookmark_date,
+        conference_slug, curator_note, inbox_item_id, fetched_via, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
-      p.pmid,
-      p.doi ?? null,
+      pmid,
+      doi,
       p.pmc_id ?? null,
+      p.source_url ?? null,
       p.title,
       p.authors_json ?? null,
       p.journal ?? null,

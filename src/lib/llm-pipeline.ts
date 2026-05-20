@@ -54,7 +54,7 @@ export type DigestInputTweet = {
 export type DigestInputPaper = {
   source_type: 'paper';
   id: number; // papers.id
-  pmid: string;
+  pmid: string | null; // v0.8: DOI-only papers have no PMID
   title: string;
   authors?: string[] | null;
   journal?: string | null;
@@ -104,7 +104,7 @@ function itemToTweetShape(item: DigestInputItem): DigestInputTweet {
   if (isTweet(item)) return { ...item, source_type: 'tweet' };
   if (isPaper(item)) {
     const parts: string[] = [];
-    parts.push(`[PAPER ${item.pmid}${item.doi ? ` doi:${item.doi}` : ''}]`);
+    parts.push(`[PAPER ${item.pmid ? `PMID:${item.pmid}` : item.doi ? `doi:${item.doi}` : '?'}]`);
     parts.push(`Title: ${item.title}`);
     if (item.authors && item.authors.length > 0) {
       parts.push(`Authors: ${item.authors.slice(0, 6).join('; ')}${item.authors.length > 6 ? ' et al.' : ''}`);

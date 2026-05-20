@@ -281,7 +281,7 @@ type DigestArtifact = {
   }>;
   papers?: Array<{
     id: number;
-    pmid: string;
+    pmid: string | null;
     doi: string | null;
     pmc_id: string | null;
     title: string;

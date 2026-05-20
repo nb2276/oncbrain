@@ -2,6 +2,61 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — v0.8 PR1: non-PMID URL ingestion
+
+DM the bot a DOI, journal-page, or PMC URL and it ingests as a paper. No
+more PubMed-detour to find a PMID first. Plan + reviews:
+`docs/plans/v0.8-non-pmid-sources.md` (CEO + codex + eng reviewed).
+
+### Added
+
+- **URL ingestion.** `pull-telegram` now detects DOI/journal/PMC URLs
+  (`extractPaperUrls` in `src/lib/paper-url.ts`) alongside tweet URLs and
+  PMIDs, storing them raw as `type='paper'` inbox items. Resolution runs
+  at enrichment, not ingest, so a journal-page timeout retries instead of
+  dropping the message (eng-review decision 1).
+- **Enrichment-time resolution.** `enrichPaperItem` classifies each
+  target and resolves: PMID → PubMed efetch; DOI → Crossref; journal/PMC
+  URL → SSRF-safe fetch → Highwire/OpenGraph meta → PMID (PubMed) or DOI
+  (Crossref) or page-meta fallback.
+- **`src/lib/ssrf-fetch.ts`** — SSRF-safe fetch: https-only, DNS-resolve +
+  reject private/loopback/link-local IPs (v4+v6, IPv4-mapped, numeric
+  encodings), per-hop redirect revalidation, 10s timeout, 5MB cap.
+- **`src/lib/crossref-client.ts`** — DOI-keyed metadata via Crossref REST,
+  polite-pool User-Agent. Abstracts are frequently absent (publishers
+  rarely deposit them) — ingest proceeds with title/authors and the digest
+  notes "no abstract available" rather than fabricating analysis.
+- **`src/lib/html-meta.ts`** — Highwire (`citation_*`) + OpenGraph meta
+  extraction from journal article pages.
+- **`src/lib/doi.ts`** — `normalizeDoi` (the single canonicalization used
+  by both the unique index and the dedup lookup), `extractDois`, `isBareDoi`.
+- **Telegram replies (E2/E3).** Confirmation on success ("Got it: <title>")
+  and named-reason rejection on permanent failure (paywall, no metadata,
+  unrecognized). Best-effort — a failed reply never fails the ingest.
+
+### Changed (schema)
+
+- **`papers` table rebuilt.** `pmid` is now nullable; uniqueness moved from
+  the inline `pmid UNIQUE` to two partial unique indexes (`pmid`,
+  `lower(doi)`) plus `CHECK (pmid IS NOT NULL OR doi IS NOT NULL)`. New
+  `source_url` column. `migratePapersAllowDoiOnly` runs the SQLite
+  table-rebuild for existing DBs (transactional, backs up to
+  `oncbrain.db.bak-<date>` first; no SQL FKs reference papers so no cascade
+  dance). `savePaper` keys on PMID-or-DOI and merges a late-arriving PMID
+  onto a DOI-only row instead of duplicating.
+
+### Engineering
+
+- 410 tests (was 339, +71): 3 CRITICAL suites (papers migration row-
+  preservation + idempotency, SSRF private-range rejection) plus doi /
+  paper-url / html-meta / crossref / savePaper-merge.
+- 0 new type errors (one pre-existing `source_ids` in obsidian-export.ts).
+
+### Not yet shipped (this PR)
+
+- PDF ingestion + scanned-PDF OCR (PR2); RSS/API + cross-day dedup (PR3).
+- Conference URL auto-detect, preprint badge, email-forwarding — TODOS.
+
 ## [Unreleased] — live search
 
 Client-side live search on the home page. The curator scans across days; as the archive grows past ~10 dates, "browse by date" stops scaling.

@@ -1,0 +1,122 @@
+import { describe, it, expect } from 'vitest';
+import { assertSafeUrl, isPrivateIP, ssrfSafeFetchText, SsrfError } from '../src/lib/ssrf-fetch.ts';
+
+// A fake DNS lookup so the guard tests don't hit the network. Maps hostnames
+// to controlled IPs.
+function fakeLookup(map: Record<string, string[]>) {
+  return async (host: string, _opts: { all: true }) => {
+    const ips = map[host];
+    if (!ips) throw new Error('ENOTFOUND');
+    return ips.map((address) => ({ address, family: address.includes(':') ? 6 : 4 }));
+  };
+}
+
+describe('isPrivateIP', () => {
+  it('flags loopback, private, link-local v4', () => {
+    for (const ip of ['127.0.0.1', '10.0.0.5', '192.168.1.1', '172.16.0.1', '169.254.1.1', '0.0.0.0', '100.64.0.1']) {
+      expect(isPrivateIP(ip), ip).toBe(true);
+    }
+  });
+  it('allows public v4', () => {
+    for (const ip of ['1.1.1.1', '140.82.112.3', '8.8.8.8']) {
+      expect(isPrivateIP(ip), ip).toBe(false);
+    }
+  });
+  it('flags v6 loopback, link-local, unique-local, mapped-private', () => {
+    for (const ip of ['::1', 'fe80::1', 'fc00::1', 'fd12::3', '::ffff:10.0.0.1']) {
+      expect(isPrivateIP(ip), ip).toBe(true);
+    }
+  });
+  it('allows public v6', () => {
+    expect(isPrivateIP('2606:4700:4700::1111')).toBe(false);
+  });
+  it('treats malformed input as unsafe', () => {
+    expect(isPrivateIP('not-an-ip')).toBe(true);
+    expect(isPrivateIP('999.1.1.1')).toBe(true);
+  });
+});
+
+describe('assertSafeUrl (CRITICAL SSRF guard)', () => {
+  const lk = fakeLookup({
+    'www.nejm.org': ['140.82.112.3'],
+    'evil.example.com': ['10.0.0.1'],
+    'rebind.example.com': ['1.1.1.1', '127.0.0.1'], // one public, one private → must reject
+  });
+
+  it('accepts an https URL resolving to a public IP', async () => {
+    await expect(assertSafeUrl('https://www.nejm.org/doi/full/10.1056/x', lk)).resolves.toBeUndefined();
+  });
+
+  it('rejects http (non-https)', async () => {
+    await expect(assertSafeUrl('http://www.nejm.org/x', lk)).rejects.toThrow(SsrfError);
+  });
+
+  it('rejects a host that resolves to a private IP', async () => {
+    await expect(assertSafeUrl('https://evil.example.com/x', lk)).rejects.toThrow(/private address/);
+  });
+
+  it('rejects if ANY resolved address is private (rebinding defense)', async () => {
+    await expect(assertSafeUrl('https://rebind.example.com/x', lk)).rejects.toThrow(/private address/);
+  });
+
+  it('rejects IPv4-literal hosts', async () => {
+    await expect(assertSafeUrl('https://127.0.0.1/x', lk)).rejects.toThrow(/IP-literal/);
+    await expect(assertSafeUrl('https://1.1.1.1/x', lk)).rejects.toThrow(/IP-literal/);
+  });
+
+  it('rejects IPv6-literal hosts', async () => {
+    await expect(assertSafeUrl('https://[::1]/x', lk)).rejects.toThrow(/IP-literal/);
+  });
+
+  it('rejects decimal/hex numeric hosts (encoded IPv4)', async () => {
+    // Node's URL parser canonicalizes integer/hex hosts to dotted-decimal
+    // (2130706433 → 127.0.0.1), so these trip the IP-literal guard. Either
+    // rejection reason is fine — the security property is that they're refused.
+    await expect(assertSafeUrl('https://2130706433/x', lk)).rejects.toThrow(SsrfError);
+    await expect(assertSafeUrl('https://0x7f000001/x', lk)).rejects.toThrow(SsrfError);
+  });
+
+  it('rejects a host that does not resolve', async () => {
+    await expect(assertSafeUrl('https://nonexistent.example.com/x', lk)).rejects.toThrow(SsrfError);
+  });
+
+  it('rejects malformed URLs', async () => {
+    await expect(assertSafeUrl('not a url', lk)).rejects.toThrow(SsrfError);
+  });
+});
+
+describe('ssrfSafeFetchText', () => {
+  const lk = fakeLookup({ 'www.nejm.org': ['140.82.112.3'], 'doi.org': ['1.1.1.1'] });
+
+  it('returns body text on a safe 200', async () => {
+    const fetchImpl = (async () =>
+      new Response('<html>ok</html>', { status: 200 })) as unknown as typeof fetch;
+    const out = await ssrfSafeFetchText('https://www.nejm.org/x', { fetchImpl, lookupImpl: lk });
+    expect(out).toBe('<html>ok</html>');
+  });
+
+  it('follows + revalidates a redirect, then rejects when the hop is unsafe', async () => {
+    // doi.org redirects to a private host — the second hop must be caught.
+    const lk2 = fakeLookup({ 'doi.org': ['1.1.1.1'], 'internal.example.com': ['10.0.0.1'] });
+    const fetchImpl = (async (url: string) => {
+      if (url.includes('doi.org')) {
+        return new Response('', { status: 302, headers: { location: 'https://internal.example.com/secret' } });
+      }
+      return new Response('should not reach', { status: 200 });
+    }) as unknown as typeof fetch;
+    await expect(
+      ssrfSafeFetchText('https://doi.org/10.1/x', { fetchImpl, lookupImpl: lk2 }),
+    ).rejects.toThrow(/private address/);
+  });
+
+  it('caps an oversized body', async () => {
+    const big = 'x'.repeat(100);
+    const fetchImpl = (async () => new Response(big, { status: 200 })) as unknown as typeof fetch;
+    const out = await ssrfSafeFetchText('https://www.nejm.org/x', {
+      fetchImpl,
+      lookupImpl: lk,
+      maxBodyBytes: 10,
+    });
+    expect(out.length).toBe(10);
+  });
+});
