@@ -195,22 +195,6 @@ for (const study of allStudiesOnDate) {
               </aside>
             )}
             <p class="study-tldr" set:html={linkifyCitations(study.tldr)} />
-            {/* Comparator before figure: codex review P2 caught the order
-                drift. A rad onc scanning wants "how does this compare to
-                current practice" before the visual detour into KM curves
-                or forest plots. */}
-            {(studyMeta.get(study)?.comparatorBullets.length ?? 0) > 0 && (
-              <section class="comparator-block">
-                <div class="comparator-label">vs leading data</div>
-                <ul class="comparator-list">
-                  {studyMeta.get(study)!.comparatorBullets.map((d) => (
-                    typeof d === 'string'
-                      ? <li set:html={linkifyCitations(stripComparatorEmoji(d))} />
-                      : <li set:html={linkifyCitations(stripComparatorEmoji(d.text))} />
-                  ))}
-                </ul>
-              </section>
-            )}
             {study.key_figure_url && isSafeImageUrl(study.key_figure_url) && (
               <figure class="study-figure">
                 <img
@@ -396,6 +380,21 @@ for (const study of allStudiesOnDate) {
                 </details>
               );
             })()}
+            {/* Comparator sits at the foot of the card, just above open
+                questions: read the study first, then "here's how it stacks
+                up against current practice" as the closing beat. */}
+            {(studyMeta.get(study)?.comparatorBullets.length ?? 0) > 0 && (
+              <section class="comparator-block">
+                <div class="comparator-label">vs leading data</div>
+                <ul class="comparator-list">
+                  {studyMeta.get(study)!.comparatorBullets.map((d) => (
+                    typeof d === 'string'
+                      ? <li set:html={linkifyCitations(stripComparatorEmoji(d))} />
+                      : <li set:html={linkifyCitations(stripComparatorEmoji(d.text))} />
+                  ))}
+                </ul>
+              </section>
+            )}
             {study.open_questions && study.open_questions.length > 0 && (
               <div class="open-questions study-open-questions">
                 <div class="section-label">Open questions</div>
