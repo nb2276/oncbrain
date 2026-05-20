@@ -198,6 +198,11 @@ export type DigestStudy = {
   // section for taxonomy and assignment rules. Older artifacts won't have
   // this; renderers should fall back to the bullet-only layout.
   verdict?: StudyVerdict;
+  // v0.8.1: unresolved questions this study raises, rendered as a separated
+  // block under the study card. Phase 2 (study agent) owns these now; older
+  // artifacts carry them at the site level (DigestSite.open_questions), which
+  // renderers fall back to.
+  open_questions?: string[] | null;
 };
 
 export type SocImplication =
@@ -868,6 +873,7 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     tweet_ids: cluster.tweet_ids,
     slug: cluster.slug,
     verdict: parseVerdict(root.verdict),
+    open_questions: parseOpenQuestions(root.open_questions),
   };
 }
 
@@ -902,6 +908,18 @@ export function parseVerdict(raw: unknown): StudyVerdict | undefined {
       ? audienceRaw.slice(0, 80).trimEnd()
       : audienceRaw;
   return { soc_implication: soc, rationale, audience };
+}
+
+// Parse the optional per-study open_questions (v0.8.1). Forgiving: trims, drops
+// empties, caps at 5. Returns null when absent/empty so renderers fall back to
+// the site-level list for older artifacts.
+export function parseOpenQuestions(raw: unknown): string[] | null {
+  if (!Array.isArray(raw)) return null;
+  const out = raw
+    .filter((q): q is string => typeof q === 'string' && q.trim().length > 0)
+    .map((q) => q.trim())
+    .slice(0, 5);
+  return out.length > 0 ? out : null;
 }
 
 // Caption validator. Multiple findings shape this:

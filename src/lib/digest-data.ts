@@ -41,6 +41,9 @@ export type DigestStudy = {
   // v0.7+ analyst verdict (see VOICE.md "SOC-implication verdict").
   // Optional — older artifacts won't have it.
   verdict?: StudyVerdict;
+  // v0.8.1: per-study open questions (Phase 2). Older artifacts carry these at
+  // the site level (DigestSite.open_questions); renderers fall back to that.
+  open_questions?: string[] | null;
 };
 
 export type SocImplication =

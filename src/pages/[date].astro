@@ -396,17 +396,27 @@ for (const study of allStudiesOnDate) {
                 </details>
               );
             })()}
+            {study.open_questions && study.open_questions.length > 0 && (
+              <div class="open-questions study-open-questions">
+                <div class="section-label">Open questions</div>
+                <ul>
+                  {study.open_questions.map((q) => (<li set:html={linkifyCitations(q)} />))}
+                </ul>
+              </div>
+            )}
           </div>
         ))}
 
-        {site.open_questions && site.open_questions.length > 0 && (
-          <div class="open-questions">
-            <div class="section-label">Open questions</div>
-            <ul>
-              {site.open_questions.map((q) => (<li set:html={linkifyCitations(q)} />))}
-            </ul>
-          </div>
-        )}
+        {!site.studies.some((s) => s.open_questions && s.open_questions.length > 0) &&
+          site.open_questions &&
+          site.open_questions.length > 0 && (
+            <div class="open-questions">
+              <div class="section-label">Open questions</div>
+              <ul>
+                {site.open_questions.map((q) => (<li set:html={linkifyCitations(q)} />))}
+              </ul>
+            </div>
+          )}
       </article>
     );
   })}
@@ -917,6 +927,16 @@ for (const study of allStudiesOnDate) {
   }
   .open-questions ul { margin: 0; padding-left: 1.2rem; line-height: 1.55; }
   .open-questions li { margin: 0.25rem 0; }
+  /* v0.8.1: per-study open questions render as a divider under the study card,
+     not a filled box, so they read as part of that study. */
+  .study-open-questions {
+    margin-top: 1rem;
+    padding: 0.6rem 0 0;
+    background: transparent;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+  }
+  .study-open-questions .section-label { color: var(--fg-muted); }
 
   @media (max-width: 600px) {
     .topline-body { font-size: 1.18rem; }

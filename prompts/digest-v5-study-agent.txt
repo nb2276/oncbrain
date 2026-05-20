@@ -68,7 +68,6 @@ Details should COMPLEMENT the caption, not duplicate it:
 - ✅ Subgroups not in the caption table
 - ✅ Cross-trial comparisons (vs prior landmark, vs concurrent trial)
 - ✅ Methodological critique (open-label, post-hoc, era effects)
-- ✅ Open questions / unresolved issues
 - ❌ Re-emitting the same comparison axes/values as a detail table
 - ❌ A first detail bullet that just restates one row of the caption table
 
@@ -115,8 +114,7 @@ Examples of INVALID captions (interpretive, would hallucinate):
       ]
     },
     "🔗 vs VISION (NEJM 2021): similar HR but pre-treated heavier here",
-    "⚠️ counter: 1° EP was composite (rPFS not OS); OS HR 0.87 not significant",
-    "❓ optimal sequencing vs cabazitaxel still open"
+    "⚠️ counter: 1° EP was composite (rPFS not OS); OS HR 0.87 not significant"
   ],
   "key_figure_url": "https://pbs.twimg.com/media/...jpg or null",
   "key_figure_caption": {
@@ -131,7 +129,11 @@ Examples of INVALID captions (interpretive, would hallucinate):
     "soc_implication": "confirmatory",
     "rationale": "Single-arm phase 2 in inoperable pts only; no randomised comparator vs partial nephrectomy. Consistent with prior SAFIR / STAR-TRK signals.",
     "audience": "Inoperable primary RCC, T1b-dominant, median age 77"
-  }
+  },
+  "open_questions": [
+    "Optimal sequencing vs cabazitaxel",
+    "Durability of response beyond 2 years"
+  ]
 }
 ```
 
@@ -143,6 +145,7 @@ Rules:
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
 - `key_figure_url` must be EXACTLY one of the image URLs in the manifest below, or null. Don't invent URLs.
 - `verdict` is REQUIRED. Pick `soc_implication` from the taxonomy in the VOICE block above (6 enums). When uncertain, default conservatively (prefer `unclear` over guessing; prefer `early-signal` or `confirmatory` over `practice-changing`). `rationale` ≤30 words and explains the VERDICT CHOICE (not the trial result). `audience` ≤80 chars, one-line eligibility gate, or null when applicability is too broad to compress.
+- `open_questions`: 0-3 short unresolved questions THIS study raises (sequencing, durability, generalizability, confirmatory trial needed). Terse noun phrases or questions, ≤15 words each. Put them HERE, not as ❓ bullets in `details`. Empty array `[]` if none.
 - `key_figure_caption` numeric-only, from OCR overlays only. Use the table form for comparison figures (2+ arms × multiple endpoints); flat string is acceptable only for non-comparison figures. Null if no OCR numbers available.
 - `nct` only if explicit in tweets/OCR. Format: "NCTxxxxxxxx" or null.
 

@@ -35,6 +35,7 @@ export type DigestArtifactForExport = {
         tweet_ids: number[];
         // v0.5+: typed source refs; renderer falls back to tweet_ids when absent.
         source_ids?: Array<{ type: 'tweet' | 'paper' | 'slide'; id: number }>;
+        open_questions?: string[] | null;
       }>;
       open_questions: string[] | null;
     }>;
@@ -326,9 +327,22 @@ function renderBody(artifact: DigestArtifactForExport): string {
         }
         lines.push('');
       }
+
+      // v0.8.1: per-study open questions, rendered under each study.
+      if (study.open_questions && study.open_questions.length > 0) {
+        lines.push('> [!question] Open questions');
+        for (const q of study.open_questions) lines.push(`> - ${wikilinkify(q)}`);
+        lines.push('');
+      }
     }
 
-    if (site.open_questions && site.open_questions.length > 0) {
+    // Back-compat: older artifacts carried open questions at the site level;
+    // render those only when no study in this site has its own (post-v0.8.1).
+    if (
+      !site.studies.some((s) => s.open_questions && s.open_questions.length > 0) &&
+      site.open_questions &&
+      site.open_questions.length > 0
+    ) {
       lines.push(`> [!question] Open questions`);
       for (const q of site.open_questions) lines.push(`> - ${wikilinkify(q)}`);
       lines.push('');
