@@ -10,8 +10,14 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# pwd -P resolves symlinks to the physical path. This repo lives under Dropbox,
+# which macOS exposes both as ~/Dropbox (legacy symlink) and the canonical
+# ~/Library/CloudStorage/Dropbox/... path. A launchd agent firing against the
+# ~/Dropbox symlink can hit "Operation not permitted" (TCC keys on the real
+# path), so bake the canonical path into the plist regardless of how this
+# script was invoked.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 
 PLIST_NAME="com.oncbrain.daily-digest.plist"
 TEMPLATE="$SCRIPT_DIR/$PLIST_NAME"
