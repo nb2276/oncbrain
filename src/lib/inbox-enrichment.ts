@@ -16,6 +16,7 @@ import {
   saveSlideUpload,
   markInboxEnriched,
   markInboxFailed,
+  markInboxFailedPermanent,
   type InboxItem,
 } from './db.ts';
 import { fetchTweet, TweetFetchError } from './twitter-fetch.ts';
@@ -34,6 +35,7 @@ import {
 import { ocrFile, isOcrAvailable } from './vision-ocr.ts';
 import { listDigests } from './digest-data.ts';
 import { extractCitations } from './extract.ts';
+import { extractDois } from './doi.ts';
 import {
   buildNctCoverageIndex,
   findPriorCoverage,
@@ -51,7 +53,7 @@ import type Database from 'better-sqlite3';
 
 export type EnrichmentResult =
   | { status: 'enriched'; enrichedRowId: number; bookmarkCreated: boolean }
-  | { status: 'failed'; reason: string }
+  | { status: 'failed'; reason: string; permanent?: boolean }
   | { status: 'deferred'; reason: string };
 
 export async function enrichInboxItem(
@@ -179,7 +181,7 @@ async function enrichPaperItem(
   const target = classifyPaperTarget(item.raw_target);
   if (!target) {
     await replyToCurator(item, `Couldn't recognize a paper in: ${item.raw_target.slice(0, 80)}`);
-    return { status: 'failed', reason: `unrecognized paper target: ${item.raw_target}` };
+    return { status: 'failed', reason: `unrecognized paper target: ${item.raw_target}`, permanent: true };
   }
 
   let saveInput: NewPaper;
@@ -203,7 +205,7 @@ async function enrichPaperItem(
     if (!retryable) {
       await replyToCurator(item, `Couldn't ingest that paper: ${message}`);
     }
-    return { status: 'failed', reason: message };
+    return { status: 'failed', reason: message, permanent: !retryable };
   }
 
   try {
@@ -256,7 +258,7 @@ async function enrichPdfPaper(
       if (!retryable) {
         await replyToCurator(item, `Couldn't fetch that PDF: ${friendlyDownloadReason(err.kind)}`);
       }
-      return { status: 'failed', reason: `pdf download ${err.kind}: ${err.message}` };
+      return { status: 'failed', reason: `pdf download ${err.kind}: ${err.message}`, permanent: !retryable };
     }
     return { status: 'failed', reason: `pdf download error: ${(err as Error).message}` };
   }
@@ -264,7 +266,7 @@ async function enrichPdfPaper(
   // 2. Verify the bytes really are a PDF.
   if (!isPdfBuffer(buffer)) {
     await replyToCurator(item, "That file isn't a PDF (failed the magic-byte check).");
-    return { status: 'failed', reason: 'not a PDF (magic-byte check failed)' };
+    return { status: 'failed', reason: 'not a PDF (magic-byte check failed)', permanent: true };
   }
   const contentHash = createHash('sha256').update(buffer).digest('hex');
 
@@ -288,7 +290,7 @@ async function enrichPdfPaper(
       if (!retryable) {
         await replyToCurator(item, `Couldn't read that PDF (${err.kind}).${filedNote}`);
       }
-      return { status: 'failed', reason: `pdf ${err.kind}: ${err.message}` };
+      return { status: 'failed', reason: `pdf ${err.kind}: ${err.message}`, permanent: !retryable };
     }
     return { status: 'failed', reason: `pdf extract error: ${(err as Error).message}` };
   } finally {
@@ -412,7 +414,17 @@ async function resolveFromUrl(
   item: InboxItem,
   note: string | null,
 ): Promise<NewPaper> {
-  const html = await ssrfSafeFetchText(url);
+  let html: string;
+  try {
+    html = await ssrfSafeFetchText(url);
+  } catch (fetchErr) {
+    // Publisher pages (Elsevier/ScienceDirect, etc.) often bot-block with 403.
+    // Before giving up, try a DOI/PMID embedded in the URL or the curator's
+    // message — those resolve via Crossref/PubMed APIs, which aren't blocked.
+    const viaId = await resolveFromEmbeddedId(url, item, note);
+    if (viaId) return viaId;
+    throw fetchErr;
+  }
   const meta = extractPaperMeta(html); // throws MetaNotFoundError if no anchor
   // Prefer PubMed (richest) when the page exposed a PMID, then Crossref for a
   // DOI, then fall back to the page's own meta tags.
@@ -448,6 +460,34 @@ async function resolveFromUrl(
     inbox_item_id: item.id,
     fetched_via: 'html_meta',
   };
+}
+
+// When a publisher page bot-blocks us (e.g. Elsevier/ScienceDirect 403), try a
+// DOI or PMID embedded in the URL or the curator's message — those resolve via
+// Crossref/PubMed, which don't bot-block. Returns null when no identifier is
+// present (the caller then surfaces the original fetch error).
+async function resolveFromEmbeddedId(
+  url: string,
+  item: InboxItem,
+  note: string | null,
+): Promise<NewPaper | null> {
+  const haystack = `${url} ${item.raw_message_text ?? ''}`;
+  for (const doi of extractDois(haystack)) {
+    try {
+      return { ...(await resolveFromDoi(doi, item, note)), source_url: url };
+    } catch {
+      // try the next identifier
+    }
+  }
+  const pmidMatch = haystack.match(/\bPMID:?\s*(\d{4,9})\b/i);
+  if (pmidMatch) {
+    try {
+      return { ...(await resolveFromPubMed(pmidMatch[1], item, note)), source_url: url };
+    } catch {
+      // fall through to null
+    }
+  }
+  return null;
 }
 
 // Map a resolution error to {retryable, message}. Network/rate-limit kinds
@@ -632,9 +672,19 @@ export async function runEnrichmentLoop(
         await notifyPriorCoverage(db, item, result.enrichedRowId, coverageIndex);
         break;
       case 'failed':
-        markInboxFailed(db, item.id, result.reason);
+        if (result.permanent) {
+          // Permanent failures (bad PDF, paywall/403 with no usable identifier,
+          // unrecognized target) won't improve on retry — park them so
+          // enrich:inbox stops re-attempting and the curator stops getting
+          // re-pinged the same error on every run.
+          markInboxFailedPermanent(db, item.id, result.reason);
+        } else {
+          markInboxFailed(db, item.id, result.reason);
+        }
         failed++;
-        console.warn(`  [enrich] item #${item.id} (${item.type}) failed: ${result.reason}`);
+        console.warn(
+          `  [enrich] item #${item.id} (${item.type}) failed${result.permanent ? ' (permanent)' : ''}: ${result.reason}`,
+        );
         break;
       case 'deferred':
         // Don't bump attempts; leave at 'pending' so the next phase can

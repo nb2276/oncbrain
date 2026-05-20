@@ -6,6 +6,7 @@ import {
   listInboxItemsForEnrichment,
   markInboxEnriched,
   markInboxFailed,
+  markInboxFailedPermanent,
   countInboxByStatus,
 } from '../src/lib/db.ts';
 import { runEnrichmentLoop } from '../src/lib/inbox-enrichment.ts';
@@ -119,6 +120,21 @@ describe('listInboxItemsForEnrichment', () => {
     // Each markInboxFailed bumps attempts by 1. Default max is 5.
     for (let i = 0; i < 5; i++) markInboxFailed(db, r.id, 'try ' + i);
     expect(listInboxItemsForEnrichment(db)).toHaveLength(0);
+  });
+
+  it('excludes permanently-failed items on the first attempt', () => {
+    const db = freshDb();
+    const r = saveInboxItem(db, {
+      type: 'paper',
+      raw_target: 'https://www.sciencedirect.com/science/article/pii/X',
+      telegram_msg_id: 1,
+      bookmark_date: '2026-05-18',
+    });
+    // A permanent failure (e.g. 403 with no usable DOI) parks the item with no
+    // retry — unlike markInboxFailed, which would retry up to maxAttempts.
+    markInboxFailedPermanent(db, r.id, 'fetch refused: HTTP 403');
+    expect(listInboxItemsForEnrichment(db)).toHaveLength(0);
+    expect(countInboxByStatus(db).failed_permanent).toBe(1);
   });
 
   it('filters by type', () => {

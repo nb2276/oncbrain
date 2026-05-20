@@ -64,7 +64,7 @@ export type InboxItem = {
   source_batch_key: string | null; // groups items from one Telegram message (e.g., multi-photo)
   received_at: number; // unix ms
   bookmark_date: string; // YYYY-MM-DD local at message receipt
-  enrichment_status: 'pending' | 'enriched' | 'failed' | 'deferred';
+  enrichment_status: 'pending' | 'enriched' | 'failed' | 'failed_permanent' | 'deferred';
   enrichment_attempts: number;
   enrichment_attempted_at: number | null;
   enrichment_error: string | null;
@@ -808,6 +808,21 @@ export function markInboxFailed(db: Database.Database, id: number, error: string
   ).run(Date.now(), error.slice(0, 500), id);
 }
 
+// Mark an inbox item PERMANENTLY failed — a non-retryable error (403 bot-block,
+// unrecognized target, unreadable PDF). 'failed_permanent' is excluded from
+// listInboxItemsForEnrichment, so the item isn't retried (and the curator isn't
+// re-pinged the same failure) on every subsequent enrich run.
+export function markInboxFailedPermanent(db: Database.Database, id: number, error: string): void {
+  db.prepare(
+    `UPDATE inbox_items
+        SET enrichment_status = 'failed_permanent',
+            enrichment_attempts = enrichment_attempts + 1,
+            enrichment_attempted_at = ?,
+            enrichment_error = ?
+      WHERE id = ?`,
+  ).run(Date.now(), error.slice(0, 500), id);
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Papers (v0.5 Phase B)
 // ────────────────────────────────────────────────────────────────────────────
@@ -998,6 +1013,7 @@ export function countInboxByStatus(
     pending: 0,
     enriched: 0,
     failed: 0,
+    failed_permanent: 0,
     deferred: 0,
   };
   for (const r of rows) out[r.status] = r.n;
