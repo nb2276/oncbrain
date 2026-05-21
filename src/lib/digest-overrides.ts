@@ -4,8 +4,8 @@
 // build time and applied as the final step before the artifact is written, so
 // curator edits and removals are durable: suppress studies, override study text
 // (tldr / name / bullets / verdict), or override the cross-site top_line/tldr.
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
 import type { DigestOutput, DigestStudy } from './llm-pipeline.ts';
 import { deriveSlug } from './slug.ts';
 
@@ -50,6 +50,14 @@ export function loadOverrides(date: string, dir = 'data/overrides'): DigestOverr
   const p = overridesPath(date, dir);
   if (!existsSync(p)) return null;
   return JSON.parse(readFileSync(p, 'utf8')) as DigestOverrides;
+}
+
+// Write the override sidecar (creating the dir if needed). Returns the path.
+export function saveOverrides(date: string, ov: DigestOverrides, dir = 'data/overrides'): string {
+  const p = overridesPath(date, dir);
+  if (!existsSync(dirname(p))) mkdirSync(dirname(p), { recursive: true });
+  writeFileSync(p, JSON.stringify(ov, null, 2) + '\n');
+  return p;
 }
 
 function studySlug(study: DigestStudy): string {
