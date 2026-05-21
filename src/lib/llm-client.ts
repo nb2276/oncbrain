@@ -41,6 +41,12 @@ export type LlmCompleteOptions = {
   model?: string;
   maxTokens?: number;
   temperature?: number;
+  // Extended-thinking budget in tokens (api backend only). When > 0, the model
+  // reasons in a separate thinking block before answering. The api requires
+  // temperature=1 and max_tokens > budget when thinking is on, so the client
+  // forces temperature=1 and adds the budget on top of maxTokens. Ignored by
+  // the claude-cli backend (no clean `claude -p` flag for it).
+  thinkingBudget?: number;
 };
 
 export interface LlmClient {
@@ -56,10 +62,18 @@ export class AnthropicLlmClient implements LlmClient {
   constructor(private readonly client: Anthropic) {}
 
   async complete(messages: LlmMessage[], opts: LlmCompleteOptions = {}): Promise<string> {
+    const thinkingBudget = opts.thinkingBudget && opts.thinkingBudget > 0 ? opts.thinkingBudget : 0;
+    const baseMax = opts.maxTokens ?? DEFAULT_MAX_TOKENS;
     const response = await this.client.messages.create({
       model: opts.model ?? DEFAULT_API_MODEL,
-      max_tokens: opts.maxTokens ?? DEFAULT_MAX_TOKENS,
-      temperature: opts.temperature ?? 0,
+      // max_tokens must exceed the thinking budget — reserve the budget on top
+      // of the answer allowance so a deep think can't starve the JSON output.
+      max_tokens: thinkingBudget ? thinkingBudget + baseMax : baseMax,
+      // The api rejects temperature != 1 when thinking is enabled.
+      temperature: thinkingBudget ? 1 : (opts.temperature ?? 0),
+      ...(thinkingBudget
+        ? { thinking: { type: 'enabled' as const, budget_tokens: thinkingBudget } }
+        : {}),
       messages: messages.map((m) => ({
         role: m.role,
         content: typeof m.content === 'string' ? m.content : m.content.map(toAnthropicBlock),

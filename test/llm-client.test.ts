@@ -82,6 +82,32 @@ describe('AnthropicLlmClient', () => {
     expect(call.messages[0].content[0].cache_control).toEqual({ type: 'ephemeral' });
     expect(call.messages[0].content[1].cache_control).toBeUndefined();
   });
+
+  it('enables thinking + forces temp=1 and reserves max_tokens when thinkingBudget set', async () => {
+    const anthropic = mockAnthropic('ok');
+    const client = new AnthropicLlmClient(anthropic);
+    await client.complete([{ role: 'user', content: 'hi' }], {
+      maxTokens: 4096,
+      temperature: 0,
+      thinkingBudget: 8000,
+    });
+    // @ts-expect-error inspecting the mock
+    const call = anthropic.messages.create.mock.calls[0][0];
+    expect(call.thinking).toEqual({ type: 'enabled', budget_tokens: 8000 });
+    expect(call.temperature).toBe(1);
+    expect(call.max_tokens).toBe(8000 + 4096);
+  });
+
+  it('omits thinking when thinkingBudget is absent', async () => {
+    const anthropic = mockAnthropic('ok');
+    const client = new AnthropicLlmClient(anthropic);
+    await client.complete([{ role: 'user', content: 'hi' }], { maxTokens: 4096, temperature: 0 });
+    // @ts-expect-error inspecting the mock
+    const call = anthropic.messages.create.mock.calls[0][0];
+    expect(call.thinking).toBeUndefined();
+    expect(call.temperature).toBe(0);
+    expect(call.max_tokens).toBe(4096);
+  });
 });
 
 // ─── ClaudeCliLlmClient ─────────────────────────────────────────────────────

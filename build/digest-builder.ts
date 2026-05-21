@@ -53,6 +53,24 @@ import {
 import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 
+// DIGEST_THINKING → Phase 2 extended-thinking budget (tokens). Accepts a number
+// (e.g. 8000) or a truthy flag (→ 8000 default). Clamped to the api minimum of
+// 1024. Returns undefined when unset. Warns when set on the claude-cli backend,
+// which can't use it.
+function parseThinkingBudget(): number | undefined {
+  const raw = process.env.DIGEST_THINKING;
+  if (!raw) return undefined;
+  const n = Number(raw);
+  const budget = Number.isFinite(n) && n > 0 ? Math.max(1024, Math.floor(n)) : 8000;
+  const backend = process.env.LLM_BACKEND ?? 'api';
+  if (backend !== 'api') {
+    console.warn(
+      `  [build] DIGEST_THINKING=${raw} set but ignored — extended thinking needs LLM_BACKEND=api (current: ${backend}). Phase 2 model still honors DIGEST_STUDY_MODEL.`,
+    );
+  }
+  return budget;
+}
+
 type Args = {
   date?: string; // exact date
   conferenceSlug?: string; // build every date for this conference
@@ -469,6 +487,9 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
       // Unset → pipeline/client defaults (sonnet).
       model: process.env.DIGEST_MODEL || undefined,
       studyModel: process.env.DIGEST_STUDY_MODEL || undefined,
+      // DIGEST_THINKING: extended-thinking token budget for Phase 2 (api backend
+      // only). Deeper reasoning before each study agent answers.
+      studyThinkingBudget: parseThinkingBudget(),
     });
   }
 

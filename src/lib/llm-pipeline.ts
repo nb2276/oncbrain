@@ -291,6 +291,10 @@ export type BuildOptions = {
   // 'claude-opus-4-7' on api) while Phase 1/3 stay on the cheaper default.
   // Falls back to `model` when unset.
   studyModel?: string;
+  // Optional extended-thinking budget (tokens) for Phase 2 only — deeper
+  // reasoning before the study agent answers. api backend only (ignored on
+  // claude-cli). 0/undefined = off.
+  studyThinkingBudget?: number;
   client?: LlmClient;
   maxRetries?: number;
   studyAgentConcurrency?: number;
@@ -661,8 +665,14 @@ async function runStudyAgent(
   const study = await completeAndParse(
     client,
     content,
-    // Phase 2 is the deep-analysis step — honor a studyModel override (e.g. Opus).
-    { model: opts.studyModel ?? opts.model, maxTokens: 4096, temperature: 0 },
+    // Phase 2 is the deep-analysis step — honor the studyModel override (e.g.
+    // Opus) and the optional extended-thinking budget.
+    {
+      model: opts.studyModel ?? opts.model,
+      maxTokens: 4096,
+      temperature: 0,
+      thinkingBudget: opts.studyThinkingBudget,
+    },
     (raw) => parseStudyAgentResponse(raw, cluster),
     maxRetries,
     `phase2:${cluster.slug}`,
@@ -1236,7 +1246,7 @@ function buildImageManifest(tweets: DigestInputTweet[]): { text: string; urls: s
 async function completeAndParse<T>(
   client: LlmClient,
   content: LlmContentBlock[],
-  opts: { model?: string; maxTokens: number; temperature: number },
+  opts: { model?: string; maxTokens: number; temperature: number; thinkingBudget?: number },
   parseFn: (raw: string) => T,
   maxRetries: number,
   label: string,
@@ -1260,6 +1270,7 @@ async function completeAndParse<T>(
         model: opts.model,
         maxTokens: opts.maxTokens,
         temperature: opts.temperature,
+        thinkingBudget: opts.thinkingBudget,
       });
       lastRaw = raw;
       return parseFn(raw);
