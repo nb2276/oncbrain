@@ -1,4 +1,5 @@
 ---
+import SearchBox from '../components/SearchBox.astro';
 interface Props {
   title: string;
   description?: string;
@@ -54,15 +55,15 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
         font-feature-settings: 'kern', 'liga', 'onum';
         max-width: 700px;
         margin: 0 auto;
-        padding: 2.5rem 1.25rem 4rem;
+        padding: 1.75rem 1.25rem 4rem;
         color: var(--fg);
         background: var(--bg);
         line-height: 1.55;
         font-size: 18px;
       }
       header {
-        margin-bottom: 2.5rem;
-        padding-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.9rem;
         border-bottom: 1px solid var(--border);
       }
       header h1 {
@@ -71,22 +72,37 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
         font-size: 1.5rem;
         font-weight: 600;
         letter-spacing: -0.01em;
+        flex: 0 0 auto;
       }
       header h1 a { color: inherit; text-decoration: none; }
-      header .curator {
-        margin-top: 0.3rem;
+      /* Title left, search right; wraps to a full-width search below the title
+         when the row is too narrow (mobile). */
+      .header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem 1rem;
+        flex-wrap: wrap;
+      }
+      .header-title { flex: 0 1 auto; min-width: 0; }
+      .header-search {
+        flex: 1 1 220px;
+        max-width: 340px;
+        position: relative;
+      }
+      @media (max-width: 600px) {
+        .header-search { flex-basis: 100%; max-width: none; }
+      }
+      /* About + curator on one compact line, directly under the title. */
+      header .header-sub {
+        margin-top: 0.15rem;
         font-family: var(--font-sans);
-        font-size: 0.825rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.02em;
+        line-height: 1.4;
         color: var(--fg-muted);
-        letter-spacing: 0.02em;
       }
-      header .curator a { color: inherit; }
-      header .topnav {
-        margin-top: 0.4rem;
-        font-family: var(--font-sans);
-        font-size: 0.825rem;
-        letter-spacing: 0.02em;
-      }
+      header .header-sub a { color: var(--accent); }
       h1, h2, h3 { line-height: 1.25; font-family: var(--font-serif); }
       a { color: var(--accent); text-decoration: none; }
       a:hover { text-decoration: underline; }
@@ -127,19 +143,26 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
   </head>
   <body>
     <header>
-      <h1><a href="/">{siteName}</a></h1>
-      <nav class="topnav"><a href="/about">About</a></nav>
-      {curatorName && (
-        <div class="curator">
-          curated by {curatorName}
-          {curatorHandle && (
-            <>
-              {' · '}
-              <a href={`https://x.com/${curatorHandle.replace(/^@/, '')}`} target="_blank" rel="noopener">{curatorHandle}</a>
-            </>
-          )}
+      <div class="header-top">
+        <div class="header-title">
+          <h1><a href="/">{siteName}</a></h1>
+          <div class="header-sub">
+            <a href="/about">About</a>
+            {curatorName && (
+              <>
+                {' · curated by '}{curatorName}
+                {curatorHandle && (
+                  <>
+                    {' · '}
+                    <a href={`https://x.com/${curatorHandle.replace(/^@/, '')}`} target="_blank" rel="noopener">{curatorHandle}</a>
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      )}
+        <div class="header-search"><SearchBox /></div>
+      </div>
     </header>
     <main>
       <slot />

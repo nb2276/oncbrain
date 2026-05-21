@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import SearchBox from '../components/SearchBox.astro';
 import {
   listDigests,
   listConferenceSummaries,
@@ -76,8 +75,6 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
       )}
     </nav>
   )}
-
-  {digests.length > 0 && <SearchBox />}
 
   {latest ? (
     <section class="hero-tldr" aria-label="Latest digest summary">
