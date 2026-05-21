@@ -1,0 +1,682 @@
+---
+// Single source of truth for the dense per-study card. Rendered by both the
+// per-date digest (`[date].astro`) and the by-site aggregation
+// (`sites/[site].astro`). Presentation-only: callers resolve a study's sources
+// to concrete bookmark/paper/slide arrays and pass them in.
+//
+// Card anatomy (top → bottom): name + NCT, "Sourced from" authors (optional),
+// "For …" audience, SOC-implication verdict block, TL;DR, promoted figure,
+// detail bullets, collapsible sources, "vs leading data" comparator callout,
+// per-study open questions (optional).
+import { linkifyCitations } from '../lib/extract.ts';
+import { isSafeImageUrl } from '../lib/vision-ocr.ts';
+import type {
+  DigestStudy,
+  DigestDetail,
+  SocImplication,
+  DigestArtifact,
+  DigestArtifactPaper,
+  DigestArtifactSlide,
+} from '../lib/digest-data.ts';
+
+type Bookmark = DigestArtifact['bookmarks'][number];
+type StudyAuthor = { name: string; kind: 'tweet' | 'paper' };
+
+interface Props {
+  study: DigestStudy;
+  // Resolved sources (the caller dereferences source_ids/tweet_ids).
+  bookmarks?: Bookmark[];
+  papers?: DigestArtifactPaper[];
+  slides?: DigestArtifactSlide[];
+  // Optional anchor id on the card root (per-date page uses it for deep links).
+  anchorId?: string;
+  // Optional "Sourced from …" attribution line (per-date page only).
+  authors?: StudyAuthor[];
+  // Per-study open questions render inside the card; the by-site page hides them.
+  showOpenQuestions?: boolean;
+}
+
+const {
+  study,
+  bookmarks = [],
+  papers = [],
+  slides = [],
+  anchorId,
+  authors = [],
+  showOpenQuestions = true,
+} = Astro.props as Props;
+
+// 60-second triage signal: verdict pill taxonomy (VOICE.md "SOC-implication verdict").
+const VERDICT_META: Record<SocImplication, { emoji: string; label: string }> = {
+  'practice-changing': { emoji: '🚀', label: 'Practice-changing' },
+  'challenges-soc': { emoji: '↔️', label: 'Challenges SOC' },
+  'confirmatory': { emoji: '🔄', label: 'Confirmatory' },
+  'early-signal': { emoji: '🧪', label: 'Early signal' },
+  'methodologically-limited': { emoji: '⚠️', label: 'Caveats dominate' },
+  'unclear': { emoji: '❔', label: 'Unclear' },
+};
+
+// 🔗 bullets are lifted out of the main list into the "vs leading data" callout.
+function isComparatorBullet(d: DigestDetail): boolean {
+  const text = typeof d === 'string' ? d : (d as { text: string }).text;
+  return /^\s*🔗/.test(text);
+}
+function stripComparatorEmoji(text: string): string {
+  return text.replace(/^\s*🔗\s*/, '');
+}
+// "data/slide-photos/<date>/<uuid>.jpg" → "/slides/<date>/<uuid>.jpg"
+function toSlideUrl(filePath: string): string {
+  return filePath.startsWith('data/slide-photos/')
+    ? '/slides/' + filePath.slice('data/slide-photos/'.length)
+    : filePath;
+}
+
+const comparatorBullets = study.details.filter(isComparatorBullet);
+const otherBullets = study.details.filter((d) => !isComparatorBullet(d));
+const verdictMeta = study.verdict ? VERDICT_META[study.verdict.soc_implication] : null;
+
+const sourceTotal = bookmarks.length + papers.length + slides.length;
+const sourceBadges: string[] = [];
+if (bookmarks.length > 0) sourceBadges.push(`🐦 ${bookmarks.length} tweet${bookmarks.length === 1 ? '' : 's'}`);
+if (papers.length > 0) sourceBadges.push(`📄 ${papers.length} paper${papers.length === 1 ? '' : 's'}`);
+if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.length === 1 ? '' : 's'}`);
+---
+
+<div class="study" id={anchorId}>
+  <h4 class="study-name">
+    {study.name}
+    {study.nct && (
+      <a class="citation study-nct" href={`https://clinicaltrials.gov/study/${study.nct}`} target="_blank" rel="noopener">{study.nct}</a>
+    )}
+  </h4>
+  {authors.length > 0 && (
+    <p class="study-authors">
+      Sourced from {authors.slice(0, 3).map((a, i) => (
+        <Fragment>{i > 0 && ', '}<span class:list={['author-name', `author-${a.kind}`]}>{a.name}</span></Fragment>
+      ))}
+      {authors.length > 3 && (
+        <span class="author-more"> · +{authors.length - 3}</span>
+      )}
+    </p>
+  )}
+  {study.verdict?.audience && (
+    <p class="study-audience"><span class="audience-label">For</span>{study.verdict.audience}</p>
+  )}
+  {study.verdict?.rationale && verdictMeta && (
+    <aside class:list={['verdict-block', `verdict-${study.verdict.soc_implication}`]}>
+      <div class="verdict-pill">
+        <span class="verdict-emoji" aria-hidden="true">{verdictMeta.emoji}</span>
+        <span class="verdict-label">{verdictMeta.label}</span>
+      </div>
+      <p class="verdict-rationale">{study.verdict.rationale}</p>
+    </aside>
+  )}
+  <p class="study-tldr" set:html={linkifyCitations(study.tldr)} />
+  {study.key_figure_url && isSafeImageUrl(study.key_figure_url) && (
+    <figure class="study-figure">
+      <img
+        src={study.key_figure_url}
+        alt={typeof study.key_figure_caption === 'string' ? study.key_figure_caption : study.name}
+        loading="lazy"
+      />
+      {typeof study.key_figure_caption === 'string' && (
+        <figcaption>{study.key_figure_caption}</figcaption>
+      )}
+      {study.key_figure_caption && typeof study.key_figure_caption !== 'string' && (
+        <figcaption>
+          <div class="study-table-wrap caption-table-wrap">
+            <table class="study-table">
+              <thead>
+                <tr>
+                  {study.key_figure_caption.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
+                </tr>
+              </thead>
+              <tbody>
+                {study.key_figure_caption.rows.map((row) => (
+                  <tr>
+                    {row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </figcaption>
+      )}
+    </figure>
+  )}
+  {otherBullets.length > 0 && (
+    <ul class="study-details">
+      {otherBullets.map((d) => {
+        if (typeof d === 'string') {
+          return <li set:html={linkifyCitations(d)} />;
+        }
+        if ('table' in d) {
+          return (
+            <li>
+              <span set:html={linkifyCitations(d.text)} />
+              <div class="study-table-wrap">
+                <table class="study-table">
+                  <thead>
+                    <tr>
+                      {d.table.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.table.rows.map((row) => (
+                      <tr>
+                        {row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </li>
+          );
+        }
+        return (
+          <li>
+            <span set:html={linkifyCitations(d.text)} />
+            {d.subdetails.length > 0 && (
+              <ul class="study-subdetails">
+                {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
+              </ul>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  )}
+  {sourceTotal > 0 && (
+    <details class="sources">
+      <summary>📚 Sources · {sourceBadges.join(' · ')}</summary>
+      <div class="source-stack">
+        {bookmarks.map((b) => {
+          if (b.html) {
+            return (
+              <div class="tw-wrap">
+                <Fragment set:html={b.html} />
+                {b.note && <div class="source-note">📝 {b.note}</div>}
+              </div>
+            );
+          }
+          return (
+            <div class="source-fallback">
+              <div class="source-meta">
+                <span>{b.author_name || b.author_handle || 'unknown'}</span>
+                <a href={b.url} target="_blank" rel="noopener">view on X →</a>
+              </div>
+              <div class="source-text" set:html={linkifyCitations(b.text)} />
+              {b.note && <div class="source-note">📝 {b.note}</div>}
+            </div>
+          );
+        })}
+        {papers.map((p) => (
+          <div class="source-paper">
+            <div class="source-meta">
+              <span class="source-type-pill">📄 PAPER</span>
+              <span>
+                {p.authors.slice(0, 3).join('; ')}
+                {p.authors.length > 3 ? ' et al.' : ''}
+              </span>
+              {p.journal && (
+                <span class="paper-journal">
+                  · <em>{p.journal}</em>{p.pub_date ? ` (${p.pub_date.slice(0, 7)})` : ''}
+                </span>
+              )}
+            </div>
+            <div class="paper-title">{p.title}</div>
+            <div class="paper-links">
+              <a href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`} target="_blank" rel="noopener">
+                PMID {p.pmid} →
+              </a>
+              {p.doi && (
+                <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener">
+                  doi
+                </a>
+              )}
+              {p.pmc_id && (
+                <a href={`https://www.ncbi.nlm.nih.gov/pmc/articles/${p.pmc_id}/`} target="_blank" rel="noopener">
+                  full text (PMC)
+                </a>
+              )}
+            </div>
+            {p.abstract && (
+              <details class="paper-abstract">
+                <summary>Abstract</summary>
+                <div class="paper-abstract-body" set:html={linkifyCitations(p.abstract.replace(/\n/g, '<br/>'))} />
+              </details>
+            )}
+            {p.note && <div class="source-note">📝 {p.note}</div>}
+          </div>
+        ))}
+        {slides.map((slide) => (
+          <div class="source-slide">
+            <div class="source-meta">
+              <span class="source-type-pill">🩻 SLIDE</span>
+              {slide.source_label && <span>{slide.source_label}</span>}
+            </div>
+            <img
+              src={toSlideUrl(slide.file_path)}
+              alt={slide.source_label ?? 'Slide photograph'}
+              loading="lazy"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+            />
+            <div class="slide-fallback" style="display:none">
+              (Slide image not published — curator-private.)
+            </div>
+            {slide.note && <div class="source-note">📝 {slide.note}</div>}
+          </div>
+        ))}
+      </div>
+    </details>
+  )}
+  {/* Comparator sits at the foot of the card: read the study first, then
+      "here's how it stacks up against current practice" as the closing beat. */}
+  {comparatorBullets.length > 0 && (
+    <section class="comparator-block">
+      <div class="comparator-label">vs leading data</div>
+      <ul class="comparator-list">
+        {comparatorBullets.map((d) => (
+          typeof d === 'string'
+            ? <li set:html={linkifyCitations(stripComparatorEmoji(d))} />
+            : <li set:html={linkifyCitations(stripComparatorEmoji(d.text))} />
+        ))}
+      </ul>
+    </section>
+  )}
+  {showOpenQuestions && study.open_questions && study.open_questions.length > 0 && (
+    <div class="open-questions study-open-questions">
+      <div class="section-label">Open questions</div>
+      <ul>
+        {study.open_questions.map((q) => (<li set:html={linkifyCitations(q)} />))}
+      </ul>
+    </div>
+  )}
+</div>
+
+<style>
+  .study {
+    margin: 1.25rem 0;
+    padding: 1rem 1.15rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    scroll-margin-top: 1rem;
+  }
+  .study-name {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem;
+  }
+  .study-nct {
+    font-size: 0.75rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* Author surface: credibility-by-attribution. Small + muted; it's metadata. */
+  .study-authors {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--fg-muted);
+    line-height: 1.4;
+  }
+  .author-name { color: var(--fg); }
+  /* Tweet @handles read as code identifiers — monospace. */
+  .author-tweet {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.78rem;
+  }
+  /* Paper attributions ("Siva et al.") read as bibliographic entries — italic. */
+  .author-paper {
+    font-style: italic;
+    font-size: 0.82rem;
+  }
+  .author-more { color: var(--fg-muted); }
+
+  /* Audience gate: "For: …" one-liner before the analyst verdict. */
+  .study-audience {
+    margin: 0 0 0.55rem;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+    line-height: 1.4;
+  }
+  .audience-label {
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    color: var(--fg-muted);
+    margin-right: 0.5rem;
+  }
+
+  /* SOC-implication verdict block — the 5-second triage signal. */
+  .verdict-block {
+    margin: 0.45rem 0 0.85rem;
+    padding: 0.65rem 0.85rem 0.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--verdict-color, var(--accent));
+    border-radius: 4px;
+  }
+  .verdict-block.verdict-practice-changing { --verdict-color: #1a5e3a; }
+  .verdict-block.verdict-challenges-soc { --verdict-color: #9a5a1a; }
+  .verdict-block.verdict-confirmatory { --verdict-color: var(--accent); }
+  .verdict-block.verdict-early-signal { --verdict-color: #1a6a7a; }
+  .verdict-block.verdict-methodologically-limited { --verdict-color: #8a3a1a; }
+  .verdict-block.verdict-unclear { --verdict-color: var(--fg-muted); }
+  .verdict-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--verdict-color);
+    margin-bottom: 0.3rem;
+  }
+  .verdict-emoji { font-size: 0.95rem; line-height: 1; }
+  .verdict-rationale {
+    margin: 0;
+    font-size: 0.93rem;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+
+  /* Comparator-first callout: 🔗 bullets lifted out of the main details list. */
+  .comparator-block {
+    margin: 0.65rem 0 0.65rem;
+    padding: 0.55rem 0.85rem 0.6rem;
+    background: var(--accent-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .comparator-label {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+  .comparator-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--fg);
+    line-height: 1.5;
+    font-size: 0.93rem;
+  }
+  .comparator-list li { margin: 0.2rem 0; }
+
+  .study-tldr {
+    margin: 0 0 0.55rem;
+    font-size: 1rem;
+    line-height: 1.45;
+    color: var(--fg);
+  }
+  .study-details {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: var(--fg);
+    line-height: 1.5;
+    font-size: 0.95rem;
+  }
+  .study-details li { margin: 0.25rem 0; }
+  .study-subdetails {
+    margin: 0.2rem 0 0.4rem;
+    padding-left: 1.1rem;
+    list-style: none;
+  }
+  .study-subdetails li {
+    margin: 0.15rem 0;
+    font-size: 0.92rem;
+    color: var(--fg);
+    position: relative;
+    padding-left: 0.7rem;
+  }
+  .study-subdetails li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* Comparison tables */
+  .study-table-wrap {
+    margin: 0.4rem 0 0.6rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg-card);
+  }
+  .study-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.88rem;
+    font-family: var(--font-sans);
+    line-height: 1.4;
+  }
+  .study-table th,
+  .study-table td {
+    padding: 0.45rem 0.7rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .study-table tbody tr:last-child td { border-bottom: none; }
+  .study-table th {
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    color: var(--fg-muted);
+    background: var(--bg-card);
+  }
+  @media (max-width: 600px) {
+    .study-table th:first-child,
+    .study-table td:first-child {
+      position: sticky;
+      left: 0;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      z-index: 1;
+    }
+  }
+
+  /* Sources (collapsed) + Twitter widgets */
+  .sources { margin-top: 0.85rem; }
+  .sources summary {
+    cursor: pointer;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    padding: 0.3rem 0;
+  }
+  .sources summary:hover { color: var(--accent); }
+  .source-stack {
+    margin-top: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .tw-wrap :global(.twitter-tweet) { margin: 0 !important; }
+  .tw-wrap :global(iframe) { max-width: 100% !important; }
+  .source-fallback {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.92rem;
+  }
+  .source-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6rem;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--fg-muted);
+    margin-bottom: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .source-text { line-height: 1.5; white-space: pre-wrap; }
+  .source-note {
+    margin-top: 0.45rem;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+  /* Paper sources */
+  .source-paper {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+    font-size: 0.92rem;
+  }
+  .source-type-pill {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 3px;
+    margin-right: 0.4rem;
+    vertical-align: 1px;
+  }
+  .paper-title {
+    margin: 0.35rem 0 0.4rem;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .paper-journal { color: var(--fg-muted); font-family: var(--font-sans); font-size: 0.82rem; }
+  .paper-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    margin-bottom: 0.4rem;
+  }
+  .paper-links a { color: var(--accent); }
+  .paper-abstract { margin-top: 0.4rem; }
+  .paper-abstract summary {
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+    padding: 0.25rem 0;
+  }
+  .paper-abstract summary:hover { color: var(--accent); }
+  .paper-abstract-body {
+    margin-top: 0.4rem;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+  /* Slide sources */
+  .source-slide {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.92rem;
+  }
+  .source-slide img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    margin-top: 0.5rem;
+  }
+  .slide-fallback {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+    text-align: center;
+  }
+
+  /* Promoted figure */
+  .study-figure {
+    margin: 0.6rem 0 0.8rem;
+    padding: 0;
+  }
+  .study-figure img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .study-figure figcaption {
+    margin-top: 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+    line-height: 1.4;
+  }
+  .caption-table-wrap {
+    margin-top: 0.4rem;
+  }
+  .caption-table-wrap .study-table {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
+  }
+
+  /* Per-study open questions: a divider under the card body, not a filled box. */
+  .section-label {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 0.4rem;
+  }
+  .open-questions {
+    margin-top: 1.5rem;
+    padding: 0.85rem 1.1rem;
+    background: var(--citation-bg);
+    border-radius: 4px;
+  }
+  .open-questions ul { margin: 0; padding-left: 1.2rem; line-height: 1.55; }
+  .open-questions li { margin: 0.25rem 0; }
+  .study-open-questions {
+    margin-top: 1rem;
+    padding: 0.6rem 0 0;
+    background: transparent;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+  }
+  .study-open-questions .section-label { color: var(--fg-muted); }
+
+  @media (max-width: 600px) {
+    .study { padding: 0.85rem 1rem; }
+  }
+
+  /* Verdict colors in dark mode: lighter values, legible on the dark card. */
+  @media (prefers-color-scheme: dark) {
+    .verdict-block.verdict-practice-changing { --verdict-color: #5fcc8a; }
+    .verdict-block.verdict-challenges-soc { --verdict-color: #d99a4a; }
+    .verdict-block.verdict-early-signal { --verdict-color: #6fbfd6; }
+    .verdict-block.verdict-methodologically-limited { --verdict-color: #d9785a; }
+  }
+</style>
