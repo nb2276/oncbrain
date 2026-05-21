@@ -1,8 +1,11 @@
 ---
 import Base from '../../layouts/Base.astro';
 import StudyCard from '../../components/StudyCard.astro';
+import TriageRail from '../../components/TriageRail.astro';
 import { listSiteSummaries, type SiteSummary } from '../../lib/digest-data.ts';
 import { getDiseaseSite } from '../../lib/disease-sites.ts';
+import { deriveSlug } from '../../lib/slug.ts';
+import { verdictMetaFor } from '../../lib/verdict.ts';
 
 export async function getStaticPaths() {
   return listSiteSummaries().map((s) => ({
@@ -26,9 +29,22 @@ for (const occ of summary.occurrences) {
   byDate.get(occ.date)!.push(occ);
 }
 const dates = Array.from(byDate.keys());
+
+// Stable per-occurrence anchor (date-prefixed so the same trial across dates
+// doesn't collide) — used for both the card id and the triage-rail jump link.
+const anchorByOcc = new Map<(typeof summary.occurrences)[number], string>();
+for (const occ of summary.occurrences) {
+  anchorByOcc.set(occ, `${occ.date}-${occ.study.slug ?? deriveSlug(occ.study.name)}`);
+}
+const railItems = summary.occurrences.map((occ) => ({
+  href: `#${anchorByOcc.get(occ)}`,
+  name: occ.study.name,
+  verdictEmoji: verdictMetaFor(occ.study.verdict?.soc_implication)?.emoji ?? '·',
+}));
 ---
 
 <Base title={`${meta.label} — oncbrain`} description={`Studies aggregated for ${meta.label} across all digest dates.`}>
+  <TriageRail items={railItems} />
   <nav class="crumb">
     <a href="/">← all dates</a>
     <a href="/sites/">browse by site</a>
@@ -57,6 +73,7 @@ const dates = Array.from(byDate.keys());
         {occurrences.map((occ) => (
           <StudyCard
             study={occ.study}
+            anchorId={anchorByOcc.get(occ)}
             bookmarks={occ.bookmarks}
             papers={occ.papers ?? []}
             slides={occ.slides ?? []}

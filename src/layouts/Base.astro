@@ -163,5 +163,21 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
         <a href="/feed.xml">RSS feed</a>
       </p>
     </footer>
+    <script is:inline>
+      // Triage-first is the base design: study depth folds (details.study-depth)
+      // render collapsed. On desktop there's room, so auto-expand them. Mobile
+      // stays collapsed for the 90-second scan. Re-syncs when crossing the
+      // breakpoint; a manual toggle persists until the next crossing.
+      (function () {
+        var mq = window.matchMedia('(min-width: 1024px)');
+        function sync() {
+          var ds = document.querySelectorAll('details.study-depth');
+          for (var i = 0; i < ds.length; i++) ds[i].open = mq.matches;
+        }
+        sync();
+        if (mq.addEventListener) mq.addEventListener('change', sync);
+        else if (mq.addListener) mq.addListener(sync);
+      })();
+    </script>
   </body>
 </html>

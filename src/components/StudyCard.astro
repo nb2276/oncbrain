@@ -4,16 +4,17 @@
 // (`sites/[site].astro`). Presentation-only: callers resolve a study's sources
 // to concrete bookmark/paper/slide arrays and pass them in.
 //
-// Card anatomy (top → bottom): name + NCT, "Sourced from" authors (optional),
-// "For …" audience, SOC-implication verdict block, TL;DR, promoted figure,
-// detail bullets, collapsible sources, "vs leading data" comparator callout,
-// per-study open questions (optional).
+// Triage-first layout (v0.9): the card rests at its triage layer — name,
+// verdict pill, TL;DR, and the "vs leading data" callout — so a busy reader
+// scans verdicts + headline numbers down the page. The methodology depth
+// (audience, figure, detail bullets/tables, open questions, attribution) folds
+// behind a native <details> expander. Sources stay in their own collapsible.
 import { linkifyCitations } from '../lib/extract.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
+import { VERDICT_META } from '../lib/verdict.ts';
 import type {
   DigestStudy,
   DigestDetail,
-  SocImplication,
   DigestArtifact,
   DigestArtifactPaper,
   DigestArtifactSlide,
@@ -46,16 +47,6 @@ const {
   showOpenQuestions = true,
 } = Astro.props as Props;
 
-// 60-second triage signal: verdict pill taxonomy (VOICE.md "SOC-implication verdict").
-const VERDICT_META: Record<SocImplication, { emoji: string; label: string }> = {
-  'practice-changing': { emoji: '🚀', label: 'Practice-changing' },
-  'challenges-soc': { emoji: '↔️', label: 'Challenges SOC' },
-  'confirmatory': { emoji: '🔄', label: 'Confirmatory' },
-  'early-signal': { emoji: '🧪', label: 'Early signal' },
-  'methodologically-limited': { emoji: '⚠️', label: 'Caveats dominate' },
-  'unclear': { emoji: '❔', label: 'Unclear' },
-};
-
 // 🔗 bullets are lifted out of the main list into the "vs leading data" callout.
 function isComparatorBullet(d: DigestDetail): boolean {
   const text = typeof d === 'string' ? d : (d as { text: string }).text;
@@ -75,6 +66,21 @@ const comparatorBullets = study.details.filter(isComparatorBullet);
 const otherBullets = study.details.filter((d) => !isComparatorBullet(d));
 const verdictMeta = study.verdict ? VERDICT_META[study.verdict.soc_implication] : null;
 
+const hasFigure = Boolean(study.key_figure_url && isSafeImageUrl(study.key_figure_url));
+const hasOpenQuestions = Boolean(
+  showOpenQuestions && study.open_questions && study.open_questions.length > 0,
+);
+// Folded "depth" layer: everything past the triage essentials.
+const hasDepth =
+  Boolean(study.verdict?.audience) ||
+  hasFigure ||
+  otherBullets.length > 0 ||
+  hasOpenQuestions ||
+  authors.length > 0;
+const depthSummary = otherBullets.length > 0
+  ? `${otherBullets.length} ${otherBullets.length === 1 ? 'detail' : 'details'}`
+  : 'Details';
+
 const sourceTotal = bookmarks.length + papers.length + slides.length;
 const sourceBadges: string[] = [];
 if (bookmarks.length > 0) sourceBadges.push(`🐦 ${bookmarks.length} tweet${bookmarks.length === 1 ? '' : 's'}`);
@@ -83,25 +89,14 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
 ---
 
 <div class="study" id={anchorId}>
+  {/* ── Triage layer: always visible ── */}
   <h4 class="study-name">
     {study.name}
     {study.nct && (
       <a class="citation study-nct" href={`https://clinicaltrials.gov/study/${study.nct}`} target="_blank" rel="noopener">{study.nct}</a>
     )}
   </h4>
-  {authors.length > 0 && (
-    <p class="study-authors">
-      Sourced from {authors.slice(0, 3).map((a, i) => (
-        <Fragment>{i > 0 && ', '}<span class:list={['author-name', `author-${a.kind}`]}>{a.name}</span></Fragment>
-      ))}
-      {authors.length > 3 && (
-        <span class="author-more"> · +{authors.length - 3}</span>
-      )}
-    </p>
-  )}
-  {study.verdict?.audience && (
-    <p class="study-audience"><span class="audience-label">For</span>{study.verdict.audience}</p>
-  )}
+  <p class="study-tldr" set:html={linkifyCitations(study.tldr)} />
   {study.verdict?.rationale && verdictMeta && (
     <aside class:list={['verdict-block', `verdict-${study.verdict.soc_implication}`]}>
       <div class="verdict-pill">
@@ -111,58 +106,47 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
       <p class="verdict-rationale">{study.verdict.rationale}</p>
     </aside>
   )}
-  <p class="study-tldr" set:html={linkifyCitations(study.tldr)} />
-  {study.key_figure_url && isSafeImageUrl(study.key_figure_url) && (
-    <figure class="study-figure">
-      <img
-        src={study.key_figure_url}
-        alt={typeof study.key_figure_caption === 'string' ? study.key_figure_caption : study.name}
-        loading="lazy"
-      />
-      {typeof study.key_figure_caption === 'string' && (
-        <figcaption>{study.key_figure_caption}</figcaption>
-      )}
-      {study.key_figure_caption && typeof study.key_figure_caption !== 'string' && (
-        <figcaption>
-          <div class="study-table-wrap caption-table-wrap">
-            <table class="study-table">
-              <thead>
-                <tr>
-                  {study.key_figure_caption.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
-                </tr>
-              </thead>
-              <tbody>
-                {study.key_figure_caption.rows.map((row) => (
-                  <tr>
-                    {row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </figcaption>
-      )}
-    </figure>
+  {comparatorBullets.length > 0 && (
+    <section class="comparator-block">
+      <div class="comparator-label">vs leading data</div>
+      <ul class="comparator-list">
+        {comparatorBullets.map((d) => (
+          typeof d === 'string'
+            ? <li set:html={linkifyCitations(stripComparatorEmoji(d))} />
+            : <li set:html={linkifyCitations(stripComparatorEmoji(d.text))} />
+        ))}
+      </ul>
+    </section>
   )}
-  {otherBullets.length > 0 && (
-    <ul class="study-details">
-      {otherBullets.map((d) => {
-        if (typeof d === 'string') {
-          return <li set:html={linkifyCitations(d)} />;
-        }
-        if ('table' in d) {
-          return (
-            <li>
-              <span set:html={linkifyCitations(d.text)} />
-              <div class="study-table-wrap">
+
+  {/* ── Depth layer: folded behind a tap ── */}
+  {hasDepth && (
+    <details class="study-depth">
+      <summary>{depthSummary}</summary>
+      {study.verdict?.audience && (
+        <p class="study-audience"><span class="audience-label">For</span>{study.verdict.audience}</p>
+      )}
+      {hasFigure && (
+        <figure class="study-figure">
+          <img
+            src={study.key_figure_url}
+            alt={typeof study.key_figure_caption === 'string' ? study.key_figure_caption : study.name}
+            loading="lazy"
+          />
+          {typeof study.key_figure_caption === 'string' && (
+            <figcaption>{study.key_figure_caption}</figcaption>
+          )}
+          {study.key_figure_caption && typeof study.key_figure_caption !== 'string' && (
+            <figcaption>
+              <div class="study-table-wrap caption-table-wrap">
                 <table class="study-table">
                   <thead>
                     <tr>
-                      {d.table.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
+                      {study.key_figure_caption.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
                     </tr>
                   </thead>
                   <tbody>
-                    {d.table.rows.map((row) => (
+                    {study.key_figure_caption.rows.map((row) => (
                       <tr>
                         {row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}
                       </tr>
@@ -170,22 +154,74 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
                   </tbody>
                 </table>
               </div>
-            </li>
-          );
-        }
-        return (
-          <li>
-            <span set:html={linkifyCitations(d.text)} />
-            {d.subdetails.length > 0 && (
-              <ul class="study-subdetails">
-                {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
-              </ul>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+            </figcaption>
+          )}
+        </figure>
+      )}
+      {otherBullets.length > 0 && (
+        <ul class="study-details">
+          {otherBullets.map((d) => {
+            if (typeof d === 'string') {
+              return <li set:html={linkifyCitations(d)} />;
+            }
+            if ('table' in d) {
+              return (
+                <li>
+                  <span set:html={linkifyCitations(d.text)} />
+                  <div class="study-table-wrap">
+                    <table class="study-table">
+                      <thead>
+                        <tr>
+                          {d.table.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {d.table.rows.map((row) => (
+                          <tr>
+                            {row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </li>
+              );
+            }
+            return (
+              <li>
+                <span set:html={linkifyCitations(d.text)} />
+                {d.subdetails.length > 0 && (
+                  <ul class="study-subdetails">
+                    {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
+                  </ul>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {hasOpenQuestions && (
+        <div class="open-questions study-open-questions">
+          <div class="section-label">Open questions</div>
+          <ul>
+            {study.open_questions!.map((q) => (<li set:html={linkifyCitations(q)} />))}
+          </ul>
+        </div>
+      )}
+      {authors.length > 0 && (
+        <p class="study-authors">
+          Sourced from {authors.slice(0, 3).map((a, i) => (
+            <Fragment>{i > 0 && ', '}<span class:list={['author-name', `author-${a.kind}`]}>{a.name}</span></Fragment>
+          ))}
+          {authors.length > 3 && (
+            <span class="author-more"> · +{authors.length - 3}</span>
+          )}
+        </p>
+      )}
+    </details>
   )}
+
+  {/* ── Provenance: separate collapsible ── */}
   {sourceTotal > 0 && (
     <details class="sources">
       <summary>📚 Sources · {sourceBadges.join(' · ')}</summary>
@@ -270,28 +306,6 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
       </div>
     </details>
   )}
-  {/* Comparator sits at the foot of the card: read the study first, then
-      "here's how it stacks up against current practice" as the closing beat. */}
-  {comparatorBullets.length > 0 && (
-    <section class="comparator-block">
-      <div class="comparator-label">vs leading data</div>
-      <ul class="comparator-list">
-        {comparatorBullets.map((d) => (
-          typeof d === 'string'
-            ? <li set:html={linkifyCitations(stripComparatorEmoji(d))} />
-            : <li set:html={linkifyCitations(stripComparatorEmoji(d.text))} />
-        ))}
-      </ul>
-    </section>
-  )}
-  {showOpenQuestions && study.open_questions && study.open_questions.length > 0 && (
-    <div class="open-questions study-open-questions">
-      <div class="section-label">Open questions</div>
-      <ul>
-        {study.open_questions.map((q) => (<li set:html={linkifyCitations(q)} />))}
-      </ul>
-    </div>
-  )}
 </div>
 
 <style>
@@ -319,7 +333,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
 
   /* Author surface: credibility-by-attribution. Small + muted; it's metadata. */
   .study-authors {
-    margin: 0 0 0.35rem;
+    margin: 0.5rem 0 0;
     font-family: var(--font-sans);
     font-size: 0.78rem;
     color: var(--fg-muted);
@@ -338,7 +352,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   }
   .author-more { color: var(--fg-muted); }
 
-  /* Audience gate: "For: …" one-liner before the analyst verdict. */
+  /* Audience gate: "For: …" one-liner inside the depth fold. */
   .study-audience {
     margin: 0 0 0.55rem;
     font-family: var(--font-sans);
@@ -357,7 +371,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
 
   /* SOC-implication verdict block — the 5-second triage signal. */
   .verdict-block {
-    margin: 0.45rem 0 0.85rem;
+    margin: 0.35rem 0 0.7rem;
     padding: 0.65rem 0.85rem 0.6rem;
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -421,6 +435,23 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     line-height: 1.45;
     color: var(--fg);
   }
+
+  /* Depth fold: methodology + attribution behind a tap. Summary mirrors the
+     sources affordance (muted, sans). Triangle marker is the native one. */
+  .study-depth { margin-top: 0.5rem; }
+  .study-depth > summary {
+    cursor: pointer;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    padding: 0.3rem 0;
+  }
+  .study-depth > summary:hover { color: var(--accent); }
+  .study-depth[open] > summary {
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+  }
+
   .study-details {
     margin: 0;
     padding-left: 1.2rem;
@@ -641,7 +672,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     font-size: 0.82rem;
   }
 
-  /* Per-study open questions: a divider under the card body, not a filled box. */
+  /* Per-study open questions: a divider inside the depth fold. */
   .section-label {
     font-family: var(--font-sans);
     font-size: 0.7rem;

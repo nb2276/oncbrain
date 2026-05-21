@@ -34,22 +34,33 @@ See the [full emoji set + selection principles](#disease-site-emoji-set) below.
 
 ## Layout principles
 
-- **Mobile-first.** 375px is the canonical render target. Tablet and desktop are progressive enhancements, not separate designs.
+- **Design for both desktop and mobile.** Both are first-class views, not mobile-only. Mobile (375px) is the dense 90-second scan; desktop uses its width (see *Study card → Device behavior*). Verify both widths on every layout change.
 - **Cards earn their existence.** Don't add a card border, shadow, or chip unless it carries information. A study heading + paragraph is fine.
 - **Brevity beats completeness in output.** Depth shows in *which* bullets are included, not in adding more.
-- **One column. Always.** Two-column reading on a phone is a footgun.
+- **One reading column.** The body is a single ~700px reading column, centered on desktop (`src/layouts/Base.astro`). No two-column *reading* of prose; desktop adds a navigation rail in the gutter, not a second column.
 
 ## Study card
 
-The unit of the digest. Top to bottom:
+The unit of the digest. **Triage-first**: the card rests at a triage layer and folds its depth behind a tap. Single source: `src/components/StudyCard.astro` (rendered by both `[date].astro` and `sites/[site].astro`).
 
-1. **Verdict pill** (v0.7): a 5-second standard-of-care triage signal at the top of each card. Six buckets, each an emoji plus a short label.
+**Resting layer (always visible), top to bottom:**
+
+1. **Trial name** + NCT link.
+2. **Description** — the study TL;DR, one line, headline number verbatim.
+3. **Verdict pill** — the standard-of-care triage signal, six buckets, each an emoji plus a short label:
    - 🚀 Practice-changing · ↔️ Challenges SOC · 🔄 Confirmatory · 🧪 Early signal · ⚠️ Caveats dominate · ❔ Unclear
-   - The pill also carries a one-line rationale and the eligible population. Assignment rules and maturity gates (single-arm / interim / post-hoc caps) are a voice concern (see `VOICE.md`). The six emojis here are the *visual* vocabulary; do not reuse them elsewhere.
-2. **Study TL;DR:** one line, headline number verbatim.
-3. **"vs leading data" callout** (v0.7): comparator (🔗) bullets are lifted out of the main list into their own callout, so the reader sees how the result sits against prior evidence before the methodology bullets.
-4. **Detail bullets:** endpoints, comparisons, critique. A 2D comparison renders as an inline table.
-5. **Sources:** collapsible, each linked back, with source-type pills (🐦 tweet · 📄 paper · 🩻 slide; see `VOICE.md`).
+   - Carries a one-line rationale. Taxonomy lives in `src/lib/verdict.ts` (shared with the triage rail). Assignment rules and maturity gates are a voice concern (see `VOICE.md`). These six emojis are the *visual* vocabulary; do not reuse them elsewhere.
+4. **"vs leading data" callout** — comparator (🔗) bullets lifted out of the depth, so the reader sees how the result sits against prior evidence at a glance.
+
+**Depth layer (folded behind `▸ N details`):** eligible population ("For …"), promoted figure, detail bullets + tables (a 2D comparison renders as an inline table), open questions, source attribution.
+
+**Sources:** a separate collapsible, each linked back, with source-type pills (🐦 tweet · 📄 paper · 🩻 slide; see `VOICE.md`).
+
+### Device behavior
+
+- **Mobile:** depth folds stay collapsed — the 90-second scan reads name + description + verdict + comparator down the page.
+- **Desktop (≥1024px):** depth auto-expands (small inline script in `Base.astro`) — there's room, so show everything; re-syncs when crossing the breakpoint.
+- **Desktop (≥1200px):** a sticky **triage rail** (`src/components/TriageRail.astro`) parks in the left gutter — one jump-link per study, marked with its verdict emoji. Hidden below 1200px (the reading column re-centers).
 
 ## Home page
 
