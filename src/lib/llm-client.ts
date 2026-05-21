@@ -21,7 +21,12 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 
-export type LlmTextBlock = { type: 'text'; text: string };
+// `cache: true` marks this block as a prompt-cache breakpoint (api backend
+// only). Content up to and including it is cached and billed at ~10% on
+// subsequent calls within the cache TTL. Used for the VOICE block, which is
+// byte-identical across every phase + study-agent call in a build. The
+// claude-cli backend ignores it (the CLI manages its own context).
+export type LlmTextBlock = { type: 'text'; text: string; cache?: boolean };
 export type LlmImageBlock = { type: 'image'; url: string };
 export type LlmContentBlock = LlmTextBlock | LlmImageBlock;
 
@@ -66,7 +71,15 @@ export class AnthropicLlmClient implements LlmClient {
 
 // Map our portable content blocks to Anthropic's SDK shape.
 function toAnthropicBlock(block: LlmContentBlock) {
-  if (block.type === 'text') return { type: 'text' as const, text: block.text };
+  if (block.type === 'text') {
+    return block.cache
+      ? {
+          type: 'text' as const,
+          text: block.text,
+          cache_control: { type: 'ephemeral' as const },
+        }
+      : { type: 'text' as const, text: block.text };
+  }
   return {
     type: 'image' as const,
     source: { type: 'url' as const, url: block.url },

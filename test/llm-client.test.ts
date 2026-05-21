@@ -64,6 +64,24 @@ describe('AnthropicLlmClient', () => {
     const result = await client.complete([{ role: 'user', content: 'hi' }]);
     expect(result).toBe('');
   });
+
+  it('emits cache_control only on blocks flagged cache:true', async () => {
+    const anthropic = mockAnthropic('ok');
+    const client = new AnthropicLlmClient(anthropic);
+    await client.complete([
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'VOICE rules', cache: true },
+          { type: 'text', text: 'variable data' },
+        ],
+      },
+    ]);
+    // @ts-expect-error inspecting the mock
+    const call = anthropic.messages.create.mock.calls[0][0];
+    expect(call.messages[0].content[0].cache_control).toEqual({ type: 'ephemeral' });
+    expect(call.messages[0].content[1].cache_control).toBeUndefined();
+  });
 });
 
 // ─── ClaudeCliLlmClient ─────────────────────────────────────────────────────

@@ -463,6 +463,12 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
     digest = await buildDigest(inputs, {
       conferenceName: confMeta?.name ?? `Day digest — ${date}`,
       conferenceDay: date,
+      // Optional model overrides (config, not hardcoded). DIGEST_MODEL sets the
+      // default for all phases; DIGEST_STUDY_MODEL overrides Phase 2 only (the
+      // deep per-study analysis — e.g. 'opus' on claude-cli for richer output).
+      // Unset → pipeline/client defaults (sonnet).
+      model: process.env.DIGEST_MODEL || undefined,
+      studyModel: process.env.DIGEST_STUDY_MODEL || undefined,
     });
   }
 

@@ -286,6 +286,11 @@ export type BuildOptions = {
     synthesis?: string;
   };
   model?: string;
+  // Optional model override for Phase 2 (per-study agents) only — the deep
+  // analysis step. Lets you run Opus there (e.g. 'opus' on claude-cli,
+  // 'claude-opus-4-7' on api) while Phase 1/3 stay on the cheaper default.
+  // Falls back to `model` when unset.
+  studyModel?: string;
   client?: LlmClient;
   maxRetries?: number;
   studyAgentConcurrency?: number;
@@ -309,6 +314,20 @@ export function loadVoice(): string {
   if (_voiceCached !== null) return _voiceCached;
   _voiceCached = readFileSync(VOICE_PATH, 'utf-8').trim();
   return _voiceCached;
+}
+
+// VOICE is sent on every phase + study-agent call, byte-identical each time. We
+// send it once as a leading, cache-flagged content block (api prompt caching:
+// ~10% billing on cache hits) and leave a pointer where {{VOICE}} sat in the
+// template. On a busy day that's one VOICE block reused across ~20 calls instead
+// of re-billed each time. The claude-cli backend just sees it as text at the top.
+const VOICE_POINTER = '(Follow the VOICE & FRAMING RULES provided at the top of this message.)';
+function voiceCacheBlock(): LlmContentBlock {
+  return {
+    type: 'text',
+    text: `═══ VOICE & FRAMING RULES (follow exactly) ═══\n\n${loadVoice()}`,
+    cache: true,
+  };
 }
 
 type StudyCluster = {
@@ -467,7 +486,7 @@ async function runGroupingPhase(
   const associationHints = renderGroupsForPrompt(associationGroups);
 
   const prompt = template
-    .replace('{{VOICE}}', loadVoice())
+    .replace('{{VOICE}}', VOICE_POINTER)
     .replace('{{CONFERENCE_NAME}}', opts.conferenceName)
     .replace('{{CONFERENCE_DAY}}', `Day ${opts.conferenceDay}`)
     .replace('{{SITE_SLUGS}}', diseaseSiteSlugList())
@@ -475,7 +494,7 @@ async function runGroupingPhase(
     .replace('{{ASSOCIATION_HINTS}}', associationHints)
     .replace('{{TWEETS_JSON}}', JSON.stringify(tweetsForPrompt, null, 2));
 
-  const content: LlmContentBlock[] = [];
+  const content: LlmContentBlock[] = [voiceCacheBlock()];
   for (const url of manifest.urls) content.push({ type: 'image', url });
   content.push({ type: 'text', text: prompt });
 
@@ -627,7 +646,7 @@ async function runStudyAgent(
     : '';
 
   const prompt = template
-    .replace('{{VOICE}}', loadVoice())
+    .replace('{{VOICE}}', VOICE_POINTER)
     .replace('{{STUDY_NAME}}', cluster.name)
     .replace('{{STUDY_SLUG}}', cluster.slug)
     .replace('{{DISEASE_SITE}}', cluster.disease_site)
@@ -635,14 +654,15 @@ async function runStudyAgent(
     .replace('{{TWEETS_JSON}}', JSON.stringify(tweetsForPrompt, null, 2))
     .replace('{{PRIOR_CONTEXT_BLOCK}}', priorContextBlock);
 
-  const content: LlmContentBlock[] = [];
+  const content: LlmContentBlock[] = [voiceCacheBlock()];
   for (const url of manifest.urls) content.push({ type: 'image', url });
   content.push({ type: 'text', text: prompt });
 
   const study = await completeAndParse(
     client,
     content,
-    { model: opts.model, maxTokens: 4096, temperature: 0 },
+    // Phase 2 is the deep-analysis step — honor a studyModel override (e.g. Opus).
+    { model: opts.studyModel ?? opts.model, maxTokens: 4096, temperature: 0 },
     (raw) => parseStudyAgentResponse(raw, cluster),
     maxRetries,
     `phase2:${cluster.slug}`,
@@ -1129,10 +1149,10 @@ async function runSynthesisPhase(
   }));
 
   const prompt = template
-    .replace('{{VOICE}}', loadVoice())
+    .replace('{{VOICE}}', VOICE_POINTER)
     .replace('{{STUDIES_JSON}}', JSON.stringify(studiesForPrompt, null, 2));
 
-  const content: LlmContentBlock[] = [{ type: 'text', text: prompt }];
+  const content: LlmContentBlock[] = [voiceCacheBlock(), { type: 'text', text: prompt }];
 
   return completeAndParse(
     client,
