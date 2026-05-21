@@ -91,6 +91,9 @@ npm run build:day -- --date=2026-05-18         # a specific date
 npm run build:day -- --backfill                # every date with sources (re-run is idempotent)
 npm run build:day -- --dry-run                 # no LLM call, see what would happen
 
+# Or curate interactively — suppress/edit studies, build, ingest — in one TUI:
+npm run studio
+
 # 3. Static build + publish:
 npm run build                                  # Astro static build (preview locally with: npm run preview)
 git add data/digests data/obsidian             # explicit paths — papers/ is gitignored, never staged
@@ -104,11 +107,8 @@ Organized by **disease site** (22-slug enum, see `DESIGN.md`), newest date first
 
 - **Top line** — one-sentence lede with the headline number.
 - **TL;DR** — 2-3 sentence cross-site synthesis (also the home-page hero).
-- **Per study card:**
-  - a **standard-of-care verdict** pill (practice-changing / challenges-SOC / confirmatory / early-signal / caveats-dominate / unclear) plus the eligible population, for instant triage;
-  - a one-line **TL;DR** with effect sizes quoted verbatim from the source;
-  - bullets: endpoints, comparisons to recent and historical trials (🔗 "vs leading data"), and methodology critique when warranted;
-  - **sources** — each tweet / paper / slide linked back, with source-type pills (🐦 📄 🩻).
+- **Per study card (triage-first):** rests at its triage layer — trial name, a one-line **TL;DR** (effect sizes verbatim), a **standard-of-care verdict** pill (practice-changing / challenges-SOC / confirmatory / early-signal / caveats-dominate / unclear), and a 🔗 **"vs leading data"** comparator callout. The methodology depth (eligible population, figures, endpoint bullets + tables, open questions, attribution) folds behind a tap; **sources** (🐦 📄 🩻) are a separate collapsible.
+  - On mobile the depth stays folded for the 90-second scan; on desktop (≥1024px) it auto-expands, and a sticky **triage rail** (≥1200px) lists every study by verdict for quick jumping.
 
 Disease-site emoji anchors live in `DESIGN.md`; the per-study bullet + verdict emoji vocabulary and voice rules live in `VOICE.md`.
 
@@ -160,8 +160,16 @@ Symlink `data/obsidian/` into your Obsidian vault, or open the repo as a vault d
 
 Two paths via `LLM_BACKEND` env var:
 
-- `LLM_BACKEND=api` (default) — Anthropic API. `ANTHROPIC_API_KEY` required. Pay per token (~$0.05–0.10 per digest).
-- `LLM_BACKEND=claude-cli` — shells out to `claude -p`. Billed to your Claude Code subscription. Best for prompt-iteration loops.
+- `LLM_BACKEND=claude-cli` — shells out to `claude -p`, billed to your Claude Code subscription (no per-token cost). The default for routine builds.
+- `LLM_BACKEND=api` — Anthropic API; `ANTHROPIC_API_KEY` required. Pay per token. Adds vision, prompt caching, and extended thinking.
+
+**Prompt caching (api):** VOICE.md is sent once as a cache-flagged block shared across every call in a build, so a busy day reuses it (~10% billing on hits) instead of re-billing it ~20×.
+
+**Deeper analysis (optional config):**
+
+- `DIGEST_MODEL` — model for all phases (default sonnet).
+- `DIGEST_STUDY_MODEL` — Phase 2 only (the deep per-study step), e.g. `opus` on cli / `claude-opus-4-7` on api.
+- `DIGEST_THINKING=8000` — Phase 2 extended-thinking budget in tokens (**api backend only**).
 
 ## Tests
 
@@ -171,7 +179,7 @@ npm run test:watch # watch mode
 npx astro check    # type check (0 errors expected)
 ```
 
-469 tests across DB + schema migrations, ingestion (Telegram, PubMed, Crossref, PDF text + OCR), the three-phase LLM pipeline, SSRF / DOI / paper-URL / HTML-meta helpers, Obsidian export, RSS + JSON API output, NCT coverage dedup, and citation extraction.
+493 tests across DB + schema migrations, ingestion (Telegram, PubMed, Crossref, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, Obsidian export, RSS + JSON API output, NCT coverage dedup, and citation extraction.
 
 ## Eval
 

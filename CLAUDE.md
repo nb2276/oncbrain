@@ -68,9 +68,14 @@ npm run build                   # Astro static build
 npm run override -- --date=2026-05-20 --list                 # show studies + slugs
 npm run override -- --date=2026-05-20 --suppress=<slug>      # drop a study
 npm run override -- --date=2026-05-20 --edit=<slug> --tldr="..."  # override text
+npm run studio                  # interactive TUI (suppress/edit studies, build, ingest) — wraps the above via @clack/prompts
+
+# Deeper analysis (optional config — see "LLM backend")
+DIGEST_STUDY_MODEL=opus npm run build:day -- --date=<date>               # Opus on Phase 2 only (works on claude-cli)
+DIGEST_THINKING=8000 LLM_BACKEND=api npm run build:day -- --date=<date>  # + Phase 2 extended thinking (api only)
 
 # Tests + eval
-npm test                        # vitest run (469 tests)
+npm test                        # vitest run (493 tests)
 npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations)
 
 # Autopilot
@@ -85,10 +90,17 @@ npm run preview                 # Astro preview (after npm run build)
 
 `LLM_BACKEND` env var:
 
-- `api` — Anthropic API via `@anthropic-ai/sdk`. Requires real `ANTHROPIC_API_KEY`. Supports vision (passes pbs.twimg.com image URLs to Claude as content blocks). Fast (~30s per build). Pay-per-token (~$0.10/build).
-- `claude-cli` — shells out to `claude -p`. Uses Claude Code subscription. No image input (CLI doesn't accept `--image` in `-p` mode), so vision falls back to "Images not accessible" in bullets. Slower (2-5 min per build). No per-call cost.
+- `api` — Anthropic API via `@anthropic-ai/sdk`. Requires real `ANTHROPIC_API_KEY`. Supports vision (passes pbs.twimg.com image URLs to Claude as content blocks). Fast (~30s per build). Pay-per-token.
+- `claude-cli` — shells out to `claude -p`. Uses Claude Code subscription. No image input (CLI doesn't accept `--image` in `-p` mode), so vision falls back to "Images not accessible" in bullets. Slower (2-5 min per build). No per-call cost. **This is the default for builds** (no per-token cost).
 
 The CLI client (`src/lib/llm-client.ts`) scrubs `ANTHROPIC_API_KEY` from the child process env so a stale or placeholder key can't hijack subscription auth.
+
+**Prompt caching (api):** VOICE.md is sent once as a leading cache-flagged content block (`cache: true` on the `LlmTextBlock`), shared across every phase + study-agent call in a build — so a busy day re-uses one cached VOICE block (~10% billing on hits) instead of re-billing it ~20×. No-op on `claude-cli`.
+
+**Per-phase model + thinking (config, not hardcoded):**
+- `DIGEST_MODEL` — model for all phases (default sonnet).
+- `DIGEST_STUDY_MODEL` — Phase 2 (per-study agents) only, the deep step (e.g. `opus` on cli, `claude-opus-4-7` on api). Falls back to `DIGEST_MODEL`.
+- `DIGEST_THINKING` — Phase 2 extended-thinking token budget (e.g. `8000`). **api backend only** (the builder warns + ignores it on cli). Forces temperature=1 and reserves the budget on top of max_tokens.
 
 ## Schema (digest output, v0.7+ study shape)
 
@@ -151,7 +163,8 @@ src/
     feed.ts                v0.8 PR3: RSS 2.0 builder
     api-output.ts          v0.8 PR3: JSON API shapers (digests index, per-study, sanitized per-date)
     digest-data.ts         Astro page data loaders (listDigests, listSiteSummaries, listRecentStudies)
-    digest-overrides.ts    durable per-date overrides: suppress/edit studies, applied at build time (pure applyOverrides)
+    digest-overrides.ts    durable per-date overrides: suppress/edit studies, applied at build time (applyOverrides + saveOverrides)
+    verdict.ts             v0.9: SOC-implication verdict taxonomy (emoji + label), shared by StudyCard + TriageRail
     disease-sites.ts       22-site enum (slug → label + emoji + rationale; see DESIGN.md)
   pages/
     index.astro            home: disease-site nav + hero TL;DR + recent-studies feed + live search
@@ -166,8 +179,10 @@ src/
     api/v1/digests.json.ts        v0.8 PR3: index of published days + counts
     api/v1/digest/[date].json.ts  v0.8 PR3: one day's artifact (papers sanitized, no full text)
     api/v1/study/[slug].json.ts   v0.8 PR3: one study, cross-date resolved
-  components/SearchBox.astro  v0.6: home-page live search input (lazy-loads the index)
-  layouts/Base.astro       shell: Newsreader font, RSS <link>, widgets.js, header (title + About), disclaimer + API/RSS footer
+  components/StudyCard.astro  v0.9: the single dense study card (triage-first — rests at name/TL;DR/verdict/comparator, folds depth); rendered by [date] + sites/[site]
+  components/TriageRail.astro v0.9: desktop-only (>=1200px) sticky jump-list (verdict emoji + name) in the left gutter
+  components/SearchBox.astro  live search input + results dropdown; lives in the global header (Base.astro), lazy-loads the index
+  layouts/Base.astro       shell: Newsreader font, RSS <link>, widgets.js, header (title + search + About/curator on one line), desktop depth-auto-expand script (>=1024px), disclaimer + API/RSS footer
 prompts/
   digest-v5-grouping.txt     CURRENT Phase 1: cluster sources into studies
   digest-v5-study-agent.txt  CURRENT Phase 2: per-study deep-analysis (parallel)
@@ -178,6 +193,7 @@ prompts/
 build/
   digest-builder.ts        CLI: pull pending sources → build sites/studies → write JSON + Obsidian
   manage-overrides.ts      CLI (npm run override): edit data/overrides/<date>.json (suppress/edit studies)
+  studio.ts                CLI (npm run studio): interactive @clack/prompts TUI over overrides + build:day + pull/enrich
   pull-telegram.ts         CLI: poll Telegram bot, write inbox_items
   enrich-inbox.ts          CLI: drain pending inbox_items into typed source tables (sweeps orphaned OCR temp dirs)
   notify-curator.ts        CLI: Telegram "build done" summary to the curator
