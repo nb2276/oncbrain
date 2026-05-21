@@ -11,10 +11,16 @@ describe('classifyPaperTarget', () => {
       value: '42144018',
     });
   });
-  it('PMC URL → pmc', () => {
+  it('PMC URL (legacy host) → pmc', () => {
     expect(classifyPaperTarget('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9876543/')).toEqual({
       kind: 'pmc',
       value: 'PMC9876543',
+    });
+  });
+  it('PMC URL (current pmc.ncbi host) → pmc', () => {
+    expect(classifyPaperTarget('https://pmc.ncbi.nlm.nih.gov/articles/PMC10326730/')).toEqual({
+      kind: 'pmc',
+      value: 'PMC10326730',
     });
   });
   it('doi.org URL → normalized doi', () => {
@@ -52,8 +58,11 @@ describe('extractPaperUrls', () => {
     expect(urls).toHaveLength(1);
     expect(urls[0]).toContain('nejm.org');
   });
-  it('pulls a PMC URL', () => {
+  it('pulls a PMC URL (legacy host)', () => {
     expect(extractPaperUrls('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123/')).toHaveLength(1);
+  });
+  it('pulls a PMC URL (current pmc.ncbi host)', () => {
+    expect(extractPaperUrls('https://pmc.ncbi.nlm.nih.gov/articles/PMC10326730/')).toHaveLength(1);
   });
   it('skips pubmed URLs (handled by extractPaperPmids)', () => {
     expect(extractPaperUrls('https://pubmed.ncbi.nlm.nih.gov/42144018/')).toEqual([]);

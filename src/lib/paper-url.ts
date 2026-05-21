@@ -15,8 +15,11 @@
 import { normalizeDoi, isBareDoi } from './doi.ts';
 import { PUBMED_URL_RE } from './telegram-ingest.ts';
 
-// PMC article URLs: ncbi.nlm.nih.gov/pmc/articles/PMC1234567/
-const PMC_URL_RE = /https?:\/\/(?:www\.)?ncbi\.nlm\.nih\.gov\/pmc\/articles\/(PMC\d+)/i;
+// PMC article URLs. Two forms: the legacy
+// www.ncbi.nlm.nih.gov/pmc/articles/PMC1234567/ and the current
+// pmc.ncbi.nlm.nih.gov/articles/PMC1234567/ (NCBI moved PMC to its own host).
+const PMC_URL_RE =
+  /https?:\/\/(?:(?:www\.)?ncbi\.nlm\.nih\.gov\/pmc|pmc\.ncbi\.nlm\.nih\.gov)\/articles\/(PMC\d+)/i;
 
 // doi.org resolver URLs.
 const DOI_URL_RE = /https?:\/\/(?:dx\.)?doi\.org\/(10\.\d{4,9}\/[-._;()/:a-z0-9]+)/i;
