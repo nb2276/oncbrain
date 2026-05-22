@@ -15,7 +15,9 @@ Format: `- [scope] description (source)`
 
 ## v0.6 — next minor (partially shipped)
 
-- **PWA + push notifications.** Manifest, installability, offline-cache of the latest digest. Push scoped as optional follow-on. Plan: `docs/plans/v0.6-pwa.md`.
+- **PWA + push notifications.** Manifest, installability, offline-cache of the latest digest. Push scoped as optional follow-on. Plan: `docs/plans/v0.6-pwa.md` (revised: `@vite-pwa/astro`/Workbox, shell-only precache + build-time precache of the latest digest, self-hosted Newsreader; install pill cut).
+- **iOS "Add to Home Screen" hint (PWA follow-on).** The Android/Chromium install pill was cut in eng review (low leverage, iPhone-heavy audience); iOS Safari has no `beforeinstallprompt`, so iOS readers currently get zero install discoverability. Add a small iOS-only, dismissible hint ("tap Share → Add to Home Screen"). Detect iOS Safari + non-standalone, show once. Depends on the PWA manifest shipping. (v0.6 eng review)
+- **search-index.json size budget + split.** `search-index.json` is regenerated daily and grows forever; once it's the largest frequently-refreshed asset it silently degrades mobile load + the SWR runtime cache. Cap or split (e.g. shard by site, lazy-load) when it crosses a size budget (~150KB). Start at `src/pages/search-index.json.ts` + `SearchBox.astro` lazy-load. Small today; not a v0.6 blocker. (v0.6 eng review — Codex outside voice)
 - **Non-photo image attachments.** Detect HEIC `document[]` attachments iOS Photos sometimes sends instead of `photo[]`. (v0.8 PR2 added PDF `document[]` handling; HEIC images still fall through. `CHANGELOG.md` v0.5 Phase C)
 - **iCloud shared album watcher.** Curator drops a slide into a shared album, oncbrain pulls it. (`docs/plans/v0.5-multi-source-ingestion.md:285`)
 - **Per-paper figure extraction from PMC XML.** Figures are linked but not pulled in. (`docs/plans/v0.5-multi-source-ingestion.md:286`)

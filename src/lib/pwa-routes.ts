@@ -1,0 +1,64 @@
+// URL classification for the PWA service worker cache strategy.
+// Imported by astro.config.mjs (Workbox runtimeCaching + precache wiring) and
+// unit-tested in pwa-routes.test.ts. Keeping the branchy decision here (rather
+// than inline in the config) means a regex typo can't silently mis-cache pages.
+//
+//   /                     home        -> StaleWhileRevalidate (changes daily)
+//   /search-index.json    search idx  -> StaleWhileRevalidate (changes daily)
+//   /about/, /sites/      shell       -> precache (cache-first, revisioned)
+//   /sites/breast/        ARCHIVE     -> NetworkFirst (grows one per site)
+//   /2026-05-17/          ARCHIVE     -> NetworkFirst (grows one per day)
+//   /conferences/asco/    ARCHIVE     -> NetworkFirst
+//   /api/..., /feed.xml   excluded from the navigation fallback
+//
+// "Archive" = the unbounded, ever-growing set. Precaching it would bloat the
+// offline footprint without limit, so it is runtime-cached on visit instead.
+
+const DATED = /^\/\d{4}-\d{2}-\d{2}\/?$/;
+const SITE_DETAIL = /^\/sites\/[^/]+\/?$/;
+const CONFERENCE_DETAIL = /^\/conferences\/[^/]+\/?$/;
+
+/** True for the unbounded archive pages (dated digests + per-site + per-conference). */
+export function isArchivePage(pathname: string): boolean {
+  return (
+    DATED.test(pathname) ||
+    SITE_DETAIL.test(pathname) ||
+    CONFERENCE_DETAIL.test(pathname)
+  );
+}
+
+/** True for the home page (served StaleWhileRevalidate, not precache). */
+export function isHome(pathname: string): boolean {
+  return pathname === '/' || pathname === '/index.html';
+}
+
+/** True for the daily-changing search index (served StaleWhileRevalidate). */
+export function isSearchIndex(pathname: string): boolean {
+  return pathname === '/search-index.json';
+}
+
+/**
+ * Paths that must never be served the offline navigation fallback: the JSON API,
+ * the RSS feed, slide assets, and any request that carries a file extension
+ * (assets, not navigations).
+ */
+export const NAV_FALLBACK_DENYLIST: RegExp[] = [
+  /^\/api\//,
+  /^\/feed\.xml$/,
+  /^\/slides\//,
+  /\/[^/?]+\.[^/?]+$/,
+];
+
+/**
+ * Newest published digest date from a list of `data/digests` filenames.
+ * Pure (takes filenames, not fs) so it is unit-testable; the config does the
+ * directory read. Returns null when there are no dated digests yet.
+ */
+export function latestDigestDateFromFiles(files: string[]): string | null {
+  const dates = files
+    .filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f))
+    .map((f) => f.replace(/\.json$/, ''));
+  if (dates.length === 0) return null;
+  dates.sort();
+  return dates[dates.length - 1];
+}

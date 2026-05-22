@@ -1,5 +1,11 @@
 ---
 import SearchBox from '../components/SearchBox.astro';
+// Self-hosted Newsreader (variable, optical-size axis + italic). Same-origin so
+// the service worker precaches it for offline fidelity; no Google Fonts CDN
+// round-trip or third-party dependency. unicode-range gates the non-latin
+// subsets at runtime; the build precaches only the latin subset.
+import '@fontsource-variable/newsreader/opsz.css';
+import '@fontsource-variable/newsreader/opsz-italic.css';
 interface Props {
   title: string;
   description?: string;
@@ -23,9 +29,12 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
     {description && <meta name="description" content={description} />}
     <link rel="alternate" type="application/rss+xml" title={`${siteName} RSS feed`} href="/feed.xml" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&display=swap" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#f7f5f0" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="onc brain" />
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     <style is:global>
       :root {
@@ -38,7 +47,7 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
         --accent: #0a4b8a;
         --accent-bg: #e8f1fa;
         --citation-bg: #f1ede1;
-        --font-serif: 'Newsreader', 'Source Serif Pro', Charter, Georgia, 'Times New Roman', serif;
+        --font-serif: 'Newsreader Variable', 'Newsreader', 'Source Serif Pro', Charter, Georgia, 'Times New Roman', serif;
         --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
       }
       @media (prefers-color-scheme: dark) {
@@ -211,6 +220,18 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
         if (mq.addEventListener) mq.addEventListener('change', sync);
         else if (mq.addListener) mq.addListener(sync);
       })();
+    </script>
+    <script is:inline>
+      // Register the @vite-pwa/astro-generated service worker. The integration's
+      // auto-registration doesn't fire under Astro 6, so we wire it manually.
+      // The SW itself (skipWaiting + clientsClaim) handles silent autoUpdate.
+      // is:inline keeps it verbatim in every page; the .catch swallows the dev
+      // 404 (the SW is only emitted by `astro build`, not `astro dev`).
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/pwa-sw.js', { scope: '/' }).catch(function () {});
+        });
+      }
     </script>
   </body>
 </html>

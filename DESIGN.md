@@ -22,15 +22,30 @@ See the [full emoji set + selection principles](#disease-site-emoji-set) below.
 
 ## Typography
 
-- **Body:** Newsreader (Google Fonts). Serif, italic + weight range loaded.
+- **Body:** Newsreader, **self-hosted** via `@fontsource-variable/newsreader` (latin subset, optical-size + weight axes, italic). Serif. Self-hosted (not the Google Fonts CDN) so the PWA service worker precaches it for offline fidelity, with no third-party round-trip. The family name is `Newsreader Variable` (see `--font-serif` in `Base.astro`).
 - **Why serif?** Clinical content reads as authoritative in serif. Sans-serif — especially `system-ui` — reads as utility/UI chrome, which is wrong for the content.
 - **Why a real face, not `system-ui`?** Branding consistency. `system-ui` changes per platform and OS update; the digest should look the same on a curator's iPhone, an attending's iPad, and the conference projection laptop.
 
 ## Color
 
-- **Background:** `#f7f5f0` (warm off-white). Soft on a phone in a dim conference room. Theme color for the eventual PWA manifest also.
+- **Background:** `#f7f5f0` (warm off-white). Soft on a phone in a dim conference room. Also the PWA manifest `theme_color` + `background_color`, and the opaque background of the maskable app icons (shipped v0.9).
 - **Foreground:** dark on light, defaults to the user agent's text color cascading from `body`. No custom near-black — let the platform pick the contrast.
 - **Accents:** minimal. The disclaimer callout has a left border; everything else is plain prose.
+
+## App icon (PWA)
+
+A dedicated home-screen mark, distinct from the old favicon "A": a **brain outline**
+(two hemispheres, single dividing line) in `#1a1a1a` stroke. Matches the product
+name ("onc brain") and reads at small sizes.
+
+- `public/favicon.svg` — transparent background, dark stroke (browser tab).
+- `public/icon-192.png`, `public/icon-512.png` — any-purpose, brain on `#f7f5f0`.
+- `public/icon-192-maskable.png`, `public/icon-512-maskable.png` — opaque `#f7f5f0`
+  background + safe-zone padding so the OS mask (circle/squircle) doesn't clip it.
+- `public/apple-touch-icon.png` — iOS home screen.
+
+When changing the mark, regenerate all five so the tab, home-screen, and maskable
+forms stay consistent.
 
 ## Layout principles
 

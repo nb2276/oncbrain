@@ -4,6 +4,35 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Added — Progressive Web App (installable + offline)
+
+oncbrain is now an installable PWA with offline support, built on
+`@vite-pwa/astro` (Workbox, `injectManifest`).
+
+- **Install to home screen** with a dedicated brain-mark icon set (192/512 +
+  maskable on the warm `#f7f5f0` background) and a web app manifest
+  (`display: standalone`, theme/background color `#f7f5f0`).
+- **Offline-first for the latest digest.** The single most-recent dated digest is
+  precached at build time, so it opens offline even for a reader who installed
+  from the home screen and never tapped today's page. The app shell (home, about,
+  sites index, search, CSS, icons, self-hosted font) is precached too.
+- **Bounded archive caching.** Older dated digests + per-site/per-conference pages
+  are `NetworkFirst` (3s timeout for hostile conference wifi), capped at 30 cached
+  entries so the offline footprint can't grow without limit.
+- **Branded offline page** (`/offline/`) with recovery links to the precached
+  latest digest + home, instead of the browser's default error screen.
+- **Self-hosted Newsreader** (`@fontsource-variable/newsreader`, latin subset)
+  replaces the Google Fonts CDN: offline font fidelity, faster first paint, no
+  third-party dependency.
+- **Silent auto-update** (`registerType: autoUpdate`): a new deploy reaches
+  readers on next load, no update prompt.
+- New `src/lib/pwa-routes.ts` (cache-route classification, unit-tested) and
+  `test/pwa-build.test.ts` (build-output assertions: precache scope, routes,
+  offline fallback, page injection). `astro.config.mjs` → `astro.config.ts`.
+
+The SW registration is wired manually in `Base.astro` because `@vite-pwa/astro`'s
+auto-injection does not fire under Astro 6.
+
 ### Added — durable digest overrides
 
 The 3-phase LLM regenerates the whole digest on every `build:day`, so hand-edits

@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+import { readdirSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { latestDigestDateFromFiles } from '../lib/pwa-routes.ts';
+
+// Build-time: the latest digest is precached, so this link is guaranteed to
+// resolve offline. Re-baked each deploy, so it stays current. Path resolved
+// from cwd (project root during `astro build`), matching digest-data.ts.
+let latest: string | null = null;
+try {
+  latest = latestDigestDateFromFiles(readdirSync(resolve(process.cwd(), 'data/digests')));
+} catch {
+  latest = null;
+}
+---
+
+<Base title="Offline" description="You're offline.">
+  <h2 style="margin-top:0">Offline</h2>
+
+  <div class="disclaimer">
+    You're offline and this page isn't cached. The latest digest and pages
+    you've already opened remain available.
+  </div>
+
+  <nav class="offline-actions">
+    {latest && <a href={`/${latest}/`}>&rarr; Latest digest ({latest})</a>}
+    <a href="/">&rarr; Home</a>
+  </nav>
+</Base>
+
+<style>
+  .offline-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    font-size: 1.05rem;
+  }
+</style>
