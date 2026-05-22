@@ -4,19 +4,23 @@
 // 700px reading column on wide screens; hidden below 1200px (the column
 // re-centers and the rail would overlap). Pure anchor links — no JS.
 interface RailItem {
-  href: string; // "#<anchor>"
+  href: string; // "#<anchor>" or a page URL
   name: string;
-  verdictEmoji: string;
+  verdictEmoji: string; // verdict emoji (studies) or site emoji (home nav)
 }
 interface Props {
   items: RailItem[];
+  label?: string; // header label; defaults to "Studies · N"
+  ariaLabel?: string;
 }
-const { items } = Astro.props as Props;
+const { items, label, ariaLabel } = Astro.props as Props;
+const railLabel = label ?? `Studies · ${items.length}`;
+const railAria = ariaLabel ?? 'Studies on this page';
 ---
 
 {items.length > 1 && (
-  <nav class="triage-rail" aria-label="Studies on this page">
-    <div class="triage-rail-label">Studies · {items.length}</div>
+  <nav class="triage-rail" aria-label={railAria}>
+    <div class="triage-rail-label">{railLabel}</div>
     <ol>
       {items.map((it) => (
         <li>

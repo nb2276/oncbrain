@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import TriageRail from '../components/TriageRail.astro';
 import {
   listDigests,
   listConferenceSummaries,
@@ -29,6 +30,12 @@ const navSites = DISEASE_SITES.map((s) => ({
 const navPopulated = navSites.filter((s) => s.count > 0);
 const navEmpty = navSites.filter((s) => s.count === 0);
 
+// Desktop left rail (same format as the study TriageRail): populated disease
+// sites, alphabetical by label. Mobile keeps the top chip nav below.
+const siteRailItems = [...navPopulated]
+  .sort((a, b) => a.label.localeCompare(b.label))
+  .map((s) => ({ href: `/sites/${s.slug}/`, name: s.label, verdictEmoji: s.emoji }));
+
 // Studies as a flat feed: every study in date-desc order, no date headers.
 // At current scale (low tens) we show the full archive on home; pagination
 // is a deferred concern (see TODOS.md when the archive grows past ~100).
@@ -36,6 +43,9 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
 ---
 
 <Base title={siteName} description="Curated AI-summarized digests of oncology updates.">
+  {digests.length > 0 && (
+    <TriageRail items={siteRailItems} label={`Sites · ${siteRailItems.length}`} ariaLabel="Browse by disease site" />
+  )}
   {digests.length > 0 && (
     <nav class="site-nav" aria-label="Browse by disease site">
       {navPopulated.length > 0 && (
@@ -156,6 +166,11 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
      inventory. Touch targets meet the 44px iOS HIG floor. */
   .site-nav {
     margin: 0 0 1.5rem;
+  }
+  /* On wide screens the left rail (TriageRail) is the disease-site nav; the top
+     chip cloud is the mobile/tablet fallback. Keep them from doubling up. */
+  @media (min-width: 1200px) {
+    .site-nav { display: none; }
   }
   .nav-row {
     display: flex;
