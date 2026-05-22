@@ -1,18 +1,18 @@
 {
   "date": "2026-05-21",
   "conference": null,
-  "generated_at": 1779396115060,
+  "generated_at": 1779409755351,
   "digest": {
-    "top_line": "SWOG S1007: 5-yr LRR <1% with/without RNI, IDFS unaffected (HR 0.85-1.03) in Oncotype-low HR+/HER2- N1 after BCS.",
-    "tldr": "SWOG S1007 secondary analysis: in Oncotype RS ≤25 HR+/HER2- N1 pts after BCS, 5-yr LRR was <1% regardless of RNI, with no IDFS signal from nodal RT in either menopausal group. Breast carried today's data, reinforcing locoregional safety of systemic de-escalation in favorable-biology early disease.",
+    "top_line": "S1007 secondary: RNI adds no IDFS signal (HR 0.85, p=0.16) in RS ≤25 N1 HR+/HER2- pts; 5-yr LRR already 0.55% without it.",
+    "tldr": "Breast locoregional de-escalation data continues to build: S1007 secondary analysis finds RNI provides no IDFS benefit in RS ≤25 N1 pts where baseline LRR is already <1% at 5 years. Non-randomized allocation limits causal inference, but findings track with post-Z0011 axillary de-escalation trends in biologically favorable subsets.",
     "sites": [
       {
         "disease_site": "breast",
-        "intro": "S1007 adds locoregional context to Oncotype-guided de-escalation: low LRR risk in favorable-biology N1 regardless of RNI receipt.",
+        "intro": "Locoregional intensity in RS-favorable N1 HR+/HER2- breast cancer remains guideline-unsettled; S1007's RT forms dataset now extends the oncotype de-escalation question from chemo to RT field.",
         "studies": [
           {
-            "name": "SWOG S1007 (RNI/LRR secondary analysis)",
-            "tldr": "5-yr LRR 0.55-0.85% with/without RNI after BCS; IDFS not associated with RNI in HR+/HER2- N1 favorable-biology breast cancer.",
+            "name": "SWOG S1007 (RNI analysis)",
+            "tldr": "S1007 secondary analysis: 5-yr LRR 0.55% (BCS, no RNI) to 0.85% (BCS + RNI); IDFS not improved by RNI in favorable N1 HR+/HER2-.",
             "details": [
               {
                 "text": "📊 5-yr cumulative LRR by locoregional treatment",
@@ -23,11 +23,11 @@
                   ],
                   "rows": [
                     [
-                      "BCS + RT with RNI",
+                      "BCS + RT + RNI",
                       "0.85%"
                     ],
                     [
-                      "BCS + RT without RNI",
+                      "BCS + RT, no RNI",
                       "0.55%"
                     ],
                     [
@@ -42,18 +42,39 @@
                 }
               },
               {
-                "text": "📐 IDFS by RNI receipt — no significant association in either menopausal group",
+                "text": "📐 IDFS by RNI receipt (adjusted)",
+                "table": {
+                  "columns": [
+                    "Subgroup",
+                    "HR (95% CI)",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "Premenopausal",
+                      "1.03 (0.74-1.43)",
+                      "0.87"
+                    ],
+                    [
+                      "Postmenopausal",
+                      "0.85 (0.68-1.07)",
+                      "0.16"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "🔍 Secondary analysis of S1007 (HR+/HER2-, RS ≤25, N1 1-3 nodes)",
                 "subdetails": [
-                  "Premenopausal: HR 1.03 (95% CI 0.74-1.43), p=0.87",
-                  "Postmenopausal: HR 0.85 (95% CI 0.68-1.07), p=0.16"
+                  "N=4871 with RT forms; median f/u 6.1 yrs",
+                  "81% received RT; 59% of RT pts received RNI",
+                  "RNI receipt by clinician discretion, not randomized"
                 ]
               },
-              "🔍 Secondary analysis of S1007 (N=4871): HR+/HER2-, Oncotype RS ≤25, 1-3 nodes; endocrine ± chemo; RT data prospectively collected",
-              "🔍 59% of RT recipients received RNI; median f/u 6.1 yrs",
-              "⚠️ RT allocation was NOT randomized — practice-pattern data; clinicians likely selectively added RNI to higher-risk pts within this already favorable-biology group",
-              "⚠️ IDFS analyses landmarked at 1 yr and adjusted for menopause, RS, tumor size, nodes, surgery — but residual confounding cannot be excluded",
-              "🔗 vs MA.20 / EORTC 22922: both showed RNI improved DFS in unselected N1, but predated Oncotype-guided systemic de-escalation; S1007 population is biologically lower-risk",
-              "📊 Chemo omission (in endocrine-only arm) was not independently associated with higher LRR — Oncotype-based systemic de-escalation appears locoregionally safe here"
+              "⚠️ RNI not randomized: confounding by indication unavoidable despite multivariate adjustment",
+              "⚠️ Very low absolute LRR limits statistical power to detect IDFS differences",
+              "🔗 vs MA.20 / EORTC 22922: those trials enrolled higher-risk N+ pts; RS ≤25 is a biologically distinct favorable subset",
+              "🔗 Low LRR without RNI consistent with post-Z0011 axillary de-escalation data in sentinel-node cohorts"
             ],
             "key_figure_url": null,
             "key_figure_caption": null,
@@ -61,16 +82,17 @@
             "tweet_ids": [
               1000000009
             ],
-            "slug": "swog-s1007-rni-lrr",
+            "slug": "swog-s1007-rni",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "RT allocation non-randomized; IDFS comparison is observational with likely selection bias. Descriptive LRR rates inform risk but cannot establish causality.",
-              "audience": "HR+/HER2-, Oncotype RS ≤25, N1 (1-3 nodes) breast cancer, BCS or mastectomy"
+              "rationale": "Secondary analysis; RNI receipt was observational, not randomized. Confounding by indication limits causal inference on IDFS.",
+              "audience": "HR+/HER2- breast, N1 (1-3 nodes), Oncotype RS ≤25, post-BCS or mastectomy"
             },
             "open_questions": [
-              "Would a randomized RNI omission trial confirm safety in Oncotype-selected N1?",
-              "Do pts with 3 nodes warrant RNI even at low recurrence score?"
+              "Would a dedicated RCT of RNI in RS ≤25 N1 pts confirm IDFS equipoise?",
+              "Findings applicable to pts who omit chemo on endocrine-only arm?"
             ],
+            "consort": null,
             "source_ids": [
               {
                 "type": "paper",
