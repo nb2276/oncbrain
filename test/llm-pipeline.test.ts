@@ -4,6 +4,7 @@ import {
   parseGroupingResponse,
   parseStudyAgentResponse,
   parseSynthesisResponse,
+  parseConsort,
   validateKeyFigure,
   validateStudyTables,
   dedupTablesAgainstCaption,
@@ -552,6 +553,78 @@ describe('validateStudyTables', () => {
     const localCluster = { slug: 'foo', name: 'PRESTIGE-PSMA', disease_site: 'prostate', tweet_ids: [1] };
     const raw = JSON.stringify({ tldr: 'y', details: [] });
     expect(parseStudyAgentResponse(raw, localCluster).name).toBe('PRESTIGE-PSMA');
+  });
+});
+
+describe('parseConsort', () => {
+  it('parses a complete CONSORT flow', () => {
+    const r = parseConsort({
+      enrolled: 1240,
+      excluded: 74,
+      randomized: 1166,
+      arms: [
+        { label: 'PPN-SBRT', allocated: 583, analyzed: 560 },
+        { label: 'P-SBRT', allocated: 583, analyzed: 571 },
+      ],
+    });
+    expect(r).toEqual({
+      enrolled: 1240,
+      excluded: 74,
+      randomized: 1166,
+      arms: [
+        { label: 'PPN-SBRT', allocated: 583, analyzed: 560 },
+        { label: 'P-SBRT', allocated: 583, analyzed: 571 },
+      ],
+    });
+  });
+
+  it('keeps minimal flow (randomized + 2 arms, optional fields null)', () => {
+    const r = parseConsort({
+      randomized: 200,
+      arms: [
+        { label: 'A', allocated: 100 },
+        { label: 'B', allocated: 100 },
+      ],
+    });
+    expect(r).toEqual({
+      enrolled: null,
+      excluded: null,
+      randomized: 200,
+      arms: [
+        { label: 'A', allocated: 100, analyzed: null },
+        { label: 'B', allocated: 100, analyzed: null },
+      ],
+    });
+  });
+
+  it('rejects fewer than 2 valid arms', () => {
+    expect(parseConsort({ randomized: 100, arms: [{ label: 'A', allocated: 100 }] })).toBeNull();
+  });
+
+  it('rejects missing/invalid total randomized', () => {
+    expect(
+      parseConsort({ arms: [{ label: 'A', allocated: 50 }, { label: 'B', allocated: 50 }] }),
+    ).toBeNull();
+    expect(parseConsort({ randomized: 0, arms: [] })).toBeNull();
+  });
+
+  it('drops arms without a label or positive allocated count', () => {
+    const r = parseConsort({
+      randomized: 150,
+      arms: [
+        { label: 'A', allocated: 75 },
+        { label: '', allocated: 75 },
+        { label: 'C', allocated: 0 },
+        { label: 'D', allocated: 75 },
+      ],
+    });
+    expect(r?.arms.map((a) => a.label)).toEqual(['A', 'D']);
+  });
+
+  it('returns null for non-objects', () => {
+    expect(parseConsort(null)).toBeNull();
+    expect(parseConsort('x')).toBeNull();
+    expect(parseConsort(undefined)).toBeNull();
   });
 });
 

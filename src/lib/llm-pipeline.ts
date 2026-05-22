@@ -203,6 +203,26 @@ export type DigestStudy = {
   // artifacts carry them at the site level (DigestSite.open_questions), which
   // renderers fall back to.
   open_questions?: string[] | null;
+  // v0.9: optional CONSORT flow for randomized trials — only when per-arm
+  // patient counts are reported in the source. Rendered as a dropdown diagram.
+  // Null/absent for single-arm, retrospective, or meta-analytic studies.
+  consort?: ConsortDiagram | null;
+};
+
+// One trial arm in the CONSORT flow.
+export type ConsortArm = {
+  label: string; // arm name, e.g. "PPN-SBRT"
+  allocated: number; // randomized/allocated to this arm
+  analyzed?: number | null; // analyzed for the primary outcome, if reported
+};
+
+// CONSORT participant flow. Every number must come from the source — the study
+// agent emits this only when per-arm counts are explicitly reported.
+export type ConsortDiagram = {
+  enrolled?: number | null; // assessed/enrolled before randomization, if reported
+  excluded?: number | null; // excluded before randomization, if reported
+  randomized: number; // total randomized
+  arms: ConsortArm[]; // >= 2 arms
 };
 
 export type SocImplication =
@@ -904,7 +924,36 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     slug: cluster.slug,
     verdict: parseVerdict(root.verdict),
     open_questions: parseOpenQuestions(root.open_questions),
+    consort: parseConsort(root.consort),
   };
+}
+
+// Parses the optional CONSORT flow. Strict: returns null unless the model gave a
+// positive total randomized and >= 2 arms each with a label + positive allocated
+// count. Drops the whole diagram on any shortfall rather than render a partial /
+// invented flow — every count must be real (no estimation).
+export function parseConsort(raw: unknown): ConsortDiagram | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const obj = raw as Record<string, unknown>;
+  const posInt = (v: unknown): number | null =>
+    typeof v === 'number' && Number.isFinite(v) && Number.isInteger(v) && v > 0 ? v : null;
+
+  const randomized = posInt(obj.randomized);
+  if (randomized === null) return null;
+
+  const armsRaw = Array.isArray(obj.arms) ? obj.arms : [];
+  const arms: ConsortArm[] = [];
+  for (const a of armsRaw) {
+    if (!a || typeof a !== 'object') continue;
+    const ao = a as Record<string, unknown>;
+    const label = typeof ao.label === 'string' ? ao.label.trim() : '';
+    const allocated = posInt(ao.allocated);
+    if (!label || allocated === null) continue;
+    arms.push({ label, allocated, analyzed: posInt(ao.analyzed) });
+  }
+  if (arms.length < 2) return null;
+
+  return { enrolled: posInt(obj.enrolled), excluded: posInt(obj.excluded), randomized, arms };
 }
 
 // Parses the optional verdict block emitted by Phase 2. Forgiving: if the

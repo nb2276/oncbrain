@@ -194,7 +194,7 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
       (function () {
         var mq = window.matchMedia('(min-width: 1024px)');
         function sync() {
-          var ds = document.querySelectorAll('details.study-depth');
+          var ds = document.querySelectorAll('details.study-depth, details.consort');
           for (var i = 0; i < ds.length; i++) ds[i].open = mq.matches;
         }
         sync();

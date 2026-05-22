@@ -44,6 +44,22 @@ export type DigestStudy = {
   // v0.8.1: per-study open questions (Phase 2). Older artifacts carry these at
   // the site level (DigestSite.open_questions); renderers fall back to that.
   open_questions?: string[] | null;
+  // v0.9: optional CONSORT participant flow (randomized trials only, when the
+  // source reports per-arm counts). Rendered as a dropdown diagram on the card.
+  consort?: ConsortDiagram | null;
+};
+
+export type ConsortArm = {
+  label: string;
+  allocated: number;
+  analyzed?: number | null;
+};
+
+export type ConsortDiagram = {
+  enrolled?: number | null;
+  excluded?: number | null;
+  randomized: number;
+  arms: ConsortArm[];
 };
 
 export type SocImplication =

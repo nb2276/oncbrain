@@ -119,6 +119,36 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     </section>
   )}
 
+  {/* ── CONSORT participant flow (randomized trials, when counts reported) ── */}
+  {study.consort && study.consort.arms.length >= 2 && (
+    <details class="consort">
+      <summary>CONSORT flow</summary>
+      <div class="consort-flow">
+        {study.consort.enrolled != null && (
+          <>
+            <div class="consort-node">Assessed / enrolled <b>{study.consort.enrolled}</b></div>
+            <div class="consort-arrow">
+              {study.consort.excluded != null ? `↓  ${study.consort.excluded} excluded` : '↓'}
+            </div>
+          </>
+        )}
+        <div class="consort-node consort-rand">Randomized <b>{study.consort.randomized}</b></div>
+        <div class="consort-arrow">↓</div>
+        <div class="consort-arms">
+          {study.consort.arms.map((a) => (
+            <div class="consort-arm">
+              <div class="consort-arm-label">{a.label}</div>
+              <div class="consort-arm-line">allocated <b>{a.allocated}</b></div>
+              {a.analyzed != null && (
+                <div class="consort-arm-line consort-analyzed">analyzed <b>{a.analyzed}</b></div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </details>
+  )}
+
   {/* ── Depth layer: folded behind a tap ── */}
   {hasDepth && (
     <details class="study-depth">
@@ -428,6 +458,63 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     font-size: 0.93rem;
   }
   .comparator-list li { margin: 0.2rem 0; }
+
+  /* CONSORT participant-flow diagram (in a dropdown). Vertical flow with box
+     nodes + arrow connectors; arms wrap to a row, stacking on narrow screens. */
+  .consort { margin-top: 0.5rem; }
+  .consort > summary {
+    cursor: pointer;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    padding: 0.3rem 0;
+  }
+  .consort > summary:hover { color: var(--accent); }
+  .consort[open] > summary { margin-bottom: 0.5rem; color: var(--accent); }
+  .consort-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    text-align: center;
+  }
+  .consort-node {
+    padding: 0.4rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+  }
+  .consort-node b { font-weight: 700; }
+  .consort-rand { border-color: var(--accent); }
+  .consort-arrow {
+    color: var(--fg-muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    padding: 0.15rem 0;
+  }
+  .consort-arms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+    width: 100%;
+  }
+  .consort-arm {
+    flex: 1 1 130px;
+    max-width: 220px;
+    padding: 0.5rem 0.7rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    text-align: left;
+  }
+  .consort-arm-label { font-weight: 700; color: var(--fg); margin-bottom: 0.2rem; }
+  .consort-arm-line { color: var(--fg-muted); line-height: 1.4; }
+  .consort-arm-line b { color: var(--fg); font-weight: 700; }
+  .consort-analyzed { font-size: 0.78rem; }
 
   .study-tldr {
     margin: 0 0 0.55rem;

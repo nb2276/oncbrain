@@ -135,7 +135,16 @@ Examples of INVALID captions (interpretive, would hallucinate):
   "open_questions": [
     "Optimal sequencing vs cabazitaxel",
     "Durability of response beyond 2 years"
-  ]
+  ],
+  "consort": {
+    "enrolled": 1240,
+    "excluded": 74,
+    "randomized": 1166,
+    "arms": [
+      { "label": "PPN-SBRT", "allocated": 583, "analyzed": 560 },
+      { "label": "P-SBRT", "allocated": 583, "analyzed": 571 }
+    ]
+  }
 }
 ```
 
@@ -150,6 +159,7 @@ Rules:
 - `open_questions`: 0-3 short unresolved questions THIS study raises (sequencing, durability, generalizability, confirmatory trial needed). Terse noun phrases or questions, ≤15 words each. Put them HERE, not as ❓ bullets in `details`. Empty array `[]` if none.
 - `key_figure_caption` numeric-only, from OCR overlays only. Use the table form for comparison figures (2+ arms × multiple endpoints); flat string is acceptable only for non-comparison figures. Null if no OCR numbers available.
 - `nct` only if explicit in tweets/OCR. Format: "NCTxxxxxxxx" or null.
+- `consort`: a CONSORT participant flow, ONLY for randomized trials where the source explicitly reports per-arm patient counts. Provide `randomized` (total) and `arms` (≥2, each `label` + `allocated`); add `enrolled`, `excluded`, and per-arm `analyzed` ONLY when those exact numbers are reported. Set to **null** for single-arm studies, retrospective series, meta-analyses, or whenever you lack the total randomized and ≥2 arm counts. NEVER invent, estimate, or back-calculate a count — every number must appear in the source.
 
 ═══ TRUST BOUNDARY ═══
 

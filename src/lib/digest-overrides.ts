@@ -21,6 +21,7 @@ const EDITABLE_STUDY_KEYS = [
   'open_questions',
   'key_figure_caption',
   'key_figure_url',
+  'consort',
 ] as const;
 
 export type StudyEdit = Partial<Pick<DigestStudy, (typeof EDITABLE_STUDY_KEYS)[number]>>;
