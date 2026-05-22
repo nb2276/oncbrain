@@ -2,6 +2,14 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.2] - 2026-05-22
+
+### Changed
+
+- The "← all dates · browse by site" nav now stays pinned to the top of the
+  screen while scrolling a digest or a by-site list, so navigation stays reachable
+  without scrolling back up.
+
 ## [0.9.1] - 2026-05-22
 
 ### Changed — study card layout + typography

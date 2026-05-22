@@ -86,8 +86,17 @@ const railItems = summary.occurrences.map((occ) => ({
 </Base>
 
 <style>
+  /* Pinned to the top while scrolling a long site list so the nav stays
+     reachable. Solid page-colored background + bottom border so cards scroll
+     under it. */
   .crumb {
+    position: sticky;
+    top: 0;
+    z-index: 50;
     margin: 0 0 0.75rem;
+    padding: 0.55rem 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
     font-size: 0.85rem;
     font-family: var(--font-sans);
     color: var(--fg-muted);

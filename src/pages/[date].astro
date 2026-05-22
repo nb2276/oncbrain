@@ -198,8 +198,16 @@ for (const study of allStudiesOnDate) {
 
 <style>
   /* ── Breadcrumb / header ───────────────────────────────── */
+  /* Pinned to the top while scrolling a long digest so the nav stays reachable.
+     Solid page-colored background + bottom border so cards scroll under it. */
   .crumb {
+    position: sticky;
+    top: 0;
+    z-index: 50;
     margin: 0 0 0.75rem;
+    padding: 0.55rem 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
     font-size: 0.85rem;
     color: var(--fg-muted);
     font-family: var(--font-sans);
