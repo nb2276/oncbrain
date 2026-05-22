@@ -28,6 +28,12 @@ export type DigestArtifactForExport = {
           | { text: string; subdetails: string[] }
           | { text: string; table: { columns: string[]; rows: string[][] } }
         >;
+        // v0.10: figure gallery. Older artifacts carry the single key_figure_*
+        // pair below; the render loop normalizes both shapes.
+        figures?: Array<{
+          url: string;
+          caption?: string | { columns: string[]; rows: string[][] } | null;
+        }>;
         key_figure_url?: string | null;
         // v0.4.3: caption can be string or table form
         key_figure_caption?: string | { columns: string[]; rows: string[][] } | null;
@@ -227,10 +233,19 @@ function renderBody(artifact: DigestArtifactForExport): string {
       lines.push(`### ${study.name}${nctSuffix}`, '');
       lines.push(`> ${wikilinkify(study.tldr)}`, '');
 
-      if (study.key_figure_url) {
-        const cap = study.key_figure_caption;
-        const altText = typeof cap === 'string' ? cap : study.name;
-        lines.push(`![${altText}](${study.key_figure_url})`);
+      // v0.10: render the figure gallery. Normalize the v0.4 single-figure
+      // shape (key_figure_url/caption) into the array so old artifacts export
+      // identically.
+      const studyFigures =
+        study.figures && study.figures.length > 0
+          ? study.figures
+          : study.key_figure_url
+            ? [{ url: study.key_figure_url, caption: study.key_figure_caption ?? null }]
+            : [];
+      for (const fig of studyFigures) {
+        const cap = fig.caption;
+        const altText = typeof cap === 'string' && cap ? cap : study.name;
+        lines.push(`![${altText}](${fig.url})`);
         if (typeof cap === 'string' && cap) {
           lines.push(`*${cap}*`);
         } else if (cap && typeof cap !== 'string') {

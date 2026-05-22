@@ -19,6 +19,8 @@ const EDITABLE_STUDY_KEYS = [
   'details',
   'verdict',
   'open_questions',
+  'figures',
+  // v0.4 single-figure fields retained so old override sidecars still apply.
   'key_figure_caption',
   'key_figure_url',
   'consort',

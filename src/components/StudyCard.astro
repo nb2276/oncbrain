@@ -12,12 +12,13 @@
 import { linkifyCitations } from '../lib/extract.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
 import { VERDICT_META } from '../lib/verdict.ts';
-import type {
-  DigestStudy,
-  DigestDetail,
-  DigestArtifact,
-  DigestArtifactPaper,
-  DigestArtifactSlide,
+import {
+  studyFigures,
+  type DigestStudy,
+  type DigestDetail,
+  type DigestArtifact,
+  type DigestArtifactPaper,
+  type DigestArtifactSlide,
 } from '../lib/digest-data.ts';
 
 type Bookmark = DigestArtifact['bookmarks'][number];
@@ -66,14 +67,21 @@ const comparatorBullets = study.details.filter(isComparatorBullet);
 const otherBullets = study.details.filter((d) => !isComparatorBullet(d));
 const verdictMeta = study.verdict ? VERDICT_META[study.verdict.soc_implication] : null;
 
-const hasFigure = Boolean(study.key_figure_url && isSafeImageUrl(study.key_figure_url));
+// v0.10: figure gallery (KM curve, forest plot, results/AE table…). Normalizes
+// the v0.4 single-figure shape; re-applies the host allowlist at render time as
+// defense-in-depth (build already validated). First figure is the visual anchor;
+// the rest fold behind a tap on mobile (auto-expanded on desktop via Base.astro).
+const figures = studyFigures(study).filter((f) => isSafeImageUrl(f.url));
+const hasFigures = figures.length > 0;
+const restFigures = figures.slice(1);
+
 const hasOpenQuestions = Boolean(
   showOpenQuestions && study.open_questions && study.open_questions.length > 0,
 );
-// Folded "depth" layer: everything past the triage essentials.
+// Folded "depth" layer: everything past the triage essentials. Figures are no
+// longer part of this fold — they live in their own column (see .study-figures).
 const hasDepth =
   Boolean(study.verdict?.audience) ||
-  hasFigure ||
   otherBullets.length > 0 ||
   hasOpenQuestions ||
   authors.length > 0;
@@ -88,7 +96,8 @@ if (papers.length > 0) sourceBadges.push(`📄 ${papers.length} paper${papers.le
 if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.length === 1 ? '' : 's'}`);
 ---
 
-<div class="study" id={anchorId}>
+<div class:list={['study', hasFigures && 'has-figures']} id={anchorId}>
+  <div class="study-head">
   {/* ── Triage layer: always visible ── */}
   <h4 class="study-name">
     {study.name}
@@ -118,7 +127,68 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
       </ul>
     </section>
   )}
+  </div>{/* /.study-head */}
 
+  {/* ── Figures: right column on desktop; first shown + rest folded on mobile ── */}
+  {hasFigures && (
+    <div class="study-figures">
+      <figure class="study-figure">
+        <img src={figures[0]!.url} alt={typeof figures[0]!.caption === 'string' ? figures[0]!.caption : study.name} loading="lazy" onerror="this.style.display='none'" />
+        {typeof figures[0]!.caption === 'string' && figures[0]!.caption && (
+          <figcaption>{figures[0]!.caption}</figcaption>
+        )}
+        {figures[0]!.caption && typeof figures[0]!.caption !== 'string' && (
+          <figcaption>
+            <div class="study-table-wrap caption-table-wrap">
+              <table class="study-table">
+                <thead>
+                  <tr>{figures[0]!.caption.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}</tr>
+                </thead>
+                <tbody>
+                  {figures[0]!.caption.rows.map((row) => (
+                    <tr>{row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}</tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </figcaption>
+        )}
+      </figure>
+      {restFigures.length > 0 && (
+        <details class="more-figures">
+          <summary>+{restFigures.length} more figure{restFigures.length === 1 ? '' : 's'}</summary>
+          <div class="more-figures-stack">
+            {restFigures.map((fig) => (
+              <figure class="study-figure">
+                <img src={fig.url} alt={typeof fig.caption === 'string' ? fig.caption : study.name} loading="lazy" onerror="this.style.display='none'" />
+                {typeof fig.caption === 'string' && fig.caption && (
+                  <figcaption>{fig.caption}</figcaption>
+                )}
+                {fig.caption && typeof fig.caption !== 'string' && (
+                  <figcaption>
+                    <div class="study-table-wrap caption-table-wrap">
+                      <table class="study-table">
+                        <thead>
+                          <tr>{fig.caption.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}</tr>
+                        </thead>
+                        <tbody>
+                          {fig.caption.rows.map((row) => (
+                            <tr>{row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}</tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </figcaption>
+                )}
+              </figure>
+            ))}
+          </div>
+        </details>
+      )}
+    </div>
+  )}
+
+  <div class="study-rest">
   {/* ── CONSORT participant flow (randomized trials, when counts reported) ── */}
   {study.consort && study.consort.arms.length >= 2 && (
     <details class="consort">
@@ -155,38 +225,6 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
       <summary>{depthSummary}</summary>
       {study.verdict?.audience && (
         <p class="study-audience"><span class="audience-label">For</span>{study.verdict.audience}</p>
-      )}
-      {hasFigure && (
-        <figure class="study-figure">
-          <img
-            src={study.key_figure_url}
-            alt={typeof study.key_figure_caption === 'string' ? study.key_figure_caption : study.name}
-            loading="lazy"
-          />
-          {typeof study.key_figure_caption === 'string' && (
-            <figcaption>{study.key_figure_caption}</figcaption>
-          )}
-          {study.key_figure_caption && typeof study.key_figure_caption !== 'string' && (
-            <figcaption>
-              <div class="study-table-wrap caption-table-wrap">
-                <table class="study-table">
-                  <thead>
-                    <tr>
-                      {study.key_figure_caption.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {study.key_figure_caption.rows.map((row) => (
-                      <tr>
-                        {row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </figcaption>
-          )}
-        </figure>
       )}
       {otherBullets.length > 0 && (
         <ul class="study-details">
@@ -336,6 +374,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
       </div>
     </details>
   )}
+  </div>{/* /.study-rest */}
 </div>
 
 <style>
@@ -348,6 +387,41 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     border-radius: 4px;
     scroll-margin-top: 1rem;
   }
+
+  /* v0.10 figure gallery. Mobile/tablet: single column, DOM order is
+     head → figures → rest, so the first figure is a visual anchor right under
+     the triage layer. Desktop (≥1024px) when figures are present: a 2-column
+     grid — narrative left, figure column right spanning the card height. */
+  .study-figures { margin: 0.9rem 0 0.2rem; }
+  .study-figures .study-figure { margin: 0; }
+
+  .more-figures { margin-top: 0.85rem; }
+  .more-figures > summary {
+    cursor: pointer;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    padding: 0.3rem 0;
+  }
+  .more-figures > summary:hover { color: var(--accent); }
+  .more-figures[open] > summary { margin-bottom: 0.6rem; color: var(--accent); }
+  .more-figures-stack { display: flex; flex-direction: column; gap: 0.85rem; }
+
+  @media (min-width: 1024px) {
+    .study.has-figures {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) clamp(240px, 30%, 330px);
+      grid-template-areas:
+        "head figs"
+        "rest figs";
+      column-gap: 1.5rem;
+      align-items: start;
+    }
+    .study.has-figures > .study-head { grid-area: head; min-width: 0; }
+    .study.has-figures > .study-rest { grid-area: rest; min-width: 0; }
+    .study.has-figures > .study-figures { grid-area: figs; margin: 0; }
+  }
+
   .study-name {
     margin: 0 0 0.35rem;
     font-family: var(--font-serif);

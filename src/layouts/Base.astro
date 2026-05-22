@@ -3,8 +3,12 @@ import SearchBox from '../components/SearchBox.astro';
 interface Props {
   title: string;
   description?: string;
+  // v0.10: study-bearing pages (date, by-site) widen the reading column on
+  // desktop so each card can carry a figure column on the right. Content pages
+  // (home, about) leave this off and stay at the 700px reading width.
+  wide?: boolean;
 }
-const { title, description } = Astro.props;
+const { title, description, wide = false } = Astro.props;
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'onc brain';
 const curatorName = import.meta.env.PUBLIC_CURATOR_NAME || '';
 const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
@@ -139,9 +143,15 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
       @media (max-width: 600px) {
         body { padding: 1.25rem 1rem 3rem; font-size: 16px; }
       }
+      /* v0.10: study pages widen on desktop to fit a per-card figure column.
+         Below 1024px the cards stay single-column, so the body stays 700px to
+         keep body text from running too wide on tablets. */
+      @media (min-width: 1024px) {
+        body.wide { max-width: 940px; }
+      }
     </style>
   </head>
-  <body>
+  <body class:list={[wide && 'wide']}>
     <header>
       <div class="header-top">
         <div class="header-title">
@@ -194,7 +204,7 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
       (function () {
         var mq = window.matchMedia('(min-width: 1024px)');
         function sync() {
-          var ds = document.querySelectorAll('details.study-depth, details.consort');
+          var ds = document.querySelectorAll('details.study-depth, details.consort, details.more-figures');
           for (var i = 0; i < ds.length; i++) ds[i].open = mq.matches;
         }
         sync();

@@ -43,8 +43,8 @@ const railItems = summary.occurrences.map((occ) => ({
 }));
 ---
 
-<Base title={`${meta.label} — oncbrain`} description={`Studies aggregated for ${meta.label} across all digest dates.`}>
-  <TriageRail items={railItems} />
+<Base title={`${meta.label} — oncbrain`} description={`Studies aggregated for ${meta.label} across all digest dates.`} wide={true}>
+  <TriageRail items={railItems} wide={true} />
   <nav class="crumb">
     <a href="/">← all dates</a>
     <a href="/sites/">browse by site</a>

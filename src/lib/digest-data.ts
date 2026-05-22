@@ -15,6 +15,13 @@ export type DigestDetail =
   | { text: string; subdetails: string[] }
   | { text: string; table: DigestTable };
 
+// v0.10: a single promoted figure (image URL + numeric caption or comparison
+// table). Studies carry an ordered array of these; see studyFigures().
+export type DigestFigure = {
+  url: string;
+  caption: string | DigestTable | null;
+};
+
 // v0.5+: typed source reference. Resolves to bookmarks/papers/slides
 // in the rendered page. Older v0.4 artifacts use tweet_ids only.
 export type DigestSourceRef =
@@ -26,9 +33,14 @@ export type DigestStudy = {
   name: string;
   tldr: string;
   details: DigestDetail[];
-  // v0.4: optional promoted figure. Both fields are null when the per-study
+  // v0.10: ordered gallery of promoted figures. Empty/absent when the agent
+  // abstained. Use studyFigures() to read — it normalizes the v0.4 single-figure
+  // shape (key_figure_url/caption) into this array for old artifacts.
+  figures?: DigestFigure[];
+  // v0.4: single promoted figure. Both fields are null when the per-study
   // agent abstains or when the post-hoc OCR validator rejects the caption.
   // v0.4.3: caption may also be a DigestTable for comparison-chart figures.
+  // Superseded by `figures` in v0.10; retained so old artifacts still render.
   key_figure_url?: string | null;
   key_figure_caption?: string | DigestTable | null;
   nct: string | null;
@@ -75,6 +87,18 @@ export type StudyVerdict = {
   rationale: string;
   audience: string | null;
 };
+
+// Normalize a study's figures across schema versions. v0.10 artifacts carry
+// `figures[]`; v0.4–v0.9 artifacts carry a single key_figure_url/caption pair.
+// Renderers and the Obsidian export read figures exclusively through this so
+// both shapes render identically.
+export function studyFigures(study: DigestStudy): DigestFigure[] {
+  if (study.figures && study.figures.length > 0) return study.figures;
+  if (study.key_figure_url) {
+    return [{ url: study.key_figure_url, caption: study.key_figure_caption ?? null }];
+  }
+  return [];
+}
 
 export type DigestArtifactPaper = {
   id: number;

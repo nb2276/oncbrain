@@ -48,34 +48,38 @@ Wall-of-semicolons strings are explicitly forbidden when the data is a compariso
 
 A downstream validator checks every numeric token in every table cell against the tweet text + image OCR of source tweets. Any cell number not traceable to source = the WHOLE table is replaced with a flat fallback string. Be conservative: only put numbers in tables that you can ground in source content.
 
-═══ KEY FIGURE ═══
+═══ KEY FIGURES ═══
 
-**Default to abstaining.** Promoting the wrong image as a study's headline figure is worse than no figure at all — the reader will give it disproportionate weight. Set both `key_figure_url` and `key_figure_caption` to `null` UNLESS you can satisfy ALL of:
-- The image is unambiguously clinically informative (KM curve > forest plot > primary endpoint bar chart > trial schema > AE table)
-- You can write a caption sourced ONLY from numeric text overlays on that specific image (HR, CI, p-value, medians, time points)
-- The OCR text for the image contains those numbers verbatim — if OCR didn't capture them, you cannot caption them
+Emit a `figures` array: the decision-relevant images for this study, **ordered most-informative first**, each `{url, caption}`. Up to 4. Empty array `[]` when you should abstain on all of them.
 
-**Caption form (v0.4.3): prefer table when the figure is a comparison.**
-- For comparison figures (KM curves with 2+ arms, forest plots, AE side-by-side tables), emit `key_figure_caption` as a TABLE: `{columns: [...], rows: [...]}`. Columns are typically the arms/trials being compared; rows are endpoints/timepoints/subgroups (or vice versa, whichever matches the figure's layout).
-- For figures that aren't comparisons (single-arm summary slide, schema, trial flow), emit a flat string caption.
-- For figures where you can't extract numeric structure cleanly, emit `null`.
+**Default to abstaining on weak images.** Promoting the wrong image is worse than no figure — the reader gives it disproportionate weight. Include a figure ONLY when it clears this bar:
+- The image is unambiguously clinically informative. Priority order: KM curve > forest plot > primary-endpoint bar chart > results/AE table > trial schema. Skip logos, headshots, title slides, photos of the room, and images redundant with one you already included.
+- You can caption it sourced ONLY from numeric text overlays on THAT specific image (HR, CI, p-value, medians, time points), OR abstain on the caption (set it to `null`) and keep the image.
+- A figure's caption numbers must appear verbatim in THAT image's OCR text — if OCR didn't capture them, you cannot caption them (set caption `null`).
 
-A downstream validator rejects caption numbers (in string or table cells) that aren't in the figure's OCR. Failed validation → caption dropped, figure kept. So: when in doubt, abstain.
+**Selection — don't dump every image.** One strong figure beats four mediocre ones. A typical trial thread has a KM curve, a forest plot, and an AE table — those are 3 good figures. Don't add a 4th just to fill the array. Order by what a busy reader most needs to see first.
 
-**(v0.4.4) No duplication between caption and details.**
-If you emit a TABLE-form `key_figure_caption`, then `details` MUST NOT contain a detail-table covering the same comparison (same columns / same axis). The caption already shows that breakdown — don't restate it.
+**Caption form: prefer a table when the figure is a comparison.**
+- For comparison figures (KM curves with 2+ arms, forest plots, AE side-by-side tables), emit that figure's `caption` as a TABLE: `{columns: [...], rows: [...]}`. Columns are typically the arms/trials being compared; rows are endpoints/timepoints/subgroups (or vice versa, whichever matches the figure's layout).
+- For non-comparison figures (single-arm summary slide, schema, trial flow), emit a flat string caption.
+- When you can't extract numeric structure cleanly, set that figure's `caption` to `null` (keep the image).
 
-Details should COMPLEMENT the caption, not duplicate it:
+A downstream validator rejects caption numbers (string or table cells) not in that figure's OCR. Failed validation → that caption is dropped, the figure kept. Figures whose URL isn't in the manifest are dropped entirely. So: when in doubt, abstain on the caption, not the image.
+
+**No duplication between captions and details.**
+If any figure caption is a TABLE, then `details` MUST NOT contain a detail-table covering the same comparison (same columns / same axis). The caption already shows that breakdown — don't restate it.
+
+Details should COMPLEMENT the captions, not duplicate them:
 - ✅ Methodology / trial design (phase, N, eligibility, dose/fractionation)
-- ✅ Subgroups not in the caption table
+- ✅ Subgroups not in any caption table
 - ✅ Cross-trial comparisons (vs prior landmark, vs concurrent trial)
 - ✅ Methodological critique (open-label, post-hoc, era effects)
 - ❌ Re-emitting the same comparison axes/values as a detail table
-- ❌ A first detail bullet that just restates one row of the caption table
+- ❌ A first detail bullet that just restates one row of a caption table
 
-If the caption table already shows "Prostate 2.7%/8.1%, NSCLC 6.0%/9.8%...", the detail bullets should pivot to WHY (methodology, biology, comparison) — not list those same numbers again in a second table.
+If a caption table already shows "Prostate 2.7%/8.1%, NSCLC 6.0%/9.8%...", the detail bullets should pivot to WHY (methodology, biology, comparison) — not list those same numbers again in a second table.
 
-For `key_figure_caption`: **numeric-only, sourced strictly from OCR text overlays on the chosen figure**. Read the OCR text for that image. Include only what is literally printed on the figure: HR + CI, p-value, medians, time points, n-at-risk. Do NOT describe curve shape, plateau, or separation timing — those are visual interpretations that drift. If OCR doesn't contain these numbers, write just the endpoint label (e.g., "Overall survival") or set caption to null.
+For every caption: **numeric-only, sourced strictly from OCR text overlays on that figure**. Read the OCR text for that image. Include only what is literally printed on it: HR + CI, p-value, medians, time points, n-at-risk. Do NOT describe curve shape, plateau, or separation timing — those are visual interpretations that drift. If OCR doesn't contain these numbers, write just the endpoint label (e.g., "Overall survival") or set that caption to null.
 
 Examples of valid captions (numeric-only, from OCR):
 - "OS: HR 0.62 (95% CI 0.48-0.79), p<0.001. Median 14.2 vs 9.8 mo."
@@ -118,14 +122,26 @@ Examples of INVALID captions (interpretive, would hallucinate):
     "🔗 vs VISION (NEJM 2021): similar HR but pre-treated heavier here",
     "⚠️ counter: 1° EP was composite (rPFS not OS); OS HR 0.87 not significant"
   ],
-  "key_figure_url": "https://pbs.twimg.com/media/...jpg or null",
-  "key_figure_caption": {
-    "columns": ["Arm", "Median OS", "HR (95% CI)", "p"],
-    "rows": [
-      ["Lu-PSMA", "14.2 mo", "0.62 (0.48-0.79)", "<0.001"],
-      ["Cabazitaxel", "9.8 mo", "n/a", "n/a"]
-    ]
-  },
+  "figures": [
+    {
+      "url": "https://pbs.twimg.com/media/...km.jpg",
+      "caption": {
+        "columns": ["Arm", "Median OS", "HR (95% CI)", "p"],
+        "rows": [
+          ["Lu-PSMA", "14.2 mo", "0.62 (0.48-0.79)", "<0.001"],
+          ["Cabazitaxel", "9.8 mo", "n/a", "n/a"]
+        ]
+      }
+    },
+    {
+      "url": "https://pbs.twimg.com/media/...forest.jpg",
+      "caption": "Forest plot — subgroup HRs, 1° endpoint OS. Overall HR 0.62."
+    },
+    {
+      "url": "https://pbs.twimg.com/media/...schema.jpg",
+      "caption": null
+    }
+  ],
   "nct": "NCT04855643 or null",
   "verdict": {
     "soc_implication": "confirmatory",
@@ -154,10 +170,10 @@ Rules:
 - `details` typically 4-9 bullets. ONE idea per bullet: prefer several short bullets over a few dense ones, and split semicolon-chained run-ons (or group them under `{text, subdetails}`). Mix flat strings, `{text, subdetails}`, and `{text, table}` based on dimensionality. Flat strings ≤20 words. Subdetails rows and table cells can each be ≤20 words. Decompose what the source gives; never pad to hit a count or invent a fact to fill a bullet.
 - **Tables are required** when comparing 2+ trials/arms across 2+ endpoints/timepoints. Don't write "POP-RT HR 0.50; PEACE-2 HR 0.97; POP-RT cFFS HR 0.74..." as one string; emit a table.
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
-- `key_figure_url` must be EXACTLY one of the image URLs in the manifest below, or null. Don't invent URLs.
+- `figures`: 0-4 items, ordered most-informative first. Each `url` must be EXACTLY one of the image URLs in the manifest below — don't invent URLs, don't repeat the same URL twice. Abstain (empty array `[]`) rather than promote weak images.
 - `verdict` is REQUIRED. Pick `soc_implication` from the taxonomy in the VOICE block above (6 enums). When uncertain, default conservatively (prefer `unclear` over guessing; prefer `early-signal` or `confirmatory` over `practice-changing`). `rationale` ≤30 words and explains the VERDICT CHOICE (not the trial result). `audience` ≤80 chars, one-line eligibility gate, or null when applicability is too broad to compress.
 - `open_questions`: 0-3 short unresolved questions THIS study raises (sequencing, durability, generalizability, confirmatory trial needed). Terse noun phrases or questions, ≤15 words each. Put them HERE, not as ❓ bullets in `details`. Empty array `[]` if none.
-- `key_figure_caption` numeric-only, from OCR overlays only. Use the table form for comparison figures (2+ arms × multiple endpoints); flat string is acceptable only for non-comparison figures. Null if no OCR numbers available.
+- each figure `caption` is numeric-only, from that image's OCR overlays only. Use the table form for comparison figures (2+ arms × multiple endpoints); flat string is acceptable only for non-comparison figures. Null if no OCR numbers available (image still kept).
 - `nct` only if explicit in tweets/OCR. Format: "NCTxxxxxxxx" or null.
 - `consort`: a CONSORT participant flow, ONLY for randomized trials where the source explicitly reports per-arm patient counts. Provide `randomized` (total) and `arms` (≥2, each `label` + `allocated`); add `enrolled`, `excluded`, and per-arm `analyzed` ONLY when those exact numbers are reported. Set to **null** for single-arm studies, retrospective series, meta-analyses, or whenever you lack the total randomized and ≥2 arm counts. NEVER invent, estimate, or back-calculate a count — every number must appear in the source.
 

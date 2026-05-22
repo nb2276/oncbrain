@@ -12,14 +12,18 @@ interface Props {
   items: RailItem[];
   label?: string; // header label; defaults to "Studies · N"
   ariaLabel?: string;
+  // v0.10: study pages widen the reading column to 940px (Base `wide`). The
+  // rail then needs a different gutter offset + a higher breakpoint to clear
+  // the wider column. Pass the same flag here as to Base.
+  wide?: boolean;
 }
-const { items, label, ariaLabel } = Astro.props as Props;
+const { items, label, ariaLabel, wide = false } = Astro.props as Props;
 const railLabel = label ?? `Studies · ${items.length}`;
 const railAria = ariaLabel ?? 'Studies on this page';
 ---
 
 {items.length > 1 && (
-  <nav class="triage-rail" aria-label={railAria}>
+  <nav class:list={['triage-rail', wide && 'triage-rail--wide']} aria-label={railAria}>
     <div class="triage-rail-label">{railLabel}</div>
     <ol>
       {items.map((it) => (
@@ -38,17 +42,33 @@ const railAria = ariaLabel ?? 'Studies on this page';
   /* Hidden by default (mobile + tablet); the card stack already triages there. */
   .triage-rail { display: none; }
 
-  /* Wide screens only: park the rail in the left gutter, just left of the
-     centered 700px column, and keep it in view as the page scrolls. The
+  /* Narrow reading column (700px): park the rail in the left gutter, just left
+     of the centered column, and keep it in view as the page scrolls. The
      breakpoint is where the gutter is wide enough to hold the rail without
      overlapping the reading column. */
   @media (min-width: 1200px) {
-    .triage-rail {
+    .triage-rail:not(.triage-rail--wide) {
       display: block;
       position: fixed;
       top: 6.5rem;
       left: calc((100vw - 700px) / 2 - 244px);
       width: 220px;
+      max-height: calc(100vh - 9rem);
+      overflow-y: auto;
+      font-family: var(--font-sans);
+    }
+  }
+
+  /* Wide reading column (940px, study pages): the gutter only clears the rail
+     from ~1400px, so the wide variant waits for that width. Below it the rail
+     stays hidden and the cards' own figure columns carry the page. */
+  @media (min-width: 1400px) {
+    .triage-rail--wide {
+      display: block;
+      position: fixed;
+      top: 6.5rem;
+      left: calc((100vw - 940px) / 2 - 224px);
+      width: 200px;
       max-height: calc(100vh - 9rem);
       overflow-y: auto;
       font-family: var(--font-sans);

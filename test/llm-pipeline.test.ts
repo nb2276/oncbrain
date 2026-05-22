@@ -6,6 +6,7 @@ import {
   parseSynthesisResponse,
   parseConsort,
   validateKeyFigure,
+  validateFigures,
   validateStudyTables,
   dedupTablesAgainstCaption,
   capStudyImages,
@@ -1052,5 +1053,167 @@ describe('detectClusterCollisions', () => {
     );
     expect(warn).not.toHaveBeenCalled();
     warn.mockRestore();
+  });
+});
+
+// ── v0.10: figure gallery (figures[]) ──
+describe('parseStudyAgentResponse — figures[]', () => {
+  const cluster = {
+    slug: 'prestige-psma',
+    name: 'PRESTIGE-PSMA',
+    disease_site: 'prostate',
+    tweet_ids: [1, 2],
+  };
+
+  it('parses a figures array with mixed caption shapes', () => {
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [],
+      figures: [
+        { url: 'https://pbs.twimg.com/media/km.jpg', caption: 'OS HR 0.62' },
+        {
+          url: 'https://pbs.twimg.com/media/tbl.jpg',
+          caption: { columns: ['Arm', 'OS'], rows: [['Lu', '14.2']] },
+        },
+        { url: 'https://pbs.twimg.com/media/schema.jpg', caption: null },
+      ],
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    expect(out.figures).toHaveLength(3);
+    expect(out.figures![0]).toEqual({ url: 'https://pbs.twimg.com/media/km.jpg', caption: 'OS HR 0.62' });
+    expect(typeof out.figures![1]!.caption).toBe('object');
+    expect(out.figures![2]!.caption).toBeNull();
+  });
+
+  it('dedupes repeated figure urls and caps at 4', () => {
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [],
+      figures: [
+        { url: 'https://pbs.twimg.com/media/a.jpg', caption: null },
+        { url: 'https://pbs.twimg.com/media/a.jpg', caption: 'dupe' }, // dropped
+        { url: 'https://pbs.twimg.com/media/b.jpg', caption: null },
+        { url: 'https://pbs.twimg.com/media/c.jpg', caption: null },
+        { url: 'https://pbs.twimg.com/media/d.jpg', caption: null },
+        { url: 'https://pbs.twimg.com/media/e.jpg', caption: null }, // over cap
+      ],
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    expect(out.figures!.map((f) => f.url)).toEqual([
+      'https://pbs.twimg.com/media/a.jpg',
+      'https://pbs.twimg.com/media/b.jpg',
+      'https://pbs.twimg.com/media/c.jpg',
+      'https://pbs.twimg.com/media/d.jpg',
+    ]);
+  });
+
+  it('drops figure entries without a usable url', () => {
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [],
+      figures: [{ caption: 'no url' }, { url: '   ' }, { url: 'https://pbs.twimg.com/media/a.jpg', caption: null }],
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    expect(out.figures).toEqual([{ url: 'https://pbs.twimg.com/media/a.jpg', caption: null }]);
+  });
+
+  it('back-compat: wraps a v0.4 single key_figure_url into figures[]', () => {
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [],
+      key_figure_url: 'https://pbs.twimg.com/media/a.jpg',
+      key_figure_caption: 'OS HR 0.62',
+    });
+    const out = parseStudyAgentResponse(raw, cluster);
+    expect(out.figures).toEqual([
+      { url: 'https://pbs.twimg.com/media/a.jpg', caption: 'OS HR 0.62' },
+    ]);
+  });
+
+  it('emits an empty figures[] when none provided', () => {
+    const raw = JSON.stringify({ name: 'X', tldr: 'y', details: [] });
+    expect(parseStudyAgentResponse(raw, cluster).figures).toEqual([]);
+  });
+});
+
+describe('validateFigures', () => {
+  const tweets: DigestInputTweet[] = [
+    {
+      id: 1,
+      author: '@drfoo',
+      text: 'PRESTIGE results',
+      image_urls: ['https://pbs.twimg.com/media/a.jpg', 'https://pbs.twimg.com/media/b.jpg'],
+      image_ocr_texts: [
+        'PRESTIGE-PSMA Overall Survival HR 0.62 95% CI 0.48 0.79',
+        'AE table G3 22 vs 14',
+      ],
+    },
+  ];
+
+  it('keeps valid figures, drops a caption with an unverifiable number', () => {
+    const out = validateFigures(
+      [
+        { url: 'https://pbs.twimg.com/media/a.jpg', caption: 'OS HR 0.62' },
+        { url: 'https://pbs.twimg.com/media/b.jpg', caption: 'G3 99 vs 14' }, // 99 not in OCR
+      ],
+      tweets,
+      true,
+    );
+    expect(out).toHaveLength(2);
+    expect(out[0]!.caption).toBe('OS HR 0.62');
+    expect(out[1]!.url).toBe('https://pbs.twimg.com/media/b.jpg');
+    expect(out[1]!.caption).toBeNull(); // caption dropped, figure kept
+  });
+
+  it('drops a figure whose url is not in the cluster', () => {
+    const out = validateFigures(
+      [
+        { url: 'https://pbs.twimg.com/media/a.jpg', caption: 'OS HR 0.62' },
+        { url: 'https://pbs.twimg.com/media/HALLUCINATED.jpg', caption: null },
+      ],
+      tweets,
+      true,
+    );
+    expect(out.map((f) => f.url)).toEqual(['https://pbs.twimg.com/media/a.jpg']);
+  });
+
+  it('drops all figures when OCR is globally unavailable (env-skew safety)', () => {
+    const out = validateFigures(
+      [{ url: 'https://pbs.twimg.com/media/a.jpg', caption: 'OS HR 0.62' }],
+      tweets,
+      false,
+    );
+    expect(out).toEqual([]);
+  });
+});
+
+describe('dedupTablesAgainstCaption — figures[]', () => {
+  it('drops a detail-table duplicating any figure caption-table', () => {
+    const study: DigestStudy = {
+      name: 'X',
+      tldr: 'y',
+      nct: null,
+      tweet_ids: [1],
+      figures: [
+        { url: 'https://pbs.twimg.com/media/a.jpg', caption: 'OS HR 0.62' },
+        {
+          url: 'https://pbs.twimg.com/media/b.jpg',
+          caption: { columns: ['Primary', '1yr LF', '3yr LF'], rows: [['Prostate', '2.7%', '8.1%']] },
+        },
+      ],
+      details: [
+        'flat bullet',
+        {
+          text: 'LF by primary',
+          table: { columns: ['Primary', '1yr LF', '3yr LF'], rows: [['Prostate', '2.7%', '8.1%']] },
+        },
+      ],
+    };
+    const out = dedupTablesAgainstCaption(study);
+    expect(out.details).toEqual(['flat bullet', 'LF by primary']);
   });
 });

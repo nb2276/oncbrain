@@ -172,15 +172,29 @@ export type DigestDetail =
   | { text: string; subdetails: string[] }
   | { text: string; table: DigestTable };
 
+// v0.10: one promoted figure. caption is numeric-only OCR text (string) or a
+// comparison matrix (table), or null when the model abstains on a caption.
+export type DigestFigure = {
+  url: string;
+  caption: string | DigestTable | null;
+};
+
 export type DigestStudy = {
   name: string;
   tldr: string;
   details: DigestDetail[];
-  key_figure_url: string | null;
+  // v0.10: gallery of promoted figures (KM curve, forest plot, results/AE
+  // table…), ordered by importance. Supersedes the single key_figure_* pair.
+  // Empty/absent = the agent abstained on all figures.
+  figures?: DigestFigure[];
+  // v0.4 back-compat: older artifacts carry a single promoted figure here.
+  // Renderers/exporters normalize via studyFigures(); new builds leave these
+  // unset and populate `figures` instead.
+  key_figure_url?: string | null;
   // v0.4.3: caption may be a flat string OR a table for comparison figures
   // (KM curves, forest plots, AE comparisons). Table form is preferred when
   // the figure has 2+ rows × 2+ columns of comparable data.
-  key_figure_caption: string | DigestTable | null;
+  key_figure_caption?: string | DigestTable | null;
   nct: string | null;
   // Back-compat: synthetic ids the pipeline uses internally. Renderers MAY
   // use this directly (v0.4 path), or prefer source_ids for typed refs.
@@ -698,18 +712,16 @@ async function runStudyAgent(
     `phase2:${cluster.slug}`,
   );
 
-  // Post-hoc validation of key_figure: drop caption if numeric tokens
-  // aren't traceable to OCR text for that figure. Drop both if figure URL
-  // isn't actually in the cluster.
-  const validated = validateKeyFigure(
-    study.key_figure_caption,
-    study.key_figure_url,
+  // Post-hoc validation of each promoted figure: drop a figure whose URL isn't
+  // in the cluster / not on the host allowlist; for survivors, drop the caption
+  // when its numbers aren't traceable to that image's OCR (figure kept). When
+  // OCR is globally unavailable, all figures are dropped (env-skew safety).
+  const validatedFigures = validateFigures(
+    study.figures ?? [],
     tweets,
     ocrAvailable,
+    cluster.slug,
   );
-  if (validated.reason) {
-    console.warn(`  [phase2:${cluster.slug}] key_figure: ${validated.reason}`);
-  }
 
   // v0.4.2: Numbers in table cells get the same OCR/source-text validation.
   // Table is structurally regular (rows × columns), so cell-level validation
@@ -718,7 +730,7 @@ async function runStudyAgent(
   // string noting the drop. Conservative: a half-validated table is more
   // misleading than no table.
   const detailsValidated = validateStudyTables(
-    { ...study, key_figure_url: validated.figureUrl, key_figure_caption: validated.caption },
+    { ...study, figures: validatedFigures },
     tweets,
     cluster.slug,
   );
@@ -729,24 +741,58 @@ async function runStudyAgent(
   return dedupTablesAgainstCaption(detailsValidated, cluster.slug);
 }
 
-// If the caption is a table, drop any detail-table whose column set
-// overlaps ≥2 headers with the caption. Replaces the detail-table with a
-// flat string of just its `text` label so the reader still sees the bullet
-// concept but not the duplicate matrix.
+// Validate every promoted figure against its own OCR, reusing the single-figure
+// validator (validateKeyFigure). A figure is dropped entirely when its URL fails
+// the host allowlist, isn't present in the cluster, or when OCR is unavailable;
+// otherwise it's kept and its caption is dropped if any caption number isn't
+// OCR-traceable. Figures stay in input order (most-informative first).
+export function validateFigures(
+  figures: DigestFigure[],
+  tweets: DigestInputTweet[],
+  ocrAvailable: boolean,
+  slug?: string,
+): DigestFigure[] {
+  const out: DigestFigure[] = [];
+  for (const fig of figures) {
+    const v = validateKeyFigure(fig.caption, fig.url, tweets, ocrAvailable);
+    if (v.reason && slug) {
+      console.warn(`  [phase2:${slug}] figure ${fig.url}: ${v.reason}`);
+    }
+    if (!v.figureUrl) continue; // dropped: bad URL / not in cluster / OCR off
+    out.push({ url: v.figureUrl, caption: v.caption });
+  }
+  return out;
+}
+
+// Drop any detail-table whose column set overlaps ≥2 headers with ANY table-form
+// figure caption. Replaces the detail-table with a flat string of just its
+// `text` label so the reader still sees the bullet concept but not the duplicate
+// matrix. Reads captions from v0.10 `figures` and the v0.4 legacy single pair.
 export function dedupTablesAgainstCaption(
   study: DigestStudy,
   slug?: string,
 ): DigestStudy {
-  const cap = study.key_figure_caption;
-  if (!cap || typeof cap === 'string') return study;
-  const capCols = new Set(cap.columns.map((c) => c.trim().toLowerCase()));
+  const captionTables: DigestTable[] = [];
+  for (const f of study.figures ?? []) {
+    if (f.caption && typeof f.caption !== 'string') captionTables.push(f.caption);
+  }
+  if (study.key_figure_caption && typeof study.key_figure_caption !== 'string') {
+    captionTables.push(study.key_figure_caption);
+  }
+  if (captionTables.length === 0) return study;
+  const capColSets = captionTables.map(
+    (t) => new Set(t.columns.map((c) => c.trim().toLowerCase())),
+  );
   let dropped = 0;
   const newDetails: DigestDetail[] = study.details.map((d) => {
     if (!isTableDetail(d)) return d;
     const detailCols = d.table.columns.map((c) => c.trim().toLowerCase());
-    let shared = 0;
-    for (const c of detailCols) if (capCols.has(c)) shared++;
-    if (shared >= 2) {
+    const isDuplicate = capColSets.some((capCols) => {
+      let shared = 0;
+      for (const c of detailCols) if (capCols.has(c)) shared++;
+      return shared >= 2;
+    });
+    if (isDuplicate) {
       dropped++;
       return d.text; // keep the parent label, drop the duplicate matrix
     }
@@ -754,7 +800,7 @@ export function dedupTablesAgainstCaption(
   });
   if (dropped > 0 && slug) {
     console.warn(
-      `  [phase2:${slug}] dropped ${dropped} detail-table(s): duplicates caption-table columns`,
+      `  [phase2:${slug}] dropped ${dropped} detail-table(s): duplicates a figure caption-table`,
     );
   }
   return { ...study, details: newDetails };
@@ -883,19 +929,63 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
       : nctRaw && /^\d{8}$/.test(nctRaw)
         ? `NCT${nctRaw}`
         : null;
-  const key_figure_url =
-    typeof root.key_figure_url === 'string' && root.key_figure_url.trim()
-      ? root.key_figure_url.trim()
-      : null;
-  // v0.4.3: caption can be flat string OR a {columns, rows} table for
-  // comparison figures. Parser collapses degenerate tables (<2 columns
-  // or 0 rows) by dropping caption entirely — the LLM signaled intent
-  // for a table but didn't fill it.
-  let key_figure_caption: string | DigestTable | null = null;
-  if (typeof root.key_figure_caption === 'string' && root.key_figure_caption.trim()) {
-    key_figure_caption = root.key_figure_caption.trim();
-  } else if (root.key_figure_caption && typeof root.key_figure_caption === 'object') {
-    const tbl = root.key_figure_caption as Record<string, unknown>;
+  // v0.10: a `figures` array, each {url, caption}. v0.4 back-compat: a model
+  // that still emits the single key_figure_url/caption pair is wrapped into a
+  // one-element array. URLs are deduped (a model may cite the same image twice)
+  // and capped at MAX_FIGURES. Captions are parsed but NOT yet validated —
+  // runStudyAgent validates each against the figure's OCR after parsing.
+  const figures = parseFigures(root);
+
+  return {
+    name,
+    tldr,
+    details,
+    figures,
+    nct,
+    tweet_ids: cluster.tweet_ids,
+    slug: cluster.slug,
+    verdict: parseVerdict(root.verdict),
+    open_questions: parseOpenQuestions(root.open_questions),
+    consort: parseConsort(root.consort),
+  };
+}
+
+const MAX_FIGURES = 4;
+
+// Parse the `figures` array (v0.10) with v0.4 single-figure back-compat. Keeps
+// only entries with a non-empty string url; dedupes repeated urls; caps the
+// count. Caption shape is normalized by parseCaption.
+export function parseFigures(root: Record<string, unknown>): DigestFigure[] {
+  const out: DigestFigure[] = [];
+  const seen = new Set<string>();
+  const push = (urlRaw: unknown, captionRaw: unknown) => {
+    if (typeof urlRaw !== 'string') return;
+    const url = urlRaw.trim();
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    out.push({ url, caption: parseCaption(captionRaw) });
+  };
+  if (Array.isArray(root.figures)) {
+    for (const f of root.figures) {
+      if (!f || typeof f !== 'object') continue;
+      const fo = f as Record<string, unknown>;
+      push(fo.url, fo.caption);
+    }
+  } else {
+    // v0.4 single-figure shape.
+    push(root.key_figure_url, root.key_figure_caption);
+  }
+  return out.slice(0, MAX_FIGURES);
+}
+
+// v0.4.3: a caption is a flat string OR a {columns, rows} table for comparison
+// figures. Degenerate tables (<2 columns or 0 rows) collapse to null — the LLM
+// signaled table intent but didn't fill it. Short rows are padded, long rows
+// truncated to the column count.
+export function parseCaption(raw: unknown): string | DigestTable | null {
+  if (typeof raw === 'string' && raw.trim()) return raw.trim();
+  if (raw && typeof raw === 'object') {
+    const tbl = raw as Record<string, unknown>;
     const columns = Array.isArray(tbl.columns)
       ? tbl.columns.filter((c): c is string => typeof c === 'string').map((c) => c.trim())
       : [];
@@ -908,24 +998,9 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
       if (cells.length > columns.length) cells.length = columns.length;
       rows.push(cells);
     }
-    if (columns.length >= 2 && rows.length >= 1) {
-      key_figure_caption = { columns, rows };
-    }
+    if (columns.length >= 2 && rows.length >= 1) return { columns, rows };
   }
-
-  return {
-    name,
-    tldr,
-    details,
-    key_figure_url,
-    key_figure_caption,
-    nct,
-    tweet_ids: cluster.tweet_ids,
-    slug: cluster.slug,
-    verdict: parseVerdict(root.verdict),
-    open_questions: parseOpenQuestions(root.open_questions),
-    consort: parseConsort(root.consort),
-  };
+  return null;
 }
 
 // Parses the optional CONSORT flow. Strict: returns null unless the model gave a
@@ -1204,7 +1279,7 @@ async function runSynthesisPhase(
     tldr: study.tldr,
     details: study.details,
     nct: study.nct,
-    key_figure_caption: study.key_figure_caption,
+    figure_captions: (study.figures ?? []).map((f) => f.caption),
   }));
 
   const prompt = template

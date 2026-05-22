@@ -110,8 +110,8 @@ for (const study of allStudiesOnDate) {
 }
 ---
 
-<Base title={title} description={digest.top_line || digest.tldr}>
-  <TriageRail items={railItems} />
+<Base title={title} description={digest.top_line || digest.tldr} wide={true}>
+  <TriageRail items={railItems} wide={true} />
   <nav class="crumb">
     <a href="/">← all dates</a>
     {conference && <a href={`/conferences/${conference.slug}/`}>{conference.name}</a>}
