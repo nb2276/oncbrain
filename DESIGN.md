@@ -81,9 +81,9 @@ Twenty-two slugs, ordered roughly head-to-toe for solid tumors, then liquid tumo
 | head-neck | Head & Neck | 👄 |
 | thoracic | Thoracic / Lung | 🫁 |
 | breast | Breast | 🎀 |
-| upper-gi | Upper GI | 🍽️ |
+| upper-gi | GI Upper | 🍽️ |
 | hepatobiliary | Hepatobiliary | 🟡 |
-| lower-gi | Lower GI | 🌀 |
+| lower-gi | GI Lower | 🌀 |
 | gyn | Gynecologic | 🌷 |
 | prostate | Prostate | 🌰 |
 | bladder | Bladder | 💧 |
@@ -107,7 +107,7 @@ Twenty-two slugs, ordered roughly head-to-toe for solid tumors, then liquid tumo
 3. **Clinical signal over etiology.** Hepatobiliary 🟡 (jaundice signal) beats 🍷 (wine implies alcoholic liver, excludes HCC of other causes).
 4. **Canonical analogies.** Prostate 🌰 (chestnut ≈ the walnut-size description used clinically). Kidney 🫘 (literally named "kidney bean").
 5. **Awareness symbols when canonical.** Breast 🎀 (pink ribbon).
-6. **Accept compromise where no good option exists.** Upper GI 🍽️ stays as food-adjacent because there is no stomach/esophagus emoji.
+6. **Accept compromise where no good option exists.** GI Upper 🍽️ stays as food-adjacent because there is no stomach/esophagus emoji.
 
 ## Embeds & third-party
 
