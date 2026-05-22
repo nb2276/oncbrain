@@ -78,10 +78,12 @@ const restFigures = figures.slice(1);
 const hasOpenQuestions = Boolean(
   showOpenQuestions && study.open_questions && study.open_questions.length > 0,
 );
-// Folded "depth" layer: everything past the triage essentials. Figures are no
-// longer part of this fold — they live in their own column (see .study-figures).
+// Audience ("For …") is lifted to the triage layer (just under the name), so it
+// is no longer part of the folded depth.
+const hasAudience = Boolean(study.verdict?.audience);
+// Folded "depth" layer: everything past the triage essentials. Figures live in
+// their own column; audience is now in the head; CONSORT stays in the main flow.
 const hasDepth =
-  Boolean(study.verdict?.audience) ||
   otherBullets.length > 0 ||
   hasOpenQuestions ||
   authors.length > 0;
@@ -105,6 +107,9 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
       <a class="citation study-nct" href={`https://clinicaltrials.gov/study/${study.nct}`} target="_blank" rel="noopener">{study.nct}</a>
     )}
   </h4>
+  {hasAudience && (
+    <p class="study-audience study-audience-head"><span class="audience-label">For</span>{study.verdict!.audience}</p>
+  )}
   <p class="study-tldr" set:html={linkifyCitations(study.tldr)} />
   {study.verdict?.rationale && verdictMeta && (
     <aside class:list={['verdict-block', `verdict-${study.verdict.soc_implication}`]}>
@@ -133,7 +138,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   {hasFigures && (
     <div class="study-figures">
       <figure class="study-figure">
-        <img src={figures[0]!.url} alt={typeof figures[0]!.caption === 'string' ? figures[0]!.caption : study.name} loading="lazy" onerror="this.style.display='none'" />
+        <img class="study-zoom" src={figures[0]!.url} alt={typeof figures[0]!.caption === 'string' ? figures[0]!.caption : study.name} loading="lazy" onerror="this.style.display='none'" />
         {typeof figures[0]!.caption === 'string' && figures[0]!.caption && (
           <figcaption>{figures[0]!.caption}</figcaption>
         )}
@@ -160,7 +165,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
           <div class="more-figures-stack">
             {restFigures.map((fig) => (
               <figure class="study-figure">
-                <img src={fig.url} alt={typeof fig.caption === 'string' ? fig.caption : study.name} loading="lazy" onerror="this.style.display='none'" />
+                <img class="study-zoom" src={fig.url} alt={typeof fig.caption === 'string' ? fig.caption : study.name} loading="lazy" onerror="this.style.display='none'" />
                 {typeof fig.caption === 'string' && fig.caption && (
                   <figcaption>{fig.caption}</figcaption>
                 )}
@@ -223,9 +228,6 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   {hasDepth && (
     <details class="study-depth">
       <summary>{depthSummary}</summary>
-      {study.verdict?.audience && (
-        <p class="study-audience"><span class="audience-label">For</span>{study.verdict.audience}</p>
-      )}
       {otherBullets.length > 0 && (
         <ul class="study-details">
           {otherBullets.map((d) => {
@@ -379,21 +381,26 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
 
 <style>
   .study {
-    margin: 1.25rem 0;
+    margin: 2.25rem 0;
     padding: 1rem 1.15rem;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-left: 3px solid var(--accent);
     border-radius: 4px;
+    /* Lift each card off the page so adjacent left accent bars read as
+       separate objects, not one continuous line, when stacked. */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     scroll-margin-top: 1rem;
   }
 
-  /* v0.10 figure gallery. Mobile/tablet: single column, DOM order is
-     head → figures → rest, so the first figure is a visual anchor right under
-     the triage layer. Desktop (≥1024px) when figures are present: a 2-column
-     grid — narrative left, figure column right spanning the card height. */
+  /* Figure gallery. Below 1200px: single column, DOM order is head → figures →
+     rest, so the first figure is a visual anchor right under the triage layer.
+     At ≥1200px when figures are present: a 2-column grid — narrative left, figure
+     column right spanning the card height (see the @media block below). */
   .study-figures { margin: 0.9rem 0 0.2rem; }
   .study-figures .study-figure { margin: 0; }
+  /* Figures open full-screen on click (lightbox wired in Base.astro). */
+  .study-zoom { cursor: zoom-in; }
 
   .more-figures { margin-top: 0.85rem; }
   .more-figures > summary {
@@ -407,14 +414,18 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   .more-figures[open] > summary { margin-bottom: 0.6rem; color: var(--accent); }
   .more-figures-stack { display: flex; flex-direction: column; gap: 0.85rem; }
 
-  @media (min-width: 1024px) {
+  /* Two-column (narrative + figure) only when the page is wide enough for both
+     to breathe (paired with body.wide → 1180px at ≥1200). Below 1200 the card
+     falls back to a single column — head, then figures full-width, then rest —
+     i.e. it "falls in line" like mobile, so the narrative never gets cramped. */
+  @media (min-width: 1200px) {
     .study.has-figures {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) clamp(240px, 30%, 330px);
+      grid-template-columns: minmax(0, 1fr) clamp(320px, 40%, 470px);
       grid-template-areas:
         "head figs"
         "rest figs";
-      column-gap: 1.5rem;
+      column-gap: 1.75rem;
       align-items: start;
     }
     .study.has-figures > .study-head { grid-area: head; min-width: 0; }
@@ -422,12 +433,16 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     .study.has-figures > .study-figures { grid-area: figs; margin: 0; }
   }
 
+  /* Title earns prominence from size + weight (big bold serif), not a tinted
+     band or color swap — keeps the card's type calm instead of choppy. */
   .study-name {
-    margin: 0 0 0.35rem;
+    margin: 0 0 0.4rem;
     font-family: var(--font-serif);
-    font-size: 1.05rem;
-    font-weight: 600;
-    letter-spacing: -0.005em;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    color: var(--fg);
     display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem;
   }
   .study-nct {
@@ -456,19 +471,23 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   }
   .author-more { color: var(--fg-muted); }
 
-  /* Audience gate: "For: …" one-liner inside the depth fold. */
+  /* Audience gate: "FOR …" qualifier under the title. Serif description matches
+     the card's content voice (TL;DR, verdict, comparator); only the small FOR
+     tag stays sans, consistent with the other section labels. */
   .study-audience {
     margin: 0 0 0.55rem;
-    font-family: var(--font-sans);
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     color: var(--fg-muted);
-    line-height: 1.4;
+    line-height: 1.45;
   }
+  /* Shared meta-label rhythm (FOR / vs leading data) — one consistent treatment
+     so the card's small labels don't each look slightly different. */
   .audience-label {
+    font-family: var(--font-sans);
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     color: var(--fg-muted);
     margin-right: 0.5rem;
   }
@@ -511,15 +530,16 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   .comparator-block {
     margin: 0.65rem 0 0.65rem;
     padding: 0.55rem 0.85rem 0.6rem;
-    background: var(--accent-bg);
+    background: var(--bg-card);
     border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
     border-radius: 4px;
   }
   .comparator-label {
     font-family: var(--font-sans);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--accent);
     margin-bottom: 0.35rem;
@@ -590,11 +610,19 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   .consort-arm-line b { color: var(--fg); font-weight: 700; }
   .consort-analyzed { font-size: 0.78rem; }
 
+  /* TL;DR is the headline result — make it the lead callout so it isn't lost
+     between the title and the verdict/comparator boxes. The one tinted block in
+     the head; verdict + comparator are quieter bordered callouts below it. */
   .study-tldr {
-    margin: 0 0 0.55rem;
-    font-size: 1rem;
-    line-height: 1.45;
+    margin: 0 0 0.7rem;
+    padding: 0.6rem 0.85rem;
+    font-size: 1.08rem;
+    line-height: 1.5;
     color: var(--fg);
+    background: var(--accent-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
   }
 
   /* Depth fold: methodology + attribution behind a tap. Summary mirrors the
@@ -830,7 +858,14 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   }
   .caption-table-wrap .study-table {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
+  }
+  /* Caption tables live in the narrow figure column; let cells wrap so wide
+     results/AE tables fit the column instead of being clipped on the right. */
+  .caption-table-wrap .study-table th,
+  .caption-table-wrap .study-table td {
+    white-space: normal;
+    padding: 0.4rem 0.55rem;
   }
 
   /* Per-study open questions: a divider inside the depth fold. */

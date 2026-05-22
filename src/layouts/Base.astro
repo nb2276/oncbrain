@@ -152,11 +152,45 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
       @media (max-width: 600px) {
         body { padding: 1.25rem 1rem 3rem; font-size: 16px; }
       }
-      /* v0.10: study pages widen on desktop to fit a per-card figure column.
-         Below 1024px the cards stay single-column, so the body stays 700px to
-         keep body text from running too wide on tablets. */
-      @media (min-width: 1024px) {
-        body.wide { max-width: 940px; }
+      /* Study pages widen to fit a narrative + figure two-column card, but only
+         once there's room for both to breathe (≥1200px → 1180px body, paired
+         with the StudyCard grid breakpoint). Below 1200 the body stays at the
+         700px reading column and figure cards fall to a single column, so the
+         narrative never runs too wide or gets cramped beside a figure. */
+      @media (min-width: 1200px) {
+        body.wide { max-width: 1180px; }
+      }
+      /* Figure lightbox: click any .study-zoom image to view it full-screen. */
+      .lightbox-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background: rgba(0, 0, 0, 0.85);
+        cursor: zoom-out;
+      }
+      .lightbox-overlay.open { display: flex; }
+      .lightbox-overlay img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      }
+      .lightbox-close {
+        position: fixed;
+        top: 0.75rem;
+        right: 1.1rem;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 2.2rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0.2rem 0.55rem;
       }
     </style>
   </head>
@@ -206,19 +240,131 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
       </p>
     </footer>
     <script is:inline>
-      // Triage-first is the base design: study depth folds (details.study-depth)
-      // render collapsed. On desktop there's room, so auto-expand them. Mobile
-      // stays collapsed for the 90-second scan. Re-syncs when crossing the
-      // breakpoint; a manual toggle persists until the next crossing.
+      // Triage-first is the base design: depth folds render collapsed; on desktop
+      // there's room, so auto-expand the narrative depth + CONSORT. Mobile stays
+      // collapsed for the 90-second scan.
+      //
+      // Figure galleries are different: "+N more figures" stays CLOSED by default
+      // and only auto-opens (two-column desktop only) when expanding it does NOT
+      // make the card taller — i.e. the figure column has spare vertical room
+      // beside a taller narrative. Measured per card, and re-checked as lazy
+      // images load (they change the column heights).
       (function () {
-        var mq = window.matchMedia('(min-width: 1024px)');
-        function sync() {
-          var ds = document.querySelectorAll('details.study-depth, details.consort, details.more-figures');
-          for (var i = 0; i < ds.length; i++) ds[i].open = mq.matches;
+        var mqDesktop = window.matchMedia('(min-width: 1024px)');
+        var mqTwoCol = window.matchMedia('(min-width: 1200px)');
+        var measuring = false;
+        // Cards the reader has manually toggled — never auto-decide these again,
+        // or the observer would fight the click (slam an opened gallery shut).
+        var userTouched = new WeakSet();
+        var ro = 'ResizeObserver' in window ? new ResizeObserver(function (entries) {
+          if (measuring) return;
+          for (var i = 0; i < entries.length; i++) decideFigures(entries[i].target);
+        }) : null;
+
+        function syncDepth() {
+          var ds = document.querySelectorAll('details.study-depth, details.consort');
+          for (var i = 0; i < ds.length; i++) ds[i].open = mqDesktop.matches;
         }
-        sync();
-        if (mq.addEventListener) mq.addEventListener('change', sync);
-        else if (mq.addListener) mq.addListener(sync);
+
+        function decideFigures(card) {
+          if (userTouched.has(card)) return; // reader is in control of this card
+          var mf = card.querySelector('details.more-figures');
+          if (!mf) return;
+          if (!mqTwoCol.matches) { mf.open = false; return; }
+          measuring = true;
+          mf.open = false;
+          var closedH = card.offsetHeight;
+          mf.open = true;
+          var openH = card.offsetHeight;
+          // Keep open only if it didn't grow the card (figure column still fits
+          // within the narrative height). +4px tolerance for sub-pixel rounding.
+          mf.open = openH <= closedH + 4;
+          measuring = false;
+        }
+
+        function syncFigures() {
+          var cards = document.querySelectorAll('.study.has-figures');
+          for (var i = 0; i < cards.length; i++) decideFigures(cards[i]);
+        }
+
+        // A manual toggle (one we didn't make) hands that card to the reader:
+        // mark it touched and stop observing it so auto-decide can't override.
+        function wireManualOptOut() {
+          var mfs = document.querySelectorAll('.study.has-figures details.more-figures');
+          for (var i = 0; i < mfs.length; i++) {
+            mfs[i].addEventListener('toggle', function () {
+              if (measuring) return;
+              var card = this.closest('.study.has-figures');
+              if (card) { userTouched.add(card); if (ro) ro.unobserve(card); }
+            });
+          }
+        }
+
+        function observeAll() {
+          if (!ro) return;
+          var cards = document.querySelectorAll('.study.has-figures');
+          for (var i = 0; i < cards.length; i++) ro.observe(cards[i]);
+        }
+
+        syncDepth();
+        wireManualOptOut();
+        // Defer the figure decision until images have dimensions.
+        window.addEventListener('load', syncFigures);
+        observeAll();
+
+        function onChange() {
+          // A breakpoint cross is a real layout change — re-apply defaults to all
+          // cards (including ones toggled at the previous width) and re-observe.
+          userTouched = new WeakSet();
+          observeAll();
+          syncDepth();
+          syncFigures();
+        }
+        if (mqDesktop.addEventListener) {
+          mqDesktop.addEventListener('change', onChange);
+          mqTwoCol.addEventListener('change', onChange);
+        } else if (mqDesktop.addListener) {
+          mqDesktop.addListener(onChange);
+          mqTwoCol.addListener(onChange);
+        }
+      })();
+    </script>
+    <script is:inline>
+      // Figure lightbox: one shared overlay, lazily created. Delegated click on
+      // any img.study-zoom opens it full-screen; click/Esc closes.
+      (function () {
+        var overlay = null;
+        function close() { if (overlay) overlay.classList.remove('open'); }
+        function open(src, alt) {
+          if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'lightbox-overlay';
+            var img = document.createElement('img');
+            var btn = document.createElement('button');
+            btn.className = 'lightbox-close';
+            btn.setAttribute('aria-label', 'Close');
+            btn.textContent = '×';
+            overlay.appendChild(img);
+            overlay.appendChild(btn);
+            overlay.addEventListener('click', function (e) {
+              if (e.target === overlay || e.target === btn) close();
+            });
+            document.body.appendChild(overlay);
+          }
+          var image = overlay.querySelector('img');
+          image.src = src;
+          image.alt = alt || '';
+          overlay.classList.add('open');
+        }
+        document.addEventListener('click', function (e) {
+          var t = e.target;
+          if (t && t.tagName === 'IMG' && t.classList.contains('study-zoom')) {
+            open(t.currentSrc || t.src, t.alt);
+          }
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') close();
+        });
       })();
     </script>
     <script is:inline>

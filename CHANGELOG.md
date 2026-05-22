@@ -2,7 +2,26 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [0.9.1] - 2026-05-22
+
+### Changed — study card layout + typography
+
+- **Bigger figures on desktop**, and click any figure to open it full-screen
+  (lightbox; click outside or press Esc to close).
+- **Wider two-column cards at ≥1200px** (narrative + figure side by side); below
+  that they fall to a single comfortable reading column with figures stacked, so
+  the text never gets cramped beside a figure.
+- The **eligible-population ("For …") line and the headline TL;DR moved up** under
+  the trial name; the TL;DR is now the card's lead callout instead of plain text
+  lost between the boxed sections.
+- **Calmer, more consistent typography** — one shared label style, serif content
+  throughout, and prominence from size/weight rather than tinted bands and color
+  swaps. Clearer visual separation between stacked cards.
+- **Caption tables wrap** to fit the figure column instead of clipping on the right.
+- **"+N more figures"** stays collapsed by default and only auto-expands (on wide
+  screens) when doing so won't make the card taller; a manual toggle always wins.
+
+## [0.9.0] - 2026-05-22
 
 ### Added — Progressive Web App (installable + offline)
 

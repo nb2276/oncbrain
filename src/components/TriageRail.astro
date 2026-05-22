@@ -59,15 +59,15 @@ const railAria = ariaLabel ?? 'Studies on this page';
     }
   }
 
-  /* Wide reading column (940px, study pages): the gutter only clears the rail
-     from ~1400px, so the wide variant waits for that width. Below it the rail
-     stays hidden and the cards' own figure columns carry the page. */
-  @media (min-width: 1400px) {
+  /* Wide reading column (1180px, study pages): the left gutter only clears the
+     rail from ~1640px, so the wide variant waits for that width. Below it the
+     rail stays hidden and the cards' own figure columns carry the page. */
+  @media (min-width: 1640px) {
     .triage-rail--wide {
       display: block;
       position: fixed;
       top: 6.5rem;
-      left: calc((100vw - 940px) / 2 - 224px);
+      left: calc((100vw - 1180px) / 2 - 224px);
       width: 200px;
       max-height: calc(100vh - 9rem);
       overflow-y: auto;
