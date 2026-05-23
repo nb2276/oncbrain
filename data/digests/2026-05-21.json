@@ -1,51 +1,59 @@
 {
   "date": "2026-05-21",
   "conference": null,
-  "generated_at": 1779409755351,
+  "generated_at": 1779555602770,
   "digest": {
-    "top_line": "S1007 secondary: RNI adds no IDFS signal (HR 0.85, p=0.16) in RS ≤25 N1 HR+/HER2- pts; 5-yr LRR already 0.55% without it.",
-    "tldr": "Breast locoregional de-escalation data continues to build: S1007 secondary analysis finds RNI provides no IDFS benefit in RS ≤25 N1 pts where baseline LRR is already <1% at 5 years. Non-randomized allocation limits causal inference, but findings track with post-Z0011 axillary de-escalation trends in biologically favorable subsets.",
+    "top_line": "Bladder adj RT post-cystectomy: 2-yr LRFS 87.1% vs 76.0% (HR 0.43) · first phase III supporting RT in high-risk MIBC.",
+    "tldr": "Phase III bladder trial shows adj pelvic RT post-RC cuts LRR by >50% (HR 0.43) in high-risk MIBC, though N=153 and pre-IO era limit applicability now that CheckMate-274 nivolumab is approved. Breast: SWOG S1007 secondary analysis finds RNI not associated with IDFS in RS≤25 N1 HR+/HER2-; LRR <1% after BCS with or without RNI.",
     "sites": [
       {
-        "disease_site": "breast",
-        "intro": "Locoregional intensity in RS-favorable N1 HR+/HER2- breast cancer remains guideline-unsettled; S1007's RT forms dataset now extends the oncotype de-escalation question from chemo to RT field.",
+        "disease_site": "other",
+        "intro": null,
         "studies": [
           {
-            "name": "SWOG S1007 (RNI analysis)",
-            "tldr": "S1007 secondary analysis: 5-yr LRR 0.55% (BCS, no RNI) to 0.85% (BCS + RNI); IDFS not improved by RNI in favorable N1 HR+/HER2-.",
+            "name": "CA Cancer Journal for Clinicians doi:10.3322/caac.70082",
+            "tldr": "CA Cancer J Clin 2026 paper (doi:10.3322/caac.70082): no extractable clinical content in source — PDF yielded only access/copyright boilerplate.",
+            "details": [
+              "📄 Source is a PDF from CA: A Cancer Journal for Clinicians (2026), downloaded via Wiley Online Library on 2026-05-21",
+              "⚠️ PDF text extraction returned only repeated copyright/terms boilerplate; no abstract, methods, or results text was captured",
+              "⚠️ No effect sizes, endpoints, N, or clinical findings recoverable from this source — no numbers to report"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000011
+            ],
+            "slug": "caac-70082",
+            "verdict": {
+              "soc_implication": "unclear",
+              "rationale": "No clinical content extracted from source PDF. Cannot assess design, results, or applicability.",
+              "audience": null
+            },
+            "open_questions": null,
+            "consort": null,
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 11
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "breast",
+        "intro": "RS-guided chemo omission may extend to RT: RNI appears to add little in biologically favorable N1 disease.",
+        "studies": [
+          {
+            "name": "SWOG S1007 RNI Analysis (Jagsi et al.)",
+            "tldr": "SWOG S1007 secondary analysis: RNI vs no RNI not associated with IDFS in RS≤25 N1 HR+/HER2-; 5-yr LRR <1% after BCS.",
             "details": [
               {
-                "text": "📊 5-yr cumulative LRR by locoregional treatment",
+                "text": "📐 IDFS by RNI receipt (landmark analysis from 1 yr)",
                 "table": {
                   "columns": [
-                    "Treatment",
-                    "5-yr LRR"
-                  ],
-                  "rows": [
-                    [
-                      "BCS + RT + RNI",
-                      "0.85%"
-                    ],
-                    [
-                      "BCS + RT, no RNI",
-                      "0.55%"
-                    ],
-                    [
-                      "Mastectomy + PMRT",
-                      "0.11%"
-                    ],
-                    [
-                      "Mastectomy, no RT",
-                      "1.7%"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📐 IDFS by RNI receipt (adjusted)",
-                "table": {
-                  "columns": [
-                    "Subgroup",
+                    "Menopausal status",
                     "HR (95% CI)",
                     "p"
                   ],
@@ -64,33 +72,55 @@
                 }
               },
               {
-                "text": "🔍 Secondary analysis of S1007 (HR+/HER2-, RS ≤25, N1 1-3 nodes)",
-                "subdetails": [
-                  "N=4871 with RT forms; median f/u 6.1 yrs",
-                  "81% received RT; 59% of RT pts received RNI",
-                  "RNI receipt by clinician discretion, not randomized"
-                ]
+                "text": "📊 5-yr cumulative LRR by locoregional therapy",
+                "table": {
+                  "columns": [
+                    "Treatment",
+                    "5-yr LRR"
+                  ],
+                  "rows": [
+                    [
+                      "BCS + RT + RNI",
+                      "0.85%"
+                    ],
+                    [
+                      "BCS + RT without RNI",
+                      "0.55%"
+                    ],
+                    [
+                      "Mastectomy + PMRT",
+                      "0.11%"
+                    ],
+                    [
+                      "Mastectomy without RT",
+                      "1.7%"
+                    ]
+                  ]
+                }
               },
-              "⚠️ RNI not randomized: confounding by indication unavoidable despite multivariate adjustment",
-              "⚠️ Very low absolute LRR limits statistical power to detect IDFS differences",
-              "🔗 vs MA.20 / EORTC 22922: those trials enrolled higher-risk N+ pts; RS ≤25 is a biologically distinct favorable subset",
-              "🔗 Low LRR without RNI consistent with post-Z0011 axillary de-escalation data in sentinel-node cohorts"
+              "🔍 Secondary analysis of SWOG S1007 RCT (randomized: chemo vs endocrine alone); RT receipt observational, not randomized",
+              "🔍 N=4871 with RT forms; 81% received RT; of those, 59% received RNI targeting ≥ supraclavicular region",
+              "🔍 Population: HR+/HER2-, Oncotype DX RS ≤25, 1-3 nodes, median age 57; median f/u 6.1 yrs",
+              "⚠️ RNI vs no RNI not randomized; confounding by indication unresolved across diverse practice settings",
+              "⚠️ Post-hoc secondary analysis of a trial designed to answer a chemotherapy question, not an RT question",
+              "🔗 vs MA.20 (NEJM 2015) and EORTC 22922: both showed DFS benefit from RNI but enrolled higher-risk N+ pts in pre-RS era; this RS ≤25 favorable subset is a different biologic context",
+              "📊 Chemo omission per S1007 assignment not an independent indication for RNI; LRR equally low in endocrine-only arm"
             ],
-            "key_figure_url": null,
-            "key_figure_caption": null,
-            "nct": null,
+            "figures": [],
+            "nct": "NCT01272037",
             "tweet_ids": [
               1000000009
             ],
             "slug": "swog-s1007-rni",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Secondary analysis; RNI receipt was observational, not randomized. Confounding by indication limits causal inference on IDFS.",
-              "audience": "HR+/HER2- breast, N1 (1-3 nodes), Oncotype RS ≤25, post-BCS or mastectomy"
+              "rationale": "RT assignment non-randomized within RCT designed to answer chemo question; confounding by indication not resolvable for RNI comparison.",
+              "audience": "HR+/HER2- breast cancer, N1 (1-3 nodes), Oncotype DX RS ≤25, post-BCS or mastect"
             },
             "open_questions": [
-              "Would a dedicated RCT of RNI in RS ≤25 N1 pts confirm IDFS equipoise?",
-              "Findings applicable to pts who omit chemo on endocrine-only arm?"
+              "Would a dedicated RCT randomizing RNI vs omission in RS ≤25 N1 confirm safety of de-escalation?",
+              "Optimal locoregional strategy in this population receiving adjuvant CDK4/6 inhibitors?",
+              "LRR trajectory beyond 10 years in this favorable-biology cohort?"
             ],
             "consort": null,
             "source_ids": [
@@ -102,17 +132,155 @@
           }
         ],
         "open_questions": null
+      },
+      {
+        "disease_site": "bladder",
+        "intro": "First phase III data for adj RT in high-risk MIBC; RT + adjuvant IO sequencing now the open question.",
+        "studies": [
+          {
+            "name": "Bladder Adjuvant Radiotherapy Phase III (Murthy et al.)",
+            "tldr": "Adj pelvic RT post-cystectomy improves 2-yr LRFS vs observation (87.1% vs 76.0%, HR 0.43, p=.04) in high-risk MIBC.",
+            "details": [
+              "📊 1° EP 2-yr LRFS: 87.1% vs 76.0%, HR 0.43 (95% CI 0.20-0.96), p=.04",
+              {
+                "text": "📊 Secondary endpoints (RT vs Obs)",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "RT",
+                    "Obs",
+                    "HR (95% CI)"
+                  ],
+                  "rows": [
+                    [
+                      "DFS",
+                      "71.6%",
+                      "58.7%",
+                      "0.62 (0.36-1.05)"
+                    ],
+                    [
+                      "BCSS",
+                      "79.6%",
+                      "65.0%",
+                      "0.59 (0.33-1.10)"
+                    ],
+                    [
+                      "OS",
+                      "70.4%",
+                      "57.4%",
+                      "0.78 (0.49-1.26)"
+                    ]
+                  ]
+                }
+              },
+              "🔍 Phase III multicenter, N=153 (RT=77, Obs=76); median f/u 47 months",
+              "🔍 RT: stoma-sparing IG-IMRT 50.4Gy/28fx to cystectomy bed + pelvic nodes",
+              "🔍 Eligibility: any of pT3-4, pN1-3, margin+, ≤10 nodes dissected; 62% pT3-4, 41% pN+",
+              "🔍 >90% periop chemo (71% neoadjuvant, 20% adjuvant); zero immunotherapy",
+              "⚠️ N=153 underpowered for survival; all secondary HRs trending but CI crosses 1",
+              "⚠️ No immunotherapy era pts; CheckMate-274 nivolumab adjuvant now approved in this setting",
+              "🔗 CheckMate-274 (NEJM 2021): nivolumab adjuvant vs placebo improved DFS in high-risk MIBC post-RC; RT + IO sequencing untested"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000010
+            ],
+            "slug": "bladder-adjuvant-rt-postcystectomy",
+            "verdict": {
+              "soc_implication": "challenges-soc",
+              "rationale": "Randomised phase III hits prespecified LRFS endpoint in a setting where observation is SOC. Survival endpoints NS; N=153 limits power.",
+              "audience": "High-risk urothelial MIBC post-RC (pT3-4 or pN+), periop chemo, no immunotherapy"
+            },
+            "open_questions": [
+              "LRFS benefit: will it translate to OS in adequately powered trial?",
+              "Optimal sequencing of adj RT with nivolumab adjuvant (CheckMate-274 SOC)?",
+              "Which high-risk subgroup (pN+ vs pT3-4 vs margin+) drives LRFS benefit?"
+            ],
+            "consort": {
+              "enrolled": null,
+              "excluded": null,
+              "randomized": 153,
+              "arms": [
+                {
+                  "label": "Adjuvant RT",
+                  "allocated": 77,
+                  "analyzed": null
+                },
+                {
+                  "label": "Observation",
+                  "allocated": 76,
+                  "analyzed": null
+                }
+              ]
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 10
+              }
+            ]
+          }
+        ],
+        "open_questions": null
       }
     ],
     "meta": {
-      "clusters_total": 1,
-      "studies_analyzed": 1,
+      "clusters_total": 3,
+      "studies_analyzed": 3,
       "dropped": [],
       "ocr_available": true
     }
   },
   "bookmarks": [],
   "papers": [
+    {
+      "id": 11,
+      "pmid": null,
+      "doi": "10.3322/caac.70082",
+      "pmc_id": null,
+      "title": "15424863, 2026, 3, Downloaded from https://acsjournals.onlinelibrary.wiley.com/doi/10.3322/caac.70082",
+      "authors": [],
+      "journal": "CA: A Cancer Journal for Clinicians",
+      "pub_date": "2026",
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/other/15424863-2026-3-downloaded-from-https-acsjournals-onlinelibrary.pdf",
+      "note": null
+    },
+    {
+      "id": 10,
+      "pmid": "42166701",
+      "doi": "10.1200/jco-25-02093",
+      "pmc_id": null,
+      "title": "Bladder Adjuvant Radiotherapy: Phase III Multicenter Randomized Controlled Trial of Adjuvant Radiotherapy or Observation for Postcystectomy Muscle-Invasive Bladder Cancer.",
+      "authors": [
+        "Murthy",
+        "Maitre",
+        "Pal",
+        "Arora",
+        "Phurailatpam",
+        "Sharma",
+        "Gudipudi",
+        "Rajappa",
+        "Pujari",
+        "Bandekar",
+        "Joseph",
+        "Kannan",
+        "Krishnatry",
+        "Misra",
+        "Joshi",
+        "Noronha",
+        "Prabhash",
+        "Menon",
+        "Bakshi",
+        "Prakash"
+      ],
+      "journal": "Journal of clinical oncology : official journal of the American Society of Clinical Oncology",
+      "pub_date": "2026-05-21",
+      "abstract": "PURPOSE: To report the primary analysis of a multicenter, phase III randomized trial of adjuvant radiotherapy (RT) after chemotherapy and radical cystectomy (RC) in patients with high-risk muscle-invasive bladder cancer (MIBC).\n\nMETHODS: Patients with nonmetastatic urothelial MIBC at high risk after RC (any one of: T3-4, N1-3, margin positive, &#x2264;10 nodes dissected) were randomly assigned 1:1 to adjuvant RT or observation (Obs), stratified by nodal involvement (yes/no) and chemotherapy (neoadjuvant/adjuvant/none). Stoma-sparing IG-IMRT 50.4Gy in 28 fractions was prescribed to the cystectomy bed and pelvic nodes. The primary end point was 2-year locoregional recurrence-free survival (LRFS), and the secondary end points were disease-free survival (DFS), bladder cancer-specific survival (BCSS), and overall survival (OS).\n\nRESULTS: From June 2016 to May 2024, 153 patients were randomly assigned (Obs = 76, RT = 77), with 62% and 41% of patients having pT3-T4 and pN+ stages, respectively. Over 90% of the patients received systemic chemotherapy (71% neoadjuvant and 20% adjuvant), and none received immunotherapy. After a median follow-up of 47 months, the 2-year LRFS was significantly higher with adjuvant RT versus observation (87.1% v 76.0%, hazard ratio [HR], 0.43 [95% CI, 0.20 to 0.96], P = .04). The DFS was 71.6% versus 58.7% (HR, 0.62 [95% CI, 0.36 to 1.05]), BCSS was 79.6% versus 65.0% (HR, 0.59 [95% CI, 0.33 to 1.10]), and OS was 70.4% versus 57.4% (HR, 0.78 [95% CI, 0.49 to 1.26]) for RT and Obs, respectively.\n\nCONCLUSION: Adjuvant pelvic IMRT after radical cystectomy and perioperative chemotherapy suggests an improvement in locoregional control in patients with high risk urothelial MIBC with no additional severe toxicity.",
+      "pdf_path": null,
+      "note": null
+    },
     {
       "id": 9,
       "pmid": "37410451",
