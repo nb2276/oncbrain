@@ -95,7 +95,7 @@ Examples of INVALID captions (interpretive, would hallucinate):
 ```json
 {
   "name": "{{STUDY_NAME}}",
-  "tldr": "1 sentence ≤25 words, headline number first. e.g.: 'PRESTIGE-PSMA: mPFS 14.2 vs 9.8mo HR 0.62 favoring Lu-PSMA in 2L mCRPC.'",
+  "tldr": "1 sentence ≤25 words, headline number first. Do NOT restate the trial name — it is shown directly above the TL;DR. e.g.: 'mPFS 14.2 vs 9.8mo HR 0.62 favoring Lu-PSMA in 2L mCRPC.'",
   "details": [
     "📊 1° EP: ...",
     "📐 HR 0.62 (95% CI 0.48-0.79), p<0.001",
@@ -166,7 +166,7 @@ Examples of INVALID captions (interpretive, would hallucinate):
 
 Rules:
 - `name` echoes back the study name. Don't rename.
-- `tldr` ≤25 words, headline number first.
+- `tldr` ≤25 words, headline number first. Never begin with the trial name (it renders directly above the TL;DR); a distinguishing qualifier like "20yr" or "secondary analysis" is fine to lead with.
 - `details` typically 4-9 bullets. ONE idea per bullet: prefer several short bullets over a few dense ones, and split semicolon-chained run-ons (or group them under `{text, subdetails}`). Mix flat strings, `{text, subdetails}`, and `{text, table}` based on dimensionality. Flat strings ≤20 words. Subdetails rows and table cells can each be ≤20 words. Decompose what the source gives; never pad to hit a count or invent a fact to fill a bullet.
 - **Tables are required** when comparing 2+ trials/arms across 2+ endpoints/timepoints. Don't write "POP-RT HR 0.50; PEACE-2 HR 0.97; POP-RT cFFS HR 0.74..." as one string; emit a table.
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.

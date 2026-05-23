@@ -100,6 +100,49 @@ export function studyFigures(study: DigestStudy): DigestFigure[] {
   return [];
 }
 
+// Drop a redundant "NAME:" / "NAME <qualifier>:" label that many TL;DRs lead
+// with — the study name is already shown immediately above the TL;DR on every
+// card. Conservative: only strips a short label segment that ENDS in a colon (or
+// dash), so a name used as a real sentence subject ("PRIME showed …") is left
+// intact, and a meaningful qualifier ("20yr", "secondary analysis") is preserved
+// as the new lead. Returns the original if stripping would leave too little.
+export function stripStudyNamePrefix(tldr: string, name: string): string {
+  const t = (tldr ?? '').trim();
+  const n = (name ?? '').trim();
+  if (!t || !n) return t;
+  // Match the name with flexible separators ("PEACE 2" ≈ "PEACE-2"). Trailing
+  // tokens are OPTIONAL so an abbreviated restatement still matches — the name
+  // "EORTC IM-MS (22922/10925)" is restated as just "EORTC IM-MS 20yr" in the
+  // TL;DR (trial numbers dropped, "20yr" qualifier added).
+  const toks = n
+    .split(/[^a-z0-9]+/i)
+    .filter(Boolean)
+    .map((tok) => tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  if (toks.length === 0) return t;
+  const namePattern =
+    toks[0] + toks.slice(1).map((tk) => `(?:[^a-z0-9]+${tk})?`).join('');
+
+  // Case A — plain "NAME: …": strip the full name and its colon. Tried FIRST so
+  // a name whose last token abuts the colon ("DBCG RT Natural:") strips whole,
+  // instead of Case B mistaking that last token for a qualifier.
+  const labelOnly = new RegExp(`^${namePattern}\\s*[:：]\\s*`, 'i');
+  const plain = t.replace(labelOnly, '').trim();
+  if (plain !== t) return plain.length >= 8 ? plain : t;
+
+  // Case B — "NAME <qualifier>: …": the qualifier ("20yr", "secondary analysis")
+  // carries real info, so drop only the name and keep the qualifier as the lead.
+  // The 23-char cap + word-char start + required colon keep this to label-style
+  // qualifiers, never a full sentence that happens to contain a later colon.
+  const withQualifier = new RegExp(`^${namePattern}\\s+([\\w][\\w\\s().\\-]{0,23}?[:：]\\s*)`, 'i');
+  const qm = t.match(withQualifier);
+  if (qm) {
+    const result = `${qm[1]!.trim()} ${t.slice(qm[0].length)}`.trim();
+    return result.length >= 8 ? result : t;
+  }
+
+  return t;
+}
+
 export type DigestArtifactPaper = {
   id: number;
   pmid: string | null;

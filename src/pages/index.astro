@@ -6,6 +6,7 @@ import {
   listConferenceSummaries,
   listRecentStudies,
   listSiteSummaries,
+  stripStudyNamePrefix,
 } from '../lib/digest-data.ts';
 import { linkifyCitations } from '../lib/extract.ts';
 import { DISEASE_SITES, getDiseaseSite } from '../lib/disease-sites.ts';
@@ -134,9 +135,8 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
       <ul class="recent-list">
         {feed.map((r) => {
           const meta = getDiseaseSite(r.disease_site);
-          const teaser = r.study.tldr.length > 200
-            ? r.study.tldr.slice(0, 199).trimEnd() + '…'
-            : r.study.tldr;
+          const tldr = stripStudyNamePrefix(r.study.tldr, r.study.name);
+          const teaser = tldr.length > 200 ? tldr.slice(0, 199).trimEnd() + '…' : tldr;
           return (
             <li>
               <a class="recent-card" href={`/${r.date}/#${r.slug}`}>

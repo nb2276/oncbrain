@@ -14,6 +14,7 @@ import { isSafeImageUrl } from '../lib/vision-ocr.ts';
 import { VERDICT_META } from '../lib/verdict.ts';
 import {
   studyFigures,
+  stripStudyNamePrefix,
   type DigestStudy,
   type DigestDetail,
   type DigestArtifact,
@@ -110,7 +111,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   {hasAudience && (
     <p class="study-audience study-audience-head"><span class="audience-label">For</span>{study.verdict!.audience}</p>
   )}
-  <p class="study-tldr" set:html={linkifyCitations(study.tldr)} />
+  <p class="study-tldr" set:html={linkifyCitations(stripStudyNamePrefix(study.tldr, study.name))} />
   {study.verdict?.rationale && verdictMeta && (
     <aside class:list={['verdict-block', `verdict-${study.verdict.soc_implication}`]}>
       <div class="verdict-pill">

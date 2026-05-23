@@ -7,7 +7,7 @@
 // URL: /search-index.json
 
 import type { APIRoute } from 'astro';
-import { listDigests } from '../lib/digest-data.ts';
+import { listDigests, stripStudyNamePrefix } from '../lib/digest-data.ts';
 import { getDiseaseSite } from '../lib/disease-sites.ts';
 import { assignSlugsForDate } from '../lib/slug-resolve.ts';
 
@@ -50,7 +50,7 @@ export const GET: APIRoute = () => {
           site_rationale: meta.rationale,
           name: study.name,
           slug: resolvedSlugs[i++]!,
-          tldr: trimTldr(study.tldr),
+          tldr: trimTldr(stripStudyNamePrefix(study.tldr, study.name)),
           nct: study.nct,
         });
       }
