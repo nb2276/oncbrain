@@ -84,6 +84,45 @@ if [ -f "$PLIST" ]; then
   fi
 fi
 
+# ── 2b. LLM CLI reachable under the launchd environment ────────────────
+# The default LLM backend (claude-cli) shells out to `claude -p`. launchd does
+# NOT source the shell profile, so ~/.local/bin is off PATH; a bare `claude`
+# spawn then ENOENTs and the build silently produces nothing. Probe the binary
+# the way launchd actually sees it (plist PATH only, no profile).
+echo ""
+echo "2b) LLM CLI reachability (claude-cli backend)"
+CLAUDE_REACHABLE=0
+if [ -f "$PLIST" ]; then
+  PLIST_PATH=$(plutil -extract EnvironmentVariables.PATH raw "$PLIST" 2>/dev/null || echo "")
+  PLIST_CLAUDE=$(plutil -extract EnvironmentVariables.CLAUDE_BIN raw "$PLIST" 2>/dev/null || echo "")
+  if [ -n "$PLIST_CLAUDE" ]; then
+    info "plist CLAUDE_BIN: $PLIST_CLAUDE"
+    if [ -x "$PLIST_CLAUDE" ]; then
+      pass "CLAUDE_BIN points to an executable"
+      CLAUDE_REACHABLE=1
+    else
+      fail "CLAUDE_BIN is set but not executable"
+    fi
+  else
+    warn "no CLAUDE_BIN in plist; backend falls back to PATH lookup for 'claude'"
+  fi
+  if [ -n "$PLIST_PATH" ]; then
+    RESOLVED=$(env -i PATH="$PLIST_PATH" HOME="$HOME" /usr/bin/which claude 2>/dev/null || true)
+    if [ -n "$RESOLVED" ]; then
+      pass "claude resolves under the plist PATH: $RESOLVED"
+      CLAUDE_REACHABLE=1
+    elif [ "$CLAUDE_REACHABLE" -eq 1 ]; then
+      info "claude not on the plist PATH, but CLAUDE_BIN covers it"
+    else
+      fail "claude NOT found under the plist PATH and no usable CLAUDE_BIN"
+      fail "this is the ENOENT failure mode (build runs, LLM calls fail silently)"
+      fail "fix: npm run cron:install   # rediscovers claude + bakes the path in"
+    fi
+  fi
+else
+  info "(plist missing — see section 1)"
+fi
+
 # ── 3. pmset wake schedule (critical for laptop overnight) ─────────────
 echo ""
 echo "3) pmset wake schedule"
@@ -174,6 +213,8 @@ if ! pmset -g sched 2>&1 | grep -qiE "wake|poweron"; then
 fi
 if [ ! -f "$PLIST" ] || [ -z "$(launchctl list 2>/dev/null | awk -v label="$LABEL" '$3 == label {print}')" ]; then
   ACTIONS+=("npm run cron:install   # install/reload the launchd plist")
+elif [ "$CLAUDE_REACHABLE" -eq 0 ]; then
+  ACTIONS+=("npm run cron:install   # claude CLI unreachable under launchd → re-bake PATH/CLAUDE_BIN")
 fi
 if [ "${#ACTIONS[@]}" -eq 0 ]; then
   echo "  (nothing to fix from this run; if the cron still misses fires, check"

@@ -272,6 +272,11 @@ export function collapseMessagesToPrompt(messages: LlmMessage[]): string {
 // Factory: pick a backend at runtime. Default 'api' for compatibility.
 export function createLlmClient(opts: { backend?: 'api' | 'claude-cli' } = {}): LlmClient {
   const backend = opts.backend ?? (process.env.LLM_BACKEND as 'api' | 'claude-cli' | undefined) ?? 'api';
-  if (backend === 'claude-cli') return new ClaudeCliLlmClient();
+  if (backend === 'claude-cli') {
+    // CLAUDE_BIN lets a non-interactive caller (launchd, cron) pin the absolute
+    // path to the claude CLI. Under launchd, ~/.local/bin is not on PATH, so a
+    // bare `claude` spawn fails with ENOENT. Falls back to PATH lookup.
+    return new ClaudeCliLlmClient({ binary: process.env.CLAUDE_BIN || undefined });
+  }
   return new AnthropicLlmClient(new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }));
 }

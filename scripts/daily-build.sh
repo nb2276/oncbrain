@@ -12,9 +12,31 @@
 #   5. git commit/push  — DigitalOcean auto-deploys
 #
 # All output goes to ~/Library/Logs/oncbrain-cron.log.
-# Exits 0 even on partial failure (logged) so the next day's run still fires.
+#
+# Failure semantics: the pipeline always runs to the end (a failed stage never
+# aborts later stages — yesterday failing must not stop today building), but the
+# script EXITS NON-ZERO if any critical stage failed. launchd records the exit
+# status, so a silent ENOENT/build break shows up as `last exit code != 0` in
+# `launchctl print` instead of masquerading as a healthy run. Critical stages:
+# pull:telegram, enrich:inbox, build:day, astro build, git push. Non-critical:
+# notify:curator.
 
 set -uo pipefail
+
+# Tracks whether any critical stage failed. Checked at the very end → exit code.
+FAILED=0
+
+# Run a critical stage. Logs a loud failure line and flips FAILED, but does NOT
+# abort — later stages still run so a single broken date doesn't sink the day.
+critical() {
+  local label="$1"; shift
+  "$@"
+  local rc=$?
+  if [ "$rc" -ne 0 ]; then
+    echo "  ✗ $label FAILED (exit $rc)"
+    FAILED=1
+  fi
+}
 
 # Resolve project root regardless of where script was invoked from.
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -25,11 +47,12 @@ LOG_DIR="$HOME/Library/Logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/oncbrain-cron.log"
 
-# launchd runs with a minimal PATH. Add the locations npm/node/git typically live.
-# (The install script discovers Node at install time and bakes the absolute path
-#  into the launchd plist's PATH env var, but we also extend here as a belt-
-#  and-suspenders for manual `npm run cron:test` invocations.)
-export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+# launchd runs with a minimal PATH. Add the locations npm/node/git/claude typically
+# live. (The install script discovers Node + claude at install time and bakes their
+# paths into the launchd plist, but we also extend here as belt-and-suspenders for
+# manual invocations and stale plists.) ~/.local/bin is where the claude CLI lives;
+# without it the claude-cli LLM backend spawns a bare `claude` that ENOENTs.
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 # We deliberately do NOT source .env here. The Node scripts (tsx + dotenv/config)
 # load it themselves with proper unquoted-value handling. Bash 'source' would
@@ -47,47 +70,65 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   echo "$(date '+%Y-%m-%d %H:%M:%S %Z') — oncbrain daily build"
   echo "  project: $PROJECT_DIR"
   echo "  target dates: $YESTERDAY, $TODAY"
-  echo "  LLM backend: ${LLM_BACKEND:-api}"
+  # LLM_BACKEND usually lives in .env, which Node (not bash) loads — so bash can't
+  # report the effective value. Show what bash sees, and the binary it resolves,
+  # so an ENOENT class failure is diagnosable straight from the log header.
+  echo "  LLM backend (bash-visible): ${LLM_BACKEND:-unset → Node resolves from .env}"
+  echo "  claude:  ${CLAUDE_BIN:-$(command -v claude || echo 'NOT FOUND on PATH')}"
+  echo "  node:    $(command -v node || echo 'NOT FOUND')  |  git: $(command -v git || echo 'NOT FOUND')"
   echo "════════════════════════════════════════════════════════════"
 
   echo ""
   echo "→ Pulling Telegram → inbox"
-  npm run pull:telegram --silent || echo "  ⚠ pull:telegram exited non-zero (continuing)"
+  critical "pull:telegram" npm run pull:telegram --silent
 
   echo ""
   echo "→ Enriching inbox items"
-  npm run enrich:inbox --silent || echo "  ⚠ enrich:inbox exited non-zero (continuing)"
+  critical "enrich:inbox" npm run enrich:inbox --silent
 
   echo ""
   echo "→ Building digests for $YESTERDAY"
-  npm run build:day --silent -- --date="$YESTERDAY" || echo "  ⚠ build:day $YESTERDAY exited non-zero (continuing)"
+  critical "build:day $YESTERDAY" npm run build:day --silent -- --date="$YESTERDAY"
 
   echo ""
   echo "→ Building digests for $TODAY"
-  npm run build:day --silent -- --date="$TODAY" || echo "  ⚠ build:day $TODAY exited non-zero (continuing)"
+  critical "build:day $TODAY" npm run build:day --silent -- --date="$TODAY"
 
   echo ""
   echo "→ Building Astro site"
-  npm run build --silent || { echo "  ✗ astro build failed; aborting commit"; exit 0; }
-
-  echo ""
-  echo "→ Staging data/ for commit"
-  git add data 2>/dev/null || true
-
-  # Which digest dates actually changed this run? A late-evening tweet can land
-  # on yesterday's date, so notifying only $TODAY would miss it. Derive the
-  # changed dates from the staged digest files (capture before the commit).
-  CHANGED_DATES="$(git diff --cached --name-only -- data/digests 2>/dev/null \
-    | sed -nE 's|.*/([0-9]{4}-[0-9]{2}-[0-9]{2})\.json$|\1|p' | sort -u)"
-
-  if git diff --cached --quiet -- data; then
-    echo "  (no new digest content — nothing to commit)"
+  if npm run build --silent; then
+    ASTRO_OK=1
   else
-    git commit -m "auto: $TODAY 6am pull"
-    if git push 2>&1; then
-      echo "  pushed → DigitalOcean will auto-deploy"
+    echo "  ✗ astro build FAILED; skipping commit"
+    ASTRO_OK=0
+    FAILED=1
+  fi
+
+  # A failed local astro build means the same build would break on DigitalOcean,
+  # so don't commit/push content that would deploy a broken site. Skip publishing
+  # (FAILED is already set above), but keep running so notify/exit-status still fire.
+  CHANGED_DATES=""
+  if [ "$ASTRO_OK" = 1 ]; then
+    echo ""
+    echo "→ Staging data/ for commit"
+    git add data 2>/dev/null || true
+
+    # Which digest dates actually changed this run? A late-evening tweet can land
+    # on yesterday's date, so notifying only $TODAY would miss it. Derive the
+    # changed dates from the staged digest files (capture before the commit).
+    CHANGED_DATES="$(git diff --cached --name-only -- data/digests 2>/dev/null \
+      | sed -nE 's|.*/([0-9]{4}-[0-9]{2}-[0-9]{2})\.json$|\1|p' | sort -u)"
+
+    if git diff --cached --quiet -- data; then
+      echo "  (no new digest content — nothing to commit)"
     else
-      echo "  ✗ git push failed (auth? — check ssh-agent / keychain)"
+      git commit -m "auto: $TODAY 6am pull"
+      if git push 2>&1; then
+        echo "  pushed → DigitalOcean will auto-deploy"
+      else
+        echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
+        FAILED=1
+      fi
     fi
   fi
 
@@ -103,5 +144,11 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   fi
 
   echo ""
-  echo "✓ Done at $(date '+%Y-%m-%d %H:%M:%S %Z')"
+  if [ "$FAILED" -ne 0 ]; then
+    echo "✗ Done WITH FAILURES at $(date '+%Y-%m-%d %H:%M:%S %Z') — see ✗ lines above"
+  else
+    echo "✓ Done at $(date '+%Y-%m-%d %H:%M:%S %Z')"
+  fi
 } >>"$LOG_FILE" 2>&1
+
+exit "$FAILED"

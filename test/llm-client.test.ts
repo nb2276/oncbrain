@@ -293,4 +293,29 @@ describe('createLlmClient', () => {
       else process.env.LLM_BACKEND = original;
     }
   });
+
+  it('pins the CLI binary from CLAUDE_BIN when set', () => {
+    const original = process.env.CLAUDE_BIN;
+    process.env.CLAUDE_BIN = '/Users/test/.local/bin/claude';
+    try {
+      const client = createLlmClient({ backend: 'claude-cli' });
+      expect((client as unknown as { opts: { binary?: string } }).opts.binary).toBe(
+        '/Users/test/.local/bin/claude',
+      );
+    } finally {
+      if (original === undefined) delete process.env.CLAUDE_BIN;
+      else process.env.CLAUDE_BIN = original;
+    }
+  });
+
+  it('leaves the CLI binary unset (PATH lookup) when CLAUDE_BIN is absent', () => {
+    const original = process.env.CLAUDE_BIN;
+    delete process.env.CLAUDE_BIN;
+    try {
+      const client = createLlmClient({ backend: 'claude-cli' });
+      expect((client as unknown as { opts: { binary?: string } }).opts.binary).toBeUndefined();
+    } finally {
+      if (original !== undefined) process.env.CLAUDE_BIN = original;
+    }
+  });
 });

@@ -35,6 +35,17 @@ if [ -z "$NODE_BIN" ]; then
 fi
 NODE_DIR="$(dirname "$NODE_BIN")"
 
+# Discover the claude CLI (default LLM backend shells out to `claude -p`). launchd
+# does not source the user's shell profile, so ~/.local/bin is off PATH and a bare
+# `claude` spawn fails with ENOENT. Bake the absolute path into the plist as
+# CLAUDE_BIN so the backend can pin it regardless of launchd's PATH.
+CLAUDE_BIN="$(command -v claude || true)"
+if [ -z "$CLAUDE_BIN" ]; then
+  echo "⚠ Could not find 'claude' on PATH. The claude-cli LLM backend will fail" >&2
+  echo "  under launchd. Install it or set CLAUDE_BIN, then re-run this installer." >&2
+  CLAUDE_BIN="claude"  # fall back to a bare name; build will surface the failure
+fi
+
 # Prefer a Homebrew bash to run the job. The system /bin/bash lives on the
 # read-only system volume and usually can't be added to Full Disk Access via the
 # picker; a Homebrew bash (/opt/homebrew or /usr/local) is selectable, so the
@@ -56,6 +67,7 @@ sed \
   -e "s|__HOME__|$HOME|g" \
   -e "s|__NODE_DIR__|$NODE_DIR|g" \
   -e "s|__BASH__|$BASH_BIN|g" \
+  -e "s|__CLAUDE_BIN__|$CLAUDE_BIN|g" \
   "$TEMPLATE" >"$TARGET"
 
 # Make the runner script executable. (Idempotent.)
@@ -70,6 +82,7 @@ echo "  - Schedule: 6:00 AM local time daily"
 echo "  - Project:  $PROJECT_DIR"
 echo "  - Node:     $NODE_BIN"
 echo "  - Bash:     $BASH_BIN"
+echo "  - Claude:   $CLAUDE_BIN"
 echo "  - Log:      $HOME/Library/Logs/oncbrain-cron.log"
 echo ""
 echo "Verify it's loaded:"

@@ -40,9 +40,14 @@
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>__NODE_DIR__:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <string>__HOME__/.local/bin:__NODE_DIR__:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
         <key>HOME</key>
         <string>__HOME__</string>
+        <!-- Absolute path to the claude CLI (claude-cli LLM backend). launchd's
+             PATH doesn't include ~/.local/bin by default, so pinning the binary
+             here is belt-and-suspenders against a bare `claude` ENOENT. -->
+        <key>CLAUDE_BIN</key>
+        <string>__CLAUDE_BIN__</string>
     </dict>
 
     <key>RunAtLoad</key>
