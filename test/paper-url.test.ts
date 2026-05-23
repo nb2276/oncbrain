@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { classifyPaperTarget, extractPaperUrls } from '../src/lib/paper-url.ts';
+import { classifyPaperTarget, extractPaperUrls, firstDoiInUrl } from '../src/lib/paper-url.ts';
 
 describe('classifyPaperTarget', () => {
   it('bare digits → pmid', () => {
@@ -44,6 +44,51 @@ describe('classifyPaperTarget', () => {
   });
   it('rejects garbage', () => {
     expect(classifyPaperTarget('hello world')).toBeNull();
+  });
+});
+
+describe('firstDoiInUrl', () => {
+  it('extracts a DOI from a Wiley /doi/ path', () => {
+    expect(firstDoiInUrl('https://onlinelibrary.wiley.com/doi/10.3322/caac.70082')).toBe(
+      '10.3322/caac.70082',
+    );
+  });
+  it('extracts a DOI from an ASCO /doi/full/ path', () => {
+    expect(firstDoiInUrl('https://ascopubs.org/doi/full/10.1200/JCO.23.01234')).toBe(
+      '10.1200/jco.23.01234',
+    );
+  });
+  it('extracts a DOI from a Springer /article/ path', () => {
+    expect(firstDoiInUrl('https://link.springer.com/article/10.1007/s00330-024-10001')).toBe(
+      '10.1007/s00330-024-10001',
+    );
+  });
+  it('trims a trailing publisher token after the DOI', () => {
+    expect(firstDoiInUrl('https://onlinelibrary.wiley.com/doi/10.1002/cncr.34567/pdf')).toBe(
+      '10.1002/cncr.34567',
+    );
+  });
+  it('ignores a query string after the DOI', () => {
+    expect(firstDoiInUrl('https://ahajournals.org/doi/10.1161/CIR.0000000000001?af=R')).toBe(
+      '10.1161/cir.0000000000001',
+    );
+  });
+  it('decodes a %2F-encoded DOI path', () => {
+    expect(firstDoiInUrl('https://onlinelibrary.wiley.com/doi/10.1002%2Fcncr.34567')).toBe(
+      '10.1002/cncr.34567',
+    );
+  });
+  it('does not pull a DOI out of a query parameter', () => {
+    // firstDoiInUrl only inspects the path; a related-DOI query param is ignored.
+    expect(firstDoiInUrl('https://www.sciencedirect.com/science/article/pii/S123?ref=10.1056/x')).toBeNull();
+  });
+  it('returns null for a PII URL with no DOI (Elsevier/ScienceDirect)', () => {
+    expect(
+      firstDoiInUrl('https://www.sciencedirect.com/science/article/abs/pii/S0360301625058948'),
+    ).toBeNull();
+  });
+  it('returns null for a Nature article-id URL (DOI not in path)', () => {
+    expect(firstDoiInUrl('https://www.nature.com/articles/s41586-024-00001-2')).toBeNull();
   });
 });
 

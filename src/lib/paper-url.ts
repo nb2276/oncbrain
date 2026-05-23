@@ -67,6 +67,33 @@ export function classifyPaperTarget(raw: string): PaperTargetKind | null {
   return null;
 }
 
+// Pull a DOI that is embedded in a publisher article URL path so it can be
+// resolved via Crossref WITHOUT fetching the page (dodging publisher bot-blocks
+// and rate limits). Covers the common `/doi/10.x`, `/doi/full/10.x`, and
+// Springer `/article/10.1007/...` shapes. Conservative: the DOI must be a path
+// segment (not a query/fragment), and trailing publisher tokens that ride after
+// it (/pdf, /full, /abstract, …) are trimmed. Returns a normalized DOI or null.
+//
+// PII-only URLs (Elsevier/ScienceDirect, Lancet, Cell) carry NO DOI in the path
+// and are intentionally not matched here — they need the PDF or a pasted DOI.
+export function firstDoiInUrl(url: string): string | null {
+  let path = url.split(/[?#]/)[0] ?? url;
+  // Decode %2F-encoded DOI paths (e.g. /doi/10.1002%2Fcncr.34567). Keep the raw
+  // path if the encoding is malformed (decodeURIComponent throws on a bad %).
+  try {
+    path = decodeURIComponent(path);
+  } catch {
+    // keep raw path
+  }
+  const m = path.match(/\/(10\.\d{4,9}\/.+)$/i);
+  if (!m || !m[1]) return null;
+  const candidate = m[1].replace(
+    /\/(?:full|fulltext|abstract|pdf|epdf|html|meta|references|citations)\/?$/i,
+    '',
+  );
+  return normalizeDoi(candidate);
+}
+
 // Ingestion-time: pull paper URLs out of message text + entities that are
 // NOT already covered by extractPaperPmids (pubmed URLs + PMID citations).
 // Returns the raw URL strings to store as paper inbox items.

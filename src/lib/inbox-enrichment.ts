@@ -22,7 +22,8 @@ import {
 import { fetchTweet, TweetFetchError } from './twitter-fetch.ts';
 import { extractCuratorNote, sendMessage } from './telegram-ingest.ts';
 import { fetchPubMedPaper, PubMedClientError } from './pubmed-client.ts';
-import { classifyPaperTarget } from './paper-url.ts';
+import { classifyPaperTarget, firstDoiInUrl } from './paper-url.ts';
+import { backfillOpenAccess } from './oa-enrichment.ts';
 import { ssrfSafeFetchText, SsrfError } from './ssrf-fetch.ts';
 import { extractPaperMeta, MetaNotFoundError } from './html-meta.ts';
 import { fetchCrossrefPaper, CrossrefError } from './crossref-client.ts';
@@ -206,6 +207,23 @@ async function enrichPaperItem(
       await replyToCurator(item, `Couldn't ingest that paper: ${message}`);
     }
     return { status: 'failed', reason: message, permanent: !retryable };
+  }
+
+  // OA backfill (#2): Crossref abstracts are usually null and URL/DOI papers
+  // carry no full text. Fill both from Europe PMC (+ OpenAlex abstract fallback)
+  // so the study agent has analyzable text. Best-effort — never fails enrichment.
+  if (!saveInput.abstract || !saveInput.fulltext_excerpt_md) {
+    const oa = await backfillOpenAccess({
+      doi: saveInput.doi ?? null,
+      pmid: saveInput.pmid ?? null,
+      abstract: saveInput.abstract ?? null,
+      fulltext: saveInput.fulltext_excerpt_md ?? null,
+    });
+    saveInput = {
+      ...saveInput,
+      abstract: oa.abstract,
+      fulltext_excerpt_md: oa.fulltext ? oa.fulltext.slice(0, MAX_FULLTEXT_CHARS) : saveInput.fulltext_excerpt_md,
+    };
   }
 
   try {
@@ -448,15 +466,23 @@ async function resolveFromUrl(
   item: InboxItem,
   note: string | null,
 ): Promise<NewPaper> {
+  // Identifier-first (#1): a DOI/PMID embedded in the URL PATH is authoritative
+  // for this URL — resolve it via Crossref/PubMed WITHOUT fetching the publisher
+  // page (faster; immune to bot-blocks/rate-limits). A retryable API error here
+  // propagates so the item retries instead of falling through to a doomed fetch.
+  const viaUrlId = await resolveFromUrlEmbeddedId(url, item, note);
+  if (viaUrlId) return viaUrlId;
+
+  // Fetch the page and scrape Highwire meta. On a blocked/refused fetch, the
+  // last resort is a DOI/PMID in the curator's MESSAGE text — kept SEPARATE from
+  // the URL so an unrelated "compare with DOI X" note can't hijack a DOI-less
+  // page before the page itself is tried.
   let html: string;
   try {
     html = await ssrfSafeFetchText(url);
   } catch (fetchErr) {
-    // Publisher pages (Elsevier/ScienceDirect, etc.) often bot-block with 403.
-    // Before giving up, try a DOI/PMID embedded in the URL or the curator's
-    // message — those resolve via Crossref/PubMed APIs, which aren't blocked.
-    const viaId = await resolveFromEmbeddedId(url, item, note);
-    if (viaId) return viaId;
+    const viaMsg = await resolveFromMessageId(item, note, url);
+    if (viaMsg) return viaMsg;
     throw fetchErr;
   }
   const meta = extractPaperMeta(html); // throws MetaNotFoundError if no anchor
@@ -496,24 +522,65 @@ async function resolveFromUrl(
   };
 }
 
-// When a publisher page bot-blocks us (e.g. Elsevier/ScienceDirect 403), try a
-// DOI or PMID embedded in the URL or the curator's message — those resolve via
-// Crossref/PubMed, which don't bot-block. Returns null when no identifier is
-// present (the caller then surfaces the original fetch error).
-async function resolveFromEmbeddedId(
+// Pre-fetch: resolve a DOI/PMID embedded in the URL PATH itself — authoritative
+// for this URL, so it resolves via Crossref/PubMed without fetching the page.
+// Returns null when the URL carries no identifier. RETRYABLE API errors
+// (network/rate-limit) propagate so the item retries; only not_found/parse are
+// swallowed to try the next candidate or fall through to a page fetch.
+async function resolveFromUrlEmbeddedId(
   url: string,
   item: InboxItem,
   note: string | null,
 ): Promise<NewPaper | null> {
-  const haystack = `${url} ${item.raw_message_text ?? ''}`;
-  for (const doi of extractDois(haystack)) {
+  // Scan only the URL PATH, never the query/fragment — a `?related=…doi.org/10.x`
+  // param must not hijack a DOI-less article URL before its page is fetched.
+  let path = url.split(/[?#]/)[0] ?? url;
+  try {
+    path = decodeURIComponent(path);
+  } catch {
+    // keep raw path on malformed encoding
+  }
+  const dois = new Set<string>();
+  const urlDoi = firstDoiInUrl(url); // clean DOI from the path (trailing tokens trimmed)
+  if (urlDoi) dois.add(urlDoi);
+  for (const d of extractDois(path)) dois.add(d); // any other DOI literally in the path
+  for (const doi of dois) {
+    try {
+      return { ...(await resolveFromDoi(doi, item, note)), source_url: url };
+    } catch (err) {
+      if (classifyResolveError(err).retryable) throw err;
+      // not_found / parse → try the next candidate, else fall through to fetch
+    }
+  }
+  const pmidMatch = url.match(/[?&/]pmid[=:/]?(\d{4,9})\b/i); // PMID inside a non-pubmed URL (rare)
+  if (pmidMatch) {
+    try {
+      return { ...(await resolveFromPubMed(pmidMatch[1], item, note)), source_url: url };
+    } catch (err) {
+      if (classifyResolveError(err).retryable) throw err;
+    }
+  }
+  return null;
+}
+
+// Post-fetch-failure last resort: a DOI/PMID in the curator's MESSAGE text (NOT
+// the URL). Best-effort — the page fetch already failed, so every API error is
+// swallowed. Kept separate from the URL path so message text can't pre-empt a
+// page that should have been fetched on its own merits.
+async function resolveFromMessageId(
+  item: InboxItem,
+  note: string | null,
+  url: string,
+): Promise<NewPaper | null> {
+  const text = item.raw_message_text ?? '';
+  for (const doi of extractDois(text)) {
     try {
       return { ...(await resolveFromDoi(doi, item, note)), source_url: url };
     } catch {
       // try the next identifier
     }
   }
-  const pmidMatch = haystack.match(/\bPMID:?\s*(\d{4,9})\b/i);
+  const pmidMatch = text.match(/\bPMID:?\s*(\d{4,9})\b/i);
   if (pmidMatch) {
     try {
       return { ...(await resolveFromPubMed(pmidMatch[1], item, note)), source_url: url };
