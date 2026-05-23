@@ -25,6 +25,17 @@ import { ocrFile, isOcrAvailable, type OcrResult } from './vision-ocr.ts';
 // A scanned PDF often yields a few stray ligatures from pdftotext rather than
 // truly empty output, so gate on a word count, not just non-empty.
 const MIN_TEXT_WORDS = 30;
+// Image-only PDFs from some publishers (Wiley/ACS etc.) carry a per-page
+// download watermark in their text layer. pdftotext then returns the same stamp
+// on every page — hundreds of words that are almost all duplicates — which would
+// clear MIN_TEXT_WORDS and wrongly skip OCR. Require the DISTINCT content to be
+// at least this fraction of the total so a stamp echoed N times doesn't pass.
+const MIN_DISTINCT_RATIO = 0.5;
+// Escape hatch: a long article with heavy repeated headers/footers can dip below
+// the ratio yet still carry plenty of real text. Accept the layer regardless of
+// ratio once distinct content clears this absolute floor, so we never force OCR
+// (and risk a hard failure where Vision is unavailable) on genuinely rich text.
+const HIGH_DISTINCT_FLOOR = 200;
 // Cap rasterized pages — bounds OCR cost on a 200-page thesis PDF. The first
 // pages carry title/abstract/methods, which is what the digest needs.
 const MAX_OCR_PAGES = 15;
@@ -70,11 +81,11 @@ export async function extractPdfText(
   const runOcr = opts.runOcr ?? ((p: string) => rasterizeAndOcr(p, opts.timeoutMs));
 
   const layer = (await runText(absPath)).trim();
-  if (wordCount(layer) >= minWords) {
+  if (isUsableTextLayer(layer, minWords)) {
     return { text: layer, via: 'text' };
   }
 
-  // Empty/garbled text layer → treat as scanned, OCR the pages.
+  // Empty/garbled/watermark-only text layer → treat as scanned, OCR the pages.
   const ocrText = (await runOcr(absPath)).trim();
   if (wordCount(ocrText) === 0) {
     throw new PdfToolError(
@@ -82,12 +93,69 @@ export async function extractPdfText(
       'empty',
     );
   }
-  return { text: ocrText, via: 'ocr' };
+  // A rejected layer is usually a download watermark, which carries the DOI in
+  // its URL. OCR of the page image can miss small marginal text, so fold the
+  // (deduped) rejected lines back in — keeps the DOI/PMID regex backstop alive
+  // for the Crossref rescue downstream. Cheap: the rejected layer is tiny.
+  const text = layer ? `${ocrText}\n\n${uniqueLines(layer)}` : ocrText;
+  return { text, via: 'ocr' };
 }
 
 function wordCount(s: string): number {
   const t = s.trim();
   return t.length === 0 ? 0 : t.split(/\s+/).length;
+}
+
+// Is a pdftotext layer real content, or a scanned page's boilerplate? Rejects
+// two cases: near-empty (a few stray ligatures) and watermark-dominated (a
+// per-page download stamp repeated on every page). Counts words across DISTINCT
+// lines — collapsing the repeated stamp to one instance — and requires the
+// distinct content to clear the floor AND either dominate the total OR be large
+// in absolute terms (a long article with heavy repeated headers stays usable).
+export function isUsableTextLayer(text: string, minWords = MIN_TEXT_WORDS): boolean {
+  const total = wordCount(text);
+  if (total === 0) return false;
+  const distinct = distinctLineWordCount(text);
+  if (distinct < minWords) return false;
+  return distinct / total >= MIN_DISTINCT_RATIO || distinct >= HIGH_DISTINCT_FLOOR;
+}
+
+// Normalize a line so per-page variation in an otherwise-constant stamp (page
+// numbers, access dates, minor wrapping) collapses to one key: lowercase, drop
+// digits, collapse whitespace. Distinct BODY lines differ by words, not just
+// digits, so they survive normalization; a varying watermark does not.
+function normalizeLine(line: string): string {
+  return line.toLowerCase().replace(/\d+/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function distinctLineWordCount(text: string): number {
+  const seen = new Set<string>();
+  let n = 0;
+  for (const raw of text.split(/[\r\n\f]+/)) {
+    const line = raw.trim();
+    if (line.length < 3) continue;
+    const key = normalizeLine(line);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    n += line.split(/\s+/).length;
+  }
+  return n;
+}
+
+// Distinct (normalized) lines from a text blob, preserving original casing and
+// order. Used to fold a tiny rejected watermark layer back into OCR output.
+function uniqueLines(text: string): string {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of text.split(/[\r\n\f]+/)) {
+    const line = raw.trim();
+    if (line.length < 3) continue;
+    const key = normalizeLine(line);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(line);
+  }
+  return out.join('\n');
 }
 
 // pdftotext <abs> - → text on stdout.

@@ -310,6 +310,40 @@ async function enrichPdfPaper(
     return { status: 'failed', reason: `pdf metadata LLM error: ${(err as Error).message}` };
   }
 
+  // 4b. When the PDF carries a DOI, prefer authoritative bibliographic metadata
+  // from Crossref over text-derived values. Image/scanned PDFs (e.g. a Wiley
+  // download-watermarked scan) can leave the extractor reading only the watermark,
+  // yielding a garbage title, no authors, and no abstract — the DOI rescues it.
+  // disease_site stays from the LLM (Crossref has no such field) and the PDF text
+  // stays as fulltext_excerpt_md. Best-effort: any Crossref failure keeps the
+  // text-derived meta rather than failing the whole enrichment.
+  if (meta.doi) {
+    try {
+      const cr = await fetchCrossrefPaper(meta.doi);
+      // Only trust a record that is actually for this DOI (fetchCrossrefPaper is
+      // a direct /works/<doi> lookup, so this holds — guard against future drift).
+      if (cr.doi === meta.doi) {
+        // Prefer a non-empty Crossref string; never let a blank field overwrite
+        // the text-derived value.
+        const prefer = (a: string | null, b: string | null): string | null =>
+          a && a.trim().length > 0 ? a : b;
+        meta = {
+          ...meta,
+          title: prefer(cr.title, meta.title) ?? meta.title,
+          authors:
+            Array.isArray(cr.authors) && cr.authors.length > 0
+              ? cr.authors.map((a) => a.name)
+              : meta.authors,
+          journal: prefer(cr.journal, meta.journal),
+          pub_date: prefer(cr.pub_date, meta.pub_date),
+          abstract: prefer(cr.abstract, meta.abstract),
+        };
+      }
+    } catch {
+      // keep text-derived meta; Crossref is a best-effort enrichment on this path
+    }
+  }
+
   // 5. File the PDF into the vault by its provisional disease site.
   const slug = deriveSlug(meta.title);
   let filedRelPath: string;
