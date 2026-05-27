@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
   fetchUpdates,
+  fetchWebhookInfo,
   extractTweetUrls,
   extractCuratorNote,
   extractPaperPmids,
@@ -66,6 +67,43 @@ describe('fetchUpdates', () => {
       throw new Error('ECONNRESET');
     }) as unknown as typeof fetch;
     await expect(fetchUpdates('t', { fetchImpl })).rejects.toBeInstanceOf(TelegramApiError);
+  });
+});
+
+describe('fetchWebhookInfo', () => {
+  it('returns the result object on ok response', async () => {
+    const fetchImpl = mockFetch({
+      ok: true,
+      result: { url: '', pending_update_count: 3, allowed_updates: ['message'] },
+    });
+    const info = await fetchWebhookInfo('t', { fetchImpl });
+    expect(info.pending_update_count).toBe(3);
+    expect(info.url).toBe('');
+  });
+
+  it('throws when token is empty', async () => {
+    await expect(fetchWebhookInfo('')).rejects.toBeInstanceOf(TelegramApiError);
+  });
+
+  it('throws when result is missing', async () => {
+    const fetchImpl = mockFetch({ ok: true });
+    await expect(fetchWebhookInfo('t', { fetchImpl })).rejects.toBeInstanceOf(TelegramApiError);
+  });
+
+  it('throws when Telegram returns ok=false', async () => {
+    const fetchImpl = mockFetch({ ok: false, description: 'Unauthorized' });
+    await expect(fetchWebhookInfo('badtoken', { fetchImpl })).rejects.toMatchObject({
+      name: 'TelegramApiError',
+      message: 'Unauthorized',
+    });
+  });
+
+  it('hits the getWebhookInfo endpoint', async () => {
+    const fetchImpl = mockFetch({ ok: true, result: { url: '', pending_update_count: 0 } });
+    await fetchWebhookInfo('t', { fetchImpl });
+    // @ts-expect-error inspecting the mock
+    const calledUrl = fetchImpl.mock.calls[0][0] as string;
+    expect(calledUrl).toContain('/getWebhookInfo');
   });
 });
 
