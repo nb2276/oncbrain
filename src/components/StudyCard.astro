@@ -68,6 +68,33 @@ const comparatorBullets = study.details.filter(isComparatorBullet);
 const otherBullets = study.details.filter((d) => !isComparatorBullet(d));
 const verdictMeta = study.verdict ? VERDICT_META[study.verdict.soc_implication] : null;
 
+// IMRD-style section bucketing for the depth fold. The leading emoji on each
+// bullet already encodes the section (VOICE.md): 🔍/💊 are Methods, 📊/📐 are
+// Results, ⚠️ is Critique. Bullets without a recognized emoji prefix fall to
+// Notes so nothing is silently dropped.
+type DepthSection = 'methods' | 'results' | 'critique' | 'notes';
+function bucketBullet(d: DigestDetail): DepthSection {
+  const text = typeof d === 'string' ? d : (d as { text: string }).text;
+  // ⚠️ ships with or without the U+FE0F variation selector depending on
+  // source/keyboard; match both forms.
+  const m = text.match(/^\s*(🔍|💊|📊|📐|⚠️|⚠)/u);
+  if (!m) return 'notes';
+  const e = m[1];
+  if (e === '🔍' || e === '💊') return 'methods';
+  if (e === '📊' || e === '📐') return 'results';
+  return 'critique';
+}
+const methodsBullets = otherBullets.filter((d) => bucketBullet(d) === 'methods');
+const resultsBullets = otherBullets.filter((d) => bucketBullet(d) === 'results');
+const critiqueBullets = otherBullets.filter((d) => bucketBullet(d) === 'critique');
+const notesBullets = otherBullets.filter((d) => bucketBullet(d) === 'notes');
+const hasConsort = Boolean(study.consort && study.consort.arms.length >= 2);
+const depthSections: Array<{ label: string; bullets: DigestDetail[]; consort: boolean }> = [];
+if (methodsBullets.length > 0 || hasConsort) depthSections.push({ label: 'Methods', bullets: methodsBullets, consort: hasConsort });
+if (resultsBullets.length > 0) depthSections.push({ label: 'Results', bullets: resultsBullets, consort: false });
+if (critiqueBullets.length > 0) depthSections.push({ label: 'Critique', bullets: critiqueBullets, consort: false });
+if (notesBullets.length > 0) depthSections.push({ label: 'Notes', bullets: notesBullets, consort: false });
+
 // v0.10: figure gallery (KM curve, forest plot, results/AE table…). Normalizes
 // the v0.4 single-figure shape; re-applies the host allowlist at render time as
 // defense-in-depth (build already validated). First figure is the visual anchor;
@@ -83,11 +110,12 @@ const hasOpenQuestions = Boolean(
 // is no longer part of the folded depth.
 const hasAudience = Boolean(study.verdict?.audience);
 // Folded "depth" layer: everything past the triage essentials. Figures live in
-// their own column; audience is now in the head; CONSORT stays in the main flow.
+// their own column; audience is now in the head; CONSORT folds into Methods.
 const hasDepth =
   otherBullets.length > 0 ||
   hasOpenQuestions ||
-  authors.length > 0;
+  authors.length > 0 ||
+  hasConsort;
 const depthSummary = otherBullets.length > 0
   ? `${otherBullets.length} ${otherBullets.length === 1 ? 'detail' : 'details'}`
   : 'Details';
@@ -195,82 +223,86 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   )}
 
   <div class="study-rest">
-  {/* ── CONSORT participant flow (randomized trials, when counts reported) ── */}
-  {study.consort && study.consort.arms.length >= 2 && (
-    <details class="consort">
-      <summary>CONSORT flow</summary>
-      <div class="consort-flow">
-        {study.consort.enrolled != null && (
-          <>
-            <div class="consort-node">Assessed / enrolled <b>{study.consort.enrolled}</b></div>
-            <div class="consort-arrow">
-              {study.consort.excluded != null ? `↓  ${study.consort.excluded} excluded` : '↓'}
-            </div>
-          </>
-        )}
-        <div class="consort-node consort-rand">Randomized <b>{study.consort.randomized}</b></div>
-        <div class="consort-arrow">↓</div>
-        <div class="consort-arms">
-          {study.consort.arms.map((a) => (
-            <div class="consort-arm">
-              <div class="consort-arm-label">{a.label}</div>
-              <div class="consort-arm-line">allocated <b>{a.allocated}</b></div>
-              {a.analyzed != null && (
-                <div class="consort-arm-line consort-analyzed">analyzed <b>{a.analyzed}</b></div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </details>
-  )}
-
-  {/* ── Depth layer: folded behind a tap ── */}
+  {/* ── Depth layer: folded behind a tap. Bullets flow IMRD-style (Methods →
+      Results → Critique → Notes), with CONSORT nested inside Methods. ── */}
   {hasDepth && (
     <details class="study-depth">
       <summary>{depthSummary}</summary>
-      {otherBullets.length > 0 && (
-        <ul class="study-details">
-          {otherBullets.map((d) => {
-            if (typeof d === 'string') {
-              return <li set:html={linkifyCitations(d)} />;
-            }
-            if ('table' in d) {
-              return (
-                <li>
-                  <span set:html={linkifyCitations(d.text)} />
-                  <div class="study-table-wrap">
-                    <table class="study-table">
-                      <thead>
-                        <tr>
-                          {d.table.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {d.table.rows.map((row) => (
-                          <tr>
-                            {row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </li>
-              );
-            }
-            return (
-              <li>
-                <span set:html={linkifyCitations(d.text)} />
-                {d.subdetails.length > 0 && (
-                  <ul class="study-subdetails">
-                    {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
-                  </ul>
+      {depthSections.map((sec) => (
+        <section class="depth-section">
+          <div class="section-label">{sec.label}</div>
+          {sec.bullets.length > 0 && (
+            <ul class="study-details">
+              {sec.bullets.map((d) => {
+                if (typeof d === 'string') {
+                  return <li set:html={linkifyCitations(d)} />;
+                }
+                if ('table' in d) {
+                  return (
+                    <li>
+                      <span set:html={linkifyCitations(d.text)} />
+                      <div class="study-table-wrap">
+                        <table class="study-table">
+                          <thead>
+                            <tr>
+                              {d.table.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {d.table.rows.map((row) => (
+                              <tr>
+                                {row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </li>
+                  );
+                }
+                return (
+                  <li>
+                    <span set:html={linkifyCitations(d.text)} />
+                    {d.subdetails.length > 0 && (
+                      <ul class="study-subdetails">
+                        {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {sec.consort && study.consort && (
+            <details class="consort">
+              <summary>CONSORT flow</summary>
+              <div class="consort-flow">
+                {study.consort.enrolled != null && (
+                  <>
+                    <div class="consort-node">Assessed / enrolled <b>{study.consort.enrolled}</b></div>
+                    <div class="consort-arrow">
+                      {study.consort.excluded != null ? `↓  ${study.consort.excluded} excluded` : '↓'}
+                    </div>
+                  </>
                 )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                <div class="consort-node consort-rand">Randomized <b>{study.consort.randomized}</b></div>
+                <div class="consort-arrow">↓</div>
+                <div class="consort-arms">
+                  {study.consort.arms.map((a) => (
+                    <div class="consort-arm">
+                      <div class="consort-arm-label">{a.label}</div>
+                      <div class="consort-arm-line">allocated <b>{a.allocated}</b></div>
+                      {a.analyzed != null && (
+                        <div class="consort-arm-line consort-analyzed">analyzed <b>{a.analyzed}</b></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </details>
+          )}
+        </section>
+      ))}
       {hasOpenQuestions && (
         <div class="open-questions study-open-questions">
           <div class="section-label">Open questions</div>
@@ -641,6 +673,22 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     margin-bottom: 0.5rem;
     color: var(--accent);
   }
+
+  /* IMRD section dividers inside the depth fold (Methods → Results → Critique
+     → Notes). The label reuses .section-label (small caps, muted); a thin top
+     rule separates sections so the dropdown reads as a structured paper rather
+     than a flat list. CONSORT, when present, is nested inside Methods. */
+  .depth-section {
+    margin-top: 0.85rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border);
+  }
+  .depth-section:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+  .depth-section .consort { margin-top: 0.6rem; }
 
   .study-details {
     margin: 0;
