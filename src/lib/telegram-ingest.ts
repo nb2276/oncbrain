@@ -115,6 +115,51 @@ export async function fetchUpdates(
   return body.result ?? [];
 }
 
+export type TelegramWebhookInfo = {
+  url: string;
+  has_custom_certificate?: boolean;
+  pending_update_count: number;
+  last_error_date?: number; // unix seconds
+  last_error_message?: string;
+  allowed_updates?: string[];
+};
+
+// Snapshot of the bot's server-side state. We call this immediately after an
+// empty getUpdates to catch the "Telegram returned result:[] but the queue
+// actually had updates" Bot API stale-read failure mode. If pending_update_count
+// is > 0 right after fetchUpdates returned 0, that proves provider inconsistency,
+// not curator silence.
+export async function fetchWebhookInfo(
+  token: string,
+  opts: { fetchImpl?: typeof fetch } = {},
+): Promise<TelegramWebhookInfo> {
+  if (!token) throw new TelegramApiError('Missing TELEGRAM_BOT_TOKEN');
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  const url = `${API_BASE}/bot${token}/getWebhookInfo`;
+  let response: Response;
+  try {
+    response = await fetchImpl(url);
+  } catch (err) {
+    throw new TelegramApiError(`Network error: ${(err as Error).message}`);
+  }
+  if (!response.ok) {
+    throw new TelegramApiError(`getWebhookInfo returned ${response.status}`, response.status);
+  }
+  let json: unknown;
+  try {
+    json = await response.json();
+  } catch (err) {
+    throw new TelegramApiError(`Failed to parse response: ${(err as Error).message}`);
+  }
+  if (!json || typeof json !== 'object') throw new TelegramApiError('Empty response');
+  const body = json as { ok: boolean; description?: string; result?: TelegramWebhookInfo };
+  if (!body.ok) {
+    throw new TelegramApiError(body.description || 'Telegram API returned ok=false', undefined, body);
+  }
+  if (!body.result) throw new TelegramApiError('Missing result in getWebhookInfo response');
+  return body.result;
+}
+
 // Outbound DM to a known chat. Used by notify-curator after a daily build to
 // ping the curator with a "✓ built — here's what shipped" summary.
 export async function sendMessage(
