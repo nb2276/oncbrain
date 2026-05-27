@@ -16,6 +16,7 @@ import {
   overridesPath,
   type DigestOverrides,
 } from '../src/lib/digest-overrides.ts';
+import { openDb, listAllSourceDates } from '../src/lib/db.ts';
 import { deriveSlug } from '../src/lib/slug.ts';
 import { verdictMetaFor } from '../src/lib/verdict.ts';
 
@@ -249,6 +250,93 @@ async function ingest(): Promise<void> {
   }
 }
 
+function localDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+// Per-date max source timestamp (Unix seconds) across bookmarks/papers/slides.
+// Used to decide if a digest is stale relative to its sources.
+function maxSourceTimestampByDate(db: ReturnType<typeof openDb>): Map<string, number> {
+  const rows = db
+    .prepare(
+      `SELECT d, MAX(c) AS m FROM (
+         SELECT bookmark_date AS d, created_at AS c FROM bookmarks
+         UNION ALL SELECT bookmark_date, created_at FROM papers
+         UNION ALL SELECT bookmark_date, created_at FROM slide_uploads
+       ) GROUP BY d`,
+    )
+    .all() as { d: string; m: number }[];
+  return new Map(rows.map((r) => [r.d, r.m]));
+}
+
+// Read just the `generated_at` (Unix ms) off a digest JSON. Returns null if
+// the digest file is missing/unparseable.
+function digestGeneratedAt(date: string): number | null {
+  const fp = resolve(DIGESTS_DIR, `${date}.json`);
+  if (!existsSync(fp)) return null;
+  try {
+    const j = JSON.parse(readFileSync(fp, 'utf8')) as { generated_at?: number };
+    return typeof j.generated_at === 'number' ? j.generated_at : null;
+  } catch {
+    return null;
+  }
+}
+
+// Same flow as scripts/daily-build.sh, minus git + notify. After ingest, picks
+// every back date whose sources are unreflected in the published digest:
+//   - missing: source date with no digest JSON at all
+//   - stale:   digest exists but a source row's created_at is newer than the
+//              digest's generated_at (late-arriving back-dated content)
+// Union with yesterday + today (always rebuilt for fresh content).
+async function dailyBuild(): Promise<void> {
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+  const todayStr = localDateStr(today);
+  const yesterdayStr = localDateStr(yesterday);
+  try {
+    await run('npm', ['run', 'pull:telegram']);
+    await run('npm', ['run', 'enrich:inbox']);
+
+    const db = openDb();
+    const sourceDates = listAllSourceDates(db);
+    const sourceMaxAt = maxSourceTimestampByDate(db);
+
+    const missing: string[] = [];
+    const stale: string[] = [];
+    for (const date of sourceDates) {
+      const generatedAtMs = digestGeneratedAt(date);
+      if (generatedAtMs === null) {
+        missing.push(date);
+        continue;
+      }
+      const sourceMaxMs = (sourceMaxAt.get(date) ?? 0) * 1000;
+      if (sourceMaxMs > generatedAtMs) stale.push(date);
+    }
+
+    const datesToBuild = Array.from(
+      new Set([...missing, ...stale, yesterdayStr, todayStr]),
+    ).sort();
+
+    if (missing.length > 0) {
+      p.log.info(`Catching up ${missing.length} unbuilt date(s): ${missing.join(', ')}`);
+    }
+    if (stale.length > 0) {
+      p.log.info(`Rebuilding ${stale.length} stale date(s): ${stale.join(', ')}`);
+    }
+
+    for (const date of datesToBuild) {
+      await run('npm', ['run', 'build:day', '--', `--date=${date}`]);
+    }
+    await run('npm', ['run', 'build']);
+    p.log.success(`Daily build complete (${datesToBuild.length} date(s)).`);
+  } catch (err) {
+    p.log.error((err as Error).message);
+  }
+}
+
 async function main(): Promise<void> {
   p.intro('oncbrain studio');
   for (;;) {
@@ -256,6 +344,7 @@ async function main(): Promise<void> {
       message: 'What do you want to do?',
       options: [
         { value: 'manage', label: 'Manage studies (suppress / edit)' },
+        { value: 'daily', label: 'Daily build', hint: 'pull + enrich + build yesterday & today + index' },
         { value: 'build', label: 'Build a day' },
         { value: 'ingest', label: 'Pull + enrich inbox' },
         { value: 'quit', label: 'Quit' },
@@ -263,6 +352,7 @@ async function main(): Promise<void> {
     });
     if (p.isCancel(action) || action === 'quit') break;
     if (action === 'manage') await manageStudies();
+    else if (action === 'daily') await dailyBuild();
     else if (action === 'build') await buildADay();
     else if (action === 'ingest') await ingest();
   }
