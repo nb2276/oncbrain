@@ -2,6 +2,13 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.4] - 2026-05-27
+
+### Changed
+
+- Card left-bars revert from `--fg-muted` back to `--border` (the darker gray
+  in dark mode that v0.9 was using before the v0.9.3 visibility tweak).
+
 ## [0.9.3] - 2026-05-27
 
 ### Changed — study card depth dropdown flows like a paper
