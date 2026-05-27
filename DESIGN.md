@@ -61,13 +61,25 @@ The unit of the digest. **Triage-first**: the card rests at a triage layer and f
 **Resting layer (always visible), top to bottom:**
 
 1. **Trial name** + NCT link.
-2. **Description** — the study TL;DR, one line, headline number verbatim.
-3. **Verdict pill** — the standard-of-care triage signal, six buckets, each an emoji plus a short label:
+2. **Eligible population** — the "For …" line that gates whether the study applies to this reader's patient.
+3. **Description** — the study TL;DR, one line, headline number verbatim.
+4. **Verdict pill** — the standard-of-care triage signal, six buckets, each an emoji plus a short label:
    - 🚀 Practice-changing · ↔️ Challenges SOC · 🔄 Confirmatory · 🧪 Early signal · ⚠️ Caveats dominate · ❔ Unclear
    - Carries a one-line rationale. Taxonomy lives in `src/lib/verdict.ts` (shared with the triage rail). Assignment rules and maturity gates are a voice concern (see `VOICE.md`). These six emojis are the *visual* vocabulary; do not reuse them elsewhere.
-4. **"vs leading data" callout** — comparator (🔗) bullets lifted out of the depth, so the reader sees how the result sits against prior evidence at a glance.
+5. **"vs leading data" callout** — comparator (🔗) bullets lifted out of the depth, so the reader sees how the result sits against prior evidence at a glance.
 
-**Depth layer (folded behind `▸ N details`):** eligible population ("For …"), promoted figure, detail bullets + tables (a 2D comparison renders as an inline table), open questions, source attribution.
+**Figures:** their own column on desktop (≥1200px when a card has figures), or stacked under the triage layer on narrower viewports. The first figure is the visual anchor; additional figures fold behind a `+N more figures` summary.
+
+**Depth layer (folded behind `▸ N details`),** flows like a scientific paper. Bullets are routed into labeled sections by their leading emoji prefix from `VOICE.md`:
+
+- **Methods** — design / regimen bullets (🔍 🔍 💊) plus the **CONSORT participant flow** (when randomization counts are reported).
+- **Results** — effect sizes and outcome tables (📊 📐). A 2D comparison renders as an inline table.
+- **Critique** — methodological caveats (⚠️).
+- **Notes** — any bullet without a recognized emoji prefix; usually empty. Catches what `VOICE.md` allows ("a bullet without an emoji is fine") instead of dropping it.
+- **Open questions** — `❓` items the study leaves unresolved for the field.
+- **Source attribution** — small muted line at the bottom of the fold.
+
+The depth dropdown's summary keeps the existing `N details` count so the affordance reads the same as before.
 
 **Sources:** a separate collapsible, each linked back, with source-type pills (🐦 tweet · 📄 paper · 🩻 slide; see `VOICE.md`).
 

@@ -107,7 +107,7 @@ Organized by **disease site** (22-slug enum, see `DESIGN.md`), newest date first
 
 - **Top line** — one-sentence lede with the headline number.
 - **TL;DR** — 2-3 sentence cross-site synthesis (also the home-page hero).
-- **Per study card (triage-first):** rests at its triage layer — trial name, a one-line **TL;DR** (effect sizes verbatim), a **standard-of-care verdict** pill (practice-changing / challenges-SOC / confirmatory / early-signal / caveats-dominate / unclear), and a 🔗 **"vs leading data"** comparator callout. The methodology depth (eligible population, figures, endpoint bullets + tables, open questions, attribution) folds behind a tap; **sources** (🐦 📄 🩻) are a separate collapsible.
+- **Per study card (triage-first):** rests at its triage layer — trial name, the eligible population ("For …"), a one-line **TL;DR** (effect sizes verbatim), a **standard-of-care verdict** pill (practice-changing / challenges-SOC / confirmatory / early-signal / caveats-dominate / unclear), and a 🔗 **"vs leading data"** comparator callout. Figures sit in their own column on wide screens (under the triage layer on narrow ones). The depth folds behind a tap and flows like a paper — **Methods** (design, regimen, CONSORT participant flow), **Results** (effect sizes + comparison tables), **Critique** (methodological caveats), then **Open questions** and source attribution. **Sources** (🐦 📄 🩻) are a separate collapsible.
   - On mobile the depth stays folded for the 90-second scan; on desktop (≥1024px) it auto-expands, and a sticky **triage rail** (≥1200px) lists every study by verdict for quick jumping.
 
 Disease-site emoji anchors live in `DESIGN.md`; the per-study bullet + verdict emoji vocabulary and voice rules live in `VOICE.md`.
