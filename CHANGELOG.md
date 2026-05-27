@@ -2,6 +2,25 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.3] - 2026-05-27
+
+### Changed — study card depth dropdown flows like a paper
+
+The expanded details on each study card are now grouped into labeled sections
+that read like a scientific paper, instead of one flat emoji-prefixed list.
+
+- **Methods · Results · Critique** dividers inside the dropdown. Bullets are
+  routed by their leading emoji from `VOICE.md` (🔍/💊 → Methods, 📊/📐 →
+  Results, ⚠️ → Critique). A small "Notes" bucket at the bottom catches any
+  bullet without a recognized emoji prefix, so nothing is silently dropped.
+- **CONSORT participant flow nested inside Methods.** Previously the
+  randomization diagram sat as a sibling above the dropdown; it now lives in
+  the Methods section where readers expect it, behind the same expandable
+  affordance as before.
+- **No schema or LLM change.** Bucketing reads the emoji vocabulary that the
+  build-time prompts already emit, so every existing digest renders with the
+  new structure without a rebuild.
+
 ## [0.9.2] - 2026-05-22
 
 ### Changed
