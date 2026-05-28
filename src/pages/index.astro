@@ -10,6 +10,7 @@ import {
 } from '../lib/digest-data.ts';
 import { linkifyCitations } from '../lib/extract.ts';
 import { DISEASE_SITES, getDiseaseSite } from '../lib/disease-sites.ts';
+import { buildShareUrl } from '../lib/share-url.ts';
 
 const digests = listDigests();
 const conferences = listConferenceSummaries();
@@ -137,8 +138,9 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
           const meta = getDiseaseSite(r.disease_site);
           const tldr = stripStudyNamePrefix(r.study.tldr, r.study.name);
           const teaser = tldr.length > 200 ? tldr.slice(0, 199).trimEnd() + '…' : tldr;
+          const shareUrl = buildShareUrl({ site: r.disease_site, date: r.date, slug: r.slug });
           return (
-            <li>
+            <li class="recent-li">
               <a class="recent-card" href={`/${r.date}/#${r.slug}`}>
                 <div class="recent-meta">
                   <span class="recent-emoji" aria-hidden="true" title={`${meta.label}: ${meta.rationale}`}>{meta.emoji}</span>
@@ -152,6 +154,25 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
                 <div class="recent-name">{r.study.name}</div>
                 <div class="recent-tldr" set:html={linkifyCitations(teaser)} />
               </a>
+              {shareUrl && (
+                <Fragment>
+                  <button
+                    type="button"
+                    class="recent-share"
+                    data-share-url={shareUrl}
+                    data-share-title={r.study.name}
+                    aria-label={`Share link to ${r.study.name}`}
+                  >Share</button>
+                  <span class="sr-share-status" aria-live="polite"></span>
+                  <input
+                    type="text"
+                    class="share-recovery"
+                    readonly
+                    tabindex={-1}
+                    aria-label="Copy this URL manually"
+                  />
+                </Fragment>
+              )}
             </li>
           );
         })}
@@ -344,17 +365,29 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
     flex-direction: column;
     gap: 0.7rem;
   }
+  /* Each feed item is a <li class="recent-li"> so the absolutely-positioned
+     share button (sibling of the <a>) can use the li as its containing block.
+     Button-in-anchor would be invalid HTML, hence the sibling layout. */
+  .recent-li { position: relative; }
   .recent-card {
     display: block;
     min-height: 44px;
-    padding: 0.9rem 1.05rem;
+    /* Extra bottom padding so the TL;DR text doesn't run under the absolutely
+       positioned share button at bottom-right. */
+    padding: 0.9rem 1.05rem 2.2rem;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 8px;
     text-decoration: none;
     color: var(--fg);
   }
-  .recent-card:hover { border-color: var(--accent); }
+  /* Card border stays accent while cursor is anywhere over the li OR keyboard
+     focus lands on either the link or the share button — avoids the visual
+     "card disconnect" when the cursor moves from card body to the absolutely-
+     positioned share button (which is outside the <a>'s hover region). */
+  .recent-li:hover .recent-card,
+  .recent-card:focus-within { border-color: var(--accent); }
+  .recent-li:focus-within .recent-card { border-color: var(--accent); }
   .recent-meta {
     display: flex;
     align-items: baseline;
@@ -389,4 +422,68 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
     font-size: 0.93rem;
     line-height: 1.45;
   }
+
+  /* Share affordance: absolute bottom-right overlay, sibling of the link
+     (button-in-anchor is invalid HTML). Hidden until share-script.ts confirms
+     navigator.share or navigator.clipboard is available. .is-flipped is added
+     during the Copied / Couldn't copy window for the accent-color flash. */
+  .recent-share {
+    display: none;
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.6rem;
+    z-index: 2;
+    background: none;
+    border: none;
+    padding: 0.5rem 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    cursor: pointer;
+    line-height: 1.2;
+    min-height: 44px;
+  }
+  .recent-share:hover { color: var(--accent); }
+  .recent-share.is-flipped { color: var(--accent); }
+
+  /* Screen-reader-only live region for state announcements. Visible label
+     change is the sighted user's signal; this announces the same text to
+     screen readers because mutating button textContent doesn't fire reliably
+     across NVDA / JAWS / VoiceOver. */
+  .sr-share-status {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* Inline URL recovery: appears above the share button (rare path — when
+     clipboard.writeText rejects). Pre-selected for Cmd+A/Cmd+C. Auto-hides
+     after 10s. */
+  .share-recovery {
+    display: none;
+    position: absolute;
+    bottom: calc(0.5rem + 44px + 0.3rem);
+    right: 0.6rem;
+    z-index: 3;
+    padding: 0.3rem 0.45rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    color: var(--fg);
+    background: var(--bg-card);
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    max-width: calc(100% - 1.2rem);
+    width: 18rem;
+  }
 </style>
+<script>
+  // Wire the share buttons on this page. Astro hoists + dedupes identical
+  // inline scripts across pages that include the same import + init call.
+  import { initShareButtons } from '../lib/share-script.ts';
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initShareButtons);
+  } else {
+    initShareButtons();
+  }
+</script>

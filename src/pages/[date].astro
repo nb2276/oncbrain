@@ -157,6 +157,7 @@ for (const study of allStudiesOnDate) {
             bookmarks={sourcesByStudy.get(study)!.bookmarks}
             papers={sourcesByStudy.get(study)!.papers}
             slides={sourcesByStudy.get(study)!.slides}
+            shareUrl={`/sites/${site.disease_site}/#${date}-${slugByStudy.get(study)}`}
           />
         ))}
 

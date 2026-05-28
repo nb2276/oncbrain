@@ -35,6 +35,9 @@ interface Props {
   anchorId?: string;
   // Optional "Sourced from …" attribution line (per-date page only).
   authors?: StudyAuthor[];
+  // Optional canonical share URL (per-site page anchor: /sites/{site}/#{date}-{slug}).
+  // Absent → share button is not rendered. Absolutized at click time in share-script.ts.
+  shareUrl?: string;
 }
 
 const {
@@ -44,6 +47,7 @@ const {
   slides = [],
   anchorId,
   authors = [],
+  shareUrl,
 } = Astro.props as Props;
 
 // 🔗 bullets are lifted out of the main list into the "vs leading data" callout.
@@ -220,8 +224,15 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   )}
 
   <div class="study-rest">
-  {/* ── Depth layer: folded behind a tap. Bullets flow IMRD-style (Methods →
-      Results → Critique → Notes), with CONSORT nested inside Methods. ── */}
+  {/* ── Utility row: depth fold (left) + share affordance (right). The share
+      button is a sibling of <details>, NEVER nested inside <summary> (nested
+      interactive elements break keyboard + AT semantics). When hasDepth is
+      false but shareUrl is present, the row holds just the button, right-
+      aligned via margin-left:auto. Share starts display:none in SSG output;
+      share-script.ts reveals it after feature-detecting navigator.share /
+      navigator.clipboard. ── */}
+  {(hasDepth || shareUrl) && (
+    <div class="study-utility-row">
   {hasDepth && (
     <details class="study-depth">
       <summary>{depthSummary}</summary>
@@ -319,6 +330,27 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
         </p>
       )}
     </details>
+  )}
+  {shareUrl && (
+    <Fragment>
+      <button
+        type="button"
+        class="study-share"
+        data-share-url={shareUrl}
+        data-share-title={study.name}
+        aria-label={`Share link to ${study.name}`}
+      >Share</button>
+      <span class="sr-share-status" aria-live="polite"></span>
+      <input
+        type="text"
+        class="share-recovery"
+        readonly
+        tabindex={-1}
+        aria-label="Copy this URL manually"
+      />
+    </Fragment>
+  )}
+    </div>
   )}
 
   {/* ── Provenance: separate collapsible ── */}
@@ -952,4 +984,76 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     .verdict-block.verdict-early-signal { --verdict-color: #6fbfd6; }
     .verdict-block.verdict-methodologically-limited { --verdict-color: #d9785a; }
   }
+
+  /* Utility row: hosts the depth-fold summary on the left and the share
+     affordance on the right. Baseline-aligned so the small sans labels share
+     a typographic line. The share button uses margin-left:auto so it sits
+     right even when no depth fold renders (button alone in the row). */
+  .study-utility-row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .study-utility-row > .study-depth { margin-top: 0; }
+
+  /* Share button: same muted-sans rhythm as .study-depth > summary. Starts
+     display:none; share-script.ts reveals after confirming Web Share or
+     Clipboard API. .is-flipped is added during the Copied/Couldn't copy
+     window for an accent-color flash that matches the existing hover state. */
+  .study-share {
+    display: none;
+    margin-left: auto;
+    background: none;
+    border: none;
+    padding: 0.5rem 0.4rem;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    cursor: pointer;
+    line-height: 1.2;
+    /* 44px minimum touch target via padding (no chip background). */
+    min-height: 44px;
+  }
+  .study-share:hover { color: var(--accent); }
+  .study-share.is-flipped { color: var(--accent); }
+
+  /* Screen-reader-only live region for state announcements. Visible label
+     change is the sighted user's signal; this announces the same text to
+     screen readers because mutating button textContent doesn't fire reliably
+     across NVDA / JAWS / VoiceOver. */
+  .sr-share-status {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* Inline URL recovery: revealed when clipboard.writeText() rejects (rare —
+     incognito, denied permission, etc.). User can Cmd+A / Cmd+C the
+     pre-selected text. Auto-hides after 10s. */
+  .share-recovery {
+    display: none;
+    margin-left: 0.5rem;
+    padding: 0.3rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    color: var(--fg);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    max-width: 18rem;
+    flex: 1 1 12rem;
+  }
 </style>
+<script>
+  // Wire the share buttons on this page. Astro hoists + dedupes identical
+  // inline scripts, so this runs once per page regardless of how many
+  // StudyCards (or home-feed share buttons) render.
+  import { initShareButtons } from '../lib/share-script.ts';
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initShareButtons);
+  } else {
+    initShareButtons();
+  }
+</script>
