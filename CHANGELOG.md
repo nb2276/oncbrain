@@ -2,6 +2,24 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.9] - 2026-05-28
+
+### Fixed
+
+- **Share button on StudyCard is now actually inline with the `▸ N details`
+  summary, not orphaned below the open depth fold.** v0.9.6 made the
+  utility row a `display: flex` parent with the `<details>` and the share
+  button as flex siblings. On desktop (≥1024px) where the depth fold
+  auto-expands, the open `<details>` claims the full row width as a flex
+  child, and `flex-wrap: wrap` pushed the share button to a new line
+  ~750px below the summary (after the entire IMRD body). Reworked to
+  `position: relative` on the utility row and `position: absolute; top:0;
+  right:0` on the button so it stays pinned to the top-right of the row
+  regardless of the depth fold's open/closed state. The recovery `<input>`
+  is also absolutely positioned now (below the share button) so it sits
+  in the row's reserved space without pushing other content. Found by
+  the second /qa pass after v0.9.8 shipped.
+
 ## [0.9.8] - 2026-05-28
 
 ### Fixed

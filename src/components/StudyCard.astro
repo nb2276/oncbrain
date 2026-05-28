@@ -985,15 +985,19 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     .verdict-block.verdict-methodologically-limited { --verdict-color: #d9785a; }
   }
 
-  /* Utility row: hosts the depth-fold summary on the left and the share
-     affordance on the right. Baseline-aligned so the small sans labels share
-     a typographic line. The share button uses margin-left:auto so it sits
-     right even when no depth fold renders (button alone in the row). */
+  /* Utility row: hosts the depth-fold on the left and the share affordance
+     pinned to the top-right. The original flex layout pushed the share
+     button BELOW the entire open depth fold on desktop (where depth auto-
+     expands) — `display: flex` + `flex-wrap` + tall open <details> sibling
+     wrapped the button to a new line ~750px down. Absolute positioning
+     keeps share visually inline with the `▸ N details` summary regardless
+     of open state. min-height holds the row open so share has somewhere to
+     anchor even when no depth fold renders (e.g., a study with zero
+     bullets, no CONSORT, no open questions). */
   .study-utility-row {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    position: relative;
+    min-height: 44px;
+    margin-top: 0.5rem;
   }
   .study-utility-row > .study-depth { margin-top: 0; }
 
@@ -1003,7 +1007,9 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
      window for an accent-color flash that matches the existing hover state. */
   .study-share {
     display: none;
-    margin-left: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
     background: none;
     border: none;
     padding: 0.5rem 0.4rem;
@@ -1031,19 +1037,24 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
 
   /* Inline URL recovery: revealed when clipboard.writeText() rejects (rare —
      incognito, denied permission, etc.). User can Cmd+A / Cmd+C the
-     pre-selected text. Auto-hides after 10s. */
+     pre-selected text. Auto-hides after 10s. Positioned absolutely below
+     the share button so it sits in the utility row's reserved space without
+     pushing other content. */
   .share-recovery {
     display: none;
-    margin-left: 0.5rem;
+    position: absolute;
+    top: calc(44px + 0.3rem);
+    right: 0;
+    z-index: 2;
     padding: 0.3rem 0.4rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.75rem;
     color: var(--fg);
     background: var(--bg-card);
-    border: 1px solid var(--border);
+    border: 1px solid var(--accent);
     border-radius: 3px;
-    max-width: 18rem;
-    flex: 1 1 12rem;
+    width: 18rem;
+    max-width: 100%;
   }
 </style>
 <script>
