@@ -2,6 +2,15 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.5] - 2026-05-27
+
+### Changed
+
+- Open questions now render on every study card, including in the by-disease-site
+  aggregation (`/sites/<site>/`) where they were previously suppressed. The
+  `showOpenQuestions` prop on `StudyCard` is removed — the open-questions block
+  is gated only on whether the study has any.
+
 ## [0.9.4] - 2026-05-27
 
 ### Changed

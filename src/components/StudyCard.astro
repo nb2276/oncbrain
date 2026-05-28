@@ -35,8 +35,6 @@ interface Props {
   anchorId?: string;
   // Optional "Sourced from …" attribution line (per-date page only).
   authors?: StudyAuthor[];
-  // Per-study open questions render inside the card; the by-site page hides them.
-  showOpenQuestions?: boolean;
 }
 
 const {
@@ -46,7 +44,6 @@ const {
   slides = [],
   anchorId,
   authors = [],
-  showOpenQuestions = true,
 } = Astro.props as Props;
 
 // 🔗 bullets are lifted out of the main list into the "vs leading data" callout.
@@ -104,7 +101,7 @@ const hasFigures = figures.length > 0;
 const restFigures = figures.slice(1);
 
 const hasOpenQuestions = Boolean(
-  showOpenQuestions && study.open_questions && study.open_questions.length > 0,
+  study.open_questions && study.open_questions.length > 0,
 );
 // Audience ("For …") is lifted to the triage layer (just under the name), so it
 // is no longer part of the folded depth.
