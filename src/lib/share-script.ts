@@ -65,8 +65,12 @@ export function setupShareButton(
 
   // Pick the label that matches what will actually happen on click.
   button.textContent = hasShare ? 'Share' : 'Copy link';
-  // Reveal after feature detect confirms the button will work.
-  button.style.display = '';
+  // Reveal after feature detect confirms the button will work. Must be an
+  // explicit value (not '') because the CSS default is `display: none` — an
+  // empty inline style clears nothing and lets the CSS rule re-apply, leaving
+  // the button invisible. inline-block works for both the StudyCard flex row
+  // and the home-feed absolute overlay.
+  button.style.display = 'inline-block';
 
   state.set(button, { originalLabel: button.textContent });
 

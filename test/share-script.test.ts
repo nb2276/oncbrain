@@ -141,7 +141,7 @@ describe('setupShareButton — feature detect + reveal', () => {
     const { deps } = makeDeps({ hasShare: true, hasClipboard: true });
     setupShareButton(asButton(b), {}, deps);
     expect(b.textContent).toBe('Share');
-    expect(b.style.display).toBe('');
+    expect(b.style.display).toBe('inline-block');
   });
 
   it('clipboard only: label = "Copy link", button revealed', () => {
@@ -149,7 +149,7 @@ describe('setupShareButton — feature detect + reveal', () => {
     const { deps } = makeDeps({ hasShare: false, hasClipboard: true });
     setupShareButton(asButton(b), {}, deps);
     expect(b.textContent).toBe('Copy link');
-    expect(b.style.display).toBe('');
+    expect(b.style.display).toBe('inline-block');
   });
 
   it('neither API: button stays hidden (no reveal)', () => {

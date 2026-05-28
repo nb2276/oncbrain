@@ -2,6 +2,21 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.7] - 2026-05-28
+
+### Fixed
+
+- **Share button now actually appears.** v0.9.6 set the SSG default to
+  `display: none` and tried to reveal via `button.style.display = ''`,
+  which cleared the inline style and let the CSS `display: none` re-apply,
+  leaving the button invisible on every card despite the feature-detect
+  having succeeded (label correctly flipped to `Copy link`). Now sets
+  `display: inline-block` explicitly so the inline style wins over the CSS
+  rule. Found by `/qa` against the live site within minutes of v0.9.6
+  shipping. The Vitest unit test asserted the inline-style value in
+  isolation rather than against actual CSS context, so it missed the
+  regression — updated to assert the explicit `inline-block` value.
+
 ## [0.9.6] - 2026-05-28
 
 ### Added — share affordance on every study card
