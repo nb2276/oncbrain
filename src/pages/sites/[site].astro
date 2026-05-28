@@ -77,6 +77,7 @@ const railItems = summary.occurrences.map((occ) => ({
             bookmarks={occ.bookmarks}
             papers={occ.papers ?? []}
             slides={occ.slides ?? []}
+            shareUrl={`/sites/${summary.disease_site}/#${anchorByOcc.get(occ)}`}
           />
         ))}
       </section>
