@@ -87,7 +87,10 @@ The depth dropdown's summary keeps the existing `N details` count so the afforda
 
 - **Mobile:** depth folds stay collapsed — the 90-second scan reads name + description + verdict + comparator down the page.
 - **Desktop (≥1024px):** depth auto-expands (small inline script in `Base.astro`) — there's room, so show everything; re-syncs when crossing the breakpoint.
-- **Desktop (≥1200px):** a sticky **triage rail** (`src/components/TriageRail.astro`) parks in the left gutter — one jump-link per study, marked with its verdict emoji. Hidden below 1200px (the reading column re-centers).
+- **Desktop:** a sticky **triage rail** (`src/components/TriageRail.astro`) parks in the left gutter — one jump-link per study, marked with its verdict emoji. Two variants with different clearance widths because the page's reading column width determines when the gutter fits the rail:
+  - **Default (700px reading column — home, sites index, conferences):** clears at **≥1200px**.
+  - **Wide variant `triage-rail--wide` (1180px body — study pages `[date].astro` and `sites/[site].astro`):** the wider body needs more page width before the gutter clears, so the rail only shows at **≥1640px**. On common 1280-1440px desktops the rail stays hidden on study pages, and the cards' own figure columns carry the page.
+  - Hidden below the matching threshold.
 
 ## Home page
 
