@@ -240,7 +240,7 @@ describe('setupShareButton — clipboard click path', () => {
     expect(b.textContent).toBe("Couldn't copy");
     expect(b._classes.has('is-flipped')).toBe(true);
     expect(recovery.value).toBe('https://oncbrain.test/sites/prostate/#2026-05-17-prestige-psma');
-    expect(recovery.style.display).toBe('');
+    expect(recovery.style.display).toBe('block');
     expect(recovery.focus).toHaveBeenCalled();
     expect(recovery.select).toHaveBeenCalled();
   });

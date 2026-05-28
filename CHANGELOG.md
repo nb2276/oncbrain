@@ -2,6 +2,18 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.8] - 2026-05-28
+
+### Fixed
+
+- **Clipboard-failure recovery input now actually appears.** Same root cause
+  as v0.9.7: `input.style.display = ''` clears the inline style, then the
+  CSS `display: none` re-applies, so the recovery input stayed invisible
+  on rare clipboard-rejection paths (privacy mode, denied permission).
+  Now sets `display: block` explicitly. Found via the same `/qa` pass that
+  caught the v0.9.7 bug, by forcing `clipboard.writeText` to reject and
+  observing computed style.
+
 ## [0.9.7] - 2026-05-28
 
 ### Fixed

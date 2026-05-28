@@ -166,7 +166,10 @@ function revealRecoveryInput(
   if (s.recoveryTimer !== undefined) clearTimeoutFn(s.recoveryTimer);
 
   input.value = absoluteUrl;
-  input.style.display = '';
+  // Explicit display value, NOT '' — see comment on button reveal: clearing
+  // the inline style lets the CSS `display: none` rule re-apply, leaving the
+  // input invisible. `block` works for both card surfaces.
+  input.style.display = 'block';
   // Defer focus + select so platforms that block focus during a rejected
   // promise's microtask still cooperate.
   try {
