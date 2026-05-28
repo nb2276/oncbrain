@@ -2,6 +2,41 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.6] - 2026-05-28
+
+### Added — share affordance on every study card
+
+Each study card now carries a small **Share** button. On iPhone (and any
+browser with the Web Share API — macOS Safari and some Chrome variants),
+tapping it opens the native share sheet pre-filled with the trial name and
+a canonical URL. Elsewhere it copies the link to the clipboard with an
+inline "Copied" confirmation. Insecure contexts and very old browsers hide
+the button entirely instead of showing one that wouldn't work.
+
+- **StudyCard** (per-date `/[date]/` and per-site `/sites/[site]/`) — share
+  sits in the bottom utility row, inline with the existing `▸ N details`
+  summary. Same muted-sans treatment as the other affordances.
+- **Home recent feed** (`/`) — share is a small bottom-right overlay on each
+  card. Clicking share doesn't navigate; clicking elsewhere on the card
+  still opens the per-date page as before. The card border stays accent
+  whenever the cursor or keyboard focus is anywhere on the li, so the
+  hover state doesn't flicker when moving between card body and button.
+- **Canonical URL:** `/sites/{site}/#{date}-{slug}` regardless of which page
+  the share was triggered from. Absolutized at click time via
+  `new URL(rel, origin).href` so pasted links work from any origin.
+- **Recovery path** when the clipboard write fails (privacy mode, denied
+  permission): a small read-only `<input>` appears with the absolute URL
+  pre-selected for manual `Cmd+C`, then auto-hides after 10 seconds.
+- **Web Share rejection chain:** AbortError (user dismissed the sheet) is
+  silent; any other rejection falls through to the clipboard path so the
+  user still gets the URL.
+- Accessibility: 44px tap target, native focus ring, per-card
+  `aria-label="Share link to {trial}"`, separate visually-hidden
+  `aria-live="polite"` region for state announcements so screen readers
+  hear "Copied" even when the button's own text mutation doesn't fire.
+- Plan + reviews: `docs/plans/share-study-link.md` captures the 11
+  design + eng + Codex-outside-voice decisions that shaped this.
+
 ## [0.9.5] - 2026-05-27
 
 ### Changed
