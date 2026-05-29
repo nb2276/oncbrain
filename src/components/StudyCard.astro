@@ -162,6 +162,29 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
       </ul>
     </section>
   )}
+  {/* ── Share affordance: top-right of the head. Anchored to .study-head (not
+      to .study) so on wide-desktop figures-present cards it stays in the left
+      narrative column instead of overlaying the figures column. Hidden via
+      CSS display:none until share-script.ts confirms an API works. ── */}
+  {shareUrl && (
+    <Fragment>
+      <button
+        type="button"
+        class="study-share"
+        data-share-url={shareUrl}
+        data-share-title={study.name}
+        aria-label={`Share link to ${study.name}`}
+      >Share</button>
+      <span class="sr-share-status" aria-live="polite"></span>
+      <input
+        type="text"
+        class="share-recovery"
+        readonly
+        tabindex={-1}
+        aria-label="Copy this URL manually"
+      />
+    </Fragment>
+  )}
   </div>{/* /.study-head */}
 
   {/* ── Figures: right column on desktop; first shown + rest folded on mobile ── */}
@@ -224,15 +247,8 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   )}
 
   <div class="study-rest">
-  {/* ── Utility row: depth fold (left) + share affordance (right). The share
-      button is a sibling of <details>, NEVER nested inside <summary> (nested
-      interactive elements break keyboard + AT semantics). When hasDepth is
-      false but shareUrl is present, the row holds just the button, right-
-      aligned via margin-left:auto. Share starts display:none in SSG output;
-      share-script.ts reveals it after feature-detecting navigator.share /
-      navigator.clipboard. ── */}
-  {(hasDepth || shareUrl) && (
-    <div class="study-utility-row">
+  {/* ── Depth layer: folded behind a tap. Bullets flow IMRD-style (Methods →
+      Results → Critique → Notes), with CONSORT nested inside Methods. ── */}
   {hasDepth && (
     <details class="study-depth">
       <summary>{depthSummary}</summary>
@@ -330,27 +346,6 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
         </p>
       )}
     </details>
-  )}
-  {shareUrl && (
-    <Fragment>
-      <button
-        type="button"
-        class="study-share"
-        data-share-url={shareUrl}
-        data-share-title={study.name}
-        aria-label={`Share link to ${study.name}`}
-      >Share</button>
-      <span class="sr-share-status" aria-live="polite"></span>
-      <input
-        type="text"
-        class="share-recovery"
-        readonly
-        tabindex={-1}
-        aria-label="Copy this URL manually"
-      />
-    </Fragment>
-  )}
-    </div>
   )}
 
   {/* ── Provenance: separate collapsible ── */}
@@ -475,6 +470,14 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   .more-figures > summary:hover { color: var(--accent); }
   .more-figures[open] > summary { margin-bottom: 0.6rem; color: var(--accent); }
   .more-figures-stack { display: flex; flex-direction: column; gap: 0.85rem; }
+
+  /* Head is the positioning anchor for the absolutely-positioned share
+     button at top-right. padding-right reserves a slot so the trial name,
+     audience, TL;DR, verdict, and comparator never run under the button. */
+  .study-head {
+    position: relative;
+    padding-right: 4.5rem;
+  }
 
   /* Two-column (narrative + figure) only when the page is wide enough for both
      to breathe (paired with body.wide → 1180px at ≥1200). Below 1200 the card
@@ -985,26 +988,14 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     .verdict-block.verdict-methodologically-limited { --verdict-color: #d9785a; }
   }
 
-  /* Utility row: hosts the depth-fold on the left and the share affordance
-     pinned to the top-right. The original flex layout pushed the share
-     button BELOW the entire open depth fold on desktop (where depth auto-
-     expands) — `display: flex` + `flex-wrap` + tall open <details> sibling
-     wrapped the button to a new line ~750px down. Absolute positioning
-     keeps share visually inline with the `▸ N details` summary regardless
-     of open state. min-height holds the row open so share has somewhere to
-     anchor even when no depth fold renders (e.g., a study with zero
-     bullets, no CONSORT, no open questions). */
-  .study-utility-row {
-    position: relative;
-    min-height: 44px;
-    margin-top: 0.5rem;
-  }
-  .study-utility-row > .study-depth { margin-top: 0; }
-
-  /* Share button: same muted-sans rhythm as .study-depth > summary. Starts
-     display:none; share-script.ts reveals after confirming Web Share or
-     Clipboard API. .is-flipped is added during the Copied/Couldn't copy
-     window for an accent-color flash that matches the existing hover state. */
+  /* Share affordance anchored to the top-right of .study-head. On wide
+     figures-present cards (grid: head | figs at >=1200px) the head is the
+     LEFT column, so the button stays in the narrative column instead of
+     overlaying the figures column. .study-head gets padding-right so the
+     trial name + audience + TL;DR + verdict + comparator never run under
+     the absolutely-positioned button. Starts display:none; share-script.ts
+     reveals it after confirming Web Share or Clipboard API. .is-flipped is
+     added during the Copied/Couldn't copy window for an accent flash. */
   .study-share {
     display: none;
     position: absolute;

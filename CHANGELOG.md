@@ -2,6 +2,22 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.10] - 2026-05-28
+
+### Changed
+
+- **StudyCard share button moved from the bottom utility row to the top-right
+  of the card head.** Anchored inside `.study-head` (not the outer `.study`)
+  so on wide-desktop figures-present cards (grid: head | figs at ≥1200px)
+  the button stays in the narrative left column instead of overlaying the
+  figures right column. `.study-head` gets `padding-right: 4.5rem` to
+  reserve a slot — trial name, audience, TL;DR, verdict, and comparator
+  never run under the absolutely-positioned button. The `.study-utility-row`
+  wrapper introduced in v0.9.6 is removed; the depth `<details>` is back
+  as a direct child of `.study-rest` as it was before.
+- Home recent-feed card share overlay is unchanged (still bottom-right of
+  the `<li>`) — different card grammar, same affordance.
+
 ## [0.9.9] - 2026-05-28
 
 ### Fixed
