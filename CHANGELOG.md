@@ -2,6 +2,23 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.11] - 2026-05-28
+
+### Fixed
+
+- **StudyCard content no longer compressed by 72px of unused padding on
+  mobile.** v0.9.10 added `padding-right: 4.5rem` to `.study-head` so the
+  trial name wouldn't run under the absolutely-positioned share button.
+  But that padding applied to the WHOLE head, not just the title row —
+  the TL;DR box, verdict pill, comparator callout, depth fold, and
+  CONSORT all got squeezed by 72px on every screen, leaving mobile
+  cards with only 235px of usable width (out of 307px available). The
+  share button only occupies the top ~44px of the card, so only the
+  title row needs to clear it. Moved the padding from `.study-head` to
+  `.study-name`. All blocks below now render full-width as designed;
+  the title row still clears the share button. Found by /qa on mobile
+  latest digest immediately after v0.9.10 shipped.
+
 ## [0.9.10] - 2026-05-28
 
 ### Changed

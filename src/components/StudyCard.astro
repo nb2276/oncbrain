@@ -472,10 +472,16 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   .more-figures-stack { display: flex; flex-direction: column; gap: 0.85rem; }
 
   /* Head is the positioning anchor for the absolutely-positioned share
-     button at top-right. padding-right reserves a slot so the trial name,
-     audience, TL;DR, verdict, and comparator never run under the button. */
+     button at top-right. Only the title row needs to reserve space for
+     the button (it's the row at top:0 where the button lives) — padding
+     here was applied head-wide in v0.9.10, which compressed every block
+     child (TL;DR, verdict, comparator, depth) by 72px and left mobile
+     cards with only 235px of usable width. Padding now lives on
+     .study-name only; everything below renders full-width. */
   .study-head {
     position: relative;
+  }
+  .study-name {
     padding-right: 4.5rem;
   }
 
