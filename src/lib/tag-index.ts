@@ -17,7 +17,14 @@
 
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import type { DigestArtifact, DigestStudy, SocImplication } from './digest-data.ts';
+import type {
+  DigestArtifact,
+  DigestStudy,
+  DigestArtifactPaper,
+  DigestArtifactSlide,
+  DigestSourceRef,
+  SocImplication,
+} from './digest-data.ts';
 import { assignSlugsForDate } from './slug-resolve.ts';
 import {
   isValidModality,
@@ -25,8 +32,12 @@ import {
   isValidMethodology,
   findSlugCollision,
   isSafeTagSlug,
+  MODALITY_DEFS,
+  INTENT_DEFS,
+  METHODOLOGY_DEFS,
   type SlugCollisionResult,
 } from './tags.ts';
+import { VERDICT_META } from './verdict.ts';
 
 const DIGEST_ROOT = resolve(process.cwd(), 'data/digests');
 
@@ -391,5 +402,238 @@ export function assertSlugUniqueness(
   );
 }
 
-// Re-export so consumers don't need to import from both tags.ts and tag-index.ts.
-export { isSafeTagSlug };
+// ---------------- Tag occurrence resolution (for landing pages + RSS + JSON) ----------------
+
+/**
+ * One study's appearance under a tag, with sources resolved. Mirrors the
+ * SiteStudyOccurrence shape so the same StudyCard renderer works for both
+ * /sites/<slug>/ and /tags/<slug>/.
+ *
+ * resolvedSlug is the per-DATE slug (so same-day siblings get -2/-3 suffixes
+ * just like the date page). diseaseSite is preserved so the landing page can
+ * show the disease-site emoji on each card.
+ */
+export type TagOccurrence = {
+  date: string;
+  conference: DigestArtifact['conference'];
+  diseaseSite: string;
+  resolvedSlug: string;
+  study: DigestStudy;
+  bookmarks: DigestArtifact['bookmarks'];
+  papers?: DigestArtifactPaper[];
+  slides?: DigestArtifactSlide[];
+};
+
+/**
+ * For every tag slug observed in the corpus (modality, intent, methodology,
+ * verdict, meeting — but NOT disease-site, which lives at /sites/), return
+ * the date-desc list of TagOccurrence entries. Used by:
+ *   - pages/tags/[...slug].astro getStaticPaths (single-tag URL set)
+ *   - pages/tags/index.astro (top-level namespace listing with counts)
+ *   - pages/tags/[...slug]/feed.xml.ts (per-tag RSS feed)
+ *   - pages/api/v1/tag/[slug].json.ts (per-tag JSON API)
+ *
+ * Resolution mirrors listSiteSummaries(): typed refs from source_ids dispatch
+ * to bookmarks/papers/slides; v0.4 back-compat falls through tweet_ids.
+ */
+export function listTagSummaries(
+  digests: readonly DigestArtifact[],
+): Map<string, TagOccurrence[]> {
+  const out = new Map<string, TagOccurrence[]>();
+
+  for (const digest of digests) {
+    const meeting = digest.conference?.slug ?? null;
+    const bookmarkById = new Map(digest.bookmarks.map((b) => [b.id, b]));
+    const papersById = new Map((digest.papers ?? []).map((p) => [p.id, p]));
+    const slidesById = new Map((digest.slides ?? []).map((s) => [s.id, s]));
+
+    for (const { study, diseaseSite, resolvedSlug } of walkStudiesPerDate(digest)) {
+      // v0.5: typed refs preferred; tweet_ids is the back-compat fallback.
+      const refs: DigestSourceRef[] =
+        study.source_ids ?? study.tweet_ids.map((id) => ({ type: 'tweet' as const, id }));
+      const studyBookmarks = refs
+        .filter((r): r is { type: 'tweet'; id: number } => r.type === 'tweet')
+        .map((r) => bookmarkById.get(r.id))
+        .filter((b): b is NonNullable<typeof b> => Boolean(b));
+      const studyPapers = refs
+        .filter((r): r is { type: 'paper'; id: number } => r.type === 'paper')
+        .map((r) => papersById.get(r.id))
+        .filter((p): p is DigestArtifactPaper => Boolean(p));
+      const studySlides = refs
+        .filter((r): r is { type: 'slide'; id: number } => r.type === 'slide')
+        .map((r) => slidesById.get(r.id))
+        .filter((s): s is DigestArtifactSlide => Boolean(s));
+
+      const occurrence: TagOccurrence = {
+        date: digest.date,
+        conference: digest.conference,
+        diseaseSite,
+        resolvedSlug,
+        study,
+        bookmarks: studyBookmarks,
+        papers: studyPapers.length > 0 ? studyPapers : undefined,
+        slides: studySlides.length > 0 ? studySlides : undefined,
+      };
+
+      const view = deriveStudyTags(study, diseaseSite, meeting);
+      for (const slug of [
+        view.modality,
+        view.intent,
+        view.methodology,
+        view.verdict,
+        view.meeting,
+      ]) {
+        if (!slug) continue;
+        let list = out.get(slug);
+        if (!list) {
+          list = [];
+          out.set(slug, list);
+        }
+        list.push(occurrence);
+      }
+    }
+  }
+
+  // Sort each list newest first; within a date, preserve render order (already
+  // emitted in render order by walkStudiesPerDate).
+  for (const list of out.values()) {
+    list.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  }
+  return out;
+}
+
+/**
+ * Intersection occurrences: every study that appears under ALL of the given
+ * tag slugs, in date-desc render order. Used by intersection landing pages.
+ *
+ * The set semantics are derived from the buildReverseIndex() Set keying
+ * ({date, resolvedSlug}), so a per-date occurrence appears at most once even
+ * across multiple disease-site sections — matching the URL semantics readers
+ * see.
+ */
+export function intersectTagOccurrences(
+  summaries: Map<string, TagOccurrence[]>,
+  tagSlugs: readonly string[],
+): TagOccurrence[] {
+  if (tagSlugs.length === 0) return [];
+  // Start from the smallest list — every subsequent filter only narrows.
+  const lists = tagSlugs.map((s) => summaries.get(s) ?? []);
+  if (lists.some((l) => l.length === 0)) return [];
+  lists.sort((a, b) => a.length - b.length);
+
+  const occurrenceKey = (o: TagOccurrence) => `${o.date}#${o.resolvedSlug}`;
+  const requiredKeys = lists.slice(1).map((list) => new Set(list.map(occurrenceKey)));
+
+  const out: TagOccurrence[] = [];
+  const seen = new Set<string>();
+  for (const occ of lists[0]!) {
+    const key = occurrenceKey(occ);
+    if (seen.has(key)) continue;
+    let inAll = true;
+    for (const required of requiredKeys) {
+      if (!required.has(key)) {
+        inAll = false;
+        break;
+      }
+    }
+    if (inAll) {
+      seen.add(key);
+      out.push(occ);
+    }
+  }
+  out.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  return out;
+}
+
+// ---------------- Canonical URL parsing for intersection pages ----------------
+
+/**
+ * Parse the [...slug] catch-all into a canonical tag tuple.
+ * Returns:
+ *   - { ok: true, tags: [...] } when the slug is one segment ('+'-joined)
+ *     containing 1-3 safe slugs in alphabetical order.
+ *   - { ok: false } on non-canonical ordering, unsafe slug shape, 4+ way
+ *     joins, empty parts, or deep nesting. Page returns 404.
+ *
+ * Non-canonical orderings (e.g. /tags/b+a/) deliberately do NOT redirect —
+ * Astro static can't dynamically redirect, and emitting permutations would
+ * double the page count per intersection. Bookmarks to the canonical form
+ * (which is what every breadcrumb + chip emits) work; ad-hoc orderings 404.
+ */
+export type ParsedTagSlug =
+  | { ok: true; tags: string[] }
+  | { ok: false };
+
+export function parseTagPageSlug(rawSlug: string | string[] | undefined): ParsedTagSlug {
+  // Astro [...slug] catch-all delivers either a string (single segment, no
+  // slashes) or string[] (when the URL has slashes — which we reject).
+  if (rawSlug === undefined) return { ok: false };
+  const segment = typeof rawSlug === 'string' ? rawSlug : Array.isArray(rawSlug) && rawSlug.length === 1 ? rawSlug[0]! : null;
+  if (segment === null || segment.length === 0) return { ok: false };
+  const parts = segment.split('+');
+  if (parts.length < 1 || parts.length > 3) return { ok: false };
+  // Every part is a complete slug shape.
+  for (const p of parts) {
+    if (!isSafeTagSlug(p)) return { ok: false };
+  }
+  // Canonical: alphabetical, no duplicates.
+  const sorted = [...parts].sort();
+  for (let i = 0; i < parts.length; i++) if (parts[i] !== sorted[i]) return { ok: false };
+  for (let i = 1; i < parts.length; i++) if (parts[i] === parts[i - 1]) return { ok: false };
+  return { ok: true, tags: parts };
+}
+
+// ---------------- Display labels ----------------
+
+/**
+ * Resolve a tag slug to its display label + namespace. Single namespace per
+ * slug is guaranteed by the build-time uniqueness assertion (assertSlugUniqueness),
+ * so a slug found in modality definitions can never also be a verdict slug.
+ *
+ * Meeting slugs need an occurrence sample to recover the human-readable
+ * conference name from `digest.conference.name`; verdict slugs use
+ * VERDICT_META; modality/intent/methodology use the static def tables.
+ *
+ * Returns null when the slug doesn't match any known namespace AND the
+ * occurrence list is empty (caller should 404). When occurrences exist but
+ * the namespace is unknown, treats it as a meeting fallback and renders the
+ * conference name from the first occurrence — defensive against new meeting
+ * slugs the curator adds before the static enum.
+ */
+export type TagDisplay = {
+  namespace: TagNamespaceLabel;
+  label: string;
+  emoji: string | null;
+};
+
+export type TagNamespaceLabel = 'modality' | 'intent' | 'methodology' | 'verdict' | 'meeting';
+
+export function resolveTagDisplay(
+  slug: string,
+  occurrences: readonly TagOccurrence[] = [],
+): TagDisplay | null {
+  // Static enum lookups first (single Map<slug, def> per namespace).
+  const modality = MODALITY_DEFS.find((d) => d.slug === slug);
+  if (modality) return { namespace: 'modality', label: modality.label, emoji: null };
+  const intent = INTENT_DEFS.find((d) => d.slug === slug);
+  if (intent) return { namespace: 'intent', label: intent.label, emoji: null };
+  const methodology = METHODOLOGY_DEFS.find((d) => d.slug === slug);
+  if (methodology) return { namespace: 'methodology', label: methodology.label, emoji: null };
+
+  // Verdict slugs come from the SocImplication enum.
+  if (slug in VERDICT_META) {
+    const meta = VERDICT_META[slug as SocImplication];
+    return { namespace: 'verdict', label: meta.label, emoji: meta.emoji };
+  }
+
+  // Meeting fallback: pull the conference name from the first occurrence
+  // that has a matching conference slug.
+  for (const occ of occurrences) {
+    if (occ.conference && occ.conference.slug === slug) {
+      return { namespace: 'meeting', label: occ.conference.name, emoji: null };
+    }
+  }
+
+  // Unknown slug AND no occurrence sample — caller should 404.
+  return null;
+}
