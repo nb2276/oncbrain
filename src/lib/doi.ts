@@ -16,16 +16,44 @@ const DOI_CORE = /10\.\d{4,9}\/[-._;()/:a-z0-9]+/i;
 // "doi:" prefix. Group 1 is the bare DOI.
 const DOI_ANYWHERE = /(?:doi:\s*|https?:\/\/(?:dx\.)?doi\.org\/)?(10\.\d{4,9}\/[-._;()/:a-z0-9]+)/i;
 
+// Publisher path tokens that ride AFTER a DOI in journal URLs
+// (e.g. /doi/10.1002/cncr.34567/pdf, .../full/abstract). The DOI's own
+// suffix is opaque (article number / publisher code) and effectively
+// never legitimately ends in these words, so stripping them collapses
+// every publisher's view-mode variant onto the same canonical DOI. The
+// `+` allows stacked tokens — `.../full/abstract` strips both.
+const TRAILING_PUBLISHER_TOKEN =
+  /(?:\/(?:full|fulltext|abstract|pdf|epdf|html|meta|references|citations))+\/?$/i;
+
 // Canonicalize a DOI to its bare lowercased form for storage + dedup.
-// Strips any doi.org URL wrapper and the "doi:" prefix, trims, lowercases.
+// Accepts any surface form a curator could plausibly forward:
+//   - bare DOI:                10.1056/NEJMoa2024001
+//   - doi: prefix:             doi:10.1001/jama.2026.1234
+//   - doi.org resolver:        https://doi.org/10.1056/NEJMoa2024001
+//   - publisher article URL:   https://www.nejm.org/doi/full/10.1056/NEJMoa2024001
+//   - URL + view-mode suffix:  https://onlinelibrary.wiley.com/doi/10.1002/cncr.34567/pdf
+//   - URL-encoded slash:       https://onlinelibrary.wiley.com/doi/10.1002%2Fcncr.34567
+//   - in-prose with punct:     "see 10.1001/jama.2026.1234."
+// All of the above must collapse to the same canonical key so the
+// papers(lower(doi)) unique index dedups a paper forwarded twice via
+// two surface forms (DOI then journal URL, journal URL then PDF, etc.).
 // Returns null if the input contains no recognizable DOI.
 export function normalizeDoi(input: string | null | undefined): string | null {
   if (!input) return null;
-  const m = input.trim().match(DOI_ANYWHERE);
+  // Decode %2F-encoded slashes so a journal URL that escapes the DOI's
+  // internal slash still matches the bare-DOI regex below. Targeted at
+  // %2F only (not a full decodeURIComponent) so we never double-decode a
+  // legitimate %25 inside a registrant code.
+  const decoded = input.trim().replace(/%2F/gi, '/');
+  const m = decoded.match(DOI_ANYWHERE);
   if (!m || !m[1]) return null;
+  // Strip publisher view-mode tokens (/pdf, /full, /abstract, …) AFTER
+  // the DOI. The greedy DOI regex matches them too because `/` is in its
+  // character class.
+  const stripped = m[1].replace(TRAILING_PUBLISHER_TOKEN, '');
   // Trim trailing punctuation that often rides along when a DOI is pasted
   // mid-sentence (".", ",", ")"), but keep legitimate DOI suffix chars.
-  return m[1].toLowerCase().replace(/[.,;)\]]+$/, '');
+  return stripped.toLowerCase().replace(/[.,;)\]]+$/, '');
 }
 
 // True when the string, on its own, IS a bare DOI (not embedded in prose).

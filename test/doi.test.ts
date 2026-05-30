@@ -37,6 +37,63 @@ describe('normalizeDoi', () => {
     const b = normalizeDoi('https://doi.org/10.1016/s1470-2045(26)00091-4');
     expect(a).toBe(b);
   });
+
+  it('extracts a DOI embedded in a publisher article URL', () => {
+    expect(normalizeDoi('https://onlinelibrary.wiley.com/doi/10.3322/caac.70082')).toBe(
+      '10.3322/caac.70082',
+    );
+    expect(normalizeDoi('https://www.nejm.org/doi/full/10.1056/NEJMoa2024001')).toBe(
+      '10.1056/nejmoa2024001',
+    );
+    expect(normalizeDoi('https://ascopubs.org/doi/full/10.1200/JCO.23.01234')).toBe(
+      '10.1200/jco.23.01234',
+    );
+  });
+
+  it('strips a single trailing publisher view-mode token (/pdf, /full, /abstract)', () => {
+    expect(normalizeDoi('https://onlinelibrary.wiley.com/doi/10.1002/cncr.34567/pdf')).toBe(
+      '10.1002/cncr.34567',
+    );
+    expect(normalizeDoi('https://www.nejm.org/doi/10.1056/NEJMoa2024001/full')).toBe(
+      '10.1056/nejmoa2024001',
+    );
+    expect(normalizeDoi('10.1002/cncr.34567/abstract')).toBe('10.1002/cncr.34567');
+  });
+
+  it('strips stacked trailing publisher tokens (/full/abstract)', () => {
+    expect(normalizeDoi('10.1056/NEJMoa2024001/full/abstract')).toBe('10.1056/nejmoa2024001');
+    expect(normalizeDoi('https://example.com/doi/10.1234/x/epdf/references')).toBe('10.1234/x');
+  });
+
+  it('decodes %2F-encoded slashes inside the DOI', () => {
+    expect(normalizeDoi('https://onlinelibrary.wiley.com/doi/10.1002%2Fcncr.34567')).toBe(
+      '10.1002/cncr.34567',
+    );
+    // Mixed case: %2f also decoded
+    expect(normalizeDoi('10.1002%2fcncr.34567')).toBe('10.1002/cncr.34567');
+  });
+
+  it('drops a query string or fragment after the DOI', () => {
+    expect(normalizeDoi('https://ahajournals.org/doi/10.1161/CIR.0000000000001?af=R')).toBe(
+      '10.1161/cir.0000000000001',
+    );
+    expect(normalizeDoi('https://example.com/doi/10.1056/x#section-2')).toBe('10.1056/x');
+  });
+
+  it('four spellings of the same DOI all collapse to one key (dedup invariant)', () => {
+    // The whole point: a paper forwarded twice as different URL variants
+    // must produce identical dedup keys, or the papers UNIQUE index splits.
+    const variants = [
+      '10.1002/cncr.34567',
+      'doi:10.1002/cncr.34567',
+      'https://doi.org/10.1002/cncr.34567',
+      'https://onlinelibrary.wiley.com/doi/10.1002/cncr.34567/pdf',
+      'https://onlinelibrary.wiley.com/doi/10.1002%2Fcncr.34567',
+    ];
+    const normalized = variants.map(normalizeDoi);
+    expect(new Set(normalized).size).toBe(1);
+    expect(normalized[0]).toBe('10.1002/cncr.34567');
+  });
 });
 
 describe('isBareDoi', () => {

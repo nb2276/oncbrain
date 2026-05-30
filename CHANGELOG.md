@@ -2,6 +2,26 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.15] - 2026-05-30
+
+### Fixed
+
+- **Paper dedup missed journal-URL variants.** `normalizeDoi` only
+  recognized bare DOIs, `doi:` prefixes, and `doi.org` resolver URLs.
+  A paper forwarded once as a DOI and again as a publisher article URL
+  (`onlinelibrary.wiley.com/doi/10.1002/cncr.34567/pdf`,
+  `nejm.org/doi/full/10.1056/NEJMoa2024001`) or as a `%2F`-encoded link
+  (`/doi/10.1002%2Fcncr.34567`) produced different normalized keys, so
+  the `papers(lower(doi))` UNIQUE index didn't catch the duplicate and
+  `savePaper()` wrote a second row instead of merging metadata onto the
+  first. `normalizeDoi` now (1) pre-decodes `%2F` to a slash so the
+  bare-DOI regex matches URL-encoded paths, and (2) strips trailing
+  publisher view-mode tokens (`/pdf`, `/full`, `/epdf`, `/abstract`,
+  `/html`, `/meta`, `/references`, `/citations`, `/fulltext`),
+  including stacked forms like `/full/abstract`. Five surface forms of
+  the same paper now collapse to one canonical key. Regression test
+  asserts the dedup invariant directly.
+
 ## [0.9.14] - 2026-05-30
 
 ### Fixed
