@@ -25,15 +25,23 @@ describe('tag namespace slug uniqueness', () => {
     }
   });
 
+  function describeResult(result: ReturnType<typeof findSlugCollision>): string {
+    if (!result) return '';
+    if (result.kind === 'collision') {
+      return `collision: ${result.a.namespace}/${result.a.slug} vs ${result.b.namespace}/${result.b.slug}`;
+    }
+    return `malformed: ${result.namespace}/${result.slug}`;
+  }
+
   it('static enums have no internal collisions (modality / intent / methodology)', () => {
     // No verdict, no meeting — just the typed enums against themselves.
     const result = findSlugCollision([], []);
-    expect(result, result ? `collision: ${result.a.namespace}/${result.a.slug} vs ${result.b.namespace}/${result.b.slug}` : '').toBeNull();
+    expect(result, describeResult(result)).toBeNull();
   });
 
   it('static enums do not collide with the verdict slug set', () => {
     const result = findSlugCollision([], VERDICT_SLUGS);
-    expect(result, result ? `collision: ${result.a.namespace}/${result.a.slug} vs ${result.b.namespace}/${result.b.slug}` : '').toBeNull();
+    expect(result, describeResult(result)).toBeNull();
   });
 
   it('static enums do not collide with a representative meeting slug set', () => {
@@ -41,23 +49,31 @@ describe('tag namespace slug uniqueness', () => {
     // unique-by-construction; this guards against future flat-named meetings.
     const meetings = ['asco-2026', 'esmo-2026', 'astro-2026', 'aacr-2026', 'asco-gi-2026', 'asco-gu-2026'];
     const result = findSlugCollision(meetings, VERDICT_SLUGS);
-    expect(result, result ? `collision: ${result.a.namespace}/${result.a.slug} vs ${result.b.namespace}/${result.b.slug}` : '').toBeNull();
+    expect(result, describeResult(result)).toBeNull();
   });
 
   it('detects a synthetic collision (regression guard)', () => {
     // If 'retrospective' (methodology) were added to verdict, this is what
     // the build-time assertion would catch.
-    const result = findSlugCollision([], ['retrospective']);
-    expect(result).not.toBeNull();
-    expect(result!.a.namespace).toBe('methodology');
-    expect(result!.b.namespace).toBe('verdict');
-    expect(result!.a.slug).toBe('retrospective');
+    const raw = findSlugCollision([], ['retrospective']);
+    expect(raw).not.toBeNull();
+    const result = raw!;
+    expect(result.kind).toBe('collision');
+    if (result.kind === 'collision') {
+      expect(result.a.namespace).toBe('methodology');
+      expect(result.b.namespace).toBe('verdict');
+      expect(result.a.slug).toBe('retrospective');
+    }
   });
 
   it('detects a meeting/methodology collision', () => {
-    const result = findSlugCollision(['phase-3-rct'], []);
-    expect(result).not.toBeNull();
-    expect(result!.b.namespace).toBe('meeting');
+    const raw = findSlugCollision(['phase-3-rct'], []);
+    expect(raw).not.toBeNull();
+    const result = raw!;
+    expect(result.kind).toBe('collision');
+    if (result.kind === 'collision') {
+      expect(result.b.namespace).toBe('meeting');
+    }
   });
 
   it('every static def has slug + label + non-empty tooltip', () => {
@@ -66,5 +82,31 @@ describe('tag namespace slug uniqueness', () => {
       expect(def.label.length).toBeGreaterThan(0);
       expect(def.tooltip.length).toBeGreaterThan(0);
     }
+  });
+
+  it('deduplicates meeting input internally (build callers do not pre-dedupe)', () => {
+    // Every day of ASCO 2026 shares the same conference slug. The build
+    // passes the raw list across all digests; a naive impl would report a
+    // confusing self-collision.
+    const result = findSlugCollision(['asco-2026', 'asco-2026', 'asco-2026'], []);
+    expect(result).toBeNull();
+  });
+
+  it('rejects a malformed meeting slug (build fails BEFORE broken URLs ship)', () => {
+    const raw = findSlugCollision(['ASCO 2026'], []);
+    expect(raw).not.toBeNull();
+    const result = raw!;
+    expect(result.kind).toBe('malformed');
+    if (result.kind === 'malformed') {
+      expect(result.namespace).toBe('meeting');
+      expect(result.slug).toBe('ASCO 2026');
+    }
+  });
+
+  it('rejects a %2F-encoded meeting slug', () => {
+    const raw = findSlugCollision(['asco%2Fgi-2026'], []);
+    expect(raw).not.toBeNull();
+    const result = raw!;
+    expect(result.kind).toBe('malformed');
   });
 });

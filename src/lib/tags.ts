@@ -163,6 +163,15 @@ export function isValidMethodology(slug: string): slug is MethodologyTag {
   return METHODOLOGY_BY_SLUG.has(slug);
 }
 
+/**
+ * Resolve a typed-namespace slug to its display def (label + tooltip).
+ * Returns null when the slug isn't in the namespace's enum.
+ *
+ * The tooltip string is author-controlled prose and trusted as text. Renderers
+ * MUST place it in a text-only context (textContent, or Astro's auto-escaped
+ * `{def.tooltip}` interpolation) — NEVER as `innerHTML` — so future tooltip
+ * extensions can't introduce an XSS vector if a string ever picks up `<`.
+ */
 export function getTagDefinition(
   namespace: 'modality' | 'intent' | 'methodology',
   slug: string,
@@ -174,6 +183,11 @@ export function getTagDefinition(
       return INTENT_BY_SLUG.get(slug) ?? null;
     case 'methodology':
       return METHODOLOGY_BY_SLUG.get(slug) ?? null;
+    default:
+      // Defensive: a future caller cast outside the union (e.g. once verdict
+      // + meeting namespaces also support per-slug defs) gets null instead of
+      // undefined slipping through.
+      return null;
   }
 }
 
@@ -199,22 +213,45 @@ export function isSafeTagSlug(slug: string): boolean {
 // useful message; returns null when all slugs are unique.
 
 export type SlugSource = { slug: string; namespace: string };
+export type SlugCollisionResult =
+  | { kind: 'collision'; a: SlugSource; b: SlugSource }
+  | { kind: 'malformed'; slug: string; namespace: string }
+  | null;
 
+// Build-time uniqueness assertion across all 5 namespaces that surface under
+// /tags/. The dynamic inputs (meeting from digest.conference, verdict from
+// VERDICT_META keys) are deduplicated internally — the caller doesn't need to
+// pre-dedupe across N digests sharing one conference slug. They're also
+// shape-validated: a malformed slug like "ASCO 2026" is reported as
+// {kind:'malformed'} so the build fails with a useful error before any broken
+// URL ships.
+//
+// Returns null when every slug is unique AND well-shaped.
 export function findSlugCollision(
   meetingSlugs: readonly string[],
   verdictSlugs: readonly string[],
-): { a: SlugSource; b: SlugSource } | null {
+): SlugCollisionResult {
+  const meetings = Array.from(new Set(meetingSlugs));
+  const verdicts = Array.from(new Set(verdictSlugs));
+
+  for (const slug of meetings) {
+    if (!isSafeTagSlug(slug)) return { kind: 'malformed', slug, namespace: 'meeting' };
+  }
+  for (const slug of verdicts) {
+    if (!isSafeTagSlug(slug)) return { kind: 'malformed', slug, namespace: 'verdict' };
+  }
+
   const all: SlugSource[] = [
     ...MODALITY_DEFS.map((d) => ({ slug: d.slug, namespace: 'modality' })),
     ...INTENT_DEFS.map((d) => ({ slug: d.slug, namespace: 'intent' })),
     ...METHODOLOGY_DEFS.map((d) => ({ slug: d.slug, namespace: 'methodology' })),
-    ...verdictSlugs.map((slug) => ({ slug, namespace: 'verdict' })),
-    ...meetingSlugs.map((slug) => ({ slug, namespace: 'meeting' })),
+    ...verdicts.map((slug) => ({ slug, namespace: 'verdict' })),
+    ...meetings.map((slug) => ({ slug, namespace: 'meeting' })),
   ];
   const seen = new Map<string, SlugSource>();
   for (const entry of all) {
     const prior = seen.get(entry.slug);
-    if (prior) return { a: prior, b: entry };
+    if (prior) return { kind: 'collision', a: prior, b: entry };
     seen.set(entry.slug, entry);
   }
   return null;

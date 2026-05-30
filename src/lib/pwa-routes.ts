@@ -23,7 +23,15 @@ const CONFERENCE_DETAIL = /^\/conferences\/[^/]+\/?$/;
 // (/tags/<a>+<b>/, /tags/<a>+<b>+<c>/) all route through NetworkFirst archive
 // caching. NOT the bare /tags/ index — that stays on the shell path because
 // it's a fixed page like /sites/ and /about/.
-const TAG_DETAIL = /^\/tags\/[^/]+\/?$/;
+//
+// Tightened to enforce isSafeTagSlug() shape on each segment of the `+`-join
+// AND to cap at 3-way (plan limit). A permissive `[^/]+` would otherwise
+// route querystring-laden URLs (/tags/foo?x=y), uppercase variants
+// (/tags/Radiation/), %2F-encoded paths, and 4+ way intersections through
+// the NetworkFirst cache, polluting the SW cache with attacker-craftable
+// garbage entries.
+const SLUG_PART = '[a-z0-9]+(?:-[a-z0-9]+)*';
+const TAG_DETAIL = new RegExp(`^/tags/${SLUG_PART}(?:\\+${SLUG_PART}){0,2}/?$`);
 
 /** True for the unbounded archive pages (dated digests + per-site + per-conference + per-tag). */
 export function isArchivePage(pathname: string): boolean {
