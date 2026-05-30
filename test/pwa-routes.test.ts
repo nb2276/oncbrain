@@ -22,12 +22,28 @@ describe('isArchivePage', () => {
     expect(isArchivePage('/conferences/asco-2026/')).toBe(true);
   });
 
-  it('does NOT match the shell: home, about, sites index', () => {
+  it('v0.10: matches per-tag landing pages (single tag)', () => {
+    expect(isArchivePage('/tags/radiation/')).toBe(true);
+    expect(isArchivePage('/tags/palliative')).toBe(true);
+    expect(isArchivePage('/tags/phase-3-rct/')).toBe(true);
+  });
+
+  it('v0.10: matches intersection pages (2-way + 3-way join with +)', () => {
+    // /tags/radiation+palliative/ — 2-way intersection
+    expect(isArchivePage('/tags/radiation+palliative/')).toBe(true);
+    // /tags/confirmatory+palliative+radiation/ — 3-way intersection
+    expect(isArchivePage('/tags/confirmatory+palliative+radiation/')).toBe(true);
+  });
+
+  it('does NOT match the shell: home, about, sites index, tags index', () => {
     expect(isArchivePage('/')).toBe(false);
     expect(isArchivePage('/about/')).toBe(false);
     expect(isArchivePage('/sites/')).toBe(false);
     expect(isArchivePage('/sites')).toBe(false);
     expect(isArchivePage('/conferences/')).toBe(false);
+    // v0.10: bare /tags/ is the shell index page (precached), not an archive
+    expect(isArchivePage('/tags/')).toBe(false);
+    expect(isArchivePage('/tags')).toBe(false);
   });
 
   it('does NOT match the API, feed, or search index', () => {

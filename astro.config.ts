@@ -103,6 +103,13 @@ export default defineConfig({
           '2[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/index.html', // dated digests -> NetworkFirst
           'sites/*/index.html', // per-site detail -> NetworkFirst (keeps sites/index.html)
           'conferences/*/index.html', // per-conference -> NetworkFirst (keeps conferences index)
+          // v0.10: per-tag landing pages + 2-way + 3-way intersection pages all
+          // route through NetworkFirst. The 1000-page intersection cap would
+          // otherwise blow the precache budget (and would re-create the
+          // v0.9.13->v0.9.14 stale-precache bug class because new tags shift
+          // CSS bundle hashes faster than the precache revisioning catches).
+          'tags/*/index.html', // single-tag landings (e.g. /tags/radiation/)
+          'tags/**/index.html', // 2-way + 3-way intersection landings
           '**/*-latin-ext-*.woff2', // unused font subsets; unicode-range gates runtime fetch
           '**/*-vietnamese-*.woff2',
         ],

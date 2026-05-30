@@ -9,6 +9,8 @@
 //   /sites/breast/        ARCHIVE     -> NetworkFirst (grows one per site)
 //   /2026-05-17/          ARCHIVE     -> NetworkFirst (grows one per day)
 //   /conferences/asco/    ARCHIVE     -> NetworkFirst
+//   /tags/radiation/      ARCHIVE     -> NetworkFirst (grows with corpus,
+//                                       intersections multiply 2-way + 3-way)
 //   /api/..., /feed.xml   excluded from the navigation fallback
 //
 // "Archive" = the unbounded, ever-growing set. Precaching it would bloat the
@@ -17,13 +19,19 @@
 const DATED = /^\/\d{4}-\d{2}-\d{2}\/?$/;
 const SITE_DETAIL = /^\/sites\/[^/]+\/?$/;
 const CONFERENCE_DETAIL = /^\/conferences\/[^/]+\/?$/;
+// v0.10: tag landing pages (/tags/<slug>/) AND intersection pages
+// (/tags/<a>+<b>/, /tags/<a>+<b>+<c>/) all route through NetworkFirst archive
+// caching. NOT the bare /tags/ index — that stays on the shell path because
+// it's a fixed page like /sites/ and /about/.
+const TAG_DETAIL = /^\/tags\/[^/]+\/?$/;
 
-/** True for the unbounded archive pages (dated digests + per-site + per-conference). */
+/** True for the unbounded archive pages (dated digests + per-site + per-conference + per-tag). */
 export function isArchivePage(pathname: string): boolean {
   return (
     DATED.test(pathname) ||
     SITE_DETAIL.test(pathname) ||
-    CONFERENCE_DETAIL.test(pathname)
+    CONFERENCE_DETAIL.test(pathname) ||
+    TAG_DETAIL.test(pathname)
   );
 }
 
