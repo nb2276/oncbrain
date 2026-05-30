@@ -28,6 +28,14 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createLlmClient, type LlmClient, type LlmContentBlock } from './llm-client.ts';
 import { diseaseSiteSlugList, isValidDiseaseSiteSlug } from './disease-sites.ts';
+import {
+  isValidModality,
+  isValidIntent,
+  isValidMethodology,
+  type ModalityTag,
+  type IntentTag,
+  type MethodologyTag,
+} from './tags.ts';
 import { loadStudyContext, isSafeSlug } from './study-retrieval.ts';
 import { isOcrAvailable, isSafeImageUrl } from './vision-ocr.ts';
 import { buildAssociationGraph, renderGroupsForPrompt } from './source-association.ts';
@@ -221,6 +229,17 @@ export type DigestStudy = {
   // patient counts are reported in the source. Rendered as a dropdown diagram.
   // Null/absent for single-arm, retrospective, or meta-analytic studies.
   consort?: ConsortDiagram | null;
+  // v0.10: cross-cutting tag fields. Phase 2 emits one value per namespace
+  // from the enums in src/lib/tags.ts (or null when uncertain). Drives
+  // /tags/<slug>/ landing pages via the build-time derive in tag-index.ts.
+  //
+  // Types imported from tags.ts so the enum definitions live in one place.
+  // (digest-data.ts:DigestStudy uses the SAME imported types — the field
+  // shape is now identical across both parallel definitions. Adversarial
+  // review surfaced the drift hazard of an inline-union triplicate.)
+  modality?: ModalityTag | null;
+  intent?: IntentTag | null;
+  methodology?: MethodologyTag | null;
 };
 
 // One trial arm in the CONSORT flow.
@@ -936,6 +955,17 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
   // runStudyAgent validates each against the figure's OCR after parsing.
   const figures = parseFigures(root);
 
+  // v0.10: cross-cutting tag fields. Phase 2 picks ONE value per namespace
+  // from the enums in src/lib/tags.ts. Invalid enum values are dropped to null
+  // and logged (the study still appears on its other tag landings; only that
+  // namespace's landing skips it). Codex review (PR #11) recommended dropping
+  // silently was a bad failure mode — logEnumDrop emits a warning the build
+  // CLI surfaces. Missing fields → null without a warning (conservative
+  // abstention is encouraged by the prompt).
+  const modality = parseEnumTag(root.modality, isValidModality, 'modality', name);
+  const intent = parseEnumTag(root.intent, isValidIntent, 'intent', name);
+  const methodology = parseEnumTag(root.methodology, isValidMethodology, 'methodology', name);
+
   return {
     name,
     tldr,
@@ -947,6 +977,9 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     verdict: parseVerdict(root.verdict),
     open_questions: parseOpenQuestions(root.open_questions),
     consort: parseConsort(root.consort),
+    modality,
+    intent,
+    methodology,
   };
 }
 
@@ -1074,6 +1107,43 @@ export function parseOpenQuestions(raw: unknown): string[] | null {
     .map((q) => q.trim())
     .slice(0, 5);
   return out.length > 0 ? out : null;
+}
+
+// v0.10: parse a single-valued enum tag (modality, intent, methodology) from
+// Phase 2 output. Returns the validated value if the LLM picked one in the
+// enum, null when the field is absent / null / non-string, and null with a
+// build-log warning when the field is a string but NOT in the enum (an
+// out-of-enum hallucination). The warning surfaces in build/digest-builder.ts
+// log so the curator can spot semantic drift without the build failing.
+//
+// Codex review (PR #11) flagged that silent dropping is a bad failure mode;
+// the warning meets the spirit of that critique without requiring a hard
+// build-fail (the rest of the study's data is still useful).
+export function parseEnumTag<T extends string>(
+  raw: unknown,
+  validator: (s: string) => s is T,
+  namespace: string,
+  studyName: string,
+): T | null {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw !== 'string') return null;
+  // Lowercase before validating: the prompt LABELS in tags.ts (e.g. "Radiation",
+  // "Phase 3 RCT") differ from the SLUGS (radiation, phase-3-rct) by case, and
+  // an LLM reading the rules block + example may emit either form. Without this
+  // normalization, every "Radiation" / "Curative" / "Phase-3-RCT" emission
+  // becomes a warn-and-drop and the study is silently missing from its
+  // landing — the single most likely production failure mode given the prompt's
+  // label/slug mix. Lowercasing pre-validate keeps the enum strict (no
+  // "radiation " with a trailing space) while accepting the common drift.
+  const normalized = raw.trim().toLowerCase();
+  if (!normalized) return null;
+  if (validator(normalized)) return normalized;
+  // Out-of-enum: log + drop. Build CLI surfaces this in its summary.
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[llm-pipeline] dropped invalid ${namespace} tag "${raw}" on study "${studyName}"`,
+  );
+  return null;
 }
 
 // Caption validator. Multiple findings shape this:
