@@ -22,12 +22,52 @@ describe('isArchivePage', () => {
     expect(isArchivePage('/conferences/asco-2026/')).toBe(true);
   });
 
-  it('does NOT match the shell: home, about, sites index', () => {
+  it('v0.10: matches per-tag landing pages (single tag)', () => {
+    expect(isArchivePage('/tags/radiation/')).toBe(true);
+    expect(isArchivePage('/tags/palliative')).toBe(true);
+    expect(isArchivePage('/tags/phase-3-rct/')).toBe(true);
+  });
+
+  it('v0.10: matches intersection pages (2-way + 3-way join with +)', () => {
+    // /tags/radiation+palliative/ — 2-way intersection
+    expect(isArchivePage('/tags/radiation+palliative/')).toBe(true);
+    // /tags/confirmatory+palliative+radiation/ — 3-way intersection
+    expect(isArchivePage('/tags/confirmatory+palliative+radiation/')).toBe(true);
+  });
+
+  it('v0.10: REJECTS unsafe tag URLs (querystring, fragments, uppercase, 4-way, encoded slash, deep nesting)', () => {
+    // 4-way intersection over plan cap of 3
+    expect(isArchivePage('/tags/a+b+c+d/')).toBe(false);
+    // Querystring smuggled in
+    expect(isArchivePage('/tags/foo?utm=evil/')).toBe(false);
+    expect(isArchivePage('/tags/foo?x=y')).toBe(false);
+    // Fragment
+    expect(isArchivePage('/tags/foo#frag')).toBe(false);
+    // Uppercase (slugs are lowercase by contract)
+    expect(isArchivePage('/tags/Radiation/')).toBe(false);
+    expect(isArchivePage('/tags/RT/')).toBe(false);
+    // %2F-encoded slash
+    expect(isArchivePage('/tags/foo%2Fbar/')).toBe(false);
+    // Deep nesting beyond a single segment
+    expect(isArchivePage('/tags/foo/bar/')).toBe(false);
+    // Empty join sides
+    expect(isArchivePage('/tags/+/')).toBe(false);
+    expect(isArchivePage('/tags/foo+/')).toBe(false);
+    expect(isArchivePage('/tags/+foo/')).toBe(false);
+    // Spaces, dots
+    expect(isArchivePage('/tags/foo bar/')).toBe(false);
+    expect(isArchivePage('/tags/.../')).toBe(false);
+  });
+
+  it('does NOT match the shell: home, about, sites index, tags index', () => {
     expect(isArchivePage('/')).toBe(false);
     expect(isArchivePage('/about/')).toBe(false);
     expect(isArchivePage('/sites/')).toBe(false);
     expect(isArchivePage('/sites')).toBe(false);
     expect(isArchivePage('/conferences/')).toBe(false);
+    // v0.10: bare /tags/ is the shell index page (precached), not an archive
+    expect(isArchivePage('/tags/')).toBe(false);
+    expect(isArchivePage('/tags')).toBe(false);
   });
 
   it('does NOT match the API, feed, or search index', () => {

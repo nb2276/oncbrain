@@ -4,6 +4,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { assignSlugsForDate } from './slug-resolve.ts';
+import type { ModalityTag, IntentTag, MethodologyTag } from './tags.ts';
 
 // Detail union (v0.4.0 → v0.4.2):
 //   - flat string for single statements
@@ -59,6 +60,16 @@ export type DigestStudy = {
   // v0.9: optional CONSORT participant flow (randomized trials only, when the
   // source reports per-arm counts). Rendered as a dropdown diagram on the card.
   consort?: ConsortDiagram | null;
+  // v0.10: typed cross-cutting tag fields. The Phase 2 agent picks one value
+  // per namespace from the enums in src/lib/tags.ts. Null when the agent
+  // can't classify (single-arm phase-1 with no comparator = no modality, etc.)
+  // — the study still appears on other landing pages; only that namespace's
+  // tag landing skips it. The unified tags[] VIEW is derived at build time
+  // from these typed fields + verdict.soc_implication + digest.conference
+  // (see src/lib/tag-index.ts).
+  modality?: ModalityTag | null;
+  intent?: IntentTag | null;
+  methodology?: MethodologyTag | null;
 };
 
 export type ConsortArm = {
