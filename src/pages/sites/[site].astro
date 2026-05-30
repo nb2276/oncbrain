@@ -10,7 +10,7 @@ import {
   buildSiblingPreviews,
   listDigestsStrict,
   studyKeyString,
-  studyTagSlugs,
+  studyTagChips,
 } from '../../lib/tag-index.ts';
 
 export async function getStaticPaths() {
@@ -91,7 +91,7 @@ const railItems = summary.occurrences.map((occ) => ({
               papers={occ.papers ?? []}
               slides={occ.slides ?? []}
               shareUrl={`/sites/${summary.disease_site}/#${anchorByOcc.get(occ)}`}
-              tagSlugs={studyTagSlugs(occ.study, occ.conference?.slug ?? null)}
+              tagChips={studyTagChips(occ.study, occ.conference)}
               siblings={siblingPreviews.get(siblingKey) ?? []}
             />
           );

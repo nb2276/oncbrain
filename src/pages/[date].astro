@@ -18,7 +18,7 @@ import {
   buildSiblingPreviews,
   listDigestsStrict,
   studyKeyString,
-  studyTagSlugs,
+  studyTagChips,
 } from '../lib/tag-index.ts';
 
 export async function getStaticPaths() {
@@ -173,7 +173,7 @@ for (const study of allStudiesOnDate) {
               papers={sourcesByStudy.get(study)!.papers}
               slides={sourcesByStudy.get(study)!.slides}
               shareUrl={`/sites/${site.disease_site}/#${date}-${resolvedSlug}`}
-              tagSlugs={studyTagSlugs(study, conference?.slug ?? null)}
+              tagChips={studyTagChips(study, conference)}
               siblings={siblingPreviews.get(siblingKey) ?? []}
             />
           );

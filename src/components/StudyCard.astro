@@ -21,7 +21,7 @@ import {
   type DigestArtifactPaper,
   type DigestArtifactSlide,
 } from '../lib/digest-data.ts';
-import { resolveTagDisplay, type SiblingPreview } from '../lib/tag-index.ts';
+import type { SiblingPreview } from '../lib/tag-index.ts';
 
 type Bookmark = DigestArtifact['bookmarks'][number];
 type StudyAuthor = { name: string; kind: 'tweet' | 'paper' };
@@ -39,15 +39,19 @@ interface Props {
   // Optional canonical share URL (per-site page anchor: /sites/{site}/#{date}-{slug}).
   // Absent → share button is not rendered. Absolutized at click time in share-script.ts.
   shareUrl?: string;
-  // v0.10: cross-cutting tag slugs (modality / intent / methodology / verdict /
-  // meeting). Caller derives via studyTagSlugs() from tag-index.ts. Rendered as
-  // a plain text meta-line below the comparator block on the card head; each
-  // chip links to /tags/<slug>/. Absent / empty → no row.
-  tagSlugs?: string[];
+  // v0.10: pre-resolved cross-cutting tag chips. Caller passes via
+  // studyTagChips() so the label resolution happens where conference
+  // context lives (meeting labels need digest.conference.name, which the
+  // card doesn't have). Adversarial review caught that calling
+  // resolveTagDisplay() with no occurrences silently dropped every meeting
+  // chip. Rendered as a plain text meta-line below the comparator on the
+  // card head; each chip links to /tags/<slug>/. Absent / empty → no row.
+  tagChips?: Array<{ slug: string; label: string }>;
   // v0.10: "Studies like this" sibling footer entries (up to 3, date-desc).
   // Caller looks up via buildSiblingPreviews() and passes the per-study list.
-  // Rendered inside the depth fold, after authors attribution. Absent / empty
-  // → no section.
+  // Rendered inside the depth fold, after authors attribution. Defensive
+  // .slice(0, 3) on render in case a caller passes more. Absent / empty →
+  // no section.
   siblings?: SiblingPreview[];
 }
 
@@ -59,22 +63,15 @@ const {
   anchorId,
   authors = [],
   shareUrl,
-  tagSlugs = [],
+  tagChips = [],
   siblings = [],
 } = Astro.props as Props;
 
-// v0.10: chip row entries. Resolve each slug to its display label without
-// the per-namespace emoji (chip row is plain text meta-line per DESIGN.md
-// "cards earn their existence"). The verdict pill already carries the
-// 6-emoji vocabulary; chips deliberately avoid reuse.
-const tagChips = tagSlugs
-  .map((slug) => {
-    const display = resolveTagDisplay(slug);
-    return display ? { slug, label: display.label } : null;
-  })
-  .filter((c): c is { slug: string; label: string } => c !== null);
+// Defensive cap on siblings: computeSiblings already caps at 3, but a future
+// caller passing a longer list shouldn't render an unbounded footer.
+const visibleSiblings = siblings.slice(0, 3);
 const hasTagChips = tagChips.length > 0;
-const hasSiblings = siblings.length > 0;
+const hasSiblings = visibleSiblings.length > 0;
 
 // 🔗 bullets are lifted out of the main list into the "vs leading data" callout.
 function isComparatorBullet(d: DigestDetail): boolean {
@@ -394,7 +391,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
         <aside class="study-siblings" aria-labelledby={`siblings-${anchorId ?? study.slug ?? 'x'}`}>
           <h4 class="section-label sibling-label" id={`siblings-${anchorId ?? study.slug ?? 'x'}`}>· Studies like this ·</h4>
           <ul class="sibling-list">
-            {siblings.map((s) => (
+            {visibleSiblings.map((s) => (
               <li class="sibling-row">
                 <a class="sibling-link" href={`/${s.date}/#${s.resolvedSlug}`}>
                   {s.verdictEmoji && (
@@ -1152,10 +1149,13 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   .tag-chip {
     color: var(--fg-muted);
     text-decoration: none;
-    /* Tap target: extends the hit area to ≥44px high on mobile via padding
-       while keeping the visible chip compact. Per design pass 6. */
-    padding: 0.5rem 0;
-    margin: -0.5rem 0;
+    /* Hit area extension via small vertical padding. We deliberately do NOT
+       use the negative-margin trick that pulled the hit zone to 44px: on
+       flex-wrap to a second row, the negative top margin on row-2 chips
+       overlapped row-1 padding, sending bottom-edge taps to the wrong row
+       (adversarial-review finding). Accept a smaller hit area for inline
+       text links — standard Apple HIG treatment for non-button affordances. */
+    padding: 0.15rem 0;
   }
   .tag-chip:hover {
     color: var(--accent);

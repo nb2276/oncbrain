@@ -32,7 +32,7 @@ import {
   parseTagPageSlug,
   resolveTagDisplay,
   studyKeyString,
-  studyTagSlugs,
+  studyTagChips,
   type TagOccurrence,
 } from '../../lib/tag-index.ts';
 import { verdictMetaFor } from '../../lib/verdict.ts';
@@ -184,7 +184,7 @@ const pageDescription =
           papers={occ.papers ?? []}
           slides={occ.slides ?? []}
           shareUrl={`/tags/${canonical}/#${anchorFor(occ)}`}
-          tagSlugs={studyTagSlugs(occ.study, occ.conference?.slug ?? null)}
+          tagChips={studyTagChips(occ.study, occ.conference)}
           siblings={siblingPreviews.get(siblingKey) ?? []}
         />
       );
