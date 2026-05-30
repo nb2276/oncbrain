@@ -2,6 +2,21 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.13] - 2026-05-29
+
+### Fixed
+
+- **Search results dropdown text rendered all-accent-blue at 18px.** The
+  result rows are injected via `list.innerHTML` at runtime, so they don't
+  carry Astro's `data-astro-cid-*` scope attribute. The component-scoped
+  `.search-list a` / `.result-name` / `.result-tldr` rules in
+  `SearchBox.astro` never matched, leaving every line to inherit the
+  global `a { color: var(--accent) }` and body 18px serif. Wrapped the
+  affected descendant selectors with `:global()` so the rules un-scope
+  the dynamic children while keeping `.search-list` itself scoped:
+  meta line is now sans 0.78rem `--fg-muted`, trial name serif 18px
+  weight 600 `--fg`, TL;DR serif 0.92rem `--fg-muted`. CSS-only.
+
 ## [0.9.12] - 2026-05-29
 
 ### Changed
