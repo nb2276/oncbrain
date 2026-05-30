@@ -649,3 +649,92 @@ export function resolveTagDisplay(
   // Unknown slug AND no occurrence sample — caller should 404.
   return null;
 }
+
+// ---------------- Per-study chip + sibling helpers (StudyCard surface) ----------------
+
+/**
+ * Tag slugs to render as chips on a StudyCard, in stable order:
+ * modality → intent → methodology → verdict → meeting. Disease-site is NOT
+ * included — that taxonomy renders via the existing emoji vocabulary on the
+ * card head and lives at /sites/, not /tags/.
+ *
+ * Null-valued namespaces are filtered. Callers (the per-date / per-site / per-
+ * tag pages) compose chip rows by iterating this list and linking each slug
+ * to /tags/<slug>/.
+ */
+export function studyTagSlugs(
+  study: DigestStudy,
+  conferenceSlug: string | null,
+): string[] {
+  const out: string[] = [];
+  if (study.modality && isValidModality(study.modality)) out.push(study.modality);
+  if (study.intent && isValidIntent(study.intent)) out.push(study.intent);
+  if (study.methodology && isValidMethodology(study.methodology)) out.push(study.methodology);
+  if (study.verdict?.soc_implication) out.push(study.verdict.soc_implication);
+  if (conferenceSlug) out.push(conferenceSlug);
+  return out;
+}
+
+/**
+ * "Studies like this" preview: a sibling rendered in a card's depth fold.
+ * Just the fields the row template needs (no resolved sources, no figures).
+ */
+export type SiblingPreview = {
+  date: string;
+  resolvedSlug: string;
+  name: string;
+  tldr: string;
+  verdictEmoji: string | null;
+};
+
+/**
+ * Pre-computed sibling previews per study. Keyed by studyKeyString. Pages
+ * call this ONCE at build time and look up the per-card list from the map;
+ * StudyCard reads from its prop, no per-render computation.
+ *
+ * The map only carries entries for studies that have ≥1 sibling — a card
+ * with no siblings omits the footer entirely (no empty "STUDIES LIKE THIS"
+ * label).
+ */
+export function buildSiblingPreviews(
+  digests: readonly DigestArtifact[],
+): Map<string, SiblingPreview[]> {
+  const siblings = computeSiblings(digests);
+  type Enriched = { name: string; tldr: string; verdictEmoji: string | null };
+  const enriched = new Map<string, Enriched>();
+  for (const digest of digests) {
+    for (const { study, resolvedSlug } of walkStudiesPerDate(digest)) {
+      const verdictMeta = study.verdict?.soc_implication
+        ? VERDICT_META[study.verdict.soc_implication]
+        : null;
+      enriched.set(studyKeyString({ date: digest.date, resolvedSlug }), {
+        name: study.name,
+        tldr: study.tldr,
+        verdictEmoji: verdictMeta?.emoji ?? null,
+      });
+    }
+  }
+
+  const out = new Map<string, SiblingPreview[]>();
+  for (const [key, siblingKeys] of siblings) {
+    if (siblingKeys.length === 0) continue;
+    const previews: SiblingPreview[] = [];
+    for (const sk of siblingKeys) {
+      const skKey = studyKeyString(sk);
+      const info = enriched.get(skKey);
+      if (!info) continue; // defensive — siblings derived from same corpus
+      previews.push({
+        date: sk.date,
+        resolvedSlug: sk.resolvedSlug,
+        name: info.name,
+        tldr: info.tldr,
+        verdictEmoji: info.verdictEmoji,
+      });
+    }
+    if (previews.length > 0) out.set(key, previews);
+  }
+  return out;
+}
+
+// Re-export so consumers don't need to import from both tags.ts and tag-index.ts.
+export { isSafeTagSlug };
