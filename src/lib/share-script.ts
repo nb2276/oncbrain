@@ -11,15 +11,15 @@
 //     - other rejections → falls through to clipboard.writeText() with
 //       the same flip feedback as the clipboard-only path,
 //   - falls back to navigator.clipboard.writeText(url) otherwise,
-//     - resolve → label flips Copy link → Copied for 1500ms + accent color,
+//     - resolve → icon flips share → checkmark for 1500ms + accent color,
 //       aria-live span announces "Copied",
-//     - reject → label flips to Couldn't copy for 2000ms + accent color,
-//       inline recovery <input> reveals with the URL pre-selected and
-//       hides again after 10s or on next click.
+//     - reject → icon flips to alert for 2000ms + accent color, aria-live
+//       announces "Couldn't copy", inline recovery <input> reveals with the
+//       URL pre-selected and hides again after 10s or on next click.
 //
-// Per-button state (active timer ids + original label) lives in a WeakMap so
-// rapid re-clicks cancel the prior flip-timer and restart cleanly, and so the
-// handler stays GC-friendly when buttons are removed from the DOM.
+// Per-button state (active timer ids + original icon markup) lives in a
+// WeakMap so rapid re-clicks cancel the prior flip-timer and restart cleanly,
+// and so the handler stays GC-friendly when buttons are removed from the DOM.
 //
 // Buttons start hidden (display:none in SSG output); the script reveals them
 // only after confirming at least one of the two APIs is present. This avoids
@@ -40,7 +40,7 @@ export interface ShareDeps {
 interface ButtonState {
   flipTimer?: number;
   recoveryTimer?: number;
-  originalLabel: string;
+  originalHTML: string;
 }
 
 const state = new WeakMap<HTMLButtonElement, ButtonState>();
@@ -48,6 +48,15 @@ const state = new WeakMap<HTMLButtonElement, ButtonState>();
 const FLIP_COPIED_MS = 1500;
 const FLIP_FAILED_MS = 2000;
 const RECOVERY_VISIBLE_MS = 10_000;
+
+// Inline SVGs kept small (Feather-style 16×16, currentColor). Exported so
+// templates and tests can reference the same source-of-truth markup.
+export const ICON_SHARE =
+  '<svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+export const ICON_COPIED =
+  '<svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+export const ICON_FAILED =
+  '<svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
 
 // Per-button setup. Exported for unit tests so the click handler logic can be
 // driven against stub elements + injected globals without a real browser.
@@ -63,16 +72,18 @@ export function setupShareButton(
   // Neither API present → leave the button hidden and bail.
   if (!hasShare && !hasClipboard) return;
 
-  // Pick the label that matches what will actually happen on click.
-  button.textContent = hasShare ? 'Share' : 'Copy link';
+  // Ensure the rest-state icon is present. The Astro template SSRs the share
+  // icon already, but in tests (or if the markup is ever stripped) we re-seed
+  // here so the button is never visibly empty.
+  if (!button.innerHTML.trim()) button.innerHTML = ICON_SHARE;
   // Reveal after feature detect confirms the button will work. Must be an
   // explicit value (not '') because the CSS default is `display: none` — an
   // empty inline style clears nothing and lets the CSS rule re-apply, leaving
-  // the button invisible. inline-block works for both the StudyCard flex row
-  // and the home-feed absolute overlay.
-  button.style.display = 'inline-block';
+  // the button invisible. inline-flex centers the SVG inside the 44px touch
+  // target on both surfaces.
+  button.style.display = 'inline-flex';
 
-  state.set(button, { originalLabel: button.textContent });
+  state.set(button, { originalHTML: button.innerHTML });
 
   const setTimeoutFn = deps.setTimeoutFn ?? ((cb, ms) => (globalThis.setTimeout as unknown as (cb: () => void, ms: number) => number)(cb, ms));
   const clearTimeoutFn = deps.clearTimeoutFn ?? ((id: number) => (globalThis.clearTimeout as unknown as (id: number) => void)(id));
@@ -121,17 +132,18 @@ function tryClipboard(
   clearTimeoutFn: (id: number) => void,
 ): void {
   nav.clipboard!.writeText!(absoluteUrl)
-    .then(() => flipLabel(button, refs, 'Copied', FLIP_COPIED_MS, setTimeoutFn, clearTimeoutFn))
+    .then(() => flipIcon(button, refs, ICON_COPIED, 'Copied', FLIP_COPIED_MS, setTimeoutFn, clearTimeoutFn))
     .catch(() => {
-      flipLabel(button, refs, "Couldn't copy", FLIP_FAILED_MS, setTimeoutFn, clearTimeoutFn);
+      flipIcon(button, refs, ICON_FAILED, "Couldn't copy", FLIP_FAILED_MS, setTimeoutFn, clearTimeoutFn);
       revealRecoveryInput(button, refs, absoluteUrl, setTimeoutFn, clearTimeoutFn);
     });
 }
 
-function flipLabel(
+function flipIcon(
   button: HTMLButtonElement,
   refs: { statusSpan?: HTMLElement | null },
-  newLabel: string,
+  iconHTML: string,
+  status: string,
   ms: number,
   setTimeoutFn: (cb: () => void, ms: number) => number,
   clearTimeoutFn: (id: number) => void,
@@ -140,12 +152,12 @@ function flipLabel(
   if (!s) return;
   if (s.flipTimer !== undefined) clearTimeoutFn(s.flipTimer);
 
-  button.textContent = newLabel;
+  button.innerHTML = iconHTML;
   button.classList.add('is-flipped');
-  if (refs.statusSpan) refs.statusSpan.textContent = newLabel;
+  if (refs.statusSpan) refs.statusSpan.textContent = status;
 
   s.flipTimer = setTimeoutFn(() => {
-    button.textContent = s.originalLabel;
+    button.innerHTML = s.originalHTML;
     button.classList.remove('is-flipped');
     if (refs.statusSpan) refs.statusSpan.textContent = '';
     s.flipTimer = undefined;
@@ -204,7 +216,7 @@ function resetToBaseline(
   refs: { statusSpan?: HTMLElement | null; recoveryInput?: HTMLInputElement | null },
 ): void {
   const s = state.get(button);
-  if (s) button.textContent = s.originalLabel;
+  if (s) button.innerHTML = s.originalHTML;
   button.classList.remove('is-flipped');
   if (refs.statusSpan) refs.statusSpan.textContent = '';
   if (refs.recoveryInput) {

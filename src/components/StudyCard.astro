@@ -140,7 +140,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
   {hasAudience && (
     <p class="study-audience study-audience-head"><span class="audience-label">For</span>{study.verdict!.audience}</p>
   )}
-  <p class="study-tldr" set:html={linkifyCitations(stripStudyNamePrefix(study.tldr, study.name))} />
+  <p class="study-tldr"><span class="tldr-label">TL;DR</span><span set:html={linkifyCitations(stripStudyNamePrefix(study.tldr, study.name))} /></p>
   {study.verdict?.rationale && verdictMeta && (
     <aside class:list={['verdict-block', `verdict-${study.verdict.soc_implication}`]}>
       <div class="verdict-pill">
@@ -174,7 +174,8 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
         data-share-url={shareUrl}
         data-share-title={study.name}
         aria-label={`Share link to ${study.name}`}
-      >Share</button>
+        title="Share"
+      ><svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
       <span class="sr-share-status" aria-live="polite"></span>
       <input
         type="text"
@@ -695,6 +696,18 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     border-left: 3px solid var(--border);
     border-radius: 4px;
   }
+  /* Inline TL;DR label — matches the FOR / vs leading data rhythm so the
+     headline paragraph is identifiable at a glance. */
+  .tldr-label {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    color: var(--fg-muted);
+    margin-right: 0.55rem;
+    vertical-align: 0.12em;
+  }
 
   /* Depth fold: methodology + attribution behind a tap. Summary mirrors the
      sources affordance (muted, sans). Triangle marker is the native one. */
@@ -1004,22 +1017,23 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
      added during the Copied/Couldn't copy window for an accent flash. */
   .study-share {
     display: none;
+    align-items: center;
+    justify-content: center;
     position: absolute;
     top: 0;
     right: 0;
     background: none;
     border: none;
-    padding: 0.5rem 0.4rem;
-    font-family: var(--font-sans);
-    font-size: 0.8rem;
+    padding: 0.5rem;
     color: var(--fg-muted);
     cursor: pointer;
-    line-height: 1.2;
-    /* 44px minimum touch target via padding (no chip background). */
+    /* 44px minimum touch target (no chip background). */
+    min-width: 44px;
     min-height: 44px;
   }
   .study-share:hover { color: var(--accent); }
   .study-share.is-flipped { color: var(--accent); }
+  .study-share .share-icon { display: block; }
 
   /* Screen-reader-only live region for state announcements. Visible label
      change is the sighted user's signal; this announces the same text to

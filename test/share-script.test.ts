@@ -1,14 +1,20 @@
 import { describe, it, expect, vi } from 'vitest';
-import { setupShareButton, type ShareDeps } from '../src/lib/share-script.ts';
+import {
+  setupShareButton,
+  ICON_SHARE,
+  ICON_COPIED,
+  ICON_FAILED,
+  type ShareDeps,
+} from '../src/lib/share-script.ts';
 
 // These tests drive setupShareButton against stub DOM nodes + injected deps,
 // so we don't need jsdom. The point is to verify the state machine: feature
-// detect, label adaptation, Web Share happy + abort + non-abort, clipboard
+// detect, icon adaptation, Web Share happy + abort + non-abort, clipboard
 // happy + failure, recovery input reveal, timer cancel-on-rapid-click,
 // stopPropagation, and absolute-URL construction at click time.
 
 interface StubButton {
-  textContent: string;
+  innerHTML: string;
   dataset: Record<string, string>;
   style: { display: string };
   classList: {
@@ -21,11 +27,12 @@ interface StubButton {
   click: () => Promise<{ stopPropagation: ReturnType<typeof vi.fn>; preventDefault: ReturnType<typeof vi.fn> }>;
 }
 
-function makeButton(overrides: Partial<{ shareUrl: string; shareTitle: string }> = {}): StubButton {
+function makeButton(overrides: Partial<{ shareUrl: string; shareTitle: string; innerHTML: string }> = {}): StubButton {
   const listeners = new Map<string, EventListener>();
   const classes = new Set<string>();
   return {
-    textContent: '',
+    // Match what the Astro template ships server-side: rest-state share icon.
+    innerHTML: overrides.innerHTML ?? ICON_SHARE,
     dataset: {
       shareUrl: overrides.shareUrl ?? '/sites/prostate/#2026-05-17-prestige-psma',
       shareTitle: overrides.shareTitle ?? 'PRESTIGE-PSMA',
@@ -136,43 +143,50 @@ function fireAllTimeouts(timeouts: Map<number, () => void>): void {
 }
 
 describe('setupShareButton — feature detect + reveal', () => {
-  it('both APIs present: label = "Share", button revealed', () => {
+  it('both APIs present: share icon preserved, button revealed', () => {
     const b = attachListenerAPI(makeButton());
     const { deps } = makeDeps({ hasShare: true, hasClipboard: true });
     setupShareButton(asButton(b), {}, deps);
-    expect(b.textContent).toBe('Share');
-    expect(b.style.display).toBe('inline-block');
+    expect(b.innerHTML).toBe(ICON_SHARE);
+    expect(b.style.display).toBe('inline-flex');
   });
 
-  it('clipboard only: label = "Copy link", button revealed', () => {
+  it('clipboard only: share icon preserved (universal label), button revealed', () => {
     const b = attachListenerAPI(makeButton());
     const { deps } = makeDeps({ hasShare: false, hasClipboard: true });
     setupShareButton(asButton(b), {}, deps);
-    expect(b.textContent).toBe('Copy link');
-    expect(b.style.display).toBe('inline-block');
+    expect(b.innerHTML).toBe(ICON_SHARE);
+    expect(b.style.display).toBe('inline-flex');
+  });
+
+  it('empty button: re-seeds the share icon as a safety net', () => {
+    const b = attachListenerAPI(makeButton({ innerHTML: '' }));
+    const { deps } = makeDeps({ hasShare: true });
+    setupShareButton(asButton(b), {}, deps);
+    expect(b.innerHTML).toBe(ICON_SHARE);
   });
 
   it('neither API: button stays hidden (no reveal)', () => {
-    const b = attachListenerAPI(makeButton());
+    const b = attachListenerAPI(makeButton({ innerHTML: '' }));
     const { deps } = makeDeps({ hasShare: false, hasClipboard: false });
     setupShareButton(asButton(b), {}, deps);
-    expect(b.textContent).toBe(''); // never set
+    expect(b.innerHTML).toBe(''); // never re-seeded
     expect(b.style.display).toBe('none');
   });
 });
 
 describe('setupShareButton — Web Share click path', () => {
-  it('share resolves: no label change', async () => {
+  it('share resolves: no icon change', async () => {
     const b = attachListenerAPI(makeButton());
     const { deps, shareFn } = makeDeps({ hasShare: true });
     setupShareButton(asButton(b), {}, deps);
     const ev = await b.click();
     expect(shareFn).toHaveBeenCalledOnce();
-    expect(b.textContent).toBe('Share'); // unchanged
+    expect(b.innerHTML).toBe(ICON_SHARE); // unchanged
     expect(ev.stopPropagation).toHaveBeenCalledOnce();
   });
 
-  it('share rejects AbortError: silent (no label change, no clipboard fallback)', async () => {
+  it('share rejects AbortError: silent (no icon change, no clipboard fallback)', async () => {
     const b = attachListenerAPI(makeButton());
     const abortErr = Object.assign(new Error('cancelled'), { name: 'AbortError' });
     const { deps, shareFn, writeTextFn } = makeDeps({
@@ -184,7 +198,7 @@ describe('setupShareButton — Web Share click path', () => {
     await b.click();
     expect(shareFn).toHaveBeenCalledOnce();
     expect(writeTextFn).not.toHaveBeenCalled();
-    expect(b.textContent).toBe('Share');
+    expect(b.innerHTML).toBe(ICON_SHARE);
   });
 
   it('share rejects non-AbortError: falls through to clipboard.writeText', async () => {
@@ -201,44 +215,46 @@ describe('setupShareButton — Web Share click path', () => {
     await b.click();
     expect(shareFn).toHaveBeenCalledOnce();
     expect(writeTextFn).toHaveBeenCalledOnce();
-    expect(b.textContent).toBe('Copied');
+    expect(b.innerHTML).toBe(ICON_COPIED);
     expect(b._classes.has('is-flipped')).toBe(true);
     expect(status.textContent).toBe('Copied');
-    // Fire the revert timer — label restores.
+    // Fire the revert timer — icon restores.
     fireAllTimeouts(timeouts);
-    expect(b.textContent).toBe('Share'); // back to original label
+    expect(b.innerHTML).toBe(ICON_SHARE); // back to original
     expect(b._classes.has('is-flipped')).toBe(false);
     expect(status.textContent).toBe('');
   });
 });
 
 describe('setupShareButton — clipboard click path', () => {
-  it('clipboard resolves: label flips Copy link → Copied for one window, aria-live announces', async () => {
+  it('clipboard resolves: icon flips share → check for one window, aria-live announces Copied', async () => {
     const b = attachListenerAPI(makeButton());
     const status = makeStatusSpan();
     const { deps, writeTextFn, timeouts } = makeDeps({ hasClipboard: true });
     setupShareButton(asButton(b), { statusSpan: status as unknown as HTMLElement }, deps);
     await b.click();
     expect(writeTextFn).toHaveBeenCalledOnce();
-    expect(b.textContent).toBe('Copied');
+    expect(b.innerHTML).toBe(ICON_COPIED);
     expect(b._classes.has('is-flipped')).toBe(true);
     expect(status.textContent).toBe('Copied');
     fireAllTimeouts(timeouts);
-    expect(b.textContent).toBe('Copy link');
+    expect(b.innerHTML).toBe(ICON_SHARE);
     expect(status.textContent).toBe('');
   });
 
-  it('clipboard rejects: label flips "Couldn\'t copy", recovery input revealed + pre-selected', async () => {
+  it('clipboard rejects: icon flips to alert, status announces "Couldn\'t copy", recovery input revealed + pre-selected', async () => {
     const b = attachListenerAPI(makeButton());
+    const status = makeStatusSpan();
     const recovery = makeRecoveryInput();
     const { deps } = makeDeps({
       hasClipboard: true,
       clipboardReject: new Error('blocked'),
     });
-    setupShareButton(asButton(b), { recoveryInput: recovery as unknown as HTMLInputElement }, deps);
+    setupShareButton(asButton(b), { statusSpan: status as unknown as HTMLElement, recoveryInput: recovery as unknown as HTMLInputElement }, deps);
     await b.click();
-    expect(b.textContent).toBe("Couldn't copy");
+    expect(b.innerHTML).toBe(ICON_FAILED);
     expect(b._classes.has('is-flipped')).toBe(true);
+    expect(status.textContent).toBe("Couldn't copy");
     expect(recovery.value).toBe('https://oncbrain.test/sites/prostate/#2026-05-17-prestige-psma');
     expect(recovery.style.display).toBe('block');
     expect(recovery.focus).toHaveBeenCalled();

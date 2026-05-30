@@ -2,6 +2,29 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.12] - 2026-05-29
+
+### Changed
+
+- **StudyCard share button is an icon, not text.** The square-with-up-arrow
+  icon at the top-right of each study card replaces the "Share" label.
+  On copy success the icon flips to a checkmark for 1.5s; on clipboard
+  rejection it flips to a triangle alert and the inline URL-recovery
+  input still appears. Screen-reader "Copied" / "Couldn't copy"
+  announcements continue through the existing aria-live span. Applies
+  to both StudyCard and the home-page recent-feed share affordance.
+- **StudyCard TL;DR paragraph is now labeled `TL;DR`.** The headline
+  result was reading as orphaned prose. The inline label matches the
+  existing `FOR` / `vs leading data` uppercase-sans rhythm so the
+  triage layer (name → audience → TL;DR → verdict → comparator) reads
+  as a labeled hierarchy.
+
+### Added
+
+- **Cloudflare Web Analytics on the live site** (production-gated via
+  `import.meta.env.PROD`, so localhost dev and `astro preview` runs
+  don't pollute the dashboard with non-production hits).
+
 ## [0.9.11] - 2026-05-28
 
 ### Fixed

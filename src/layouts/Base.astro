@@ -36,6 +36,13 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="onc brain" />
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    {import.meta.env.PROD && (
+      <Fragment>
+        {/* Cloudflare Web Analytics — production only, so localhost previews and
+            `astro preview` don't pollute the dashboard with dev hits. */}
+        <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "7de09515538540f1b55e9d16c13a1cd4"}'></script>
+      </Fragment>
+    )}
     <style is:global>
       :root {
         color-scheme: light dark;
