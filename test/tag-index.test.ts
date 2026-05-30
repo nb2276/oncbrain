@@ -290,6 +290,42 @@ describe('computeIntersections', () => {
     // The pair with the most studies should win.
     expect(inters[0]!.studyCount).toBe(3); // {palliative, radiation} has 3 studies
   });
+
+  it('CAP TRUNCATION: every emitted 3-way has its 2-way subsets also emitted (breadcrumb 404 guard)', () => {
+    // Codex review: arity-first ordering ensures that if a 3-way page makes
+    // the cap, its three constituent 2-way pages do too. Otherwise the
+    // breadcrumb `×` button on the 3-way would 404 when removing one tag.
+    // Anti-monotone guarantees count(3-way) ≤ count(every 2-way subset), so
+    // sorting 2-way before 3-way preserves the invariant.
+    const studies = [
+      makeStudy('A', { modality: 'radiation', intent: 'palliative', methodology: 'phase-3-rct' }),
+      makeStudy('B', { modality: 'radiation', intent: 'palliative', methodology: 'phase-3-rct' }),
+      makeStudy('C', { modality: 'radiation', intent: 'palliative', methodology: 'phase-3-rct' }),
+    ];
+    const index = buildReverseIndex([
+      makeDigest('2026-05-27', null, [{ disease_site: 'breast', studies }]),
+    ]);
+    // 2-way pairs: {palliative,radiation}, {palliative,phase-3-rct}, {phase-3-rct,radiation}, all count=3
+    // 3-way: {palliative, phase-3-rct, radiation}, count=3
+    // Cap=3 keeps all three 2-ways but drops the 3-way. Cap=4 keeps everything.
+    const inters3 = computeIntersections(index, { maxArity: 3, threshold: 3, cap: 3 });
+    expect(inters3).toHaveLength(3);
+    expect(inters3.every((i) => i.tags.length === 2)).toBe(true);
+    expect(inters3.find((i) => i.tags.length === 3)).toBeUndefined();
+
+    const inters4 = computeIntersections(index, { maxArity: 3, threshold: 3, cap: 4 });
+    expect(inters4).toHaveLength(4);
+    const threeWay = inters4.find((i) => i.tags.length === 3);
+    expect(threeWay).toBeTruthy();
+    // For every 3-way emitted, all 3 of its 2-way subsets are also emitted.
+    if (threeWay) {
+      const emittedKeys = new Set(inters4.map((i) => i.tags.join('+')));
+      const [a, b, c] = threeWay.tags;
+      expect(emittedKeys.has(`${a}+${b}`)).toBe(true);
+      expect(emittedKeys.has(`${a}+${c}`)).toBe(true);
+      expect(emittedKeys.has(`${b}+${c}`)).toBe(true);
+    }
+  });
 });
 
 // ---------------- computeSiblings ----------------

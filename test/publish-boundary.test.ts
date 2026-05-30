@@ -32,3 +32,72 @@ describe('PDF publish boundary', () => {
     }
   });
 });
+
+// v0.10 surface — extends the boundary to the new tag pages. A future
+// rendering bug or schema drift could conceivably inject a vault PDF link
+// (data/obsidian/papers/<site>/<slug>.pdf) into /tags/<slug>/ output;
+// these assertions catch that pre-deploy.
+describe('PDF publish boundary — /tags/ surfaces (v0.10)', () => {
+  const root = resolve(process.cwd());
+  const distRoot = resolve(root, 'dist');
+
+  function* walkHtmlFiles(dir: string): IterableIterator<string> {
+    if (!existsSync(dir)) return;
+    const { readdirSync, statSync } = require('node:fs') as typeof import('node:fs');
+    for (const name of readdirSync(dir)) {
+      const full = resolve(dir, name);
+      if (statSync(full).isDirectory()) {
+        yield* walkHtmlFiles(full);
+      } else if (name.endsWith('.html')) {
+        yield full;
+      }
+    }
+  }
+
+  function* walkFeedFiles(dir: string): IterableIterator<string> {
+    if (!existsSync(dir)) return;
+    const { readdirSync, statSync } = require('node:fs') as typeof import('node:fs');
+    for (const name of readdirSync(dir)) {
+      const full = resolve(dir, name);
+      if (statSync(full).isDirectory()) {
+        yield* walkFeedFiles(full);
+      } else if (name === 'feed.xml') {
+        yield full;
+      }
+    }
+  }
+
+  it('no /tags/ HTML page contains a data/obsidian/papers/ reference', () => {
+    const tagsDir = resolve(distRoot, 'tags');
+    if (!existsSync(tagsDir)) return; // build not yet run in this test session
+    for (const f of walkHtmlFiles(tagsDir)) {
+      const content = readFileSync(f, 'utf-8');
+      expect(content, `${f}: contains vault PDF reference`).not.toMatch(/data\/obsidian\/papers/);
+      // Also catch raw .pdf hrefs that aren't via the vault path.
+      expect(content, `${f}: contains a .pdf href`).not.toMatch(/href="[^"]*\.pdf"/);
+    }
+  });
+
+  it('no /tags/ RSS feed contains a vault PDF reference', () => {
+    const tagsDir = resolve(distRoot, 'tags');
+    if (!existsSync(tagsDir)) return;
+    for (const f of walkFeedFiles(tagsDir)) {
+      const content = readFileSync(f, 'utf-8');
+      expect(content, `${f}: contains vault PDF reference`).not.toMatch(/data\/obsidian\/papers/);
+      expect(content, `${f}: contains a .pdf URL`).not.toMatch(/\.pdf</);
+    }
+  });
+
+  it('no /api/v1/tag/ JSON response contains a vault PDF reference', () => {
+    const tagApiDir = resolve(distRoot, 'api/v1/tag');
+    if (!existsSync(tagApiDir)) return;
+    const { readdirSync } = require('node:fs') as typeof import('node:fs');
+    for (const name of readdirSync(tagApiDir)) {
+      if (!name.endsWith('.json')) continue;
+      const full = resolve(tagApiDir, name);
+      const content = readFileSync(full, 'utf-8');
+      expect(content, `${full}: contains vault PDF reference`).not.toMatch(/data\/obsidian\/papers/);
+      expect(content, `${full}: contains pdf_path field`).not.toMatch(/"pdf_path"/);
+    }
+  });
+});

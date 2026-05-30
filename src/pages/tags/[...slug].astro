@@ -1,0 +1,276 @@
+---
+// v0.10 tag landing page: single-tag (/tags/<slug>/) + 2-way + 3-way
+// intersections (/tags/<a>+<b>/, /tags/<a>+<b>+<c>/). Mirrors the
+// /sites/[site]/ pattern — header + count + RSS link + flat reverse-chrono
+// StudyCard list — so readers feel the same density they get on the by-site
+// landings.
+//
+// URL design (per eng review + design pass 1):
+//   /tags/radiation/               single-tag landing
+//   /tags/palliative+radiation/    2-way intersection (alphabetical canonical)
+//   /tags/confirmatory+palliative+radiation/   3-way intersection
+// Non-canonical orderings (e.g. /tags/b+a/) 404 — Astro static can't emit
+// permutations cheaply and bookmarks land on the breadcrumb-rendered
+// canonical anyway.
+//
+// Intersection cardinality (per design pass 1 + plan):
+//   - N≥3 studies threshold (computeIntersections opts)
+//   - Hard cap at 1000 HTML pages (RSS feeds + JSON API are uncapped — they're
+//     trivially cheap static endpoint emissions and don't count against this)
+//   - 4-way+ intersections explicitly excluded by parseTagPageSlug.
+
+import Base from '../../layouts/Base.astro';
+import StudyCard from '../../components/StudyCard.astro';
+import TriageRail from '../../components/TriageRail.astro';
+import {
+  buildReverseIndex,
+  computeIntersections,
+  intersectTagOccurrences,
+  listDigestsStrict,
+  listTagSummaries,
+  parseTagPageSlug,
+  resolveTagDisplay,
+  type TagOccurrence,
+} from '../../lib/tag-index.ts';
+import { verdictMetaFor } from '../../lib/verdict.ts';
+
+export async function getStaticPaths() {
+  // Astro runs getStaticPaths in an isolated scope — module-top constants
+  // are NOT accessible here. Define inline.
+  const INTERSECTION_THRESHOLD = 3;
+  const INTERSECTION_PAGE_CAP = 1000;
+
+  // Codex review: tag surfaces fail-closed on malformed digest input. A
+  // silently-skipped bad file would ship missing tag landings; better to
+  // abort the build pre-deploy.
+  const digests = listDigestsStrict();
+  const summaries = listTagSummaries(digests);
+  const reverseIndex = buildReverseIndex(digests);
+
+  const paths: Array<{ params: { slug: string }; props: { tags: string[]; occurrences: TagOccurrence[] } }> = [];
+
+  // Single-tag pages — one per slug with at least one study.
+  for (const [slug, occurrences] of summaries) {
+    paths.push({
+      params: { slug },
+      props: { tags: [slug], occurrences },
+    });
+  }
+
+  // 2-way + 3-way intersection pages — N≥3, capped at 1000 HTML pages.
+  const intersections = computeIntersections(reverseIndex, {
+    maxArity: 3,
+    threshold: INTERSECTION_THRESHOLD,
+    cap: INTERSECTION_PAGE_CAP,
+  });
+  for (const inter of intersections) {
+    const canonical = inter.tags.join('+'); // computeIntersections returns alphabetical
+    const occurrences = intersectTagOccurrences(summaries, inter.tags);
+    paths.push({
+      params: { slug: canonical },
+      props: { tags: inter.tags, occurrences },
+    });
+  }
+
+  return paths;
+}
+
+interface Props {
+  tags: string[];
+  occurrences: TagOccurrence[];
+}
+
+const { tags, occurrences } = Astro.props as Props;
+const rawSlug = Astro.params.slug;
+
+// Defense in depth: parseTagPageSlug validates everything getStaticPaths
+// emitted (canonical alphabetical order, isSafeTagSlug shape, max 3-way).
+// If this fails on a path getStaticPaths produced, that's a bug.
+const parsed = parseTagPageSlug(rawSlug);
+if (!parsed.ok) {
+  return new Response('Not found', { status: 404 });
+}
+const canonical = parsed.tags.join('+');
+
+// Each tag in the URL gets a display label + namespace. The first occurrence's
+// conference (if any) backstops meeting-slug labels.
+const tagDisplays = tags
+  .map((t) => ({ slug: t, display: resolveTagDisplay(t, occurrences) }))
+  .filter((t): t is { slug: string; display: NonNullable<ReturnType<typeof resolveTagDisplay>> } => t.display !== null);
+
+const titleLabel =
+  tagDisplays.length === 1
+    ? tagDisplays[0]!.display.label
+    : tagDisplays.map((t) => t.display.label).join(' × ');
+const countText = `${occurrences.length} stud${occurrences.length === 1 ? 'y' : 'ies'}`;
+
+// Breadcrumb chain on intersections: each segment links to the reduced
+// (single-tag) landing, with `×` separators that signal "remove this filter."
+// Single-tag pages get the simpler /tags/ + canonical breadcrumb.
+function reducedHref(removeSlug: string): string {
+  const remaining = tags.filter((t) => t !== removeSlug);
+  if (remaining.length === 0) return '/tags/';
+  return `/tags/${[...remaining].sort().join('+')}/`;
+}
+
+// StudyCard wants stable per-occurrence anchors (date-prefixed so the same
+// trial across dates doesn't collide on the page).
+function anchorFor(occ: TagOccurrence): string {
+  return `${occ.date}-${occ.resolvedSlug}`;
+}
+const railItems = occurrences.map((occ) => ({
+  href: `#${anchorFor(occ)}`,
+  name: occ.study.name,
+  verdictEmoji: verdictMetaFor(occ.study.verdict?.soc_implication)?.emoji ?? '·',
+}));
+
+const pageTitle = `${titleLabel} — oncbrain`;
+const pageDescription =
+  tags.length === 1
+    ? `Studies tagged ${titleLabel} across all digest dates.`
+    : `Studies at the intersection of ${titleLabel}.`;
+---
+
+<Base title={pageTitle} description={pageDescription} wide={true}>
+  <TriageRail items={railItems} wide={true} />
+
+  <nav class="crumb" aria-label="Tag filters">
+    <a href="/">← all dates</a>
+    <a href="/tags/">browse by tag</a>
+    {tags.length > 1 && (
+      <ol class="filter-chain">
+        {tagDisplays.map((td, i) => (
+          <li>
+            <a href={`/tags/${td.slug}/`}>{td.display.label}</a>
+            <button
+              type="button"
+              class="filter-remove"
+              data-href={reducedHref(td.slug)}
+              aria-label={`Remove ${td.display.label} filter`}
+            >×</button>
+            {i < tagDisplays.length - 1 && <span class="filter-sep" aria-hidden="true">+</span>}
+          </li>
+        ))}
+      </ol>
+    )}
+  </nav>
+
+  <header class="tag-header">
+    <h2>{titleLabel}</h2>
+    <p class="meta">
+      <span>{countText}</span>
+      <span aria-hidden="true">·</span>
+      <a href={`/tags/${canonical}/feed.xml`} class="feed-link">Subscribe via RSS →</a>
+    </p>
+  </header>
+
+  {occurrences.length === 0 ? (
+    <p class="empty">No studies match this combination yet.</p>
+  ) : (
+    occurrences.map((occ) => (
+      <StudyCard
+        study={occ.study}
+        anchorId={anchorFor(occ)}
+        bookmarks={occ.bookmarks}
+        papers={occ.papers ?? []}
+        slides={occ.slides ?? []}
+        shareUrl={`/tags/${canonical}/#${anchorFor(occ)}`}
+      />
+    ))
+  )}
+</Base>
+
+<script>
+  // Wire the filter-remove buttons: navigate to the reduced intersection
+  // (or single-tag landing) when clicked. data-href is set per button on
+  // server render; we keep the click handler tiny + delegated.
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement | null;
+    if (!t || !t.classList.contains('filter-remove')) return;
+    const href = t.getAttribute('data-href');
+    if (href) window.location.href = href;
+  });
+</script>
+
+<style>
+  .crumb {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    margin: 0 0 0.75rem;
+    padding: 0.55rem 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+  }
+  .crumb a { color: var(--fg-muted); text-decoration: none; margin-right: 0.5rem; }
+  .crumb a + a::before { content: '· '; margin-right: 0.25rem; color: var(--border); }
+  .crumb a:hover { color: var(--accent); }
+
+  .filter-chain {
+    list-style: none;
+    margin: 0.35rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: baseline;
+  }
+  .filter-chain li {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.15rem;
+  }
+  .filter-chain a { color: var(--fg); margin-right: 0; }
+  .filter-remove {
+    border: 0;
+    background: transparent;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 0 0.2rem;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .filter-remove:hover { color: var(--accent); background: var(--accent-bg); }
+  .filter-remove:focus-visible { outline: 2px solid var(--accent); }
+  .filter-sep {
+    color: var(--border);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    padding: 0 0.15rem;
+  }
+
+  .tag-header h2 {
+    margin: 0;
+    font-size: 1.55rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .tag-header .meta {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: baseline;
+  }
+  .feed-link {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .feed-link:hover { text-decoration: underline; }
+  .empty {
+    margin-top: 2rem;
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+  @media (max-width: 600px) {
+    .tag-header h2 { font-size: 1.3rem; }
+  }
+</style>

@@ -1,0 +1,186 @@
+---
+// v0.10 /tags/ top-level index. Lists every namespace with its tag values +
+// study counts, so a reader can see the cross-cutting taxonomy at a glance
+// before diving into a specific landing.
+//
+// Design pass 5: mirrors sites/index.astro layout pattern. Groups by
+// namespace (modality → intent → methodology → verdict → meeting), each as
+// a section with a count-sorted list of tag chips. Disease-site is NOT
+// surfaced here — that taxonomy still lives at /sites/ (per the eng-review
+// URL decision).
+
+import Base from '../../layouts/Base.astro';
+import {
+  listDigestsStrict,
+  listTagSummaries,
+  resolveTagDisplay,
+  type TagNamespaceLabel,
+} from '../../lib/tag-index.ts';
+import { VERDICT_META } from '../../lib/verdict.ts';
+import type { SocImplication } from '../../lib/digest-data.ts';
+
+// Fail-closed for the tag surface (Codex review): malformed digest input
+// aborts the build rather than shipping an incomplete index.
+const summaries = listTagSummaries(listDigestsStrict());
+
+// Bucket every populated slug into its namespace, with the display label.
+type Bucket = { slug: string; label: string; emoji: string | null; count: number };
+const buckets: Record<TagNamespaceLabel, Bucket[]> = {
+  modality: [],
+  intent: [],
+  methodology: [],
+  verdict: [],
+  meeting: [],
+};
+for (const [slug, occurrences] of summaries) {
+  const display = resolveTagDisplay(slug, occurrences);
+  if (!display) continue;
+  buckets[display.namespace].push({
+    slug,
+    label: display.label,
+    emoji: display.emoji,
+    count: occurrences.length,
+  });
+}
+// Sort each bucket: verdict by clinical priority (taxonomy order from
+// VERDICT_META — derived, not hardcoded, so a future enum addition doesn't
+// silently sort the new value to the front via indexOf-returns-(-1)).
+// Adversarial review: an explicit array fell out of sync with the enum
+// once (v0.7 'methodologically-limited' addition); reading the canonical
+// order from VERDICT_META keeps the two in lockstep.
+const verdictOrder = Object.keys(VERDICT_META) as SocImplication[];
+const verdictOrderIndex = new Map(verdictOrder.map((slug, i) => [slug, i]));
+for (const ns of Object.keys(buckets) as TagNamespaceLabel[]) {
+  if (ns === 'verdict') {
+    buckets.verdict.sort((a, b) => {
+      // Unknown slugs go to the END (not the front, which indexOf-based
+      // ordering produced) so a future enum desync is visually obvious.
+      const ai = verdictOrderIndex.get(a.slug as SocImplication) ?? Number.MAX_SAFE_INTEGER;
+      const bi = verdictOrderIndex.get(b.slug as SocImplication) ?? Number.MAX_SAFE_INTEGER;
+      return ai - bi;
+    });
+  } else {
+    buckets[ns].sort((a, b) => (b.count - a.count) || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0));
+  }
+}
+
+const sections: Array<{ namespace: TagNamespaceLabel; heading: string; description: string; items: Bucket[] }> = [
+  { namespace: 'modality', heading: 'Modality', description: 'Primary treatment modality under evaluation.', items: buckets.modality },
+  { namespace: 'intent', heading: 'Intent', description: 'Treatment intent: curative, palliative, supportive.', items: buckets.intent },
+  { namespace: 'methodology', heading: 'Methodology', description: 'Study design archetype.', items: buckets.methodology },
+  { namespace: 'verdict', heading: 'Verdict', description: 'Standard-of-care implication of the study result.', items: buckets.verdict },
+  { namespace: 'meeting', heading: 'Meeting', description: 'Conference the study was presented at.', items: buckets.meeting },
+];
+const populatedSections = sections.filter((s) => s.items.length > 0);
+
+const totalSlugs = populatedSections.reduce((n, s) => n + s.items.length, 0);
+const totalOccurrences = populatedSections.reduce(
+  (n, s) => n + s.items.reduce((m, i) => m + i.count, 0),
+  0,
+);
+---
+
+<Base title="Browse by tag — oncbrain" description="All cross-cutting tags across disease sites: modality, intent, methodology, verdict, and meeting.">
+  <header class="page-header">
+    <h2>Browse by tag</h2>
+    <p class="meta">
+      {totalSlugs} tag{totalSlugs === 1 ? '' : 's'} across {populatedSections.length} namespace{populatedSections.length === 1 ? '' : 's'} · {totalOccurrences} study occurrence{totalOccurrences === 1 ? '' : 's'}
+    </p>
+  </header>
+
+  {populatedSections.length === 0 ? (
+    <p class="empty">Tags will appear here after the next digest run.</p>
+  ) : (
+    populatedSections.map((section) => (
+      <section class="tag-namespace" aria-labelledby={`ns-${section.namespace}`}>
+        <h3 id={`ns-${section.namespace}`}>{section.heading}</h3>
+        <p class="ns-description">{section.description}</p>
+        <ul class="tag-list">
+          {section.items.map((item) => (
+            <li>
+              <a href={`/tags/${item.slug}/`}>
+                {section.namespace === 'verdict' && item.emoji && (
+                  <span class="verdict-emoji" aria-hidden="true">{item.emoji}</span>
+                )}
+                <span class="tag-label">{item.label}</span>
+                <span class="tag-count" aria-label={`${item.count} studies`}>· {item.count}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  )}
+
+  <p class="footer-note">
+    Disease-site taxonomy lives at <a href="/sites/">/sites/</a>. Tags are cross-cutting axes layered on top.
+  </p>
+</Base>
+
+<style>
+  .page-header h2 {
+    margin: 0;
+    font-size: 1.55rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .page-header .meta {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+  }
+  .empty {
+    margin-top: 2rem;
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+
+  .tag-namespace {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+  .tag-namespace h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  .ns-description {
+    margin: 0.2rem 0 0.85rem;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+  }
+  .tag-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 0.85rem;
+  }
+  .tag-list a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    color: var(--fg);
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+  }
+  .tag-list a:hover { color: var(--accent); }
+  .verdict-emoji { font-size: 0.95rem; line-height: 1; }
+  .tag-count {
+    color: var(--fg-muted);
+    font-size: 0.82rem;
+  }
+  .footer-note {
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+  }
+</style>
