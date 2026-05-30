@@ -35,8 +35,16 @@ precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
 // Archive pages grow without bound; cache on visit, bounded, time-boxed.
+//
+// The url.search/url.hash guards prevent cache pollution from query-variant
+// URLs (e.g. /tags/radiation?utm_source=twitter would otherwise be cached
+// alongside /tags/radiation? as a distinct entry, and a 30-entry bounded cache
+// would thrash). isArchivePage() validates the pathname shape; this guard
+// rejects anything with a non-empty querystring or fragment BEFORE Workbox
+// gets a chance to cache the full URL.
 registerRoute(
-  ({ url, sameOrigin }) => sameOrigin && isArchivePage(url.pathname),
+  ({ url, sameOrigin }) =>
+    sameOrigin && url.search === '' && url.hash === '' && isArchivePage(url.pathname),
   new NetworkFirst({
     cacheName: 'oncbrain-archive',
     networkTimeoutSeconds: 3,
