@@ -166,6 +166,22 @@ describe('buildReverseIndex', () => {
     expect(set.has(studyKeyString({ date: '2026-05-27', resolvedSlug: 'trial' }))).toBe(true);
     expect(set.has(studyKeyString({ date: '2026-05-27', resolvedSlug: 'trial-2' }))).toBe(true);
   });
+
+  it('CROSS-SITE same-name collisions resolve per-DATE, not per-site', () => {
+    // Codex adversarial-review: two studies named "Trial" in different
+    // disease-site sections of the same digest. Naive per-site assignSlugs
+    // would yield {date#trial, date#trial} (collision via Set dedupe → ONE
+    // entry, the other study silently lost from every tag landing). Correct
+    // behavior is per-date dedup: {date#trial, date#trial-2}.
+    const d = makeDigest('2026-05-27', null, [
+      { disease_site: 'breast', studies: [makeStudy('Trial', { modality: 'radiation' })] },
+      { disease_site: 'prostate', studies: [makeStudy('Trial', { modality: 'radiation' })] },
+    ]);
+    const set = buildReverseIndex([d]).get('radiation')!;
+    expect(set.size).toBe(2);
+    expect(set.has(studyKeyString({ date: '2026-05-27', resolvedSlug: 'trial' }))).toBe(true);
+    expect(set.has(studyKeyString({ date: '2026-05-27', resolvedSlug: 'trial-2' }))).toBe(true);
+  });
 });
 
 // ---------------- computeIntersections ----------------
@@ -233,6 +249,46 @@ describe('computeIntersections', () => {
   it('returns no intersections on an empty index', () => {
     const inters = computeIntersections(new Map(), { maxArity: 3, threshold: 3, cap: 1000 });
     expect(inters).toEqual([]);
+  });
+
+  it('treats negative cap as 0 (defensive — slice(0,-1) would silently truncate)', () => {
+    const studies = [
+      makeStudy('A', { modality: 'radiation', intent: 'palliative' }),
+      makeStudy('B', { modality: 'radiation', intent: 'palliative' }),
+      makeStudy('C', { modality: 'radiation', intent: 'palliative' }),
+    ];
+    const index = buildReverseIndex([
+      makeDigest('2026-05-27', null, [{ disease_site: 'breast', studies }]),
+    ]);
+    expect(computeIntersections(index, { maxArity: 2, threshold: 3, cap: -1 })).toEqual([]);
+  });
+
+  it('treats non-integer / sub-1 threshold as invalid (no pages)', () => {
+    const studies = [
+      makeStudy('A', { modality: 'radiation', intent: 'palliative' }),
+      makeStudy('B', { modality: 'radiation', intent: 'palliative' }),
+    ];
+    const index = buildReverseIndex([
+      makeDigest('2026-05-27', null, [{ disease_site: 'breast', studies }]),
+    ]);
+    expect(computeIntersections(index, { maxArity: 2, threshold: 0, cap: 1000 })).toEqual([]);
+    expect(computeIntersections(index, { maxArity: 2, threshold: 1.5, cap: 1000 })).toEqual([]);
+  });
+
+  it('cap actually truncates a longer list (boundary test)', () => {
+    // Two intersections both meeting threshold; cap=1 keeps the higher-count one.
+    const studies = [
+      makeStudy('A', { modality: 'radiation', intent: 'palliative', methodology: 'phase-3-rct' }),
+      makeStudy('B', { modality: 'radiation', intent: 'palliative', methodology: 'phase-3-rct' }),
+      makeStudy('C', { modality: 'radiation', intent: 'palliative' }),
+    ];
+    const index = buildReverseIndex([
+      makeDigest('2026-05-27', null, [{ disease_site: 'breast', studies }]),
+    ]);
+    const inters = computeIntersections(index, { maxArity: 2, threshold: 2, cap: 1 });
+    expect(inters).toHaveLength(1);
+    // The pair with the most studies should win.
+    expect(inters[0]!.studyCount).toBe(3); // {palliative, radiation} has 3 studies
   });
 });
 
@@ -342,6 +398,46 @@ describe('computeSiblings', () => {
     ]);
     const aKey = studyKeyString({ date: '2026-05-27', resolvedSlug: 'a' });
     expect(map.get(aKey)).toEqual([]);
+  });
+
+  it('exercises the 3-cap boundary (4 candidates → 3 siblings)', () => {
+    const make = (name: string) =>
+      makeStudy(name, {
+        modality: 'radiation',
+        verdict: { soc_implication: 'confirmatory', rationale: '', audience: null },
+      });
+    const digests = [
+      makeDigest('2026-05-24', null, [{ disease_site: 'breast', studies: [make('A')] }]),
+      makeDigest('2026-05-25', null, [{ disease_site: 'breast', studies: [make('B')] }]),
+      makeDigest('2026-05-26', null, [{ disease_site: 'breast', studies: [make('C')] }]),
+      makeDigest('2026-05-27', null, [
+        { disease_site: 'breast', studies: [make('Target'), make('D')] },
+      ]),
+    ];
+    const map = computeSiblings(digests);
+    const targetKey = studyKeyString({ date: '2026-05-27', resolvedSlug: 'target' });
+    const siblings = map.get(targetKey)!;
+    expect(siblings).toHaveLength(3);
+    // Newest siblings first; oldest (A) is the one cut.
+    expect(siblings.map((s) => s.resolvedSlug)).not.toContain('a');
+  });
+
+  it('CROSS-SITE same-name siblings use per-DATE slug resolution', () => {
+    // Same Codex bug as buildReverseIndex — confirms computeSiblings uses
+    // the shared walkStudiesPerDate iterator.
+    const make = (name: string) =>
+      makeStudy(name, {
+        modality: 'radiation',
+        verdict: { soc_implication: 'confirmatory', rationale: '', audience: null },
+      });
+    const digest = makeDigest('2026-05-27', null, [
+      { disease_site: 'breast', studies: [make('Trial')] },
+      { disease_site: 'breast', studies: [make('Trial')] }, // collision across sites
+    ]);
+    const map = computeSiblings([digest]);
+    expect(map.size).toBe(2);
+    expect(map.has(studyKeyString({ date: '2026-05-27', resolvedSlug: 'trial' }))).toBe(true);
+    expect(map.has(studyKeyString({ date: '2026-05-27', resolvedSlug: 'trial-2' }))).toBe(true);
   });
 });
 

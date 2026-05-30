@@ -38,21 +38,39 @@ const DIGEST_ROOT = resolve(process.cwd(), 'data/digests');
  * cache, uniqueness assertion, RSS feeds, JSON API) where a partial corpus
  * would yield incomplete navigation surface that ships to readers.
  */
-export function listDigestsStrict(): DigestArtifact[] {
-  if (!existsSync(DIGEST_ROOT)) return [];
-  const entries = readdirSync(DIGEST_ROOT);
+export function listDigestsStrict(digestsDir: string = DIGEST_ROOT): DigestArtifact[] {
+  if (!existsSync(digestsDir)) return [];
+  const entries = readdirSync(digestsDir);
   const out: DigestArtifact[] = [];
   for (const file of entries) {
     if (!file.endsWith('.json')) continue;
-    const path = join(DIGEST_ROOT, file);
+    const path = join(digestsDir, file);
     const raw = readFileSync(path, 'utf-8');
-    let parsed: DigestArtifact;
+    let parsed: unknown;
     try {
-      parsed = JSON.parse(raw) as DigestArtifact;
+      parsed = JSON.parse(raw);
     } catch (e) {
       throw new Error(`tag-index: malformed JSON in ${path} (${(e as Error).message})`);
     }
-    out.push(parsed);
+    // Shape validation: a malformed artifact missing .date or .digest.sites
+    // would otherwise propagate as a confusing TypeError downstream (Codex
+    // adversarial-review finding). Reject loudly with the file path so
+    // recovery is obvious: delete the bad file and rerun.
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error(`tag-index: ${path} root is not an object — delete the file and rerun`);
+    }
+    const obj = parsed as Record<string, unknown>;
+    if (typeof obj.date !== 'string' || obj.date.length === 0) {
+      throw new Error(`tag-index: ${path} missing .date — delete the file and rerun`);
+    }
+    if (!obj.digest || typeof obj.digest !== 'object') {
+      throw new Error(`tag-index: ${path} missing .digest — delete the file and rerun`);
+    }
+    const inner = obj.digest as Record<string, unknown>;
+    if (!Array.isArray(inner.sites)) {
+      throw new Error(`tag-index: ${path} missing .digest.sites array — delete the file and rerun`);
+    }
+    out.push(parsed as DigestArtifact);
   }
   return out.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
 }
@@ -121,25 +139,63 @@ export function deriveStudyTags(
  */
 export type ReverseIndex = Map<string, Set<string>>;
 
+/**
+ * Walk one digest as a single per-DATE pass: flatten studies across every
+ * disease-site section, resolve slugs once over the whole list (matching how
+ * pages/[date].astro renders), then yield {study, site, resolvedSlug} tuples in
+ * site render order. This is the SINGLE source of truth for per-date slug
+ * resolution used by buildReverseIndex + computeSiblings.
+ *
+ * Why this exists: assignSlugsForDate dedupes WITHIN its input list. Calling
+ * it once per site (the naive pattern) leaves cross-site name collisions
+ * undeduplicated — two studies named "Trial" in different disease-site
+ * sections would both resolve to "trial" and collide on the {date, slug} key,
+ * silently overwriting each other in the reverse index Set. Page rendering
+ * handles this correctly by flattening across sites first; this iterator
+ * does the same for build-time derivation.
+ */
+type WalkedStudy = {
+  study: DigestStudy;
+  diseaseSite: string;
+  resolvedSlug: string;
+};
+
+function* walkStudiesPerDate(digest: DigestArtifact): IterableIterator<WalkedStudy> {
+  const sites = digest.digest?.sites ?? [];
+  // Flatten across sites in render order, preserving the (study, site) pairing
+  // so deriveStudyTags can read disease_site off the parent site.
+  const flat: Array<{ study: DigestStudy; diseaseSite: string }> = [];
+  for (const site of sites) {
+    for (const study of site.studies ?? []) {
+      flat.push({ study, diseaseSite: site.disease_site });
+    }
+  }
+  const resolvedSlugs = assignSlugsForDate(flat.map((f) => f.study));
+  for (let i = 0; i < flat.length; i++) {
+    yield {
+      study: flat[i]!.study,
+      diseaseSite: flat[i]!.diseaseSite,
+      resolvedSlug: resolvedSlugs[i]!,
+    };
+  }
+}
+
 export function buildReverseIndex(digests: readonly DigestArtifact[]): ReverseIndex {
   const index: ReverseIndex = new Map();
   for (const digest of digests) {
     const meeting = digest.conference?.slug ?? null;
-    for (const site of digest.digest.sites ?? []) {
-      const resolvedSlugs = assignSlugsForDate(site.studies);
-      site.studies.forEach((study, i) => {
-        const key = studyKeyString({ date: digest.date, resolvedSlug: resolvedSlugs[i]! });
-        const view = deriveStudyTags(study, site.disease_site, meeting);
-        for (const slug of [view.modality, view.intent, view.methodology, view.verdict, view.meeting]) {
-          if (!slug) continue;
-          let set = index.get(slug);
-          if (!set) {
-            set = new Set<string>();
-            index.set(slug, set);
-          }
-          set.add(key);
+    for (const { study, diseaseSite, resolvedSlug } of walkStudiesPerDate(digest)) {
+      const key = studyKeyString({ date: digest.date, resolvedSlug });
+      const view = deriveStudyTags(study, diseaseSite, meeting);
+      for (const slug of [view.modality, view.intent, view.methodology, view.verdict, view.meeting]) {
+        if (!slug) continue;
+        let set = index.get(slug);
+        if (!set) {
+          set = new Set<string>();
+          index.set(slug, set);
         }
-      });
+        set.add(key);
+      }
     }
   }
   return index;
@@ -171,6 +227,12 @@ export function computeIntersections(
   opts: { maxArity: 2 | 3; threshold: number; cap: number },
 ): Intersection[] {
   const { maxArity, threshold, cap } = opts;
+  // Input guards: a negative cap would silently truncate via Array.slice(0, -1)
+  // returning all-but-last (adversarial-review finding). A non-integer cap is
+  // similarly malformed. Treat invalid input as "no pages" so the build emits
+  // nothing rather than something wrong.
+  if (!Number.isInteger(cap) || cap < 0) return [];
+  if (!Number.isInteger(threshold) || threshold < 1) return [];
   const tagsSorted = [...index.keys()].sort();
   const out: Intersection[] = [];
 
@@ -251,13 +313,10 @@ export function computeSiblings(digests: readonly DigestArtifact[]): SiblingMap 
   const enriched: EnrichedStudy[] = [];
   for (const digest of digests) {
     const meeting = digest.conference?.slug ?? null;
-    for (const site of digest.digest.sites ?? []) {
-      const resolvedSlugs = assignSlugsForDate(site.studies);
-      site.studies.forEach((study, i) => {
-        enriched.push({
-          key: { date: digest.date, resolvedSlug: resolvedSlugs[i]! },
-          view: deriveStudyTags(study, site.disease_site, meeting),
-        });
+    for (const { study, diseaseSite, resolvedSlug } of walkStudiesPerDate(digest)) {
+      enriched.push({
+        key: { date: digest.date, resolvedSlug },
+        view: deriveStudyTags(study, diseaseSite, meeting),
       });
     }
   }

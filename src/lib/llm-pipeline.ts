@@ -28,7 +28,14 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createLlmClient, type LlmClient, type LlmContentBlock } from './llm-client.ts';
 import { diseaseSiteSlugList, isValidDiseaseSiteSlug } from './disease-sites.ts';
-import { isValidModality, isValidIntent, isValidMethodology } from './tags.ts';
+import {
+  isValidModality,
+  isValidIntent,
+  isValidMethodology,
+  type ModalityTag,
+  type IntentTag,
+  type MethodologyTag,
+} from './tags.ts';
 import { loadStudyContext, isSafeSlug } from './study-retrieval.ts';
 import { isOcrAvailable, isSafeImageUrl } from './vision-ocr.ts';
 import { buildAssociationGraph, renderGroupsForPrompt } from './source-association.ts';
@@ -226,21 +233,13 @@ export type DigestStudy = {
   // from the enums in src/lib/tags.ts (or null when uncertain). Drives
   // /tags/<slug>/ landing pages via the build-time derive in tag-index.ts.
   //
-  // NOTE: mirrored from digest-data.ts:DigestStudy because this file has a
-  // parallel type definition. Both must stay in sync until the duplication
-  // is consolidated (TODO: dedupe — see digest-data.ts:type-duplication in
-  // the prior code review log).
-  modality?: 'radiation' | 'surgery' | 'systemic' | 'combined' | null;
-  intent?: 'curative' | 'palliative' | 'supportive' | null;
-  methodology?:
-    | 'phase-3-rct'
-    | 'phase-2-trial'
-    | 'phase-1'
-    | 'retrospective'
-    | 'meta-analysis'
-    | 'real-world-evidence'
-    | 'consensus-guideline'
-    | null;
+  // Types imported from tags.ts so the enum definitions live in one place.
+  // (digest-data.ts:DigestStudy uses the SAME imported types — the field
+  // shape is now identical across both parallel definitions. Adversarial
+  // review surfaced the drift hazard of an inline-union triplicate.)
+  modality?: ModalityTag | null;
+  intent?: IntentTag | null;
+  methodology?: MethodologyTag | null;
 };
 
 // One trial arm in the CONSORT flow.
@@ -1128,13 +1127,21 @@ export function parseEnumTag<T extends string>(
 ): T | null {
   if (raw === null || raw === undefined) return null;
   if (typeof raw !== 'string') return null;
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  if (validator(trimmed)) return trimmed;
+  // Lowercase before validating: the prompt LABELS in tags.ts (e.g. "Radiation",
+  // "Phase 3 RCT") differ from the SLUGS (radiation, phase-3-rct) by case, and
+  // an LLM reading the rules block + example may emit either form. Without this
+  // normalization, every "Radiation" / "Curative" / "Phase-3-RCT" emission
+  // becomes a warn-and-drop and the study is silently missing from its
+  // landing — the single most likely production failure mode given the prompt's
+  // label/slug mix. Lowercasing pre-validate keeps the enum strict (no
+  // "radiation " with a trailing space) while accepting the common drift.
+  const normalized = raw.trim().toLowerCase();
+  if (!normalized) return null;
+  if (validator(normalized)) return normalized;
   // Out-of-enum: log + drop. Build CLI surfaces this in its summary.
   // eslint-disable-next-line no-console
   console.warn(
-    `[llm-pipeline] dropped invalid ${namespace} tag "${trimmed}" on study "${studyName}"`,
+    `[llm-pipeline] dropped invalid ${namespace} tag "${raw}" on study "${studyName}"`,
   );
   return null;
 }
