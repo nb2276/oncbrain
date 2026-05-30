@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 import AstroPWA from '@vite-pwa/astro';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { latestDigestDateFromFiles } from './src/lib/pwa-routes.ts';
@@ -10,19 +10,70 @@ import { latestDigestDateFromFiles } from './src/lib/pwa-routes.ts';
 // makes "open the latest digest offline" hold even for a reader who installed
 // from the home screen and never opened today's page. Bounded to one page,
 // re-pointed (and re-revisioned on content change) each build.
+//
+// The precache revision MUST hash the rendered HTML, not the digest JSON.
+// The HTML carries content-hashed <link rel="stylesheet"> references to
+// Base.<hash>.css and StudyCard.<hash>.css; when a UI commit changes those
+// bundle hashes but the digest JSON is unchanged, a JSON-based revision would
+// match the existing precache, Workbox would keep the stale HTML, and that
+// HTML would point at a CSS bundle Workbox has evicted (and which `astro build`
+// has deleted from dist/). The reader gets unstyled HTML with no --bg and a
+// flash of white background until they hard-reload.
 const digestsDir = fileURLToPath(new URL('./data/digests', import.meta.url));
+const distDir = fileURLToPath(new URL('./dist', import.meta.url));
 
-function latestDigestPrecacheEntries(): { url: string; revision: string }[] {
-  try {
-    const latest = latestDigestDateFromFiles(readdirSync(digestsDir));
-    if (!latest) return [];
-    const json = readFileSync(`${digestsDir}/${latest}.json`, 'utf8');
-    const revision = createHash('md5').update(json).digest('hex').slice(0, 12);
-    return [{ url: `/${latest}/`, revision }];
-  } catch {
-    // No digests yet (fresh checkout) — shell-only precache is correct.
-    return [];
-  }
+type ManifestTransformEntry = { url: string; revision: string | null; size: number };
+
+// `manifestTransforms` runs second-to-last in workbox-build, AFTER glob scan
+// and BEFORE additionalManifestEntries. Two reasons we do everything in one
+// transform instead of using additionalManifestEntries + a separate revision
+// transform:
+//   1. additionalManifestEntries appends LAST, so a separate revision transform
+//      would never see the digest URL and silently no-op.
+//   2. @vite-pwa/astro only auto-pushes its own `.html` → clean-URL transform
+//      when the user hasn't supplied any manifestTransforms (its config code
+//      guards on `if (!manifestTransforms)`), so providing our own array
+//      disables the directory-format rewrite (`sites/index.html` → `sites`).
+// One transform does both: rewrite all `.html` URLs to clean URLs (matching
+// what astro-pwa would have auto-injected), then append the latest-digest URL
+// with its HTML-derived revision.
+function buildManifestTransform(useDirectoryFormat: boolean, trailingSlash: 'always' | 'never') {
+  return async (entries: ManifestTransformEntry[]) => {
+    const rewritten = entries.map((e) => {
+      if (!e || !e.url.endsWith('.html')) return e;
+      const raw = e.url.startsWith('/') ? e.url.slice(1) : e.url;
+      let url: string;
+      if (raw === 'index.html') {
+        url = '/';
+      } else {
+        const parts = raw.split('/');
+        parts[parts.length - 1] = parts[parts.length - 1].replace(/\.html$/, '');
+        url = useDirectoryFormat
+          ? parts.length > 1
+            ? parts.slice(0, parts.length - 1).join('/')
+            : parts[0]
+          : parts.join('/');
+        if (trailingSlash === 'always') url += '/';
+      }
+      return { ...e, url };
+    });
+
+    // Append the latest digest with its HTML-derived revision (or skip if none
+    // exists yet — fresh checkout, shell-only precache is the right behavior).
+    try {
+      const latest = latestDigestDateFromFiles(readdirSync(digestsDir));
+      if (!latest) return { manifest: rewritten };
+      const htmlPath = `${distDir}/${latest}/index.html`;
+      if (!existsSync(htmlPath)) return { manifest: rewritten };
+      const html = readFileSync(htmlPath, 'utf8');
+      const revision = createHash('md5').update(html).digest('hex').slice(0, 12);
+      return {
+        manifest: [...rewritten, { url: `/${latest}/`, revision, size: html.length }],
+      };
+    } catch {
+      return { manifest: rewritten };
+    }
+  };
 }
 
 // https://astro.build/config
@@ -55,7 +106,9 @@ export default defineConfig({
           '**/*-latin-ext-*.woff2', // unused font subsets; unicode-range gates runtime fetch
           '**/*-vietnamese-*.woff2',
         ],
-        additionalManifestEntries: latestDigestPrecacheEntries(),
+        // useDirectoryFormat=true + trailingSlash='never' matches astro-pwa's
+        // default auto-injected transform — see buildManifestTransform comment.
+        manifestTransforms: [buildManifestTransform(true, 'never')],
       },
       manifest: {
         name: 'onc brain',

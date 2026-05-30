@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { execSync } from 'node:child_process';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { latestDigestDateFromFiles } from '../src/lib/pwa-routes.ts';
 
@@ -53,6 +54,22 @@ describe('PWA build output', () => {
     const latest = latestDigestDateFromFiles(readdirSync(`${root}/data/digests`));
     expect(latest).toBeTruthy();
     expect(sw).toContain(`"url":"/${latest}/"`);
+  });
+
+  it('revisions the latest digest entry against the BUILT HTML, not the digest JSON', () => {
+    // Regression: the precached HTML carries content-hashed CSS bundle URLs
+    // (Base.<hash>.css). When a UI commit changes those hashes but the digest
+    // JSON is unchanged, a JSON-derived revision would keep the stale HTML in
+    // precache, pointing at a CSS bundle Workbox has evicted — white-bg flash
+    // until hard reload. The revision must hash the HTML so any CSS-bundle
+    // change invalidates the precache entry.
+    const latest = latestDigestDateFromFiles(readdirSync(`${root}/data/digests`));
+    expect(latest).toBeTruthy();
+    const html = readFileSync(`${dist}/${latest}/index.html`, 'utf8');
+    const expected = createHash('md5').update(html).digest('hex').slice(0, 12);
+    const m = sw.match(new RegExp(`"revision":"([^"]+)","url":"/${latest}/"`));
+    expect(m, 'latest-digest precache entry missing from sw').not.toBeNull();
+    expect(m![1]).toBe(expected);
   });
 
   it('precaches the shell (sites index, about, offline) but NOT the unbounded archive', () => {

@@ -2,6 +2,33 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.14] - 2026-05-30
+
+### Fixed
+
+- **Stale-precache white flash when opening the latest digest.** Opening
+  a study on the precached latest digest (e.g. SENOMAC on `/2026-05-27/`)
+  rendered with the browser's default white background instead of the
+  warm off-white `#f7f5f0`; hard reload fixed it. Root cause: the PWA
+  service worker keyed the precache revision for `/<latest>/` on the
+  digest JSON's md5, but the precached HTML carries content-hashed
+  `<link rel="stylesheet">` URLs to `Base.<hash>.css` (which sets
+  `--bg`). When a UI commit changed the CSS bundle hash but the digest
+  JSON was unchanged, Workbox saw the same `(url, revision)` tuple and
+  KEPT the stale HTML; `cleanupOutdatedCaches` then evicted the old CSS
+  bundle, and `astro build` had already deleted it from `dist/`, so the
+  stylesheet 404'd and the `--bg` cascade never applied. Replaced the
+  JSON-keyed `additionalManifestEntries` with a single
+  `manifestTransforms` callback that rewrites `.html` URLs to clean URLs
+  (replacing the `@vite-pwa/astro` auto-injection that gets disabled
+  whenever a user provides their own transforms array) AND appends
+  `/<latest>/` with `revision = md5(dist/<latest>/index.html)`. The
+  revision now tracks the actual cached bytes, so any CSS-bundle hash
+  change invalidates the precached digest entry. Bonus: also collapses
+  5× duplicate `manifest.webmanifest` precache entries down to one.
+  Regression test in `test/pwa-build.test.ts` asserts the revision
+  hashes the built HTML.
+
 ## [0.9.13] - 2026-05-29
 
 ### Fixed
