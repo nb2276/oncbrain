@@ -10,12 +10,18 @@
 // URL decision).
 
 import Base from '../../layouts/Base.astro';
-import { listDigests } from '../../lib/digest-data.ts';
-import { listTagSummaries, resolveTagDisplay, type TagNamespaceLabel } from '../../lib/tag-index.ts';
-import { verdictMetaFor } from '../../lib/verdict.ts';
+import {
+  listDigestsStrict,
+  listTagSummaries,
+  resolveTagDisplay,
+  type TagNamespaceLabel,
+} from '../../lib/tag-index.ts';
+import { VERDICT_META } from '../../lib/verdict.ts';
 import type { SocImplication } from '../../lib/digest-data.ts';
 
-const summaries = listTagSummaries(listDigests());
+// Fail-closed for the tag surface (Codex review): malformed digest input
+// aborts the build rather than shipping an incomplete index.
+const summaries = listTagSummaries(listDigestsStrict());
 
 // Bucket every populated slug into its namespace, with the display label.
 type Bucket = { slug: string; label: string; emoji: string | null; count: number };
@@ -36,21 +42,21 @@ for (const [slug, occurrences] of summaries) {
     count: occurrences.length,
   });
 }
-// Sort each bucket: verdict by clinical priority (taxonomy order), every
-// other namespace by count desc with alphabetic tie-break.
-const VERDICT_ORDER: SocImplication[] = [
-  'practice-changing',
-  'challenges-soc',
-  'confirmatory',
-  'early-signal',
-  'methodologically-limited',
-  'unclear',
-];
+// Sort each bucket: verdict by clinical priority (taxonomy order from
+// VERDICT_META — derived, not hardcoded, so a future enum addition doesn't
+// silently sort the new value to the front via indexOf-returns-(-1)).
+// Adversarial review: an explicit array fell out of sync with the enum
+// once (v0.7 'methodologically-limited' addition); reading the canonical
+// order from VERDICT_META keeps the two in lockstep.
+const verdictOrder = Object.keys(VERDICT_META) as SocImplication[];
+const verdictOrderIndex = new Map(verdictOrder.map((slug, i) => [slug, i]));
 for (const ns of Object.keys(buckets) as TagNamespaceLabel[]) {
   if (ns === 'verdict') {
     buckets.verdict.sort((a, b) => {
-      const ai = VERDICT_ORDER.indexOf(a.slug as SocImplication);
-      const bi = VERDICT_ORDER.indexOf(b.slug as SocImplication);
+      // Unknown slugs go to the END (not the front, which indexOf-based
+      // ordering produced) so a future enum desync is visually obvious.
+      const ai = verdictOrderIndex.get(a.slug as SocImplication) ?? Number.MAX_SAFE_INTEGER;
+      const bi = verdictOrderIndex.get(b.slug as SocImplication) ?? Number.MAX_SAFE_INTEGER;
       return ai - bi;
     });
   } else {

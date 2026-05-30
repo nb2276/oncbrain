@@ -22,11 +22,11 @@
 import Base from '../../layouts/Base.astro';
 import StudyCard from '../../components/StudyCard.astro';
 import TriageRail from '../../components/TriageRail.astro';
-import { listDigests } from '../../lib/digest-data.ts';
 import {
   buildReverseIndex,
   computeIntersections,
   intersectTagOccurrences,
+  listDigestsStrict,
   listTagSummaries,
   parseTagPageSlug,
   resolveTagDisplay,
@@ -40,7 +40,10 @@ export async function getStaticPaths() {
   const INTERSECTION_THRESHOLD = 3;
   const INTERSECTION_PAGE_CAP = 1000;
 
-  const digests = listDigests();
+  // Codex review: tag surfaces fail-closed on malformed digest input. A
+  // silently-skipped bad file would ship missing tag landings; better to
+  // abort the build pre-deploy.
+  const digests = listDigestsStrict();
   const summaries = listTagSummaries(digests);
   const reverseIndex = buildReverseIndex(digests);
 

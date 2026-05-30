@@ -273,4 +273,16 @@ describe('resolveTagDisplay', () => {
   it('returns null for an unknown slug with no occurrence sample', () => {
     expect(resolveTagDisplay('does-not-exist')).toBeNull();
   });
+
+  it('REJECTS prototype-chain keys (toString, hasOwnProperty, __proto__, constructor)', () => {
+    // Adversarial-review finding B1: `slug in VERDICT_META` would match
+    // Object.prototype.toString and return Function.prototype as the
+    // verdict meta, rendering the pill with undefined label + emoji.
+    // hasOwnProperty.call gates the lookup.
+    expect(resolveTagDisplay('toString')).toBeNull();
+    expect(resolveTagDisplay('hasOwnProperty')).toBeNull();
+    expect(resolveTagDisplay('__proto__')).toBeNull();
+    expect(resolveTagDisplay('constructor')).toBeNull();
+    expect(resolveTagDisplay('valueOf')).toBeNull();
+  });
 });

@@ -14,11 +14,12 @@
 // effectively zero.
 
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { listDigests, type RecentStudy } from '../../../lib/digest-data.ts';
+import type { RecentStudy } from '../../../lib/digest-data.ts';
 import {
   buildReverseIndex,
   computeIntersections,
   intersectTagOccurrences,
+  listDigestsStrict,
   listTagSummaries,
   parseTagPageSlug,
   type TagOccurrence,
@@ -36,7 +37,8 @@ export const getStaticPaths: GetStaticPaths = () => {
   const INTERSECTION_THRESHOLD = 3;
   const INTERSECTION_PAGE_CAP = 1000;
 
-  const digests = listDigests();
+  // Fail-closed for the tag surface (Codex review).
+  const digests = listDigestsStrict();
   const summaries = listTagSummaries(digests);
   const reverseIndex = buildReverseIndex(digests);
 
@@ -71,7 +73,8 @@ export const GET: APIRoute = ({ params, site }) => {
   if (!parsed.ok) {
     return new Response('Not found', { status: 404 });
   }
-  const digests = listDigests();
+  // Fail-closed for the tag surface (Codex review).
+  const digests = listDigestsStrict();
   const summaries = listTagSummaries(digests);
   const occurrences =
     parsed.tags.length === 1

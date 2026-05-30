@@ -286,8 +286,16 @@ export function computeIntersections(
     }
   }
 
-  // Sort by study count desc, then tag tuple asc (deterministic tie-break).
+  // Sort: lower-arity first, THEN by study count desc, then tag tuple asc.
+  // Critical for cap correctness: anti-monotone guarantees count(3-way) ≤
+  // count(2-way subset). Sorting 2-way before 3-way means every retained
+  // 3-way's 2-way subsets are ALSO retained — so the breadcrumb's
+  // remove-filter "×" link can never 404 because of cap truncation. Codex
+  // review surfaced this: without arity-first ordering, a 3-way could
+  // survive at the cap boundary while a constituent 2-way got cut, breaking
+  // the reduced-intersection navigation.
   out.sort((x, y) => {
+    if (x.tags.length !== y.tags.length) return x.tags.length - y.tags.length;
     if (x.studyCount !== y.studyCount) return y.studyCount - x.studyCount;
     const xt = x.tags.join('+');
     const yt = y.tags.join('+');
@@ -620,8 +628,12 @@ export function resolveTagDisplay(
   const methodology = METHODOLOGY_DEFS.find((d) => d.slug === slug);
   if (methodology) return { namespace: 'methodology', label: methodology.label, emoji: null };
 
-  // Verdict slugs come from the SocImplication enum.
-  if (slug in VERDICT_META) {
+  // Verdict slugs come from the SocImplication enum. Use hasOwnProperty.call
+  // (not `slug in VERDICT_META`) because `in` walks the prototype chain — a
+  // slug of 'toString' / 'hasOwnProperty' / '__proto__' would otherwise match
+  // and return a prototype function as the verdict meta, rendering the pill
+  // with undefined label + emoji.
+  if (Object.prototype.hasOwnProperty.call(VERDICT_META, slug)) {
     const meta = VERDICT_META[slug as SocImplication];
     return { namespace: 'verdict', label: meta.label, emoji: meta.emoji };
   }

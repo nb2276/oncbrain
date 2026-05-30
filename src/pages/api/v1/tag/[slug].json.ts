@@ -13,9 +13,9 @@
 // counted against the 1000 HTML-page intersection cap.
 
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { listDigests } from '../../../../lib/digest-data.ts';
 import { API_VERSION } from '../../../../lib/api-output.ts';
 import {
+  listDigestsStrict,
   listTagSummaries,
   resolveTagDisplay,
   type TagOccurrence,
@@ -47,7 +47,7 @@ type TagApiPayload = {
 };
 
 export const getStaticPaths: GetStaticPaths = () => {
-  const summaries = listTagSummaries(listDigests());
+  const summaries = listTagSummaries(listDigestsStrict());
   return Array.from(summaries.keys()).map((slug) => ({ params: { slug } }));
 };
 
@@ -81,7 +81,7 @@ export const GET: APIRoute = ({ params }) => {
       headers: { 'Content-Type': 'application/json' },
     });
   }
-  const summaries = listTagSummaries(listDigests());
+  const summaries = listTagSummaries(listDigestsStrict());
   const occurrences = summaries.get(slug);
   if (!occurrences) {
     return new Response(JSON.stringify({ error: 'not found' }), {
