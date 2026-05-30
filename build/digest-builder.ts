@@ -44,6 +44,8 @@ import {
 } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
+import { listDigestsStrict, assertSlugUniqueness } from '../src/lib/tag-index.ts';
+import { VERDICT_META } from '../src/lib/verdict.ts';
 import {
   isOcrAvailable,
   ocrImageUrls,
@@ -536,6 +538,17 @@ async function main() {
   for (const date of dates) {
     await buildOneDate(args, db, date);
   }
+
+  // v0.10: cross-namespace slug uniqueness assertion. Reads the freshly
+  // written data/digests/*.json corpus + the verdict enum, fails the build
+  // on collision or malformed slug. Slug-only /tags/<slug>/ URLs require
+  // every value to be globally unique across modality + intent + methodology
+  // + verdict + meeting; this assertion is what catches a future tag value
+  // (or a freshly imported conference) that would silently route the wrong
+  // studies to a tag landing page.
+  const corpus = listDigestsStrict();
+  const verdictSlugs = Object.keys(VERDICT_META);
+  assertSlugUniqueness(corpus, verdictSlugs);
 }
 
 main().catch((err) => {

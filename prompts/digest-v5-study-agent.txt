@@ -148,6 +148,9 @@ Examples of INVALID captions (interpretive, would hallucinate):
     "rationale": "Single-arm phase 2 in inoperable pts only; no randomised comparator vs partial nephrectomy. Consistent with prior SAFIR / STAR-TRK signals.",
     "audience": "Inoperable primary RCC, T1b-dominant, median age 77"
   },
+  "modality": "radiation",
+  "intent": "curative",
+  "methodology": "phase-2-trial",
   "open_questions": [
     "Optimal sequencing vs cabazitaxel",
     "Durability of response beyond 2 years"
@@ -172,6 +175,27 @@ Rules:
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
 - `figures`: 0-4 items, ordered most-informative first. Each `url` must be EXACTLY one of the image URLs in the manifest below — don't invent URLs, don't repeat the same URL twice. Abstain (empty array `[]`) rather than promote weak images.
 - `verdict` is REQUIRED. Pick `soc_implication` from the taxonomy in the VOICE block above (6 enums). When uncertain, default conservatively (prefer `unclear` over guessing; prefer `early-signal` or `confirmatory` over `practice-changing`). `rationale` ≤30 words and explains the VERDICT CHOICE (not the trial result). `audience` ≤80 chars, one-line eligibility gate, or null when applicability is too broad to compress.
+- `modality`, `intent`, `methodology`: cross-cutting tag fields, OPTIONAL — emit `null` when the source doesn't make the classification unambiguous. Pick exactly ONE value per field from the enums below; never invent a new value. These drive cross-corpus navigation pages (`/tags/<slug>/`), so a conservative null is much better than a guess that puts the study on a wrong landing page.
+  - `modality`: the primary treatment modality being evaluated. Enum:
+    - `radiation` — RT is a primary intervention or comparator (definitive, salvage, palliative, SBRT, brachytherapy, proton, hypofractionation studies, dose-escalation).
+    - `surgery` — a surgical procedure is a primary intervention or comparator (resection trials, axillary management, robotic vs open).
+    - `systemic` — drug therapy as the primary intervention (chemo, IO, targeted, ADC, hormonal). Single-modality drug studies.
+    - `combined` — multi-modality therapy is the central comparison (chemoradiation, peri-operative systemic + surgery, trimodality). Pick `combined` only when the trial’s central question is the combination, not just a regimen that happens to include radiation as standard of care.
+    - null — supportive care, biomarker-only, methodology meta-analyses with no single dominant modality, or unclear.
+  - `intent`: the treatment intent under evaluation. Enum:
+    - `curative` — definitive intent, cure as the goal.
+    - `palliative` — symptom control or disease control without curative intent (advanced/metastatic, pain palliation, oligometastatic disease that is explicitly palliative-intent).
+    - `supportive` — supportive care, symptom management, QoL, end-of-life, antiemetic, financial-toxicity, navigation, decision aid.
+    - null — when the intent is mixed across arms (e.g. some curative + some palliative in a registry) or genuinely ambiguous.
+  - `methodology`: the study design archetype. Enum:
+    - `phase-3-rct` — randomized phase 3.
+    - `phase-2-trial` — phase 2, randomized or single-arm.
+    - `phase-1` — phase 1, including 1/2 dose-expansion.
+    - `retrospective` — retrospective cohort, case series, single-center analysis.
+    - `meta-analysis` — meta-analysis or pooled analysis of multiple trials.
+    - `real-world-evidence` — registry, claims, or EHR-based real-world evidence.
+    - `consensus-guideline` — consensus statement or clinical practice guideline.
+    - null — design unclear from the source.
 - `open_questions`: 0-3 short unresolved questions THIS study raises (sequencing, durability, generalizability, confirmatory trial needed). Terse noun phrases or questions, ≤15 words each. Put them HERE, not as ❓ bullets in `details`. Empty array `[]` if none.
 - each figure `caption` is numeric-only, from that image's OCR overlays only. Use the table form for comparison figures (2+ arms × multiple endpoints); flat string is acceptable only for non-comparison figures. Null if no OCR numbers available (image still kept).
 - `nct` only if explicit in tweets/OCR. Format: "NCTxxxxxxxx" or null.
