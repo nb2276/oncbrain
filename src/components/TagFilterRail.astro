@@ -420,6 +420,15 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
     color: var(--accent);
     font-weight: 600;
   }
+  .filter-rail-rss {
+    color: var(--accent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .filter-rail-rss:hover,
+  .filter-rail-rss:focus-visible {
+    text-decoration: underline;
+  }
 
   .filter-rail-section {
     border: none;
@@ -547,6 +556,49 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
     const closeBtn = rail.querySelector('[data-filter-rail-close]');
     const baseTotalText = countEl ? countEl.textContent : '';
 
+    /* PR-5: read the inlined built-intersections allowlist + the
+       namespace map (PR-1a) so the canonical-redirect + RSS-subscribe
+       logic knows when the active filter set has a canonical landing
+       page. The namespace map doubles as the single-tag allowlist —
+       every slug in it has a /tags/<slug>/ landing by construction.
+       Codex P1: without this gate, a bookmarked
+       /?tag=invalid-slug would redirect to /tags/invalid-slug/ → 404. */
+    const builtIntersections = (function () {
+      const el = document.getElementById('built-intersections');
+      if (!el) return new Set();
+      try {
+        const parsed = JSON.parse(el.textContent || '{}');
+        if (parsed && Array.isArray(parsed.paths)) {
+          return new Set(parsed.paths);
+        }
+      } catch (e) {
+        /* malformed JSON — treat as empty allowlist */
+      }
+      return new Set();
+    })();
+    const validSlugs = (function () {
+      const el = document.getElementById('tag-namespaces');
+      if (!el) return new Set();
+      try {
+        const parsed = JSON.parse(el.textContent || '{}');
+        if (parsed && parsed.map && typeof parsed.map === 'object') {
+          return new Set(Object.keys(parsed.map));
+        }
+      } catch (e) {
+        /* malformed — treat as empty (every single-tag redirect now
+           bails out, which is safer than a guaranteed 404). */
+      }
+      return new Set();
+    })();
+
+    const lockedSlugs = new Set();
+    for (const cb of checkboxes) {
+      if (cb.disabled) {
+        const slug = cb.getAttribute('data-slug');
+        if (slug) lockedSlugs.add(slug);
+      }
+    }
+
     /** Read the active filter set from window.location.search. */
     function readUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -560,6 +612,65 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
       return out;
     }
 
+    /* PR-5 canonical strategy: when the active filter set matches a
+       pre-generated /tags/<slug>/ or /tags/<a>+<b>(+<c>)/ landing
+       page, redirect to that canonical URL. Auto-redirect runs ONLY
+       on home (/) and on existing /tags/ routes — on /sites/ and
+       /<date>/ pages the redirect would silently drop the site/date
+       scope, so the canonical URL is only ever a suggestion there
+       (handled by the RSS button being suppressed). */
+    const FILTER_RECEPTIVE_ROUTES = ['/'];
+    function isFilterReceptiveRoute(pathname) {
+      if (FILTER_RECEPTIVE_ROUTES.includes(pathname)) return true;
+      // /tags/<...>/ landings — both single-tag and intersections.
+      // /tags/ itself is the index; allow but no auto-redirect because
+      // there's no implicit filter scope.
+      return /^\/tags\/[^/]+\/?$/.test(pathname);
+    }
+
+    function canonicalForActive(active) {
+      if (active.size === 0) return null;
+      // Sort + alphabetical-join — must match the SSR
+      // buildIntersectionAllowlist output format.
+      const sorted = Array.from(active).sort();
+      const canonical = sorted.join('+');
+      if (sorted.length === 1) {
+        // Single-tag: validate against the namespace map. Every slug
+        // in the map has a /tags/<slug>/ landing; slugs OUTSIDE the
+        // map (typo'd bookmark, future-rename, hand-edited URL) would
+        // redirect to a non-existent page → 404. Codex P1 fix.
+        return validSlugs.has(canonical) ? canonical : null;
+      }
+      // 2-way and 3-way: must appear in the built allowlist.
+      if (builtIntersections.has(canonical)) return canonical;
+      return null;
+    }
+
+    /** Cross-route redirect if the active set has a canonical and we
+       are on a route where auto-redirect is allowed. Returns true if
+       a redirect fired (caller should bail out of further work — the
+       page is about to navigate). */
+    function maybeCrossRouteRedirect(active) {
+      const canonical = canonicalForActive(active);
+      if (!canonical) return false;
+      const target = '/tags/' + canonical + '/';
+      const currentPath = window.location.pathname;
+      if (currentPath === target) return false; // already canonical
+      if (!isFilterReceptiveRoute(currentPath)) return false;
+      // PR-5 review (Claude P1): on slow networks the navigation
+      // window can run hundreds of ms. Without this guard the reader
+      // sees the unfiltered SSR cards because applyFilter was skipped.
+      // Hide every study card before navigating so the page goes
+      // blank-blank rather than wrong-content → blank → right-content.
+      for (const card of cardData) {
+        card.el.setAttribute('hidden', '');
+      }
+      // Full cross-route navigation — replaceState would leave the
+      // page DOM in place and PR-5 promised an actual navigation.
+      window.location.assign(target);
+      return true;
+    }
+
     /** Build a canonical filter URL and history.replaceState into it. */
     function writeUrl(active) {
       const url = new URL(window.location.href);
@@ -570,7 +681,19 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
         if (k.toLowerCase() === FILTER_KEY) url.searchParams.delete(k);
       }
       const sorted = Array.from(active).sort();
-      for (const slug of sorted) url.searchParams.append(FILTER_KEY, slug);
+      // PR-5 review (Claude P2): when the active set is JUST the
+      // locked filter on /tags/<locked>/, the URL would mirror the
+      // path as a redundant ?tag=<locked>. Drop the URL params in
+      // that case so the address bar stays clean.
+      const lockedOnlyOnCanonical =
+        active.size === lockedSlugs.size &&
+        Array.from(lockedSlugs).every(function (s) {
+          return active.has(s);
+        }) &&
+        window.location.pathname === '/tags/' + sorted.join('+') + '/';
+      if (!lockedOnlyOnCanonical) {
+        for (const slug of sorted) url.searchParams.append(FILTER_KEY, slug);
+      }
       const target = url.pathname + url.search + url.hash;
       // replaceState (not pushState) — per autoplan revision, every chip
       // click would otherwise stack as a back-button entry the reader
@@ -615,12 +738,29 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
               : null;
             chipLabels.push((labelEl && labelEl.textContent) || slug);
           }
+          /* PR-5 RSS subscribe link: when the active set matches a
+             built canonical landing AND the current route IS that
+             canonical landing, surface an RSS feed link pointing at
+             the existing /tags/<canonical>/feed.xml endpoint (built
+             in v0.10 PR3). The previous "startsWith('/tags/')" gate
+             was too loose — Claude review caught that a future
+             /tags/foo/related/ subpath would match without a feed
+             existing. Exact-path-match closes the gap. */
+          const canonical = canonicalForActive(active);
+          const showRss =
+            canonical !== null &&
+            window.location.pathname === '/tags/' + canonical + '/';
           activeEl.innerHTML =
             'Filtering: <strong>' +
             chipLabels.map(escapeHtml).join(' + ') +
             '</strong> · ' +
             visible +
-            ' shown';
+            ' shown' +
+            (showRss
+              ? ' · <a class="filter-rail-rss" href="/tags/' +
+                escapeHtml(canonical) +
+                '/feed.xml" rel="alternate" type="application/rss+xml">📡 RSS</a>'
+              : '');
         }
       }
       if (countEl) {
@@ -692,19 +832,21 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
       // Respect locked checkboxes — they're always in the active set
       // regardless of URL (the /tags/<slug>/ page already rendered only
       // matching cards; unchecking is impossible client-side).
-      for (const cb of checkboxes) {
-        if (cb.disabled) {
-          const slug = cb.getAttribute('data-slug');
-          if (slug) active.add(slug);
-        }
-      }
+      for (const slug of lockedSlugs) active.add(slug);
+      // PR-5 canonical: a URL like /?tag=radiation+phase-3-rct on a
+      // filter-receptive route should immediately navigate to the
+      // canonical landing. Bail out of further hydration — the page
+      // is about to unload.
+      if (maybeCrossRouteRedirect(active)) return;
       syncCheckboxes(active);
       applyFilter(active, { scrollToFirst: false });
     }
 
     /** Handler for checkbox change events. Reads ticked state from the
        DOM (not from a Set we maintain), builds the active set, writes
-       URL + applies filter. */
+       URL + applies filter. PR-5 canonical: if the user is on a
+       filter-receptive route AND the new active set matches a built
+       canonical landing, cross-route navigate there instead. */
     function onChange() {
       const active = new Set();
       for (const cb of checkboxes) {
@@ -713,19 +855,19 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
           if (slug) active.add(slug);
         }
       }
+      // Canonical redirect FIRST — saves the same-route URL write
+      // and the apply-filter pass when we're about to navigate away.
+      if (maybeCrossRouteRedirect(active)) return;
       writeUrl(active);
       applyFilter(active, { scrollToFirst: true });
     }
 
     function onClear() {
-      const active = new Set();
-      // Preserve locked filters even on clear-all.
-      for (const cb of checkboxes) {
-        if (cb.disabled) {
-          const slug = cb.getAttribute('data-slug');
-          if (slug) active.add(slug);
-        }
-      }
+      // Preserve locked filters even on clear-all. lockedSlugs is
+      // already snapshot at init from the SSR-disabled checkboxes;
+      // re-iterating here would be a second source of truth (Claude
+      // review).
+      const active = new Set(lockedSlugs);
       syncCheckboxes(active);
       writeUrl(active);
       applyFilter(active, { scrollToFirst: false });

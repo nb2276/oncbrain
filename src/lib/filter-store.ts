@@ -124,3 +124,50 @@ export function buildFilterUrl(
 // dynamic would-be counts. Both reviewers caught it as dead code with
 // no caller. Re-introduce in PR-3 or PR-6 when the count display is
 // wired into the inline script.
+
+// ---------------- PR-5 canonical-redirect helpers ----------------
+
+/**
+ * Compute the canonical /tags/<...>/ slug for an active filter set.
+ * Returns null when the set is empty, when a single-tag isn't in the
+ * namespace map (an invalid bookmark or hand-edited URL — Codex P1
+ * caught this would otherwise redirect to a non-existent /tags/<bad>/
+ * page), or when a multi-tag set isn't in the built-intersections
+ * allowlist (the build only generated /tags/ pages for combinations
+ * meeting the N≥3 threshold).
+ *
+ * Every populated single-tag has a /tags/<slug>/ landing by
+ * construction (listTagSummaries → getStaticPaths in
+ * src/pages/tags/[...slug].astro); the namespace map enumerates them.
+ *
+ * The inline client script in TagFilterRail.astro reimplements this —
+ * KEEP IN SYNC.
+ */
+export function canonicalForActiveFilters(
+  active: ReadonlySet<string> | ReadonlyArray<string>,
+  builtIntersections: ReadonlySet<string>,
+  validSingleTagSlugs: ReadonlySet<string>,
+): string | null {
+  const sorted = Array.from(active).sort();
+  if (sorted.length === 0) return null;
+  const canonical = sorted.join('+');
+  if (sorted.length === 1) {
+    return validSingleTagSlugs.has(canonical) ? canonical : null;
+  }
+  if (builtIntersections.has(canonical)) return canonical;
+  return null;
+}
+
+/**
+ * True iff `pathname` is a route where the filter rail is allowed to
+ * auto-redirect to a canonical /tags/<...>/ landing. Home (`/`) and
+ * existing /tags/<...>/ pages qualify; /sites/ and /<date>/ do NOT —
+ * a redirect there would silently drop the site/date scope (caught by
+ * Codex pass-2 P0 #1).
+ *
+ * The inline client script reimplements this — KEEP IN SYNC.
+ */
+export function isFilterReceptiveRoute(pathname: string): boolean {
+  if (pathname === '/') return true;
+  return /^\/tags\/[^/]+\/?$/.test(pathname);
+}
