@@ -159,25 +159,6 @@ const tagChipRow = Array.from(tagSummaries.entries())
     </section>
   )}
 
-  {tagActivity.length > 0 && (
-    <section class="tag-activity-section" aria-labelledby="tag-activity-heading">
-      <h2 class="section-label" id="tag-activity-heading">Active tags · {tagActivity[0]!.counts.length}d window</h2>
-      <ul class="tag-activity-list">
-        {tagActivity.map((row) => {
-          const arrow = row.trend === 'up' ? '↑' : row.trend === 'down' ? '↓' : '→';
-          return (
-            <li class="tag-activity-row">
-              <a href={`/tags/${row.slug}/`} class="tag-activity-name">{row.label}</a>
-              <Sparkline counts={row.counts} label={row.label} trend={row.trend} />
-              <span class="tag-activity-count">{row.totalRecent}</span>
-              <span class="tag-activity-arrow" aria-hidden="true">{arrow}</span>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  )}
-
   {feed.length > 0 && (
     <section class="recent-section">
       <h2 class="section-label">Studies · {feed.length}</h2>
@@ -229,9 +210,40 @@ const tagChipRow = Array.from(tagSummaries.entries())
     </section>
   )}
 
+  {/* v0.10 home page tag surfaces. Both live BELOW the recent-studies feed
+       per design pass 1 lock — the reader's primary scan (disease-site nav →
+       hero TL;DR → recent feed) is preserved, and tag discovery surfaces
+       are tertiary: readers scroll to them when curious, not encounter them
+       mid-scan. Empty-state copy renders when no tags carry studies yet
+       (fresh corpus pre-backfill or pre-first-digest). */}
+  {digests.length > 0 && tagActivity.length > 0 && (
+    <section class="tag-activity-section" aria-labelledby="tag-activity-heading">
+      <h2 class="section-label" id="tag-activity-heading">Active tags · {tagActivity[0]!.counts.length}d window</h2>
+      <ul class="tag-activity-list">
+        {tagActivity.map((row) => {
+          const arrow = row.trend === 'up' ? '↑' : row.trend === 'down' ? '↓' : '→';
+          return (
+            <li class="tag-activity-row">
+              <a href={`/tags/${row.slug}/`} class="tag-activity-name">{row.label}</a>
+              <Sparkline counts={row.counts} label={row.label} trend={row.trend} />
+              <span class="tag-activity-count">{row.totalRecent}</span>
+              <span class="tag-activity-arrow" aria-hidden="true">{arrow}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )}
+  {digests.length > 0 && tagActivity.length === 0 && (
+    <section class="tag-activity-section" aria-labelledby="tag-activity-heading">
+      <h2 class="section-label" id="tag-activity-heading">Active tags</h2>
+      <p class="tag-empty">Tag activity will appear after the next digest.</p>
+    </section>
+  )}
+
   {tagChipRow.length > 0 && (
     <section class="tag-chip-section" aria-labelledby="tag-chip-row-heading">
-      <h2 class="section-label" id="tag-chip-row-heading">Tags</h2>
+      <h2 class="section-label" id="tag-chip-row-heading">Tags · {tagChipRow.length}{tagChipRow.length === TAG_CHIP_ROW_CAP && '+'}</h2>
       <p class="tag-chip-row">
         {tagChipRow.map((c, i) => (
           <Fragment>
@@ -239,7 +251,10 @@ const tagChipRow = Array.from(tagSummaries.entries())
             <a class="tag-chip-link" href={`/tags/${c.slug}/`}>{c.label}</a>
           </Fragment>
         ))}
-        {tagSummaries.size > TAG_CHIP_ROW_CAP && (
+        {/* "more →" only when the displayable count was actually capped — not
+            when the cap matched the natural population. Codex review caught
+            the misleading link case. */}
+        {tagChipRow.length === TAG_CHIP_ROW_CAP && tagSummaries.size > TAG_CHIP_ROW_CAP && (
           <Fragment>
             <span class="tag-chip-sep" aria-hidden="true">·</span>
             <a class="tag-chip-link tag-chip-more" href="/tags/">more →</a>
@@ -587,6 +602,13 @@ const tagChipRow = Array.from(tagSummaries.entries())
     color: var(--fg-muted);
     font-size: 0.85rem;
     line-height: 1;
+  }
+  .tag-empty {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    font-style: italic;
   }
 
   /* ── v0.10 mobile TAGS chip row. Plain text meta-line per DESIGN.md

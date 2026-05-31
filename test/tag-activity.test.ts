@@ -163,17 +163,79 @@ describe('buildTagActivity', () => {
     expect(result).toHaveLength(3);
   });
 
-  it('top-N ordering: totalRecent desc, then trend (up > flat > down), then alphabetic', () => {
+  it('top-N ordering: recency-weighted desc surfaces emerging themes over historical volume', () => {
+    // Design Pass 4: "top tags by recency-weighted study count" — a newer
+    // single study can rank above an older double-study when the recency
+    // weighting puts them at the same weighted score. Curative=2 on day 1,
+    // palliative=1 on day 2 → curative weighted = 2 × 1/2 = 1.0, palliative
+    // weighted = 1 × 2/2 = 1.0 (tie). Trend tie-break: palliative is in the
+    // later half → up; curative in the earlier half → down; up wins.
     const digests = [
       makeDigest('2026-05-25', null, [
-        // intent:palliative gets 1 study, intent:curative gets 2
         makeStudy('A', { intent: 'curative' }),
         makeStudy('B', { intent: 'curative' }),
       ]),
       makeDigest('2026-05-26', null, [makeStudy('C', { intent: 'palliative' })]),
     ].sort((a, b) => (a.date < b.date ? 1 : -1));
     const result = buildTagActivity(digests, { limit: 5, window: 30 });
-    expect(result[0]!.slug).toBe('curative'); // 2 > 1
-    expect(result[1]!.slug).toBe('palliative');
+    expect(result[0]!.slug).toBe('palliative'); // newer activity wins on tie
+    expect(result[1]!.slug).toBe('curative');
+  });
+
+  it('handles unsorted input defensively (no date-desc precondition)', () => {
+    // Adversarial-review fix: prior version assumed digests were date-desc.
+    // Now sorts a local copy so any caller order works.
+    const digests = [
+      makeDigest('2026-05-26', null, [makeStudy('B', { modality: 'radiation' })]),
+      makeDigest('2026-05-25', null, [makeStudy('A', { modality: 'radiation' })]),
+      makeDigest('2026-05-27', null, [makeStudy('C', { modality: 'radiation' })]),
+    ]; // intentionally NOT date-desc
+    const result = buildTagActivity(digests, { limit: 5, window: 30 });
+    expect(result[0]!.counts).toEqual([1, 1, 1]); // 05-25, 05-26, 05-27 oldest-first
+  });
+
+  it('single-day window forces flat trend (no trend exists with one data point)', () => {
+    // Adversarial-review fix: prior version returned "up" when counts[0]>=2
+    // because earlier=0 vs later=counts[0]. Now forces flat for length<2.
+    const digests = [
+      makeDigest('2026-05-27', null, [
+        makeStudy('A', { modality: 'radiation' }),
+        makeStudy('B', { modality: 'radiation' }),
+      ]),
+    ];
+    const result = buildTagActivity(digests, { limit: 5, window: 30 });
+    expect(result[0]!.counts).toEqual([2]);
+    expect(result[0]!.trend).toBe('flat');
+  });
+
+  it('odd-length window: equal-sized halves, middle dropped (no structural up-bias)', () => {
+    // Adversarial-review fix: prior split was Math.floor(N/2) which biased
+    // odd N toward "up" (later half was bigger). Now both halves are equal
+    // size and the middle day is dropped from both.
+    //
+    // 9-day window with 1 study per day → uniformly flat. Old impl would
+    // have computed earlier=4 (days 0-3), later=5 (days 4-8), 5 > 4+1 false,
+    // got lucky and said flat. But with [0,0,0,0,2,1,1,1,1] (heavier on day
+    // 4, the dropped middle): old impl earlier=2 (days 0-3=0), later=6
+    // (days 4-8=2+1+1+1+1=6) → up. NEW impl: halfSize=4, earlier=slice(0,4)
+    // = days 0..3 = 0, later=slice(5,9) = days 5..8 = 4 → 4 > 0+1 → up too.
+    // Both agree on this case. The fix matters most when the middle day has
+    // the bulk: [0,0,0,0,5,0,0,0,0] — old: earlier=0, later=5 → up; NEW:
+    // earlier=0 (days 0..3), later=0 (days 5..8) → flat. The middle is
+    // correctly ignored.
+    const digests = Array.from({ length: 9 }, (_, i) => {
+      const day = String(20 + i).padStart(2, '0');
+      const studies = i === 4 ? [
+        makeStudy('M1', { modality: 'radiation' }),
+        makeStudy('M2', { modality: 'radiation' }),
+        makeStudy('M3', { modality: 'radiation' }),
+        makeStudy('M4', { modality: 'radiation' }),
+        makeStudy('M5', { modality: 'radiation' }),
+      ] : [];
+      return makeDigest(`2026-05-${day}`, null, studies);
+    });
+    const result = buildTagActivity(digests, { limit: 5, window: 30 });
+    expect(result[0]!.counts).toEqual([0, 0, 0, 0, 5, 0, 0, 0, 0]);
+    expect(result[0]!.trend).toBe('flat');
   });
 });
