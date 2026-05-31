@@ -1,260 +1,83 @@
 {
   "date": "2026-05-21",
   "conference": null,
-  "generated_at": 1779575142241,
+  "generated_at": 1780196589041,
   "digest": {
-    "top_line": "EORTC 22922 20yr: IM-MS-RT null OS (HR 1.00) despite BC mortality benefit (HR 0.82); late cardiac/pulmonary deaths erase the gain.",
-    "tldr": "EORTC 22922 at 20yr: IM-MS-RT's BC mortality benefit (HR 0.82) fully offset by late cardiac/pulmonary deaths, null OS. S1007 confirms RNI adds no IDFS signal in favorable N1, LRR <1% regardless. Bladder adjuvant IMRT improved 2yr LRFS (HR 0.43) but no OS benefit; pre-IO cohort limits translation.",
+    "top_line": "EORTC 22922 20yr: OS HR 1.00; IM-MS-RT cuts BC mortality (HR 0.82) but late non-BC deaths (HR 1.26) erase the gain.",
+    "tldr": "Breast led: EORTC 22922 at 20yr shows IM-MS-RT null OS, BC mortality gain offset by late cardiac/pulmonary deaths; S1007 adds LRR <1% with/without RNI in Oncotype ≤25 N1, supporting regional de-escalation. Bladder adj IMRT improves LRFS post-cystectomy (HR 0.43) but small N and pre-IO cohort limit current applicability.",
     "sites": [
       {
-        "disease_site": "breast",
-        "intro": "Two nodal RT datasets converge: long-term toxicity narrows the benefit case for IM-MS-RT, and RNI adds no IDFS signal in favorable N1.",
-        "studies": [
-          {
-            "name": "SWOG S1007 RNI analysis",
-            "tldr": "S1007 secondary: RNI not associated with IDFS (HR 0.85-1.03); 5-yr LRR <1% with BCS+RT regardless of RNI receipt.",
-            "details": [
-              {
-                "text": "📊 5-yr LRR by locoregional treatment",
-                "table": {
-                  "columns": [
-                    "Group",
-                    "5-yr LRR"
-                  ],
-                  "rows": [
-                    [
-                      "BCS + RT with RNI",
-                      "0.85%"
-                    ],
-                    [
-                      "BCS + RT without RNI",
-                      "0.55%"
-                    ],
-                    [
-                      "Mastectomy + PMRT",
-                      "0.11%"
-                    ],
-                    [
-                      "Mastectomy without RT",
-                      "1.7%"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📐 IDFS by RNI receipt and menopausal status",
-                "table": {
-                  "columns": [
-                    "Subgroup",
-                    "HR",
-                    "95% CI",
-                    "p"
-                  ],
-                  "rows": [
-                    [
-                      "Premenopausal",
-                      "1.03",
-                      "0.74-1.43",
-                      "0.87"
-                    ],
-                    [
-                      "Postmenopausal",
-                      "0.85",
-                      "0.68-1.07",
-                      "0.16"
-                    ]
-                  ]
-                }
-              },
-              "🔍 Secondary analysis of S1007 (RxPONDER); N=4871 with RT forms, median f/u 6.1 yr",
-              "🔍 RNI not randomized; RT patterns prospectively recorded, comparison is observational",
-              "📊 81% received RT overall; 59% of those received RNI (practice divided)",
-              "📊 Low LRR in endocrine-therapy-only arm without RNI as well",
-              "⚠️ Selection bias: who received RNI was at MD/pt discretion, not randomized",
-              "⚠️ Favorable-risk N1 population (RS ≤25); may not generalize to higher RS or N2 disease"
-            ],
-            "figures": [],
-            "nct": null,
-            "tweet_ids": [
-              1000000009
-            ],
-            "slug": "swog-s1007-rni",
-            "verdict": {
-              "soc_implication": "methodologically-limited",
-              "rationale": "RNI not randomized in S1007; observational secondary analysis with uncontrolled selection bias in who received RNI. Post-hoc design dominates.",
-              "audience": "HR+/HER2-, Oncotype RS ≤25, 1-3 nodes positive, BCS or mastectomy"
-            },
-            "open_questions": [
-              "Would prospective randomization of RNI in this population confirm no IDFS benefit?",
-              "Optimal RNI strategy in RS ≤25 N1 pts receiving endocrine therapy alone"
-            ],
-            "consort": null,
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 9
-              }
-            ]
-          },
-          {
-            "name": "EORTC 22922/10925",
-            "tldr": "EORTC 22922/10925 20yr: IM-MS-RT null OS (HR 1.00, p=0.967); breast cancer mortality benefit offset by increased non-cancer deaths.",
-            "details": [
-              {
-                "text": "📊 20yr outcomes: control vs IM-MS-RT",
-                "table": {
-                  "columns": [
-                    "Endpoint",
-                    "Control",
-                    "IM-MS-RT",
-                    "HR",
-                    "p"
-                  ],
-                  "rows": [
-                    [
-                      "OS",
-                      "61.8%",
-                      "61.0%",
-                      "1.00",
-                      "0.967"
-                    ],
-                    [
-                      "DFS",
-                      "49.0%",
-                      "48.2%",
-                      "0.97",
-                      "0.515"
-                    ],
-                    [
-                      "DMFS",
-                      "59.8%",
-                      "58.9%",
-                      "0.97",
-                      "0.578"
-                    ],
-                    [
-                      "BC mortality",
-                      "22.4%",
-                      "18.6%",
-                      "0.82",
-                      "0.006"
-                    ],
-                    [
-                      "Non-BC deaths",
-                      "15.8%",
-                      "20.4%",
-                      "1.26",
-                      "0.002"
-                    ]
-                  ]
-                }
-              },
-              "🔍 phase III, N=4004, randomized 1996-2004, median f/u 22.2yr; pre-specified 20yr primary OS analysis",
-              "🔍 eligible: stage I-III, node-positive OR central/medial primary, post-BCS or mastectomy + ALND, women ≤75yr",
-              {
-                "text": "⚠️ Late toxicities higher with IM-MS-RT",
-                "subdetails": [
-                  "Lung fibrosis: 6.3% vs 3.2%",
-                  "Cardiac fibrosis: 2.7% vs 1.7%",
-                  "Cardiac disease: 15.2% vs 11.7%",
-                  "Severe cardiac (G3-4): 1.9% vs 1.7%",
-                  "Severe lung (G3-4): 0.3% vs 0.0%"
-                ]
-              },
-              "⚠️ Non-BC deaths diverged after 15yr, reflecting accumulation of late RT-related cardiac/pulmonary mortality",
-              "⚠️ 2D RT era (1996-2004); cardiac/lung doses exceed modern 3D/IMRT standards; toxicity magnitude may not reflect current technique",
-              "🔗 MA.20 (NEJM 2015, 10yr): RNI including IM nodes improved DFS but not OS; same OS-null pattern at shorter f/u, different eligibility"
-            ],
-            "figures": [],
-            "nct": null,
-            "tweet_ids": [
-              1000000015
-            ],
-            "slug": "eortc-22922-10925-20y",
-            "verdict": {
-              "soc_implication": "challenges-soc",
-              "rationale": "Valid phase III; null OS at pre-specified 20yr endpoint diverges from current IM-MS-RT practice rationale (DFS/DMFS benefit used to support adoption).",
-              "audience": "Stage I-III breast cancer, node-positive or central/medial primary, post-surgery"
-            },
-            "open_questions": [
-              "Does modern 3D/IMRT IM-MS-RT avoid the competing non-cancer mortality offset?",
-              "Which pts gain net benefit: younger pts with low baseline competing mortality risk?",
-              "Very long-term follow-up design standards for favorable-prognosis cancers with delayed RT effects"
-            ],
-            "consort": null,
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 15
-              }
-            ]
-          }
-        ],
-        "open_questions": null
-      },
-      {
         "disease_site": "bladder",
-        "intro": "First phase III data for adjuvant pelvic RT post-cystectomy; locoregional benefit clear, OS signal absent, pre-IO era cohort.",
+        "intro": "Phase III LRFS signal for adj IMRT post-cystectomy, but cohort predates IO consolidation; interaction with nivolumab unstudied.",
         "studies": [
           {
-            "name": "Bladder Adjuvant Radiotherapy (Phase III)",
-            "tldr": "Adjuvant pelvic IMRT post-cystectomy: 2yr LRFS 87.1% vs 76.0%, HR 0.43 (p=0.04) in high-risk MIBC (N=153).",
+            "name": "Bladder Adjuvant Radiotherapy",
+            "tldr": "2-yr LRFS 87.1% vs 76.0% (HR 0.43, p=0.04) favoring adj pelvic IMRT post-cystectomy in high-risk MIBC; DFS/OS NS.",
             "details": [
-              "📊 1° EP (2yr LRFS): 87.1% RT vs 76.0% Obs, HR 0.43 (95% CI 0.20-0.96), p=0.04",
               {
-                "text": "📊 Secondary endpoints (RT vs Obs)",
+                "text": "📊 RT vs observation outcomes, median f/u 47mo",
                 "table": {
                   "columns": [
                     "Endpoint",
                     "RT",
                     "Obs",
-                    "HR (95% CI)"
+                    "HR (95% CI)",
+                    "p"
                   ],
                   "rows": [
                     [
-                      "2yr DFS",
+                      "2-yr LRFS (1°)",
+                      "87.1%",
+                      "76.0%",
+                      "0.43 (0.20-0.96)",
+                      "0.04"
+                    ],
+                    [
+                      "DFS",
                       "71.6%",
                       "58.7%",
-                      "0.62 (0.36-1.05)"
+                      "0.62 (0.36-1.05)",
+                      "—"
                     ],
                     [
-                      "2yr BCSS",
+                      "BCSS",
                       "79.6%",
                       "65.0%",
-                      "0.59 (0.33-1.10)"
+                      "0.59 (0.33-1.10)",
+                      "—"
                     ],
                     [
-                      "2yr OS",
+                      "OS",
                       "70.4%",
                       "57.4%",
-                      "0.78 (0.49-1.26)"
+                      "0.78 (0.49-1.26)",
+                      "—"
                     ]
                   ]
                 }
               },
-              "🔍 Phase III RCT, N=153 (RT=77, Obs=76), 1:1; stratified by nodal status + chemo timing; median f/u 47mo",
-              "🔍 IG-IMRT 50.4Gy/28fr to cystectomy bed + pelvic nodes; stoma-sparing technique",
-              "🔍 High-risk eligibility: pT3-4, pN1-3, positive margins, or <10 nodes dissected; 62% pT3-T4, 41% pN+",
-              "🔍 >90% received periop chemo (71% neoadjuvant, 20% adjuvant); no pts received immunotherapy",
-              "⚠️ N=153 enrolled over 8 years; wide CI on primary EP (0.20-0.96); underpowered for OS",
-              "⚠️ OS HR 0.78 (0.49-1.26), not significant; no survival benefit demonstrated",
-              "⚠️ Zero immunotherapy exposure; adjuvant nivolumab now guideline-listed in high-risk MIBC, limiting generalizability"
+              "🔍 Phase III RCT, N=153 (RT=77, Obs=76); stratified by nodal involvement and chemo timing",
+              "🔍 Eligibility: any of pT3-4, pN1-3, margin+, or ≤10 nodes dissected; 62% pT3-T4, 41% pN+",
+              "💊 Stoma-sparing IG-IMRT 50.4Gy/28fx to cystectomy bed and pelvic nodes",
+              "⚠️ Small N (153); underpowered for OS; CI crosses 1.0 on all secondary endpoints",
+              "⚠️ None received immunotherapy; cohort predates nivolumab post-cystectomy standard (CheckMate 274)",
+              "🔗 Adj RT + IO interaction unstudied; generalizability to current practice uncertain"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
               1000000010
             ],
-            "slug": "bladder-adjuvant-rt-phase3",
+            "slug": "bladder-adj-rt-phase3",
             "verdict": {
               "soc_implication": "early-signal",
-              "rationale": "Phase III but N=153, wide LRFS CI (0.20-0.96), OS not significant, and no immunotherapy-era pts enrolled.",
-              "audience": "High-risk MIBC post-RC (pT3-T4, pN+, R1, or <10 nodes), post-perioperative chemo"
+              "rationale": "Small N (153), LRFS surrogate primary, OS non-significant, no IO; predates nivolumab post-cystectomy standard.",
+              "audience": "High-risk urothelial MIBC post-RC (pT3-4, pN+, margin+, or ≤10 nodes), periopera"
             },
             "open_questions": [
-              "Does adjuvant RT improve OS in an adequately powered trial?",
-              "Role of adjuvant RT when combined with adjuvant nivolumab",
-              "Optimal patient selection beyond current high-risk criteria"
+              "OS benefit with longer follow-up?",
+              "Safety and efficacy of adj RT combined with IO (nivolumab) post-RC",
+              "Optimal selection: does pN+ subgroup derive greatest locoregional benefit?"
             ],
             "consort": {
               "enrolled": null,
@@ -262,7 +85,7 @@
               "randomized": 153,
               "arms": [
                 {
-                  "label": "RT",
+                  "label": "Adjuvant RT",
                   "allocated": 77,
                   "analyzed": null
                 },
@@ -273,10 +96,210 @@
                 }
               ]
             },
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "phase-3-rct",
             "source_ids": [
               {
                 "type": "paper",
                 "id": 10
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "breast",
+        "intro": "Two trials converge on de-escalation: EORTC 22922 final data reframes IM-MS-RT's 20yr risk-benefit; S1007 shows minimal locoregional impact from RNI in genomically favorable N1.",
+        "studies": [
+          {
+            "name": "EORTC 22922/10925",
+            "tldr": "20yr OS HR 1.00 (null): BC mortality reduced HR 0.82 but non-BC deaths increased HR 1.26, offsetting benefit.",
+            "details": [
+              {
+                "text": "📊 Outcomes at 20 years (IM-MS-RT vs control)",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "Control",
+                    "IM-MS-RT",
+                    "HR",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "OS (20yr rate)",
+                      "61.8%",
+                      "61.0%",
+                      "1.00",
+                      ".967"
+                    ],
+                    [
+                      "DFS (20yr rate)",
+                      "49.0%",
+                      "48.2%",
+                      "0.97",
+                      ".515"
+                    ],
+                    [
+                      "DMFS (20yr rate)",
+                      "59.8%",
+                      "58.9%",
+                      "0.97",
+                      ".578"
+                    ],
+                    [
+                      "BC mortality (20yr rate)",
+                      "22.4%",
+                      "18.6%",
+                      "0.82",
+                      ".006"
+                    ],
+                    [
+                      "Non-BC deaths (20yr rate)",
+                      "15.8%",
+                      "20.4%",
+                      "1.26",
+                      ".002"
+                    ]
+                  ]
+                }
+              },
+              "🔍 Phase 3 RCT, N=4004 randomized 1996-2004, median f/u 22.2yr; prespecified 20yr final analysis",
+              "🔍 Eligible: women ≤75yr, stage I-III, node-positive OR central/medial tumor; post-mastectomy or BCS + ALND",
+              "⚠️ Non-BC death excess emerged after 15yr, driven by cardiac and pulmonary morbidity from IM-MS-RT",
+              {
+                "text": "⚠️ Late RT morbidity (IM-MS-RT vs control)",
+                "subdetails": [
+                  "Lung fibrosis: 6.3% vs 3.2%",
+                  "Cardiac fibrosis: 2.7% vs 1.7%",
+                  "Cardiac diseases: 15.2% vs 11.7%",
+                  "Severe cardiac G3-4: 1.9% vs 1.7%",
+                  "Severe lung G3-4: 0.3% vs 0.0%"
+                ]
+              },
+              "⚠️ 2D RT planning era (enrolled 1996-2004); modern cardiac-sparing techniques may attenuate the non-BC mortality signal",
+              "🔗 vs EORTC 22922 10yr data (NEJM 2015): DFS and BC mortality benefit seen at 10yr did not translate to OS by 20yr; competing-cause mortality dominant"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000015
+            ],
+            "slug": "eortc-22922-im-ms-rt",
+            "verdict": {
+              "soc_implication": "challenges-soc",
+              "rationale": "Phase 3 final analysis (20yr): OS null HR 1.00 despite BC mortality reduction; non-BC death excess after 15yr offsets benefit.",
+              "audience": "Stage I-III breast, node-positive or central/medial tumor, median age 54, post-s"
+            },
+            "open_questions": [
+              "Does modern cardiac-sparing IM-RT eliminate the non-BC death excess?",
+              "Which subgroups (high nodal burden, HER2+, TNBC) derive net OS benefit?",
+              "Impact of contemporary systemic therapy on IM-MS-RT benefit/harm ratio"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "phase-3-rct",
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 15
+              }
+            ]
+          },
+          {
+            "name": "SWOG S1007 RNI analysis",
+            "tldr": "5-yr LRR <1% with or without RNI in HR+/HER2-, Oncotype ≤25, N1 breast; IDFS not associated with RNI receipt.",
+            "details": [
+              {
+                "text": "📊 5-yr cumulative LRR by locoregional treatment",
+                "table": {
+                  "columns": [
+                    "Treatment",
+                    "5-yr LRR"
+                  ],
+                  "rows": [
+                    [
+                      "BCS + RT + RNI",
+                      "0.85%"
+                    ],
+                    [
+                      "BCS + RT, no RNI",
+                      "0.55%"
+                    ],
+                    [
+                      "Mastectomy + PMRT",
+                      "0.11%"
+                    ],
+                    [
+                      "Mastectomy, no RT",
+                      "1.7%"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📐 IDFS by RNI receipt (observational; RNI not randomized)",
+                "table": {
+                  "columns": [
+                    "Menopausal status",
+                    "HR (95% CI)",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "Premenopausal",
+                      "1.03 (0.74-1.43)",
+                      "0.87"
+                    ],
+                    [
+                      "Postmenopausal",
+                      "0.85 (0.68-1.07)",
+                      "0.16"
+                    ]
+                  ]
+                }
+              },
+              "🔍 Secondary analysis of S1007 phase 3 RCT (chemo vs ET); N=4871 with prospective RT data; median f/u 6.1 yrs",
+              {
+                "text": "🔍 RT practice patterns",
+                "subdetails": [
+                  "81% received any RT",
+                  "59% of RT recipients received RNI (supraclavicular region minimum)",
+                  "Practice divided on RNI use in this biologically favorable N1 setting"
+                ]
+              },
+              "🔍 Low LRR also observed in pts randomized to ET alone without chemo",
+              "⚠️ RNI not randomized: confounding by indication likely (lower-risk pts selected for omission by treating physicians)",
+              "⚠️ Survival analyses landmarked at 1 yr; RT data recorded only in first year post-randomization",
+              "🔗 vs MA.20/EORTC 22922 (RNI benefit in N+ disease broadly): S1007 population (Oncotype ≤25) is a biologically favorable subgroup potentially below the threshold for RNI benefit"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000009
+            ],
+            "slug": "swog-s1007-rni",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "RNI vs no RNI not randomized; secondary observational analysis with likely confounding by indication in an S1007 RCT subpopulation.",
+              "audience": "HR+/HER2-, Oncotype DX ≤25, N1 (1-3 nodes) breast cancer, adjuvant"
+            },
+            "open_questions": [
+              "Dedicated RCT of RNI omission in Oncotype ≤25 N1 disease needed to confirm safety",
+              "Does chemo vs ET assignment (original randomization) modify RNI benefit?",
+              "Durability of low LRR beyond 6 yrs in this favorable-biology population?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": null,
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 9
               }
             ]
           }

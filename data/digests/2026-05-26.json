@@ -1,57 +1,56 @@
 {
   "date": "2026-05-26",
   "conference": null,
-  "generated_at": 1779897230648,
+  "generated_at": 1780196165200,
   "digest": {
-    "top_line": "SWOG S1914: IO+SBRT no better than SBRT alone in inoperable NSCLC — OS HR 1.15, PFS HR 1.35, closed early for futility.",
-    "tldr": "S1914 is the day's only study: atezolizumab adds nothing to SBRT in medically inoperable early/locally advanced NSCLC and increased G≥3 toxicity (12% vs 2%). The IO-ablative synergy hypothesis, positive in phase II, does not survive phase III.",
+    "top_line": "SWOG S1914: SBRT + atezo vs SBRT alone in inoperable NSCLC, OS HR 1.15, closed for futility; 6x more G≥3 AEs.",
+    "tldr": "Thoracic was the sole site today: IO added to SBRT for inoperable early NSCLC shows no OS or PFS benefit and 6x more G≥3 toxicity, closed at interim for futility. Former/never smokers trended worse with the combination (OS HR 2.50). Phase II IO+SBRT signals do not replicate in a definitive RCT.",
     "sites": [
       {
         "disease_site": "thoracic",
-        "intro": "Phase III data closes the door on IO+SBRT consolidation for inoperable NSCLC — futility on both OS and PFS.",
+        "intro": "SBRT monotherapy holds as standard for inoperable early NSCLC; IO augmentation strategies need rethinking after S1914.",
         "studies": [
           {
             "name": "SWOG/NRG S1914",
-            "tldr": "OS HR 1.15 (p=0.63), PFS HR 1.35 (p=0.16): IO+SBRT no better than SBRT alone; trial closed early for futility.",
+            "tldr": "No OS benefit from adding atezolizumab to SBRT (HR 1.15, p=0.63); closed for futility; G≥3 AEs 12% vs 2%.",
             "details": [
               {
-                "text": "📊 Efficacy: SBRT alone vs Atezo+SBRT",
+                "text": "📊 Efficacy outcomes: SBRT vs SBRT + atezolizumab",
                 "table": {
                   "columns": [
                     "Endpoint",
-                    "SBRT (S)",
-                    "Atezo+SBRT (AS)",
                     "HR (95% CI)",
-                    "p"
+                    "p",
+                    "2yr SBRT",
+                    "2yr SBRT+atezo"
                   ],
                   "rows": [
                     [
-                      "OS (2-yr)",
-                      "82%",
-                      "80%",
+                      "OS (1° EP)",
                       "1.15 (0.65-2.01)",
-                      "0.63"
+                      "0.63",
+                      "82%",
+                      "80%"
                     ],
                     [
-                      "PFS (2-yr)",
-                      "71%",
-                      "60%",
+                      "PFS",
                       "1.35 (0.89-2.06)",
-                      "0.16"
+                      "0.16",
+                      "71%",
+                      "60%"
                     ]
                   ]
                 }
               },
-              "🔍 Phase III; N=403 eligible, medically inoperable or surgery-declined, T1-3N0M0 ≤7cm, ≥1 high-risk recurrence factor",
-              "🔍 SBRT 3-8 fx BED ≥100 Gy; atezolizumab 1200mg Q3W × 8 cycles (SBRT initiated cycle 3)",
-              "🔍 Closed at 1st interim analysis for futility on both OS and PFS per design; median f/u 12 months",
+              "🔍 Phase III RCT; N=403 eligible (201 SBRT / 202 atezo+SBRT); accrual closed at first interim for OS + PFS futility per prespecified design",
+              "🔍 T1-3N0M0 NSCLC ≤7cm, inoperable or declined surgery, ≥1 recurrence risk factor; atezo 1200mg Q3W x8 cycles; SBRT 3-8 fx BED ≥100Gy initiated cycle 3",
               {
-                "text": "📊 Failure patterns: SBRT vs Atezo+SBRT",
+                "text": "📊 Failure patterns at cutoff",
                 "table": {
                   "columns": [
                     "Pattern",
-                    "SBRT (S)",
-                    "Atezo+SBRT (AS)"
+                    "SBRT",
+                    "SBRT + atezo"
                   ],
                   "rows": [
                     [
@@ -72,42 +71,53 @@
                   ]
                 }
               },
-              "⚠️ G≥3 AEs: 12% AS (21 G3, 1 G4, 1 G5 respiratory failure) vs 2% S (3 G3, 1 G4)",
-              "⚠️ Former/never smoker subgroup: AS worse OS HR 2.50 (1.11-5.59, p=0.03) and PFS HR 2.16 (1.15-4.04, p=0.01); exploratory",
-              "🔗 Prior phase II (PMID 37478883) suggested IO benefit with SBRT; phase III does not confirm"
+              "⚠️ G≥3 AEs: 12% atezo arm (21 G3, 1 G4, 1 G5 respiratory failure) vs 2% SBRT (3 G3, 1 G4)",
+              {
+                "text": "🔍 Former/never smoker subgroup (56%): AS worse than S",
+                "subdetails": [
+                  "OS: HR 2.50 (1.11-5.59), p=0.03",
+                  "PFS: HR 2.16 (1.15-4.04), p=0.01"
+                ]
+              },
+              "🔗 Contradicts prior phase II (PMID 37478883) that suggested IO benefit added to SBRT",
+              "⚠️ Median f/u 12 mo among survivors; 49 OS events at cutoff; local recurrence central review, PD-L1, and QoL analyses pending"
             ],
             "figures": [],
             "nct": "NCT04214262",
             "tweet_ids": [
               1000000016
             ],
-            "slug": "swog-nrg-s1914",
+            "slug": "swog-s1914",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Phase III futility stop; IO+SBRT numerically inferior on both OS and PFS, confirming SBRT monotherapy as SoC.",
-              "audience": "Medically inoperable early NSCLC, T1-3N0M0 ≤7cm, ≥1 recurrence risk factor"
+              "rationale": "Phase III RCT confirms SBRT alone as SOC; IO addition failed on OS and PFS with excess toxicity, definitively closing this hypothesis.",
+              "audience": "Inoperable early-stage NSCLC T1-3N0M0 ≤7cm, ≥1 recurrence risk factor"
             },
             "open_questions": [
-              "PD-L1 or tissue/blood biomarker subset that might benefit from IO addition",
-              "Whether different IO sequencing (adjuvant-only) changes the null result"
+              "Whether PD-L1-high or other biomarker-defined subsets benefit from IO addition",
+              "Mechanism behind excess local failures in the atezo arm",
+              "Durability of SBRT-alone outcomes beyond 2 years in high-risk pts"
             ],
             "consort": {
-              "enrolled": null,
+              "enrolled": 417,
               "excluded": 14,
-              "randomized": 417,
+              "randomized": 403,
               "arms": [
                 {
-                  "label": "SBRT (S)",
+                  "label": "SBRT",
                   "allocated": 201,
                   "analyzed": null
                 },
                 {
-                  "label": "Atezo+SBRT (AS)",
+                  "label": "SBRT + atezolizumab",
                   "allocated": 202,
                   "analyzed": null
                 }
               ]
             },
+            "modality": "combined",
+            "intent": "curative",
+            "methodology": "phase-3-rct",
             "source_ids": [
               {
                 "type": "paper",
