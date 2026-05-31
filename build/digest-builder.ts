@@ -44,16 +44,23 @@ import {
 } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
-import { listDigestsStrict, assertSlugUniqueness } from '../src/lib/tag-index.ts';
+import {
+  listDigestsStrict,
+  assertSlugUniqueness,
+  summarizeTagEmissions,
+  formatTagEmissionStats,
+} from '../src/lib/tag-index.ts';
 import { VERDICT_META } from '../src/lib/verdict.ts';
+import type { LlmClient } from '../src/lib/llm-client.ts';
 import {
   isOcrAvailable,
   ocrImageUrls,
   isOcrEntryFresh,
   type OcrEntry,
 } from '../src/lib/vision-ocr.ts';
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { writeFileSync, mkdirSync, existsSync, realpathSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // DIGEST_THINKING → Phase 2 extended-thinking budget (tokens). Accepts a number
 // (e.g. 8000) or a truthy flag (→ 8000 default). Clamped to the api minimum of
@@ -408,7 +415,17 @@ function writeArtifact(args: Args, artifact: DigestArtifact): { json: string; ob
   return { json: jsonPath, obsidian: obsidianPath };
 }
 
-async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: string): Promise<void> {
+// Exported so the v0.10 backfill smoke test can drive one date end-to-end
+// without spawning the CLI: it seeds an in-memory SQLite DB, passes a mock
+// LlmClient via `deps.client`, and asserts the written artifact preserves
+// study identity, source refs, and tag emissions. CLI callers omit `deps`
+// and get the default LlmClient via createLlmClient().
+export async function buildOneDate(
+  args: Args,
+  db: ReturnType<typeof openDb>,
+  date: string,
+  deps?: { client?: LlmClient },
+): Promise<void> {
   const allForDate = listBookmarks(db, { bookmark_date: date });
   const papersForDate = listPapers(db, { bookmark_date: date });
   const slidesForDate = listSlideUploads(db, { bookmark_date: date });
@@ -482,6 +499,7 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
     digest = await buildDigest(inputs, {
       conferenceName: confMeta?.name ?? `Day digest — ${date}`,
       conferenceDay: date,
+      client: deps?.client,
       // Optional model overrides (config, not hardcoded). DIGEST_MODEL sets the
       // default for all phases; DIGEST_STUDY_MODEL overrides Phase 2 only (the
       // deep per-study analysis — e.g. 'opus' on claude-cli for richer output).
@@ -492,6 +510,14 @@ async function buildOneDate(args: Args, db: ReturnType<typeof openDb>, date: str
       // only). Deeper reasoning before each study agent answers.
       studyThinkingBudget: parseThinkingBudget(),
     });
+  }
+
+  // T18: build-time tag emission summary so the curator can see at a glance
+  // whether Phase 2 produced the expected distribution. Logged before override
+  // application — these are the raw LLM emissions, separate from curator-
+  // applied corrections (override summary logs immediately after).
+  if (!args.dryRun) {
+    console.log(`  tag emissions: ${formatTagEmissionStats(summarizeTagEmissions(digest))}`);
   }
 
   // Apply durable curator overrides last, so suppressed/edited studies survive
@@ -551,7 +577,31 @@ async function main() {
   assertSlugUniqueness(corpus, verdictSlugs);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Only run as a CLI when invoked directly. Guard added in v0.10 so the
+// smoke test can import `buildOneDate` without triggering the full builder
+// loop (which would otherwise call openDb('./oncbrain.db') against the
+// curator's local DB at module load time).
+//
+// Symlink hazard: the curator's working dir is in Dropbox, which exposes
+// BOTH `/Users/<u>/Library/CloudStorage/Dropbox/...` (real path) and
+// `/Users/<u>/Dropbox/...` (symlink). Node ESM resolves `import.meta.url`
+// to the realpath while `process.argv[1]` is preserved literally — so a
+// naive `===` compare would skip `main()` when the cron starts under the
+// symlinked path and the build silently no-ops. Realpath both sides so
+// the cron + manual invocations both fire `main()` regardless of which
+// alias was used to launch tsx.
+function isInvokedAsScript(): boolean {
+  const arg = process.argv[1];
+  if (!arg) return false;
+  try {
+    return realpathSync(arg) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+if (isInvokedAsScript()) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

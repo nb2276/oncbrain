@@ -981,3 +981,79 @@ export function buildTagActivity(
     .slice(0, limit)
     .map(({ _ordSlug, _recencyWeighted, ...rest }) => rest);
 }
+
+// ---------------- Tag emission stats (T18 build observability) ----------------
+
+export type TagEmissionStats = {
+  studies_total: number;
+  tagged_any: number;
+  modality: Record<string, number>;
+  intent: Record<string, number>;
+  methodology: Record<string, number>;
+};
+
+/**
+ * Walk one freshly-built digest and tally per-namespace tag emissions for the
+ * build-time log. Counts only validated values (the LLM output has already
+ * been normalized by parseEnumTag, so anything that survived to here is a
+ * canonical enum value). Out-of-enum LLM emissions get logged separately by
+ * parseEnumTag's own warning; this summary covers the positive path.
+ *
+ * Codex tension addressed: silent dropping was a bad failure mode (PR #11
+ * adversarial review). The per-call drop warnings live in llm-pipeline.ts;
+ * this aggregate emission summary tells the curator at a glance whether the
+ * Phase 2 prompt is producing the expected distribution. A digest that yields
+ * zero modality emissions probably means the LLM ignored the section, not
+ * that the day genuinely lacked radiation / surgery / systemic studies.
+ */
+export function summarizeTagEmissions(
+  digest: { sites: ReadonlyArray<{ studies: ReadonlyArray<DigestStudy> }> },
+): TagEmissionStats {
+  const stats: TagEmissionStats = {
+    studies_total: 0,
+    tagged_any: 0,
+    modality: {},
+    intent: {},
+    methodology: {},
+  };
+  for (const site of digest.sites) {
+    for (const study of site.studies) {
+      stats.studies_total += 1;
+      let any = false;
+      // Defensive enum filter so a future caller passing on-disk artifacts
+      // (where a hand-edited or legacy file might carry an out-of-enum value)
+      // can't smuggle bogus buckets into the summary. At post-Phase-2 call
+      // sites (current sole caller) the values are already normalized.
+      if (study.modality && isValidModality(study.modality)) {
+        stats.modality[study.modality] = (stats.modality[study.modality] ?? 0) + 1;
+        any = true;
+      }
+      if (study.intent && isValidIntent(study.intent)) {
+        stats.intent[study.intent] = (stats.intent[study.intent] ?? 0) + 1;
+        any = true;
+      }
+      if (study.methodology && isValidMethodology(study.methodology)) {
+        stats.methodology[study.methodology] = (stats.methodology[study.methodology] ?? 0) + 1;
+        any = true;
+      }
+      if (any) stats.tagged_any += 1;
+    }
+  }
+  return stats;
+}
+
+export function formatTagEmissionStats(stats: TagEmissionStats): string {
+  if (stats.studies_total === 0) return 'no studies';
+  const fmt = (label: string, bucket: Record<string, number>): string => {
+    const entries = Object.entries(bucket).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
+    if (entries.length === 0) return `${label}=0`;
+    const total = entries.reduce((n, [, c]) => n + c, 0);
+    return `${label}=${total} (${entries.map(([k, c]) => `${k}:${c}`).join(', ')})`;
+  };
+  return [
+    `tagged ${stats.tagged_any}/${stats.studies_total}`,
+    fmt('modality', stats.modality),
+    fmt('intent', stats.intent),
+    fmt('methodology', stats.methodology),
+  ].join('; ');
+}
