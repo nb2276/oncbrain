@@ -94,12 +94,56 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
 ---
 
 {sections.length > 0 && (
-  <aside class="filter-rail" aria-label="Filter studies by tag" data-filter-rail>
+  <Fragment>
+    {/* v0.11 PR-3 mobile drawer trigger. Rendered inline in document
+        flow so it appears above the cards on each page type, BUT only
+        visible at viewports where the desktop rail is hidden (the CSS
+        in the style block flips visibility on the same breakpoints).
+        Carries an aria-controls + aria-expanded pair so screen readers
+        announce the drawer state changes. */}
+    <button
+      type="button"
+      class="filter-rail-trigger"
+      data-filter-rail-trigger
+      data-active={initialSet.size > 0 ? 'true' : null}
+      aria-controls="filter-rail-panel"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+    >
+      <span class="filter-rail-trigger-label">Filters</span>
+      <span class="filter-rail-trigger-count" data-filter-rail-trigger-count>
+        {totalCount}
+      </span>
+    </button>
+    {/* Backdrop for the mobile drawer: tap-outside dismiss. Hidden
+        until the drawer is open at mobile breakpoints. */}
+    <div
+      class="filter-rail-backdrop"
+      data-filter-rail-backdrop
+      hidden
+    ></div>
+    <aside
+      id="filter-rail-panel"
+      class="filter-rail"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="filter-rail-title"
+      data-filter-rail
+    >
     <header class="filter-rail-header">
-      <div class="filter-rail-title">Filters</div>
+      <div class="filter-rail-title" id="filter-rail-title">Filters</div>
       <div class="filter-rail-count" data-filter-rail-count>
         {totalCount} stud{totalCount === 1 ? 'y' : 'ies'}
       </div>
+      {/* Close button shown only when the drawer is open at mobile
+          breakpoints. Provides keyboard + tap dismiss alongside Escape
+          and tap-outside. */}
+      <button
+        type="button"
+        class="filter-rail-close"
+        data-filter-rail-close
+        aria-label="Close filters"
+      >×</button>
     </header>
 
     <div class="filter-rail-active" data-filter-rail-active hidden>
@@ -141,12 +185,170 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
     <button type="button" class="filter-rail-clear" data-filter-rail-clear>
       Clear all
     </button>
-  </aside>
+    </aside>
+  </Fragment>
 )}
 
 <style>
-  /* Hidden on mobile + tablet; PR-3 ships a drawer for those viewports. */
+  /* ── Mobile drawer trigger (PR-3) ───────────────────────────────
+     Inline in document flow on smaller viewports; CSS-hidden on
+     viewports where the desktop rail takes over. */
+  .filter-rail-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    padding: 0.45rem 0.85rem;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    background: var(--bg-card);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    /* Touch target: 36px tall is below iOS HIG 44px; bump on mobile. */
+    min-height: 44px;
+  }
+  .filter-rail-trigger:hover,
+  .filter-rail-trigger:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .filter-rail-trigger-label {
+    font-weight: 500;
+  }
+  .filter-rail-trigger-count {
+    margin-left: auto;
+    padding: 0.05rem 0.45rem;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Subtle pulse when filters are active to nudge readers toward the
+     active state without being visually loud. data-active is set
+     server-side via initialSet (no first-paint flash on URL-filtered
+     loads) and updated client-side after each filter change. */
+  .filter-rail-trigger[data-active='true'] {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .filter-rail-trigger[data-active='true'] .filter-rail-trigger-count {
+    background: var(--accent);
+    color: var(--bg-card);
+  }
+
+  /* Hide the trigger while the drawer is open so it can't sit
+     visually-obscured behind the backdrop with `aria-expanded=true` —
+     a screen-reader user tabbing onto it would land on a hidden
+     element. Adversarial review caught this. */
+  :global(html[data-drawer-open]) .filter-rail-trigger {
+    visibility: hidden;
+  }
+
+  /* ── Mobile drawer backdrop ─────────────────────────────────────
+     Hidden until the drawer is opened at mobile breakpoints. */
+  .filter-rail-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 50;
+    /* Tap-outside dismiss happens via JS click handler. */
+  }
+
+  /* ── Mobile drawer close button ─────────────────────────────────
+     Inside the rail header; visible only at mobile breakpoints. */
+  .filter-rail-close {
+    margin-left: auto;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--fg-muted);
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    display: none;
+  }
+  .filter-rail-close:hover,
+  .filter-rail-close:focus-visible {
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+
+  /* Hidden by default; bottom-sheet drawer state at mobile widths. */
   .filter-rail { display: none; }
+  .filter-rail-trigger { display: none; }
+
+  /* Mobile / tablet drawer at <1200px (narrow body) and <1640px (wide
+     body). Trigger is inline in document flow; rail sits as a bottom
+     sheet, transformed off-screen until the drawer is open. */
+  @media (max-width: 1199.98px) {
+    body:not(.wide) .filter-rail-trigger { display: flex; }
+    body:not(.wide) .filter-rail {
+      display: block;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      /* 100dvh accounts for iOS Safari's collapsing URL bar — 100vh
+         would over-shoot and put the close button off-screen. Falls
+         back to vh on older browsers via the safety net below. */
+      max-height: 80vh;
+      max-height: 80dvh;
+      padding: 0.75rem 0.75rem calc(1rem + env(safe-area-inset-bottom, 0));
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25);
+      overflow-y: auto;
+      font-family: var(--font-sans);
+      z-index: 60;
+      /* Slide up when [data-open]; out-of-view by default. The
+         transform animates so readers feel the drawer arrive. */
+      transform: translateY(100%);
+      transition: transform 200ms ease;
+    }
+    body:not(.wide) .filter-rail[data-open='true'] {
+      transform: translateY(0);
+    }
+    body:not(.wide) .filter-rail-close { display: flex; align-items: center; justify-content: center; }
+  }
+  @media (max-width: 1639.98px) {
+    body.wide .filter-rail-trigger { display: flex; }
+    body.wide .filter-rail {
+      display: block;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-height: 80vh;
+      max-height: 80dvh;
+      padding: 0.75rem 0.75rem calc(1rem + env(safe-area-inset-bottom, 0));
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25);
+      overflow-y: auto;
+      font-family: var(--font-sans);
+      z-index: 60;
+      transform: translateY(100%);
+      transition: transform 200ms ease;
+    }
+    body.wide .filter-rail[data-open='true'] {
+      transform: translateY(0);
+    }
+    body.wide .filter-rail-close { display: flex; align-items: center; justify-content: center; }
+  }
+
+  /* Body scroll-lock when the drawer is open: the JS adds
+     [data-drawer-open] to <html>; the page underneath stops scrolling
+     so the drawer feels like a real modal. */
+  :global(html[data-drawer-open]) {
+    overflow: hidden;
+  }
 
   /* Narrow body (700px, home + sites): rail visible at ≥1200px. The
      viewport gutter at 1200px is (1200-700)/2 = 250px on each side,
@@ -338,6 +540,11 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
     const activeEl = rail.querySelector('[data-filter-rail-active]');
     const countEl = rail.querySelector('[data-filter-rail-count]');
     const clearBtn = rail.querySelector('[data-filter-rail-clear]');
+    const trigger = document.querySelector('[data-filter-rail-trigger]');
+    const triggerCount = document.querySelector('[data-filter-rail-trigger-count]');
+    const triggerCountBase = triggerCount ? triggerCount.textContent : '';
+    const backdrop = document.querySelector('[data-filter-rail-backdrop]');
+    const closeBtn = rail.querySelector('[data-filter-rail-close]');
     const baseTotalText = countEl ? countEl.textContent : '';
 
     /** Read the active filter set from window.location.search. */
@@ -427,6 +634,20 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
       if (clearBtn) {
         clearBtn.toggleAttribute('disabled', active.size === 0);
       }
+      // PR-3: mobile trigger reflects the active filter state. Count
+      // becomes the visible-card count when filters are on; falls back
+      // to the base total when filters are cleared. data-active toggles
+      // the accent styling so the trigger reads as "filtered" at a
+      // glance even before the reader opens the drawer.
+      if (trigger) {
+        if (active.size === 0) {
+          trigger.removeAttribute('data-active');
+          if (triggerCount) triggerCount.textContent = triggerCountBase;
+        } else {
+          trigger.setAttribute('data-active', 'true');
+          if (triggerCount) triggerCount.textContent = String(visible);
+        }
+      }
       // Scroll-to-first-visible on USER-triggered changes (not URL hydrate).
       if (options && options.scrollToFirst) {
         for (const { el } of cardData) {
@@ -510,11 +731,123 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
       applyFilter(active, { scrollToFirst: false });
     }
 
+    /* ── PR-3 drawer state ────────────────────────────────────────
+       Mobile-only behavior: trigger button opens the drawer, backdrop
+       and Escape and close button dismiss it. Body scroll-locks while
+       open via the html[data-drawer-open] attribute. Focus moves to
+       the first interactive control on open and returns to the
+       trigger on close. */
+    let lastFocused = null;
+
+    /* Focus trap: cycle Tab/Shift+Tab between the first and last
+       focusable element inside the drawer when it's open. Adversarial
+       + Codex review both caught the WAI-ARIA dialog gap. Disabled
+       checkboxes are excluded. */
+    function focusableInRail() {
+      const candidates = rail.querySelectorAll(
+        'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+      );
+      return Array.from(candidates).filter(function (el) {
+        return el instanceof HTMLElement && !el.hidden;
+      });
+    }
+
+    function openDrawer() {
+      if (!trigger) return;
+      const active = document.activeElement;
+      // `lastFocused === document.body` is meaningless — body.focus()
+      // on close would leave the page with no visible focus ring.
+      // Fall back to the trigger in that case. Claude P1 finding.
+      lastFocused =
+        active && active !== document.body ? active : trigger;
+      rail.setAttribute('data-open', 'true');
+      if (backdrop) backdrop.removeAttribute('hidden');
+      trigger.setAttribute('aria-expanded', 'true');
+      document.documentElement.setAttribute('data-drawer-open', '');
+      // Focus the first focusable element inside the rail.
+      const focusables = focusableInRail();
+      if (focusables.length > 0) focusables[0].focus();
+    }
+    function closeDrawer() {
+      if (!trigger) return;
+      rail.removeAttribute('data-open');
+      if (backdrop) backdrop.setAttribute('hidden', '');
+      trigger.setAttribute('aria-expanded', 'false');
+      document.documentElement.removeAttribute('data-drawer-open');
+      if (lastFocused && lastFocused instanceof HTMLElement) {
+        lastFocused.focus();
+      } else if (trigger instanceof HTMLElement) {
+        trigger.focus();
+      }
+    }
+    function isDrawerOpen() {
+      return rail.getAttribute('data-open') === 'true';
+    }
+
     // Wire events.
     for (const cb of checkboxes) {
       cb.addEventListener('change', onChange);
     }
     if (clearBtn) clearBtn.addEventListener('click', onClear);
+    if (trigger) {
+      trigger.addEventListener('click', function () {
+        if (isDrawerOpen()) closeDrawer();
+        else openDrawer();
+      });
+    }
+    if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+    if (backdrop) backdrop.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', function (e) {
+      if (!isDrawerOpen()) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeDrawer();
+        return;
+      }
+      // Focus trap: cycle Tab/Shift+Tab within the dialog.
+      if (e.key === 'Tab') {
+        const focusables = focusableInRail();
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const activeEl = document.activeElement;
+        if (e.shiftKey) {
+          if (activeEl === first || !rail.contains(activeEl)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (activeEl === last || !rail.contains(activeEl)) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    });
+
+    /* Viewport-crossing cleanup (both reviewers P0): if the reader
+       opens the drawer on mobile, then rotates / resizes past the
+       desktop breakpoint, the [data-open] + html[data-drawer-open]
+       + visible backdrop all remain — locking page scroll and painting
+       the backdrop over the desktop layout with no way to close
+       (close button is display:none on desktop). Listen for breakpoint
+       crossings and force-close. */
+    const narrowDesktopMq = window.matchMedia('(min-width: 1200px)');
+    const wideDesktopMq = window.matchMedia('(min-width: 1640px)');
+    function onBreakpointChange() {
+      if (!isDrawerOpen()) return;
+      const isWide = document.body.classList.contains('wide');
+      if (isWide ? wideDesktopMq.matches : narrowDesktopMq.matches) {
+        closeDrawer();
+      }
+    }
+    if (narrowDesktopMq.addEventListener) {
+      narrowDesktopMq.addEventListener('change', onBreakpointChange);
+      wideDesktopMq.addEventListener('change', onBreakpointChange);
+    } else if (narrowDesktopMq.addListener) {
+      narrowDesktopMq.addListener(onBreakpointChange);
+      wideDesktopMq.addListener(onBreakpointChange);
+    }
 
     // Initial hydrate. The inline script runs WITHIN the Astro <body>,
     // potentially BEFORE the page's study cards are parsed below the
