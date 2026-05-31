@@ -98,29 +98,24 @@ describe('DigestStudy schema migration (v0.10 optional fields)', () => {
     }
   });
 
-  it('legacy pre-v0.10 artifacts: tag fields are absent (defense against silent migration drift)', () => {
-    // This test documents the state at this PR: every existing digest is
-    // pre-v0.10 and has NO tag fields. After T17 (backfill) lands, this
-    // assertion will need updating — the failure will be informative ("oh
-    // right, we re-tagged the corpus").
-    let foundAny = false;
+  it('post-v0.10 corpus: every dated digest carries at least one tagged study (regression catcher)', () => {
+    // Inverted from the pre-v0.10 transition guard. The backfill landed in
+    // v0.10.0; from here forward, every digest in data/digests/ must include
+    // at least one study with a populated modality/intent/methodology field.
+    // A future builder regression that silently dropped tag emission would
+    // strip tags on the next backfill rebuild, breaking the /tags/ landing
+    // pages — this assertion catches it pre-deploy.
     for (const f of listDigestFiles()) {
       const json = JSON.parse(readFileSync(resolve(DIGESTS_DIR, f), 'utf8'));
+      let anyTagged = false;
       for (const site of json.digest.sites ?? []) {
         for (const study of site.studies ?? []) {
-          if (
-            study.modality !== undefined ||
-            study.intent !== undefined ||
-            study.methodology !== undefined
-          ) {
-            foundAny = true;
+          if (study.modality || study.intent || study.methodology) {
+            anyTagged = true;
           }
         }
       }
+      expect(anyTagged, `${f}: no study carries any tag — backfill regressed?`).toBe(true);
     }
-    expect(
-      foundAny,
-      'A pre-backfill digest has a tag field. Either backfill ran (update this test) or LLM emitted unexpectedly.',
-    ).toBe(false);
   });
 });

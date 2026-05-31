@@ -2,6 +2,71 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.10.0] - 2026-05-30
+
+### Added
+
+- **Cross-cutting tags on top of disease site.** Studies now carry three
+  typed tag fields that the Phase 2 LLM emits and the curator can
+  override: **modality** (radiation, surgery, systemic, combined),
+  **intent** (curative, palliative, supportive), and **methodology**
+  (phase-3-rct, phase-2-trial, phase-1, retrospective, meta-analysis,
+  real-world-evidence, consensus-guideline). Verdict (SOC implication)
+  and meeting are also exposed as tag namespaces. Every existing digest
+  has been backfilled, so 41 studies across 9 dates are tagged at
+  launch.
+- **Tag landing pages.** Slug-only URLs at `/tags/<slug>/` (e.g.
+  `/tags/radiation/`, `/tags/practice-changing/`, `/tags/asco-2026/`).
+  Two- and three-way intersections render at
+  `/tags/<a>+<b>/` and `/tags/<a>+<b>+<c>/`, alphabetical canonical.
+  A `/tags/` index page lists every populated namespace at a glance.
+- **Per-tag RSS feeds and JSON API.** Every tag landing has a
+  `/tags/<slug>/feed.xml` companion. New `/api/v1/tag/<slug>.json`
+  endpoint joins the existing per-date and per-study API surface.
+- **Tag chips on StudyCard + sibling footer.** Each study now renders a
+  chip row showing its tags (each linking to the landing page) plus a
+  footer linking to up to three peer studies that share the same
+  modality+disease-site (the "you might also want to read..." surface).
+- **Home page tag activity histogram.** Inline 80×10px sparklines show
+  the last-30-published-day count per top tag, with up/down/flat trend
+  arrows. Recency-weighted ranking surfaces emerging themes over
+  historical volume. Section sits below the recent-studies feed.
+- **Curator override flags for tag fields.** `npm run override -- --edit
+  --modality=<slug>` (and `--intent`, `--methodology`) lets the curator
+  correct hard semantic LLM calls (palliative vs curative borderline
+  cases, phase 2 vs phase 3 misclassification) without re-running the
+  LLM. Empty value clears the LLM emission; tags are case-normalized
+  and enum-validated, with sidecar JSON edits validated at apply time
+  so a hand-edit can't silently land an out-of-enum slug.
+- **Build-time tag emission observability.** `build:day` now prints
+  `tag emissions: tagged X/Y; modality=...; intent=...; methodology=...`
+  per date so the curator sees Phase 2's tag distribution at a glance.
+- **Backfill smoke test.** `test/backfill-smoke.test.ts` seeds an in-
+  memory SQLite fixture, drives `buildOneDate` end-to-end with a
+  content-addressed mock `LlmClient`, and asserts per-date study
+  identity, source-ref preservation across bookmarks/papers/slides,
+  and tag fields populated on every study.
+
+### Changed
+
+- **PWA cache hygiene extended to /tags/.** Tag landing pages route
+  through the existing NetworkFirst `oncbrain-archive` strategy (3s
+  timeout, 30-entry cap). Intersection pages are deliberately excluded
+  from precache so the SW doesn't cache 1000 combinatoric URLs.
+- **Build-time slug uniqueness assertion.** Build fails if a slug
+  collides across modality + intent + methodology + verdict + meeting
+  namespaces — catches a future tag value or freshly-imported
+  conference that would silently route the wrong studies to a tag
+  landing page.
+
+### Fixed
+
+- **`buildOneDate` no longer auto-runs on import.** Added a realpath-
+  aware `import.meta.url` guard so importing the module from a test
+  doesn't trigger `openDb('./oncbrain.db')` against the curator's
+  local DB. Realpath both sides to handle the Dropbox/Library/
+  CloudStorage symlink alias on macOS.
+
 ## [0.9.15] - 2026-05-30
 
 ### Fixed
