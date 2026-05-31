@@ -1,0 +1,539 @@
+---
+// v0.11 PR-2: cross-page tag filter rail (desktop-only ≥1200px).
+//
+// Server-side renders a checkbox tree grouped by namespace. The inlined
+// client-side script reads the URL on hydrate, ticks matching boxes,
+// and re-applies the filter to every `[data-tags]` card on the page.
+// On change, the URL is updated via `history.replaceState` and the
+// filter is re-applied; the first matching card is scrolled into view.
+//
+// Layout: sits in the LEFT gutter at ≥1200px (narrow content pages,
+// home + sites) and at ≥1640px (wide content pages, date + tag landing
+// pages, which set Base `wide`). On the wide layout the TriageRail
+// gets moved to the right gutter (see TriageRail.astro) so the filter
+// rail owns the left.
+//
+// Below 1200px the rail is hidden entirely. The PR-3 mobile drawer
+// will surface filters on smaller viewports; until then the static
+// `/tags/<slug>/` landings + intersection URLs serve narrow-screen
+// filter intent.
+//
+// Cards lacking the `[data-tags]` attribute (e.g. a hypothetical pre-
+// v0.11 study artifact) are intentionally left UNFILTERED — the
+// filter logic only touches elements that opted in via the attribute.
+// This is the empty-tags semantic pinned in
+// test/study-data-tags.test.ts.
+
+import { VERDICT_META } from '../lib/verdict.ts';
+import type { TagNamespace } from '../lib/tag-foundations.ts';
+
+interface TagOption {
+  slug: string;
+  label: string;
+  count: number; // base count for this tag on the current page
+}
+
+interface Props {
+  // Per-namespace tag options, in the display order the rail should
+  // render. Caller passes only tags that have at least one card on the
+  // current page, so the rail never shows a zero-count checkbox the
+  // reader can never satisfy.
+  modality?: TagOption[];
+  intent?: TagOption[];
+  methodology?: TagOption[];
+  verdict?: TagOption[];
+  meeting?: TagOption[];
+  // Pre-checked filters (e.g. on /tags/<slug>/ the URL's path tag is
+  // checked at server render so the page loads with the correct
+  // visible card set even before JS hydrates). Passed slug-only.
+  initialFilters?: ReadonlyArray<string>;
+  // Pre-checked filters the reader CANNOT uncheck. On /tags/<slug>/
+  // the path-derived tag(s) lock — unchecking them would silently
+  // empty the page (the SSR rendered only matching cards).
+  lockedFilters?: ReadonlyArray<string>;
+  // Total visible-card count for the header. Caller computes this so
+  // the rail header reads e.g. "FILTERS — 41 studies".
+  totalCount: number;
+}
+
+const {
+  modality = [],
+  intent = [],
+  methodology = [],
+  verdict = [],
+  meeting = [],
+  initialFilters = [],
+  lockedFilters = [],
+  totalCount,
+} = Astro.props as Props;
+
+// Render order is the v0.10 information hierarchy: Verdict (the triage
+// signal subspecialists scan for first), then Modality / Intent /
+// Methodology (the structural facets), then Meeting (the temporal
+// facet). Order matches the cards' on-page chip order.
+type Section = { namespace: TagNamespace; label: string; options: TagOption[] };
+const allSections: Section[] = [
+  { namespace: 'verdict', label: 'Verdict', options: verdict },
+  { namespace: 'modality', label: 'Modality', options: modality },
+  { namespace: 'intent', label: 'Intent', options: intent },
+  { namespace: 'methodology', label: 'Methodology', options: methodology },
+  { namespace: 'meeting', label: 'Meeting', options: meeting },
+];
+const sections: Section[] = allSections.filter((s) => s.options.length > 0);
+
+const initialSet = new Set(initialFilters.map((s) => s.toLowerCase()));
+const lockedSet = new Set(lockedFilters.map((s) => s.toLowerCase()));
+
+// Verdict emojis come from the canonical taxonomy. Other namespaces
+// don't carry an emoji vocabulary — they stay plain text.
+function emojiFor(namespace: TagNamespace, slug: string): string | null {
+  if (namespace !== 'verdict') return null;
+  const meta = (VERDICT_META as Record<string, { emoji: string }>)[slug];
+  return meta?.emoji ?? null;
+}
+---
+
+{sections.length > 0 && (
+  <aside class="filter-rail" aria-label="Filter studies by tag" data-filter-rail>
+    <header class="filter-rail-header">
+      <div class="filter-rail-title">Filters</div>
+      <div class="filter-rail-count" data-filter-rail-count>
+        {totalCount} stud{totalCount === 1 ? 'y' : 'ies'}
+      </div>
+    </header>
+
+    <div class="filter-rail-active" data-filter-rail-active hidden>
+      {/* Replaced by client script when filters are active. */}
+    </div>
+
+    {sections.map((section) => (
+      <fieldset class="filter-rail-section" data-namespace={section.namespace}>
+        <legend>{section.label}</legend>
+        <ul>
+          {section.options.map((opt) => {
+            const checked = initialSet.has(opt.slug);
+            const locked = lockedSet.has(opt.slug);
+            const id = `filter-${section.namespace}-${opt.slug}`;
+            const emoji = emojiFor(section.namespace, opt.slug);
+            return (
+              <li>
+                <label for={id}>
+                  <input
+                    type="checkbox"
+                    id={id}
+                    data-filter-checkbox
+                    data-slug={opt.slug}
+                    data-namespace={section.namespace}
+                    checked={checked}
+                    disabled={locked}
+                  />
+                  {emoji && <span class="filter-rail-emoji" aria-hidden="true">{emoji}</span>}
+                  <span class="filter-rail-label">{opt.label}</span>
+                  <span class="filter-rail-base-count">{opt.count}</span>
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+      </fieldset>
+    ))}
+
+    <button type="button" class="filter-rail-clear" data-filter-rail-clear>
+      Clear all
+    </button>
+  </aside>
+)}
+
+<style>
+  /* Hidden on mobile + tablet; PR-3 ships a drawer for those viewports. */
+  .filter-rail { display: none; }
+
+  /* Narrow body (700px, home + sites): rail visible at ≥1200px. The
+     viewport gutter at 1200px is (1200-700)/2 = 250px on each side,
+     enough to hold the 220px rail at left:1.25rem without overlap. */
+  @media (min-width: 1200px) {
+    body:not(.wide) .filter-rail {
+      display: block;
+      position: fixed;
+      top: 6.5rem;
+      left: 1.25rem;
+      width: 220px;
+      max-height: calc(100vh - 9rem);
+      overflow-y: auto;
+      font-family: var(--font-sans);
+      background: var(--bg);
+      z-index: 5;
+    }
+  }
+
+  /* Wide body (1180px, date + tag-landings): rail waits for ≥1640px
+     because at 1200-1639px viewports the content column nearly fills
+     the screen and the rail would paint OVER the right edge of every
+     card. Both reviewers caught this. Below 1640px, wide-body pages
+     get no filter rail — readers narrow via /tags/<slug>/ navigation
+     until PR-3 ships the mobile drawer. */
+  @media (min-width: 1640px) {
+    body.wide .filter-rail {
+      display: block;
+      position: fixed;
+      top: 6.5rem;
+      left: 1.25rem;
+      width: 220px;
+      max-height: calc(100vh - 9rem);
+      overflow-y: auto;
+      font-family: var(--font-sans);
+      background: var(--bg);
+      z-index: 5;
+    }
+  }
+
+  .filter-rail-header {
+    margin-bottom: 0.5rem;
+    padding: 0 0.4rem;
+  }
+  .filter-rail-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .filter-rail-count {
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    margin-top: 0.1rem;
+  }
+
+  /* Active-filter summary chips appear above the namespace sections
+     when at least one filter is on. Updated by the inline script. */
+  .filter-rail-active {
+    margin: 0.4rem 0.4rem 0.8rem;
+    padding: 0.5rem 0.6rem;
+    background: var(--accent-bg);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+  .filter-rail-active strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .filter-rail-section {
+    border: none;
+    margin: 0;
+    padding: 0.5rem 0.4rem 0.5rem;
+  }
+  .filter-rail-section legend {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 0.25rem;
+  }
+  .filter-rail-section ul { list-style: none; margin: 0; padding: 0; }
+  .filter-rail-section li { margin: 0; }
+
+  .filter-rail-section label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.22rem 0.3rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .filter-rail-section label:hover {
+    background: var(--accent-bg);
+  }
+  .filter-rail-section input[type='checkbox'] {
+    flex: none;
+    margin: 0;
+    accent-color: var(--accent);
+  }
+  .filter-rail-section input[type='checkbox']:disabled + .filter-rail-emoji,
+  .filter-rail-section input[type='checkbox']:disabled ~ .filter-rail-label {
+    opacity: 0.55;
+  }
+  .filter-rail-emoji {
+    flex: none;
+    font-size: 0.85rem;
+    line-height: 1;
+  }
+  .filter-rail-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .filter-rail-base-count {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-muted);
+    font-size: 0.72rem;
+  }
+
+  .filter-rail-clear {
+    margin: 0.6rem 0.4rem 0;
+    width: calc(100% - 0.8rem);
+    padding: 0.4rem 0.5rem;
+    font-size: 0.78rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--fg-muted);
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .filter-rail-clear:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .filter-rail-clear:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+</style>
+
+<script is:inline>
+  /* v0.11 PR-2 client-side filter logic. Pure DOM; no bundler.
+     IMPORTANT: KEEP IN SYNC WITH src/lib/filter-store.ts. The pure
+     module is unit-tested in test/filter-store.test.ts; THIS inline
+     script reimplements the same semantics so it can ship per-page
+     without a JS bundle dependency. When you change one, change the
+     other AND update the relevant test. Both reviewers caught the
+     drift risk; a future PR (likely PR-6) can extract this script
+     into a shared <script src> and import directly from the pure
+     module. */
+  function init() {
+    const rail = document.querySelector('[data-filter-rail]');
+    if (!rail) return;
+
+    const FILTER_KEY = 'tag';
+    const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+    const cards = Array.from(document.querySelectorAll('[data-tags]'));
+    if (cards.length === 0) return;
+
+    // Pre-compute each card's slug set once (filter logic queries it
+    // every time the filter set changes). Sub-millisecond for 41 cards.
+    const cardData = cards.map((card) => {
+      const tokens = (card.getAttribute('data-tags') || '')
+        .split(/\s+/)
+        .filter(Boolean);
+      const slugs = new Set();
+      for (const t of tokens) {
+        const idx = t.indexOf(':');
+        if (idx > 0 && idx < t.length - 1) {
+          slugs.add(t.slice(idx + 1).toLowerCase());
+        }
+      }
+      return { el: card, slugs };
+    });
+
+    const checkboxes = Array.from(rail.querySelectorAll('[data-filter-checkbox]'));
+    const activeEl = rail.querySelector('[data-filter-rail-active]');
+    const countEl = rail.querySelector('[data-filter-rail-count]');
+    const clearBtn = rail.querySelector('[data-filter-rail-clear]');
+    const baseTotalText = countEl ? countEl.textContent : '';
+
+    /** Read the active filter set from window.location.search. */
+    function readUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const out = new Set();
+      for (const [k, v] of params) {
+        if (k.toLowerCase() !== FILTER_KEY) continue;
+        const slug = v.trim().toLowerCase();
+        if (!slug || !SLUG_REGEX.test(slug)) continue;
+        out.add(slug);
+      }
+      return out;
+    }
+
+    /** Build a canonical filter URL and history.replaceState into it. */
+    function writeUrl(active) {
+      const url = new URL(window.location.href);
+      // Strip every `tag` (case-folded) before re-appending in canonical
+      // alphabetical order. Mirror of buildFilterUrl in filter-store.ts.
+      const keys = Array.from(new Set(Array.from(url.searchParams.keys())));
+      for (const k of keys) {
+        if (k.toLowerCase() === FILTER_KEY) url.searchParams.delete(k);
+      }
+      const sorted = Array.from(active).sort();
+      for (const slug of sorted) url.searchParams.append(FILTER_KEY, slug);
+      const target = url.pathname + url.search + url.hash;
+      // replaceState (not pushState) — per autoplan revision, every chip
+      // click would otherwise stack as a back-button entry the reader
+      // would have to walk through one filter at a time.
+      window.history.replaceState(window.history.state, '', target);
+    }
+
+    /** Apply the filter to every [data-tags] card on the page. */
+    function applyFilter(active, options) {
+      let visible = 0;
+      for (const { el, slugs } of cardData) {
+        let match = true;
+        if (active.size > 0) {
+          for (const slug of active) {
+            if (!slugs.has(slug)) {
+              match = false;
+              break;
+            }
+          }
+        }
+        if (match) {
+          el.removeAttribute('hidden');
+          visible++;
+        } else {
+          el.setAttribute('hidden', '');
+        }
+      }
+      // Update the active-filter summary + count.
+      if (activeEl) {
+        if (active.size === 0) {
+          activeEl.setAttribute('hidden', '');
+          activeEl.textContent = '';
+        } else {
+          activeEl.removeAttribute('hidden');
+          const chipLabels = [];
+          for (const slug of active) {
+            const cb = rail.querySelector(
+              '[data-filter-checkbox][data-slug="' + slug + '"]',
+            );
+            const labelEl = cb && cb.parentElement
+              ? cb.parentElement.querySelector('.filter-rail-label')
+              : null;
+            chipLabels.push((labelEl && labelEl.textContent) || slug);
+          }
+          activeEl.innerHTML =
+            'Filtering: <strong>' +
+            chipLabels.map(escapeHtml).join(' + ') +
+            '</strong> · ' +
+            visible +
+            ' shown';
+        }
+      }
+      if (countEl) {
+        if (active.size === 0) {
+          countEl.textContent = baseTotalText;
+        } else {
+          countEl.textContent =
+            visible + ' of ' + cardData.length + ' stud' + (cardData.length === 1 ? 'y' : 'ies');
+        }
+      }
+      if (clearBtn) {
+        clearBtn.toggleAttribute('disabled', active.size === 0);
+      }
+      // Scroll-to-first-visible on USER-triggered changes (not URL hydrate).
+      if (options && options.scrollToFirst) {
+        for (const { el } of cardData) {
+          if (!el.hasAttribute('hidden')) {
+            const r = el.getBoundingClientRect();
+            // Only scroll if the first visible card is off-screen above
+            // the fold; otherwise the page jump is more disruptive than
+            // the silent narrow.
+            if (r.top < 0) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    /** Tick / untick checkboxes to match the given active set. */
+    function syncCheckboxes(active) {
+      for (const cb of checkboxes) {
+        const slug = cb.getAttribute('data-slug');
+        if (!slug) continue;
+        const desired = active.has(slug);
+        if (cb.checked !== desired) {
+          cb.checked = desired;
+        }
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /** Hydrate from URL → tick boxes → apply filter. Called on first
+       load and on bfcache restore (pageshow event.persisted=true). */
+    function hydrate() {
+      const active = readUrl();
+      // Respect locked checkboxes — they're always in the active set
+      // regardless of URL (the /tags/<slug>/ page already rendered only
+      // matching cards; unchecking is impossible client-side).
+      for (const cb of checkboxes) {
+        if (cb.disabled) {
+          const slug = cb.getAttribute('data-slug');
+          if (slug) active.add(slug);
+        }
+      }
+      syncCheckboxes(active);
+      applyFilter(active, { scrollToFirst: false });
+    }
+
+    /** Handler for checkbox change events. Reads ticked state from the
+       DOM (not from a Set we maintain), builds the active set, writes
+       URL + applies filter. */
+    function onChange() {
+      const active = new Set();
+      for (const cb of checkboxes) {
+        if (cb.checked) {
+          const slug = cb.getAttribute('data-slug');
+          if (slug) active.add(slug);
+        }
+      }
+      writeUrl(active);
+      applyFilter(active, { scrollToFirst: true });
+    }
+
+    function onClear() {
+      const active = new Set();
+      // Preserve locked filters even on clear-all.
+      for (const cb of checkboxes) {
+        if (cb.disabled) {
+          const slug = cb.getAttribute('data-slug');
+          if (slug) active.add(slug);
+        }
+      }
+      syncCheckboxes(active);
+      writeUrl(active);
+      applyFilter(active, { scrollToFirst: false });
+    }
+
+    // Wire events.
+    for (const cb of checkboxes) {
+      cb.addEventListener('change', onChange);
+    }
+    if (clearBtn) clearBtn.addEventListener('click', onClear);
+
+    // Initial hydrate. The inline script runs WITHIN the Astro <body>,
+    // potentially BEFORE the page's study cards are parsed below the
+    // rail — so we defer wiring + hydrate to DOMContentLoaded (or
+    // execute synchronously if the document is already complete).
+    hydrate();
+    // bfcache restore (iOS Safari + Firefox): re-hydrate so the URL
+    // and the in-memory FilterStore stay in sync. event.persisted=true
+    // means we came back via bfcache, not a fresh load.
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted) hydrate();
+    });
+    // History back/forward changes the URL but not the DOM — re-hydrate.
+    window.addEventListener('popstate', hydrate);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>

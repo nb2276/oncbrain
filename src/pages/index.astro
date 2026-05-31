@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import TriageRail from '../components/TriageRail.astro';
+import TagFilterRail from '../components/TagFilterRail.astro';
 import Sparkline from '../components/Sparkline.astro';
 import {
   listDigests,
@@ -13,6 +13,7 @@ import { linkifyCitations } from '../lib/extract.ts';
 import { DISEASE_SITES, getDiseaseSite } from '../lib/disease-sites.ts';
 import { buildShareUrl } from '../lib/share-url.ts';
 import { studyDataTags } from '../lib/study-data-tags.ts';
+import { buildFilterRailOptions } from '../lib/tag-foundations.ts';
 import {
   buildTagActivity,
   listTagSummaries,
@@ -39,16 +40,28 @@ const navSites = DISEASE_SITES.map((s) => ({
 const navPopulated = navSites.filter((s) => s.count > 0);
 const navEmpty = navSites.filter((s) => s.count === 0);
 
-// Desktop left rail (same format as the study TriageRail): populated disease
-// sites, alphabetical by label. Mobile keeps the top chip nav below.
-const siteRailItems = [...navPopulated]
-  .sort((a, b) => a.label.localeCompare(b.label))
-  .map((s) => ({ href: `/sites/${s.slug}/`, name: s.label, verdictEmoji: s.emoji }));
+// v0.11 PR-2: the home left gutter now hosts the TagFilterRail. The
+// disease-site nav lives in the top chip row below the hero (already
+// present on every viewport), so readers keep their cross-corpus
+// navigation surface; the left rail switches from "browse by site" to
+// "narrow this feed" — the tighter affordance for a returning reader.
 
 // Studies as a flat feed: every study in date-desc order, no date headers.
 // At current scale (low tens) we show the full archive on home; pagination
 // is a deferred concern (see TODOS.md when the archive grows past ~100).
 const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
+
+// v0.11 PR-2: per-namespace filter options scoped to the studies that
+// will actually render on this page. Empty namespaces (no studies
+// carry that tag type) are dropped by buildFilterRailOptions; the
+// component additionally drops empty namespaces at render time.
+const filterOptions = buildFilterRailOptions(
+  feed.map((r) => ({
+    study: r.study,
+    conferenceSlug: r.conference?.slug ?? null,
+    conferenceLabel: r.conference?.name ?? null,
+  })),
+);
 
 // v0.10 home page surfaces (design pass 1 + pass 4 locks):
 //   1. 30-day tag activity histogram: top-5 tags by recency-weighted study
@@ -76,7 +89,14 @@ const tagChipRow = Array.from(tagSummaries.entries())
 
 <Base title={siteName} description="Curated AI-summarized digests of oncology updates.">
   {digests.length > 0 && (
-    <TriageRail items={siteRailItems} label={`Sites · ${siteRailItems.length}`} ariaLabel="Browse by disease site" />
+    <TagFilterRail
+      modality={filterOptions.modality}
+      intent={filterOptions.intent}
+      methodology={filterOptions.methodology}
+      verdict={filterOptions.verdict}
+      meeting={filterOptions.meeting}
+      totalCount={feed.length}
+    />
   )}
   {digests.length > 0 && (
     <nav class="site-nav" aria-label="Browse by disease site">
@@ -274,11 +294,13 @@ const tagChipRow = Array.from(tagSummaries.entries())
   .site-nav {
     margin: 0 0 1.5rem;
   }
-  /* On wide screens the left rail (TriageRail) is the disease-site nav; the top
-     chip cloud is the mobile/tablet fallback. Keep them from doubling up. */
-  @media (min-width: 1200px) {
-    .site-nav { display: none; }
-  }
+  /* v0.11 PR-2: kept visible at every viewport. Pre-v0.11 the desktop
+     left rail (TriageRail) carried the disease-site nav and the top
+     chip row was hidden ≥1200px to avoid duplication. Now the left
+     rail is the TagFilterRail (filter, not site nav), so the chip row
+     becomes the only disease-site navigation surface on desktop too.
+     Both reviewers caught the regression where desktop home lost
+     site nav entirely. */
   .nav-row {
     display: flex;
     flex-wrap: wrap;
