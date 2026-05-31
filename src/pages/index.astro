@@ -12,6 +12,7 @@ import {
 import { linkifyCitations } from '../lib/extract.ts';
 import { DISEASE_SITES, getDiseaseSite } from '../lib/disease-sites.ts';
 import { buildShareUrl } from '../lib/share-url.ts';
+import { studyDataTags } from '../lib/study-data-tags.ts';
 import {
   buildTagActivity,
   listTagSummaries,
@@ -168,8 +169,9 @@ const tagChipRow = Array.from(tagSummaries.entries())
           const tldr = stripStudyNamePrefix(r.study.tldr, r.study.name);
           const teaser = tldr.length > 200 ? tldr.slice(0, 199).trimEnd() + '…' : tldr;
           const shareUrl = buildShareUrl({ site: r.disease_site, date: r.date, slug: r.slug });
+          const dataTags = studyDataTags(r.study, r.disease_site, r.conference?.slug ?? null);
           return (
-            <li class="recent-li">
+            <li class="recent-li" data-tags={dataTags || undefined}>
               <a class="recent-card" href={`/${r.date}/#${r.slug}`}>
                 <div class="recent-meta">
                   <span class="recent-emoji" aria-hidden="true" title={`${meta.label}: ${meta.rationale}`}>{meta.emoji}</span>

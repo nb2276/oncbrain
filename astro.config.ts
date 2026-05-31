@@ -4,6 +4,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { latestDigestDateFromFiles } from './src/lib/pwa-routes.ts';
+import slugUniqueness from './src/integrations/slug-uniqueness.ts';
 
 // Build-time precache of the SINGLE latest digest page. NetworkFirst alone would
 // only cache a digest after the reader visited that exact dated page online; this
@@ -82,6 +83,13 @@ export default defineConfig({
   // JSON API endpoints (v0.8 PR3) so they can emit absolute links.
   site: 'https://oncbrain.oncologytoolkit.com',
   integrations: [
+    // v0.11 PR-1a: fail the build pre-SSG if any tag slug collides
+    // across modality/intent/methodology/verdict/meeting namespaces.
+    // build:day already validates after `build:day`, but `astro build`
+    // ran independently before this — a hand-edited override JSON could
+    // ship a colliding slug and silently mis-route the /tags/<slug>/
+    // landing. This integration closes that gap.
+    slugUniqueness(),
     AstroPWA({
       strategies: 'injectManifest',
       srcDir: 'src',
