@@ -45,12 +45,14 @@ import {
 import { VERDICT_META } from './verdict.ts';
 import type { DigestStudy } from './digest-data.ts';
 
-// Must agree with the threshold + cap baked into
-// `src/pages/tags/[...slug].astro:getStaticPaths` — the allowlist must
-// list exactly the URLs the build actually generated. If those change,
-// update both call sites in lockstep.
-const INTERSECTION_THRESHOLD = 3;
-const INTERSECTION_PAGE_CAP = 1000;
+// Threshold + cap for /tags/<a>+<b>(+<c>)/ landing-page generation.
+// EXPORTED so every consumer (this module's allowlist, getStaticPaths
+// in src/pages/tags/[...slug].astro, the matching feed.xml endpoint)
+// reads from the same source — Codex PR-5 review caught that
+// duplicated literals could drift and produce redirect targets or RSS
+// links without artifacts. v0.11 PR-6 centralization.
+export const INTERSECTION_THRESHOLD = 3;
+export const INTERSECTION_PAGE_CAP = 1000;
 
 export type TagNamespace =
   | 'modality'
