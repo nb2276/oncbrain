@@ -24,6 +24,10 @@ import {
   parseTagPageSlug,
   type TagOccurrence,
 } from '../../../lib/tag-index.ts';
+import {
+  INTERSECTION_THRESHOLD,
+  INTERSECTION_PAGE_CAP,
+} from '../../../lib/tag-foundations.ts';
 import { studiesToRss } from '../../../lib/feed.ts';
 
 const FALLBACK_SITE = 'https://oncbrain.oncologytoolkit.com';
@@ -32,11 +36,10 @@ const FALLBACK_SITE = 'https://oncbrain.oncologytoolkit.com';
 // the URL set emitted by pages/tags/[...slug].astro getStaticPaths so
 // readers can subscribe to any landing they can navigate to.
 export const getStaticPaths: GetStaticPaths = () => {
-  // Astro runs getStaticPaths in an isolated scope — module-top constants
-  // are NOT accessible here. Define inline.
-  const INTERSECTION_THRESHOLD = 3;
-  const INTERSECTION_PAGE_CAP = 1000;
-
+  // INTERSECTION_THRESHOLD + INTERSECTION_PAGE_CAP imported from
+  // tag-foundations.ts as part of v0.11 PR-6's drift-elimination
+  // (Codex PR-5 review). Same source as the allowlist + the
+  // /tags/<...>/ landing-page generator.
   // Fail-closed for the tag surface (Codex review).
   const digests = listDigestsStrict();
   const summaries = listTagSummaries(digests);

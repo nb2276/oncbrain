@@ -112,4 +112,16 @@ const railAria = ariaLabel ?? 'Studies on this page';
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  /* v0.11 PR-6: stale items (target study hidden by the filter rail)
+     are visually dimmed AND removed from the interaction surface.
+     Both reviewers caught the original design exposed dead links +
+     failed WCAG contrast at opacity 0.3. Now `pointer-events: none`
+     blocks the click that would jump to a hidden anchor, and
+     `tabindex` is set to -1 via JS so keyboard users skip them too.
+     Opacity 0.5 stays readable for sighted reference while signaling
+     "out of current scope." */
+  .triage-rail li[data-stale='true'] a {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 </style>

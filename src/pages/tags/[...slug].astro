@@ -23,7 +23,11 @@ import Base from '../../layouts/Base.astro';
 import StudyCard from '../../components/StudyCard.astro';
 import TriageRail from '../../components/TriageRail.astro';
 import TagFilterRail from '../../components/TagFilterRail.astro';
-import { buildFilterRailOptions } from '../../lib/tag-foundations.ts';
+import {
+  buildFilterRailOptions,
+  INTERSECTION_THRESHOLD,
+  INTERSECTION_PAGE_CAP,
+} from '../../lib/tag-foundations.ts';
 import {
   buildReverseIndex,
   buildSiblingPreviews,
@@ -41,10 +45,12 @@ import { verdictMetaFor } from '../../lib/verdict.ts';
 import { studyDataTags } from '../../lib/study-data-tags.ts';
 
 export async function getStaticPaths() {
-  // Astro runs getStaticPaths in an isolated scope — module-top constants
-  // are NOT accessible here. Define inline.
-  const INTERSECTION_THRESHOLD = 3;
-  const INTERSECTION_PAGE_CAP = 1000;
+  // INTERSECTION_THRESHOLD + INTERSECTION_PAGE_CAP are imported above;
+  // v0.11 PR-6 centralized the constants in tag-foundations.ts to
+  // eliminate drift between the allowlist and the build's getStaticPaths
+  // + feed.xml generators. Note: Astro's getStaticPaths runs in an
+  // isolated scope but module-level imports DO work — the previous
+  // inline declaration was an over-cautious carryover from v0.10.
 
   // Codex review: tag surfaces fail-closed on malformed digest input. A
   // silently-skipped bad file would ship missing tag landings; better to

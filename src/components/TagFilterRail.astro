@@ -122,6 +122,22 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
       data-filter-rail-backdrop
       hidden
     ></div>
+    {/* PR-6 page-level empty banner: inline in document flow ABOVE
+        the cards, visible on mobile when the drawer is closed AND
+        the filter yields zero matches. Both reviewers caught the
+        original empty-state lived inside the closed drawer where a
+        mobile reader couldn't see it. Hidden by default; the JS
+        toggles visibility when visible-card count is 0 AND the
+        active filter set is non-empty. Pure text + "Open filters"
+        link to the drawer trigger — the suggestions stay in the
+        drawer panel for desktop + opened-drawer cases. */}
+    <div
+      class="filter-rail-page-empty"
+      data-filter-rail-page-empty
+      hidden
+      role="status"
+      aria-live="polite"
+    ></div>
     <aside
       id="filter-rail-panel"
       class="filter-rail"
@@ -148,6 +164,19 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
 
     <div class="filter-rail-active" data-filter-rail-active hidden>
       {/* Replaced by client script when filters are active. */}
+    </div>
+    <div
+      class="filter-rail-empty"
+      data-filter-rail-empty
+      hidden
+      role="status"
+      aria-live="polite"
+    >
+      {/* PR-9 promise folded into PR-6: when the active filter yields
+          zero studies, surface "Removing X would show N" suggestions
+          so the reader has a one-tap path back to a non-empty view.
+          Populated by the inline script via textContent + dataset to
+          dodge any innerHTML interpolation surface. */}
     </div>
 
     {sections.map((section) => (
@@ -430,6 +459,79 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
     text-decoration: underline;
   }
 
+  /* PR-6 smart empty-state: when the active filter narrows to 0
+     studies, show "Removing X would show N" suggestions so the
+     reader has a one-tap escape. Lives under the active-chips
+     summary; visible only when populated. */
+  .filter-rail-empty {
+    margin: 0.4rem 0.4rem 0.8rem;
+    padding: 0.6rem 0.7rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--fg-muted);
+  }
+  .filter-rail-empty strong {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .filter-rail-empty-suggest {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--accent);
+    background: transparent;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+  }
+  .filter-rail-empty-suggest:hover,
+  .filter-rail-empty-suggest:focus-visible {
+    text-decoration: underline;
+  }
+
+  /* PR-6 page-level empty banner. Inline in document flow so it's
+     readable on mobile when the drawer is closed; on desktop the rail
+     itself shows the richer empty-state, so the banner is suppressed
+     to avoid duplication. */
+  .filter-rail-page-empty {
+    margin: 1rem 0 1.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+  }
+  .filter-rail-page-empty strong {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .filter-rail-page-empty button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-left: 0.4rem;
+    color: var(--accent);
+    font: inherit;
+    cursor: pointer;
+  }
+  .filter-rail-page-empty button:hover,
+  .filter-rail-page-empty button:focus-visible {
+    text-decoration: underline;
+  }
+  /* Suppress the page-level banner at desktop breakpoints — the
+     drawer-internal empty-state is already visible there. */
+  @media (min-width: 1200px) {
+    body:not(.wide) .filter-rail-page-empty { display: none; }
+  }
+  @media (min-width: 1640px) {
+    body.wide .filter-rail-page-empty { display: none; }
+  }
+
   .filter-rail-section {
     border: none;
     margin: 0;
@@ -554,7 +656,33 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
     const triggerCountBase = triggerCount ? triggerCount.textContent : '';
     const backdrop = document.querySelector('[data-filter-rail-backdrop]');
     const closeBtn = rail.querySelector('[data-filter-rail-close]');
+    const emptyEl = rail.querySelector('[data-filter-rail-empty]');
+    const pageEmptyEl = document.querySelector('[data-filter-rail-page-empty]');
     const baseTotalText = countEl ? countEl.textContent : '';
+    /* PR-6 aria-live spam guard: cache the last rendered empty-state
+       signature so repeated checkbox toggles that yield the same
+       suggestion list don't re-trigger a screen-reader announcement.
+       Reviewers caught the original announced on every change. */
+    let lastEmptySignature = '';
+
+    /* PR-6 smart empty-state: build a slug → label map once so the
+       suggestion buttons can render the same label the checkbox shows.
+       Reads from the SSR-rendered checkbox labels rather than the
+       namespace JSON because the checkbox labels reflect the curator's
+       voice + the page's filter context (e.g. "Practice-changing"
+       casing, "Phase 3 RCT" with space, etc.). */
+    const slugLabels = (function () {
+      const out = new Map();
+      for (const cb of checkboxes) {
+        const slug = cb.getAttribute('data-slug');
+        if (!slug) continue;
+        const labelEl = cb.parentElement
+          ? cb.parentElement.querySelector('.filter-rail-label')
+          : null;
+        out.set(slug, (labelEl && labelEl.textContent) || slug);
+      }
+      return out;
+    })();
 
     /* PR-5: read the inlined built-intersections allowlist + the
        namespace map (PR-1a) so the canonical-redirect + RSS-subscribe
@@ -701,6 +829,29 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
       window.history.replaceState(window.history.state, '', target);
     }
 
+    /* PR-6: TriageRail stale-item tracking. The jump-list items on
+       /<date>/ and /tags/<...>/ pages link to per-study anchors; when
+       the filter hides a card, the matching TriageRail item points to
+       a hidden target. Codex P2 caught the dead-link surface. Snapshot
+       the (item, target-card, anchor) triples once at init — TriageRail
+       is SSR'd in the same pass as the cards, so there's no late-DOM
+       race. applyFilter iterates the triples and toggles data-stale +
+       tabindex on the anchor (pointer-events handled by CSS). */
+    const triageItems = (function () {
+      const out = [];
+      const anchors = document.querySelectorAll('.triage-rail a[href^="#"]');
+      for (const a of anchors) {
+        const href = a.getAttribute('href');
+        if (!href) continue;
+        const id = href.slice(1);
+        const target = id ? document.getElementById(id) : null;
+        if (!target) continue;
+        const li = a.closest('li');
+        if (li) out.push({ li, target, anchor: a });
+      }
+      return out;
+    })();
+
     /** Apply the filter to every [data-tags] card on the page. */
     function applyFilter(active, options) {
       let visible = 0;
@@ -719,6 +870,123 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
           visible++;
         } else {
           el.setAttribute('hidden', '');
+        }
+      }
+      // Dim TriageRail items whose target study is now hidden AND
+      // remove them from the keyboard tab order. The CSS rule on
+      // [data-stale=true] handles pointer-events; tabindex=-1 keeps
+      // them out of Tab focus so a keyboard user doesn't land on a
+      // dead link.
+      for (const { li, target, anchor } of triageItems) {
+        if (target.hasAttribute('hidden')) {
+          li.setAttribute('data-stale', 'true');
+          anchor.setAttribute('tabindex', '-1');
+        } else {
+          li.removeAttribute('data-stale');
+          anchor.removeAttribute('tabindex');
+        }
+      }
+      // PR-6 smart empty-state: when the active filter yields 0 cards
+      // AND there are 2+ unlocked filters, suggest the single removal
+      // that would unlock the most studies. textContent + dynamic
+      // button creation only (no innerHTML interpolation surface).
+      //
+      // Aria-live spam guard: compute a signature for the empty-state
+      // contents (visible count + top suggestions) and only re-render
+      // when it changes. Avoids screen-reader announcing on every
+      // checkbox toggle that keeps the state empty.
+      const isEmpty = visible === 0 && active.size > 0;
+      let suggestions = [];
+      if (isEmpty) {
+        const unlocked = Array.from(active).filter(function (s) {
+          return !lockedSlugs.has(s);
+        });
+        for (const removeSlug of unlocked) {
+          const without = new Set(active);
+          without.delete(removeSlug);
+          let wouldShow = 0;
+          for (const { slugs } of cardData) {
+            if (without.size === 0) { wouldShow++; continue; }
+            let ok = true;
+            for (const s of without) {
+              if (!slugs.has(s)) { ok = false; break; }
+            }
+            if (ok) wouldShow++;
+          }
+          if (wouldShow > 0) {
+            suggestions.push({ slug: removeSlug, count: wouldShow });
+          }
+        }
+        // Sort by count desc, then alphabetical for stability.
+        suggestions.sort(function (a, b) {
+          return b.count - a.count || (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0);
+        });
+        // Cap at top-2 — cognitive load + screen-reader brevity.
+        suggestions = suggestions.slice(0, 2);
+      }
+      const signature = isEmpty
+        ? '0|' + suggestions.map(function (s) { return s.slug + ':' + s.count; }).join(',')
+        : 'n';
+      const lockedForcedEmpty =
+        isEmpty && suggestions.length === 0 && lockedSlugs.size > 0;
+      if (emptyEl && signature !== lastEmptySignature) {
+        lastEmptySignature = signature;
+        emptyEl.textContent = '';
+        if (isEmpty) {
+          const heading = document.createElement('strong');
+          heading.textContent = 'No studies match this filter.';
+          emptyEl.appendChild(heading);
+          if (suggestions.length === 0) {
+            if (lockedForcedEmpty) {
+              // Reader is stuck on a locked /tags/<...>/ page where
+              // every unlocked removal still yields 0. Offer an
+              // actual escape link instead of the lying "clear all".
+              const tip = document.createTextNode(' ');
+              emptyEl.appendChild(tip);
+              const link = document.createElement('a');
+              link.href = '/tags/';
+              link.textContent = 'Browse all tags →';
+              emptyEl.appendChild(link);
+            } else {
+              const tip = document.createTextNode(' Use Clear all to reset.');
+              emptyEl.appendChild(tip);
+            }
+          } else {
+            for (const s of suggestions) {
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'filter-rail-empty-suggest';
+              btn.textContent =
+                'Drop ' + (slugLabels.get(s.slug) || s.slug) + ' → ' + s.count + ' would show.';
+              btn.dataset.removeSlug = s.slug;
+              emptyEl.appendChild(btn);
+            }
+          }
+          emptyEl.removeAttribute('hidden');
+        } else {
+          emptyEl.setAttribute('hidden', '');
+        }
+      }
+      // Page-level inline empty banner (mobile-only via CSS). Mirrors
+      // the trigger-open + drawer-open path so a mobile reader with
+      // the drawer closed sees the recovery affordance directly above
+      // the (empty) card list.
+      if (pageEmptyEl) {
+        if (isEmpty) {
+          pageEmptyEl.textContent = '';
+          const heading = document.createElement('strong');
+          heading.textContent = 'No studies match this filter.';
+          pageEmptyEl.appendChild(heading);
+          const open = document.createElement('button');
+          open.type = 'button';
+          open.textContent = 'Open filters';
+          open.addEventListener('click', function () {
+            if (trigger) trigger.click();
+          });
+          pageEmptyEl.appendChild(open);
+          pageEmptyEl.removeAttribute('hidden');
+        } else {
+          pageEmptyEl.setAttribute('hidden', '');
         }
       }
       // Update the active-filter summary + count.
@@ -931,6 +1199,27 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
       cb.addEventListener('change', onChange);
     }
     if (clearBtn) clearBtn.addEventListener('click', onClear);
+    if (emptyEl) {
+      emptyEl.addEventListener('click', function (e) {
+        const target = e.target;
+        if (
+          target instanceof HTMLElement &&
+          target.classList.contains('filter-rail-empty-suggest') &&
+          target.dataset.removeSlug
+        ) {
+          const slug = target.dataset.removeSlug;
+          // Untick the checkbox and fire onChange to re-run the
+          // canonical-redirect + applyFilter pipeline.
+          for (const cb of checkboxes) {
+            if (cb.getAttribute('data-slug') === slug && !cb.disabled) {
+              cb.checked = false;
+              break;
+            }
+          }
+          onChange();
+        }
+      });
+    }
     if (trigger) {
       trigger.addEventListener('click', function () {
         if (isDrawerOpen()) closeDrawer();
