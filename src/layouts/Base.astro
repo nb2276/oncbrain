@@ -7,6 +7,7 @@ import SearchBox from '../components/SearchBox.astro';
 import '@fontsource-variable/newsreader/opsz.css';
 import '@fontsource-variable/newsreader/opsz-italic.css';
 import { tagFoundations } from '../lib/tag-foundations.ts';
+import { jsonForScriptTag } from '../lib/json-script.ts';
 interface Props {
   title: string;
   description?: string;
@@ -69,12 +70,13 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
         {/* Cloudflare Web Analytics — production only, so localhost previews and
             `astro preview` don't pollute the dashboard with dev hits.
             v0.11 PR-1a: `spa: false` disables Cloudflare's automatic SPA
-            pageview tracking. PR-2 will mutate history via replaceState
-            for `?tag=` URL sync; PR-5 will navigate cross-route via
-            location.assign. Without spa:false, CF auto-fires a pageview
-            on every replaceState — every chip click would dwarf real
-            reads. Custom-event filter telemetry is deferred to v0.12
-            (TODOS.md) per the autoplan revision. */}
+            pageview tracking. CF's SPA mode auto-fires pageview events
+            on history.pushState + popstate (per Cloudflare's SPA docs);
+            PR-2 will mutate history via replaceState for `?tag=` URL
+            sync; PR-5 will navigate cross-route via location.assign.
+            Without spa:false, every chip click on a future SPA build
+            would dwarf real reads. Custom-event filter telemetry is
+            deferred to v0.12 (TODOS.md) per the autoplan revision. */}
         <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "7de09515538540f1b55e9d16c13a1cd4", "spa": false}'></script>
       </Fragment>
     )}
@@ -82,8 +84,8 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
         PR-5 canonical-redirect logic read at hydrate time. Versioned so
         a stale PWA-cached page can detect the schema has moved and skip
         the lookup gracefully. */}
-    <script type="application/json" id="tag-namespaces" set:html={JSON.stringify(namespaceMap)} />
-    <script type="application/json" id="built-intersections" set:html={JSON.stringify(intersectionAllowlist)} />
+    <script type="application/json" id="tag-namespaces" set:html={jsonForScriptTag(namespaceMap)} />
+    <script type="application/json" id="built-intersections" set:html={jsonForScriptTag(intersectionAllowlist)} />
     <style is:global>
       :root {
         color-scheme: light dark;

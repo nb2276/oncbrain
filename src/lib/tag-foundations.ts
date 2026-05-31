@@ -22,7 +22,7 @@
 // re-walking the corpus per page render — first call reads + computes,
 // every subsequent call within the build returns the memoized value.
 
-import { readdirSync, existsSync } from 'node:fs';
+import { readdirSync, existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { DigestArtifact } from './digest-data.ts';
 import {
@@ -116,23 +116,33 @@ export function resetTagFoundationsCache(): void {
   _cache = null;
 }
 
-// Lightweight cache key: the sorted-joined digest filenames currently
-// on disk. If the file set hasn't changed since the last call within
-// this build, return the cached value. A digests dir override is
-// allowed for tests; production code passes nothing and reads from the
-// default `data/digests/`.
+// Cache key: resolved directory path + sorted (filename, mtime, size)
+// tuples. Adversarial review (Codex P1) caught the prior filename-only
+// key would (a) cross-contaminate two test fixture dirs whose filename
+// sets coincide and (b) miss in-place content edits during astro dev.
+// Resolving the dir avoids relative-path confusion; mtime + size covers
+// both "file added/removed" and "file replaced with same name."
+function computeDigestsKey(dir: string): string {
+  if (!existsSync(dir)) return `${dir}::`;
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith('.json'))
+    .sort();
+  const parts = files.map((f) => {
+    const st = statSync(resolve(dir, f));
+    return `${f}@${st.mtimeMs}:${st.size}`;
+  });
+  return `${dir}::${parts.join('|')}`;
+}
+
+// A digests dir override is allowed for tests; production code passes
+// nothing and reads from the default `data/digests/`.
 export function tagFoundations(digestsDir?: string): {
   namespaceMap: NamespaceMap;
   intersectionAllowlist: IntersectionAllowlist;
 } {
-  const dir = digestsDir ?? resolve(process.cwd(), 'data/digests');
-  const filesKey = existsSync(dir)
-    ? readdirSync(dir)
-        .filter((f) => f.endsWith('.json'))
-        .sort()
-        .join('|')
-    : '';
-  if (_cache && _cache.digestsKey === filesKey) {
+  const dir = resolve(digestsDir ?? resolve(process.cwd(), 'data/digests'));
+  const digestsKey = computeDigestsKey(dir);
+  if (_cache && _cache.digestsKey === digestsKey) {
     return {
       namespaceMap: _cache.namespaceMap,
       intersectionAllowlist: _cache.intersectionAllowlist,
@@ -141,7 +151,7 @@ export function tagFoundations(digestsDir?: string): {
   const digests = listDigestsStrict(dir);
   const namespaceMap = buildNamespaceMap(digests);
   const intersectionAllowlist = buildIntersectionAllowlist(digests);
-  _cache = { digestsKey: filesKey, namespaceMap, intersectionAllowlist };
+  _cache = { digestsKey, namespaceMap, intersectionAllowlist };
   return { namespaceMap, intersectionAllowlist };
 }
 
