@@ -59,12 +59,14 @@ const railAria = ariaLabel ?? 'Studies on this page';
     }
   }
 
-  /* v0.11 PR-2: wide-body pages (date + tag-landing) now host the
-     TagFilterRail in the LEFT gutter at ≥1200px, so TriageRail mirrors
-     to the RIGHT edge — both rails coexist at any ≥1200px viewport.
-     The right anchor matches TagFilterRail's left anchor (1.25rem)
-     for visual symmetry. */
-  @media (min-width: 1200px) {
+  /* v0.11 PR-2: wide-body pages (date + tag-landing) host the
+     TagFilterRail in the LEFT gutter at ≥1640px; this rail mirrors
+     to the RIGHT edge at the same breakpoint. Below 1640px both
+     rails are hidden because the 1180px content column would paint
+     OVER them — both adversarial + Codex review caught the overlap
+     when this was relaxed to ≥1200px. The right anchor matches
+     TagFilterRail's left anchor (1.25rem) for visual symmetry. */
+  @media (min-width: 1640px) {
     .triage-rail--wide {
       display: block;
       position: fixed;

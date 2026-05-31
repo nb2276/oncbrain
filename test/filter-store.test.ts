@@ -7,7 +7,6 @@ import {
   matchesFilter,
   parseFilterUrl,
   buildFilterUrl,
-  computeFacetUnionCount,
 } from '../src/lib/filter-store.ts';
 
 describe('parseDataTagsAttr', () => {
@@ -148,38 +147,5 @@ describe('buildFilterUrl', () => {
   });
 });
 
-describe('computeFacetUnionCount', () => {
-  // 5 cards, varied tag combinations.
-  const cards: ReadonlyArray<ReadonlySet<string>> = [
-    new Set(['radiation', 'curative', 'phase-3-rct']),
-    new Set(['radiation', 'palliative', 'phase-2-trial']),
-    new Set(['surgery', 'curative', 'phase-3-rct']),
-    new Set(['radiation', 'curative', 'phase-2-trial']),
-    new Set(['systemic', 'palliative', 'phase-3-rct']),
-  ];
-
-  it('with empty filter: count is just how many cards have the candidate slug', () => {
-    expect(computeFacetUnionCount(cards, new Set(), 'radiation')).toBe(3);
-    expect(computeFacetUnionCount(cards, new Set(), 'surgery')).toBe(1);
-    expect(computeFacetUnionCount(cards, new Set(), 'phase-3-rct')).toBe(3);
-  });
-
-  it('with one active filter: count is cards matching BOTH active AND candidate', () => {
-    // Filter active = {phase-3-rct}. Candidate = radiation.
-    // Cards with BOTH phase-3-rct AND radiation: index 0 only.
-    expect(computeFacetUnionCount(cards, new Set(['phase-3-rct']), 'radiation')).toBe(1);
-    // Candidate = surgery (also has phase-3-rct): index 2.
-    expect(computeFacetUnionCount(cards, new Set(['phase-3-rct']), 'surgery')).toBe(1);
-  });
-
-  it('returns 0 when no card has both the active filters and the candidate', () => {
-    // Filter active = {radiation, surgery} — impossible AND combination.
-    expect(computeFacetUnionCount(cards, new Set(['radiation', 'surgery']), 'curative')).toBe(0);
-  });
-
-  it('returns the current count when the candidate is already in the active filter (no-op extension)', () => {
-    // Filter active = {radiation}. Candidate = radiation (no-op).
-    // Cards matching: indices 0, 1, 3 (all have radiation).
-    expect(computeFacetUnionCount(cards, new Set(['radiation']), 'radiation')).toBe(3);
-  });
-});
+// computeFacetUnionCount tests removed alongside the function — re-add
+// in PR-3 or PR-6 when the would-be-count display lands.

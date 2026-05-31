@@ -294,11 +294,13 @@ const tagChipRow = Array.from(tagSummaries.entries())
   .site-nav {
     margin: 0 0 1.5rem;
   }
-  /* On wide screens the left rail (TriageRail) is the disease-site nav; the top
-     chip cloud is the mobile/tablet fallback. Keep them from doubling up. */
-  @media (min-width: 1200px) {
-    .site-nav { display: none; }
-  }
+  /* v0.11 PR-2: kept visible at every viewport. Pre-v0.11 the desktop
+     left rail (TriageRail) carried the disease-site nav and the top
+     chip row was hidden ≥1200px to avoid duplication. Now the left
+     rail is the TagFilterRail (filter, not site nav), so the chip row
+     becomes the only disease-site navigation surface on desktop too.
+     Both reviewers caught the regression where desktop home lost
+     site nav entirely. */
   .nav-row {
     display: flex;
     flex-wrap: wrap;

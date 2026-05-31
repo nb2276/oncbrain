@@ -118,38 +118,9 @@ export function buildFilterUrl(
   return out;
 }
 
-/**
- * Facet count math: "what would the visible-card count be if this
- * candidate tag were added to the active filter set?" Used by the
- * filter rail to display would-be counts on unchecked checkboxes
- * (per the autoplan revision's facet count semantics decision).
- *
- * For CHECKED facets (slug already in filterSlugs), the caller passes
- * the current visible count directly — no math needed.
- *
- * For UNCHECKED facets, this returns count(cards that match
- * filterSlugs ∪ {candidate}). Always ≤ current visible count because
- * AND can only narrow.
- *
- * Implementation: pure, O(N × F) where N = cards on page, F = active
- * filters. Sub-millisecond on 41 cards × ~5 tokens × 0-5 filters.
- */
-export function computeFacetUnionCount(
-  cardSlugSets: ReadonlyArray<ReadonlySet<string>>,
-  filterSlugs: ReadonlySet<string>,
-  candidateSlug: string,
-): number {
-  let count = 0;
-  for (const card of cardSlugSets) {
-    if (!card.has(candidateSlug)) continue;
-    let allMatched = true;
-    for (const slug of filterSlugs) {
-      if (!card.has(slug)) {
-        allMatched = false;
-        break;
-      }
-    }
-    if (allMatched) count++;
-  }
-  return count;
-}
+// computeFacetUnionCount (would-be-count math for unchecked facets)
+// was drafted here per the autoplan revision's facet semantics decision,
+// but PR-2 ships static base counts on each checkbox label rather than
+// dynamic would-be counts. Both reviewers caught it as dead code with
+// no caller. Re-introduce in PR-3 or PR-6 when the count display is
+// wired into the inline script.

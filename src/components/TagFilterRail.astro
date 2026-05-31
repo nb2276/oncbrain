@@ -148,19 +148,32 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
   /* Hidden on mobile + tablet; PR-3 ships a drawer for those viewports. */
   .filter-rail { display: none; }
 
-  /* ≥1200px viewport on every page type. The rail anchors to the
-     viewport's LEFT EDGE (not the content column), so the same rule
-     applies whether the page uses the 700px or 1180px Base body
-     width. On wide-body pages (date + tag-landings) the centered
-     content column nominally has 10px of gutter at 1200px viewport
-     and 230px at 1640px; the rail sits 1.25rem from the viewport
-     edge, narrowly overlapping the reading column at the smallest
-     wide-body viewports — readers at that exact width get the rail
-     above the content (no scroll fight, just visual proximity).
-     TriageRail on wide-body pages is mirrored to the right edge, so
-     both rails coexist at any ≥1200px viewport. */
+  /* Narrow body (700px, home + sites): rail visible at ≥1200px. The
+     viewport gutter at 1200px is (1200-700)/2 = 250px on each side,
+     enough to hold the 220px rail at left:1.25rem without overlap. */
   @media (min-width: 1200px) {
-    .filter-rail {
+    body:not(.wide) .filter-rail {
+      display: block;
+      position: fixed;
+      top: 6.5rem;
+      left: 1.25rem;
+      width: 220px;
+      max-height: calc(100vh - 9rem);
+      overflow-y: auto;
+      font-family: var(--font-sans);
+      background: var(--bg);
+      z-index: 5;
+    }
+  }
+
+  /* Wide body (1180px, date + tag-landings): rail waits for ≥1640px
+     because at 1200-1639px viewports the content column nearly fills
+     the screen and the rail would paint OVER the right edge of every
+     card. Both reviewers caught this. Below 1640px, wide-body pages
+     get no filter rail — readers narrow via /tags/<slug>/ navigation
+     until PR-3 ships the mobile drawer. */
+  @media (min-width: 1640px) {
+    body.wide .filter-rail {
       display: block;
       position: fixed;
       top: 6.5rem;
@@ -286,10 +299,15 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
 </style>
 
 <script is:inline>
-  /* v0.11 PR-2 client-side filter logic. Pure DOM; no bundler. The
-     pure logic equivalents live in src/lib/filter-store.ts and are
-     unit-tested in test/filter-store.test.ts — when this file's
-     behavior drifts, the tests catch the regression. */
+  /* v0.11 PR-2 client-side filter logic. Pure DOM; no bundler.
+     IMPORTANT: KEEP IN SYNC WITH src/lib/filter-store.ts. The pure
+     module is unit-tested in test/filter-store.test.ts; THIS inline
+     script reimplements the same semantics so it can ship per-page
+     without a JS bundle dependency. When you change one, change the
+     other AND update the relevant test. Both reviewers caught the
+     drift risk; a future PR (likely PR-6) can extract this script
+     into a shared <script src> and import directly from the pure
+     module. */
   function init() {
     const rail = document.querySelector('[data-filter-rail]');
     if (!rail) return;
