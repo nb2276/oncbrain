@@ -35,8 +35,15 @@ import {
   MODALITY_VALUES,
   INTENT_VALUES,
   METHODOLOGY_VALUES,
+  MODALITY_DEFS,
+  INTENT_DEFS,
+  METHODOLOGY_DEFS,
+  isValidModality,
+  isValidIntent,
+  isValidMethodology,
 } from './tags.ts';
 import { VERDICT_META } from './verdict.ts';
+import type { DigestStudy } from './digest-data.ts';
 
 // Must agree with the threshold + cap baked into
 // `src/pages/tags/[...slug].astro:getStaticPaths` — the allowlist must
@@ -163,5 +170,125 @@ export function readDigestsForFoundations(
 ): DigestArtifact[] {
   const dir = digestsDir ?? resolve(process.cwd(), 'data/digests');
   return listDigestsStrict(dir);
+}
+
+// ---------------- PR-2 filter rail option builder ----------------
+
+export type FilterStudyContext = {
+  study: DigestStudy;
+  conferenceSlug: string | null;
+  conferenceLabel: string | null;
+};
+
+export type FilterTagOption = {
+  slug: string;
+  label: string;
+  count: number;
+};
+
+export type FilterRailOptions = {
+  modality: FilterTagOption[];
+  intent: FilterTagOption[];
+  methodology: FilterTagOption[];
+  verdict: FilterTagOption[];
+  meeting: FilterTagOption[];
+};
+
+const MODALITY_LABEL_BY_SLUG: Record<string, string> = Object.fromEntries(
+  MODALITY_DEFS.map((d) => [d.slug, d.label]),
+);
+const INTENT_LABEL_BY_SLUG: Record<string, string> = Object.fromEntries(
+  INTENT_DEFS.map((d) => [d.slug, d.label]),
+);
+const METHODOLOGY_LABEL_BY_SLUG: Record<string, string> = Object.fromEntries(
+  METHODOLOGY_DEFS.map((d) => [d.slug, d.label]),
+);
+
+/**
+ * Build the per-namespace option arrays the TagFilterRail component
+ * consumes. Each entry counts the number of studies on the CURRENT
+ * PAGE (not the corpus) that carry that tag — so the rail never offers
+ * a zero-count checkbox the reader can never satisfy.
+ *
+ * The returned arrays are sorted by count desc, then slug asc, so the
+ * most populous tags surface first within each namespace.
+ *
+ * Disease-site is intentionally NOT in the output — see
+ * buildNamespaceMap header for the supportive-collision rationale.
+ */
+export function buildFilterRailOptions(
+  studies: ReadonlyArray<FilterStudyContext>,
+): FilterRailOptions {
+  const modality = new Map<string, FilterTagOption>();
+  const intent = new Map<string, FilterTagOption>();
+  const methodology = new Map<string, FilterTagOption>();
+  const verdict = new Map<string, FilterTagOption>();
+  const meeting = new Map<string, FilterTagOption>();
+
+  const bump = (
+    bucket: Map<string, FilterTagOption>,
+    slug: string,
+    label: string,
+  ): void => {
+    const existing = bucket.get(slug);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      bucket.set(slug, { slug, label, count: 1 });
+    }
+  };
+
+  for (const { study, conferenceSlug, conferenceLabel } of studies) {
+    if (study.modality && isValidModality(study.modality)) {
+      bump(
+        modality,
+        study.modality,
+        MODALITY_LABEL_BY_SLUG[study.modality] ?? study.modality,
+      );
+    }
+    if (study.intent && isValidIntent(study.intent)) {
+      bump(intent, study.intent, INTENT_LABEL_BY_SLUG[study.intent] ?? study.intent);
+    }
+    if (study.methodology && isValidMethodology(study.methodology)) {
+      bump(
+        methodology,
+        study.methodology,
+        METHODOLOGY_LABEL_BY_SLUG[study.methodology] ?? study.methodology,
+      );
+    }
+    const verdictSlug = study.verdict?.soc_implication;
+    if (
+      verdictSlug &&
+      Object.prototype.hasOwnProperty.call(VERDICT_META, verdictSlug)
+    ) {
+      bump(
+        verdict,
+        verdictSlug,
+        VERDICT_META[verdictSlug as keyof typeof VERDICT_META].label,
+      );
+    }
+    if (conferenceSlug) {
+      bump(meeting, conferenceSlug, conferenceLabel ?? conferenceSlug);
+    }
+  }
+
+  const sortOptions = (m: Map<string, FilterTagOption>): FilterTagOption[] =>
+    Array.from(m.values()).sort((a, b) =>
+      b.count !== a.count
+        ? b.count - a.count
+        : a.slug < b.slug
+          ? -1
+          : a.slug > b.slug
+            ? 1
+            : 0,
+    );
+
+  return {
+    modality: sortOptions(modality),
+    intent: sortOptions(intent),
+    methodology: sortOptions(methodology),
+    verdict: sortOptions(verdict),
+    meeting: sortOptions(meeting),
+  };
 }
 

@@ -22,6 +22,8 @@
 import Base from '../../layouts/Base.astro';
 import StudyCard from '../../components/StudyCard.astro';
 import TriageRail from '../../components/TriageRail.astro';
+import TagFilterRail from '../../components/TagFilterRail.astro';
+import { buildFilterRailOptions } from '../../lib/tag-foundations.ts';
 import {
   buildReverseIndex,
   buildSiblingPreviews,
@@ -132,6 +134,20 @@ const railItems = occurrences.map((occ) => ({
 // renders. Each StudyCard reads its per-card sibling list from the map.
 const siblingPreviews = buildSiblingPreviews(listDigestsStrict());
 
+// v0.11 PR-2: filter options scoped to occurrences on this tag landing.
+// The URL's path-derived tag(s) are passed as both initialFilters AND
+// lockedFilters — they're pre-checked and can't be unticked (the SSR
+// page only rendered matching cards; unchecking would silently leave
+// the reader on a "filter active but no studies" view they can't escape
+// without navigating away).
+const filterOptions = buildFilterRailOptions(
+  occurrences.map((occ) => ({
+    study: occ.study,
+    conferenceSlug: occ.conference?.slug ?? null,
+    conferenceLabel: occ.conference?.name ?? null,
+  })),
+);
+
 const pageTitle = `${titleLabel} — oncbrain`;
 const pageDescription =
   tags.length === 1
@@ -140,6 +156,16 @@ const pageDescription =
 ---
 
 <Base title={pageTitle} description={pageDescription} wide={true}>
+  <TagFilterRail
+    modality={filterOptions.modality}
+    intent={filterOptions.intent}
+    methodology={filterOptions.methodology}
+    verdict={filterOptions.verdict}
+    meeting={filterOptions.meeting}
+    initialFilters={tags}
+    lockedFilters={tags}
+    totalCount={occurrences.length}
+  />
   <TriageRail items={railItems} wide={true} />
 
   <nav class="crumb" aria-label="Tag filters">

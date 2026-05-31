@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import StudyCard from '../components/StudyCard.astro';
 import TriageRail from '../components/TriageRail.astro';
+import TagFilterRail from '../components/TagFilterRail.astro';
 import {
   listDigests,
   type DigestArtifact,
@@ -15,6 +16,7 @@ import { getDiseaseSite } from '../lib/disease-sites.ts';
 import { assignSlugsForDate } from '../lib/slug-resolve.ts';
 import { verdictMetaFor } from '../lib/verdict.ts';
 import { studyDataTags } from '../lib/study-data-tags.ts';
+import { buildFilterRailOptions } from '../lib/tag-foundations.ts';
 import {
   buildSiblingPreviews,
   listDigestsStrict,
@@ -63,6 +65,15 @@ const railItems = allStudiesOnDate.map((study) => ({
   name: study.name,
   verdictEmoji: verdictMetaFor(study.verdict?.soc_implication)?.emoji ?? '·',
 }));
+
+// v0.11 PR-2: filter options scoped to studies on this date.
+const filterOptions = buildFilterRailOptions(
+  allStudiesOnDate.map((study) => ({
+    study,
+    conferenceSlug: conference?.slug ?? null,
+    conferenceLabel: conference?.name ?? null,
+  })),
+);
 
 // Per-study render data precomputed so the template stays a single expression
 // per study (Astro's parser dislikes multi-statement arrow bodies in JSX):
@@ -124,6 +135,14 @@ for (const study of allStudiesOnDate) {
 ---
 
 <Base title={title} description={digest.top_line || digest.tldr} wide={true}>
+  <TagFilterRail
+    modality={filterOptions.modality}
+    intent={filterOptions.intent}
+    methodology={filterOptions.methodology}
+    verdict={filterOptions.verdict}
+    meeting={filterOptions.meeting}
+    totalCount={allStudiesOnDate.length}
+  />
   <TriageRail items={railItems} wide={true} />
   <nav class="crumb">
     <a href="/">← all dates</a>

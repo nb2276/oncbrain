@@ -9,6 +9,8 @@ import {
   buildIntersectionAllowlist,
   tagFoundations,
   resetTagFoundationsCache,
+  buildFilterRailOptions,
+  type FilterStudyContext,
 } from '../src/lib/tag-foundations.ts';
 import type { DigestArtifact, DigestStudy } from '../src/lib/digest-data.ts';
 
@@ -171,5 +173,96 @@ describe('tagFoundations (module cache)', () => {
     expect(result.namespaceMap.version).toBe(1);
     expect(result.namespaceMap.map.radiation).toBe('modality');
     expect(result.intersectionAllowlist.paths).toEqual([]);
+  });
+});
+
+describe('buildFilterRailOptions', () => {
+  function ctx(
+    study: Partial<DigestStudy>,
+    conferenceSlug: string | null = null,
+    conferenceLabel: string | null = null,
+  ): FilterStudyContext {
+    return {
+      study: {
+        name: 'X',
+        tldr: 'X',
+        details: [],
+        nct: null,
+        tweet_ids: [],
+        ...study,
+      } as DigestStudy,
+      conferenceSlug,
+      conferenceLabel,
+    };
+  }
+
+  it('groups tags into the five namespaces with per-page counts', () => {
+    const out = buildFilterRailOptions([
+      ctx({
+        modality: 'radiation',
+        intent: 'curative',
+        methodology: 'phase-3-rct',
+        verdict: { soc_implication: 'practice-changing', rationale: '', audience: null },
+      }, 'asco-2026', 'ASCO 2026'),
+      ctx({
+        modality: 'radiation',
+        intent: 'palliative',
+        methodology: 'phase-2-trial',
+        verdict: { soc_implication: 'confirmatory', rationale: '', audience: null },
+      }, 'asco-2026', 'ASCO 2026'),
+      ctx({
+        modality: 'surgery',
+        intent: 'curative',
+        methodology: 'phase-3-rct',
+        verdict: { soc_implication: 'confirmatory', rationale: '', audience: null },
+      }, 'esmo-2026', 'ESMO 2026'),
+    ]);
+    expect(out.modality.map((o) => [o.slug, o.count])).toEqual([
+      ['radiation', 2],
+      ['surgery', 1],
+    ]);
+    expect(out.intent.map((o) => [o.slug, o.count])).toEqual([
+      ['curative', 2],
+      ['palliative', 1],
+    ]);
+    expect(out.methodology.map((o) => [o.slug, o.count])).toEqual([
+      ['phase-3-rct', 2],
+      ['phase-2-trial', 1],
+    ]);
+    expect(out.verdict.map((o) => [o.slug, o.count])).toEqual([
+      ['confirmatory', 2],
+      ['practice-changing', 1],
+    ]);
+    expect(out.meeting.map((o) => [o.slug, o.count])).toEqual([
+      ['asco-2026', 2],
+      ['esmo-2026', 1],
+    ]);
+  });
+
+  it('resolves human-readable labels per namespace', () => {
+    const out = buildFilterRailOptions([
+      ctx({
+        modality: 'radiation',
+        verdict: { soc_implication: 'practice-changing', rationale: '', audience: null },
+      }, 'asco-2026', 'ASCO 2026'),
+    ]);
+    expect(out.modality[0]!.label).toBe('Radiation');
+    expect(out.verdict[0]!.label).toBe('Practice-changing');
+    expect(out.meeting[0]!.label).toBe('ASCO 2026');
+  });
+
+  it('returns empty arrays for namespaces with no studies', () => {
+    const out = buildFilterRailOptions([ctx({ modality: 'radiation' })]);
+    expect(out.intent).toEqual([]);
+    expect(out.methodology).toEqual([]);
+    expect(out.verdict).toEqual([]);
+    expect(out.meeting).toEqual([]);
+  });
+
+  it('drops invalid enum values silently (legacy artifacts)', () => {
+    const out = buildFilterRailOptions([
+      ctx({ modality: 'chemo' as unknown as 'radiation' }),
+    ]);
+    expect(out.modality).toEqual([]);
   });
 });

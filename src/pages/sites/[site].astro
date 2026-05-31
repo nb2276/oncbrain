@@ -2,11 +2,13 @@
 import Base from '../../layouts/Base.astro';
 import StudyCard from '../../components/StudyCard.astro';
 import TriageRail from '../../components/TriageRail.astro';
+import TagFilterRail from '../../components/TagFilterRail.astro';
 import { listSiteSummaries, type SiteSummary } from '../../lib/digest-data.ts';
 import { getDiseaseSite } from '../../lib/disease-sites.ts';
 import { deriveSlug } from '../../lib/slug.ts';
 import { verdictMetaFor } from '../../lib/verdict.ts';
 import { studyDataTags } from '../../lib/study-data-tags.ts';
+import { buildFilterRailOptions } from '../../lib/tag-foundations.ts';
 import {
   buildSiblingPreviews,
   listDigestsStrict,
@@ -53,9 +55,26 @@ const railItems = summary.occurrences.map((occ) => ({
   name: occ.study.name,
   verdictEmoji: verdictMetaFor(occ.study.verdict?.soc_implication)?.emoji ?? '·',
 }));
+
+// v0.11 PR-2: filter options scoped to this site's studies.
+const filterOptions = buildFilterRailOptions(
+  summary.occurrences.map((occ) => ({
+    study: occ.study,
+    conferenceSlug: occ.conference?.slug ?? null,
+    conferenceLabel: occ.conference?.name ?? null,
+  })),
+);
 ---
 
 <Base title={`${meta.label} — oncbrain`} description={`Studies aggregated for ${meta.label} across all digest dates.`} wide={true}>
+  <TagFilterRail
+    modality={filterOptions.modality}
+    intent={filterOptions.intent}
+    methodology={filterOptions.methodology}
+    verdict={filterOptions.verdict}
+    meeting={filterOptions.meeting}
+    totalCount={summary.occurrences.length}
+  />
   <TriageRail items={railItems} wide={true} />
   <nav class="crumb">
     <a href="/">← all dates</a>
