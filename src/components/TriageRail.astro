@@ -113,13 +113,15 @@ const railAria = ariaLabel ?? 'Studies on this page';
     white-space: nowrap;
   }
   /* v0.11 PR-6: stale items (target study hidden by the filter rail)
-     dim to ~30% opacity so they read as "not currently visible." The
-     TagFilterRail inline script applies the data attribute after each
-     filter change; CSS does the rest. Stale items are still focusable
-     and clickable — the jump would land on a hidden anchor but doing
-     nothing felt wrong, and the design pass-1 review wanted them
-     "always there, dim when out of scope" rather than removed. */
+     are visually dimmed AND removed from the interaction surface.
+     Both reviewers caught the original design exposed dead links +
+     failed WCAG contrast at opacity 0.3. Now `pointer-events: none`
+     blocks the click that would jump to a hidden anchor, and
+     `tabindex` is set to -1 via JS so keyboard users skip them too.
+     Opacity 0.5 stays readable for sighted reference while signaling
+     "out of current scope." */
   .triage-rail li[data-stale='true'] a {
-    opacity: 0.3;
+    opacity: 0.5;
+    pointer-events: none;
   }
 </style>
