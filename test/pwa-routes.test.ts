@@ -5,6 +5,8 @@ import {
   isSearchIndex,
   NAV_FALLBACK_DENYLIST,
   latestDigestDateFromFiles,
+  hasOnlyFilterParams,
+  stripFilterParams,
 } from '../src/lib/pwa-routes.ts';
 
 describe('isArchivePage', () => {
@@ -136,5 +138,138 @@ describe('latestDigestDateFromFiles', () => {
   it('returns null when there are no dated digests', () => {
     expect(latestDigestDateFromFiles([])).toBe(null);
     expect(latestDigestDateFromFiles(['index.json', 'foo.txt'])).toBe(null);
+  });
+});
+
+// v0.11 PR-1b: SW filter-param normalization. These two helpers gate
+// the cache strategy: hasOnlyFilterParams decides what gets routed to
+// the SW cache; stripFilterParams normalizes the cache key so variants
+// share one entry. Both are pure and unit-tested here; integration into
+// pwa-sw.ts is verified by the Astro build emitting a valid SW bundle.
+
+describe('hasOnlyFilterParams', () => {
+  it('accepts URLs with no query params', () => {
+    expect(hasOnlyFilterParams(new URL('https://example.com/sites/breast/'))).toBe(true);
+  });
+
+  it('accepts URLs with a single `tag` param', () => {
+    expect(hasOnlyFilterParams(new URL('https://example.com/?tag=radiation'))).toBe(true);
+  });
+
+  it('accepts URLs with repeated `tag` params (the canonical form for multi-tag filter)', () => {
+    expect(
+      hasOnlyFilterParams(new URL('https://example.com/?tag=radiation&tag=phase-3-rct')),
+    ).toBe(true);
+  });
+
+  it('rejects legacy `tags` param (v0.11 standardized on repeated `tag=` only)', () => {
+    // No v0.11 surface emits `?tags=`; if a future redirect is needed,
+    // re-add then with the redirect handler.
+    expect(
+      hasOnlyFilterParams(new URL('https://example.com/?tags=radiation+phase-3-rct')),
+    ).toBe(false);
+  });
+
+  it('accepts mixed-case TAG / Tag / TaG / tAG (case-folded, defense-in-depth)', () => {
+    expect(hasOnlyFilterParams(new URL('https://example.com/?TAG=radiation'))).toBe(true);
+    expect(hasOnlyFilterParams(new URL('https://example.com/?Tag=radiation'))).toBe(true);
+    expect(hasOnlyFilterParams(new URL('https://example.com/?TaG=radiation'))).toBe(true);
+    expect(hasOnlyFilterParams(new URL('https://example.com/?tAG=radiation'))).toBe(true);
+  });
+
+  it('rejects URLs with utm_* tracking params (fall through to network)', () => {
+    expect(
+      hasOnlyFilterParams(new URL('https://example.com/?utm_source=twitter')),
+    ).toBe(false);
+  });
+
+  it('rejects URLs that mix filter + tracking params', () => {
+    expect(
+      hasOnlyFilterParams(
+        new URL('https://example.com/?tag=radiation&utm_source=twitter'),
+      ),
+    ).toBe(false);
+  });
+
+  it('rejects URLs with gclid / fbclid / any other non-filter key', () => {
+    expect(hasOnlyFilterParams(new URL('https://example.com/?gclid=abc'))).toBe(false);
+    expect(hasOnlyFilterParams(new URL('https://example.com/?fbclid=xyz'))).toBe(false);
+    expect(hasOnlyFilterParams(new URL('https://example.com/?ref=hn'))).toBe(false);
+  });
+});
+
+describe('stripFilterParams', () => {
+  it('strips a single `tag` param, returning the bare path URL', () => {
+    const out = stripFilterParams(new URL('https://example.com/sites/breast/?tag=radiation'));
+    expect(out.toString()).toBe('https://example.com/sites/breast/');
+  });
+
+  it('strips all instances of repeated `tag` params (canonical multi-tag form)', () => {
+    const out = stripFilterParams(
+      new URL('https://example.com/?tag=radiation&tag=phase-3-rct&tag=curative'),
+    );
+    expect(out.toString()).toBe('https://example.com/');
+  });
+
+  it('does NOT strip legacy `tags` param (kept distinct from `tag` per v0.11 URL spec)', () => {
+    const out = stripFilterParams(
+      new URL('https://example.com/?tag=radiation&tags=phase-3-rct'),
+    );
+    expect(out.toString()).toBe('https://example.com/?tags=phase-3-rct');
+  });
+
+  it('strips mixed-case TAG / Tag / TaG (case-folded)', () => {
+    expect(stripFilterParams(new URL('https://example.com/?TAG=Radiation')).toString()).toBe(
+      'https://example.com/',
+    );
+    expect(stripFilterParams(new URL('https://example.com/?Tag=Radiation')).toString()).toBe(
+      'https://example.com/',
+    );
+    expect(stripFilterParams(new URL('https://example.com/?TaG=Radiation')).toString()).toBe(
+      'https://example.com/',
+    );
+  });
+
+  it('strips duplicate-value `tag` params (?tag=foo&tag=foo)', () => {
+    // URLSearchParams.delete() removes all entries with that name in one
+    // shot — pin the contract so a future runtime change can't regress.
+    const out = stripFilterParams(new URL('https://example.com/?tag=foo&tag=foo'));
+    expect(out.toString()).toBe('https://example.com/');
+  });
+
+  it('removes the trailing `?` artifact when the only param was stripped', () => {
+    // PR-2 URL-share code will compare cache-key strings; this exact
+    // form (no trailing `?`) is the contract.
+    const out = stripFilterParams(new URL('https://example.com/sites/breast/?tag=radiation'));
+    expect(out.toString()).toBe('https://example.com/sites/breast/');
+    expect(out.search).toBe('');
+  });
+
+  it('does NOT touch utm_* or other non-filter params', () => {
+    const out = stripFilterParams(
+      new URL('https://example.com/?tag=radiation&utm_source=twitter'),
+    );
+    expect(out.toString()).toBe('https://example.com/?utm_source=twitter');
+  });
+
+  it('preserves the hash fragment', () => {
+    const out = stripFilterParams(
+      new URL('https://example.com/2026-05-17/?tag=radiation#senomac'),
+    );
+    expect(out.toString()).toBe('https://example.com/2026-05-17/#senomac');
+  });
+
+  it('returns a NEW URL object — does not mutate input', () => {
+    const input = new URL('https://example.com/?tag=radiation');
+    const out = stripFilterParams(input);
+    expect(input.search).toBe('?tag=radiation'); // input untouched
+    expect(out.search).toBe(''); // output stripped
+    expect(out).not.toBe(input);
+  });
+
+  it('is idempotent — strip twice yields the same URL', () => {
+    const once = stripFilterParams(new URL('https://example.com/?tag=radiation'));
+    const twice = stripFilterParams(once);
+    expect(twice.toString()).toBe(once.toString());
   });
 });

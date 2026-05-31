@@ -65,6 +65,62 @@ export const NAV_FALLBACK_DENYLIST: RegExp[] = [
   /\/[^/?]+\.[^/?]+$/,
 ];
 
+// v0.11 PR-1b: filter-rail params recognized by the SW. These get
+// NORMALIZED OUT of the cache key so `/sites/breast/?tag=radiation` and
+// `/sites/breast/?tag=phase-3-rct` share one cached entry instead of
+// thrashing the 30-entry archive cap. Stored lowercase; the matcher
+// folds case so `?Tag=...` and `?TAG=...` also normalize (defense in
+// depth — the PR-2 emitter only writes lowercase, but readers can
+// paste anything).
+//
+// `tag` is the canonical form (Codex pass-2 P0 #4 chose repeated-param
+// `?tag=a&tag=b` over the `+`-separated `?tags=a+b` ambiguity). The
+// legacy `?tags=` form is intentionally NOT aliased — no v0.11 surface
+// emits it, and Base.astro's canonical link already strips both. If a
+// future PR ships a redirect from `?tags=` to `?tag=`, re-add then.
+const FILTER_PARAM_KEYS = new Set(['tag']);
+
+/**
+ * True iff every query parameter on `url` is one of the recognized
+ * filter-rail params. URLs with NO query params return true (trivially).
+ * URLs with even one non-filter param (utm_*, gclid, fbclid, etc) return
+ * false — those are deliberately rejected from the SW cache to avoid
+ * one-off variants eating the 30-entry archive budget. Tracking-param
+ * variants fall through to the network on every request, which is the
+ * right behavior (their value is the side-effect on the analytics
+ * beacon, not the cached HTML).
+ */
+export function hasOnlyFilterParams(url: URL): boolean {
+  for (const key of url.searchParams.keys()) {
+    if (!FILTER_PARAM_KEYS.has(key.toLowerCase())) return false;
+  }
+  return true;
+}
+
+/**
+ * Return a new URL with every filter-rail param stripped. Used by the SW
+ * `cacheKeyWillBeUsed` plugin so `?tag=radiation`, `?tag=phase-3-rct`,
+ * `?tag=radiation&tag=phase-3-rct`, and the bare URL all share one cache
+ * entry. Pure: the input URL is not mutated. Preserves path, hash, and
+ * any NON-filter params (though those are normally rejected by the
+ * matcher before reaching this helper — see hasOnlyFilterParams).
+ */
+export function stripFilterParams(url: URL): URL {
+  const out = new URL(url.toString());
+  // Snapshot keys before mutation: URLSearchParams.delete() removes ALL
+  // entries with that name in one shot, but iterating-and-mutating the
+  // live set is unsafe across runtimes. The snapshot also lets us fold
+  // case for matching without relying on URLSearchParams' (case-sensitive)
+  // key store.
+  const keys = Array.from(new Set(Array.from(out.searchParams.keys())));
+  for (const key of keys) {
+    if (FILTER_PARAM_KEYS.has(key.toLowerCase())) {
+      out.searchParams.delete(key);
+    }
+  }
+  return out;
+}
+
 /**
  * Newest published digest date from a list of `data/digests` filenames.
  * Pure (takes filenames, not fs) so it is unit-testable; the config does the
