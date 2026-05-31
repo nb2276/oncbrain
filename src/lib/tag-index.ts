@@ -649,3 +649,175 @@ export function resolveTagDisplay(
   // Unknown slug AND no occurrence sample — caller should 404.
   return null;
 }
+
+// ---------------- Per-study chip + sibling helpers (StudyCard surface) ----------------
+
+/**
+ * Tag slugs to render as chips on a StudyCard, in stable order:
+ * modality → intent → methodology → verdict → meeting. Disease-site is NOT
+ * included — that taxonomy renders via the existing emoji vocabulary on the
+ * card head and lives at /sites/, not /tags/.
+ *
+ * Null-valued namespaces are filtered. Callers (the per-date / per-site / per-
+ * tag pages) compose chip rows by iterating this list and linking each slug
+ * to /tags/<slug>/.
+ */
+export function studyTagSlugs(
+  study: DigestStudy,
+  conferenceSlug: string | null,
+): string[] {
+  const out: string[] = [];
+  if (study.modality && isValidModality(study.modality)) out.push(study.modality);
+  if (study.intent && isValidIntent(study.intent)) out.push(study.intent);
+  if (study.methodology && isValidMethodology(study.methodology)) out.push(study.methodology);
+  if (study.verdict?.soc_implication) out.push(study.verdict.soc_implication);
+  if (conferenceSlug) out.push(conferenceSlug);
+  // Defensive dedup (build-time assertion gates production, but a hypothetical
+  // bypass would otherwise yield duplicate chips on the card head).
+  return Array.from(new Set(out));
+}
+
+/**
+ * Pre-resolved tag chip pairs: {slug, label} per namespace, in stable order.
+ * Preferred over studyTagSlugs() for the StudyCard chip-row site because
+ * meeting labels (conference.name) require occurrence context that the card
+ * doesn't have — the caller (a page that knows the conference) does.
+ *
+ * Adversarial-review finding: calling resolveTagDisplay(slug) inside the
+ * card with no occurrences argument returned null for every meeting slug
+ * because the meeting-label path falls back to occurrence sampling. The
+ * 5th-namespace chip silently dropped on every card. This helper closes
+ * that gap by resolving labels at the call site, where conference data
+ * lives.
+ */
+export function studyTagChips(
+  study: DigestStudy,
+  conference: { slug: string; name: string } | null,
+): Array<{ slug: string; label: string }> {
+  const out: Array<{ slug: string; label: string }> = [];
+  if (study.modality && isValidModality(study.modality)) {
+    const def = MODALITY_DEFS.find((d) => d.slug === study.modality)!;
+    out.push({ slug: def.slug, label: def.label });
+  }
+  if (study.intent && isValidIntent(study.intent)) {
+    const def = INTENT_DEFS.find((d) => d.slug === study.intent)!;
+    out.push({ slug: def.slug, label: def.label });
+  }
+  if (study.methodology && isValidMethodology(study.methodology)) {
+    const def = METHODOLOGY_DEFS.find((d) => d.slug === study.methodology)!;
+    out.push({ slug: def.slug, label: def.label });
+  }
+  if (study.verdict?.soc_implication) {
+    const slug = study.verdict.soc_implication;
+    out.push({ slug, label: VERDICT_META[slug].label });
+  }
+  if (conference) {
+    out.push({ slug: conference.slug, label: conference.name });
+  }
+  // Defensive dedup by slug — same rationale as studyTagSlugs.
+  const seen = new Set<string>();
+  return out.filter((c) => {
+    if (seen.has(c.slug)) return false;
+    seen.add(c.slug);
+    return true;
+  });
+}
+
+/**
+ * "Studies like this" preview: a sibling rendered in a card's depth fold.
+ * Just the fields the row template needs (no resolved sources, no figures).
+ */
+export type SiblingPreview = {
+  date: string;
+  resolvedSlug: string;
+  name: string;
+  tldr: string;
+  verdictEmoji: string | null;
+};
+
+// Module-level cache for sibling previews. Astro evaluates page frontmatter
+// once PER STATIC PAGE, so without this every emitted page would re-walk the
+// full corpus (O(M × N²) at build time). The cache is build-scope: when the
+// astro build process boots, this module is loaded once and reused across all
+// static page renders.
+//
+// Cache key is a sentinel — the corpus is immutable mid-build, so a single
+// computed map serves every caller. Codex review surfaced the perf cliff;
+// this closes it without changing the page-side API.
+let _siblingPreviewsCache: Map<string, SiblingPreview[]> | null = null;
+
+/**
+ * Pre-computed sibling previews per study, cached at module scope so the
+ * full-corpus O(N²) sibling scan runs ONCE per build instead of once per
+ * emitted page (~1000 tag intersection pages at the cap → 1000× redundant
+ * scans without caching).
+ *
+ * The map only carries entries for studies that have ≥1 sibling — a card
+ * with no siblings omits the footer entirely (no empty "STUDIES LIKE THIS"
+ * label).
+ *
+ * Pages call this with the corpus they already loaded; the cache keys off
+ * the FIRST call's result. Subsequent calls IGNORE the argument and return
+ * the cached map. This is correct because: (a) all callers pass the same
+ * listDigestsStrict() result, (b) the corpus is immutable during a build,
+ * (c) cross-build invalidation happens automatically when the Node process
+ * exits.
+ *
+ * For tests that need fresh corpora, call resetSiblingPreviewsCache() in
+ * beforeEach.
+ */
+export function buildSiblingPreviews(
+  digests: readonly DigestArtifact[],
+): Map<string, SiblingPreview[]> {
+  if (_siblingPreviewsCache !== null) return _siblingPreviewsCache;
+  _siblingPreviewsCache = computeSiblingPreviewsUncached(digests);
+  return _siblingPreviewsCache;
+}
+
+/** Test-only: drop the cache so the next buildSiblingPreviews() rebuilds. */
+export function resetSiblingPreviewsCache(): void {
+  _siblingPreviewsCache = null;
+}
+
+function computeSiblingPreviewsUncached(
+  digests: readonly DigestArtifact[],
+): Map<string, SiblingPreview[]> {
+  const siblings = computeSiblings(digests);
+  type Enriched = { name: string; tldr: string; verdictEmoji: string | null };
+  const enriched = new Map<string, Enriched>();
+  for (const digest of digests) {
+    for (const { study, resolvedSlug } of walkStudiesPerDate(digest)) {
+      const verdictMeta = study.verdict?.soc_implication
+        ? VERDICT_META[study.verdict.soc_implication]
+        : null;
+      enriched.set(studyKeyString({ date: digest.date, resolvedSlug }), {
+        name: study.name,
+        tldr: study.tldr,
+        verdictEmoji: verdictMeta?.emoji ?? null,
+      });
+    }
+  }
+
+  const out = new Map<string, SiblingPreview[]>();
+  for (const [key, siblingKeys] of siblings) {
+    if (siblingKeys.length === 0) continue;
+    const previews: SiblingPreview[] = [];
+    for (const sk of siblingKeys) {
+      const skKey = studyKeyString(sk);
+      const info = enriched.get(skKey);
+      if (!info) continue; // defensive — siblings derived from same corpus
+      previews.push({
+        date: sk.date,
+        resolvedSlug: sk.resolvedSlug,
+        name: info.name,
+        tldr: info.tldr,
+        verdictEmoji: info.verdictEmoji,
+      });
+    }
+    if (previews.length > 0) out.set(key, previews);
+  }
+  return out;
+}
+
+// Re-export so consumers don't need to import from both tags.ts and tag-index.ts.
+export { isSafeTagSlug };

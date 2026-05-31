@@ -6,6 +6,12 @@ import { listSiteSummaries, type SiteSummary } from '../../lib/digest-data.ts';
 import { getDiseaseSite } from '../../lib/disease-sites.ts';
 import { deriveSlug } from '../../lib/slug.ts';
 import { verdictMetaFor } from '../../lib/verdict.ts';
+import {
+  buildSiblingPreviews,
+  listDigestsStrict,
+  studyKeyString,
+  studyTagChips,
+} from '../../lib/tag-index.ts';
 
 export async function getStaticPaths() {
   return listSiteSummaries().map((s) => ({
@@ -20,6 +26,11 @@ interface Props {
 
 const { summary } = Astro.props as Props;
 const meta = getDiseaseSite(summary.disease_site);
+
+// v0.10: tag chip + sibling helpers. Sibling map computed ONCE over the full
+// corpus and looked up per-occurrence (NOT per-render-call inside the map
+// callback — that would be O(N²) in the corpus).
+const siblingPreviews = buildSiblingPreviews(listDigestsStrict());
 
 // Group occurrences by date so the page reads as a reverse-chronological
 // stack with date headers, like a per-site journal.
@@ -70,16 +81,21 @@ const railItems = summary.occurrences.map((occ) => ({
           <a href={`/${date}/`}>{date}</a>
           {conf && <span class="conf-pill">{conf.name}</span>}
         </h3>
-        {occurrences.map((occ) => (
-          <StudyCard
-            study={occ.study}
-            anchorId={anchorByOcc.get(occ)}
-            bookmarks={occ.bookmarks}
-            papers={occ.papers ?? []}
-            slides={occ.slides ?? []}
-            shareUrl={`/sites/${summary.disease_site}/#${anchorByOcc.get(occ)}`}
-          />
-        ))}
+        {occurrences.map((occ) => {
+          const siblingKey = studyKeyString({ date: occ.date, resolvedSlug: occ.resolvedSlug });
+          return (
+            <StudyCard
+              study={occ.study}
+              anchorId={anchorByOcc.get(occ)}
+              bookmarks={occ.bookmarks}
+              papers={occ.papers ?? []}
+              slides={occ.slides ?? []}
+              shareUrl={`/sites/${summary.disease_site}/#${anchorByOcc.get(occ)}`}
+              tagChips={studyTagChips(occ.study, occ.conference)}
+              siblings={siblingPreviews.get(siblingKey) ?? []}
+            />
+          );
+        })}
       </section>
     );
   })}

@@ -14,6 +14,12 @@ import { linkifyCitations } from '../lib/extract.ts';
 import { getDiseaseSite } from '../lib/disease-sites.ts';
 import { assignSlugsForDate } from '../lib/slug-resolve.ts';
 import { verdictMetaFor } from '../lib/verdict.ts';
+import {
+  buildSiblingPreviews,
+  listDigestsStrict,
+  studyKeyString,
+  studyTagChips,
+} from '../lib/tag-index.ts';
 
 export async function getStaticPaths() {
   return listDigests().map((artifact) => ({
@@ -28,6 +34,12 @@ interface Props {
 
 const { artifact } = Astro.props as Props;
 const { date, conference, digest, bookmarks, generated_at } = artifact;
+
+// v0.10: per-date sibling map built ONCE over the full corpus. Per-card
+// lookup via studyKeyString({date, resolvedSlug}). Pre-computing avoids
+// the O(N²) per-card-render scan that would otherwise blow build time
+// as the corpus grows.
+const siblingPreviews = buildSiblingPreviews(listDigestsStrict());
 
 const bookmarksById = new Map(bookmarks.map((b) => [b.id, b]));
 const papersById = new Map((artifact.papers ?? []).map((p) => [p.id, p]));
@@ -149,17 +161,23 @@ for (const study of allStudiesOnDate) {
           <p class="site-intro" set:html={linkifyCitations(site.intro)} />
         )}
 
-        {site.studies.map((study) => (
-          <StudyCard
-            study={study}
-            anchorId={slugByStudy.get(study)}
-            authors={authorsByStudy.get(study)}
-            bookmarks={sourcesByStudy.get(study)!.bookmarks}
-            papers={sourcesByStudy.get(study)!.papers}
-            slides={sourcesByStudy.get(study)!.slides}
-            shareUrl={`/sites/${site.disease_site}/#${date}-${slugByStudy.get(study)}`}
-          />
-        ))}
+        {site.studies.map((study) => {
+          const resolvedSlug = slugByStudy.get(study)!;
+          const siblingKey = studyKeyString({ date, resolvedSlug });
+          return (
+            <StudyCard
+              study={study}
+              anchorId={resolvedSlug}
+              authors={authorsByStudy.get(study)}
+              bookmarks={sourcesByStudy.get(study)!.bookmarks}
+              papers={sourcesByStudy.get(study)!.papers}
+              slides={sourcesByStudy.get(study)!.slides}
+              shareUrl={`/sites/${site.disease_site}/#${date}-${resolvedSlug}`}
+              tagChips={studyTagChips(study, conference)}
+              siblings={siblingPreviews.get(siblingKey) ?? []}
+            />
+          );
+        })}
 
         {!site.studies.some((s) => s.open_questions && s.open_questions.length > 0) &&
           site.open_questions &&

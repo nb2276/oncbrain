@@ -24,12 +24,15 @@ import StudyCard from '../../components/StudyCard.astro';
 import TriageRail from '../../components/TriageRail.astro';
 import {
   buildReverseIndex,
+  buildSiblingPreviews,
   computeIntersections,
   intersectTagOccurrences,
   listDigestsStrict,
   listTagSummaries,
   parseTagPageSlug,
   resolveTagDisplay,
+  studyKeyString,
+  studyTagChips,
   type TagOccurrence,
 } from '../../lib/tag-index.ts';
 import { verdictMetaFor } from '../../lib/verdict.ts';
@@ -124,6 +127,10 @@ const railItems = occurrences.map((occ) => ({
   verdictEmoji: verdictMetaFor(occ.study.verdict?.soc_implication)?.emoji ?? '·',
 }));
 
+// v0.10: sibling map computed ONCE over the full corpus for this page's
+// renders. Each StudyCard reads its per-card sibling list from the map.
+const siblingPreviews = buildSiblingPreviews(listDigestsStrict());
+
 const pageTitle = `${titleLabel} — oncbrain`;
 const pageDescription =
   tags.length === 1
@@ -167,16 +174,21 @@ const pageDescription =
   {occurrences.length === 0 ? (
     <p class="empty">No studies match this combination yet.</p>
   ) : (
-    occurrences.map((occ) => (
-      <StudyCard
-        study={occ.study}
-        anchorId={anchorFor(occ)}
-        bookmarks={occ.bookmarks}
-        papers={occ.papers ?? []}
-        slides={occ.slides ?? []}
-        shareUrl={`/tags/${canonical}/#${anchorFor(occ)}`}
-      />
-    ))
+    occurrences.map((occ) => {
+      const siblingKey = studyKeyString({ date: occ.date, resolvedSlug: occ.resolvedSlug });
+      return (
+        <StudyCard
+          study={occ.study}
+          anchorId={anchorFor(occ)}
+          bookmarks={occ.bookmarks}
+          papers={occ.papers ?? []}
+          slides={occ.slides ?? []}
+          shareUrl={`/tags/${canonical}/#${anchorFor(occ)}`}
+          tagChips={studyTagChips(occ.study, occ.conference)}
+          siblings={siblingPreviews.get(siblingKey) ?? []}
+        />
+      );
+    })
   )}
 </Base>
 

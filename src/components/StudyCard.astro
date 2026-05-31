@@ -21,6 +21,7 @@ import {
   type DigestArtifactPaper,
   type DigestArtifactSlide,
 } from '../lib/digest-data.ts';
+import type { SiblingPreview } from '../lib/tag-index.ts';
 
 type Bookmark = DigestArtifact['bookmarks'][number];
 type StudyAuthor = { name: string; kind: 'tweet' | 'paper' };
@@ -38,6 +39,20 @@ interface Props {
   // Optional canonical share URL (per-site page anchor: /sites/{site}/#{date}-{slug}).
   // Absent → share button is not rendered. Absolutized at click time in share-script.ts.
   shareUrl?: string;
+  // v0.10: pre-resolved cross-cutting tag chips. Caller passes via
+  // studyTagChips() so the label resolution happens where conference
+  // context lives (meeting labels need digest.conference.name, which the
+  // card doesn't have). Adversarial review caught that calling
+  // resolveTagDisplay() with no occurrences silently dropped every meeting
+  // chip. Rendered as a plain text meta-line below the comparator on the
+  // card head; each chip links to /tags/<slug>/. Absent / empty → no row.
+  tagChips?: Array<{ slug: string; label: string }>;
+  // v0.10: "Studies like this" sibling footer entries (up to 3, date-desc).
+  // Caller looks up via buildSiblingPreviews() and passes the per-study list.
+  // Rendered inside the depth fold, after authors attribution. Defensive
+  // .slice(0, 3) on render in case a caller passes more. Absent / empty →
+  // no section.
+  siblings?: SiblingPreview[];
 }
 
 const {
@@ -48,7 +63,15 @@ const {
   anchorId,
   authors = [],
   shareUrl,
+  tagChips = [],
+  siblings = [],
 } = Astro.props as Props;
+
+// Defensive cap on siblings: computeSiblings already caps at 3, but a future
+// caller passing a longer list shouldn't render an unbounded footer.
+const visibleSiblings = siblings.slice(0, 3);
+const hasTagChips = tagChips.length > 0;
+const hasSiblings = visibleSiblings.length > 0;
 
 // 🔗 bullets are lifted out of the main list into the "vs leading data" callout.
 function isComparatorBullet(d: DigestDetail): boolean {
@@ -161,6 +184,20 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
         ))}
       </ul>
     </section>
+  )}
+  {/* ── v0.10 tag chip row: plain text meta-line, dot separated. Each chip
+      links to /tags/<slug>/. No border, no fill, no uppercase. Wraps to
+      multiple lines on narrow viewports rather than overflowing. Subtraction
+      first per DESIGN.md "cards earn their existence." ── */}
+  {hasTagChips && (
+    <p class="study-tags" aria-label="Cross-cutting tags">
+      {tagChips.map((c, i) => (
+        <Fragment>
+          {i > 0 && <span class="tag-sep" aria-hidden="true">·</span>}
+          <a class="tag-chip" href={`/tags/${c.slug}/`}>{c.label}</a>
+        </Fragment>
+      ))}
+    </p>
   )}
   {/* ── Share affordance: top-right of the head. Anchored to .study-head (not
       to .study) so on wide-desktop figures-present cards it stays in the left
@@ -345,6 +382,29 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
             <span class="author-more"> · +{authors.length - 3}</span>
           )}
         </p>
+      )}
+      {/* ── v0.10 "Studies like this" sibling footer. Inside the depth fold so
+          mobile readers see it only when they tap to expand (auto-expanded on
+          desktop per Base.astro). No cards, no borders, no grid — reads as a
+          continuation of the source-attribution lines per design pass 4. ── */}
+      {hasSiblings && (
+        <aside class="study-siblings" aria-labelledby={`siblings-${anchorId ?? study.slug ?? 'x'}`}>
+          <h4 class="section-label sibling-label" id={`siblings-${anchorId ?? study.slug ?? 'x'}`}>· Studies like this ·</h4>
+          <ul class="sibling-list">
+            {visibleSiblings.map((s) => (
+              <li class="sibling-row">
+                <a class="sibling-link" href={`/${s.date}/#${s.resolvedSlug}`}>
+                  {s.verdictEmoji && (
+                    <span class="sibling-emoji" aria-hidden="true">{s.verdictEmoji}</span>
+                  )}
+                  <span class="sibling-name">{s.name}</span>
+                  <span class="sibling-tldr">{s.tldr}</span>
+                  <span class="sibling-date">{s.date}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
       )}
     </details>
   )}
@@ -1066,6 +1126,107 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     border-radius: 3px;
     width: 18rem;
     max-width: 100%;
+  }
+
+  /* ── v0.10 tag chip row. Plain text meta-line per DESIGN.md "cards earn
+       their existence": no border, no fill, no uppercase, no rounded corners.
+       Sans 0.78rem --fg-muted to match the SearchBox result-meta and the
+       header sub line. Chip hover lifts to --accent; focus-visible adds a
+       visible outline so the chip is keyboard-navigable. Wraps to multiple
+       lines on narrow viewports rather than overflowing. ── */
+  .study-tags {
+    margin: 0.85rem 0 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--fg-muted);
+    line-height: 1.4;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.5rem;
+    align-items: baseline;
+  }
+  .tag-chip {
+    color: var(--fg-muted);
+    text-decoration: none;
+    /* Hit area extension via small vertical padding. We deliberately do NOT
+       use the negative-margin trick that pulled the hit zone to 44px: on
+       flex-wrap to a second row, the negative top margin on row-2 chips
+       overlapped row-1 padding, sending bottom-edge taps to the wrong row
+       (adversarial-review finding). Accept a smaller hit area for inline
+       text links — standard Apple HIG treatment for non-button affordances. */
+    padding: 0.15rem 0;
+  }
+  .tag-chip:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .tag-chip:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  .tag-sep {
+    color: var(--fg-muted);
+    user-select: none;
+  }
+
+  /* ── v0.10 "Studies like this" sibling footer. Lives inside the depth
+       fold so mobile readers see it on tap-expand (desktop auto-expands per
+       Base.astro). Reads as a continuation of the source-attribution lines:
+       no cards, no borders, no grid layout. ── */
+  .study-siblings {
+    margin: 1.5rem 0 0;
+    padding: 0;
+  }
+  .sibling-label {
+    /* The leading and trailing · come from the literal text in the markup
+       per design pass 4. .section-label gives us sans 0.7rem uppercase
+       --fg-muted from the existing depth-section subhead style. */
+    margin: 0 0 0.5rem;
+  }
+  .sibling-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .sibling-row {
+    margin: 0.35rem 0;
+  }
+  .sibling-link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+    color: var(--fg);
+    text-decoration: none;
+    font-family: var(--font-serif);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .sibling-link:hover {
+    color: var(--accent);
+  }
+  .sibling-link:hover .sibling-name {
+    text-decoration: underline;
+  }
+  .sibling-emoji {
+    flex: 0 0 auto;
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+  .sibling-name {
+    font-weight: 600;
+  }
+  .sibling-tldr {
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+  .sibling-date {
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    margin-left: auto;
   }
 </style>
 <script>

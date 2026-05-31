@@ -270,6 +270,13 @@ export type SiteStudyOccurrence = {
   date: string; // YYYY-MM-DD
   conference: { slug: string; name: string } | null;
   study: DigestStudy;
+  // v0.10: per-date resolved slug (matches the anchor on /<date>/ page). Used
+  // by callers that look up cross-axis data keyed by {date, resolvedSlug} —
+  // notably the v0.10 sibling map. Computed via assignSlugsForDate over the
+  // FULL per-date study list (across all disease-site sections), so two
+  // same-name studies in different sections get the same -2/-3 suffix
+  // resolution as the date page.
+  resolvedSlug: string;
   bookmarks: DigestArtifact['bookmarks']; // bookmarks referenced by this study
   papers?: DigestArtifactPaper[]; // v0.5+: papers referenced by this study
   slides?: DigestArtifactSlide[]; // v0.5+: slides referenced by this study
@@ -286,10 +293,17 @@ export function listSiteSummaries(): SiteSummary[] {
     const bookmarkById = new Map(artifact.bookmarks.map((b) => [b.id, b]));
     const papersById = new Map((artifact.papers ?? []).map((p) => [p.id, p]));
     const slidesById = new Map((artifact.slides ?? []).map((s) => [s.id, s]));
+    // v0.10: compute per-date resolved slugs across ALL disease-site sections,
+    // matching tag-index.ts:walkStudiesPerDate. Indexed positionally by the
+    // flat study list, then mapped back to each (site, study) pair below.
+    const allStudiesOnDate = artifact.digest.sites.flatMap((s) => s.studies);
+    const resolvedSlugs = assignSlugsForDate(allStudiesOnDate);
+    let perDateIdx = 0;
     for (const site of artifact.digest.sites) {
       if (!bySite.has(site.disease_site)) bySite.set(site.disease_site, []);
       const list = bySite.get(site.disease_site)!;
       for (const study of site.studies) {
+        const resolvedSlug = resolvedSlugs[perDateIdx++]!;
         // v0.5: typed refs preferred; tweet_ids is the back-compat fallback.
         const refs: DigestSourceRef[] = study.source_ids ?? study.tweet_ids.map((id) => ({ type: 'tweet' as const, id }));
         const studyBookmarks = refs
@@ -308,6 +322,7 @@ export function listSiteSummaries(): SiteSummary[] {
           date: artifact.date,
           conference: artifact.conference,
           study,
+          resolvedSlug,
           bookmarks: studyBookmarks,
           papers: studyPapers.length > 0 ? studyPapers : undefined,
           slides: studySlides.length > 0 ? studySlides : undefined,
