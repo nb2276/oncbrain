@@ -111,6 +111,91 @@ describe('applyOverrides', () => {
   });
 });
 
+// v0.10: tag-field overrides. Curator fixes wrong Phase 2 LLM emissions
+// (palliative vs curative, phase-2 vs phase-3) without re-running the LLM.
+// Empty/null value clears the LLM emission so the study disappears from
+// that namespace's landing page entirely.
+describe('applyOverrides — v0.10 tag fields', () => {
+  it('sets modality / intent / methodology via the edits map', () => {
+    const { digest, summary } = applyOverrides(sampleDigest(), {
+      edits: {
+        'study-a': {
+          modality: 'radiation',
+          intent: 'palliative',
+          methodology: 'phase-3-rct',
+        },
+      },
+    });
+    const a = digest.sites[0]!.studies[0]!;
+    expect(a.modality).toBe('radiation');
+    expect(a.intent).toBe('palliative');
+    expect(a.methodology).toBe('phase-3-rct');
+    expect(summary.edited).toEqual(['study-a']);
+  });
+
+  it('overrides a wrong LLM emission (palliative → curative)', () => {
+    const base = sampleDigest();
+    base.sites[0]!.studies[0]!.intent = 'palliative';
+    const { digest } = applyOverrides(base, {
+      edits: { 'study-a': { intent: 'curative' } },
+    });
+    expect(digest.sites[0]!.studies[0]!.intent).toBe('curative');
+  });
+
+  it('null value clears the LLM emission (study off the modality landing)', () => {
+    const base = sampleDigest();
+    base.sites[0]!.studies[0]!.modality = 'radiation';
+    const { digest } = applyOverrides(base, {
+      edits: { 'study-a': { modality: null } },
+    });
+    expect(digest.sites[0]!.studies[0]!.modality).toBeNull();
+  });
+
+  it('does not silently propagate an unknown tag field (whitelist enforced)', () => {
+    // A sidecar JSON could contain stale or hand-edited fields. pickEditable
+    // only copies whitelisted keys, so a typo or future-removed field can't
+    // poison the rendered study.
+    const ov = {
+      edits: {
+        'study-a': { modality: 'radiation', some_future_field: 'leaked' },
+      },
+    } as unknown as DigestOverrides;
+    const { digest } = applyOverrides(sampleDigest(), ov);
+    const a = digest.sites[0]!.studies[0]! as Record<string, unknown>;
+    expect(a.modality).toBe('radiation');
+    expect(a.some_future_field).toBeUndefined();
+  });
+
+  it('partial tag edits do not zero out other tag fields', () => {
+    const base = sampleDigest();
+    base.sites[0]!.studies[0]!.modality = 'radiation';
+    base.sites[0]!.studies[0]!.intent = 'curative';
+    base.sites[0]!.studies[0]!.methodology = 'phase-3-rct';
+    const { digest } = applyOverrides(base, {
+      edits: { 'study-a': { intent: 'palliative' } }, // only intent
+    });
+    const a = digest.sites[0]!.studies[0]!;
+    expect(a.modality).toBe('radiation'); // preserved
+    expect(a.intent).toBe('palliative'); // overridden
+    expect(a.methodology).toBe('phase-3-rct'); // preserved
+  });
+
+  it('tag overrides survive across multiple build:day rebuilds (sidecar persistence)', () => {
+    // Sidecar is the SAME JSON we load each build; applying it twice should
+    // be idempotent and not accumulate "edited" counts in the per-build
+    // summary beyond the one slug.
+    const ov: DigestOverrides = {
+      edits: { 'study-a': { modality: 'surgery', intent: 'palliative' } },
+    };
+    const first = applyOverrides(sampleDigest(), ov);
+    const second = applyOverrides(sampleDigest(), ov);
+    expect(first.digest.sites[0]!.studies[0]!.modality).toBe('surgery');
+    expect(second.digest.sites[0]!.studies[0]!.modality).toBe('surgery');
+    expect(first.summary.edited).toEqual(['study-a']);
+    expect(second.summary.edited).toEqual(['study-a']);
+  });
+});
+
 describe('formatOverrideSummary', () => {
   it('summarizes applied changes', () => {
     const s = formatOverrideSummary({

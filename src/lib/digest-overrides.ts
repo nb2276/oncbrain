@@ -24,6 +24,14 @@ const EDITABLE_STUDY_KEYS = [
   'key_figure_caption',
   'key_figure_url',
   'consort',
+  // v0.10: cross-cutting tag fields. The Phase 2 LLM emits these but is
+  // imperfect on hard semantic calls (palliative vs curative, phase 2 vs
+  // phase 3). Curator overrides land here so a wrong emission can be fixed
+  // without re-running the LLM. Pass null to explicitly clear the LLM's
+  // emission ({modality: null} → study appears on no modality landing).
+  'modality',
+  'intent',
+  'methodology',
 ] as const;
 
 export type StudyEdit = Partial<Pick<DigestStudy, (typeof EDITABLE_STUDY_KEYS)[number]>>;
