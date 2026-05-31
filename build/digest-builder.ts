@@ -58,7 +58,7 @@ import {
   isOcrEntryFresh,
   type OcrEntry,
 } from '../src/lib/vision-ocr.ts';
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { writeFileSync, mkdirSync, existsSync, realpathSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -581,10 +581,25 @@ async function main() {
 // smoke test can import `buildOneDate` without triggering the full builder
 // loop (which would otherwise call openDb('./oncbrain.db') against the
 // curator's local DB at module load time).
-const invokedAsScript =
-  process.argv[1] !== undefined &&
-  resolve(process.argv[1]) === fileURLToPath(import.meta.url);
-if (invokedAsScript) {
+//
+// Symlink hazard: the curator's working dir is in Dropbox, which exposes
+// BOTH `/Users/<u>/Library/CloudStorage/Dropbox/...` (real path) and
+// `/Users/<u>/Dropbox/...` (symlink). Node ESM resolves `import.meta.url`
+// to the realpath while `process.argv[1]` is preserved literally — so a
+// naive `===` compare would skip `main()` when the cron starts under the
+// symlinked path and the build silently no-ops. Realpath both sides so
+// the cron + manual invocations both fire `main()` regardless of which
+// alias was used to launch tsx.
+function isInvokedAsScript(): boolean {
+  const arg = process.argv[1];
+  if (!arg) return false;
+  try {
+    return realpathSync(arg) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+if (isInvokedAsScript()) {
   main().catch((err) => {
     console.error(err);
     process.exit(1);

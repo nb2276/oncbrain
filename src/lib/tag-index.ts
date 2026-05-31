@@ -1020,15 +1020,19 @@ export function summarizeTagEmissions(
     for (const study of site.studies) {
       stats.studies_total += 1;
       let any = false;
-      if (study.modality) {
+      // Defensive enum filter so a future caller passing on-disk artifacts
+      // (where a hand-edited or legacy file might carry an out-of-enum value)
+      // can't smuggle bogus buckets into the summary. At post-Phase-2 call
+      // sites (current sole caller) the values are already normalized.
+      if (study.modality && isValidModality(study.modality)) {
         stats.modality[study.modality] = (stats.modality[study.modality] ?? 0) + 1;
         any = true;
       }
-      if (study.intent) {
+      if (study.intent && isValidIntent(study.intent)) {
         stats.intent[study.intent] = (stats.intent[study.intent] ?? 0) + 1;
         any = true;
       }
-      if (study.methodology) {
+      if (study.methodology && isValidMethodology(study.methodology)) {
         stats.methodology[study.methodology] = (stats.methodology[study.methodology] ?? 0) + 1;
         any = true;
       }

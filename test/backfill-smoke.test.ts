@@ -33,18 +33,68 @@ import {
   paperIdToSyntheticTweetId,
   slideIdToSyntheticTweetId,
 } from '../src/lib/llm-pipeline.ts';
-import type { LlmClient } from '../src/lib/llm-client.ts';
+import type {
+  LlmClient,
+  LlmMessage,
+  LlmContentBlock,
+  LlmTextBlock,
+} from '../src/lib/llm-client.ts';
 
-// Mirrors mockLlmClient in test/llm-pipeline.test.ts: one queued response per
-// .complete() call. v0.4 makes 1 + N + 1 calls (grouping → N study agents →
-// synthesis), so each date's responses are queued in that order.
-function mockClient(responses: string[]): { client: LlmClient; remaining: () => number } {
-  const queue = [...responses];
-  const complete = vi.fn(async () => {
-    if (queue.length === 0) throw new Error('mock client exhausted');
-    return queue.shift()!;
+/**
+ * Build a content-addressed mock LlmClient. Phase 2 runs studies concurrently
+ * (default 4 at once), so a queue-ordered mock is fragile against any future
+ * change to cluster ordering or pre-`complete` awaits. Instead we dispatch by
+ * inspecting the rendered prompt:
+ *   - the Phase 1 (grouping) prompt is the only one that doesn't carry a
+ *     study-slug heading from Phase 2 / the lede-and-tldr heading from Phase 3
+ *   - each Phase 2 prompt carries `[[STUDY]] <slug>` (from the prompt template);
+ *     we route by substring match against the slug
+ *   - Phase 3 carries the lede heading
+ *
+ * Falls back to the queue order only for the catch-all path.
+ */
+type MockRoutes = {
+  grouping: string;
+  studies: Record<string, string>; // slug → response
+  synthesis: string;
+};
+
+function flattenPromptText(messages: LlmMessage[]): string {
+  const parts: string[] = [];
+  for (const m of messages) {
+    const c = m.content;
+    if (typeof c === 'string') parts.push(c);
+    else
+      for (const b of c as LlmContentBlock[]) {
+        if (b.type === 'text') parts.push((b as LlmTextBlock).text);
+      }
+  }
+  return parts.join('\n');
+}
+
+function mockClient(routes: MockRoutes): { client: LlmClient; calls: () => number } {
+  let n = 0;
+  const complete = vi.fn(async (messages: LlmMessage[]) => {
+    n += 1;
+    const text = flattenPromptText(messages);
+    // Phase-specific anchors are unique strings in the rendered prompt
+    // templates (prompts/digest-v5-*.txt). Routing by these is robust to
+    // Phase 2 concurrency reordering AND to future per-phase prompt edits
+    // because anchors are short and intrinsic to the phase's identity.
+    if (text.includes('Phase 1 of 3')) return routes.grouping;
+    if (text.includes('Phase 3 of 3')) return routes.synthesis;
+    if (text.includes('Phase 2 of 3')) {
+      for (const [slug, response] of Object.entries(routes.studies)) {
+        // Phase 2 puts `Slug: <slug>` in the rendered user message.
+        if (text.includes(`Slug: ${slug}`)) return response;
+      }
+      throw new Error(
+        `mock Phase 2 received unknown study; prompt contained no known slug. Available: ${Object.keys(routes.studies).join(', ')}`,
+      );
+    }
+    throw new Error('mock client could not identify phase from prompt');
   });
-  return { client: { complete }, remaining: () => queue.length };
+  return { client: { complete }, calls: () => n };
 }
 
 const SAMPLE_PAPER_TITLE = 'Sample Paper for Smoke Test';
@@ -98,6 +148,7 @@ describe('backfill smoke (v0.10 T16.5)', () => {
             intent?: string | null;
             methodology?: string | null;
             tweet_ids: number[];
+            source_ids?: Array<{ type: 'tweet' | 'paper' | 'slide'; id: number }>;
           }>;
         }>;
       };
@@ -229,16 +280,20 @@ describe('backfill smoke (v0.10 T16.5)', () => {
       ],
     });
 
-    const { client: clientA } = mockClient([groupingA, studyAgentA, synthesisA]);
+    const { client: clientA } = mockClient({
+      grouping: groupingA,
+      studies: { 'prestige-psma': studyAgentA },
+      synthesis: synthesisA,
+    });
     await buildOneDate(args(), db, dateA, { client: clientA });
-    const { client: clientB, remaining: remainingB } = mockClient([
-      groupingB,
-      studyAgentB1,
-      studyAgentB2,
-      synthesisB,
-    ]);
+    const { client: clientB, calls: callsB } = mockClient({
+      grouping: groupingB,
+      studies: { 'datopotamab-tnbc': studyAgentB1, 'sabr-oligomet': studyAgentB2 },
+      synthesis: synthesisB,
+    });
     await buildOneDate(args(), db, dateB, { client: clientB });
-    expect(remainingB(), 'all Date B mock responses should be consumed').toBe(0);
+    // 1 grouping + 2 study agents + 1 synthesis = 4 calls for Date B.
+    expect(callsB()).toBe(4);
 
     // ─── (a) Per-date study identity ───────────────────────────────────────
     const artA = readArtifact(dateA);
@@ -269,6 +324,19 @@ describe('backfill smoke (v0.10 T16.5)', () => {
         bA1.id,
         paperIdToSyntheticTweetId(pA1.id),
         slideIdToSyntheticTweetId(sA1.id),
+      ]),
+    );
+
+    // v0.5 invariant: typed source_ids decoded back from the synthetic tweet
+    // ids. attachSourceIds runs at the end of buildDigest; a regression that
+    // dropped one type would still pass the tweet_ids check above, so assert
+    // the decoded refs explicitly.
+    const sourceIdsA = studiesA[0]!.source_ids ?? [];
+    expect(sourceIdsA).toEqual(
+      expect.arrayContaining([
+        { type: 'tweet', id: bA1.id },
+        { type: 'paper', id: pA1.id },
+        { type: 'slide', id: sA1.id },
       ]),
     );
 
@@ -326,7 +394,11 @@ describe('backfill smoke (v0.10 T16.5)', () => {
       site_meta: [{ disease_site: 'breast', intro: null, open_questions: null }],
     });
 
-    const { client } = mockClient([grouping, studyAgent, synthesis]);
+    const { client } = mockClient({
+      grouping,
+      studies: { 'lone-paper-study': studyAgent },
+      synthesis,
+    });
     await buildOneDate(args(), db, date, { client });
 
     const art = readArtifact(date);
@@ -337,13 +409,16 @@ describe('backfill smoke (v0.10 T16.5)', () => {
     expect(studies).toHaveLength(1);
     expect(studies[0]!.slug).toBe('lone-paper-study');
     expect(studies[0]!.modality).toBe('systemic');
+    expect(studies[0]!.source_ids).toEqual(
+      expect.arrayContaining([{ type: 'paper', id: paper.id }]),
+    );
   });
 
   it('skips a date with zero sources without writing an artifact', async () => {
     const date = '2026-05-24';
-    const { client, remaining } = mockClient([]);
+    const { client, calls } = mockClient({ grouping: '', studies: {}, synthesis: '' });
     await buildOneDate(args(), db, date, { client });
     expect(existsSync(resolve(outDir, `${date}.json`))).toBe(false);
-    expect(remaining()).toBe(0); // never called the LLM
+    expect(calls()).toBe(0); // never called the LLM
   });
 });
