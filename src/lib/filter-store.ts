@@ -129,13 +129,16 @@ export function buildFilterUrl(
 
 /**
  * Compute the canonical /tags/<...>/ slug for an active filter set.
- * Returns null when the set is empty OR when a multi-tag set isn't in
- * the built-intersections allowlist (the build only generated /tags/
- * pages for combinations meeting the N≥3 threshold).
+ * Returns null when the set is empty, when a single-tag isn't in the
+ * namespace map (an invalid bookmark or hand-edited URL — Codex P1
+ * caught this would otherwise redirect to a non-existent /tags/<bad>/
+ * page), or when a multi-tag set isn't in the built-intersections
+ * allowlist (the build only generated /tags/ pages for combinations
+ * meeting the N≥3 threshold).
  *
- * Single-tag sets always return the slug — every populated single tag
- * gets a /tags/<slug>/ landing by construction (listTagSummaries →
- * getStaticPaths in src/pages/tags/[...slug].astro).
+ * Every populated single-tag has a /tags/<slug>/ landing by
+ * construction (listTagSummaries → getStaticPaths in
+ * src/pages/tags/[...slug].astro); the namespace map enumerates them.
  *
  * The inline client script in TagFilterRail.astro reimplements this —
  * KEEP IN SYNC.
@@ -143,11 +146,14 @@ export function buildFilterUrl(
 export function canonicalForActiveFilters(
   active: ReadonlySet<string> | ReadonlyArray<string>,
   builtIntersections: ReadonlySet<string>,
+  validSingleTagSlugs: ReadonlySet<string>,
 ): string | null {
   const sorted = Array.from(active).sort();
   if (sorted.length === 0) return null;
   const canonical = sorted.join('+');
-  if (sorted.length === 1) return canonical;
+  if (sorted.length === 1) {
+    return validSingleTagSlugs.has(canonical) ? canonical : null;
+  }
   if (builtIntersections.has(canonical)) return canonical;
   return null;
 }

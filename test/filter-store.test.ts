@@ -158,48 +158,81 @@ describe('canonicalForActiveFilters (PR-5)', () => {
     'phase-3-rct+radiation',
     'curative+phase-3-rct+radiation',
   ]);
+  // Populated single-tag landings (per the namespace map). Codex P1
+  // caught the prior version returned bogus slugs as canonical →
+  // /tags/<bad>/ → 404. The valid-slug Set closes that gap.
+  const validSingles = new Set([
+    'radiation',
+    'curative',
+    'phase-3-rct',
+    'surgery',
+    'practice-changing',
+  ]);
 
-  it('single-tag set returns the slug unchanged (every populated tag has a /tags/<slug>/ landing)', () => {
-    expect(canonicalForActiveFilters(new Set(['radiation']), allowlist)).toBe(
-      'radiation',
-    );
-    // Even if the slug is not in the multi-tag allowlist, single-tag
-    // landings are generated for every populated slug.
-    expect(canonicalForActiveFilters(new Set(['surgery']), allowlist)).toBe('surgery');
+  it('valid single-tag returns the slug unchanged', () => {
+    expect(
+      canonicalForActiveFilters(new Set(['radiation']), allowlist, validSingles),
+    ).toBe('radiation');
+    expect(
+      canonicalForActiveFilters(new Set(['surgery']), allowlist, validSingles),
+    ).toBe('surgery');
+  });
+
+  it('INVALID single-tag returns null (no /tags/<bad>/ landing would exist)', () => {
+    // Hand-edited URL, stale bookmark, renamed slug, etc. Without
+    // gating, the auto-redirect would land the reader on a 404.
+    expect(
+      canonicalForActiveFilters(new Set(['not-a-real-tag']), allowlist, validSingles),
+    ).toBeNull();
+    expect(
+      canonicalForActiveFilters(new Set(['']), allowlist, validSingles),
+    ).toBeNull();
   });
 
   it('multi-tag set returns the alphabetical canonical when in the allowlist', () => {
     // The active order doesn't matter — canonical is sorted.
     expect(
-      canonicalForActiveFilters(new Set(['radiation', 'curative']), allowlist),
+      canonicalForActiveFilters(
+        new Set(['radiation', 'curative']),
+        allowlist,
+        validSingles,
+      ),
     ).toBe('curative+radiation');
     expect(
       canonicalForActiveFilters(
         new Set(['radiation', 'phase-3-rct', 'curative']),
         allowlist,
+        validSingles,
       ),
     ).toBe('curative+phase-3-rct+radiation');
   });
 
   it('multi-tag NOT in the allowlist returns null (below N=3 threshold or 4+ way)', () => {
     expect(
-      canonicalForActiveFilters(new Set(['radiation', 'surgery']), allowlist),
+      canonicalForActiveFilters(
+        new Set(['radiation', 'surgery']),
+        allowlist,
+        validSingles,
+      ),
     ).toBeNull();
     expect(
       canonicalForActiveFilters(
         new Set(['radiation', 'phase-3-rct', 'surgery']),
         allowlist,
+        validSingles,
       ),
     ).toBeNull();
   });
 
   it('empty active set returns null (no canonical applies)', () => {
-    expect(canonicalForActiveFilters(new Set(), allowlist)).toBeNull();
+    expect(
+      canonicalForActiveFilters(new Set(), allowlist, validSingles),
+    ).toBeNull();
   });
 
   it('handles iterable inputs (Set or Array)', () => {
     expect(
-      canonicalForActiveFilters(['radiation', 'curative'], allowlist),
+      canonicalForActiveFilters(['radiation', 'curative'], allowlist, validSingles),
     ).toBe('curative+radiation');
   });
 });
