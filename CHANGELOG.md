@@ -2,6 +2,92 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.11.0] - 2026-05-31
+
+### Added
+
+- **Cross-page tag filter rail.** Every page that lists studies (home,
+  `/sites/<site>/`, `/<date>/`, `/tags/<slug>/`) now hosts a checkbox
+  filter on the left at ≥1200px (narrow body) and ≥1640px (wide
+  body). Tick any combination of modality, intent, methodology,
+  verdict, or meeting and the visible cards narrow client-side with
+  strict AND semantics. Filter state syncs to the URL as repeated
+  `?tag=<slug>` params so a reload or share-link preserves the view.
+- **Auto-redirect to canonical landing pages.** On home (`/`) and on
+  existing `/tags/<...>/` routes, when the active filter set matches
+  a pre-built landing page (`/tags/radiation/`,
+  `/tags/phase-3-rct+radiation/`, etc.), the rail redirects to that
+  canonical URL via a full navigation. `/sites/` and `/<date>/`
+  pages stay on the query-string form to preserve their site/date
+  scope.
+- **RSS subscribe button per filter combination.** When the active
+  filter state matches a canonical `/tags/<...>/` landing, the
+  active-chips header shows a 📡 RSS link to that landing's existing
+  `feed.xml` endpoint. Turns the filter into a durable
+  subscribe-once workflow: filter once, hit the RSS link, your
+  feed reader carries the ongoing narrowed updates.
+- **Mobile filter drawer.** Below the desktop breakpoint, the rail
+  collapses behind a "Filters" trigger button rendered inline above
+  the card list. Tapping the trigger slides up a bottom-sheet drawer
+  containing the same checkbox tree. Full WAI-ARIA dialog pattern
+  (`role="dialog"`, `aria-modal="true"`, `aria-haspopup="dialog"`,
+  focus trap, Escape dismiss, tap-outside dismiss, body scroll lock).
+  iOS-safe sizing via `100dvh` + `env(safe-area-inset-bottom)`.
+- **Smart empty-state with "Drop X → N would show." suggestions.**
+  When a filter combination yields zero matching studies AND there
+  are unlocked filters active, a status card under the active-chips
+  header lists up to two single-removal suggestions sorted by
+  would-show count. Click a suggestion → unticks that filter and the
+  reader is back in a non-empty view in one tap. On
+  `/tags/<rare-slug>/` pages where every removal still yields zero,
+  the suggestion falls back to a `Browse all tags →` escape link to
+  `/tags/` index.
+- **TriageRail stale-link dimming.** On `/<date>/` and `/tags/<...>/`
+  pages the jump-list now dims items whose target study is hidden by
+  the filter and removes them from the keyboard tab order
+  (`tabindex="-1"` + `pointer-events: none`) so dead clicks are
+  impossible.
+- **Mobile-only inline empty banner.** A page-level "No studies
+  match this filter. Open filters" banner renders inline above the
+  card list at mobile breakpoints so phone readers see the recovery
+  affordance without having to open the drawer first.
+
+### Changed
+
+- **PWA service worker normalizes `?tag=` cache keys.** Both the
+  archive (`NetworkFirst`) and home (`StaleWhileRevalidate`) routes
+  now route `/sites/breast/?tag=radiation`,
+  `/sites/breast/?tag=phase-3-rct`, and the bare `/sites/breast/`
+  through the same cache entry via a `cacheKeyWillBeUsed` plugin.
+  Non-filter query params (utm_*, gclid, fbclid) still fall through
+  to the network on archive routes so they don't evict useful
+  entries; on the home route every variant collapses to a single
+  fixed cache key.
+- **Cloudflare Web Analytics beacon `spa: false`.** Disables CF's
+  automatic SPA pageview tracking on `pushState` + `popstate` so
+  the filter rail's URL-sync mutations don't fire one analytics
+  hit per chip click.
+- **Canonical `<link rel="canonical">` on every page.** Strips
+  `?tag=` and `?tags=` filter params so search engines index one
+  URL per content page rather than one per filter combination.
+- **Build-time slug-uniqueness assertion runs in `astro:build:start`.**
+  Previously only `npm run build:day` validated; now `npm run build`
+  fails pre-SSG if any tag slug collides across the five `/tags/`
+  namespaces (modality / intent / methodology / verdict / meeting).
+- **TriageRail wide-mode anchors to the right edge.** At ≥1640px on
+  date and tag-landing pages, the TriageRail mirrors to the right
+  gutter so the TagFilterRail can occupy the left.
+- **Home page left rail switches from disease-site nav to filter.**
+  The disease-site chip row at the top of content remains the
+  navigation surface at every viewport; the left rail at ≥1200px is
+  now the filter.
+
+### Fixed
+
+- **Repo open-source preparation.** Added MIT LICENSE, a GitHub
+  link in the /about page, and a README version bump. Audit
+  confirmed no secrets in any committed file.
+
 ## [0.10.0] - 2026-05-30
 
 ### Added
