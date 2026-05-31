@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import TriageRail from '../components/TriageRail.astro';
+import Sparkline from '../components/Sparkline.astro';
 import {
   listDigests,
   listConferenceSummaries,
@@ -11,6 +12,11 @@ import {
 import { linkifyCitations } from '../lib/extract.ts';
 import { DISEASE_SITES, getDiseaseSite } from '../lib/disease-sites.ts';
 import { buildShareUrl } from '../lib/share-url.ts';
+import {
+  buildTagActivity,
+  listTagSummaries,
+  resolveTagDisplay,
+} from '../lib/tag-index.ts';
 
 const digests = listDigests();
 const conferences = listConferenceSummaries();
@@ -42,6 +48,29 @@ const siteRailItems = [...navPopulated]
 // At current scale (low tens) we show the full archive on home; pagination
 // is a deferred concern (see TODOS.md when the archive grows past ~100).
 const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
+
+// v0.10 home page surfaces (design pass 1 + pass 4 locks):
+//   1. 30-day tag activity histogram: top-5 tags by recency-weighted study
+//      count with inline sparkline + count + trend arrow. Lives just above
+//      the chip row so a returning reader sees "what's trending" at a glance.
+//   2. TAGS chip row: every populated tag, sorted by count desc, plain text
+//      meta-line. Tertiary navigation per design pass 1 — placed AFTER the
+//      recent feed so the reader's primary scan (hero TL;DR → recent feed)
+//      isn't displaced.
+const tagActivity = buildTagActivity(digests, { limit: 5, window: 30 });
+const tagSummaries = listTagSummaries(digests);
+// All populated tag slugs sorted by occurrence count desc, capped at 20 so
+// the row stays a discovery surface rather than a chip cloud. The full
+// per-namespace browse lives at /tags/.
+const TAG_CHIP_ROW_CAP = 20;
+const tagChipRow = Array.from(tagSummaries.entries())
+  .map(([slug, occurrences]) => {
+    const display = resolveTagDisplay(slug, occurrences);
+    return display ? { slug, label: display.label, count: occurrences.length } : null;
+  })
+  .filter((c): c is { slug: string; label: string; count: number } => c !== null)
+  .sort((a, b) => (b.count - a.count) || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0))
+  .slice(0, TAG_CHIP_ROW_CAP);
 ---
 
 <Base title={siteName} description="Curated AI-summarized digests of oncology updates.">
@@ -130,6 +159,25 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
     </section>
   )}
 
+  {tagActivity.length > 0 && (
+    <section class="tag-activity-section" aria-labelledby="tag-activity-heading">
+      <h2 class="section-label" id="tag-activity-heading">Active tags · {tagActivity[0]!.counts.length}d window</h2>
+      <ul class="tag-activity-list">
+        {tagActivity.map((row) => {
+          const arrow = row.trend === 'up' ? '↑' : row.trend === 'down' ? '↓' : '→';
+          return (
+            <li class="tag-activity-row">
+              <a href={`/tags/${row.slug}/`} class="tag-activity-name">{row.label}</a>
+              <Sparkline counts={row.counts} label={row.label} trend={row.trend} />
+              <span class="tag-activity-count">{row.totalRecent}</span>
+              <span class="tag-activity-arrow" aria-hidden="true">{arrow}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )}
+
   {feed.length > 0 && (
     <section class="recent-section">
       <h2 class="section-label">Studies · {feed.length}</h2>
@@ -178,6 +226,26 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
           );
         })}
       </ul>
+    </section>
+  )}
+
+  {tagChipRow.length > 0 && (
+    <section class="tag-chip-section" aria-labelledby="tag-chip-row-heading">
+      <h2 class="section-label" id="tag-chip-row-heading">Tags</h2>
+      <p class="tag-chip-row">
+        {tagChipRow.map((c, i) => (
+          <Fragment>
+            {i > 0 && <span class="tag-chip-sep" aria-hidden="true">·</span>}
+            <a class="tag-chip-link" href={`/tags/${c.slug}/`}>{c.label}</a>
+          </Fragment>
+        ))}
+        {tagSummaries.size > TAG_CHIP_ROW_CAP && (
+          <Fragment>
+            <span class="tag-chip-sep" aria-hidden="true">·</span>
+            <a class="tag-chip-link tag-chip-more" href="/tags/">more →</a>
+          </Fragment>
+        )}
+      </p>
     </section>
   )}
 </Base>
@@ -477,6 +545,91 @@ const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
     border-radius: 3px;
     max-width: calc(100% - 1.2rem);
     width: 18rem;
+  }
+
+  /* ── v0.10 30-day tag activity histogram. Tufte-restrained one-off:
+       inline sparkline (Sparkline.astro) + count + trend arrow per row.
+       Five rows max (top-N by recency-weighted count). Lives just above the
+       recent feed so a returning reader sees "what's trending" at a glance.
+       No semantic color on the arrow per design pass 4 (verdict pill owns
+       the 6-emoji color vocabulary). ── */
+  .tag-activity-section {
+    margin: 2.5rem 0 0;
+  }
+  .tag-activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+  }
+  .tag-activity-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+  .tag-activity-name {
+    color: var(--fg);
+    text-decoration: none;
+    flex: 0 0 auto;
+    min-width: 6.5rem;
+  }
+  .tag-activity-name:hover { color: var(--accent); }
+  .tag-activity-row .sparkline {
+    flex: 0 0 auto;
+  }
+  .tag-activity-count {
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+  .tag-activity-arrow {
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+    line-height: 1;
+  }
+
+  /* ── v0.10 mobile TAGS chip row. Plain text meta-line per DESIGN.md
+       "cards earn their existence": no border, no fill, no uppercase.
+       --font-sans 0.78rem --fg-muted matches SearchBox result-meta and
+       StudyCard chip row. flex-wrap so long lists become multi-line on
+       narrow viewports rather than overflowing. Lives at the bottom of
+       the home page per design pass 1 ("tertiary navigation; readers scroll
+       to it"). The "more →" link points at the full /tags/ index when the
+       cap kicks in. ── */
+  .tag-chip-section {
+    margin: 2.5rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .tag-chip-row {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--fg-muted);
+    line-height: 1.6;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.5rem;
+    align-items: baseline;
+  }
+  .tag-chip-link {
+    color: var(--fg-muted);
+    text-decoration: none;
+  }
+  .tag-chip-link:hover { color: var(--accent); }
+  .tag-chip-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  .tag-chip-more {
+    color: var(--accent);
+  }
+  .tag-chip-sep {
+    color: var(--fg-muted);
+    user-select: none;
   }
 </style>
 <script>
