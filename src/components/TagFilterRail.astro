@@ -105,7 +105,9 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
       type="button"
       class="filter-rail-trigger"
       data-filter-rail-trigger
+      data-active={initialSet.size > 0 ? 'true' : null}
       aria-controls="filter-rail-panel"
+      aria-haspopup="dialog"
       aria-expanded="false"
     >
       <span class="filter-rail-trigger-label">Filters</span>
@@ -123,7 +125,8 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
     <aside
       id="filter-rail-panel"
       class="filter-rail"
-      aria-label="Filter studies by tag"
+      role="dialog"
+      aria-modal="true"
       aria-labelledby="filter-rail-title"
       data-filter-rail
     >
@@ -224,7 +227,9 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
     font-variant-numeric: tabular-nums;
   }
   /* Subtle pulse when filters are active to nudge readers toward the
-     active state without being visually loud. */
+     active state without being visually loud. data-active is set
+     server-side via initialSet (no first-paint flash on URL-filtered
+     loads) and updated client-side after each filter change. */
   .filter-rail-trigger[data-active='true'] {
     border-color: var(--accent);
     color: var(--accent);
@@ -232,6 +237,14 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
   .filter-rail-trigger[data-active='true'] .filter-rail-trigger-count {
     background: var(--accent);
     color: var(--bg-card);
+  }
+
+  /* Hide the trigger while the drawer is open so it can't sit
+     visually-obscured behind the backdrop with `aria-expanded=true` —
+     a screen-reader user tabbing onto it would land on a hidden
+     element. Adversarial review caught this. */
+  :global(html[data-drawer-open]) .filter-rail-trigger {
+    visibility: hidden;
   }
 
   /* ── Mobile drawer backdrop ─────────────────────────────────────
@@ -725,21 +738,35 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
        the first interactive control on open and returns to the
        trigger on close. */
     let lastFocused = null;
+
+    /* Focus trap: cycle Tab/Shift+Tab between the first and last
+       focusable element inside the drawer when it's open. Adversarial
+       + Codex review both caught the WAI-ARIA dialog gap. Disabled
+       checkboxes are excluded. */
+    function focusableInRail() {
+      const candidates = rail.querySelectorAll(
+        'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+      );
+      return Array.from(candidates).filter(function (el) {
+        return el instanceof HTMLElement && !el.hidden;
+      });
+    }
+
     function openDrawer() {
       if (!trigger) return;
-      lastFocused = document.activeElement;
+      const active = document.activeElement;
+      // `lastFocused === document.body` is meaningless — body.focus()
+      // on close would leave the page with no visible focus ring.
+      // Fall back to the trigger in that case. Claude P1 finding.
+      lastFocused =
+        active && active !== document.body ? active : trigger;
       rail.setAttribute('data-open', 'true');
       if (backdrop) backdrop.removeAttribute('hidden');
       trigger.setAttribute('aria-expanded', 'true');
       document.documentElement.setAttribute('data-drawer-open', '');
-      // Focus the first focusable element inside the rail. Disabled
-      // checkboxes are skipped; closeBtn is a reliable anchor.
-      const focusTarget =
-        rail.querySelector('[data-filter-rail-close]') ||
-        rail.querySelector('[data-filter-checkbox]:not(:disabled)');
-      if (focusTarget && focusTarget instanceof HTMLElement) {
-        focusTarget.focus();
-      }
+      // Focus the first focusable element inside the rail.
+      const focusables = focusableInRail();
+      if (focusables.length > 0) focusables[0].focus();
     }
     function closeDrawer() {
       if (!trigger) return;
@@ -771,11 +798,56 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
     if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
     if (backdrop) backdrop.addEventListener('click', closeDrawer);
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && isDrawerOpen()) {
+      if (!isDrawerOpen()) return;
+      if (e.key === 'Escape') {
         e.preventDefault();
         closeDrawer();
+        return;
+      }
+      // Focus trap: cycle Tab/Shift+Tab within the dialog.
+      if (e.key === 'Tab') {
+        const focusables = focusableInRail();
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const activeEl = document.activeElement;
+        if (e.shiftKey) {
+          if (activeEl === first || !rail.contains(activeEl)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (activeEl === last || !rail.contains(activeEl)) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       }
     });
+
+    /* Viewport-crossing cleanup (both reviewers P0): if the reader
+       opens the drawer on mobile, then rotates / resizes past the
+       desktop breakpoint, the [data-open] + html[data-drawer-open]
+       + visible backdrop all remain — locking page scroll and painting
+       the backdrop over the desktop layout with no way to close
+       (close button is display:none on desktop). Listen for breakpoint
+       crossings and force-close. */
+    const narrowDesktopMq = window.matchMedia('(min-width: 1200px)');
+    const wideDesktopMq = window.matchMedia('(min-width: 1640px)');
+    function onBreakpointChange() {
+      if (!isDrawerOpen()) return;
+      const isWide = document.body.classList.contains('wide');
+      if (isWide ? wideDesktopMq.matches : narrowDesktopMq.matches) {
+        closeDrawer();
+      }
+    }
+    if (narrowDesktopMq.addEventListener) {
+      narrowDesktopMq.addEventListener('change', onBreakpointChange);
+      wideDesktopMq.addEventListener('change', onBreakpointChange);
+    } else if (narrowDesktopMq.addListener) {
+      narrowDesktopMq.addListener(onBreakpointChange);
+      wideDesktopMq.addListener(onBreakpointChange);
+    }
 
     // Initial hydrate. The inline script runs WITHIN the Astro <body>,
     // potentially BEFORE the page's study cards are parsed below the

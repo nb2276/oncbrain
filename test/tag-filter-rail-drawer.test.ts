@@ -42,14 +42,20 @@ describe('PR-3 mobile drawer structural contract', () => {
     const html = readFileSync(path, 'utf-8');
 
     describe(page, () => {
-      it('renders the drawer trigger with the ARIA controls/expanded pair', () => {
+      it('renders the drawer trigger with the ARIA controls/expanded/haspopup triple', () => {
         expect(html).toContain('data-filter-rail-trigger');
         expect(html).toMatch(/aria-controls="filter-rail-panel"/);
         expect(html).toMatch(/aria-expanded="false"/);
+        // aria-haspopup="dialog" advertises the trigger's WAI-ARIA
+        // dialog target — paired with the panel's role=dialog +
+        // aria-modal=true (asserted below).
+        expect(html).toMatch(/aria-haspopup="dialog"/);
       });
 
-      it('renders the rail panel with the matching id and aria-labelledby', () => {
+      it('rail panel emits role=dialog + aria-modal + aria-labelledby (full WAI-ARIA dialog pattern)', () => {
         expect(html).toContain('id="filter-rail-panel"');
+        expect(html).toMatch(/role="dialog"/);
+        expect(html).toMatch(/aria-modal="true"/);
         expect(html).toMatch(/aria-labelledby="filter-rail-title"/);
         expect(html).toContain('id="filter-rail-title"');
       });
@@ -79,4 +85,40 @@ describe('PR-3 mobile drawer structural contract', () => {
       });
     });
   }
+});
+
+describe('PR-3 SSR data-active for URL-filtered initial loads', () => {
+  // The tag landing page renders with the URL's path tags pre-checked
+  // (initialFilters non-empty) — the trigger should emit data-active
+  // at SSR so there's no first-paint flash where the trigger looks
+  // un-filtered until the inline script runs. Codex P2 finding.
+  const root = resolve(process.cwd());
+  const tagLanding = resolve(root, 'dist/tags/radiation/index.html');
+
+  it('tags/radiation/ emits data-active="true" on the trigger', () => {
+    if (!existsSync(tagLanding)) {
+      // Build artifact missing; test the file when it exists.
+      expect(existsSync(tagLanding)).toBe(true);
+      return;
+    }
+    const html = readFileSync(tagLanding, 'utf-8');
+    // Match the trigger element's attributes for data-active.
+    expect(html).toMatch(
+      /data-filter-rail-trigger[^>]*data-active="true"/,
+    );
+  });
+
+  it('non-tag pages (e.g. home) emit the trigger WITHOUT data-active by default', () => {
+    const home = resolve(root, 'dist/index.html');
+    if (!existsSync(home)) {
+      expect(existsSync(home)).toBe(true);
+      return;
+    }
+    const html = readFileSync(home, 'utf-8');
+    // Trigger exists but has no data-active attribute (filter state
+    // is empty by default on home).
+    const triggerMatch = html.match(/<button[^>]*data-filter-rail-trigger[^>]*>/);
+    expect(triggerMatch).not.toBeNull();
+    expect(triggerMatch![0]).not.toMatch(/data-active/);
+  });
 });
