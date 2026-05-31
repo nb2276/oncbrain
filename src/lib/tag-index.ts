@@ -821,3 +821,163 @@ function computeSiblingPreviewsUncached(
 
 // Re-export so consumers don't need to import from both tags.ts and tag-index.ts.
 export { isSafeTagSlug };
+
+// ---------------- 30-day tag activity histogram (home page) ----------------
+
+/**
+ * One row in the home page's 30-day activity strip. counts[] is per-published-
+ * digest-day (oldest first), totalRecent is the sum, trend compares the latter
+ * half of the window to the earlier half.
+ *
+ * Design Pass 4: the row renders <tag-name> <80px sparkline SVG> <count>
+ * <↑↓→>. The sparkline shape carries the trend (slope); the arrow + number
+ * carry precision. Top-5 only; <5 active tags → render what exists, no
+ * padding. Empty corpus → caller renders the "Tag activity will appear after
+ * the next digest" copy.
+ */
+export type TagActivity = {
+  slug: string;
+  label: string;
+  counts: number[]; // length === number of in-window dates; oldest first
+  totalRecent: number;
+  trend: 'up' | 'down' | 'flat';
+};
+
+/**
+ * Compute the 30-day-window tag activity strip for the home page.
+ *
+ * Window semantics (per design Pass 4 lock): the window is the LAST N
+ * PUBLISHED-DIGEST DAYS, not the last N calendar days. A multi-day weekend
+ * with no digests doesn't pad the X axis with empty columns; only days that
+ * actually emitted content count. With N=30 on a corpus of 9 digest days the
+ * window collapses to those 9 days (counts.length === 9), not 30.
+ *
+ * Input contract: callers may pass digests in any order. The helper sorts
+ * a local copy date-desc before windowing, so the result corresponds to the
+ * chronologically-latest N published days regardless of caller order.
+ * (Adversarial-review fix: the prior version had an undocumented date-desc
+ * precondition that would silently produce the wrong window on misorder.)
+ *
+ * Top-N selection: sort by RECENCY-WEIGHTED study count desc per design
+ * Pass 4 ("top 5 tags by recency-weighted study count"). Each day's count
+ * is weighted (i+1)/N where i is the 0-indexed position from oldest, so
+ * the newest day's contribution counts most and a tag whose activity
+ * concentrates in the back half of the window outranks one with the same
+ * total spread evenly. Ties broken by trend (up > flat > down), then
+ * alphabetic for deterministic ordering.
+ *
+ * Trend: compare sums over EQUAL-SIZED halves of the window. For odd N
+ * the middle day is dropped from both halves so earlier.length ==
+ * later.length always. Up when later > earlier + 1, down when later <
+ * earlier - 1, flat otherwise. Single-day window (counts.length < 2) →
+ * flat (no trend exists with one data point). The +1 tolerance prevents
+ * single-study fluctuation from oscillating the arrow on small corpora.
+ * (Adversarial-review fix: prior version split via Math.floor(length/2)
+ * which biased odd windows toward "up".)
+ *
+ * Empty input (no digests OR no tags) → []; caller's empty-state copy
+ * fires.
+ */
+export function buildTagActivity(
+  digests: readonly DigestArtifact[],
+  opts: { limit?: number; window?: number } = {},
+): TagActivity[] {
+  const limit = opts.limit ?? 5;
+  const window = opts.window ?? 30;
+  if (digests.length === 0) return [];
+
+  // Defensive date-desc sort: don't depend on caller ordering.
+  const dateDesc = [...digests].sort((a, b) =>
+    a.date < b.date ? 1 : a.date > b.date ? -1 : 0,
+  );
+
+  // Distinct dates desc, take last N, reverse to oldest-first for sparkline.
+  const dates = dateDesc
+    .map((d) => d.date)
+    .filter((d, i, a) => a.indexOf(d) === i)
+    .slice(0, window)
+    .reverse();
+  if (dates.length === 0) return [];
+
+  const dateIndex = new Map(dates.map((d, i) => [d, i]));
+
+  const perTag = new Map<string, number[]>();
+  for (const digest of dateDesc) {
+    const windowIdx = dateIndex.get(digest.date);
+    if (windowIdx === undefined) continue;
+    const meeting = digest.conference?.slug ?? null;
+    for (const { study, diseaseSite } of walkStudiesPerDate(digest)) {
+      const view = deriveStudyTags(study, diseaseSite, meeting);
+      for (const slug of [view.modality, view.intent, view.methodology, view.verdict, view.meeting]) {
+        if (!slug) continue;
+        let counts = perTag.get(slug);
+        if (!counts) {
+          counts = new Array(dates.length).fill(0);
+          perTag.set(slug, counts);
+        }
+        counts[windowIdx]! += 1;
+      }
+    }
+  }
+
+  type Bucket = TagActivity & { _ordSlug: string; _recencyWeighted: number };
+  const buckets: Bucket[] = [];
+  for (const [slug, counts] of perTag) {
+    const totalRecent = counts.reduce((s, n) => s + n, 0);
+    if (totalRecent === 0) continue;
+
+    // Recency-weighted ranking score per design Pass 4 lock.
+    const recencyWeighted = counts.reduce(
+      (s, n, i) => s + n * ((i + 1) / counts.length),
+      0,
+    );
+
+    // Trend via equal-sized halves with middle dropped on odd N.
+    let trend: TagActivity['trend'];
+    if (counts.length < 2) {
+      trend = 'flat';
+    } else {
+      const halfSize = Math.floor(counts.length / 2);
+      const earlier = counts.slice(0, halfSize).reduce((s, n) => s + n, 0);
+      const later = counts.slice(counts.length - halfSize).reduce((s, n) => s + n, 0);
+      if (later > earlier + 1) trend = 'up';
+      else if (later < earlier - 1) trend = 'down';
+      else trend = 'flat';
+    }
+
+    let label = slug;
+    const display = resolveTagDisplay(slug);
+    if (display) {
+      label = display.label;
+    } else {
+      // Meeting fallback: recover conference name from any digest carrying it.
+      for (const d of dateDesc) {
+        if (d.conference?.slug === slug) {
+          label = d.conference.name;
+          break;
+        }
+      }
+    }
+    buckets.push({
+      slug,
+      label,
+      counts,
+      totalRecent,
+      trend,
+      _ordSlug: slug,
+      _recencyWeighted: recencyWeighted,
+    });
+  }
+
+  const trendRank: Record<TagActivity['trend'], number> = { up: 0, flat: 1, down: 2 };
+  buckets.sort((a, b) => {
+    if (a._recencyWeighted !== b._recencyWeighted) {
+      return b._recencyWeighted - a._recencyWeighted;
+    }
+    if (a.trend !== b.trend) return trendRank[a.trend] - trendRank[b.trend];
+    return a._ordSlug < b._ordSlug ? -1 : a._ordSlug > b._ordSlug ? 1 : 0;
+  });
+  return buckets
+    .slice(0, limit)
+    .map(({ _ordSlug, _recencyWeighted, ...rest }) => rest);
+}

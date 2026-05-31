@@ -1,0 +1,84 @@
+---
+// v0.10 home page tag-activity sparkline. Tufte-restrained one-off SVG —
+// hairline stroke, no fill, no axes, no markers. The shape carries the
+// activity trend; the surrounding row supplies precision (count + arrow).
+//
+// DESIGN.md exception documented inline: most decorative SVG is banned, but
+// a sparkline that conveys information per pixel earns its existence. Do not
+// generalize this pattern to other decorative charts without re-reading
+// DESIGN.md "Cards earn their existence."
+//
+// A11y: role="img" + aria-label describing the trend so screen readers get
+// the same signal sighted readers do from the shape.
+
+interface Props {
+  counts: readonly number[];
+  // Display title for the aria-label, e.g. "radiation".
+  label: string;
+  // Trend direction matching the row arrow. Drives the aria-label phrasing.
+  trend: 'up' | 'down' | 'flat';
+  // Width in CSS pixels. Default matches the design Pass 4 spec (80px).
+  width?: number;
+  height?: number;
+}
+
+const { counts, label, trend, width = 80, height = 10 } = Astro.props as Props;
+
+// Empty / single-sample defenses: no points → no line. Single point → no line
+// either (a line needs at least two coords). Both render an empty <svg> so
+// layout stays predictable.
+const hasShape = counts.length >= 2;
+const max = hasShape ? Math.max(1, ...counts) : 1; // avoid div-by-zero
+
+// Compute the SVG polyline path. Y axis is inverted (SVG 0 is top), so a
+// higher count maps to a smaller y. 1px padding on each side keeps the
+// hairline stroke from clipping at the SVG edges.
+const xMin = 1;
+const xMax = width - 1;
+const yMin = 1;
+const yMax = height - 1;
+const stepX = hasShape ? (xMax - xMin) / (counts.length - 1) : 0;
+const points = hasShape
+  ? counts
+      .map((v, i) => {
+        const x = xMin + stepX * i;
+        const y = yMax - (v / max) * (yMax - yMin);
+        return `${x.toFixed(2)},${y.toFixed(2)}`;
+      })
+      .join(' ')
+  : '';
+
+const trendWord = trend === 'up' ? 'rising' : trend === 'down' ? 'falling' : 'flat';
+const totalLabel = counts.reduce((s, n) => s + n, 0);
+const ariaLabel = `${label} trend over the last ${counts.length} digest day${counts.length === 1 ? '' : 's'}: ${trendWord}, ${totalLabel} stud${totalLabel === 1 ? 'y' : 'ies'}`;
+---
+
+<svg
+  class="sparkline"
+  role="img"
+  aria-label={ariaLabel}
+  width={width}
+  height={height}
+  viewBox={`0 0 ${width} ${height}`}
+  preserveAspectRatio="none"
+>
+  {hasShape && (
+    <polyline
+      points={points}
+      fill="none"
+      stroke="var(--fg-muted)"
+      stroke-width="1"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+      vector-effect="non-scaling-stroke"
+    />
+  )}
+</svg>
+
+<style>
+  .sparkline {
+    display: inline-block;
+    vertical-align: middle;
+    /* Reserved for the bare hairline; no fill, no background, no border. */
+  }
+</style>
