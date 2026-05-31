@@ -69,15 +69,16 @@ export const NAV_FALLBACK_DENYLIST: RegExp[] = [
 // NORMALIZED OUT of the cache key so `/sites/breast/?tag=radiation` and
 // `/sites/breast/?tag=phase-3-rct` share one cached entry instead of
 // thrashing the 30-entry archive cap. Stored lowercase; the matcher
-// folds case so `?TAG=...` also normalizes (defense in depth — the
-// PR-2 emitter only writes lowercase, but readers can paste anything).
+// folds case so `?Tag=...` and `?TAG=...` also normalize (defense in
+// depth — the PR-2 emitter only writes lowercase, but readers can
+// paste anything).
 //
 // `tag` is the canonical form (Codex pass-2 P0 #4 chose repeated-param
-// `?tag=a&tag=b` over the `+`-separated `?tags=a+b` ambiguity). `tags`
-// stays here as a soft alias because (a) Base.astro's canonical link
-// strips both for SEO and (b) external links sharing the older `?tags=`
-// form should still find their cached page.
-const FILTER_PARAM_KEYS = new Set(['tag', 'tags']);
+// `?tag=a&tag=b` over the `+`-separated `?tags=a+b` ambiguity). The
+// legacy `?tags=` form is intentionally NOT aliased — no v0.11 surface
+// emits it, and Base.astro's canonical link already strips both. If a
+// future PR ships a redirect from `?tags=` to `?tag=`, re-add then.
+const FILTER_PARAM_KEYS = new Set(['tag']);
 
 /**
  * True iff every query parameter on `url` is one of the recognized

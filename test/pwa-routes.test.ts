@@ -162,14 +162,19 @@ describe('hasOnlyFilterParams', () => {
     ).toBe(true);
   });
 
-  it('accepts legacy `tags` param as a soft alias', () => {
-    expect(hasOnlyFilterParams(new URL('https://example.com/?tags=radiation+phase-3-rct'))).toBe(
-      true,
-    );
+  it('rejects legacy `tags` param (v0.11 standardized on repeated `tag=` only)', () => {
+    // No v0.11 surface emits `?tags=`; if a future redirect is needed,
+    // re-add then with the redirect handler.
+    expect(
+      hasOnlyFilterParams(new URL('https://example.com/?tags=radiation+phase-3-rct')),
+    ).toBe(false);
   });
 
-  it('accepts uppercase TAG (case-folded, defense-in-depth)', () => {
+  it('accepts mixed-case TAG / Tag / TaG / tAG (case-folded, defense-in-depth)', () => {
     expect(hasOnlyFilterParams(new URL('https://example.com/?TAG=radiation'))).toBe(true);
+    expect(hasOnlyFilterParams(new URL('https://example.com/?Tag=radiation'))).toBe(true);
+    expect(hasOnlyFilterParams(new URL('https://example.com/?TaG=radiation'))).toBe(true);
+    expect(hasOnlyFilterParams(new URL('https://example.com/?tAG=radiation'))).toBe(true);
   });
 
   it('rejects URLs with utm_* tracking params (fall through to network)', () => {
@@ -206,16 +211,38 @@ describe('stripFilterParams', () => {
     expect(out.toString()).toBe('https://example.com/');
   });
 
-  it('strips legacy `tags` param alongside the canonical `tag`', () => {
+  it('does NOT strip legacy `tags` param (kept distinct from `tag` per v0.11 URL spec)', () => {
     const out = stripFilterParams(
       new URL('https://example.com/?tag=radiation&tags=phase-3-rct'),
     );
+    expect(out.toString()).toBe('https://example.com/?tags=phase-3-rct');
+  });
+
+  it('strips mixed-case TAG / Tag / TaG (case-folded)', () => {
+    expect(stripFilterParams(new URL('https://example.com/?TAG=Radiation')).toString()).toBe(
+      'https://example.com/',
+    );
+    expect(stripFilterParams(new URL('https://example.com/?Tag=Radiation')).toString()).toBe(
+      'https://example.com/',
+    );
+    expect(stripFilterParams(new URL('https://example.com/?TaG=Radiation')).toString()).toBe(
+      'https://example.com/',
+    );
+  });
+
+  it('strips duplicate-value `tag` params (?tag=foo&tag=foo)', () => {
+    // URLSearchParams.delete() removes all entries with that name in one
+    // shot — pin the contract so a future runtime change can't regress.
+    const out = stripFilterParams(new URL('https://example.com/?tag=foo&tag=foo'));
     expect(out.toString()).toBe('https://example.com/');
   });
 
-  it('strips uppercase TAG (case-folded)', () => {
-    const out = stripFilterParams(new URL('https://example.com/?TAG=Radiation'));
-    expect(out.toString()).toBe('https://example.com/');
+  it('removes the trailing `?` artifact when the only param was stripped', () => {
+    // PR-2 URL-share code will compare cache-key strings; this exact
+    // form (no trailing `?`) is the contract.
+    const out = stripFilterParams(new URL('https://example.com/sites/breast/?tag=radiation'));
+    expect(out.toString()).toBe('https://example.com/sites/breast/');
+    expect(out.search).toBe('');
   });
 
   it('does NOT touch utm_* or other non-filter params', () => {
