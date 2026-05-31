@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { applyOverrides, formatOverrideSummary, type DigestOverrides } from '../src/lib/digest-overrides.ts';
+import {
+  applyOverrides,
+  formatOverrideSummary,
+  parseTagFlag,
+  type DigestOverrides,
+} from '../src/lib/digest-overrides.ts';
 import { deriveSlug } from '../src/lib/slug.ts';
 import type { DigestOutput, DigestStudy } from '../src/lib/llm-pipeline.ts';
 
@@ -111,6 +116,219 @@ describe('applyOverrides', () => {
   });
 });
 
+// v0.10: tag-field overrides. Curator fixes wrong Phase 2 LLM emissions
+// (palliative vs curative, phase-2 vs phase-3) without re-running the LLM.
+// Empty/null value clears the LLM emission so the study disappears from
+// that namespace's landing page entirely.
+describe('applyOverrides — v0.10 tag fields', () => {
+  it('sets modality / intent / methodology via the edits map', () => {
+    const { digest, summary } = applyOverrides(sampleDigest(), {
+      edits: {
+        'study-a': {
+          modality: 'radiation',
+          intent: 'palliative',
+          methodology: 'phase-3-rct',
+        },
+      },
+    });
+    const a = digest.sites[0]!.studies[0]!;
+    expect(a.modality).toBe('radiation');
+    expect(a.intent).toBe('palliative');
+    expect(a.methodology).toBe('phase-3-rct');
+    expect(summary.edited).toEqual(['study-a']);
+  });
+
+  it('overrides a wrong LLM emission (palliative → curative)', () => {
+    const base = sampleDigest();
+    base.sites[0]!.studies[0]!.intent = 'palliative';
+    const { digest } = applyOverrides(base, {
+      edits: { 'study-a': { intent: 'curative' } },
+    });
+    expect(digest.sites[0]!.studies[0]!.intent).toBe('curative');
+  });
+
+  it('null value clears the LLM emission (study off the modality landing)', () => {
+    const base = sampleDigest();
+    base.sites[0]!.studies[0]!.modality = 'radiation';
+    const { digest } = applyOverrides(base, {
+      edits: { 'study-a': { modality: null } },
+    });
+    expect(digest.sites[0]!.studies[0]!.modality).toBeNull();
+  });
+
+  it('does not silently propagate an unknown tag field (whitelist enforced)', () => {
+    // A sidecar JSON could contain stale or hand-edited fields. pickEditable
+    // only copies whitelisted keys, so a typo or future-removed field can't
+    // poison the rendered study.
+    const ov = {
+      edits: {
+        'study-a': { modality: 'radiation', some_future_field: 'leaked' },
+      },
+    } as unknown as DigestOverrides;
+    const { digest } = applyOverrides(sampleDigest(), ov);
+    const a = digest.sites[0]!.studies[0]! as Record<string, unknown>;
+    expect(a.modality).toBe('radiation');
+    expect(a.some_future_field).toBeUndefined();
+  });
+
+  it('partial tag edits do not zero out other tag fields', () => {
+    const base = sampleDigest();
+    base.sites[0]!.studies[0]!.modality = 'radiation';
+    base.sites[0]!.studies[0]!.intent = 'curative';
+    base.sites[0]!.studies[0]!.methodology = 'phase-3-rct';
+    const { digest } = applyOverrides(base, {
+      edits: { 'study-a': { intent: 'palliative' } }, // only intent
+    });
+    const a = digest.sites[0]!.studies[0]!;
+    expect(a.modality).toBe('radiation'); // preserved
+    expect(a.intent).toBe('palliative'); // overridden
+    expect(a.methodology).toBe('phase-3-rct'); // preserved
+  });
+
+  it('tag overrides survive across multiple build:day rebuilds (sidecar persistence)', () => {
+    // Sidecar is the SAME JSON we load each build; applying it twice should
+    // be idempotent and not accumulate "edited" counts in the per-build
+    // summary beyond the one slug.
+    const ov: DigestOverrides = {
+      edits: { 'study-a': { modality: 'surgery', intent: 'palliative' } },
+    };
+    const first = applyOverrides(sampleDigest(), ov);
+    const second = applyOverrides(sampleDigest(), ov);
+    expect(first.digest.sites[0]!.studies[0]!.modality).toBe('surgery');
+    expect(second.digest.sites[0]!.studies[0]!.modality).toBe('surgery');
+    expect(first.summary.edited).toEqual(['study-a']);
+    expect(second.summary.edited).toEqual(['study-a']);
+  });
+});
+
+// v0.10 CLI flag parser. Shared with build/manage-overrides.ts and tested
+// here so the CLI's case-normalization, bareword guard, whitespace-typo guard,
+// and enum validation can't regress without a test failure.
+describe('parseTagFlag', () => {
+  it('accepts a valid enum value', () => {
+    expect(parseTagFlag('modality', 'radiation')).toEqual({ ok: true, value: 'radiation' });
+    expect(parseTagFlag('intent', 'palliative')).toEqual({ ok: true, value: 'palliative' });
+    expect(parseTagFlag('methodology', 'phase-3-rct')).toEqual({ ok: true, value: 'phase-3-rct' });
+  });
+
+  it('lowercases before validating (curator types "Radiation")', () => {
+    // Adversarial-review fix: PR #2 surfaced this exact bug in parseEnumTag
+    // (LLM emits "Radiation" → silent drop). The CLI re-introduced it; this
+    // test locks the fix.
+    expect(parseTagFlag('modality', 'Radiation')).toEqual({ ok: true, value: 'radiation' });
+    expect(parseTagFlag('modality', 'RADIATION')).toEqual({ ok: true, value: 'radiation' });
+    expect(parseTagFlag('methodology', 'Phase-3-RCT')).toEqual({ ok: true, value: 'phase-3-rct' });
+  });
+
+  it('explicit empty string clears to null', () => {
+    expect(parseTagFlag('modality', '')).toEqual({ ok: true, value: null });
+  });
+
+  it('bareword flag (boolean true from parseArgs) errors with hint', () => {
+    const r = parseTagFlag('modality', true);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toMatch(/requires a value/);
+      expect(r.error).toMatch(/--modality=/);
+    }
+  });
+
+  it('whitespace-only value errors (NOT silently treated as clear)', () => {
+    const r = parseTagFlag('modality', '   ');
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toMatch(/whitespace-only/);
+      expect(r.error).toMatch(/--modality= \(empty\)/);
+    }
+  });
+
+  it('rejects out-of-enum values with the allowed list', () => {
+    const r = parseTagFlag('modality', 'immunotherapy');
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toMatch(/invalid --modality/);
+      expect(r.error).toMatch(/radiation/);
+      expect(r.error).toMatch(/surgery/);
+    }
+  });
+
+  it('rejects non-string values (defense against weird argv)', () => {
+    expect(parseTagFlag('modality', 42).ok).toBe(false);
+    expect(parseTagFlag('modality', null).ok).toBe(false);
+    expect(parseTagFlag('modality', undefined).ok).toBe(false);
+    expect(parseTagFlag('modality', {}).ok).toBe(false);
+  });
+
+  it('per-field validators: intent enum is independent of modality enum', () => {
+    // 'radiation' is a valid modality but NOT a valid intent.
+    expect(parseTagFlag('intent', 'radiation').ok).toBe(false);
+    // 'palliative' is a valid intent but NOT a valid modality.
+    expect(parseTagFlag('modality', 'palliative').ok).toBe(false);
+  });
+});
+
+// v0.10 sidecar-bypass guard. The CLI gates the input, but the JSON file
+// is a separate trust boundary — a hand-edited or stale-on-disk override
+// could carry an invalid value. applyOverrides must drop it (not silently
+// publish) and surface a warning. Codex P2 finding.
+describe('applyOverrides — sidecar tag validation (bypass guard)', () => {
+  it('drops an invalid modality value (sidecar hand-edit bypass) and warns', () => {
+    const ov = {
+      edits: { 'study-a': { modality: 'immunotherapy' } },
+    } as unknown as DigestOverrides;
+    const { digest, summary } = applyOverrides(sampleDigest(), ov);
+    const a = digest.sites[0]!.studies[0]! as Record<string, unknown>;
+    expect(a.modality).toBeUndefined(); // NOT silently set to 'immunotherapy'
+    expect(summary.tagWarnings).toHaveLength(1);
+    expect(summary.tagWarnings[0]!).toMatch(/invalid modality/);
+    expect(summary.tagWarnings[0]!).toMatch(/immunotherapy/);
+  });
+
+  it('drops uppercase sidecar values (CLI lowercases but sidecar might not)', () => {
+    // Symmetric with parseTagFlag's case-normalization: even if a curator
+    // hand-edits the JSON with "Radiation" instead of "radiation", the
+    // sidecar layer rejects it. (Alternative would be to lowercase here too;
+    // we keep the JSON shape strict so the file matches what the CLI writes.)
+    const ov = {
+      edits: { 'study-a': { modality: 'Radiation' } },
+    } as unknown as DigestOverrides;
+    const { digest, summary } = applyOverrides(sampleDigest(), ov);
+    const a = digest.sites[0]!.studies[0]! as Record<string, unknown>;
+    expect(a.modality).toBeUndefined();
+    expect(summary.tagWarnings[0]!).toMatch(/invalid modality/);
+  });
+
+  it('drops non-string sidecar values (e.g. a typo that left a number)', () => {
+    const ov = {
+      edits: { 'study-a': { methodology: 3 } },
+    } as unknown as DigestOverrides;
+    const { digest, summary } = applyOverrides(sampleDigest(), ov);
+    const a = digest.sites[0]!.studies[0]! as Record<string, unknown>;
+    expect(a.methodology).toBeUndefined();
+    expect(summary.tagWarnings[0]!).toMatch(/invalid methodology type/);
+  });
+
+  it('passes through valid sidecar values', () => {
+    const ov: DigestOverrides = {
+      edits: { 'study-a': { modality: 'radiation', intent: 'palliative' } },
+    };
+    const { digest, summary } = applyOverrides(sampleDigest(), ov);
+    expect(digest.sites[0]!.studies[0]!.modality).toBe('radiation');
+    expect(digest.sites[0]!.studies[0]!.intent).toBe('palliative');
+    expect(summary.tagWarnings).toEqual([]);
+  });
+
+  it('formatOverrideSummary surfaces tag warnings in the WARN section', () => {
+    const ov = {
+      edits: { 'study-a': { modality: 'unknown-value' } },
+    } as unknown as DigestOverrides;
+    const { summary } = applyOverrides(sampleDigest(), ov);
+    const formatted = formatOverrideSummary(summary);
+    expect(formatted).toMatch(/WARN/);
+    expect(formatted).toMatch(/unknown-value/);
+  });
+});
+
 describe('formatOverrideSummary', () => {
   it('summarizes applied changes', () => {
     const s = formatOverrideSummary({
@@ -119,6 +337,7 @@ describe('formatOverrideSummary', () => {
       edited: ['y'],
       editMissing: [],
       digestFields: ['top_line'],
+      tagWarnings: [],
     });
     expect(s).toContain('suppressed 1');
     expect(s).toContain('edited 1');
@@ -132,6 +351,7 @@ describe('formatOverrideSummary', () => {
       edited: [],
       editMissing: [],
       digestFields: [],
+      tagWarnings: [],
     });
     expect(s).toContain('WARN');
     expect(s).toContain('z');

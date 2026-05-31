@@ -9,6 +9,8 @@
 //   npm run override -- --date=2026-05-20 --suppress=<slug>
 //   npm run override -- --date=2026-05-20 --unsuppress=<slug>
 //   npm run override -- --date=2026-05-20 --edit=<slug> --tldr="..." [--name="..."] [--nct=NCT...]
+//   npm run override -- --date=2026-05-20 --edit=<slug> --modality=radiation [--intent=palliative] [--methodology=phase-3-rct]
+//   npm run override -- --date=2026-05-20 --edit=<slug> --modality=    # empty value clears the LLM emission
 //   npm run override -- --date=2026-05-20 --top-line="..." [--digest-tldr="..."]
 //   npm run override -- --date=2026-05-20 --clear
 //
@@ -17,7 +19,14 @@
 // After any change: npm run build:day -- --date=<date> && npm run build
 import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
-import { overridesPath, type DigestOverrides, type StudyEdit } from '../src/lib/digest-overrides.ts';
+import {
+  overridesPath,
+  parseTagFlag,
+  type DigestOverrides,
+  type StudyEdit,
+  type TagFlagField,
+} from '../src/lib/digest-overrides.ts';
+import type { ModalityTag, IntentTag, MethodologyTag } from '../src/lib/tags.ts';
 
 function parseArgs(argv: string[]): Record<string, string | boolean> {
   const out: Record<string, string | boolean> = {};
@@ -111,6 +120,27 @@ function main(): void {
     if (typeof args.tldr === 'string') edit.tldr = args.tldr;
     if (typeof args.name === 'string') edit.name = args.name;
     if (typeof args.nct === 'string') edit.nct = args.nct;
+    // v0.10: tag field overrides. parseTagFlag (shared with the unit tests
+    // and with applyOverrides' sidecar-validation layer) handles case
+    // normalization, bareword detection, whitespace-only typo guard, and
+    // enum validation. Single source of truth for the rules so the CLI and
+    // sidecar paths can't drift.
+    const tagFields: ReadonlyArray<{ flag: string; field: TagFlagField }> = [
+      { flag: 'modality', field: 'modality' },
+      { flag: 'intent', field: 'intent' },
+      { flag: 'methodology', field: 'methodology' },
+    ];
+    for (const { flag, field } of tagFields) {
+      if (!(flag in args)) continue;
+      const result = parseTagFlag(field, args[flag]);
+      if (!result.ok) {
+        console.error(`Error (--edit=${slug} on ${date}): ${result.error}`);
+        process.exit(1);
+      }
+      if (field === 'modality') edit.modality = result.value as ModalityTag | null;
+      else if (field === 'intent') edit.intent = result.value as IntentTag | null;
+      else if (field === 'methodology') edit.methodology = result.value as MethodologyTag | null;
+    }
     ov.edits = { ...(ov.edits ?? {}), [slug]: edit };
     changed = true;
     console.log(`~ edit ${slug}: {${Object.keys(edit).join(', ')}}`);
