@@ -36,6 +36,7 @@ import {
   type TagOccurrence,
 } from '../../lib/tag-index.ts';
 import { verdictMetaFor } from '../../lib/verdict.ts';
+import { studyDataTags } from '../../lib/study-data-tags.ts';
 
 export async function getStaticPaths() {
   // Astro runs getStaticPaths in an isolated scope — module-top constants
@@ -186,6 +187,7 @@ const pageDescription =
           shareUrl={`/tags/${canonical}/#${anchorFor(occ)}`}
           tagChips={studyTagChips(occ.study, occ.conference)}
           siblings={siblingPreviews.get(siblingKey) ?? []}
+          dataTags={studyDataTags(occ.study, occ.diseaseSite, occ.conference?.slug ?? null)}
         />
       );
     })

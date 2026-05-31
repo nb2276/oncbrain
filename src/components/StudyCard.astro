@@ -53,6 +53,11 @@ interface Props {
   // .slice(0, 3) on render in case a caller passes more. Absent / empty →
   // no section.
   siblings?: SiblingPreview[];
+  // v0.11 PR-1a: space-separated `namespace:slug` token string for the
+  // future filter rail (PR-2). Caller derives via studyDataTags() so the
+  // disease-site + conference context lives where it's known. Absent →
+  // no attribute emitted (filter rail treats the card as uncategorized).
+  dataTags?: string;
 }
 
 const {
@@ -65,6 +70,7 @@ const {
   shareUrl,
   tagChips = [],
   siblings = [],
+  dataTags,
 } = Astro.props as Props;
 
 // Defensive cap on siblings: computeSiblings already caps at 3, but a future
@@ -151,7 +157,7 @@ if (papers.length > 0) sourceBadges.push(`📄 ${papers.length} paper${papers.le
 if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.length === 1 ? '' : 's'}`);
 ---
 
-<div class:list={['study', hasFigures && 'has-figures']} id={anchorId}>
+<div class:list={['study', hasFigures && 'has-figures']} id={anchorId} data-tags={dataTags || undefined}>
   <div class="study-head">
   {/* ── Triage layer: always visible ── */}
   <h4 class="study-name">

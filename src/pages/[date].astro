@@ -14,6 +14,7 @@ import { linkifyCitations } from '../lib/extract.ts';
 import { getDiseaseSite } from '../lib/disease-sites.ts';
 import { assignSlugsForDate } from '../lib/slug-resolve.ts';
 import { verdictMetaFor } from '../lib/verdict.ts';
+import { studyDataTags } from '../lib/study-data-tags.ts';
 import {
   buildSiblingPreviews,
   listDigestsStrict,
@@ -175,6 +176,7 @@ for (const study of allStudiesOnDate) {
               shareUrl={`/sites/${site.disease_site}/#${date}-${resolvedSlug}`}
               tagChips={studyTagChips(study, conference)}
               siblings={siblingPreviews.get(siblingKey) ?? []}
+              dataTags={studyDataTags(study, site.disease_site, conference?.slug ?? null)}
             />
           );
         })}

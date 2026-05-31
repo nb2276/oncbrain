@@ -6,6 +6,7 @@ import { listSiteSummaries, type SiteSummary } from '../../lib/digest-data.ts';
 import { getDiseaseSite } from '../../lib/disease-sites.ts';
 import { deriveSlug } from '../../lib/slug.ts';
 import { verdictMetaFor } from '../../lib/verdict.ts';
+import { studyDataTags } from '../../lib/study-data-tags.ts';
 import {
   buildSiblingPreviews,
   listDigestsStrict,
@@ -93,6 +94,7 @@ const railItems = summary.occurrences.map((occ) => ({
               shareUrl={`/sites/${summary.disease_site}/#${anchorByOcc.get(occ)}`}
               tagChips={studyTagChips(occ.study, occ.conference)}
               siblings={siblingPreviews.get(siblingKey) ?? []}
+              dataTags={studyDataTags(occ.study, summary.disease_site, occ.conference?.slug ?? null)}
             />
           );
         })}

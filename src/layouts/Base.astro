@@ -6,6 +6,8 @@ import SearchBox from '../components/SearchBox.astro';
 // subsets at runtime; the build precaches only the latin subset.
 import '@fontsource-variable/newsreader/opsz.css';
 import '@fontsource-variable/newsreader/opsz-italic.css';
+import { tagFoundations } from '../lib/tag-foundations.ts';
+import { jsonForScriptTag } from '../lib/json-script.ts';
 interface Props {
   title: string;
   description?: string;
@@ -18,6 +20,30 @@ const { title, description, wide = false } = Astro.props;
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'onc brain';
 const curatorName = import.meta.env.PUBLIC_CURATOR_NAME || '';
 const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
+
+// v0.11 PR-1a: canonical URL emission. Strip every filter param so search
+// engines don't index the per-page filter URLs as duplicates of the
+// canonical content URL. Astro.site is set in astro.config.ts; on dev /
+// preview where site may be absent, fall back to the pathname (relative
+// canonical, still resolves correctly).
+const FILTER_PARAMS = new Set(['tag', 'tags']);
+function canonicalHref(url: URL, siteOrigin: string | undefined): string {
+  const canon = new URL(url.pathname, siteOrigin || url.origin);
+  // Preserve non-filter query params (e.g. utm_*) so canonical doesn't
+  // collide with legitimate query-bearing URLs in the future. Today no
+  // canonical URL uses query params, so this is defensive only.
+  for (const [k, v] of url.searchParams) {
+    if (!FILTER_PARAMS.has(k.toLowerCase())) canon.searchParams.append(k, v);
+  }
+  return canon.toString();
+}
+const canonicalUrl = canonicalHref(Astro.url, Astro.site?.toString());
+
+// v0.11 PR-1a: namespace map + built-intersections allowlist for the
+// future filter rail (PR-2) and canonical-redirect logic (PR-5). Inlined
+// on every page; ~1KB total. Module-level cache in tag-foundations.ts
+// keeps this O(1) per page after the first call this build.
+const { namespaceMap, intersectionAllowlist } = tagFoundations();
 ---
 
 <!doctype html>
@@ -27,6 +53,9 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    {/* v0.11 PR-1a: canonical strips ?tag= filter params so search engines
+        index one URL per content page, not one per filter combination. */}
+    <link rel="canonical" href={canonicalUrl} />
     <link rel="alternate" type="application/rss+xml" title={`${siteName} RSS feed`} href="/feed.xml" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -39,10 +68,24 @@ const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
     {import.meta.env.PROD && (
       <Fragment>
         {/* Cloudflare Web Analytics — production only, so localhost previews and
-            `astro preview` don't pollute the dashboard with dev hits. */}
-        <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "7de09515538540f1b55e9d16c13a1cd4"}'></script>
+            `astro preview` don't pollute the dashboard with dev hits.
+            v0.11 PR-1a: `spa: false` disables Cloudflare's automatic SPA
+            pageview tracking. CF's SPA mode auto-fires pageview events
+            on history.pushState + popstate (per Cloudflare's SPA docs);
+            PR-2 will mutate history via replaceState for `?tag=` URL
+            sync; PR-5 will navigate cross-route via location.assign.
+            Without spa:false, every chip click on a future SPA build
+            would dwarf real reads. Custom-event filter telemetry is
+            deferred to v0.12 (TODOS.md) per the autoplan revision. */}
+        <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "7de09515538540f1b55e9d16c13a1cd4", "spa": false}'></script>
       </Fragment>
     )}
+    {/* v0.11 PR-1a: small inlined JSON blobs the PR-2 filter rail and
+        PR-5 canonical-redirect logic read at hydrate time. Versioned so
+        a stale PWA-cached page can detect the schema has moved and skip
+        the lookup gracefully. */}
+    <script type="application/json" id="tag-namespaces" set:html={jsonForScriptTag(namespaceMap)} />
+    <script type="application/json" id="built-intersections" set:html={jsonForScriptTag(intersectionAllowlist)} />
     <style is:global>
       :root {
         color-scheme: light dark;

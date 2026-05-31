@@ -4,6 +4,12 @@ Open work for oncbrain, seeded from CHANGELOG "Not yet shipped" sections and per
 
 Format: `- [scope] description (source)`
 
+## v0.12 — tag filter rail extensions (deferred from v0.11 via /autoplan)
+
+- **Tag-filter observability.** Pick a CF-compatible backend first (Plausible / Umami / Cloudflare Worker → KV / self-hosted). CF Web Analytics docs confirm custom events are NOT supported. Once a backend is picked, fire custom events on filter activation with `{tagCount, tagNames, pageType, source}` to drive v0.13 prioritization. (v0.11 autoplan eng pass — CF Analytics infeasibility / `docs/plans/v0.11-tag-filter-rail.md`)
+- **Reader-prefs cookie / saved-default filters.** localStorage-backed; precedence URL > saved > none. Defer until v0.11 ships and reader behavior data exists (or until curator feedback validates the workflow). Implementation must use `requestIdleCallback` defer + post-paint application + "applying saved filter…" transition to avoid blocking critical render path on iOS Safari. (v0.11 autoplan design + eng — perf risk + design-thin / `docs/plans/v0.11-tag-filter-rail.md`)
+- **Tag-filter keyboard shortcuts.** Resolve the `f`-vs-global-search-focus collision first (try `\` or `/` instead). Spec the editable-control guard list explicitly including `<select>` and `[role="textbox"]`. Numerals 1-9 map to top visible filters with `<kbd>` hints inline. (v0.11 autoplan eng — Base.astro search-focus collision / `docs/plans/v0.11-tag-filter-rail.md`)
+
 ## Now — highest priority
 
 - **Preprint detection + badge + verdict cap (E5).** Detect medRxiv / bioRxiv / Research Square + DOI prefix `10.1101`; set `is_preprint`; render a "PREPRINT — not peer-reviewed" badge; cap preprint verdicts at `early-signal` in VOICE.md. **Promoted to top priority:** v0.8 PR1/PR2 made preprint ingestion live (`paper-url.ts` allowlists those hosts; the DOI path resolves `10.1101`), but nothing flags them, so a preprint can currently earn a confident standard-of-care verdict with no peer-review warning. Clinical-safety. (v0.8 CEO review — `docs/plans/v0.8-non-pmid-sources.md:30`)
