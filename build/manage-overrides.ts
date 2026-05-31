@@ -19,18 +19,14 @@
 // After any change: npm run build:day -- --date=<date> && npm run build
 import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
-import { overridesPath, type DigestOverrides, type StudyEdit } from '../src/lib/digest-overrides.ts';
 import {
-  MODALITY_VALUES,
-  INTENT_VALUES,
-  METHODOLOGY_VALUES,
-  isValidModality,
-  isValidIntent,
-  isValidMethodology,
-  type ModalityTag,
-  type IntentTag,
-  type MethodologyTag,
-} from '../src/lib/tags.ts';
+  overridesPath,
+  parseTagFlag,
+  type DigestOverrides,
+  type StudyEdit,
+  type TagFlagField,
+} from '../src/lib/digest-overrides.ts';
+import type { ModalityTag, IntentTag, MethodologyTag } from '../src/lib/tags.ts';
 
 function parseArgs(argv: string[]): Record<string, string | boolean> {
   const out: Record<string, string | boolean> = {};
@@ -124,42 +120,26 @@ function main(): void {
     if (typeof args.tldr === 'string') edit.tldr = args.tldr;
     if (typeof args.name === 'string') edit.name = args.name;
     if (typeof args.nct === 'string') edit.nct = args.nct;
-    // v0.10: tag field overrides. Empty value clears the LLM emission
-    // (sets to null). Invalid enum value errors out so curator catches the
-    // typo at CLI time rather than seeing it silently no-op on the next
-    // build. Enum lists come from src/lib/tags.ts (single source of truth).
-    const tagFlags: ReadonlyArray<{
-      flag: keyof typeof args;
-      field: 'modality' | 'intent' | 'methodology';
-      validator: ((s: string) => boolean);
-      allowed: readonly string[];
-    }> = [
-      { flag: 'modality', field: 'modality', validator: isValidModality, allowed: MODALITY_VALUES },
-      { flag: 'intent', field: 'intent', validator: isValidIntent, allowed: INTENT_VALUES },
-      { flag: 'methodology', field: 'methodology', validator: isValidMethodology, allowed: METHODOLOGY_VALUES },
+    // v0.10: tag field overrides. parseTagFlag (shared with the unit tests
+    // and with applyOverrides' sidecar-validation layer) handles case
+    // normalization, bareword detection, whitespace-only typo guard, and
+    // enum validation. Single source of truth for the rules so the CLI and
+    // sidecar paths can't drift.
+    const tagFields: ReadonlyArray<{ flag: string; field: TagFlagField }> = [
+      { flag: 'modality', field: 'modality' },
+      { flag: 'intent', field: 'intent' },
+      { flag: 'methodology', field: 'methodology' },
     ];
-    for (const { flag, field, validator, allowed } of tagFlags) {
-      const raw = args[flag];
-      if (typeof raw !== 'string') continue;
-      const v = raw.trim();
-      if (v === '') {
-        // Empty value → explicit null. Curator is overriding the LLM's
-        // emission with "no value" (study disappears from this namespace's
-        // landing pages).
-        edit[field] = null;
-        continue;
-      }
-      if (!validator(v)) {
-        console.error(`Error: invalid --${flag}="${raw}".`);
-        console.error(`Allowed values: ${allowed.join(', ')}`);
-        console.error(`Or use --${flag}= (empty) to clear the LLM's emission.`);
+    for (const { flag, field } of tagFields) {
+      if (!(flag in args)) continue;
+      const result = parseTagFlag(field, args[flag]);
+      if (!result.ok) {
+        console.error(`Error (--edit=${slug} on ${date}): ${result.error}`);
         process.exit(1);
       }
-      // The validator is a type guard, so TypeScript narrows v to the enum
-      // type. The assertion below documents the narrowing for human readers.
-      if (field === 'modality') edit.modality = v as ModalityTag;
-      else if (field === 'intent') edit.intent = v as IntentTag;
-      else if (field === 'methodology') edit.methodology = v as MethodologyTag;
+      if (field === 'modality') edit.modality = result.value as ModalityTag | null;
+      else if (field === 'intent') edit.intent = result.value as IntentTag | null;
+      else if (field === 'methodology') edit.methodology = result.value as MethodologyTag | null;
     }
     ov.edits = { ...(ov.edits ?? {}), [slug]: edit };
     changed = true;

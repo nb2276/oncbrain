@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { applyOverrides, formatOverrideSummary, type DigestOverrides } from '../src/lib/digest-overrides.ts';
+import {
+  applyOverrides,
+  formatOverrideSummary,
+  parseTagFlag,
+  type DigestOverrides,
+} from '../src/lib/digest-overrides.ts';
 import { deriveSlug } from '../src/lib/slug.ts';
 import type { DigestOutput, DigestStudy } from '../src/lib/llm-pipeline.ts';
 
@@ -196,6 +201,134 @@ describe('applyOverrides — v0.10 tag fields', () => {
   });
 });
 
+// v0.10 CLI flag parser. Shared with build/manage-overrides.ts and tested
+// here so the CLI's case-normalization, bareword guard, whitespace-typo guard,
+// and enum validation can't regress without a test failure.
+describe('parseTagFlag', () => {
+  it('accepts a valid enum value', () => {
+    expect(parseTagFlag('modality', 'radiation')).toEqual({ ok: true, value: 'radiation' });
+    expect(parseTagFlag('intent', 'palliative')).toEqual({ ok: true, value: 'palliative' });
+    expect(parseTagFlag('methodology', 'phase-3-rct')).toEqual({ ok: true, value: 'phase-3-rct' });
+  });
+
+  it('lowercases before validating (curator types "Radiation")', () => {
+    // Adversarial-review fix: PR #2 surfaced this exact bug in parseEnumTag
+    // (LLM emits "Radiation" → silent drop). The CLI re-introduced it; this
+    // test locks the fix.
+    expect(parseTagFlag('modality', 'Radiation')).toEqual({ ok: true, value: 'radiation' });
+    expect(parseTagFlag('modality', 'RADIATION')).toEqual({ ok: true, value: 'radiation' });
+    expect(parseTagFlag('methodology', 'Phase-3-RCT')).toEqual({ ok: true, value: 'phase-3-rct' });
+  });
+
+  it('explicit empty string clears to null', () => {
+    expect(parseTagFlag('modality', '')).toEqual({ ok: true, value: null });
+  });
+
+  it('bareword flag (boolean true from parseArgs) errors with hint', () => {
+    const r = parseTagFlag('modality', true);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toMatch(/requires a value/);
+      expect(r.error).toMatch(/--modality=/);
+    }
+  });
+
+  it('whitespace-only value errors (NOT silently treated as clear)', () => {
+    const r = parseTagFlag('modality', '   ');
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toMatch(/whitespace-only/);
+      expect(r.error).toMatch(/--modality= \(empty\)/);
+    }
+  });
+
+  it('rejects out-of-enum values with the allowed list', () => {
+    const r = parseTagFlag('modality', 'immunotherapy');
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toMatch(/invalid --modality/);
+      expect(r.error).toMatch(/radiation/);
+      expect(r.error).toMatch(/surgery/);
+    }
+  });
+
+  it('rejects non-string values (defense against weird argv)', () => {
+    expect(parseTagFlag('modality', 42).ok).toBe(false);
+    expect(parseTagFlag('modality', null).ok).toBe(false);
+    expect(parseTagFlag('modality', undefined).ok).toBe(false);
+    expect(parseTagFlag('modality', {}).ok).toBe(false);
+  });
+
+  it('per-field validators: intent enum is independent of modality enum', () => {
+    // 'radiation' is a valid modality but NOT a valid intent.
+    expect(parseTagFlag('intent', 'radiation').ok).toBe(false);
+    // 'palliative' is a valid intent but NOT a valid modality.
+    expect(parseTagFlag('modality', 'palliative').ok).toBe(false);
+  });
+});
+
+// v0.10 sidecar-bypass guard. The CLI gates the input, but the JSON file
+// is a separate trust boundary — a hand-edited or stale-on-disk override
+// could carry an invalid value. applyOverrides must drop it (not silently
+// publish) and surface a warning. Codex P2 finding.
+describe('applyOverrides — sidecar tag validation (bypass guard)', () => {
+  it('drops an invalid modality value (sidecar hand-edit bypass) and warns', () => {
+    const ov = {
+      edits: { 'study-a': { modality: 'immunotherapy' } },
+    } as unknown as DigestOverrides;
+    const { digest, summary } = applyOverrides(sampleDigest(), ov);
+    const a = digest.sites[0]!.studies[0]! as Record<string, unknown>;
+    expect(a.modality).toBeUndefined(); // NOT silently set to 'immunotherapy'
+    expect(summary.tagWarnings).toHaveLength(1);
+    expect(summary.tagWarnings[0]!).toMatch(/invalid modality/);
+    expect(summary.tagWarnings[0]!).toMatch(/immunotherapy/);
+  });
+
+  it('drops uppercase sidecar values (CLI lowercases but sidecar might not)', () => {
+    // Symmetric with parseTagFlag's case-normalization: even if a curator
+    // hand-edits the JSON with "Radiation" instead of "radiation", the
+    // sidecar layer rejects it. (Alternative would be to lowercase here too;
+    // we keep the JSON shape strict so the file matches what the CLI writes.)
+    const ov = {
+      edits: { 'study-a': { modality: 'Radiation' } },
+    } as unknown as DigestOverrides;
+    const { digest, summary } = applyOverrides(sampleDigest(), ov);
+    const a = digest.sites[0]!.studies[0]! as Record<string, unknown>;
+    expect(a.modality).toBeUndefined();
+    expect(summary.tagWarnings[0]!).toMatch(/invalid modality/);
+  });
+
+  it('drops non-string sidecar values (e.g. a typo that left a number)', () => {
+    const ov = {
+      edits: { 'study-a': { methodology: 3 } },
+    } as unknown as DigestOverrides;
+    const { digest, summary } = applyOverrides(sampleDigest(), ov);
+    const a = digest.sites[0]!.studies[0]! as Record<string, unknown>;
+    expect(a.methodology).toBeUndefined();
+    expect(summary.tagWarnings[0]!).toMatch(/invalid methodology type/);
+  });
+
+  it('passes through valid sidecar values', () => {
+    const ov: DigestOverrides = {
+      edits: { 'study-a': { modality: 'radiation', intent: 'palliative' } },
+    };
+    const { digest, summary } = applyOverrides(sampleDigest(), ov);
+    expect(digest.sites[0]!.studies[0]!.modality).toBe('radiation');
+    expect(digest.sites[0]!.studies[0]!.intent).toBe('palliative');
+    expect(summary.tagWarnings).toEqual([]);
+  });
+
+  it('formatOverrideSummary surfaces tag warnings in the WARN section', () => {
+    const ov = {
+      edits: { 'study-a': { modality: 'unknown-value' } },
+    } as unknown as DigestOverrides;
+    const { summary } = applyOverrides(sampleDigest(), ov);
+    const formatted = formatOverrideSummary(summary);
+    expect(formatted).toMatch(/WARN/);
+    expect(formatted).toMatch(/unknown-value/);
+  });
+});
+
 describe('formatOverrideSummary', () => {
   it('summarizes applied changes', () => {
     const s = formatOverrideSummary({
@@ -204,6 +337,7 @@ describe('formatOverrideSummary', () => {
       edited: ['y'],
       editMissing: [],
       digestFields: ['top_line'],
+      tagWarnings: [],
     });
     expect(s).toContain('suppressed 1');
     expect(s).toContain('edited 1');
@@ -217,6 +351,7 @@ describe('formatOverrideSummary', () => {
       edited: [],
       editMissing: [],
       digestFields: [],
+      tagWarnings: [],
     });
     expect(s).toContain('WARN');
     expect(s).toContain('z');
