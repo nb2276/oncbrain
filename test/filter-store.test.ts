@@ -7,6 +7,8 @@ import {
   matchesFilter,
   parseFilterUrl,
   buildFilterUrl,
+  canonicalForActiveFilters,
+  isFilterReceptiveRoute,
 } from '../src/lib/filter-store.ts';
 
 describe('parseDataTagsAttr', () => {
@@ -149,3 +151,94 @@ describe('buildFilterUrl', () => {
 
 // computeFacetUnionCount tests removed alongside the function — re-add
 // in PR-3 or PR-6 when the would-be-count display lands.
+
+describe('canonicalForActiveFilters (PR-5)', () => {
+  const allowlist = new Set([
+    'curative+radiation',
+    'phase-3-rct+radiation',
+    'curative+phase-3-rct+radiation',
+  ]);
+
+  it('single-tag set returns the slug unchanged (every populated tag has a /tags/<slug>/ landing)', () => {
+    expect(canonicalForActiveFilters(new Set(['radiation']), allowlist)).toBe(
+      'radiation',
+    );
+    // Even if the slug is not in the multi-tag allowlist, single-tag
+    // landings are generated for every populated slug.
+    expect(canonicalForActiveFilters(new Set(['surgery']), allowlist)).toBe('surgery');
+  });
+
+  it('multi-tag set returns the alphabetical canonical when in the allowlist', () => {
+    // The active order doesn't matter — canonical is sorted.
+    expect(
+      canonicalForActiveFilters(new Set(['radiation', 'curative']), allowlist),
+    ).toBe('curative+radiation');
+    expect(
+      canonicalForActiveFilters(
+        new Set(['radiation', 'phase-3-rct', 'curative']),
+        allowlist,
+      ),
+    ).toBe('curative+phase-3-rct+radiation');
+  });
+
+  it('multi-tag NOT in the allowlist returns null (below N=3 threshold or 4+ way)', () => {
+    expect(
+      canonicalForActiveFilters(new Set(['radiation', 'surgery']), allowlist),
+    ).toBeNull();
+    expect(
+      canonicalForActiveFilters(
+        new Set(['radiation', 'phase-3-rct', 'surgery']),
+        allowlist,
+      ),
+    ).toBeNull();
+  });
+
+  it('empty active set returns null (no canonical applies)', () => {
+    expect(canonicalForActiveFilters(new Set(), allowlist)).toBeNull();
+  });
+
+  it('handles iterable inputs (Set or Array)', () => {
+    expect(
+      canonicalForActiveFilters(['radiation', 'curative'], allowlist),
+    ).toBe('curative+radiation');
+  });
+});
+
+describe('isFilterReceptiveRoute (PR-5)', () => {
+  it('returns true for home (/)', () => {
+    expect(isFilterReceptiveRoute('/')).toBe(true);
+  });
+
+  it('returns true for /tags/<slug>/ landings (single tag)', () => {
+    expect(isFilterReceptiveRoute('/tags/radiation/')).toBe(true);
+    expect(isFilterReceptiveRoute('/tags/practice-changing/')).toBe(true);
+  });
+
+  it('returns true for /tags/<a+b+c>/ intersection landings', () => {
+    expect(isFilterReceptiveRoute('/tags/curative+radiation/')).toBe(true);
+    expect(
+      isFilterReceptiveRoute('/tags/curative+phase-3-rct+radiation/'),
+    ).toBe(true);
+  });
+
+  it('returns false for /sites/<slug>/ (redirect would drop site scope)', () => {
+    expect(isFilterReceptiveRoute('/sites/breast/')).toBe(false);
+  });
+
+  it('returns false for /<date>/ pages (redirect would drop date scope)', () => {
+    expect(isFilterReceptiveRoute('/2026-05-29/')).toBe(false);
+  });
+
+  it('returns false for /tags/ index (no implicit filter scope)', () => {
+    expect(isFilterReceptiveRoute('/tags/')).toBe(false);
+  });
+
+  it('returns false for /conferences/<slug>/ (out of scope for PR-5)', () => {
+    expect(isFilterReceptiveRoute('/conferences/asco-2026/')).toBe(false);
+  });
+
+  it('returns false for /about and other content pages', () => {
+    expect(isFilterReceptiveRoute('/about/')).toBe(false);
+    expect(isFilterReceptiveRoute('/api/')).toBe(false);
+  });
+});
