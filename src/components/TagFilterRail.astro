@@ -7,11 +7,11 @@
 // On change, the URL is updated via `history.replaceState` and the
 // filter is re-applied; the first matching card is scrolled into view.
 //
-// Layout: sits in the LEFT gutter at ≥1200px (narrow content pages,
+// Layout: sits in the RIGHT gutter at ≥1200px (narrow content pages,
 // home + sites) and at ≥1640px (wide content pages, date + tag landing
 // pages, which set Base `wide`). On the wide layout the TriageRail
-// gets moved to the right gutter (see TriageRail.astro) so the filter
-// rail owns the left.
+// gets moved to the LEFT gutter (see TriageRail.astro) so the filter
+// rail owns the right.
 //
 // Below 1200px the rail is hidden entirely. The PR-3 mobile drawer
 // will surface filters on smaller viewports; until then the static
@@ -162,23 +162,6 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
       >×</button>
     </header>
 
-    <div class="filter-rail-active" data-filter-rail-active hidden>
-      {/* Replaced by client script when filters are active. */}
-    </div>
-    <div
-      class="filter-rail-empty"
-      data-filter-rail-empty
-      hidden
-      role="status"
-      aria-live="polite"
-    >
-      {/* PR-9 promise folded into PR-6: when the active filter yields
-          zero studies, surface "Removing X would show N" suggestions
-          so the reader has a one-tap path back to a non-empty view.
-          Populated by the inline script via textContent + dataset to
-          dodge any innerHTML interpolation surface. */}
-    </div>
-
     {sections.map((section) => (
       <fieldset class="filter-rail-section" data-namespace={section.namespace}>
         <legend>{section.label}</legend>
@@ -210,6 +193,27 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
         </ul>
       </fieldset>
     ))}
+
+    {/* Active-filter summary + empty-state suggestions live at the
+        BOTTOM of the rail (not the top) so ticking a checkbox doesn't
+        push the namespace sections downward — the box you just clicked
+        stays at the same y-coordinate. */}
+    <div class="filter-rail-active" data-filter-rail-active hidden>
+      {/* Replaced by client script when filters are active. */}
+    </div>
+    <div
+      class="filter-rail-empty"
+      data-filter-rail-empty
+      hidden
+      role="status"
+      aria-live="polite"
+    >
+      {/* PR-9 promise folded into PR-6: when the active filter yields
+          zero studies, surface "Removing X would show N" suggestions
+          so the reader has a one-tap path back to a non-empty view.
+          Populated by the inline script via textContent + dataset to
+          dodge any innerHTML interpolation surface. */}
+    </div>
 
     <button type="button" class="filter-rail-clear" data-filter-rail-clear>
       Clear all
@@ -381,13 +385,13 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
 
   /* Narrow body (700px, home + sites): rail visible at ≥1200px. The
      viewport gutter at 1200px is (1200-700)/2 = 250px on each side,
-     enough to hold the 220px rail at left:1.25rem without overlap. */
+     enough to hold the 220px rail at right:1.25rem without overlap. */
   @media (min-width: 1200px) {
     body:not(.wide) .filter-rail {
       display: block;
       position: fixed;
       top: 6.5rem;
-      left: 1.25rem;
+      right: 1.25rem;
       width: 220px;
       max-height: calc(100vh - 9rem);
       overflow-y: auto;
@@ -408,7 +412,7 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
       display: block;
       position: fixed;
       top: 6.5rem;
-      left: 1.25rem;
+      right: 1.25rem;
       width: 220px;
       max-height: calc(100vh - 9rem);
       overflow-y: auto;

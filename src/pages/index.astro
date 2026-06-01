@@ -40,11 +40,11 @@ const navSites = DISEASE_SITES.map((s) => ({
 const navPopulated = navSites.filter((s) => s.count > 0);
 const navEmpty = navSites.filter((s) => s.count === 0);
 
-// v0.11 PR-2: the home left gutter now hosts the TagFilterRail. The
+// v0.11 PR-2: the home right gutter now hosts the TagFilterRail. The
 // disease-site nav lives in the top chip row below the hero (already
 // present on every viewport), so readers keep their cross-corpus
-// navigation surface; the left rail switches from "browse by site" to
-// "narrow this feed" — the tighter affordance for a returning reader.
+// navigation surface; the right rail offers "narrow this feed" — the
+// tighter affordance for a returning reader.
 
 // Studies as a flat feed: every study in date-desc order, no date headers.
 // At current scale (low tens) we show the full archive on home; pagination
