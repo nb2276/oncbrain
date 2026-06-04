@@ -233,7 +233,7 @@ TODOS.md                   deferred work tracker (seeded from CHANGELOG "Not yet
 
 ## Operational notes
 
-- **Working dir is in Dropbox** (`/Users/nboehling/Library/CloudStorage/Dropbox/dev/MeetingSummary`). `node_modules` and `dist` are `xattr com.dropbox.ignored` to avoid sync churn. Reapply if reinstalling.
+- **Working dir is in Dropbox** (`/Users/nboehling/Library/CloudStorage/Dropbox/dev/oncbrain`). `node_modules` and `dist` are `xattr com.dropbox.ignored` to avoid sync churn. Reapply if reinstalling. If this directory is renamed, re-run `npm run cron:install` — the launchd plist bakes the absolute path, so a rename without reinstall silently breaks the 6am cron.
 - **Local DB** (`oncbrain.db`) is gitignored. Phone-bookmarking is via Telegram bot, NOT remote DB — admin runs locally only.
 - **Cron** at 6am Pacific via launchd. If Mac is asleep, pmset wake at 5:55 is required.
 - **Curator name** (`PUBLIC_CURATOR_NAME`, `PUBLIC_CURATOR_HANDLE`) is local-only — DO's build doesn't see `.env`. Set these as DO app env vars to attribute on the live site.
