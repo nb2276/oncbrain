@@ -2,6 +2,27 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.11.1] - 2026-06-04
+
+### Changed
+
+- **Filter rail moved to the right gutter.** Studies stay centered;
+  filter chips and namespace sections now sit in the right gutter on
+  desktop and TriageRail (wide-mode jump-list) mirrors to the left.
+  Reads more naturally as "the content, then how to narrow it."
+- **Active-filter chips render below the checkboxes, not above.**
+  Ticking a filter no longer pushes the namespace sections downward —
+  the checkbox you just clicked stays at the same y-coordinate.
+
+### Fixed
+
+- **Daily 6am cron failed silently after the repo directory was
+  renamed.** Added a callout in CLAUDE.md noting that the launchd
+  plist bakes the absolute path; renaming the working directory
+  without re-running `npm run cron:install` produces an `EX_CONFIG`
+  exit and no digest publishes that morning. Updated the documented
+  Dropbox path to the new `oncbrain/` location.
+
 ## [0.11.0] - 2026-05-31
 
 ### Added
