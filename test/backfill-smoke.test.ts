@@ -57,6 +57,14 @@ type MockRoutes = {
   grouping: string;
   studies: Record<string, string>; // slug → response
   synthesis: string;
+  // v0.13: optional rerank-trials route. The orchestrator fires a rerank
+  // LLM call when a Phase 2 response includes a non-null `related_search`
+  // field with at least one valid query. When the existing fixtures here
+  // don't emit related_search (the default), this route is unused and the
+  // mock never sees a rerank prompt. When future fixtures add
+  // related_search, set this to a JSON-shaped picks response (or '{"picks":[]}'
+  // to exercise the abstain path).
+  rerankTrials?: string;
 };
 
 function flattenPromptText(messages: LlmMessage[]): string {
@@ -91,6 +99,12 @@ function mockClient(routes: MockRoutes): { client: LlmClient; calls: () => numbe
       throw new Error(
         `mock Phase 2 received unknown study; prompt contained no known slug. Available: ${Object.keys(routes.studies).join(', ')}`,
       );
+    }
+    // v0.13: rerank-trials auxiliary phase. Anchor 'Per-study auxiliary phase'
+    // is unique to prompts/digest-v5-rerank-trials.txt. Return the configured
+    // route or fall back to safe abstain so legacy fixtures never break.
+    if (text.includes('Per-study auxiliary phase')) {
+      return routes.rerankTrials ?? '{"picks":[]}';
     }
     throw new Error('mock client could not identify phase from prompt');
   });
