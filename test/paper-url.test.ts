@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { classifyPaperTarget, extractPaperUrls, firstDoiInUrl } from '../src/lib/paper-url.ts';
+import {
+  classifyPaperTarget,
+  extractPaperUrls,
+  firstDoiInUrl,
+  isTradePressUrl,
+  tradePressLabel,
+  tradePressOutletNames,
+  canonicalizeTradeUrl,
+  urlPathOnly,
+} from '../src/lib/paper-url.ts';
 
 describe('classifyPaperTarget', () => {
   it('bare digits → pmid', () => {
@@ -127,5 +136,127 @@ describe('extractPaperUrls', () => {
   });
   it('returns empty for no paper URLs', () => {
     expect(extractPaperUrls('just a note, no links')).toEqual([]);
+  });
+
+  it('pulls a trade-press URL (ASCO Post)', () => {
+    const urls = extractPaperUrls(
+      'big readout https://ascopost.com/issues/june-10-2026/some-trial-readout/',
+    );
+    expect(urls).toHaveLength(1);
+    expect(urls[0]).toContain('ascopost.com');
+  });
+  it('pulls trade-press URLs from UroToday and OncLive', () => {
+    const urls = extractPaperUrls(
+      'https://www.urotoday.com/conference-highlights/asco-2026/x.html and https://www.onclive.com/view/y',
+    );
+    expect(urls).toHaveLength(2);
+  });
+  it('pulls an ASCO Daily News URL (dailynews.ascopubs.org subdomain)', () => {
+    expect(extractPaperUrls('https://dailynews.ascopubs.org/do/some-coverage')).toHaveLength(1);
+  });
+});
+
+describe('isTradePressUrl', () => {
+  it.each([
+    'https://ascopost.com/issues/june-10-2026/x/',
+    'https://www.ascopost.com/news/y',
+    'https://www.urotoday.com/conference-highlights/z.html',
+    'https://www.onclive.com/view/a',
+    'https://www.targetedonc.com/view/b',
+    'https://www.cancernetwork.com/view/c',
+    'https://www.healio.com/news/hematology-oncology/d',
+    'https://www.medpagetoday.com/hematologyoncology/e',
+    'https://oncodaily.com/f',
+    'https://dailynews.ascopubs.org/do/g',
+  ])('matches %s', (url) => {
+    expect(isTradePressUrl(url)).toBe(true);
+  });
+  it('does not match journal or social hosts', () => {
+    expect(isTradePressUrl('https://www.nejm.org/doi/full/10.1056/NEJMoa1')).toBe(false);
+    expect(isTradePressUrl('https://ascopubs.org/doi/10.1200/JCO.1')).toBe(false);
+    expect(isTradePressUrl('https://x.com/foo/status/123')).toBe(false);
+  });
+  it('rejects a host that merely SUFFIXES a trade host (spoof guard)', () => {
+    // The attacker host ends with "ascopost.com." — an exact-hostname check must
+    // not treat this as The ASCO Post.
+    expect(isTradePressUrl('https://ascopost.com.attacker.example/article')).toBe(false);
+    expect(tradePressLabel('https://ascopost.com.attacker.example/article')).toBeNull();
+    expect(isTradePressUrl('https://notascopost.com/article')).toBe(false);
+    expect(isTradePressUrl('https://ascopost.com.evil/x')).toBe(false);
+  });
+  it('classifyPaperTarget routes a trade URL to the fetch path', () => {
+    expect(classifyPaperTarget('https://ascopost.com/issues/june-10-2026/x/')?.kind).toBe('url');
+  });
+});
+
+describe('tradePressLabel', () => {
+  it.each([
+    ['https://ascopost.com/issues/june-10-2026/x/', 'The ASCO Post'],
+    ['https://www.urotoday.com/conference-highlights/z.html', 'UroToday'],
+    ['https://www.onclive.com/view/a', 'OncLive'],
+    ['https://www.targetedonc.com/view/b', 'Targeted Oncology'],
+    ['https://www.cancernetwork.com/view/c', 'Cancer Network'],
+    ['https://www.healio.com/news/hematology-oncology/d', 'Healio'],
+    ['https://www.medpagetoday.com/hematologyoncology/e', 'MedPage Today'],
+    ['https://oncodaily.com/f', 'OncoDaily'],
+    ['https://dailynews.ascopubs.org/do/g', 'ASCO Daily News'],
+  ])('labels %s → %s', (url, label) => {
+    expect(tradePressLabel(url)).toBe(label);
+  });
+  it('returns null for a non-trade host', () => {
+    expect(tradePressLabel('https://www.nejm.org/doi/full/10.1056/NEJMoa1')).toBeNull();
+    expect(tradePressLabel('https://x.com/foo/status/123')).toBeNull();
+  });
+});
+
+describe('tradePressOutletNames', () => {
+  it('returns the display names for the reply text, drawn from the same table', () => {
+    const names = tradePressOutletNames();
+    expect(names).toContain('The ASCO Post');
+    expect(names).toContain('OncLive');
+    expect(names).toContain('ASCO Daily News');
+    // Every host that isTradePressUrl accepts must be represented (no drift).
+    expect(names.length).toBe(9);
+  });
+});
+
+describe('urlPathOnly', () => {
+  it('strips query and fragment', () => {
+    expect(urlPathOnly('https://x.org/a/b?utm=1#frag')).toBe('https://x.org/a/b');
+  });
+  it('is a no-op when there is no query/fragment', () => {
+    expect(urlPathOnly('https://x.org/a/b')).toBe('https://x.org/a/b');
+  });
+});
+
+describe('canonicalizeTradeUrl', () => {
+  it('collapses utm / trailing-slash / www / scheme variants to one key', () => {
+    const canonical = 'https://urotoday.com/conference-highlights/asco-2026/aranote.html';
+    expect(canonicalizeTradeUrl('https://www.urotoday.com/conference-highlights/asco-2026/aranote.html?utm_source=tw')).toBe(canonical);
+    expect(canonicalizeTradeUrl('http://www.urotoday.com/conference-highlights/asco-2026/aranote.html/')).toBe(canonical);
+    expect(canonicalizeTradeUrl('https://urotoday.com/conference-highlights/asco-2026/aranote.html#top')).toBe(canonical);
+  });
+  it('preserves path case (case-sensitive CMS slugs must not collide)', () => {
+    expect(canonicalizeTradeUrl('https://ascopost.com/Issues/Trial-X/')).toBe(
+      'https://ascopost.com/Issues/Trial-X',
+    );
+  });
+  it('keeps genuinely different paths distinct', () => {
+    expect(canonicalizeTradeUrl('https://onclive.com/view/a')).not.toBe(
+      canonicalizeTradeUrl('https://onclive.com/view/b'),
+    );
+  });
+  it('keeps identity query params but strips tracking params', () => {
+    // ?p=ID addresses distinct articles — must NOT collapse to one key.
+    expect(canonicalizeTradeUrl('https://ascopost.com/?p=123')).not.toBe(
+      canonicalizeTradeUrl('https://ascopost.com/?p=456'),
+    );
+    // utm_* is tracking — stripping it dedups a re-send.
+    expect(canonicalizeTradeUrl('https://ascopost.com/?p=123&utm_source=tw')).toBe(
+      canonicalizeTradeUrl('https://ascopost.com/?p=123'),
+    );
+  });
+  it('falls back to a bare strip on a malformed URL', () => {
+    expect(canonicalizeTradeUrl('not a url?x=1')).toBe('not a url');
   });
 });

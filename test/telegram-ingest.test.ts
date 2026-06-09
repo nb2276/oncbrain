@@ -6,6 +6,7 @@ import {
   extractCuratorNote,
   extractPaperPmids,
   extractPdfDocument,
+  looksLikeAttemptedShare,
   messageOf,
   unixToLocalDate,
   TelegramApiError,
@@ -363,5 +364,99 @@ describe('extractCuratorNote (paper citations)', () => {
     expect(
       extractCuratorNote('PMID: 42139645. doi: 10.1200/JCO-25-02399. Epub ahead of print.'),
     ).toBeNull();
+  });
+});
+
+describe('looksLikeAttemptedShare', () => {
+  const msg = (overrides: Partial<TelegramMessage>): TelegramMessage => ({
+    message_id: 1,
+    date: 0,
+    ...overrides,
+  });
+
+  it('true for an unrecognized URL in text (the dropped ASCO Post case)', () => {
+    expect(
+      looksLikeAttemptedShare(msg({ text: 'https://www.some-news-site.com/article/123' })),
+    ).toBe(true);
+  });
+
+  it('true for a URL in the caption', () => {
+    expect(looksLikeAttemptedShare(msg({ caption: 'see http://example.org/x' }))).toBe(true);
+  });
+
+  it('true for a url entity even when the text itself hides it', () => {
+    expect(
+      looksLikeAttemptedShare(
+        msg({
+          text: 'this trial',
+          entities: [{ type: 'text_link', offset: 0, length: 10, url: 'https://e.com/a' }],
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it("true for a plain 'url' entity type (auto-detected link)", () => {
+    expect(
+      looksLikeAttemptedShare(
+        msg({
+          text: 'see ascopost.com/x for the readout',
+          entities: [{ type: 'url', offset: 4, length: 14 }],
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it('false for a text_link entity missing its url (the !!e.url guard)', () => {
+    expect(
+      looksLikeAttemptedShare(
+        msg({
+          text: 'a trial',
+          entities: [{ type: 'text_link', offset: 0, length: 7 }],
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it('true for a url entity carried in caption_entities (no text/entities)', () => {
+    expect(
+      looksLikeAttemptedShare(
+        msg({
+          caption: 'photo with a link',
+          caption_entities: [{ type: 'url', offset: 0, length: 5 }],
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it('true for a non-PDF document attachment (.docx)', () => {
+    expect(
+      looksLikeAttemptedShare(
+        msg({
+          document: { file_id: 'F1', file_unique_id: 'U1', mime_type: 'application/msword', file_name: 'notes.docx' },
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it('false for conversational text and bot commands', () => {
+    expect(looksLikeAttemptedShare(msg({ text: 'thanks!' }))).toBe(false);
+    expect(looksLikeAttemptedShare(msg({ text: '/start' }))).toBe(false);
+    expect(looksLikeAttemptedShare(msg({}))).toBe(false);
+  });
+
+  it('false when the only links are obvious non-source hosts (no nudge for a talk/shortener)', () => {
+    expect(
+      looksLikeAttemptedShare(msg({ text: 'great talk https://www.youtube.com/watch?v=abc' })),
+    ).toBe(false);
+    expect(looksLikeAttemptedShare(msg({ text: 'https://bit.ly/xyz' }))).toBe(false);
+    expect(looksLikeAttemptedShare(msg({ text: 'https://t.co/abc123' }))).toBe(false);
+  });
+
+  it('true when a real source link sits alongside a noise link', () => {
+    expect(
+      looksLikeAttemptedShare(
+        msg({ text: 'https://youtu.be/x and https://some-journal.org/article/5' }),
+      ),
+    ).toBe(true);
   });
 });

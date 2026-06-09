@@ -94,6 +94,7 @@ export type FetchedVia =
   | 'pubmed_efetch'
   | 'crossref'
   | 'html_meta'
+  | 'trade_html' // trade-press article (ASCO Post, OncLive, …) with no DOI/PMID to key on
   | 'pdf' // PDF with a text layer
   | 'pdf_ocr' // scanned PDF, text recovered via Apple Vision OCR
   | 'pending'

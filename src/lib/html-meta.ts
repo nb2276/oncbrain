@@ -26,19 +26,28 @@ export type PaperMeta = {
   pub_date: string | null; // YYYY-MM-DD or YYYY when only year is known
 };
 
+// The content="…" value capture. The value is delimited by the quote it OPENED
+// with (captured, then matched by the \N backref), so an apostrophe inside a
+// double-quoted value — content="Patients' survival" — isn't truncated to
+// "Patients". `(?:(?!\N)[^>])*` is a tempered token: it consumes anything that
+// is neither the delimiter quote nor `>`, so it stays within the tag and runs
+// linearly (no catastrophic backtracking on the uncapped 5MB meta path).
+const CONTENT_VAL = (group: number) => `content=(["'])((?:(?!\\${group})[^>])*)\\${group}`;
+
 // Pull the content of a <meta name="X" content="Y"> (or property="X"),
 // tolerating attribute order and single/double quotes. Returns the FIRST
-// match (for single-valued tags like citation_doi).
+// match (for single-valued tags like citation_doi). The content value is in
+// capture group 2 (group 1 is its opening quote).
 function metaContent(html: string, name: string): string | null {
   // name="..." content="..."  OR  content="..." name="..."
   const esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const patterns = [
-    new RegExp(`<meta[^>]*\\b(?:name|property)=["']${esc}["'][^>]*\\bcontent=["']([^"']*)["']`, 'i'),
-    new RegExp(`<meta[^>]*\\bcontent=["']([^"']*)["'][^>]*\\b(?:name|property)=["']${esc}["']`, 'i'),
+    new RegExp(`<meta[^>]*\\b(?:name|property)=["']${esc}["'][^>]*\\b${CONTENT_VAL(1)}`, 'i'),
+    new RegExp(`<meta[^>]*\\b${CONTENT_VAL(1)}[^>]*\\b(?:name|property)=["']${esc}["']`, 'i'),
   ];
   for (const re of patterns) {
     const m = html.match(re);
-    if (m && m[1]) return decodeEntities(m[1].trim());
+    if (m && m[2]) return decodeEntities(m[2].trim());
   }
   return null;
 }
@@ -46,10 +55,10 @@ function metaContent(html: string, name: string): string | null {
 // All values for a repeated meta tag (citation_author appears once per author).
 function metaContentAll(html: string, name: string): string[] {
   const esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp(`<meta[^>]*\\b(?:name|property)=["']${esc}["'][^>]*\\bcontent=["']([^"']*)["']`, 'gi');
+  const re = new RegExp(`<meta[^>]*\\b(?:name|property)=["']${esc}["'][^>]*\\b${CONTENT_VAL(1)}`, 'gi');
   const out: string[] = [];
   for (const m of html.matchAll(re)) {
-    if (m[1]) out.push(decodeEntities(m[1].trim()));
+    if (m[2]) out.push(decodeEntities(m[2].trim()));
   }
   return out;
 }
@@ -91,7 +100,9 @@ export function extractPaperMeta(html: string): PaperMeta {
   const journal =
     metaContent(html, 'citation_journal_title') ?? metaContent(html, 'og:site_name');
   const pub_date = normalizeDate(
-    metaContent(html, 'citation_publication_date') ?? metaContent(html, 'citation_date'),
+    metaContent(html, 'citation_publication_date') ??
+      metaContent(html, 'citation_date') ??
+      metaContent(html, 'article:published_time'), // trade-press pages have only the OG date
   );
 
   // Need at least one strong identifier (DOI or PMID) or a title to be useful.
@@ -112,4 +123,62 @@ export function extractPaperMeta(html: string): PaperMeta {
 function titleTag(html: string): string | null {
   const m = html.match(/<title[^>]*>([^<]+)<\/title>/i);
   return m && m[1] ? decodeEntities(m[1].trim()) : null;
+}
+
+// og:description / meta description — the only summary a trade-press article
+// page offers (no citation_abstract exists outside journal sites).
+export function extractOgDescription(html: string): string | null {
+  return metaContent(html, 'og:description') ?? metaContent(html, 'description');
+}
+
+// Cap the HTML handed to the lazy [\s\S]*? regexes below. Those quantifiers
+// rescan to end-of-string from every open-tag position when a closing tag is
+// absent (the 5MB body cap in ssrf-fetch can also sever one mid-document), so
+// on adversarial/malformed input the cost is ~O(n²) — a multi-minute CPU hang
+// at 5MB. A trade-article page is tens of KB (a real ASCO Post page is ~60KB
+// total, ~12KB of body text); 128KB covers the main <article> with room while
+// bounding the pathological worst case to ~300ms on this single-threaded path.
+const MAX_ARTICLE_HTML = 128 * 1024;
+
+// Visible article text from a trade-press page, for DOI/NCT scanning and the
+// paper's fulltext excerpt. Same regex-only stance as the meta extraction:
+// no DOM parse, never executed. Picks the LARGEST <article> region (teaser /
+// related-article cards are smaller <article> siblings, and a lazy "first
+// match" would grab a teaser or truncate at a nested close); falls back to
+// <main>, then body-sans-head. Then strips script/style/chrome subtrees and
+// all remaining tags.
+export function extractArticleText(html: string): string {
+  const capped = html.length > MAX_ARTICLE_HTML ? html.slice(0, MAX_ARTICLE_HTML) : html;
+  const region = largestTagContent(capped, 'article') ?? firstTagContent(capped, 'main') ?? stripHead(capped);
+  const noSubtrees = region.replace(
+    /<(script|style|noscript|template|svg|nav|header|footer|aside|form)\b[\s\S]*?<\/\1\s*>/gi,
+    ' ',
+  );
+  // Every remaining tag becomes a space so adjacent words across tag
+  // boundaries (e.g. across a </p><p> or <br>) don't fuse.
+  const text = noSubtrees.replace(/<[^>]+>/g, ' ');
+  return decodeEntities(text).replace(/\s+/g, ' ').trim();
+}
+
+function firstTagContent(html: string, tag: string): string | null {
+  const m = html.match(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}\\s*>`, 'i'));
+  return m && m[1] ? m[1] : null;
+}
+
+// The longest content across all <tag>…</tag> blocks. On a page with several
+// <article> elements (teaser + body + related cards) this returns the real
+// body instead of whichever lazy match comes first. Operates on size-capped
+// input, so the global lazy scan is bounded.
+function largestTagContent(html: string, tag: string): string | null {
+  const re = new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}\\s*>`, 'gi');
+  let best: string | null = null;
+  for (const m of html.matchAll(re)) {
+    const body = m[1];
+    if (body && (best === null || body.length > best.length)) best = body;
+  }
+  return best;
+}
+
+function stripHead(html: string): string {
+  return html.replace(/<head\b[\s\S]*?<\/head\s*>/i, ' ');
 }

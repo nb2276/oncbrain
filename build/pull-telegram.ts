@@ -28,12 +28,21 @@ import {
   extractPaperPmids,
   extractSlidePhoto,
   extractPdfDocument,
+  looksLikeAttemptedShare,
   messageOf,
+  sendMessage,
   unixToLocalDate,
 } from '../src/lib/telegram-ingest.ts';
-import { extractPaperUrls } from '../src/lib/paper-url.ts';
+import { extractPaperUrls, tradePressOutletNames } from '../src/lib/paper-url.ts';
 
 const OFFSET_KEY = 'telegram_offset';
+
+// Built from the trade-outlet source of truth so the curator-facing list can't
+// drift from the hosts the enricher actually accepts.
+const UNRECOGNIZED_SOURCE_REPLY =
+  `Couldn't find an ingestible source in that message. I can take: tweet/X links, ` +
+  `PubMed or DOI links, journal article pages, trade articles (${tradePressOutletNames().join(', ')}), ` +
+  `PDFs, and slide photos.`;
 
 type Args = {
   sinceZero: boolean;
@@ -130,6 +139,25 @@ async function main() {
       !pdfDoc
     ) {
       skippedNoTarget++;
+      // A silent drop hides a supported-source gap from the curator (an ASCO
+      // Post link vanished this way pre-v0.14). Reply only when the message
+      // looked like a share attempt; conversational text stays unanswered.
+      // NOT during --since-zero: that replays the whole history and would
+      // re-ping the curator about every old unrecognized message.
+      if (!args.sinceZero && looksLikeAttemptedShare(msg) && msg.chat?.id != null) {
+        if (args.dryRun) {
+          console.log(`  [dry-run] would reply unrecognized-source: msg=${msg.message_id}`);
+        } else {
+          try {
+            await sendMessage(token, msg.chat.id, UNRECOGNIZED_SOURCE_REPLY, {
+              disableWebPagePreview: true,
+            });
+            console.log(`  replied unrecognized-source: msg=${msg.message_id}`);
+          } catch (err) {
+            console.warn(`  failed to send unrecognized-source reply: ${(err as Error).message}`);
+          }
+        }
+      }
       continue;
     }
 

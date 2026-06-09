@@ -295,6 +295,39 @@ export function extractPaperPmids(
   return Array.from(found);
 }
 
+// Hosts the curator plainly didn't intend as a paper source — sharing a
+// conference talk or a shortened link shouldn't draw a "couldn't find a source"
+// nudge. Scheme is optional because Telegram auto-links bare hosts (a `url`
+// entity's text can be schemeless). This is a small reply-GATING denylist; the
+// ingestion-side denylist lives in paper-url.ts (kept separate to avoid a
+// telegram-ingest↔paper-url import cycle — paper-url already imports from here).
+const NOISE_HOST_RE =
+  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be|google\.[a-z.]+|bit\.ly|t\.co)\b/i;
+
+// True when a message that matched NO extractor still looks like an attempted
+// source share: a document attachment, OR at least one link the curator might
+// have meant as a source (i.e. NOT an obvious talk/shortener/social host).
+// Gates the "couldn't recognize that" reply so conversational text ("thanks",
+// bot commands) and shared non-source links stay unanswered, while a genuinely
+// dropped paper link gets surfaced instead of vanishing silently.
+export function looksLikeAttemptedShare(msg: TelegramMessage): boolean {
+  if (msg.document) return true; // e.g. a .docx the PDF extractor rejected
+  const text = msg.text ?? msg.caption ?? '';
+  const candidates: string[] = [];
+  for (const m of text.matchAll(/https?:\/\/[^\s<>")]+/gi)) candidates.push(m[0]);
+  const entities = msg.entities ?? msg.caption_entities ?? [];
+  for (const e of entities) {
+    if (e.type === 'text_link' && typeof e.url === 'string') {
+      candidates.push(e.url); // text_link carries the target out-of-band
+    } else if (e.type === 'url' && typeof e.offset === 'number' && typeof e.length === 'number') {
+      // A `url` entity's link IS the visible text slice (often schemeless).
+      const slice = text.slice(e.offset, e.offset + e.length).trim();
+      if (slice) candidates.push(slice);
+    }
+  }
+  return candidates.some((u) => !NOISE_HOST_RE.test(u));
+}
+
 // v0.5 Phase C: extract slide photo attachment from a Telegram message.
 // Returns the HIGHEST-resolution photo if present, else null. Telegram
 // sends `photo[]` ordered smallest → largest, so we want the last entry

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { extractPaperMeta, MetaNotFoundError } from '../src/lib/html-meta.ts';
+import {
+  extractPaperMeta,
+  extractArticleText,
+  extractOgDescription,
+  MetaNotFoundError,
+} from '../src/lib/html-meta.ts';
 
 const LANCET = `<!doctype html><html><head>
   <meta name="citation_title" content="Long-term outcomes of SABR for primary kidney cancer (FASTRACK II)">
@@ -65,6 +70,16 @@ describe('extractPaperMeta', () => {
     expect(extractPaperMeta(html).title).toBe('RT & chemo in NSCLC');
   });
 
+  it('does not truncate a double-quoted value at an inner apostrophe', () => {
+    const html = `<head><meta name="citation_title" content="Patients' survival improved with RT"></head>`;
+    expect(extractPaperMeta(html).title).toBe("Patients' survival improved with RT");
+  });
+
+  it('does not truncate a single-quoted value at an inner double-quote', () => {
+    const html = `<head><meta property='og:title' content='The "PRESTIGE" trial readout'></head>`;
+    expect(extractPaperMeta(html).title).toBe('The "PRESTIGE" trial readout');
+  });
+
   it('tolerates reversed attribute order', () => {
     const html = `<head><meta content="10.1056/x" name="citation_doi"></head>`;
     expect(extractPaperMeta(html).doi).toBe('10.1056/x');
@@ -73,5 +88,103 @@ describe('extractPaperMeta', () => {
   it('normalizes a year-only date', () => {
     const html = `<head><meta name="citation_title" content="t"><meta name="citation_date" content="2025"></head>`;
     expect(extractPaperMeta(html).pub_date).toBe('2025');
+  });
+
+  it('falls back to article:published_time for the date (trade-press pages)', () => {
+    const html = `<head><meta property="og:title" content="t"><meta property="article:published_time" content="2026-06-05T14:30:00Z"></head>`;
+    expect(extractPaperMeta(html).pub_date).toBe('2026-06-05');
+  });
+});
+
+const TRADE_PAGE = `<!doctype html><html><head>
+  <meta property="og:title" content="PRESTIGE-PSMA Improves rPFS in mCRPC">
+  <meta property="og:site_name" content="The ASCO Post">
+  <meta property="og:description" content="The phase 3 trial met its primary endpoint.">
+  <title>PRESTIGE-PSMA | The ASCO Post</title>
+  <style>.nav { color: red }</style>
+</head><body>
+  <nav><a href="/issues/">All issues &raquo;</a></nav>
+  <div class="sidebar">Trending: unrelated piece</div>
+  <article>
+    <h1>PRESTIGE-PSMA Improves rPFS in mCRPC</h1>
+    <script>window.track('view')</script>
+    <p>The phase 3 PRESTIGE-PSMA trial (NCT05000001) showed a median rPFS of
+    11.2 vs 8.1 months (HR = 0.62).</p>
+    <p>DOI: 10.1200/JCO.2026.44.16_suppl.5000</p>
+  </article>
+  <footer>Copyright</footer>
+</body></html>`;
+
+describe('extractArticleText', () => {
+  it('prefers the <article> region and drops nav/sidebar/footer chrome', () => {
+    const text = extractArticleText(TRADE_PAGE);
+    expect(text).toContain('median rPFS of 11.2 vs 8.1 months');
+    expect(text).not.toContain('All issues');
+    expect(text).not.toContain('Trending');
+    expect(text).not.toContain('Copyright');
+  });
+  it('strips script/style content inside the article', () => {
+    expect(extractArticleText(TRADE_PAGE)).not.toContain('window.track');
+  });
+  it('keeps citations (NCT, DOI) intact for downstream extraction', () => {
+    const text = extractArticleText(TRADE_PAGE);
+    expect(text).toContain('NCT05000001');
+    expect(text).toContain('10.1200/JCO.2026.44.16_suppl.5000');
+  });
+  it('falls back to <main> then body-sans-head when there is no <article>', () => {
+    const mainOnly = `<html><head><title>x</title></head><body><main><p>main text</p></main></body></html>`;
+    expect(extractArticleText(mainOnly)).toBe('main text');
+    const bodyOnly = `<html><head><style>p{}</style></head><body><p>body text</p></body></html>`;
+    expect(extractArticleText(bodyOnly)).toBe('body text');
+  });
+  it('decodes entities and collapses whitespace', () => {
+    const html = `<article><p>RT &amp; chemo</p>\n\n<p>in   NSCLC</p></article>`;
+    expect(extractArticleText(html)).toBe('RT & chemo in NSCLC');
+  });
+
+  it('picks the LARGEST <article> when a teaser/promo article precedes the body', () => {
+    const html = `<body>
+      <article><p>Teaser NCT00000001</p></article>
+      <article><p>The real article body with the substantive findings and the
+      trial of interest NCT05000002 and effect sizes worth keeping.</p></article>
+    </body>`;
+    const text = extractArticleText(html);
+    expect(text).toContain('NCT05000002'); // the real body won
+    expect(text).not.toContain('NCT00000001'); // the teaser did not truncate it
+  });
+
+  it('does not let a related-article <article> leak its ids over the main body', () => {
+    const html = `<body>
+      <article><p>Main coverage of the pivotal trial NCT05000002 with the full
+      writeup, the comparator arm, and the discussion of where it fits.</p></article>
+      <article class="related"><p>Related: NCT09999999</p></article>
+    </body>`;
+    const text = extractArticleText(html);
+    expect(text).toContain('NCT05000002');
+    expect(text).not.toContain('NCT09999999');
+  });
+
+  it('stays bounded on a huge malformed input (ReDoS guard — completes fast)', () => {
+    // Many unmatched open tags would be O(n^2) on the lazy subtree-strip regex
+    // without the size cap. Assert it returns quickly rather than hanging.
+    const huge = '<nav>'.repeat(400_000) + '<article><p>body NCT05000002</p></article>';
+    const start = Date.now();
+    const text = extractArticleText(huge);
+    // Uncapped this is ~90s on 2M chars; the 128KB cap brings it to ~300ms. A
+    // 3s ceiling proves the cap engaged without flaking on slow CI.
+    expect(Date.now() - start).toBeLessThan(3000);
+    expect(typeof text).toBe('string');
+  });
+});
+
+describe('extractOgDescription', () => {
+  it('reads og:description', () => {
+    expect(extractOgDescription(TRADE_PAGE)).toBe('The phase 3 trial met its primary endpoint.');
+  });
+  it('falls back to meta description, else null', () => {
+    expect(extractOgDescription(`<head><meta name="description" content="plain desc"></head>`)).toBe(
+      'plain desc',
+    );
+    expect(extractOgDescription('<head></head>')).toBeNull();
   });
 });

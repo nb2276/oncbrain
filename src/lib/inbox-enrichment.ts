@@ -22,10 +22,22 @@ import {
 import { fetchTweet, TweetFetchError } from './twitter-fetch.ts';
 import { extractCuratorNote, sendMessage } from './telegram-ingest.ts';
 import { fetchPubMedPaper, PubMedClientError } from './pubmed-client.ts';
-import { classifyPaperTarget, firstDoiInUrl } from './paper-url.ts';
+import {
+  classifyPaperTarget,
+  firstDoiInUrl,
+  isTradePressUrl,
+  tradePressLabel,
+  canonicalizeTradeUrl,
+} from './paper-url.ts';
 import { backfillOpenAccess } from './oa-enrichment.ts';
 import { ssrfSafeFetchText, SsrfError } from './ssrf-fetch.ts';
-import { extractPaperMeta, MetaNotFoundError } from './html-meta.ts';
+import {
+  extractPaperMeta,
+  extractArticleText,
+  extractOgDescription,
+  MetaNotFoundError,
+  type PaperMeta,
+} from './html-meta.ts';
 import { fetchCrossrefPaper, CrossrefError } from './crossref-client.ts';
 import type { NewPaper } from './db.ts';
 import {
@@ -503,6 +515,11 @@ async function resolveFromUrl(
     }
   }
   if (!meta.doi && !meta.pmid) {
+    // Trade-press coverage (ASCO Post, OncLive, …) never carries citation
+    // meta — resolve it from the article body instead of giving up.
+    if (isTradePressUrl(url)) {
+      return resolveTradeArticle(url, html, meta, item, note);
+    }
     // Need at least one identifier for the papers CHECK + dedup key.
     throw new MetaNotFoundError('page had a title but no DOI or PMID to key on');
   }
@@ -519,6 +536,79 @@ async function resolveFromUrl(
     curator_note: note,
     inbox_item_id: item.id,
     fetched_via: 'html_meta',
+  };
+}
+
+// Below these, a trade page has nothing for the study agent to analyze.
+const MIN_TRADE_TEXT = 200; // chars of article body
+const MIN_TRADE_DESC = 80; // chars of og:description (the headline summary)
+
+// A short body that also trips a registration/paywall marker is a wall stub,
+// not an article — several listed outlets (OncLive, Targeted Oncology, Healio)
+// gate full text behind sign-in. A genuine article runs thousands of chars, so
+// a body under this length carrying wall language is the interstitial, not
+// trial data; saving it would feed boilerplate to the study agent as findings.
+const MIN_REAL_ARTICLE = 1200;
+const PAYWALL_MARKER_RE =
+  /\b(?:sign[ -]?in to (?:continue|read)|log[ -]?in to (?:continue|read|view)|register(?:ed)? (?:to (?:continue|read|view)|members)|subscribe to (?:read|continue)|create a (?:free )?account|reserved for (?:registered|subscribers)|members[- ]only)\b/i;
+
+// Trade-press articles cover a study but expose no Highwire citation meta, so we
+// ALWAYS save the article itself — content-hash keyed (canonical URL), OG
+// title/description, the article body text as the analyzable excerpt. We do NOT
+// key the row on a DOI found in the body: a trade page routinely links exactly
+// one *foreign* DOI in a "related coverage" block, and treating that as the
+// article's identity would silently merge this article onto the wrong paper.
+// NCT ids in the excerpt still drive cross-source clustering and prior-coverage
+// nudges at build time (the existing association layer), so a trade article and
+// its primary paper still group there — without a brittle identity merge.
+async function resolveTradeArticle(
+  url: string,
+  html: string,
+  meta: PaperMeta,
+  item: InboxItem,
+  note: string | null,
+): Promise<NewPaper> {
+  const articleText = extractArticleText(html);
+  const ogDescription = extractOgDescription(html);
+  // A short body carrying registration/paywall language is the sign-in wall,
+  // not the article — reject it rather than feed boilerplate to the study agent.
+  if (articleText.length < MIN_REAL_ARTICLE && PAYWALL_MARKER_RE.test(articleText)) {
+    throw new MetaNotFoundError(
+      'that article is behind a registration or paywall — forward the PDF or paste the key finding',
+    );
+  }
+  // SPA outlets (OncLive, Targeted Oncology) client-render the body, so the
+  // fetched shell carries no readable text. With no body AND no usable OG
+  // summary there's nothing to analyze — fail permanently with a curator nudge
+  // instead of silently saving a contentless row and replying "Got it".
+  if (articleText.length < MIN_TRADE_TEXT && (ogDescription?.length ?? 0) < MIN_TRADE_DESC) {
+    throw new MetaNotFoundError(
+      'that page rendered no readable article text (likely JavaScript-rendered) — forward the PDF or paste the key finding',
+    );
+  }
+  // meta.title is guaranteed non-null here: extractPaperMeta (the caller's
+  // source) throws unless doi||pmid||title, and resolveFromUrl only reaches
+  // resolveTradeArticle after establishing !doi && !pmid. The guard is
+  // unreachable at runtime; it satisfies the NewPaper.title type and documents
+  // the invariant for the next reader.
+  if (!meta.title) {
+    throw new MetaNotFoundError('trade article page had no usable title');
+  }
+  return {
+    content_hash: createHash('sha256')
+      .update(`trade-url:${canonicalizeTradeUrl(url)}`)
+      .digest('hex'),
+    source_url: url,
+    title: meta.title,
+    authors_json: JSON.stringify(meta.authors.map((name) => ({ name }))),
+    journal: meta.journal ?? tradePressLabel(url), // most trade sites omit og:site_name
+    pub_date: meta.pub_date,
+    abstract: ogDescription,
+    fulltext_excerpt_md: articleText ? articleText.slice(0, MAX_FULLTEXT_CHARS) : null,
+    bookmark_date: item.bookmark_date,
+    curator_note: note,
+    inbox_item_id: item.id,
+    fetched_via: 'trade_html',
   };
 }
 
@@ -606,7 +696,13 @@ function classifyResolveError(err: unknown): { retryable: boolean; message: stri
     return { retryable: false, message: `fetch refused: ${err.message}` };
   }
   if (err instanceof MetaNotFoundError) {
-    return { retryable: false, message: 'no paper metadata on that page (paywall or non-article URL?)' };
+    // Surface a specific message (e.g. the trade-press "no readable text" nudge);
+    // fall back to the canned line for the default-constructed error.
+    const specific = err.message && err.message !== 'no paper metadata found on page';
+    return {
+      retryable: false,
+      message: specific ? err.message : 'no paper metadata on that page (paywall or non-article URL?)',
+    };
   }
   return { retryable: false, message: `unexpected: ${(err as Error).message}` };
 }
