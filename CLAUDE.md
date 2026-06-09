@@ -80,8 +80,12 @@ DIGEST_STUDY_MODEL=opus npm run build:day -- --date=<date>               # Opus 
 DIGEST_THINKING=8000 LLM_BACKEND=api npm run build:day -- --date=<date>  # + Phase 2 extended thinking (api only)
 
 # Tests + eval
-npm test                        # vitest run (493 tests)
-npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations)
+npm test                        # vitest run (1000+ tests)
+npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations / v0.13 query+trial axes)
+npm run quality-eval                                # multi-persona quality review of today's digest
+npm run quality-eval -- --date=2026-06-05           # specific day
+npm run quality-eval -- --date=2026-06-05 --dry-run # print the persona prompts, no LLM calls
+# Reports land at ~/.gstack/projects/nb2276-oncbrain/quality-reports/<date>.md
 
 # Autopilot
 npm run cron:install            # macOS launchd job at 06:00 local daily
