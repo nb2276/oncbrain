@@ -2,7 +2,7 @@
 
 Curated, AI-summarized digest of oncology meeting research. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets). One oncologist curates the sources; an AI pipeline summarizes each study with comparative-literature context and a standard-of-care verdict.
 
-**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.10.0
+**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.13.0
 
 ## Architecture
 
@@ -10,10 +10,11 @@ Curated, AI-summarized digest of oncology meeting research. Continual cadence wi
 INGESTION                LOCAL (laptop only)                       GITHUB        DIGITALOCEAN
 ─────────                ───────────────────                       ──────        ────────────
 Telegram bot ─────┐      pull:telegram ─▶ inbox_items queue                      App Platform
-  tweets,         │                          │                      ▲           (static site)
-  paper URLs /    ├──▶   enrich:inbox  ◀──────┘                      │                  │
-  DOIs / PMIDs,   │        oEmbed · PubMed · Crossref ·              │                  ▼
-  PDFs, slides    │        PDF text + Apple Vision OCR               │           public reads
+  tweets, paper   │                          │                      ▲           (static site)
+  URLs / DOIs /   ├──▶   enrich:inbox  ◀──────┘                      │                  │
+  PMIDs, trade-   │        oEmbed · PubMed · Crossref ·              │                  │
+  press articles, │        trade-press HTML · PDF text +             │                  ▼
+  PDFs, slides    │        Apple Vision OCR                          │           public reads
 admin form @ 3001 ┘                       ▼                          │           static HTML +
                          SQLite (oncbrain.db): bookmarks /           │           RSS + JSON API
                          papers / slide_uploads                      │           at oncbrain.
@@ -60,7 +61,7 @@ Two ingestion paths, both write to the same SQLite inbox queue. Use either or bo
 
 1. Open Telegram, find `@BotFather`, send `/newbot`. Get a token, paste it into `.env` as `TELEGRAM_BOT_TOKEN`.
 2. Optional: create a private Telegram channel and add the bot as admin.
-3. Throughout the day, DM the bot: tweet URLs, paper links (DOI / PubMed / journal pages), full-text PDFs, or slide photos (or post them in your private channel).
+3. Throughout the day, DM the bot: tweet URLs, paper links (DOI / PubMed / journal pages), trade-press articles (ASCO Post, OncLive, UroToday, Targeted Oncology, Cancer Network, Healio, MedPage Today, OncoDaily, ASCO Daily News), full-text PDFs, or slide photos (or post them in your private channel).
 4. Drain the queue and enrich the items into bookmarks / papers / slides:
 
 ```bash
@@ -68,7 +69,7 @@ npm run pull:telegram   # writes each new message to the inbox_items queue (offs
 npm run enrich:inbox    # tweets → oEmbed, papers → PubMed/Crossref, PDFs → text/OCR + vault filing
 ```
 
-The bot also recognizes a `/note <text>` command on the same message to attach a curator note, and replies with what it ingested (or a named reason if it could not).
+The bot also recognizes a `/note <text>` command on the same message to attach a curator note, and replies with what it ingested (or a named reason if it could not). If a forwarded message carries a link it can't ingest, it replies with the source types it accepts instead of dropping the message silently; conversational text and obvious non-source links (YouTube, shorteners) stay unanswered.
 
 ### Path B: localhost admin form
 
@@ -179,7 +180,7 @@ npm run test:watch # watch mode
 npx astro check    # type check (0 errors expected)
 ```
 
-796 tests across DB + schema migrations, ingestion (Telegram, PubMed, Crossref, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, Obsidian export, RSS + JSON API output, NCT coverage dedup, citation extraction, and the v0.10 tag system + v0.11 PR-1a foundations.
+1100 tests across DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, Obsidian export, RSS + JSON API output, NCT coverage dedup, citation extraction, the v0.10 tag system, and the v0.13 trials-to-watch + trade-press ingestion.
 
 ## Eval
 
