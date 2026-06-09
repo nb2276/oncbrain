@@ -216,6 +216,32 @@ describe('parseRelatedTrials', () => {
     expect(out![0]!.nct).toBe('NCT05000001');
   });
 
+  it('INVARIANT 2: curly-quote drift survives; case drift still fails (codex PR-2 #4)', () => {
+    // The LLM commonly normalizes apostrophes to curly quotes. Without
+    // normalization the invariant would drop legitimate picks.
+    const studyQuestions = [
+      "Does deeper AR blockade extend OS in patient's nmCRPC?", // ascii
+      'Sequencing vs cabazitaxel',
+    ];
+    const out = parseRelatedTrials(
+      {
+        picks: [
+          // curly apostrophe → matches via NFC + smart-quote fold
+          { nct: 'NCT05000001', answers_question: 'Does deeper AR blockade extend OS in patient’s nmCRPC?', relevance_phrase: 'a' },
+          // case drift → drops
+          { nct: 'NCT05000002', answers_question: 'sequencing vs cabazitaxel', relevance_phrase: 'b' },
+        ],
+      },
+      candidateMap(c1, c2),
+      studyQuestions,
+    );
+    expect(out).toHaveLength(1);
+    expect(out![0]!.nct).toBe('NCT05000001');
+    // Persisted answers_question is the CANONICAL ascii form, not the
+    // LLM's curly-quote version.
+    expect(out![0]!.answers_question).toBe(studyQuestions[0]);
+  });
+
   it('INVARIANT 2: case drift drops; whitespace drift survives (parser trims)', () => {
     const out = parseRelatedTrials(
       {

@@ -155,6 +155,18 @@ Examples of INVALID captions (interpretive, would hallucinate):
     "Optimal sequencing vs cabazitaxel",
     "Durability of response beyond 2 years"
   ],
+  "related_search": {
+    "queries": [
+      {
+        "term": "lutetium PSMA cabazitaxel sequencing",
+        "watches_question": "Optimal sequencing vs cabazitaxel"
+      },
+      {
+        "term": "PSMA radioligand long-term followup mCRPC",
+        "watches_question": "Durability of response beyond 2 years"
+      }
+    ]
+  },
   "consort": {
     "enrolled": 1240,
     "excluded": 74,
@@ -197,6 +209,12 @@ Rules:
     - `consensus-guideline` — consensus statement or clinical practice guideline.
     - null — design unclear from the source.
 - `open_questions`: 0-3 short unresolved questions THIS study raises (sequencing, durability, generalizability, confirmatory trial needed). Terse noun phrases or questions, ≤15 words each. Put them HERE, not as ❓ bullets in `details`. Empty array `[]` if none.
+- `related_search`: 0-3 clinicaltrials.gov free-text queries, ONE PER open question, that would find currently-open trials answering that question. Shape: `{ "queries": [{ "term": "...", "watches_question": "EXACT text from open_questions" }, ...] }`. Or `null` when no open question maps cleanly to a CT.gov query (e.g., retrospective subgroup speculation; methodology meta-questions).
+  - `watches_question` MUST be byte-identical to one of the `open_questions` strings above. Do NOT reword. The build pipeline rejects picks whose `watches_question` does not exactly match.
+  - `term` is a free-text query string. It may target ANY intervention type that fits the question: drug name + condition, radiation modality + fractionation + site, surgical approach + setting, biomarker + line of therapy, methodology (e.g., "real-world cohort prostate radiation"). Match the question's nature; do not force a drug+condition shape on a non-drug question.
+  - `term` must be specific enough to retrieve a focused candidate set: at least 2 non-generic, non-numeric tokens. Avoid: bare drug names alone, single-word generics ("cancer", "drug", "treatment", "phase", "trial", "study", "efficacy", "safety", "survival"). The parser drops queries that fail this bar.
+  - Cap at 3 queries. If there are more than 3 open questions, pick the ones most likely to have open trials addressing them (skip retrospective-cohort-only or pure-methodology questions). Match question text exactly.
+  - Emit `null` (not `[]`) when no open question maps cleanly. Saves the build pipeline an empty round trip.
 - each figure `caption` is numeric-only, from that image's OCR overlays only. Use the table form for comparison figures (2+ arms × multiple endpoints); flat string is acceptable only for non-comparison figures. Null if no OCR numbers available (image still kept).
 - `nct` only if explicit in tweets/OCR. Format: "NCTxxxxxxxx" or null.
 - `consort`: a CONSORT participant flow, ONLY for randomized trials where the source explicitly reports per-arm patient counts. Provide `randomized` (total) and `arms` (≥2, each `label` + `allocated`); add `enrolled`, `excluded`, and per-arm `analyzed` ONLY when those exact numbers are reported. Set to **null** for single-arm studies, retrospective series, meta-analyses, or whenever you lack the total randomized and ≥2 arm counts. NEVER invent, estimate, or back-calculate a count — every number must appear in the source.

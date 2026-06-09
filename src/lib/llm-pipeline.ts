@@ -26,7 +26,17 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { createLlmClient, type LlmClient, type LlmContentBlock } from './llm-client.ts';
+import { createHash } from 'node:crypto';
+import {
+  createLlmClient,
+  type LlmClient,
+  type LlmContentBlock,
+  type LlmMessage,
+} from './llm-client.ts';
+import {
+  fetchCandidateTrials,
+  type FetchCandidateTrialsResult,
+} from './clinicaltrials.ts';
 import { diseaseSiteSlugList, isValidDiseaseSiteSlug } from './disease-sites.ts';
 import {
   isValidModality,
@@ -417,6 +427,21 @@ export type BuildOptions = {
   maxRetries?: number;
   studyAgentConcurrency?: number;
   maxImagesPerStudy?: number; // cap to control Phase 2 token cost; default 6
+
+  // v0.13: related-trials orchestrator wiring. Optional; nothing about it
+  // is required for a basic build. When provided:
+  //   - relatedTrialsRunCache: in-memory cache for ct.gov fetches. When
+  //     omitted, buildDigest allocates a fresh cache scoped to this
+  //     invocation. runBackfill passes the same cache across dates so
+  //     overlapping drug+condition queries dedup across the run.
+  //   - relatedTrialsDeps: injectable seams for tests (ctgovFetch, clock,
+  //     sleep, rerankClient, promptPath). In production this is undefined
+  //     and the orchestrator uses real implementations.
+  //
+  // The orchestrator NEVER throws, so omitting either of these does not
+  // affect Phase 2 success accounting.
+  relatedTrialsRunCache?: RelatedTrialsRunCache;
+  relatedTrialsDeps?: EnrichRelatedTrialsDeps;
 };
 
 const PROMPTS_DIR = resolve(__dirname, '../../prompts');
@@ -511,6 +536,17 @@ export async function buildDigest(
   const successful: { cluster: StudyCluster; study: DigestStudy }[] = [];
   const dropped: DigestMeta['dropped'] = [];
 
+  // v0.13: shared in-run cache for ct.gov fetches across all studies in this
+  // build. runBackfill may pass one in via opts so the same cache is reused
+  // across dates (cross-date dedup on overlapping drug+condition queries).
+  const relatedRunCache = opts.relatedTrialsRunCache ?? createRelatedTrialsRunCache();
+
+  // v0.13: track studies eligible for related-trials (had a non-null
+  // related_search) and how many got populated; emitted as a minimum-
+  // success warn banner at end of build. Codex round-2 #15.
+  let relatedEligible = 0;
+  let relatedPopulated = 0;
+
   await runConcurrent(clusters, concurrency, async (cluster) => {
     const allClusterTweets = cluster.tweet_ids
       .map((id) => tweetById.get(id))
@@ -522,14 +558,74 @@ export async function buildDigest(
     }
     const capped = capStudyImages(allClusterTweets, maxImagesPerStudy);
     try {
-      const study = await runStudyAgent(client, cluster, capped, opts, maxRetries, ocrAvailable);
-      successful.push({ cluster, study });
+      const { study, raw } = await runStudyAgent(client, cluster, capped, opts, maxRetries, ocrAvailable);
+      // v0.13: re-parse the raw Phase 2 response so the orchestrator can
+      // read auxiliary fields (related_search) that parseStudyAgentResponse
+      // intentionally strips from DigestStudy. JSON.parse here only fails
+      // if the response shape is unrepresentable; runStudyAgent already
+      // successfully parsed once, so this is defensive.
+      let rawParsed: unknown = null;
+      try {
+        rawParsed = JSON.parse(stripFences(raw));
+      } catch {
+        // Orchestrator handles null by logging no_related_search and
+        // returning a skipped provenance.
+      }
+      // v0.13: enrich the study with related trials. Orchestrator never
+      // throws; even total failure just leaves related_trials null and
+      // logs a differentiated tag. Study itself is unaffected on failure.
+      //
+      // Default the rerank client to the same Phase 2 client unless the
+      // caller (tests) overrides it. Without this, production builds
+      // silently take the deterministic-fallback path on every study
+      // (caught by both PR-2 outside-voice reviews as the primary P1).
+      const baseDeps = opts.relatedTrialsDeps ?? {};
+      const resolvedDeps: EnrichRelatedTrialsDeps = {
+        ...baseDeps,
+        rerankClient: baseDeps.rerankClient ?? client,
+      };
+      const enriched = await enrichStudyWithRelatedTrials(
+        study,
+        rawParsed,
+        relatedRunCache,
+        resolvedDeps,
+      );
+      if (enriched.related_trials_provenance.rerank_outcome !== 'skipped') {
+        relatedEligible += 1;
+        if (enriched.related_trials && enriched.related_trials.length > 0) {
+          relatedPopulated += 1;
+        }
+      }
+      successful.push({
+        cluster,
+        study: {
+          ...study,
+          related_trials: enriched.related_trials,
+          related_trials_provenance: enriched.related_trials_provenance,
+        },
+      });
     } catch (err) {
       const reason = (err as Error).message;
       dropped.push({ slug: cluster.slug, name: cluster.name, reason });
       console.warn(`  [phase2] dropped ${cluster.slug} (${cluster.name}): ${reason}`);
     }
   });
+
+  // v0.13: end-of-Phase-2 minimum-success gate. Cron stays green; total
+  // retrieval-wide outages become loud. Codex round-2 #15.
+  if (relatedEligible > 0) {
+    const pct = Math.round((relatedPopulated / relatedEligible) * 100);
+    const skipped = clusters.length - relatedEligible - dropped.length;
+    console.warn(
+      `[v0.13] related_trials populated: ${relatedPopulated} of ${relatedEligible} eligible (${pct}%) · skipped: ${skipped} (no_related_search)`,
+    );
+    if (pct < 50) {
+      console.warn(
+        `[v0.13] WARN: related_trials populated rate ${pct}% is below 50%. ` +
+          `Possible CT.gov outage or rerank degradation. Build continues.`,
+      );
+    }
+  }
 
   if (successful.length === 0) {
     throw new DigestParseError('All Phase 2 study agents failed. Cannot continue to synthesis.');
@@ -620,7 +716,7 @@ async function runGroupingPhase(
   for (const url of manifest.urls) content.push({ type: 'image', url });
   content.push({ type: 'text', text: prompt });
 
-  return completeAndParse(
+  const { value } = await completeAndParse(
     client,
     content,
     { model: opts.model, maxTokens: 4096, temperature: 0 },
@@ -628,6 +724,7 @@ async function runGroupingPhase(
     maxRetries,
     'grouping',
   );
+  return value;
 }
 
 export function parseGroupingResponse(raw: string, tweets: DigestInputTweet[]): StudyCluster[] {
@@ -739,6 +836,10 @@ export function detectClusterCollisions(
 // Phase 2 — per-study agent
 // ────────────────────────────────────────────────────────────────────────────
 
+// v0.13 refactor: returns BOTH the validated DigestStudy AND the raw Phase 2
+// JSON response string. The raw is consumed by enrichStudyWithRelatedTrials
+// to read the internal `related_search` field that parseStudyAgentResponse
+// deliberately omits from DigestStudy. Codex round-2 #18.
 async function runStudyAgent(
   client: LlmClient,
   cluster: StudyCluster,
@@ -746,7 +847,7 @@ async function runStudyAgent(
   opts: BuildOptions,
   maxRetries: number,
   ocrAvailable: boolean,
-): Promise<DigestStudy> {
+): Promise<{ study: DigestStudy; raw: string }> {
   const promptPath = opts.promptPaths?.studyAgent ?? DEFAULT_PROMPTS.studyAgent;
   const template = readFileSync(promptPath, 'utf-8');
 
@@ -780,10 +881,10 @@ async function runStudyAgent(
   for (const url of manifest.urls) content.push({ type: 'image', url });
   content.push({ type: 'text', text: prompt });
 
-  const study = await completeAndParse(
+  const { value: study, raw } = await completeAndParse(
     client,
     content,
-    // Phase 2 is the deep-analysis step — honor the studyModel override (e.g.
+    // Phase 2 is the deep-analysis step; honor the studyModel override (e.g.
     // Opus) and the optional extended-thinking budget.
     {
       model: opts.studyModel ?? opts.model,
@@ -791,7 +892,7 @@ async function runStudyAgent(
       temperature: 0,
       thinkingBudget: opts.studyThinkingBudget,
     },
-    (raw) => parseStudyAgentResponse(raw, cluster),
+    (rawResp) => parseStudyAgentResponse(rawResp, cluster),
     maxRetries,
     `phase2:${cluster.slug}`,
   );
@@ -822,7 +923,8 @@ async function runStudyAgent(
   // v0.4.4 backstop: if the LLM emitted both a table caption AND a detail
   // table covering the same columns, drop the detail-table. Prompt-level
   // rule asks for non-duplication; this is the safety net.
-  return dedupTablesAgainstCaption(detailsValidated, cluster.slug);
+  const finalStudy = dedupTablesAgainstCaption(detailsValidated, cluster.slug);
+  return { study: finalStudy, raw };
 }
 
 // Validate every promoted figure against its own OCR, reusing the single-figure
@@ -1316,7 +1418,17 @@ export function parseRelatedTrials(
   const picksRaw = (raw as { picks?: unknown }).picks;
   if (!Array.isArray(picksRaw)) return null;
 
-  const validQuestions = new Set(studyOpenQuestions);
+  // Build a normalization map from normalized form back to the original
+  // study.open_questions string. The LLM's `answers_question` is normalized
+  // (Unicode NFC + smart-quote-to-ascii) for the comparison ONLY; the
+  // value persisted on the artifact is the canonical original string from
+  // study.open_questions. Codex PR-2 P2 #4: protects against legitimate
+  // curly-quote / NBSP drift without opening a path to LLM invention.
+  const canonicalByNormalized = new Map<string, string>();
+  for (const q of studyOpenQuestions) {
+    canonicalByNormalized.set(normalizeQuestionForMatch(q), q);
+  }
+
   const seenTuples = new Set<string>();
   const accepted: RelatedTrial[] = [];
 
@@ -1325,17 +1437,20 @@ export function parseRelatedTrials(
     if (!isPlainObject(entry)) continue;
     const e = entry as Record<string, unknown>;
     const nct = typeof e.nct === 'string' ? e.nct.trim() : '';
-    const aq = typeof e.answers_question === 'string' ? e.answers_question.trim() : '';
+    const aqRaw = typeof e.answers_question === 'string' ? e.answers_question.trim() : '';
     const phraseRaw = typeof e.relevance_phrase === 'string' ? e.relevance_phrase.trim() : '';
-    if (!nct || !aq || !phraseRaw) continue;
+    if (!nct || !aqRaw || !phraseRaw) continue;
 
     // INVARIANT 1: nct must be in the candidate set we just fetched.
     const candidate = candidatesByNct.get(nct);
     if (!candidate) continue;
 
-    // INVARIANT 2: answers_question must be byte-identical to one of the
-    // study's open questions.
-    if (!validQuestions.has(aq)) continue;
+    // INVARIANT 2: answers_question must match (after Unicode/quote
+    // normalization) one of the study's open questions. We persist the
+    // CANONICAL source string, never the LLM's normalized form, so the
+    // artifact field stays byte-identical to study.open_questions.
+    const aq = canonicalByNormalized.get(normalizeQuestionForMatch(aqRaw));
+    if (!aq) continue;
 
     const tupleKey = `${nct}|${aq}`;
     if (seenTuples.has(tupleKey)) continue;
@@ -1385,6 +1500,301 @@ function compareCompletionDates(a: string | null, b: string | null): number {
 
 function isPlainObject(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null && !Array.isArray(x);
+}
+
+// v0.13: Normalize an open-question string for INVARIANT 2 matching.
+// Unicode NFC + smart-quote / NBSP folding. Used ONLY to compare the LLM's
+// emitted `answers_question` against study.open_questions; the canonical
+// string from study.open_questions is what gets persisted on the artifact,
+// so a curly-quote-drifted match still produces byte-identical artifact
+// output. Does not lowercase or trim, so case drift still fails.
+function normalizeQuestionForMatch(s: string): string {
+  return s
+    .normalize('NFC')
+    .replace(/[‘’‚′]/g, "'")
+    .replace(/[“”„″]/g, '"')
+    .replace(/ /g, ' ');
+}
+
+// v0.13: In-memory cache for ct.gov fetches. Lives across one build
+// invocation (and across all dates of a backfill once T6 plumbs it through
+// runBackfill). Stores RESULTS only, never failures, so a transient
+// ct.gov error on one study does not poison the same query for the next
+// study (codex round-2 #13). Key: sha1(normalize(query.term)).
+//
+// The cache holds an in-flight promise during the fetch window, so
+// concurrent Phase 2 workers issuing the same query share one ct.gov
+// call instead of racing two duplicate fetches. Codex PR-2 P2 #3.
+export type RelatedTrialsRunCache = Map<string, Promise<FetchCandidateTrialsResult>>;
+
+export function createRelatedTrialsRunCache(): RelatedTrialsRunCache {
+  return new Map();
+}
+
+// v0.13: Injectable dependencies for the orchestrator. Production callers
+// pass nothing (real ct.gov fetch, real LLM client, real clock); tests
+// inject stubs.
+export type EnrichRelatedTrialsDeps = {
+  ctgovFetch?: (term: string) => Promise<FetchCandidateTrialsResult>;
+  rerankClient?: LlmClient;
+  clock?: () => Date;
+  promptPath?: string;
+  // Cap on candidates surfaced into the rerank prompt per query. Default
+  // 20 (matches ct.gov pageSize). Tests may shrink for fixture clarity.
+  maxCandidatesPerQuery?: number;
+};
+
+export type EnrichRelatedTrialsResult = {
+  related_trials: RelatedTrial[] | null;
+  related_trials_provenance: RelatedTrialsProvenance;
+};
+
+const RERANK_PROMPT_PATH = resolve(PROMPTS_DIR, 'digest-v5-rerank-trials.txt');
+const DETERMINISTIC_FALLBACK_CAP = 3;
+
+// v0.13: Per-study orchestrator. Reads `related_search` off the raw Phase
+// 2 response, fan-outs ct.gov fetches per query (deduped through the run
+// cache), aggregates candidates by question, sends a single rerank LLM
+// call, parses with the structural invariants. Returns the trials + a
+// provenance record. NEVER THROWS (codex round-2 #5): orchestrator
+// failures must never drop the underlying study from Phase 2.
+export async function enrichStudyWithRelatedTrials(
+  study: DigestStudy,
+  rawStudyAgentResponse: unknown,
+  runCache: RelatedTrialsRunCache,
+  deps: EnrichRelatedTrialsDeps = {},
+  log?: (line: string) => void,
+): Promise<EnrichRelatedTrialsResult> {
+  const slug = study.slug ?? 'unknown';
+
+  const emit = (line: string): void => {
+    if (log) log(line);
+    else console.warn(line);
+  };
+
+  // Provenance is initialized inside the try so a throwing clock cannot
+  // escape the catch-all (codex PR-2 P2 #5).
+  let provenance: RelatedTrialsProvenance = {
+    queries_fired: [],
+    queries_failed: [],
+    candidates_returned: 0,
+    fetched_at: '',
+    rerank_outcome: 'skipped',
+  };
+
+  try {
+    const clock = deps.clock ?? (() => new Date());
+    provenance = { ...provenance, fetched_at: clock().toISOString() };
+    // 1. Parse related_search off the raw Phase 2 response.
+    const rawSearch = isPlainObject(rawStudyAgentResponse)
+      ? (rawStudyAgentResponse as Record<string, unknown>).related_search
+      : null;
+    const relatedSearch = parseRelatedSearch(rawSearch);
+
+    if (!relatedSearch) {
+      emit(`[v0.13] no_related_search: ${slug}`);
+      return { related_trials: null, related_trials_provenance: provenance };
+    }
+
+    // 2. Fetch candidates per query (cache hit short-circuits ct.gov call).
+    const openQuestions = study.open_questions ?? [];
+    const candidatesByNct = new Map<string, CandidateTrial>();
+    const groupedByQuestion = new Map<string, CandidateTrial[]>();
+    const fetchFn = deps.ctgovFetch ?? fetchCandidateTrials;
+    const maxPerQuery = deps.maxCandidatesPerQuery ?? 20;
+
+    for (const q of relatedSearch.queries) {
+      provenance.queries_fired.push(q.term);
+      const cacheKey = sha1Hex(normalizeTermForCache(q.term));
+      // Race-safe dedup: store the in-flight promise so a concurrent worker
+      // issuing the same query awaits the same call. After settle, if the
+      // result was a failure we evict the promise so the NEXT study retries
+      // (matches the "cache results only, never failures" rule from PR-1).
+      let promise = runCache.get(cacheKey);
+      if (!promise) {
+        promise = fetchFn(q.term);
+        runCache.set(cacheKey, promise);
+        // Schedule eviction of failures; succeed-cache stays. Use the awaited
+        // value to decide; do NOT block the cache set on it.
+        void promise.then(
+          (res) => {
+            if (!res.ok) runCache.delete(cacheKey);
+          },
+          () => {
+            // Rejected promise: also evict so retries are possible.
+            runCache.delete(cacheKey);
+          },
+        );
+      }
+      const result = await promise;
+
+      if (!result.ok) {
+        provenance.queries_failed.push({ term: q.term, reason: result.error });
+        emit(`[v0.13] ctgov_${result.error}: ${slug} · ${q.term}`);
+        continue;
+      }
+
+      // Cap per-query and aggregate.
+      const group: CandidateTrial[] = [];
+      for (const c of result.candidates.slice(0, maxPerQuery)) {
+        candidatesByNct.set(c.nct, c);
+        group.push(c);
+      }
+      // If two queries watch the same open question (rare but possible),
+      // concatenate their candidates under that question.
+      const existing = groupedByQuestion.get(q.watches_question);
+      if (existing) {
+        existing.push(...group);
+      } else {
+        groupedByQuestion.set(q.watches_question, group);
+      }
+    }
+
+    provenance.candidates_returned = candidatesByNct.size;
+
+    if (groupedByQuestion.size === 0) {
+      // Codex PR-2 P2 #2: when every query failed (vs Phase 2 not emitting
+      // any), the study WAS eligible. Mark provenance as 'failed' so the
+      // build-end minimum-success gate counts this study in the denominator
+      // and a total CT.gov outage becomes visible.
+      provenance.rerank_outcome = 'failed';
+      emit(`[v0.13] all_queries_failed: ${slug}`);
+      return { related_trials: null, related_trials_provenance: provenance };
+    }
+
+    // 3. Rerank LLM call (or deterministic fallback if no client).
+    const rerankClient = deps.rerankClient;
+    if (!rerankClient) {
+      emit(`[v0.13] rerank_no_client_fallback_used: ${slug}`);
+      const fallback = deterministicDegradedFallback(groupedByQuestion, openQuestions);
+      provenance.rerank_outcome = fallback.length > 0 ? 'fallback' : 'abstained';
+      return {
+        related_trials: fallback.length > 0 ? fallback : null,
+        related_trials_provenance: provenance,
+      };
+    }
+
+    let rerankRaw: string;
+    try {
+      rerankRaw = await runRerankTrialsPhase(
+        rerankClient,
+        study,
+        openQuestions,
+        groupedByQuestion,
+        deps,
+      );
+    } catch (err) {
+      emit(`[v0.13] rerank_failed_fallback_used: ${slug} · ${(err as Error).message}`);
+      const fallback = deterministicDegradedFallback(groupedByQuestion, openQuestions);
+      provenance.rerank_outcome = fallback.length > 0 ? 'fallback' : 'failed';
+      return {
+        related_trials: fallback.length > 0 ? fallback : null,
+        related_trials_provenance: provenance,
+      };
+    }
+
+    // 4. Parse rerank picks and enforce the invariants via parseRelatedTrials.
+    const cleaned = stripFences(rerankRaw);
+    let parsed: unknown = null;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      emit(`[v0.13] rerank_parse_failed_fallback_used: ${slug}`);
+      const fallback = deterministicDegradedFallback(groupedByQuestion, openQuestions);
+      provenance.rerank_outcome = fallback.length > 0 ? 'fallback' : 'failed';
+      return {
+        related_trials: fallback.length > 0 ? fallback : null,
+        related_trials_provenance: provenance,
+      };
+    }
+
+    const trials = parseRelatedTrials(parsed, candidatesByNct, openQuestions);
+    if (!trials) {
+      emit(`[v0.13] rerank_abstained: ${slug}`);
+      provenance.rerank_outcome = 'abstained';
+      return { related_trials: null, related_trials_provenance: provenance };
+    }
+
+    // 'picked_N' is the structural tag; codex PR-2 #8 flagged that callers
+    // wanting the count should read trials.length. Keeping the enum value
+    // stable across schema versions; trial count is on the array itself.
+    provenance.rerank_outcome = 'picked_N';
+    return { related_trials: trials, related_trials_provenance: provenance };
+  } catch (err) {
+    // Catch-all so the orchestrator never propagates an exception to the
+    // Phase 2 try block. Codex round-2 #5.
+    emit(`[v0.13] orchestrator_exception: ${slug} · ${(err as Error).message}`);
+    provenance.rerank_outcome = 'failed';
+    return { related_trials: null, related_trials_provenance: provenance };
+  }
+}
+
+// v0.13: Deterministic fallback. Picks top 1 trial per open question by
+// primary_completion_date ascending (nulls last). Cap of
+// DETERMINISTIC_FALLBACK_CAP total picks. Relevance phrase is the literal
+// string "candidate match" so the renderer can show something without
+// pretending the LLM judged fit. Codex round-2 #17.
+export function deterministicDegradedFallback(
+  groupedByQuestion: Map<string, CandidateTrial[]>,
+  studyOpenQuestions: string[],
+): RelatedTrial[] {
+  const out: RelatedTrial[] = [];
+  for (const question of studyOpenQuestions) {
+    if (out.length >= DETERMINISTIC_FALLBACK_CAP) break;
+    const candidates = groupedByQuestion.get(question);
+    if (!candidates || candidates.length === 0) continue;
+    const sorted = [...candidates].sort((a, b) =>
+      compareCompletionDates(a.primary_completion_date, b.primary_completion_date),
+    );
+    const best = sorted[0];
+    if (!best) continue;
+    out.push({
+      ...best,
+      answers_question: question,
+      relevance_phrase: 'candidate match',
+    });
+  }
+  return out;
+}
+
+// Build the rerank LLM message: VOICE cache block + the rendered prompt
+// template with the study context and grouped candidates injected.
+async function runRerankTrialsPhase(
+  client: LlmClient,
+  study: DigestStudy,
+  openQuestions: string[],
+  groupedByQuestion: Map<string, CandidateTrial[]>,
+  deps: EnrichRelatedTrialsDeps,
+): Promise<string> {
+  const promptPath = deps.promptPath ?? RERANK_PROMPT_PATH;
+  const template = readFileSync(promptPath, 'utf-8');
+
+  const grouped: Record<string, CandidateTrial[]> = {};
+  for (const [q, candidates] of groupedByQuestion.entries()) {
+    grouped[q] = candidates;
+  }
+
+  const rendered = template
+    .replace('{{VOICE}}', VOICE_POINTER)
+    .replace('{{STUDY_NAME}}', study.name)
+    .replace('{{STUDY_TLDR}}', study.tldr)
+    .replace('{{OPEN_QUESTIONS_JSON}}', JSON.stringify(openQuestions, null, 2))
+    .replace('{{CANDIDATES_BY_QUESTION_JSON}}', JSON.stringify(grouped, null, 2));
+
+  const content: LlmContentBlock[] = [voiceCacheBlock(), { type: 'text', text: rendered }];
+  const messages: LlmMessage[] = [{ role: 'user', content }];
+  return client.complete(messages, {});
+}
+
+// Normalize a query term for cache key purposes: trim, lowercase, collapse
+// runs of whitespace. Survives LLM whitespace drift across studies that
+// happen to extract the same drug+condition.
+function normalizeTermForCache(term: string): string {
+  return term.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function sha1Hex(s: string): string {
+  return createHash('sha1').update(s).digest('hex');
 }
 
 // v0.10: parse a single-valued enum tag (modality, intent, methodology) from
@@ -1636,7 +2046,7 @@ async function runSynthesisPhase(
 
   const content: LlmContentBlock[] = [voiceCacheBlock(), { type: 'text', text: prompt }];
 
-  return completeAndParse(
+  const { value } = await completeAndParse(
     client,
     content,
     { model: opts.model, maxTokens: 2048, temperature: 0 },
@@ -1644,6 +2054,7 @@ async function runSynthesisPhase(
     maxRetries,
     'synthesis',
   );
+  return value;
 }
 
 export function parseSynthesisResponse(raw: string): SynthesisOutput {
@@ -1715,6 +2126,11 @@ function buildImageManifest(tweets: DigestInputTweet[]): { text: string; urls: s
 // network error. Codex amended-plan finding #7: deterministic malformed JSON
 // often comes from prompt pressure / truncation, not randomness — repair is
 // cheap and beats dropping the study.
+// v0.13: returns BOTH the parsed value AND the raw response string. The
+// raw is needed by callers that read auxiliary fields the parseFn discarded
+// (currently: runStudyAgent surfaces the raw to the related-trials
+// orchestrator so it can read `related_search`). Existing callers that
+// don't need the raw destructure { value } and ignore raw.
 async function completeAndParse<T>(
   client: LlmClient,
   content: LlmContentBlock[],
@@ -1722,7 +2138,7 @@ async function completeAndParse<T>(
   parseFn: (raw: string) => T,
   maxRetries: number,
   label: string,
-): Promise<T> {
+): Promise<{ value: T; raw: string }> {
   let lastError: Error | undefined;
   let lastRaw: string | undefined;
 
@@ -1745,7 +2161,7 @@ async function completeAndParse<T>(
         thinkingBudget: opts.thinkingBudget,
       });
       lastRaw = raw;
-      return parseFn(raw);
+      return { value: parseFn(raw), raw };
     } catch (err) {
       lastError = err as Error;
       // Continue retrying on network OR parse errors.

@@ -36,11 +36,14 @@ import {
 import { fetchTweet, TweetFetchError } from '../src/lib/twitter-fetch.ts';
 import {
   buildDigest,
+  createRelatedTrialsRunCache,
   type DigestInputItem,
   type DigestInputTweet,
   type DigestInputPaper,
   type DigestInputSlide,
   type DigestOutput,
+  type RelatedTrialsRunCache,
+  type EnrichRelatedTrialsDeps,
 } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
@@ -424,7 +427,18 @@ export async function buildOneDate(
   args: Args,
   db: ReturnType<typeof openDb>,
   date: string,
-  deps?: { client?: LlmClient },
+  deps?: {
+    client?: LlmClient;
+    // v0.13: optional injectable seams for the related-trials orchestrator.
+    // `relatedTrialsRunCache` lets `main()` allocate ONE cache and share it
+    // across every `buildOneDate` invocation in a backfill so overlapping
+    // drug+condition queries dedup across dates (codex round-2 #20). When
+    // omitted, buildDigest allocates a per-call cache (single-date semantic).
+    // `relatedTrialsDeps` is injectable for tests (ctgovFetch, rerankClient,
+    // etc.); production callers omit it.
+    relatedTrialsRunCache?: RelatedTrialsRunCache;
+    relatedTrialsDeps?: EnrichRelatedTrialsDeps;
+  },
 ): Promise<void> {
   const allForDate = listBookmarks(db, { bookmark_date: date });
   const papersForDate = listPapers(db, { bookmark_date: date });
@@ -509,6 +523,9 @@ export async function buildOneDate(
       // DIGEST_THINKING: extended-thinking token budget for Phase 2 (api backend
       // only). Deeper reasoning before each study agent answers.
       studyThinkingBudget: parseThinkingBudget(),
+      // v0.13: thread the shared cache + injectable seams.
+      relatedTrialsRunCache: deps?.relatedTrialsRunCache,
+      relatedTrialsDeps: deps?.relatedTrialsDeps,
     });
   }
 
@@ -561,8 +578,13 @@ async function main() {
     process.exit(1);
   }
   console.log(`Building ${dates.length} date(s): ${dates.join(', ')}`);
+  // v0.13: allocate ONE related-trials run cache for the entire backfill so
+  // overlapping drug+condition queries dedup across dates. For single-date
+  // builds this is functionally identical to per-call allocation.
+  // Codex round-2 #20.
+  const relatedTrialsRunCache = createRelatedTrialsRunCache();
   for (const date of dates) {
-    await buildOneDate(args, db, date);
+    await buildOneDate(args, db, date, { relatedTrialsRunCache });
   }
 
   // v0.10: cross-namespace slug uniqueness assertion. Reads the freshly
