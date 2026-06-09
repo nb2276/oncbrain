@@ -6,7 +6,11 @@ import {
   type DigestOverrides,
 } from '../src/lib/digest-overrides.ts';
 import { deriveSlug } from '../src/lib/slug.ts';
-import type { DigestOutput, DigestStudy } from '../src/lib/llm-pipeline.ts';
+import type {
+  DigestOutput,
+  DigestStudy,
+  RelatedTrial,
+} from '../src/lib/llm-pipeline.ts';
 
 function study(name: string, slug: string, extra: Partial<DigestStudy> = {}): DigestStudy {
   return {
@@ -329,6 +333,298 @@ describe('applyOverrides — sidecar tag validation (bypass guard)', () => {
   });
 });
 
+// v0.13: related-trials override tests.
+function rt(over: Partial<RelatedTrial> & { nct: string; answers_question: string }): RelatedTrial {
+  return {
+    nct: over.nct,
+    brief_title: over.brief_title ?? `Trial ${over.nct}`,
+    overall_status: over.overall_status ?? 'RECRUITING',
+    phase: over.phase ?? ['PHASE3'],
+    enrollment_count: over.enrollment_count ?? 100,
+    primary_completion_date: over.primary_completion_date ?? '2027-03',
+    brief_summary: over.brief_summary ?? null,
+    conditions: over.conditions ?? [],
+    interventions: over.interventions ?? [],
+    eligibility_brief: over.eligibility_brief ?? null,
+    answers_question: over.answers_question,
+    relevance_phrase: over.relevance_phrase ?? 'pinned by curator',
+  };
+}
+
+const Q1 = 'Optimal sequencing vs cabazitaxel';
+const Q2 = 'Durability of response beyond 2 years';
+
+function digestWithTrials(): DigestOutput {
+  const a = study('Study A', 'study-a', {
+    open_questions: [Q1, Q2],
+    related_trials: [rt({ nct: 'NCT05000001', answers_question: Q1 }), rt({ nct: 'NCT05000002', answers_question: Q2 })],
+    related_trials_provenance: {
+      queries_fired: ['x', 'y'],
+      queries_failed: [],
+      candidates_returned: 2,
+      fetched_at: '2026-06-09T00:00:00Z',
+      rerank_outcome: 'picked_N',
+    },
+  });
+  return {
+    top_line: 'top',
+    tldr: 'tldr',
+    sites: [{ disease_site: 'prostate', intro: null, open_questions: null, studies: [a] }],
+    meta: { clusters_total: 1, studies_analyzed: 1, dropped: [], ocr_available: false },
+  };
+}
+
+describe('applyOverrides: related_trials suppress', () => {
+  it('whole-study suppress clears related_trials to []', () => {
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'suppress' } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    const studyOut = digest.sites[0]!.studies[0]!;
+    expect(studyOut.related_trials).toEqual([]);
+    expect(summary.relatedTrialsSuppressed).toEqual(['study-a']);
+  });
+
+  it('per-question suppress drops only matching trials', () => {
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'suppress', questions: [Q1] } },
+    };
+    const { digest } = applyOverrides(digestWithTrials(), ov);
+    const trials = digest.sites[0]!.studies[0]!.related_trials!;
+    expect(trials.map((t) => t.nct)).toEqual(['NCT05000002']);
+    expect(trials[0]!.answers_question).toBe(Q2);
+  });
+
+  it('per-question suppress is whitespace-forgiving on the question key', () => {
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'suppress', questions: [`  ${Q1}  `] } },
+    };
+    const { digest } = applyOverrides(digestWithTrials(), ov);
+    expect(digest.sites[0]!.studies[0]!.related_trials!.map((t) => t.nct)).toEqual(['NCT05000002']);
+  });
+
+  it('per-question suppress with no matching trials is a no-op (but records the slug)', () => {
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'suppress', questions: ['Some Other Question'] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect(digest.sites[0]!.studies[0]!.related_trials).toHaveLength(2);
+    expect(summary.relatedTrialsSuppressed).toEqual(['study-a']);
+    // Symmetric with set: a question key that doesn't match any current open
+    // question surfaces as a WARN so the curator knows their key drifted.
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('not in current study.open_questions'))).toBe(true);
+  });
+
+  it('suppress with empty questions array is a no-op + WARN (not whole-study suppress; claude PR-3 #3)', () => {
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'suppress', questions: [] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect(digest.sites[0]!.studies[0]!.related_trials).toHaveLength(2);
+    expect(summary.relatedTrialsSuppressed).toEqual([]);
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('omit the field to suppress all'))).toBe(true);
+  });
+
+  it('rejects unknown override kind (codex PR-3 P2)', () => {
+    const ov = {
+      related_trials: { 'study-a': { kind: 'destroy', trials: [] } as never },
+    } as DigestOverrides;
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect(digest.sites[0]!.studies[0]!.related_trials).toHaveLength(2);
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('unknown override kind'))).toBe(true);
+  });
+
+  it('rejects suppress.questions non-array (hand-edit sidecar trust boundary)', () => {
+    const ov = {
+      related_trials: { 'study-a': { kind: 'suppress', questions: 'Not an array' as never } },
+    } as DigestOverrides;
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect(digest.sites[0]!.studies[0]!.related_trials).toHaveLength(2);
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('suppress.questions must be an array'))).toBe(true);
+  });
+
+  it('records relatedTrialsMissing when slug does not exist', () => {
+    const ov: DigestOverrides = {
+      related_trials: { 'nonexistent-slug': { kind: 'suppress' } },
+    };
+    const { summary } = applyOverrides(digestWithTrials(), ov);
+    expect(summary.relatedTrialsMissing).toEqual(['nonexistent-slug']);
+    expect(summary.relatedTrialsSuppressed).toEqual([]);
+  });
+});
+
+describe('applyOverrides: related_trials set', () => {
+  it('replaces the orchestrator output with the pinned set', () => {
+    const pinned = rt({ nct: 'NCT09999999', answers_question: Q1, relevance_phrase: 'curator vetted' });
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [pinned] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    const studyOut = digest.sites[0]!.studies[0]!;
+    expect(studyOut.related_trials).toHaveLength(1);
+    expect(studyOut.related_trials![0]!.nct).toBe('NCT09999999');
+    expect(studyOut.related_trials_provenance!.rerank_outcome).toBe('pinned_by_curator');
+    expect(summary.relatedTrialsSet).toEqual(['study-a']);
+  });
+
+  it('drops set entries whose answers_question is no longer in study.open_questions (codex round-2 #23)', () => {
+    const stale = rt({ nct: 'NCT05111111', answers_question: 'Old question that no longer exists' });
+    const valid = rt({ nct: 'NCT05222222', answers_question: Q1 });
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [stale, valid] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    const trials = digest.sites[0]!.studies[0]!.related_trials!;
+    expect(trials.map((t) => t.nct)).toEqual(['NCT05222222']);
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('stale'))).toBe(true);
+  });
+
+  it('drops set entries with invalid NCT format (codex round-2 #24)', () => {
+    const bad = rt({ nct: 'NOT-AN-NCT', answers_question: Q1 });
+    const good = rt({ nct: 'NCT05222222', answers_question: Q1 });
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [bad, good] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect(digest.sites[0]!.studies[0]!.related_trials!.map((t) => t.nct)).toEqual(['NCT05222222']);
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('invalid nct format'))).toBe(true);
+  });
+
+  it('drops set entries with out-of-enum overall_status (drop AND warn)', () => {
+    const bad = rt({ nct: 'NCT05111111', answers_question: Q1, overall_status: 'COMPLETED' as never });
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [bad] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    // The bad entry must NOT appear in the artifact.
+    expect((digest.sites[0]!.studies[0]!.related_trials ?? []).map((t) => t.nct)).not.toContain('NCT05111111');
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('overall_status not in enum'))).toBe(true);
+  });
+
+  it('drops set entries with relevance_phrase too long (drop AND warn)', () => {
+    const bad = rt({ nct: 'NCT05111111', answers_question: Q1, relevance_phrase: 'x'.repeat(81) });
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [bad] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect((digest.sites[0]!.studies[0]!.related_trials ?? []).map((t) => t.nct)).not.toContain('NCT05111111');
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('relevance_phrase too long'))).toBe(true);
+  });
+
+  it('drops set entries with malformed phase (string instead of array)', () => {
+    // Hand-edited sidecar can carry shapes TypeScript can't catch. The
+    // validator must reject these or downstream renderers crash.
+    const bad = { ...rt({ nct: 'NCT05111111', answers_question: Q1 }), phase: 'PHASE3' as never };
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [bad as never] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect((digest.sites[0]!.studies[0]!.related_trials ?? []).length).toBe(0);
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('phase must be string'))).toBe(true);
+  });
+
+  it('drops set entries with malformed enrollment_count (string)', () => {
+    const bad = {
+      ...rt({ nct: 'NCT05111111', answers_question: Q1 }),
+      enrollment_count: 'many' as never,
+    };
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [bad as never] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect((digest.sites[0]!.studies[0]!.related_trials ?? []).length).toBe(0);
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('enrollment_count must be'))).toBe(true);
+  });
+
+  it('drops set entries with malformed interventions[] structure', () => {
+    const bad = {
+      ...rt({ nct: 'NCT05111111', answers_question: Q1 }),
+      interventions: [{ name: 'Drug' }] as never, // missing type
+    };
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [bad as never] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect((digest.sites[0]!.studies[0]!.related_trials ?? []).length).toBe(0);
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('interventions[] entries must have string name and type'))).toBe(true);
+  });
+
+  it('defensive clone: mutating the pinned input after apply does not corrupt the digest', () => {
+    const pinned = rt({ nct: 'NCT05111111', answers_question: Q1 });
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [pinned] } },
+    };
+    const { digest } = applyOverrides(digestWithTrials(), ov);
+    // Mutate input after apply.
+    pinned.conditions.push('Should not appear in digest');
+    pinned.interventions.push({ name: 'Should not appear', type: 'DRUG' });
+    if (pinned.phase) pinned.phase.push('FAKE');
+    const trial = digest.sites[0]!.studies[0]!.related_trials![0]!;
+    expect(trial.conditions).toEqual([]);
+    expect(trial.interventions).toEqual([]);
+    expect(trial.phase).toEqual(['PHASE3']);
+  });
+
+  it('uses opts.digestDate as deterministic fetched_at for fresh provenance (codex PR-3 P2)', () => {
+    const noOrch = sampleDigest();
+    noOrch.sites[0]!.studies[0]!.open_questions = [Q1];
+    const pinned = rt({ nct: 'NCT05000099', answers_question: Q1 });
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [pinned] } },
+    };
+    const { digest: d1 } = applyOverrides(noOrch, ov, { digestDate: '2026-06-09' });
+    const { digest: d2 } = applyOverrides(noOrch, ov, { digestDate: '2026-06-09' });
+    expect(d1.sites[0]!.studies[0]!.related_trials_provenance!.fetched_at).toBe('2026-06-09');
+    expect(d2.sites[0]!.studies[0]!.related_trials_provenance!.fetched_at).toBe('2026-06-09');
+  });
+
+  it('caps the pinned set at 5 entries with a WARN for extras', () => {
+    const trials = Array.from({ length: 8 }, (_, i) =>
+      rt({ nct: `NCT0500000${i}`, answers_question: Q1, relevance_phrase: `p${i}` }),
+    );
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect(digest.sites[0]!.studies[0]!.related_trials).toHaveLength(5);
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('cap 5'))).toBe(true);
+  });
+
+  it('dedupes pinned entries with duplicate NCTs', () => {
+    const a = rt({ nct: 'NCT05111111', answers_question: Q1 });
+    const aDup = rt({ nct: 'NCT05111111', answers_question: Q1, relevance_phrase: 'duplicate' });
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [a, aDup] } },
+    };
+    const { digest, summary } = applyOverrides(digestWithTrials(), ov);
+    expect(digest.sites[0]!.studies[0]!.related_trials).toHaveLength(1);
+    expect(summary.relatedTrialsWarnings.some((w) => w.includes('duplicate NCT'))).toBe(true);
+  });
+
+  it('set on a study that had no orchestrator output still applies (codex round-2 #26)', () => {
+    const noOrchestrator = sampleDigest();
+    noOrchestrator.sites[0]!.studies[0]!.open_questions = [Q1];
+    const pinned = rt({ nct: 'NCT05000099', answers_question: Q1, relevance_phrase: 'fresh pin' });
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [pinned] } },
+    };
+    const { digest, summary } = applyOverrides(noOrchestrator, ov);
+    const studyOut = digest.sites[0]!.studies[0]!;
+    expect(studyOut.related_trials).toHaveLength(1);
+    expect(studyOut.related_trials_provenance!.rerank_outcome).toBe('pinned_by_curator');
+    expect(summary.relatedTrialsSet).toEqual(['study-a']);
+  });
+
+  it('set resulting in 0 valid entries leaves related_trials null', () => {
+    const stale = rt({ nct: 'NCT05111111', answers_question: 'no longer here' });
+    const ov: DigestOverrides = {
+      related_trials: { 'study-a': { kind: 'set', trials: [stale] } },
+    };
+    const { digest } = applyOverrides(digestWithTrials(), ov);
+    expect(digest.sites[0]!.studies[0]!.related_trials).toBeNull();
+  });
+});
+
 describe('formatOverrideSummary', () => {
   it('summarizes applied changes', () => {
     const s = formatOverrideSummary({
@@ -338,6 +634,10 @@ describe('formatOverrideSummary', () => {
       editMissing: [],
       digestFields: ['top_line'],
       tagWarnings: [],
+      relatedTrialsSuppressed: [],
+      relatedTrialsSet: [],
+      relatedTrialsMissing: [],
+      relatedTrialsWarnings: [],
     });
     expect(s).toContain('suppressed 1');
     expect(s).toContain('edited 1');
@@ -352,6 +652,10 @@ describe('formatOverrideSummary', () => {
       editMissing: [],
       digestFields: [],
       tagWarnings: [],
+      relatedTrialsSuppressed: [],
+      relatedTrialsSet: [],
+      relatedTrialsMissing: [],
+      relatedTrialsWarnings: [],
     });
     expect(s).toContain('WARN');
     expect(s).toContain('z');
