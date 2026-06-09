@@ -240,6 +240,71 @@ export type DigestStudy = {
   modality?: ModalityTag | null;
   intent?: IntentTag | null;
   methodology?: MethodologyTag | null;
+  // v0.13: trials watching each open question. Phase 2 emits per-question
+  // search queries internally (consumed by the orchestrator, not retained
+  // on this object); the build-time orchestrator hits clinicaltrials.gov
+  // per query and reranks to pair each pick with the question it answers.
+  // Null when Phase 2 abstained, every query failed, or the rerank produced
+  // 0 valid picks. Older artifacts won't have this; renderers fall back to
+  // no nested trials. See plan v0.13 D10.
+  //
+  // Mirrored in src/lib/digest-data.ts: the build emits the artifact JSON
+  // and the Astro pages re-read it through the digest-data definitions, so
+  // both files MUST keep these shapes in lockstep.
+  related_trials?: RelatedTrial[] | null;
+  related_trials_provenance?: RelatedTrialsProvenance | null;
+};
+
+// v0.13: CT.gov status subset we surface. See plan D8.
+export type RelatedTrialStatus =
+  | 'RECRUITING'
+  | 'NOT_YET_RECRUITING'
+  | 'ACTIVE_NOT_RECRUITING'
+  | 'ENROLLING_BY_INVITATION';
+
+export const RELATED_TRIAL_STATUSES: readonly RelatedTrialStatus[] = [
+  'RECRUITING',
+  'NOT_YET_RECRUITING',
+  'ACTIVE_NOT_RECRUITING',
+  'ENROLLING_BY_INVITATION',
+] as const;
+
+// v0.13: Pre-rerank candidate. Returned by the CT.gov client; cached
+// in-run; fed to the rerank LLM. NOT persisted in the artifact.
+//
+// The richer codex-round-2 #3 fields (brief_summary, conditions,
+// interventions, eligibility_brief) are required so the rerank LLM has
+// real content to judge fit, not just titles.
+export type CandidateTrial = {
+  nct: string;
+  brief_title: string;
+  overall_status: RelatedTrialStatus;
+  phase: string[] | null;
+  enrollment_count: number | null;
+  primary_completion_date: string | null; // YYYY-MM
+  brief_summary: string | null;
+  conditions: string[];
+  interventions: Array<{ name: string; type: string }>;
+  eligibility_brief: string | null;
+};
+
+// v0.13: Post-rerank. Paired to a specific open question via byte-identical
+// match against study.open_questions[i]. INVARIANTS (enforced in
+// parseRelatedTrials):
+//   1. nct ∈ aggregated candidate set
+//   2. answers_question ∈ study.open_questions (byte-identical)
+export type RelatedTrial = CandidateTrial & {
+  answers_question: string;
+  relevance_phrase: string; // ≤ 60 chars
+};
+
+// v0.13: Auditable provenance (codex round-2 #36).
+export type RelatedTrialsProvenance = {
+  queries_fired: string[];
+  queries_failed: Array<{ term: string; reason: string }>;
+  candidates_returned: number;
+  fetched_at: string; // ISO 8601
+  rerank_outcome: 'picked_N' | 'abstained' | 'failed' | 'skipped' | 'fallback' | 'pinned_by_curator';
 };
 
 // One trial arm in the CONSORT flow.
@@ -1107,6 +1172,219 @@ export function parseOpenQuestions(raw: unknown): string[] | null {
     .map((q) => q.trim())
     .slice(0, 5);
   return out.length > 0 ? out : null;
+}
+
+// v0.13: internal Phase 2 output shape. NOT persisted on DigestStudy. The
+// orchestrator reads this off the raw Phase 2 response and uses it to drive
+// per-question ct.gov fetches.
+export type RelatedSearch = {
+  queries: Array<{
+    term: string;            // free-text CT.gov query.term value
+    watches_question: string; // EXACT text from study.open_questions[i]
+  }>;
+};
+
+// v0.13: stop-list applied to emitted query terms. Designed to catch the
+// failure mode where Phase 2 hallucinates a too-generic term ("the drug",
+// "cancer", "RT") that CT.gov would match against thousands of trials.
+// Lowercased single-token lookup; per-token (not substring).
+//
+// Extended list catches common oncology generics flagged by codex round-2:
+// efficacy, safety, survival, dose, response, regimen, combination,
+// outcome (and plural). A query like "survival combination therapy" passes
+// the old 3-token check but is still useless for CT.gov; the extended
+// stop-list plus the "2 specific tokens required" bar rejects it.
+const QUERY_STOP_TOKENS = new Set([
+  'cancer',
+  'tumor',
+  'tumour',
+  'oncology',
+  'drug',
+  'drugs',
+  'medication',
+  'treatment',
+  'therapy',
+  'trial',
+  'study',
+  'rt',
+  'radiation',
+  'chemo',
+  'chemotherapy',
+  'phase',
+  'placebo',
+  'arm',
+  'efficacy',
+  'safety',
+  'survival',
+  'dose',
+  'response',
+  'regimen',
+  'combination',
+  'outcome',
+  'outcomes',
+  'advanced',
+]);
+
+// Forgiving structural parser for Phase 2's `related_search` field. Returns
+// null when the field is absent, malformed, or all queries fail the
+// stop-list. The orchestrator treats null as "no_related_search" and skips
+// trial enrichment for that study.
+//
+// Rules (mirror prompt instructions in prompts/digest-v5-study-agent.txt):
+//   - queries must be an array; cap at 3
+//   - each entry must have term (string) and watches_question (string)
+//   - both must be non-empty after trim
+//   - term must have ≥ 3 whitespace-separated tokens (rejects "darolutamide",
+//     "prostate cancer", and other under-specified queries)
+//   - term must not consist entirely of stop-list tokens
+//   - duplicate term-and-question pairs are deduped (LLM repeats happen)
+//   - watches_question is NOT validated against study.open_questions here;
+//     that's the orchestrator's job once it has the study object
+export function parseRelatedSearch(raw: unknown): RelatedSearch | null {
+  if (!isPlainObject(raw)) return null;
+  const queriesRaw = (raw as { queries?: unknown }).queries;
+  if (!Array.isArray(queriesRaw)) return null;
+
+  const seen = new Set<string>();
+  const out: RelatedSearch['queries'] = [];
+
+  for (const entry of queriesRaw) {
+    if (out.length >= 3) break;
+    if (!isPlainObject(entry)) continue;
+    const e = entry as Record<string, unknown>;
+    const termRaw = typeof e.term === 'string' ? e.term.trim() : '';
+    const wqRaw = typeof e.watches_question === 'string' ? e.watches_question.trim() : '';
+    if (!termRaw || !wqRaw) continue;
+
+    if (!passesQueryStopList(termRaw)) continue;
+
+    const dedupKey = `${termRaw.toLowerCase()}|${wqRaw}`;
+    if (seen.has(dedupKey)) continue;
+    seen.add(dedupKey);
+
+    out.push({ term: termRaw, watches_question: wqRaw });
+  }
+
+  return out.length > 0 ? { queries: out } : null;
+}
+
+function passesQueryStopList(term: string): boolean {
+  // Split on whitespace AND hyphens before regex strip so "phase-3 trial"
+  // becomes ["phase", "3", "trial"] and the "phase" token gets caught by
+  // the stop-list; without splitting on hyphens, "phase-3" would collapse
+  // to "phase3" (non-stop, non-numeric) and pass.
+  const tokens = term
+    .toLowerCase()
+    .split(/[\s\-]+/)
+    .filter((t) => t.length > 0)
+    .map((t) => t.replace(/[^a-z0-9]/g, ''))
+    .filter((t) => t.length > 0);
+  if (tokens.length < 2) return false;
+  // The query must contain at least 2 SPECIFIC tokens: not in the stop-list
+  // AND not a pure number. A drug-plus-condition pair like "darolutamide
+  // nmCRPC" passes. "advanced cancer treatment" fails because only
+  // "treatment" is meaningful and it is in the stop-list.
+  const specificTokens = tokens.filter(
+    (t) => !QUERY_STOP_TOKENS.has(t) && !/^\d+$/.test(t),
+  );
+  return specificTokens.length >= 2;
+}
+
+// v0.13: parse the rerank LLM's pick list into RelatedTrial[]. Enforces
+// BOTH invariants:
+//   1. nct ∈ candidate set (provided as candidatesByNct)
+//   2. answers_question ∈ study.open_questions (byte-identical)
+//
+// Then:
+//   - dedup (nct, answers_question) tuples
+//   - cap at 5 total
+//   - re-hydrate full CandidateTrial fields by nct (rerank only emits
+//     nct + answers_question + relevance_phrase; everything else is
+//     pulled from the candidate)
+//   - trim relevance_phrase, cap at 60 chars
+//   - sort displayed list: group by question (preserving study.open_questions
+//     order); within group, primary_completion_date ascending, nulls last
+//
+// Returns null when no valid picks survived (treat as "rerank_abstained"
+// per the orchestrator's failure-mode policy).
+export function parseRelatedTrials(
+  raw: unknown,
+  candidatesByNct: Map<string, CandidateTrial>,
+  studyOpenQuestions: string[],
+): RelatedTrial[] | null {
+  if (!isPlainObject(raw)) return null;
+  const picksRaw = (raw as { picks?: unknown }).picks;
+  if (!Array.isArray(picksRaw)) return null;
+
+  const validQuestions = new Set(studyOpenQuestions);
+  const seenTuples = new Set<string>();
+  const accepted: RelatedTrial[] = [];
+
+  for (const entry of picksRaw) {
+    if (accepted.length >= 5) break;
+    if (!isPlainObject(entry)) continue;
+    const e = entry as Record<string, unknown>;
+    const nct = typeof e.nct === 'string' ? e.nct.trim() : '';
+    const aq = typeof e.answers_question === 'string' ? e.answers_question.trim() : '';
+    const phraseRaw = typeof e.relevance_phrase === 'string' ? e.relevance_phrase.trim() : '';
+    if (!nct || !aq || !phraseRaw) continue;
+
+    // INVARIANT 1: nct must be in the candidate set we just fetched.
+    const candidate = candidatesByNct.get(nct);
+    if (!candidate) continue;
+
+    // INVARIANT 2: answers_question must be byte-identical to one of the
+    // study's open questions.
+    if (!validQuestions.has(aq)) continue;
+
+    const tupleKey = `${nct}|${aq}`;
+    if (seenTuples.has(tupleKey)) continue;
+    seenTuples.add(tupleKey);
+
+    accepted.push({
+      ...candidate,
+      answers_question: aq,
+      relevance_phrase: capRelevancePhrase(phraseRaw),
+    });
+  }
+
+  if (accepted.length === 0) return null;
+
+  // Sort: preserve study.open_questions order across groups, primary
+  // completion date ascending within each group (nulls last).
+  const questionOrder = new Map<string, number>();
+  studyOpenQuestions.forEach((q, idx) => questionOrder.set(q, idx));
+
+  accepted.sort((a, b) => {
+    const qa = questionOrder.get(a.answers_question) ?? Number.MAX_SAFE_INTEGER;
+    const qb = questionOrder.get(b.answers_question) ?? Number.MAX_SAFE_INTEGER;
+    if (qa !== qb) return qa - qb;
+    return compareCompletionDates(a.primary_completion_date, b.primary_completion_date);
+  });
+
+  return accepted;
+}
+
+function capRelevancePhrase(s: string): string {
+  if (s.length <= 60) return s;
+  // Truncate at last whitespace before 60 chars to avoid mid-word cuts.
+  const slice = s.slice(0, 60);
+  const lastSpace = slice.lastIndexOf(' ');
+  return (lastSpace > 40 ? slice.slice(0, lastSpace) : slice).trimEnd() + '…';
+}
+
+// Sort helper: nulls go LAST regardless of direction. YYYY-MM and YYYY
+// strings compare lexicographically (correct because both are
+// zero-padded).
+function compareCompletionDates(a: string | null, b: string | null): number {
+  if (a === null && b === null) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  return a.localeCompare(b);
+}
+
+function isPlainObject(x: unknown): x is Record<string, unknown> {
+  return typeof x === 'object' && x !== null && !Array.isArray(x);
 }
 
 // v0.10: parse a single-valued enum tag (modality, intent, methodology) from

@@ -70,6 +70,82 @@ export type DigestStudy = {
   modality?: ModalityTag | null;
   intent?: IntentTag | null;
   methodology?: MethodologyTag | null;
+  // v0.13: trials watching each open question. Phase 2 emits per-question
+  // search queries; the build-time orchestrator hits clinicaltrials.gov per
+  // query and reranks across all candidates to pair each pick with the
+  // question it answers. Null when Phase 2 abstained, every query failed,
+  // or the rerank produced 0 valid picks. Older artifacts won't have this;
+  // renderers fall back to no nested trials.
+  related_trials?: RelatedTrial[] | null;
+  // v0.13: auditable provenance for the trial fetch + rerank pass. Not
+  // rendered on the card; ships in /api/v1/*.json for downstream consumers
+  // and post-hoc audit. Null when no fetch was attempted.
+  related_trials_provenance?: RelatedTrialsProvenance | null;
+};
+
+// v0.13: CT.gov status subset we surface as "open to enrollment or
+// active follow-up." See plan D8.
+export type RelatedTrialStatus =
+  | 'RECRUITING'
+  | 'NOT_YET_RECRUITING'
+  | 'ACTIVE_NOT_RECRUITING'
+  | 'ENROLLING_BY_INVITATION';
+
+export const RELATED_TRIAL_STATUSES: readonly RelatedTrialStatus[] = [
+  'RECRUITING',
+  'NOT_YET_RECRUITING',
+  'ACTIVE_NOT_RECRUITING',
+  'ENROLLING_BY_INVITATION',
+] as const;
+
+// v0.13: Pre-rerank candidate shape. Returned by the CT.gov client; cached
+// in-run; fed to the rerank LLM. NOT persisted in the artifact directly;
+// only the post-rerank RelatedTrial subset survives.
+export type CandidateTrial = {
+  nct: string;
+  brief_title: string;
+  overall_status: RelatedTrialStatus;
+  // CT.gov returns Phase as an array; can hold multiple values
+  // (e.g. ["PHASE1","PHASE2"]) or be absent for non-interventional studies.
+  phase: string[] | null;
+  // CT.gov EnrollmentCount: current count if recorded, may be the target on
+  // a not-yet-recruiting study. Nullable per the codex #11 note that this
+  // is not strictly a contracted target.
+  enrollment_count: number | null;
+  // YYYY-MM trimmed from CT.gov PrimaryCompletionDate.
+  primary_completion_date: string | null;
+  // ~500 chars of CT.gov BriefSummary. Gives the rerank LLM real content
+  // to judge fit (codex round-2 #3); ground truth for relevance_phrase.
+  brief_summary: string | null;
+  // CT.gov Conditions array.
+  conditions: string[];
+  // CT.gov Interventions, normalized to { name, type } pairs.
+  interventions: Array<{ name: string; type: string }>;
+  // First ~300 chars of CT.gov EligibilityCriteria; lets the rerank judge
+  // biomarker / line-of-therapy / population fit.
+  eligibility_brief: string | null;
+};
+
+// v0.13: Post-rerank shape. Paired to a specific open question on the
+// study via byte-identical match against study.open_questions[i].
+// What we attach to the study and ship in the artifact.
+export type RelatedTrial = CandidateTrial & {
+  // EXACT string from study.open_questions. Enforced by parser invariant.
+  answers_question: string;
+  // ≤ 60 chars. LLM-written tie of this trial to the watched question,
+  // grounded in observable candidate fields (BriefSummary / Eligibility /
+  // Interventions). VOICE.md compliance enforced via the shared cache block.
+  relevance_phrase: string;
+};
+
+// v0.13: Auditable provenance (codex round-2 #36). Records what was
+// queried, what failed, and the rerank outcome. Not rendered.
+export type RelatedTrialsProvenance = {
+  queries_fired: string[];
+  queries_failed: Array<{ term: string; reason: string }>;
+  candidates_returned: number;
+  fetched_at: string; // ISO 8601 timestamp
+  rerank_outcome: 'picked_N' | 'abstained' | 'failed' | 'skipped' | 'fallback' | 'pinned_by_curator';
 };
 
 export type ConsortArm = {
