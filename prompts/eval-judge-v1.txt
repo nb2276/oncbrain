@@ -14,7 +14,13 @@ Dimensions:
 
 5. **hallucinations_detected** — List any factual claims in the digest that are NOT supported by the input tweets. Drug names, trial outcomes, effect sizes, population details, anything. If any hallucination is found, factual_accuracy MUST be capped at 5/10. If zero hallucinations, list as empty array.
 
-Compute overall_score as the mean of the four numeric scores (factual_accuracy, clinical_relevance, citation_correctness, clustering_quality), rounded to one decimal. If hallucinations_detected is non-empty, cap overall_score at 5.0 regardless of dimension scores.
+v0.13 additions (only when the digest's studies populate `related_trials`):
+
+6. **related_query_targeting**: for each study with a non-null `related_trials_provenance.queries_fired`, are those query terms actually targeting the study's specific `open_questions`? A good query names the drug+condition+line of therapy (or the radiation modality, surgical setting, biomarker, methodology) the question is about. A bad query is over-generic ("cancer drug treatment"), targets the wrong question, or fires when no open question maps cleanly to a CT.gov search. Score 10 when every fired query is specifically tied to one of the study's open questions; 5 when half drift or are too generic; 1 when queries are mostly noise. Emit `null` (NOT `{score: 1, notes: "n/a"}`) when NO study in the digest has any queries_fired (the orchestrator never ran or every study abstained). Do not substitute a low score for null; the dimension is genuinely not applicable.
+
+7. **related_trial_relevance**: for each entry in `related_trials`, does the picked trial plausibly answer the open question named in `answers_question`? Evaluate by looking at the trial's `brief_summary`, `eligibility_brief`, and `interventions`: is there a real fit between the trial's design and the question, or is it just a same-drug / same-disease coincidence? Penalize for picks where the relevance_phrase invents endpoints or populations not visible in the candidate text. Score 10 when every pick directly addresses its paired question; 5 when half are tangential; 1 when picks are mostly noise. Emit `null` (NOT a low score) when no study in the digest has any populated `related_trials`.
+
+Compute overall_score as the mean of the numeric dimension scores. The core dimensions (factual_accuracy, clinical_relevance, citation_correctness, clustering_quality) are always included. If you score related_query_targeting and/or related_trial_relevance (i.e. did not emit null), include them in the mean too. Round to one decimal. If hallucinations_detected is non-empty, cap overall_score at 5.0 (do not raise scores already below 5; the cap is one-way, downward only).
 
 Return a single JSON object matching this exact schema, no other text:
 
@@ -23,6 +29,8 @@ Return a single JSON object matching this exact schema, no other text:
   "clinical_relevance": { "score": <1-10>, "notes": "<one sentence>" },
   "citation_correctness": { "score": <1-10>, "notes": "<one sentence>" },
   "clustering_quality": { "score": <1-10>, "notes": "<one sentence>" },
+  "related_query_targeting": { "score": <1-10>, "notes": "<one sentence>" } | null,
+  "related_trial_relevance": { "score": <1-10>, "notes": "<one sentence>" } | null,
   "hallucinations_detected": [ "<specific hallucination 1>", "..." ],
   "overall_score": <float 1.0-10.0>,
   "verdict": "<one sentence summary, e.g., 'Ship-quality digest.' or 'Reject: fabricated effect size in cluster 2.'>"

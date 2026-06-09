@@ -119,6 +119,115 @@ describe('parseEvalResult', () => {
     expect(() => parseEvalResult('')).toThrow(EvalParseError);
   });
 
+  // v0.13: optional related-trials dimensions.
+  it('parses both new v0.13 dimensions when present', () => {
+    const withV13 = {
+      ...goodResult,
+      related_query_targeting: { score: 7, notes: 'Most queries target the open question.' },
+      related_trial_relevance: { score: 8, notes: 'Picks tied to questions; one tangential.' },
+    };
+    const result = parseEvalResult(JSON.stringify(withV13));
+    expect(result.related_query_targeting?.score).toBe(7);
+    expect(result.related_trial_relevance?.score).toBe(8);
+  });
+
+  it('treats null v0.13 dimensions as not applicable (legacy/no-related-trials build)', () => {
+    const withNulls = {
+      ...goodResult,
+      related_query_targeting: null,
+      related_trial_relevance: null,
+    };
+    const result = parseEvalResult(JSON.stringify(withNulls));
+    expect(result.related_query_targeting).toBeUndefined();
+    expect(result.related_trial_relevance).toBeUndefined();
+    // Overall stays at the 4-dim mean since the new dims were nulled out.
+    expect(result.overall_score).toBe(8.8);
+  });
+
+  it('treats omitted v0.13 dimensions the same as null (older judge prompt)', () => {
+    // Codex flagged this as test theater previously; assert OMITTED and NULL
+    // actually produce the same parsed shape so a future bug where one path
+    // throws would be caught here.
+    const omitted = parseEvalResult(JSON.stringify(goodResult));
+    const nulled = parseEvalResult(
+      JSON.stringify({
+        ...goodResult,
+        related_query_targeting: null,
+        related_trial_relevance: null,
+      }),
+    );
+    expect(omitted.related_query_targeting).toBeUndefined();
+    expect(omitted.related_trial_relevance).toBeUndefined();
+    expect(nulled.related_query_targeting).toBeUndefined();
+    expect(nulled.related_trial_relevance).toBeUndefined();
+    expect(omitted).toEqual(nulled);
+  });
+
+  it('averages over 6 dimensions when both new dimensions are scored and overall is omitted', () => {
+    const withSix = {
+      ...goodResult,
+      related_query_targeting: { score: 6, notes: 'Two over-generic queries.' },
+      related_trial_relevance: { score: 6, notes: 'Half the picks tangential.' },
+    } as Record<string, unknown>;
+    delete withSix.overall_score;
+    const result = parseEvalResult(JSON.stringify(withSix));
+    // (9 + 8 + 10 + 8 + 6 + 6) / 6 = 7.83 → 7.8
+    expect(result.overall_score).toBe(7.8);
+  });
+
+  it('averages over 5 dimensions when only related_query_targeting is scored', () => {
+    const withFive = {
+      ...goodResult,
+      related_query_targeting: { score: 5, notes: 'Mixed.' },
+    } as Record<string, unknown>;
+    delete withFive.overall_score;
+    const result = parseEvalResult(JSON.stringify(withFive));
+    // (9 + 8 + 10 + 8 + 5) / 5 = 8.0
+    expect(result.overall_score).toBe(8);
+  });
+
+  it('averages over 5 dimensions when only related_trial_relevance is scored (symmetric)', () => {
+    // Symmetric counterpart to the previous test: catches a typo that
+    // swapped the two optional-dimension fall-through branches.
+    const withFive = {
+      ...goodResult,
+      related_trial_relevance: { score: 5, notes: 'Mixed picks.' },
+    } as Record<string, unknown>;
+    delete withFive.overall_score;
+    const result = parseEvalResult(JSON.stringify(withFive));
+    expect(result.related_trial_relevance?.score).toBe(5);
+    expect(result.related_query_targeting).toBeUndefined();
+    expect(result.overall_score).toBe(8);
+  });
+
+  it('still caps overall at 5 when hallucinations exist, even with the new dimensions', () => {
+    const withHallAndV13 = {
+      ...goodResult,
+      hallucinations_detected: ['fabricated trial outcome'],
+      related_query_targeting: { score: 9, notes: 'Good.' },
+      related_trial_relevance: { score: 9, notes: 'Good.' },
+      overall_score: 9.0,
+    };
+    const result = parseEvalResult(JSON.stringify(withHallAndV13));
+    expect(result.overall_score).toBe(5.0);
+  });
+
+  it('throws when a v0.13 dimension is present but the score is out of range', () => {
+    const broken = {
+      ...goodResult,
+      related_query_targeting: { score: 0, notes: 'zero is invalid' },
+    };
+    expect(() => parseEvalResult(JSON.stringify(broken))).toThrow(/invalid score/);
+  });
+
+  it('throws when a v0.13 dimension is present but malformed (not object, not null)', () => {
+    const broken = {
+      ...goodResult,
+      related_query_targeting: 'string instead of object' as never,
+    };
+    expect(() => parseEvalResult(JSON.stringify(broken))).toThrow(/must be an object or null/);
+  });
+
   it('throws on invalid JSON', () => {
     expect(() => parseEvalResult('{not json}')).toThrow(EvalParseError);
   });

@@ -32,6 +32,14 @@ export type EvalResult = {
   clinical_relevance: DimensionScore;
   citation_correctness: DimensionScore;
   clustering_quality: DimensionScore;
+  // v0.13: two new dimensions for the trials-to-watch affordance.
+  // OPTIONAL because (a) older digests have no related_trials populated and
+  // (b) a digest where every study legitimately abstained (no_related_search)
+  // can't be scored on these axes. The judge emits null in both cases; the
+  // parser returns undefined here. overall_score averages over whichever
+  // dimensions are present.
+  related_query_targeting?: DimensionScore;
+  related_trial_relevance?: DimensionScore;
   hallucinations_detected: string[];
   overall_score: number;
   verdict: string;
@@ -134,10 +142,32 @@ export function parseEvalResult(raw: string): EvalResult {
     return { score, notes };
   };
 
+  // v0.13: optional dimension parser. The judge emits null (or omits) the
+  // field when the digest has no related_trials to score against; treat
+  // that as "not applicable" and exclude from the overall mean. A field
+  // that is present but malformed still throws so we don't silently
+  // accept a broken judge response.
+  const optionalDimension = (key: string): DimensionScore | undefined => {
+    const v = obj[key];
+    if (v === null || v === undefined) return undefined;
+    if (typeof v !== 'object' || Array.isArray(v)) {
+      throw new EvalParseError(`Dimension ${key} must be an object or null`, raw);
+    }
+    const dim = v as Record<string, unknown>;
+    const score = typeof dim.score === 'number' ? dim.score : NaN;
+    const notes = typeof dim.notes === 'string' ? dim.notes : '';
+    if (!Number.isFinite(score) || score < 1 || score > 10) {
+      throw new EvalParseError(`Dimension ${key} has invalid score: ${dim.score}`, raw);
+    }
+    return { score, notes };
+  };
+
   const factual_accuracy = dimension('factual_accuracy');
   const clinical_relevance = dimension('clinical_relevance');
   const citation_correctness = dimension('citation_correctness');
   const clustering_quality = dimension('clustering_quality');
+  const related_query_targeting = optionalDimension('related_query_targeting');
+  const related_trial_relevance = optionalDimension('related_trial_relevance');
 
   const hallucinations_detected = Array.isArray(obj.hallucinations_detected)
     ? obj.hallucinations_detected.filter((s): s is string => typeof s === 'string')
@@ -149,15 +179,19 @@ export function parseEvalResult(raw: string): EvalResult {
       : NaN;
 
   if (!Number.isFinite(overall_score)) {
-    // The judge sometimes omits or miscomputes overall_score — compute it ourselves
-    // as a defensive fallback. Use the same rule: mean of 4 dimensions, cap at 5 if
-    // hallucinations exist.
-    overall_score =
-      (factual_accuracy.score +
-        clinical_relevance.score +
-        citation_correctness.score +
-        clustering_quality.score) /
-      4;
+    // The judge sometimes omits or miscomputes overall_score; compute it
+    // ourselves as a defensive fallback. Mean over present dimensions
+    // (4 core + 0-2 optional v0.13 dimensions), capped at 5 if any
+    // hallucination was detected.
+    const presentScores = [
+      factual_accuracy.score,
+      clinical_relevance.score,
+      citation_correctness.score,
+      clustering_quality.score,
+    ];
+    if (related_query_targeting) presentScores.push(related_query_targeting.score);
+    if (related_trial_relevance) presentScores.push(related_trial_relevance.score);
+    overall_score = presentScores.reduce((a, b) => a + b, 0) / presentScores.length;
   }
 
   if (hallucinations_detected.length > 0 && overall_score > 5) {
@@ -171,6 +205,8 @@ export function parseEvalResult(raw: string): EvalResult {
     clinical_relevance,
     citation_correctness,
     clustering_quality,
+    ...(related_query_targeting !== undefined && { related_query_targeting }),
+    ...(related_trial_relevance !== undefined && { related_trial_relevance }),
     hallucinations_detected,
     overall_score: Math.round(overall_score * 10) / 10,
     verdict,
