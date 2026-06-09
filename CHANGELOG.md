@@ -2,6 +2,53 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.13.0] - 2026-06-09
+
+### Added
+
+- **Trade-press article ingestion.** The Telegram bot now accepts news and
+  coverage links from oncology trade outlets (ASCO Post, OncLive, UroToday,
+  Targeted Oncology, Cancer Network, Healio, MedPage Today, OncoDaily, ASCO
+  Daily News), not just journal pages and PubMed/DOI links. The article's
+  title, summary, and body text are pulled from the page and filed as a
+  source; trial NCT numbers in the body still cluster the coverage with the
+  underlying study at build time. Registration-walled and JavaScript-rendered
+  pages that carry no readable text are rejected with a note to forward the
+  PDF, rather than saved as empty rows.
+- **"Trials to watch" per study.** Each study can surface a short list of
+  open, recruiting clinical trials tied to its open questions, pulled from the
+  ClinicalTrials.gov v2 API and reranked to the most relevant five. Curators
+  can pin, suppress, or override the set per study
+  (`npm run override -- --related-trials-*`).
+- **Unrecognized-source bot reply.** When a forwarded message carries a link
+  the pipeline can't ingest, the bot replies with the source types it accepts
+  instead of dropping the message silently. Conversational text and obvious
+  non-source links (YouTube, shorteners) stay unanswered.
+- **quality-eval skill.** A multi-persona review of a day's build
+  (`npm run quality-eval`) that reads the digest as different subspecialist
+  readers and reports where it falls short.
+
+### Changed
+
+- **Eval suite now scores the v0.13 query and trial-recommendation axes** and
+  snapshots the JSON API output, so a regression in the public feed shape
+  surfaces in CI.
+
+### Fixed
+
+- **Trade-press trust and robustness hardening.** Outlet matching uses exact
+  hostname parsing so a look-alike host (`ascopost.com.example`) can't
+  masquerade as a trusted outlet; article extraction is size-capped to bound
+  CPU on malformed pages; the dedup key normalizes scheme, `www.`, trailing
+  slash, and tracking query params so a re-sent link collapses to one row
+  while distinct query-addressed articles stay separate.
+- **Meta-tag values containing an apostrophe no longer truncate.** A
+  double-quoted og:description or title with an inner apostrophe (`Patients'
+  survival`) is now read in full.
+- **Build-output tests made deterministic.** The PWA build test no longer
+  rebuilds the site mid-suite, which had let parallel tests read a
+  half-written `dist/` directory and report spurious failures.
+
 ## [0.11.1] - 2026-06-04
 
 ### Changed
