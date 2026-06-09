@@ -17,7 +17,16 @@ let home = '';
 let manifest: Record<string, unknown> = {};
 
 beforeAll(() => {
-  execSync('npm run build', { cwd: root, stdio: 'ignore' });
+  // Reuse the dist the suite already built (the documented workflow + /ship
+  // both `npm run build` before vitest). Rebuilding here UNCONDITIONALLY wiped
+  // dist mid-suite, and under file-parallelism every other dist-reading test
+  // (tag-filter-rail-drawer, publish-boundary, pwa-routes) raced the empty
+  // window and saw files briefly missing → 6 nondeterministic failures. Only
+  // build when artifacts are actually absent (a cold standalone run of this
+  // file), where nothing else is reading dist concurrently.
+  if (!existsSync(`${dist}/pwa-sw.js`) || !existsSync(`${dist}/index.html`)) {
+    execSync('npm run build', { cwd: root, stdio: 'ignore' });
+  }
   sw = readFileSync(`${dist}/pwa-sw.js`, 'utf8');
   home = readFileSync(`${dist}/index.html`, 'utf8');
   manifest = JSON.parse(readFileSync(`${dist}/manifest.webmanifest`, 'utf8'));
