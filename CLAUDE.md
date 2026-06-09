@@ -68,7 +68,12 @@ npm run build                   # Astro static build
 npm run override -- --date=2026-05-20 --list                 # show studies + slugs
 npm run override -- --date=2026-05-20 --suppress=<slug>      # drop a study
 npm run override -- --date=2026-05-20 --edit=<slug> --tldr="..."  # override text
-npm run studio                  # interactive TUI (suppress/edit studies, build, ingest) — wraps the above via @clack/prompts
+# v0.13: per-study "Trials to watch" overrides
+npm run override -- --date=2026-05-20 --related-trials-suppress=<slug>                   # hide all
+npm run override -- --date=2026-05-20 --related-trials-suppress=<slug> --question="..."  # per question
+npm run override -- --date=2026-05-20 --related-trials-set=<slug> --json='[...]'         # pin set
+npm run override -- --date=2026-05-20 --related-trials-clear=<slug>                       # clear
+npm run studio                  # interactive TUI (suppress/edit studies, trials-to-watch, build, ingest) wraps the above via @clack/prompts
 
 # Deeper analysis (optional config — see "LLM backend")
 DIGEST_STUDY_MODEL=opus npm run build:day -- --date=<date>               # Opus on Phase 2 only (works on claude-cli)

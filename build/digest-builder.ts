@@ -541,7 +541,7 @@ export async function buildOneDate(
   // every rebuild (the LLM regenerates the digest from scratch each run).
   const overrides = loadOverrides(date, args.overridesDir);
   if (overrides) {
-    const applied = applyOverrides(digest, overrides);
+    const applied = applyOverrides(digest, overrides, { digestDate: date });
     digest = applied.digest;
     console.log(`  applied overrides: ${formatOverrideSummary(applied.summary)}`);
   }

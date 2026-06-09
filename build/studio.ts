@@ -31,12 +31,23 @@ type DigestArtifactLite = {
         name: string;
         slug?: string;
         verdict?: { soc_implication?: string } | null;
+        // v0.13: studio needs open_questions to drive the per-question
+        // suppress menu, and related_trials to show the populated count.
+        open_questions?: string[] | null;
+        related_trials?: Array<{ nct: string; answers_question: string }> | null;
       }>;
     }>;
   };
 };
 
-type StudyRow = { slug: string; name: string; site: string; emoji: string };
+type StudyRow = {
+  slug: string;
+  name: string;
+  site: string;
+  emoji: string;
+  openQuestions: string[];
+  relatedTrialsCount: number;
+};
 
 function readArtifact(date: string): DigestArtifactLite | null {
   const fp = resolve(DIGESTS_DIR, `${date}.json`);
@@ -68,6 +79,8 @@ function listStudies(date: string): StudyRow[] {
         name: st.name,
         site: site.disease_site,
         emoji: verdictMetaFor((st.verdict?.soc_implication ?? null) as never)?.emoji ?? '·',
+        openQuestions: st.open_questions ?? [],
+        relatedTrialsCount: st.related_trials?.length ?? 0,
       });
     }
   }
@@ -194,6 +207,118 @@ async function clearOverrides(date: string): Promise<void> {
   await maybeRebuild(date);
 }
 
+// v0.13: edit the "Trials to watch" affordance for one study. The TUI
+// covers the common cases (suppress all, suppress one question, clear);
+// pinning a vetted set with the full RelatedTrial structure is pointed at
+// the CLI since the JSON blob is unwieldy to paste in a TUI prompt.
+async function editTrialsToWatch(date: string): Promise<void> {
+  const rows = listStudies(date);
+  if (rows.length === 0) {
+    p.log.warn('No studies in this digest.');
+    return;
+  }
+  // Show all studies, not just those with related_trials populated, so the
+  // curator can pin a set when the orchestrator returned nothing for the
+  // study (codex round-2 #26).
+  const slug = await p.select({
+    message: "Edit which study's trials-to-watch?",
+    options: rows.map((r) => ({
+      value: r.slug,
+      label: `${r.emoji} ${r.name}`,
+      hint: `${r.site} · ${r.relatedTrialsCount} trial${r.relatedTrialsCount === 1 ? '' : 's'} · ${r.openQuestions.length} open Q`,
+    })),
+  });
+  if (cancelled(slug)) return;
+  const row = rows.find((r) => r.slug === slug)!;
+
+  const action = await p.select({
+    message: `${row.name}: choose action`,
+    options: [
+      { value: 'suppress-all', label: 'Hide all trials for this study', hint: `currently ${row.relatedTrialsCount}` },
+      {
+        value: 'suppress-question',
+        label: 'Hide trials under one open question',
+        hint: row.openQuestions.length === 0 ? 'no open questions on this study' : `${row.openQuestions.length} questions`,
+      },
+      { value: 'pin-set', label: 'Pin a curated trial set', hint: 'opens CLI hint (JSON blob)' },
+      { value: 'clear', label: 'Clear any related-trials override' },
+      { value: 'back', label: 'Back' },
+    ],
+  });
+  if (cancelled(action) || action === 'back') return;
+
+  const ov: DigestOverrides = loadOverrides(date) ?? {};
+  const map = { ...(ov.related_trials ?? {}) };
+
+  if (action === 'suppress-all') {
+    map[slug as string] = { kind: 'suppress' };
+    ov.related_trials = map;
+    saveOverrides(date, ov);
+    p.log.success(`Suppressed all trials for ${slug}.`);
+    await maybeRebuild(date);
+    return;
+  }
+
+  if (action === 'suppress-question') {
+    if (row.openQuestions.length === 0) {
+      p.log.warn('No open questions on this study; nothing to suppress per-question.');
+      return;
+    }
+    const question = await p.select({
+      message: 'Which open question?',
+      options: row.openQuestions.map((q) => ({ value: q, label: q })),
+    });
+    if (cancelled(question)) return;
+    map[slug as string] = { kind: 'suppress', questions: [question as string] };
+    ov.related_trials = map;
+    saveOverrides(date, ov);
+    p.log.success(`Suppressed trials under "${question}".`);
+    await maybeRebuild(date);
+    return;
+  }
+
+  if (action === 'pin-set') {
+    // Pasting a full RelatedTrial array in a single TUI prompt is awful;
+    // point the curator at the CLI instead. Shown verbatim so they can
+    // copy-paste the example.
+    p.log.info(
+      [
+        'To pin a curated trial set, use the CLI with a JSON array of',
+        'RelatedTrial objects:',
+        '',
+        `  npm run override -- --date=${date} --related-trials-set=${slug} \\`,
+        `    --json='[{"nct":"NCT05123456","brief_title":"...","overall_status":"RECRUITING",`,
+        `             "phase":["PHASE3"],"enrollment_count":1200,`,
+        `             "primary_completion_date":"2027-03","brief_summary":null,`,
+        `             "conditions":[],"interventions":[],"eligibility_brief":null,`,
+        `             "answers_question":"<EXACT text from open_questions>",`,
+        `             "relevance_phrase":"<= 60 chars"}]'`,
+        '',
+        'Build-time validation drops entries with bad NCT format, stale',
+        'answers_question, dup NCTs, or > 5 total. Warnings surface in the',
+        'override summary line.',
+      ].join('\n'),
+    );
+    return;
+  }
+
+  if (action === 'clear') {
+    if (!(slug in map)) {
+      p.log.info(`No related-trials override on ${slug}.`);
+      return;
+    }
+    delete map[slug as string];
+    if (Object.keys(map).length === 0) {
+      delete ov.related_trials;
+    } else {
+      ov.related_trials = map;
+    }
+    saveOverrides(date, ov);
+    p.log.success(`Cleared related-trials override for ${slug}.`);
+    await maybeRebuild(date);
+  }
+}
+
 async function manageStudies(): Promise<void> {
   const date = await pickDate('Manage which date?');
   if (!date) return;
@@ -202,6 +327,7 @@ async function manageStudies(): Promise<void> {
     options: [
       { value: 'suppress', label: 'Suppress / restore studies', hint: 'delete from the published digest' },
       { value: 'edit', label: "Edit a study's TL;DR" },
+      { value: 'trials', label: 'Edit trials-to-watch', hint: 'v0.13: per-question suppress, pin set, clear' },
       { value: 'clear', label: 'Clear all overrides for this date' },
       { value: 'back', label: 'Back' },
     ],
@@ -209,6 +335,7 @@ async function manageStudies(): Promise<void> {
   if (cancelled(action) || action === 'back') return;
   if (action === 'suppress') await suppressStudies(date);
   else if (action === 'edit') await editTldr(date);
+  else if (action === 'trials') await editTrialsToWatch(date);
   else if (action === 'clear') await clearOverrides(date);
 }
 
