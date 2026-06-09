@@ -21,6 +21,15 @@ import {
   type DigestArtifactPaper,
   type DigestArtifactSlide,
 } from '../lib/digest-data.ts';
+import {
+  groupTrialsByQuestion,
+  watchingTrialsBadge,
+  statusPillText,
+  statusAriaLabel,
+  formatPhaseChip,
+  formatTrialSubline,
+  hasTrialSubline,
+} from '../lib/related-trials-render.ts';
 import type { SiblingPreview } from '../lib/tag-index.ts';
 
 type Bookmark = DigestArtifact['bookmarks'][number];
@@ -149,6 +158,13 @@ const hasDepth =
 const depthSummary = otherBullets.length > 0
   ? `${otherBullets.length} ${otherBullets.length === 1 ? 'detail' : 'details'}`
   : 'Details';
+
+// v0.13: trials-to-watch grouping. Pre-compute the per-question lookup map
+// so the open-questions <ul> can find watchers for each <li> in O(1). The
+// badge text is null when this study has zero related_trials so the
+// <summary> just renders the existing depthSummary.
+const trialsByQuestion = groupTrialsByQuestion(study.related_trials);
+const trialsBadgeText = watchingTrialsBadge(study.related_trials);
 
 const sourceTotal = bookmarks.length + papers.length + slides.length;
 const sourceBadges: string[] = [];
@@ -295,7 +311,15 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
       Results → Critique → Notes), with CONSORT nested inside Methods. ── */}
   {hasDepth && (
     <details class="study-depth">
-      <summary>{depthSummary}</summary>
+      <summary>
+        <span class="depth-summary-count">{depthSummary}</span>
+        {trialsBadgeText && (
+          <Fragment>
+            <span class="trials-badge-sep" aria-hidden="true"> · </span>
+            <span class="trials-watching-badge">{trialsBadgeText}</span>
+          </Fragment>
+        )}
+      </summary>
       {depthSections.map((sec) => (
         <section class="depth-section">
           <div class="section-label">{sec.label}</div>
@@ -375,7 +399,49 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
         <div class="open-questions study-open-questions">
           <div class="section-label">Open questions</div>
           <ul>
-            {study.open_questions!.map((q) => (<li set:html={linkifyCitations(q)} />))}
+            {study.open_questions!.map((q) => {
+              const watching = trialsByQuestion.get(q) ?? [];
+              const hasWatching = watching.length > 0;
+              return (
+                <li class:list={[hasWatching && 'has-watching']}>
+                  <span class="open-question-text" set:html={linkifyCitations(q)} />
+                  {hasWatching && (
+                    <div
+                      class="trials-watching"
+                      role="group"
+                      aria-label="Trials watching this question"
+                    >
+                      {watching.map((t) => {
+                        const phaseText = formatPhaseChip(t.phase);
+                        const subline = formatTrialSubline(t);
+                        return (
+                          <div class="trials-watching-row">
+                            <div class="trials-watching-line1">
+                              <span
+                                class="trial-status"
+                                aria-label={`Status: ${statusAriaLabel(t.overall_status)}`}
+                              >{statusPillText(t.overall_status)}</span>
+                              <a
+                                class="citation trial-nct"
+                                href={`https://clinicaltrials.gov/study/${t.nct}`}
+                                target="_blank"
+                                rel="noopener"
+                              >{t.brief_title}</a>
+                              {phaseText && (
+                                <span class="trial-phase-chip">{phaseText}</span>
+                              )}
+                            </div>
+                            {hasTrialSubline(t) && (
+                              <div class="trials-watching-line2">{subline}</div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
@@ -1060,6 +1126,104 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     border-radius: 0;
   }
   .study-open-questions .section-label { color: var(--fg-muted); }
+
+  /* ── v0.13: trials-to-watch nest under each open question ─────────────
+     Design review (gap 2) caught that a nested <ul> would inherit
+     .open-questions ul's padding-left: 1.2rem and exhaust the 375px
+     horizontal budget. We use a flat <div class="trials-watching"> sibling
+     after the question text instead, with border-left for visual nesting.
+     Scoped tightly so the existing .open-questions ul selectors don't
+     bleed onto trial content (codex round-2 #27). */
+
+  /* Questions WITH watching trials get bolded so the reader sees the
+     vertical-rhythm irregularity as intentional rather than accidental
+     (design review gap 6). */
+  .open-questions li.has-watching > .open-question-text {
+    font-weight: 600;
+  }
+
+  .trials-watching {
+    margin-top: 0.4rem;
+    border-left: 2px solid var(--border);
+    padding-left: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    /* Reset font-weight on the container so child rows don't inherit the
+       parent <li>'s 600 weight when has-watching is set. */
+    font-weight: 400;
+  }
+
+  .trials-watching-row {
+    /* 44px touch target on mobile per DESIGN.md (design review gap 5). */
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.15rem;
+  }
+
+  .trials-watching-line1 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: baseline;
+  }
+
+  .trials-watching-line2 {
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    line-height: 1.4;
+  }
+
+  /* Text pill (NOT a colored emoji): collision-free with the DESIGN.md
+     vocabulary (🟡 hepatobiliary, the verdict pill 6-emoji set). Same
+     typographic shape as .section-label so the pattern is consistent. */
+  .trial-status {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    white-space: nowrap;
+    /* Slightly raise baseline so the all-caps pill aligns with the title. */
+    transform: translateY(-0.05em);
+  }
+
+  .trial-nct {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .trial-phase-chip {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--fg-muted);
+    white-space: nowrap;
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    line-height: 1.4;
+  }
+
+  /* Depth-fold summary badge. Quieter than the count text, middle-dot
+     separator already included inline by the template. Hidden at desktop
+     widths because the depth fold auto-expands there (per Base.astro), so
+     the badge is redundant noise the reader can already see in the body
+     (design review gap 3). */
+  .trials-watching-badge {
+    color: var(--fg-muted);
+    font-weight: 400;
+  }
+
+  @media (min-width: 1024px) {
+    .trials-watching-badge {
+      display: none;
+    }
+  }
 
   @media (max-width: 600px) {
     .study { padding: 0.85rem 1rem; }
