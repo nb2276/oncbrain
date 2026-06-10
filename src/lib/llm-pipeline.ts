@@ -1552,6 +1552,45 @@ export type EnrichRelatedTrialsResult = {
 const RERANK_PROMPT_PATH = resolve(PROMPTS_DIR, 'digest-v5-rerank-trials.txt');
 const DETERMINISTIC_FALLBACK_CAP = 3;
 
+// ct.gov free-text ANDs every token, so an over-specific query ("dose
+// escalation meningioma WHO grade 2 radiation randomized") returns nothing
+// while its clinical core ("meningioma radiation") returns a full set. When a
+// query comes back empty we retry once with this broadened form: trial-design,
+// tumor-grade, line-of-therapy, and bare numeric qualifiers stripped, leaving
+// the condition + intervention. Returns null when stripping leaves fewer than 2
+// tokens or changes nothing (no useful retry).
+const TERM_DESIGN_STOPWORDS = new Set([
+  'randomized', 'randomised', 'randomization', 'randomisation', 'phase', 'dose',
+  'escalation', 'de-escalation', 'deescalation', 'who', 'grade', 'high-grade',
+  'low-grade', 'placebo', 'controlled', 'double-blind', 'single-blind', 'blinded',
+  'blind', 'open-label', 'open', 'label', 'prospective', 'retrospective',
+  'multicenter', 'multicentre', 'single-center', 'single-centre', 'single-arm',
+  'two-arm', 'pilot', 'feasibility', 'non-inferiority', 'noninferiority',
+  'superiority', 'first-line', 'second-line', 'third-line', 'frontline', 'first',
+  'second', 'third', 'line', '1l', '2l', '3l', 'adaptive', 'crossover',
+]);
+
+export function broadenTrialQuery(term: string): string | null {
+  const kept: string[] = [];
+  for (const raw of term.trim().split(/\s+/)) {
+    const cleaned = raw.replace(/[.,;:()"']/g, ''); // strip surrounding punctuation, keep case + hyphens
+    if (cleaned.length === 0) continue;
+    const w = cleaned.toLowerCase();
+    if (/^\d+$/.test(w) || TERM_DESIGN_STOPWORDS.has(w)) continue;
+    kept.push(cleaned);
+  }
+  if (kept.length < 2) return null;
+  // Reject an all-generic broadening ("radiation chemotherapy", "survival
+  // outcomes") that would swamp the rerank: keep only when at least one token
+  // is a specific clinical noun (a real condition/drug/intervention), not a
+  // ct.gov-generic stop token. One specific token is enough for a best-effort
+  // retry (e.g. "meningioma radiation"); the rerank still filters per question.
+  const hasSpecific = kept.some((t) => !QUERY_STOP_TOKENS.has(t.toLowerCase()) && !/^\d+$/.test(t));
+  if (!hasSpecific) return null;
+  const broadened = kept.join(' ');
+  return broadened.toLowerCase() === term.trim().toLowerCase() ? null : broadened;
+}
+
 // v0.13: Per-study orchestrator. Reads `related_search` off the raw Phase
 // 2 response, fan-outs ct.gov fetches per query (deduped through the run
 // cache), aggregates candidates by question, sends a single rerank LLM
@@ -1599,6 +1638,7 @@ export async function enrichStudyWithRelatedTrials(
     // 2. Fetch candidates per query (cache hit short-circuits ct.gov call).
     const openQuestions = study.open_questions ?? [];
     const candidatesByNct = new Map<string, CandidateTrial>();
+    const ownNct = (study.nct ?? '').toUpperCase(); // exclude the study's own trial from its watch-list
     const groupedByQuestion = new Map<string, CandidateTrial[]>();
     const fetchFn = deps.ctgovFetch ?? fetchCandidateTrials;
     const maxPerQuery = deps.maxCandidatesPerQuery ?? 20;
@@ -1626,7 +1666,43 @@ export async function enrichStudyWithRelatedTrials(
           },
         );
       }
-      const result = await promise;
+      let result = await promise;
+
+      // An empty result usually means the query ANDed too many qualifiers.
+      // Retry once with a broadened term (design/grade/numeric tokens stripped)
+      // before recording the failure. broadenTrialQuery already rejects an
+      // all-generic strip ("radiation chemotherapy"), so a non-null result is
+      // safe to fire. Reuses the run cache so a broadened term shared across
+      // studies hits ct.gov once.
+      if (!result.ok && result.error === 'empty') {
+        const broad = broadenTrialQuery(q.term);
+        if (broad) {
+          const broadKey = sha1Hex(normalizeTermForCache(broad));
+          let bp = runCache.get(broadKey);
+          if (!bp) {
+            bp = fetchFn(broad);
+            runCache.set(broadKey, bp);
+            void bp.then(
+              (res) => {
+                if (!res.ok) runCache.delete(broadKey);
+              },
+              () => runCache.delete(broadKey),
+            );
+          }
+          const broadResult = await bp;
+          if (broadResult.ok) {
+            // The original was fired and came back empty; the broadened term
+            // returned the candidates. Record both truthfully (clean terms, no
+            // annotation strings) so the eval scores real queries: the
+            // broadened term joins queries_fired, the original joins
+            // queries_failed.
+            provenance.queries_fired.push(broad);
+            provenance.queries_failed.push({ term: q.term, reason: 'empty' });
+            emit(`[v0.13] ctgov_broadened: ${slug} · "${q.term}" → "${broad}"`);
+            result = broadResult;
+          }
+        }
+      }
 
       if (!result.ok) {
         provenance.queries_failed.push({ term: q.term, reason: result.error });
@@ -1634,9 +1710,11 @@ export async function enrichStudyWithRelatedTrials(
         continue;
       }
 
-      // Cap per-query and aggregate.
+      // Cap per-query and aggregate. Drop the study's OWN trial: "trials to
+      // watch" means OTHER open trials, not the one this study reports.
       const group: CandidateTrial[] = [];
       for (const c of result.candidates.slice(0, maxPerQuery)) {
+        if (ownNct && c.nct.toUpperCase() === ownNct) continue;
         candidatesByNct.set(c.nct, c);
         group.push(c);
       }
