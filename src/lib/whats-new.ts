@@ -52,9 +52,16 @@ export interface WhatsNewDeps {
 export interface WhatsNewRefs {
   // Feed <li> elements, each carrying data-study-id and (in markup) a hidden
   // .recent-new-pill child revealed by the .is-new class this function adds.
+  // These are only the RENDERED rows; a page may render a slice of the corpus.
   rows: ArrayLike<HTMLElement>;
   // The "N new overall" total element, hidden until .is-shown is added.
   totalEl?: HTMLElement | null;
+  // The FULL current corpus of study ids (T3: the home renders a ~12-row slice
+  // but must count, snapshot the baseline against, and persist the whole feed,
+  // or visiting home would mark the unrendered studies seen and /studies would
+  // never flag them). When omitted, the corpus is the rendered rows' ids (the
+  // /studies and legacy single-page case where every study renders).
+  allIds?: string[];
 }
 
 export function isValidId(id: string): boolean {
@@ -136,17 +143,25 @@ export function setupWhatsNew(refs: WhatsNewRefs, deps: WhatsNewDeps = {}): numb
   const session = deps.session !== undefined ? deps.session : safeStorage(() => (globalThis as { sessionStorage?: StorageLike }).sessionStorage);
 
   const rows = Array.from(refs.rows);
-  const currentIds: string[] = [];
+  const renderedIds: string[] = [];
   for (const row of rows) {
     const id = row.getAttribute?.('data-study-id') ?? '';
-    if (id) currentIds.push(id);
+    if (id) renderedIds.push(id);
   }
 
-  // Nothing to mark and nothing to persist if no row carries an id. Bailing
-  // here means we never write an empty set, which on a later visit would have
-  // an empty baseline and flood every row as new.
-  if (currentIds.length === 0) return 0;
-  const currentSet = new Set<string>(currentIds);
+  // The CORPUS is the full current feed (T3: home renders a slice). It drives
+  // the count, the baseline, and the persisted seen-set. The rendered rows only
+  // drive which visible row gets a NEW pill. When allIds is omitted, empty, or
+  // entirely invalid, the corpus falls back to the rendered rows (the /studies
+  // and legacy single-page case, and a defensive guard against a junk island).
+  const validAllIds = refs.allIds ? refs.allIds.filter(isValidId) : [];
+  const corpus = validAllIds.length > 0 ? validAllIds : renderedIds;
+
+  // Nothing to count or persist if the corpus is empty. Bailing here means we
+  // never write an empty set, which on a later visit would have an empty
+  // baseline and flood every row as new.
+  if (corpus.length === 0) return 0;
+  const corpusSet = new Set<string>(corpus);
 
   // 1. Persisted seen-set (localStorage). Absent/malformed -> null (first visit).
   let stored: string | null = null;
@@ -168,18 +183,19 @@ export function setupWhatsNew(refs: WhatsNewRefs, deps: WhatsNewDeps = {}): numb
     const ssRaw = session ? session.getItem(SS_KEY) : null;
     if (ssRaw !== null && ssRaw !== undefined) {
       const parsed = parseSeen(ssRaw);
-      baseline = parsed && parsed.size > 0 ? parsed : currentSet;
+      baseline = parsed && parsed.size > 0 ? parsed : corpusSet;
     } else {
-      baseline = seen && seen.size > 0 ? seen : currentSet;
+      baseline = seen && seen.size > 0 ? seen : corpusSet;
       session?.setItem(SS_KEY, serializeSeen(baseline));
     }
   } catch {
-    baseline = seen && seen.size > 0 ? seen : currentSet;
+    baseline = seen && seen.size > 0 ? seen : corpusSet;
   }
 
-  // 3. Mark. Clear stale state first so a re-invocation on the same DOM is
-  //    idempotent (no SPA today, but cheap and removes a footgun).
-  const fresh = partitionNew(currentIds, baseline);
+  // 3. The new set is computed over the whole CORPUS (so the count is correct
+  //    even on a sliced page). Mark only the RENDERED rows whose id is new;
+  //    clear stale state first so a re-invocation on the same DOM is idempotent.
+  const fresh = partitionNew(corpus, baseline);
   for (const row of rows) {
     const id = row.getAttribute?.('data-study-id') ?? '';
     if (!id) continue;
@@ -205,10 +221,10 @@ export function setupWhatsNew(refs: WhatsNewRefs, deps: WhatsNewDeps = {}): numb
   //    shorter than the unbounded feed re-flagged old studies).
   try {
     const merged = new Set<string>(seen ?? []);
-    for (const id of currentIds) {
+    for (const id of corpus) {
       if (isValidId(id)) merged.add(id);
     }
-    const cap = Math.max(MAX_SEEN, currentIds.length);
+    const cap = Math.max(MAX_SEEN, corpus.length);
     local?.setItem(LS_KEY, serializeSeen(capSeen(merged, cap)));
   } catch {
     // Storage full / blocked: markers already applied, skip persistence.
@@ -217,11 +233,24 @@ export function setupWhatsNew(refs: WhatsNewRefs, deps: WhatsNewDeps = {}): numb
   return fresh.size;
 }
 
-// Page-level entry point. Idempotent.
+// Page-level entry point. Idempotent. Reads the optional full-corpus id list
+// from a <script type="application/json" id="all-study-ids"> tag (T3: the home
+// renders a slice but must count + persist the whole feed). Absent -> the
+// rendered rows are the corpus (/studies and legacy pages).
 export function initWhatsNew(): void {
   if (typeof document === 'undefined') return;
   const rows = document.querySelectorAll<HTMLElement>('.recent-li[data-study-id]');
   if (rows.length === 0) return;
   const totalEl = document.querySelector<HTMLElement>('.recent-new-total');
-  setupWhatsNew({ rows, totalEl });
+  let allIds: string[] | undefined;
+  const idsTag = document.getElementById('all-study-ids');
+  if (idsTag?.textContent) {
+    try {
+      const parsed = JSON.parse(idsTag.textContent);
+      if (Array.isArray(parsed)) allIds = parsed.filter((x): x is string => typeof x === 'string');
+    } catch {
+      // Malformed corpus JSON -> fall back to the rendered rows.
+    }
+  }
+  setupWhatsNew({ rows, totalEl, allIds });
 }

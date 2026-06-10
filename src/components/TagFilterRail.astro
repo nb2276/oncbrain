@@ -747,11 +747,13 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
     /* PR-5 canonical strategy: when the active filter set matches a
        pre-generated /tags/<slug>/ or /tags/<a>+<b>(+<c>)/ landing
        page, redirect to that canonical URL. Auto-redirect runs ONLY
-       on home (/) and on existing /tags/ routes — on /sites/ and
+       on the full corpus index (/studies/, the v0.14 T3 home of the
+       filter rail) and on existing /tags/ routes — on /sites/ and
        /<date>/ pages the redirect would silently drop the site/date
        scope, so the canonical URL is only ever a suggestion there
-       (handled by the RSS button being suppressed). */
-    const FILTER_RECEPTIVE_ROUTES = ['/'];
+       (handled by the RSS button being suppressed). (Before T3 the
+       full index was home (/); the rail moved to /studies/ with it.) */
+    const FILTER_RECEPTIVE_ROUTES = ['/studies/'];
     function isFilterReceptiveRoute(pathname) {
       if (FILTER_RECEPTIVE_ROUTES.includes(pathname)) return true;
       // /tags/<...>/ landings — both single-tag and intersections.
