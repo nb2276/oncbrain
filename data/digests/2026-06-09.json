@@ -1,26 +1,26 @@
 {
   "date": "2026-06-09",
   "conference": null,
-  "generated_at": 1781030874267,
+  "generated_at": 1781052961877,
   "digest": {
-    "top_line": "FIRESTORM: 5-yr PFS 65.8% vs 38.8% (HR 0.40) · dose-escalated postop RT cuts meningioma failure risk 60% in high-risk pts.",
-    "tldr": "CNS carried the day. FIRESTORM (7-institution IPD meta-analysis, N=248) shows DE-RT (BED ≥79.2 Gy) cuts 5-yr failure risk by 60% in high-risk postop meningioma, at cost of higher any-grade radionecrosis (34% vs 13%). G3+ toxicity gap not significant; retrospective design limits certainty.",
+    "top_line": "FIRESTORM: DE-RT 5-yr PFS 65.8% vs 38.8% (HR 0.40) in high-risk meningioma; dose escalation earns its toxicity tradeoff.",
+    "tldr": "CNS dominated today. FIRESTORM 7-institution IPD meta-analysis (N=248) shows DE-RT halves progression risk in high-risk meningioma (HR 0.40, p=0.001). Non-randomised design limits certitude, but the effect size is large enough to inform dose selection pending prospective data.",
     "sites": [
       {
         "disease_site": "cns",
-        "intro": "Meningioma dose-escalation debate now has multi-institutional IPD data; FIRESTORM is the largest comparative dataset to date for this population.",
+        "intro": "High-risk meningioma dose-escalation data maturing; FIRESTORM adds the largest IPD series to date.",
         "studies": [
           {
             "name": "FIRESTORM",
-            "tldr": "5-yr PFS 65.8% vs 38.8%, HR 0.40 (P=.001) favoring dose-escalated postop RT in high-risk meningioma.",
+            "tldr": "DE-RT vs SD-RT: 5-yr PFS 65.8% vs 38.8%, HR 0.40 (0.24-0.69) in 7-institution IPD meta-analysis of 248 high-risk meningiomas.",
             "details": [
               {
-                "text": "📊 PFS by timepoint (DE-RT vs SD-RT)",
+                "text": "📊 PFS by arm",
                 "table": {
                   "columns": [
                     "Timepoint",
-                    "DE-RT",
-                    "SD-RT"
+                    "DE-RT (n=59)",
+                    "SD-RT (n=189)"
                   ],
                   "rows": [
                     [
@@ -36,64 +36,131 @@
                   ]
                 }
               },
-              "📐 MVA HR 0.40 (95% CI 0.24-0.69), P=.001",
-              "📐 IPTW HR 0.45 (95% CI 0.24-0.83), P=.01",
-              "🔍 IPD meta-analysis, 7 institutions, N=248 (59 DE-RT / 189 SD-RT); DE-RT defined as BED ≥79.2 Gy (≡ 66 Gy/33 fx)",
-              "🔍 75.8% WHO grade 2; 41.5% recurrent; 75.2% STR",
-              {
-                "text": "📊 Radionecrosis: DE-RT vs SD-RT",
-                "subdetails": [
-                  "Any grade: 33.9% (20/59) vs 13.2% (25/189), P=.001",
-                  "G3+: 5.1% vs 3.2% (not significant)"
-                ]
-              },
-              "⚠️ Retrospective non-randomized; IPTW adjusts for observed confounders but unmeasured selection bias (institutional volume, era effects) cannot be excluded",
-              "⚠️ DE-RT cohort small (N=59); 3:1 imbalance limits precision of all estimates"
+              "📐 MVA: HR 0.40 (95% CI 0.24-0.69), p=0.001",
+              "📐 IPTW-adjusted: HR 0.45 (95% CI 0.24-0.83), p=0.01",
+              "🔍 7-institution IPD meta-analysis, N=248; non-randomized, propensity score-adjusted",
+              "🔍 DE-RT: BED ≥79.2 Gy (equivalent 66 Gy/33 fx); SD-RT below this threshold",
+              "🔍 75.8% WHO grade 2; 41.5% recurrent; 75.2% subtotal resection",
+              "⚠️ Any-grade RN higher with DE-RT: 33.9% vs 13.2% (p=.001)",
+              "⚠️ G3+ RN similar: DE-RT 5.1% vs SD-RT 3.2%",
+              "⚠️ Non-randomized; DE-RT arm only N=59; institutional selection bias plausible despite IPTW"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
               1000000020
             ],
-            "slug": "firestorm-meningioma-de-rt",
+            "slug": "firestorm",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective non-randomized IPD meta-analysis; IPTW cannot address unmeasured confounders. DE-RT arm N=59 only. No RCT.",
-              "audience": "WHO grade 2/3 meningioma, post-STR or recurrent, receiving adjuvant RT"
+              "rationale": "Retrospective non-randomized IPD meta-analysis; DE-RT cohort only N=59; IPTW adjusts but cannot eliminate institutional selection bias.",
+              "audience": "WHO grade 2/3 high-risk meningioma, post-resection (75% subtotal), newly diagnos"
             },
             "open_questions": [
-              "Randomized trial of DE-RT vs SD-RT in high-risk meningioma",
-              "Optimal DE-RT fractionation schema (66 Gy/33 fx vs SRS boost)",
-              "Strategies to mitigate elevated any-grade RN risk (33.9%) after DE-RT"
+              "Does OS benefit accompany the PFS gain with DE-RT?",
+              "Optimal DE-RT dose/fractionation for high-risk meningioma",
+              "Prospective RCT needed to confirm DE-RT PFS benefit"
             ],
             "consort": null,
             "modality": "radiation",
             "intent": "curative",
             "methodology": "meta-analysis",
-            "related_trials": null,
+            "related_trials": [
+              {
+                "nct": "NCT02978677",
+                "brief_title": "Proton Dose Escalation for Patients With Atypical or Anaplastic Meningiomas",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 90,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "The trial evaluates the effect of a moderately increased radiation dose in patients with atypical (grade II) and anaplastic (grade III) meningioma after incomplete or no surgery. Endpoint is recurrence-free survival after 5 years.",
+                "conditions": [
+                  "Meningioma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Radiotherapy 68 Gy(RBE)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Radiotherapy 72 Gy(RBE)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Radiotherapy 60 Gy(RBE)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* histologically confirmed atypical (WHO grade II) or anaplastic (WHO grade III) meningioma with the indication for radiotherapy\n* MRI (within 24h post-operative, if not available than with a time interval of \\~ 6 weeks) including contrast-enhanced T1 weighted 3D dataset and…",
+                "answers_question": "Optimal DE-RT dose/fractionation for high-risk meningioma",
+                "relevance_phrase": "60/68/72 Gy(RBE) proton RT comparison, grade II/III"
+              },
+              {
+                "nct": "NCT06830356",
+                "brief_title": "Somatostatin Receptor PET Imaging to Guide Radiotherapy Dose Escalation in High Risk Meningiomas.",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 53,
+                "primary_completion_date": "2037-12",
+                "brief_summary": "High-risk meningiomas always require postsurgical radiation treatment. Recent evidence has shown that increased radiation therapy dose may be associated with increased intracranial control of disease. In order to better define the volume of radiation treatment, the addition of PET imaging with somatostatin receptor tracers adds additional information compared to encephalon MRI with MoC alone.The present study aims to investigate whether radiation treatment with higher doses than the standard…",
+                "conditions": [
+                  "Meningioma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Dose escalation of radiation therapy, based on somatostatin receptor PET imaging",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 16 years;\n* Ability to express appropriate informed consent to treatment;\n* Diagnosis of grade III meningioma (regardless of presence of residual) or diagnosis of recurrence of grade II meningioma (regardless of presence of residual) or first diagnosis of grade II…",
+                "answers_question": "Optimal DE-RT dose/fractionation for high-risk meningioma",
+                "relevance_phrase": "SSTR PET-guided dose escalation, grade III/recurrent II"
+              },
+              {
+                "nct": "NCT02978677",
+                "brief_title": "Proton Dose Escalation for Patients With Atypical or Anaplastic Meningiomas",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 90,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "The trial evaluates the effect of a moderately increased radiation dose in patients with atypical (grade II) and anaplastic (grade III) meningioma after incomplete or no surgery. Endpoint is recurrence-free survival after 5 years.",
+                "conditions": [
+                  "Meningioma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Radiotherapy 68 Gy(RBE)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Radiotherapy 72 Gy(RBE)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Radiotherapy 60 Gy(RBE)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* histologically confirmed atypical (WHO grade II) or anaplastic (WHO grade III) meningioma with the indication for radiotherapy\n* MRI (within 24h post-operative, if not available than with a time interval of \\~ 6 weeks) including contrast-enhanced T1 weighted 3D dataset and…",
+                "answers_question": "Prospective RCT needed to confirm DE-RT PFS benefit",
+                "relevance_phrase": "prospective proton dose escalation; 5-yr RFS endpoint"
+              }
+            ],
             "related_trials_provenance": {
               "queries_fired": [
-                "dose escalation meningioma WHO grade 2 radiation randomized",
-                "stereotactic radiosurgery boost meningioma high-risk postoperative",
-                "radionecrosis prevention meningioma dose escalation management"
+                "meningioma dose escalation radiation",
+                "meningioma postoperative radiation overall survival"
               ],
-              "queries_failed": [
-                {
-                  "term": "dose escalation meningioma WHO grade 2 radiation randomized",
-                  "reason": "empty"
-                },
-                {
-                  "term": "stereotactic radiosurgery boost meningioma high-risk postoperative",
-                  "reason": "empty"
-                },
-                {
-                  "term": "radionecrosis prevention meningioma dose escalation management",
-                  "reason": "empty"
-                }
-              ],
-              "candidates_returned": 0,
-              "fetched_at": "2026-06-09T18:47:20.673Z",
-              "rerank_outcome": "failed"
+              "queries_failed": [],
+              "candidates_returned": 8,
+              "fetched_at": "2026-06-10T00:54:52.249Z",
+              "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {

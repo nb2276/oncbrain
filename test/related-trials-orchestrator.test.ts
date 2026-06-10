@@ -3,6 +3,7 @@ import {
   enrichStudyWithRelatedTrials,
   createRelatedTrialsRunCache,
   deterministicDegradedFallback,
+  broadenTrialQuery,
   type CandidateTrial,
   type DigestStudy,
 } from '../src/lib/llm-pipeline.ts';
@@ -395,5 +396,132 @@ describe('deterministicDegradedFallback', () => {
 
   it('returns empty array when no question has candidates', () => {
     expect(deterministicDegradedFallback(new Map(), QUESTIONS)).toEqual([]);
+  });
+});
+
+describe('broadenTrialQuery', () => {
+  it('strips trial-design, grade, and numeric qualifiers to the clinical core', () => {
+    expect(broadenTrialQuery('dose escalation meningioma WHO grade 2 radiation randomized')).toBe(
+      'meningioma radiation',
+    );
+  });
+  it('drops line-of-therapy and phase qualifiers', () => {
+    expect(broadenTrialQuery('darolutamide prostate phase 3 first-line randomized')).toBe(
+      'darolutamide prostate',
+    );
+  });
+  it('returns null when nothing is stripped (already broad)', () => {
+    expect(broadenTrialQuery('meningioma radiation')).toBeNull();
+  });
+  it('returns null when stripping leaves fewer than 2 tokens', () => {
+    expect(broadenTrialQuery('phase 3 randomized trial')).toBeNull(); // 'trial' kept, only 1 token
+  });
+  it('returns null for an all-generic broadening (no specific clinical token)', () => {
+    // strip design tokens (dose, escalation) → "radiation chemotherapy survival",
+    // all ct.gov-generic stop tokens → would swamp the rerank, so reject.
+    expect(broadenTrialQuery('dose escalation radiation chemotherapy survival')).toBeNull();
+  });
+  it('keeps a single specific token alongside a generic one', () => {
+    expect(broadenTrialQuery('phase 3 prostate radiation randomized')).toBe('prostate radiation');
+  });
+  it('strips punctuation off kept tokens (clean ct.gov term)', () => {
+    expect(broadenTrialQuery('meningioma, radiation; (phase) 3 randomized')).toBe(
+      'meningioma radiation',
+    );
+  });
+});
+
+describe('enrichStudyWithRelatedTrials, empty-query broadening', () => {
+  const Q = ['Dose escalation in grade 2 meningioma'];
+
+  it('retries an empty query with the broadened term and uses its candidates', async () => {
+    const study = makeStudy({ slug: 'firestorm', open_questions: Q });
+    const raw = rawWith([
+      { term: 'dose escalation meningioma WHO grade 2 radiation randomized', watches_question: Q[0]! },
+    ]);
+    const c = makeCandidate({ nct: 'NCT05254197', brief_title: 'Meningioma RT registry' });
+
+    // The narrow query returns empty; only the broadened "meningioma radiation" hits.
+    const ctgovFetch = vi.fn(async (term: string): Promise<FetchCandidateTrialsResult> => {
+      if (term === 'meningioma radiation') return { ok: true, candidates: [c] };
+      return { ok: false, error: 'empty', message: 'no match' };
+    });
+    const rerank = stubLlm(
+      JSON.stringify({
+        picks: [{ nct: 'NCT05254197', answers_question: Q[0], relevance_phrase: 'open RT dose study' }],
+      }),
+    );
+
+    const out = await enrichStudyWithRelatedTrials(
+      study,
+      raw,
+      createRelatedTrialsRunCache(),
+      { ctgovFetch, rerankClient: rerank, clock: () => new Date('2026-06-09T00:00:00Z') },
+      vi.fn(),
+    );
+
+    expect(out.related_trials).toHaveLength(1);
+    expect(out.related_trials_provenance.candidates_returned).toBe(1);
+    // Clean terms only (no annotation strings): the broadened term that
+    // returned candidates joins queries_fired; the original empty query joins
+    // queries_failed. The eval scores real query terms, not notes.
+    expect(out.related_trials_provenance.queries_fired).toEqual([
+      'dose escalation meningioma WHO grade 2 radiation randomized',
+      'meningioma radiation',
+    ]);
+    expect(out.related_trials_provenance.queries_failed).toEqual([
+      { term: 'dose escalation meningioma WHO grade 2 radiation randomized', reason: 'empty' },
+    ]);
+    expect(ctgovFetch).toHaveBeenCalledWith('meningioma radiation');
+  });
+
+  it("excludes the study's own trial from its watch-list", async () => {
+    const study = makeStudy({ slug: 'prestige', nct: 'NCT04567890', open_questions: [QUESTIONS[0]!] });
+    const raw = rawWith([{ term: 'lutetium PSMA mCRPC sequencing', watches_question: QUESTIONS[0]! }]);
+    // ct.gov returns the study's own trial plus one other open trial.
+    const own = makeCandidate({ nct: 'NCT04567890', brief_title: 'PRESTIGE-PSMA (this study)' });
+    const other = makeCandidate({ nct: 'NCT09999999', brief_title: 'A different open trial' });
+    const ctgovFetch = vi.fn(async (): Promise<FetchCandidateTrialsResult> => ({
+      ok: true,
+      candidates: [own, other],
+    }));
+    const rerank = stubLlm(
+      JSON.stringify({
+        picks: [{ nct: 'NCT09999999', answers_question: QUESTIONS[0], relevance_phrase: 'open competitor' }],
+      }),
+    );
+    const out = await enrichStudyWithRelatedTrials(
+      study,
+      raw,
+      createRelatedTrialsRunCache(),
+      { ctgovFetch, rerankClient: rerank, clock: () => new Date() },
+      vi.fn(),
+    );
+    // Own NCT dropped before rerank; only the other trial can be picked.
+    expect(out.related_trials_provenance.candidates_returned).toBe(1);
+    expect((out.related_trials ?? []).map((t) => t.nct)).not.toContain('NCT04567890');
+  });
+
+  it('records the failure when even the broadened query is empty', async () => {
+    const study = makeStudy({ slug: 'firestorm', open_questions: Q });
+    const raw = rawWith([
+      { term: 'dose escalation meningioma WHO grade 2 radiation randomized', watches_question: Q[0]! },
+    ]);
+    const ctgovFetch = vi.fn(async (): Promise<FetchCandidateTrialsResult> => ({
+      ok: false,
+      error: 'empty',
+      message: 'no match',
+    }));
+    const out = await enrichStudyWithRelatedTrials(
+      study,
+      raw,
+      createRelatedTrialsRunCache(),
+      { ctgovFetch, rerankClient: stubLlm(JSON.stringify({ picks: [] })), clock: () => new Date() },
+      vi.fn(),
+    );
+    expect(out.related_trials).toBeNull();
+    expect(out.related_trials_provenance.rerank_outcome).toBe('failed');
+    expect(out.related_trials_provenance.queries_failed[0]?.reason).toBe('empty');
+    expect(ctgovFetch).toHaveBeenCalledTimes(2); // original + one broadened retry
   });
 });
