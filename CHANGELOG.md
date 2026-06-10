@@ -2,6 +2,22 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.13.1] - 2026-06-09
+
+### Fixed
+
+- **"Trials to watch" now actually finds trials.** The per-study
+  ClinicalTrials.gov queries were too specific, stacking trial-design and
+  tumor-grade qualifiers ("WHO grade 2", "randomized", "dose escalation"), so
+  ct.gov's keyword search (which requires every term to match) returned
+  nothing on every digest. Two changes fix it: the query-generation prompt now
+  keeps each term to the clinical core (condition plus intervention class), and
+  the build retries any query that returns empty once with a broadened term
+  (design, grade, and numeric qualifiers stripped) before giving up. The
+  broadening keeps at least one specific clinical token, so it never falls back
+  to an over-generic search that would swamp the ranker.
+- **A study no longer lists its own trial** in its "Trials to watch" set.
+
 ## [0.13.0] - 2026-06-09
 
 ### Added
