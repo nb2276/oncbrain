@@ -2,6 +2,31 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.0] - 2026-06-10
+
+### Added
+
+- **Verdict triage at scan distance.** The SOC-implication verdict is now a
+  peripheral signal, not just a pill you read after opening a card. The home
+  feed leads a row with a 🚀 flag for practice-changing studies (the rarest,
+  highest-signal verdict), and the study card's left border is colored for the
+  three attention verdicts only (practice-changing, challenges-SOC,
+  caveats-dominate), so a long page reads as a heat-map where the few that
+  demand action pop. The other verdicts stay neutral; their pill still carries
+  the full verdict. A design-review render showed the other five verdict emoji
+  fail as bare feed glyphs (🔄/↔️/❔ read as UI controls; ⚠️ collides with the
+  safety disease-site anchor), so only 🚀 leads a feed row. `--verdict-color`
+  is defined once on `.study.verdict-*` and shared by the pill and the border.
+- **"New since your last visit."** Each home-feed study added since the reader
+  last visited gets a NEW text pill, with a "N new overall" total beside the
+  Studies heading. Client-side only (no backend, no accounts): a localStorage
+  set of seen study ids (`date#slug`), a sessionStorage baseline so the markers
+  stay stable as you navigate in-session, an immediate monotonic write so a
+  stale tab can never move the marker backward, and a first-visit that flags
+  nothing. The seen-set is capped to at least the live feed size, so a study
+  still in the feed is never dropped and re-flagged. Degrades to no markers if
+  storage is blocked (Safari private mode).
+
 ## [0.13.2] - 2026-06-09
 
 ### Fixed
