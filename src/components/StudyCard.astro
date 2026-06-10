@@ -1197,6 +1197,26 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     overflow-wrap: anywhere;
   }
 
+  /* The title link reuses the global .citation class for the link affordance,
+     but .citation is a monospace CODE chip (for NCT/PMID/DOI identifiers). A
+     trial title is PROSE, so neutralize the chip + monospace here: read it as a
+     serif accent link in the clinical register, not a heavy code box. Real
+     citation chips elsewhere are untouched (this is scoped to the trial row). */
+  .trials-watching-line1 .trial-nct.citation {
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    color: var(--accent);
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    display: inline;
+  }
+  .trials-watching-line1 .trial-nct.citation:hover {
+    background: none;
+    text-decoration: underline;
+  }
+
   .trial-phase-chip {
     font-family: var(--font-sans);
     font-size: 0.7rem;
