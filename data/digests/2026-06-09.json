@@ -1,65 +1,49 @@
 {
   "date": "2026-06-09",
   "conference": null,
-  "generated_at": 1781052961877,
+  "generated_at": 1781055293149,
   "digest": {
-    "top_line": "FIRESTORM: DE-RT 5-yr PFS 65.8% vs 38.8% (HR 0.40) in high-risk meningioma; dose escalation earns its toxicity tradeoff.",
-    "tldr": "CNS dominated today. FIRESTORM 7-institution IPD meta-analysis (N=248) shows DE-RT halves progression risk in high-risk meningioma (HR 0.40, p=0.001). Non-randomised design limits certitude, but the effect size is large enough to inform dose selection pending prospective data.",
+    "top_line": "FIRESTORM: DE-RT vs SD-RT in high-risk meningioma, 5-yr PFS 65.8% vs 38.8% (HR 0.40); dose escalation signals benefit, retrospective design.",
+    "tldr": "CNS led today: FIRESTORM (retrospective IPD) and RTOG 0539 (prospective phase 2, ~12-yr f/u) together frame the meningioma RT dose question across risk strata. Breast: RAPCHEM's 10-yr LRR 2.9% supports risk-adapted de-escalation post-NAC in cN1, pending the NSABP RCT.",
     "sites": [
       {
         "disease_site": "cns",
-        "intro": "High-risk meningioma dose-escalation data maturing; FIRESTORM adds the largest IPD series to date.",
+        "intro": "Two meningioma datasets bookend the dose-intensity question: FIRESTORM adds a retrospective IPD signal for escalation; RTOG 0539 provides the field's longest prospective benchmarks.",
         "studies": [
           {
             "name": "FIRESTORM",
-            "tldr": "DE-RT vs SD-RT: 5-yr PFS 65.8% vs 38.8%, HR 0.40 (0.24-0.69) in 7-institution IPD meta-analysis of 248 high-risk meningiomas.",
+            "tldr": "5-yr PFS 65.8% vs 38.8%, HR 0.40 favoring dose-escalated RT in high-risk meningioma; retrospective IPD meta-analysis.",
             "details": [
-              {
-                "text": "📊 PFS by arm",
-                "table": {
-                  "columns": [
-                    "Timepoint",
-                    "DE-RT (n=59)",
-                    "SD-RT (n=189)"
-                  ],
-                  "rows": [
-                    [
-                      "3-yr PFS",
-                      "86.4%",
-                      "55.6%"
-                    ],
-                    [
-                      "5-yr PFS",
-                      "65.8%",
-                      "38.8%"
-                    ]
-                  ]
-                }
-              },
-              "📐 MVA: HR 0.40 (95% CI 0.24-0.69), p=0.001",
-              "📐 IPTW-adjusted: HR 0.45 (95% CI 0.24-0.83), p=0.01",
-              "🔍 7-institution IPD meta-analysis, N=248; non-randomized, propensity score-adjusted",
-              "🔍 DE-RT: BED ≥79.2 Gy (equivalent 66 Gy/33 fx); SD-RT below this threshold",
+              "📊 5-yr PFS: DE-RT 65.8% vs SD-RT 38.8%; 3-yr PFS 86.4% vs 55.6% (log-rank P=.0022)",
+              "📐 MVA: HR 0.40 (95% CI 0.24-0.69), P=.001; IPTW-adjusted HR 0.45 (95% CI 0.24-0.83), P=.01",
+              "🔍 IPD meta-analysis, 7 institutions, N=248 (59 DE-RT, 189 SD-RT); DE-RT = BED ≥79.2 Gy (≡66 Gy/33 fr)",
               "🔍 75.8% WHO grade 2; 41.5% recurrent; 75.2% subtotal resection",
-              "⚠️ Any-grade RN higher with DE-RT: 33.9% vs 13.2% (p=.001)",
-              "⚠️ G3+ RN similar: DE-RT 5.1% vs SD-RT 3.2%",
-              "⚠️ Non-randomized; DE-RT arm only N=59; institutional selection bias plausible despite IPTW"
+              {
+                "text": "⚠️ Radionecrosis higher with DE-RT",
+                "subdetails": [
+                  "Any grade RN: 33.9% DE-RT vs 13.2% SD-RT, P=.001",
+                  "Grade 3+ RN: 5.1% vs 3.2% (not significant)"
+                ]
+              },
+              "⚠️ Retrospective non-randomized design; selection bias in who received dose escalation not fully eliminated by IPTW",
+              "⚠️ DE-RT arm small (N=59); 3:1 imbalance limits subgroup stability",
+              "⚠️ No OS endpoint reported in source"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
               1000000020
             ],
-            "slug": "firestorm",
+            "slug": "firestorm-meningioma",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective non-randomized IPD meta-analysis; DE-RT cohort only N=59; IPTW adjusts but cannot eliminate institutional selection bias.",
-              "audience": "WHO grade 2/3 high-risk meningioma, post-resection (75% subtotal), newly diagnos"
+              "rationale": "Retrospective pooled analysis; IPTW attenuates but cannot eliminate confounding in who received dose escalation. Prospective RCT needed before practice change.",
+              "audience": "High-risk meningioma (WHO grade 2 or recurrent), post-resection (mostly subtotal"
             },
             "open_questions": [
-              "Does OS benefit accompany the PFS gain with DE-RT?",
-              "Optimal DE-RT dose/fractionation for high-risk meningioma",
-              "Prospective RCT needed to confirm DE-RT PFS benefit"
+              "Does OS benefit accompany the PFS gain with dose-escalated RT?",
+              "Does a prospective RCT confirm superiority of dose-escalated RT?",
+              "Which pts carry highest radionecrosis risk from dose escalation?"
             ],
             "consort": null,
             "modality": "radiation",
@@ -94,8 +78,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* histologically confirmed atypical (WHO grade II) or anaplastic (WHO grade III) meningioma with the indication for radiotherapy\n* MRI (within 24h post-operative, if not available than with a time interval of \\~ 6 weeks) including contrast-enhanced T1 weighted 3D dataset and…",
-                "answers_question": "Optimal DE-RT dose/fractionation for high-risk meningioma",
-                "relevance_phrase": "60/68/72 Gy(RBE) proton RT comparison, grade II/III"
+                "answers_question": "Does a prospective RCT confirm superiority of dose-escalated RT?",
+                "relevance_phrase": "prospective proton dose escalation, 5y RFS endpoint"
               },
               {
                 "nct": "NCT06830356",
@@ -117,8 +101,175 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 16 years;\n* Ability to express appropriate informed consent to treatment;\n* Diagnosis of grade III meningioma (regardless of presence of residual) or diagnosis of recurrence of grade II meningioma (regardless of presence of residual) or first diagnosis of grade II…",
-                "answers_question": "Optimal DE-RT dose/fractionation for high-risk meningioma",
-                "relevance_phrase": "SSTR PET-guided dose escalation, grade III/recurrent II"
+                "answers_question": "Does a prospective RCT confirm superiority of dose-escalated RT?",
+                "relevance_phrase": "prospective dose escalation guided by SSTR-PET in high-risk"
+              },
+              {
+                "nct": "NCT06830356",
+                "brief_title": "Somatostatin Receptor PET Imaging to Guide Radiotherapy Dose Escalation in High Risk Meningiomas.",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 53,
+                "primary_completion_date": "2037-12",
+                "brief_summary": "High-risk meningiomas always require postsurgical radiation treatment. Recent evidence has shown that increased radiation therapy dose may be associated with increased intracranial control of disease. In order to better define the volume of radiation treatment, the addition of PET imaging with somatostatin receptor tracers adds additional information compared to encephalon MRI with MoC alone.The present study aims to investigate whether radiation treatment with higher doses than the standard…",
+                "conditions": [
+                  "Meningioma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Dose escalation of radiation therapy, based on somatostatin receptor PET imaging",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 16 years;\n* Ability to express appropriate informed consent to treatment;\n* Diagnosis of grade III meningioma (regardless of presence of residual) or diagnosis of recurrence of grade II meningioma (regardless of presence of residual) or first diagnosis of grade II…",
+                "answers_question": "Which pts carry highest radionecrosis risk from dose escalation?",
+                "relevance_phrase": "SSTR-PET-guided contouring to limit OAR dose escalation risk"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "meningioma dose escalation radiation",
+                "meningioma radionecrosis dose escalation"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 3,
+              "fetched_at": "2026-06-10T01:32:46.739Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 20
+              }
+            ]
+          },
+          {
+            "name": "NRG Oncology RTOG 0539",
+            "tldr": "10-yr PFS 85.2%, 72.2%, 42.5% for low/intermediate/high-risk meningioma with risk-adapted observation or RT (median f/u ~12yr).",
+            "details": [
+              {
+                "text": "📊 10-yr outcomes by risk group",
+                "table": {
+                  "columns": [
+                    "Risk Group",
+                    "Rx",
+                    "n",
+                    "10-yr PFS",
+                    "10-yr OS",
+                    "10-yr prog. incidence"
+                  ],
+                  "rows": [
+                    [
+                      "Low",
+                      "Observation",
+                      "60",
+                      "85.2%",
+                      "94.1%",
+                      "8.9% (3.2–18.2%)"
+                    ],
+                    [
+                      "Intermediate",
+                      "54 Gy/30fx",
+                      "52",
+                      "72.2%",
+                      "84.7%",
+                      "21.2% (10.8–33.9%)"
+                    ],
+                    [
+                      "High",
+                      "60 Gy/30fx",
+                      "53",
+                      "42.5%",
+                      "51.1%",
+                      "39.3% (25.8–52.5%)"
+                    ]
+                  ]
+                }
+              },
+              "🔍 Prospective phase 2, N=165 eligible (244 consented); risk-stratified by WHO grade, resection extent, recurrence status",
+              "🔍 Low: grade 1 GTR/STR → obs; intermediate: recurrent grade 1 or new grade 2 post-GTR → 54 Gy; high: new grade 2 post-STR, grade 3, or recurrent grade 2/3 → 60 Gy",
+              "🔍 Median PFS not reached in low- and intermediate-risk cohorts",
+              {
+                "text": "⚠️ G3+ RT-attributed toxicity",
+                "subdetails": [
+                  "Intermediate-risk: 9.6% (5/52 pts)",
+                  "High-risk: 15.1% (8/53 pts)"
+                ]
+              },
+              "⚠️ Non-randomized: risk allocation deterministic, not randomised; no RT vs obs head-to-head for intermediate group",
+              "⚠️ WHO 2021 molecular criteria not applied; risk stratification reflects histologic grading (WHO 2007/2016)",
+              "🔗 Long-term benchmarks for future trials; ROAM/EORTC-1308 is ongoing randomised RT vs obs for grade 2"
+            ],
+            "figures": [],
+            "nct": "NCT00895622",
+            "tweet_ids": [
+              1000000021
+            ],
+            "slug": "rtog-0539-meningioma",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Phase 2, single-arm per risk stratum, no randomised comparator; benchmarks RT vs obs association but cannot establish causation.",
+              "audience": "WHO grade 1-3 meningioma, post-resection (GTR or STR), newly-diagnosed or recurr"
+            },
+            "open_questions": [
+              "RT vs observation for intermediate-risk meningioma: no randomised data",
+              "Optimal RT dose for WHO grade 3 meningioma beyond 60 Gy",
+              "Role of WHO 2021 molecular grading in meningioma risk stratification"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "phase-2-trial",
+            "related_trials": [
+              {
+                "nct": "NCT03180268",
+                "brief_title": "Observation or Radiation Therapy in Treating Patients With Newly Diagnosed Grade II Meningioma That Has Been Completely Removed by Surgery",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 163,
+                "primary_completion_date": "2027-06",
+                "brief_summary": "This randomized phase III trial studies how well radiation therapy works compared with observation in treating patients with newly diagnosed grade II meningioma that has been completely removed by surgery. Radiation therapy uses high energy x-rays to kill tumor cells and shrink tumors.",
+                "conditions": [
+                  "Grade 2 Meningioma",
+                  "Intracranial Meningioma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Biospecimen Collection",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Clinical Observation",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Intensity-Modulated Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Laboratory Biomarker Analysis",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Magnetic Resonance Imaging",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Proton Beam Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Quality-of-Life Assessment",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* PRIOR TO STEP 1 REGISTRATION:\n* The patient must have a newly diagnosed unifocal intracranial meningioma, gross totally resected, and histologically confirmed as WHO grade II based upon pathology findings at the enrolling institution. WHO grade will be assigned according to…",
+                "answers_question": "RT vs observation for intermediate-risk meningioma: no randomised data",
+                "relevance_phrase": "phase 3 RCT: adjuvant RT vs obs, resected grade II"
               },
               {
                 "nct": "NCT02978677",
@@ -148,24 +299,217 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* histologically confirmed atypical (WHO grade II) or anaplastic (WHO grade III) meningioma with the indication for radiotherapy\n* MRI (within 24h post-operative, if not available than with a time interval of \\~ 6 weeks) including contrast-enhanced T1 weighted 3D dataset and…",
-                "answers_question": "Prospective RCT needed to confirm DE-RT PFS benefit",
-                "relevance_phrase": "prospective proton dose escalation; 5-yr RFS endpoint"
+                "answers_question": "Optimal RT dose for WHO grade 3 meningioma beyond 60 Gy",
+                "relevance_phrase": "proton escalation 60/68/72 Gy(RBE), grade II/III"
+              },
+              {
+                "nct": "NCT06830356",
+                "brief_title": "Somatostatin Receptor PET Imaging to Guide Radiotherapy Dose Escalation in High Risk Meningiomas.",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 53,
+                "primary_completion_date": "2037-12",
+                "brief_summary": "High-risk meningiomas always require postsurgical radiation treatment. Recent evidence has shown that increased radiation therapy dose may be associated with increased intracranial control of disease. In order to better define the volume of radiation treatment, the addition of PET imaging with somatostatin receptor tracers adds additional information compared to encephalon MRI with MoC alone.The present study aims to investigate whether radiation treatment with higher doses than the standard…",
+                "conditions": [
+                  "Meningioma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Dose escalation of radiation therapy, based on somatostatin receptor PET imaging",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 16 years;\n* Ability to express appropriate informed consent to treatment;\n* Diagnosis of grade III meningioma (regardless of presence of residual) or diagnosis of recurrence of grade II meningioma (regardless of presence of residual) or first diagnosis of grade II…",
+                "answers_question": "Optimal RT dose for WHO grade 3 meningioma beyond 60 Gy",
+                "relevance_phrase": "SSTR-PET guided dose escalation, grade III/recurrent II"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "meningioma dose escalation radiation",
-                "meningioma postoperative radiation overall survival"
+                "meningioma intermediate risk radiotherapy",
+                "meningioma grade 3 dose escalation"
               ],
               "queries_failed": [],
-              "candidates_returned": 8,
-              "fetched_at": "2026-06-10T00:54:52.249Z",
+              "candidates_returned": 11,
+              "fetched_at": "2026-06-10T01:33:34.530Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {
                 "type": "paper",
-                "id": 20
+                "id": 21
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "breast",
+        "intro": "RAPCHEM extends RT de-escalation data to 10 years in cN1 post-NAC, with 2.9% LRR across all risk tiers; randomized confirmation pending.",
+        "studies": [
+          {
+            "name": "RAPCHEM (BOOG 2010-03)",
+            "tldr": "10-yr locoregional recurrence 2.9% overall with risk-stratified RT de-escalation after NAC + surgery in cN1 breast cancer.",
+            "details": [
+              {
+                "text": "📊 10-yr locoregional recurrence by risk tier",
+                "subdetails": [
+                  "Low (ypN0): 7/291 (2.4%)",
+                  "Intermediate (ypN1-3): 12/370 (3.2%)",
+                  "High (ypN4+): 5/177 (2.8%)"
+                ]
+              },
+              "📊 Overall: 24/838 (2.9%) locoregional events at 10 yr",
+              "🔍 Prospective single-arm, N=848, 17 centers (Netherlands), enrolled 2011-2015",
+              "🔍 Eligibility: cT<5cm, cN1-3 at diagnosis; risk tier assigned by ypN status post-NAC + surgery",
+              {
+                "text": "🔍 RT allocation by risk tier",
+                "subdetails": [
+                  "ypN0 (low): BCS → breast RT; mastectomy → RT omitted",
+                  "ypN1-3 (intermediate): breast/chest wall RT; regional nodal RT withheld",
+                  "ypN4+ (high): breast/chest wall + regional nodal RT"
+                ]
+              },
+              "⚠️ No randomized comparator arm; low LRR rates may reflect patient selection or favorable NAC biology, not de-escalation effect per se",
+              "⚠️ Most pts had ALND — less common in current practice; generalizability to sentinel node biopsy era uncertain",
+              "🔗 NSABP RCT (NCT01872975) directly tests RT omission post-NAC in ypN0; results expected ~3 years from EBCC15 presentation"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000022
+            ],
+            "slug": "rapchem",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Single-arm prospective cohort, no randomized comparator. Reassuring 10-yr LRR rates but cannot causally attribute to de-escalation.",
+              "audience": "Breast cancer cT<5cm cN1-3, receiving NAC prior to BCS or mastectomy"
+            },
+            "open_questions": [
+              "OS impact of RT omission in ypN0 after mastectomy vs. locoregional control alone?",
+              "Applicability to sentinel node biopsy era without ALND?",
+              "Does risk-stratified RT de-escalation hold in randomized comparison?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "phase-2-trial",
+            "related_trials": [
+              {
+                "nct": "NCT01901094",
+                "brief_title": "Comparison of Axillary Lymph Node Dissection with Axillary Radiation for Patients with Node-Positive Breast Cancer Treated with Chemotherapy",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 2012,
+                "primary_completion_date": "2026-01",
+                "brief_summary": "This randomized phase III trial studies lymph node dissection and radiation therapy to see how well it works compared to radiation therapy alone in treating patients with breast cancer previously treated with chemotherapy and surgery. Lymph node dissection may remove cancer cells that have spread to nearby lymph nodes in patients with breast cancer. Radiation therapy uses high-energy x rays or protons to kill tumor cells. It is not yet known if radiation therapy works better alone or with lymph…",
+                "conditions": [
+                  "Stage II Breast Cancer",
+                  "Stage IIIA Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Axillary Lymph Node Dissection (ALND)",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Nodal Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Axillary Radiation Therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Pre-Registration Eligibility Criteria:\n\n* Clinical stage T1-3 N1 M0 breast cancer at diagnosis (prior to the start of neoadjuvant chemotherapy) by American Joint Committee on Cancer (AJCC) staging 7th edition\n* No inflammatory breast cancer\n* No other malignancy within 5 years of registration with…",
+                "answers_question": "Applicability to sentinel node biopsy era without ALND?",
+                "relevance_phrase": "ph3 RCT: ALND vs nodal RT post-NAC in cT1-3N1"
+              },
+              {
+                "nct": "NCT04889924",
+                "brief_title": "ALND vs ART in Positive Sentinel Node After Neoadjuvant Therapy in Breast Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 820,
+                "primary_completion_date": "2026-06",
+                "brief_summary": "In the case of primary surgery, in patients with sentinel node involvement, it has already been shown that omitting axillary lymph node dissection (ALND), often combining axillary radiotherapy (RT), does not worsen the prognosis and does significantly reduce the appearance of lymphedema. However, patients who have received neoadjuvant systemic treatment cannot benefit from this option, even though in the majority of those who have responded well to treatment, a residual disease in the armpit is…",
+                "conditions": [
+                  "Breast Cancer",
+                  "Chemotherapy",
+                  "Sentinel Lymph Node",
+                  "Axillary Lymph Nodes Dissection",
+                  "Radiotherapy Side Effect"
+                ],
+                "interventions": [
+                  {
+                    "name": "Axillary Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Lymphadenectomy",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* T1-T4 N0/ T0-T4 N1 at diagnosis and subsidiary of neoadjuvant treatment\n* Post-CT SLN with ≤2 macrometastasis/micrometastasis or ITCs\n* Post-CT axillary response by ultrasound or MRI\n* Complete at least 70% of neoadjuvant chemotherapy and 6 months of endocrine…",
+                "answers_question": "Applicability to sentinel node biopsy era without ALND?",
+                "relevance_phrase": "ALND vs axillary RT in ypSLN+ post-NAT cN1 pts"
+              },
+              {
+                "nct": "NCT04109079",
+                "brief_title": "Axillary Management in Breast Cancer Patients With Needle Biopsy Proven Nodal Metastases After Neoadjuvant Chemotherapy",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 1900,
+                "primary_completion_date": "2030-02",
+                "brief_summary": "The aim of this study is to assess whether, omitting further axillary treatment (ALND and ART) for patients with early stage breast cancer and axillary nodal metastases on needle biopsy, who after NACT have no residual cancer in the lymph nodes on sentinel node biopsy, is non-inferior to axillary treatment in terms of disease free survival (DFS) and results in reduced risk of lymphoedema at 5 years.",
+                "conditions": [
+                  "Breast Cancer",
+                  "Sentinel Lymph Node",
+                  "Neoplasm, Breast"
+                ],
+                "interventions": [
+                  {
+                    "name": "Axillary lymph node dissection",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Axillary radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Breast or chest wall radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18\n* Male or female\n* cT1-3N1M0 breast cancer at diagnosis (prior to NACT) as per AJCC 8th edition (see Section 6.4.1)\n\n  o Patients with occult primary invasive breast cancer (no identifiable invasive cancer in the breast) with FNA or core biopsy proven nodal…",
+                "answers_question": "Applicability to sentinel node biopsy era without ALND?",
+                "relevance_phrase": "ALND+ART omission in cN1→ypN0 on SLNB, DFS endpoint"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "breast mastectomy radiation omission neoadjuvant",
+                "breast radiation sentinel neoadjuvant",
+                "breast radiation omission neoadjuvant randomized"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 13,
+              "fetched_at": "2026-06-10T01:33:34.802Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 22
               }
             ]
           }
@@ -174,14 +518,67 @@
       }
     ],
     "meta": {
-      "clusters_total": 1,
-      "studies_analyzed": 1,
+      "clusters_total": 3,
+      "studies_analyzed": 3,
       "dropped": [],
       "ocr_available": true
     }
   },
   "bookmarks": [],
   "papers": [
+    {
+      "id": 22,
+      "pmid": null,
+      "doi": null,
+      "pmc_id": null,
+      "title": "Breast Cancer Recurrence Remains Low—Even After 10 Years—With Radiotherapy Tailored to Patient’s Individual Risk",
+      "authors": [],
+      "journal": "The ASCO Post",
+      "pub_date": null,
+      "abstract": "“The results of our study show that tailoring the extent of radiotherapy according to how well the chemotherapy has worked to treat cancer in the lymph nodes leads to very low and reassuring recurrenc...",
+      "pdf_path": null,
+      "note": "Breast Cancer Recurrence Remains Low Even After 10 Years With Radiotherapy Tailored to Patient’s Individual Risk - The ASCO Post"
+    },
+    {
+      "id": 21,
+      "pmid": null,
+      "doi": "10.1200/jco-25-01441",
+      "pmc_id": null,
+      "title": "Long-Term Analysis of NRG Oncology RTOG 0539: A Phase II Trial of Observation for Low-Risk Meningioma and Radiotherapy for Intermediate- and High-Risk Meningioma",
+      "authors": [
+        "Kotecha, Rupesh",
+        "Polley, Mei-Yin",
+        "Vogelbaum, Michael A.",
+        "Perry, Arie",
+        "Ashby, Lynn",
+        "Modi, Jignesh M.",
+        "Alleman, Anthony M.",
+        "Tsien, Christina I.",
+        "Barani, Igor Johan",
+        "Li, Jing",
+        "Braunstein, Steve",
+        "Whitton, Anthony C.",
+        "Bovi, Joseph A.",
+        "Deb, Nimisha",
+        "Lindhorst, Scott M.",
+        "Shrieve, Dennis C.",
+        "Robinson, Clifford G.",
+        "Shu, Hui-Kuo G.",
+        "Vempati, Prashant",
+        "Mishra, Mark Vikas",
+        "Suh, John H.",
+        "Bloom, Beatrice",
+        "Hunter, Grant K.",
+        "Won, Minhee",
+        "Mehta, Minesh P.",
+        "Rogers, C. Leland"
+      ],
+      "journal": "Journal of Clinical Oncology",
+      "pub_date": "2026-05-27",
+      "abstract": "NRG Oncology RTOG 0539 was a prospective phase II trial of risk-adapted radiotherapy for patients with WHO grade 1-3 meningioma. Low-risk (group 1, n = 60) was defined as a grade 1 tumor after gross total resection or subtotal resection (GTR/STR) and prospectively monitored. Intermediate-risk (group 2, n = 52) was defined as recurrent grade 1 or newly diagnosed grade 2 tumor after GTR and treated with radiotherapy (54 Gy). High-risk (group 3, n = 53) included a newly diagnosed grade 2 tumor after STR, newly diagnosed grade 3 tumor, or recurrent grade 2 or 3 tumor and treated with radiotherapy (60 Gy). Progression-free survival (PFS) and overall survival (OS) were estimated using the Kaplan-Meier method. The median follow-up times for the low-, intermediate-, and high-risk cohorts were 12.1, 12.0, and 11.1 years, respectively. The 10-year PFS and OS rates for the low-, intermediate-, and high-risk cohorts were 85.2% and 94.1%, 72.2% and 84.7%, and 42.5% and 51.1%, respectively. Five patients (9.6%) and eight patients (15.1%) had a grade 3+ toxicity attributed to radiotherapy in the intermediate- and high-risk cohorts, respectively. The long-term outcomes using this risk-adapted approach support observation for low-risk patients, inform radiotherapy patient selection and practice standards for intermediate- and high-risk patients, and provide comparative benchmarks for future trials.",
+      "pdf_path": "data/obsidian/papers/cns/long-term-analysis-of-nrg-oncology-rtog-0539-a-phase-ii-trial-of.pdf",
+      "note": null
+    },
     {
       "id": 20,
       "pmid": null,
