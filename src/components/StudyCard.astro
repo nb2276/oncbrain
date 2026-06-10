@@ -173,7 +173,7 @@ if (papers.length > 0) sourceBadges.push(`📄 ${papers.length} paper${papers.le
 if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.length === 1 ? '' : 's'}`);
 ---
 
-<div class:list={['study', hasFigures && 'has-figures']} id={anchorId} data-tags={dataTags || undefined}>
+<div class:list={['study', hasFigures && 'has-figures', study.verdict?.soc_implication && `verdict-${study.verdict.soc_implication}`]} id={anchorId} data-tags={dataTags || undefined}>
   <div class="study-head">
   {/* ── Triage layer: always visible ── */}
   <h4 class="study-name">
@@ -705,12 +705,25 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     border-left: 3px solid var(--border);
     border-radius: 4px;
   }
-  .verdict-block.verdict-practice-changing { --verdict-color: #1a5e3a; }
-  .verdict-block.verdict-challenges-soc { --verdict-color: #9a5a1a; }
-  .verdict-block.verdict-confirmatory { --verdict-color: var(--accent); }
-  .verdict-block.verdict-early-signal { --verdict-color: #1a6a7a; }
-  .verdict-block.verdict-methodologically-limited { --verdict-color: #8a3a1a; }
-  .verdict-block.verdict-unclear { --verdict-color: var(--fg-muted); }
+  /* Verdict color is defined ONCE on the card root (so the pill inherits it via
+     cascade) and reused for the selective left-border below. */
+  .study.verdict-practice-changing { --verdict-color: #1a5e3a; }
+  .study.verdict-challenges-soc { --verdict-color: #9a5a1a; }
+  .study.verdict-confirmatory { --verdict-color: var(--accent); }
+  .study.verdict-early-signal { --verdict-color: #1a6a7a; }
+  .study.verdict-methodologically-limited { --verdict-color: #8a3a1a; }
+  .study.verdict-unclear { --verdict-color: var(--fg-muted); }
+
+  /* T1-B: color the card's left border for the ATTENTION verdicts only, so a
+     long page of cards reads as a heat-map where the few that demand action
+     pop. Confirmatory / early-signal / unclear keep the neutral border; their
+     pill still carries the full verdict. Design review 2026-06-10 validated
+     this selective set over coloring all six (which flattened the signal). */
+  .study.verdict-practice-changing,
+  .study.verdict-challenges-soc,
+  .study.verdict-methodologically-limited {
+    border-left-color: var(--verdict-color);
+  }
   .verdict-pill {
     display: inline-flex;
     align-items: center;
@@ -1251,10 +1264,10 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
 
   /* Verdict colors in dark mode: lighter values, legible on the dark card. */
   @media (prefers-color-scheme: dark) {
-    .verdict-block.verdict-practice-changing { --verdict-color: #5fcc8a; }
-    .verdict-block.verdict-challenges-soc { --verdict-color: #d99a4a; }
-    .verdict-block.verdict-early-signal { --verdict-color: #6fbfd6; }
-    .verdict-block.verdict-methodologically-limited { --verdict-color: #d9785a; }
+    .study.verdict-practice-changing { --verdict-color: #5fcc8a; }
+    .study.verdict-challenges-soc { --verdict-color: #d99a4a; }
+    .study.verdict-early-signal { --verdict-color: #6fbfd6; }
+    .study.verdict-methodologically-limited { --verdict-color: #d9785a; }
   }
 
   /* Share affordance anchored to the top-right of .study-head. On wide

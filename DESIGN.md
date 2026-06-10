@@ -98,7 +98,10 @@ Built for a returning reader, not a first-time browser:
 
 - **Disease-site nav bar:** the emoji chips fan out across the top; tap to jump to that site's page. The primary wayfinding.
 - **Hero TL;DR:** the latest digest's TL;DR in a prominent box directly under the title, so the freshest synthesis is the first thing read.
-- **Recent studies feed:** the last ~10 studies as a flat feed (not grouped by date), newest first, so a returning reader sees what is new at a glance.
+- **Recent studies feed:** every study as a flat filterable index (not grouped by date), newest first, so a returning reader sees what is new at a glance. Two markers ride the feed rows (v0.14):
+  - A 🚀 **practice-changing flag** leads the row for practice-changing studies only. It is the one verdict that survives as a bare glyph in a dense row: the others (🔄 ↔️ ❔) read as UI controls without their pill label, and ⚠️ collides with the safety disease-site anchor (design review 2026-06-10). The card's verdict pill still carries the full verdict for every study.
+  - A **NEW text pill** + a "N new overall" total mark studies added since the reader's last visit (client-side, localStorage seen-id set). The pill is text at `.section-label` typography in a NEUTRAL color, never an emoji or a verdict color, so it stays clear of the 3-axis emoji vocabulary.
+- **Verdict card border (v0.14):** the study card's left border is colored for the three ATTENTION verdicts only (🚀 practice-changing, ↔️ challenges-SOC, ⚠️ caveats-dominate). Confirmatory / early-signal / unclear keep the neutral border, so a long page reads as a heat-map where the few that demand action pop. `--verdict-color` is defined once on `.study.verdict-*` and shared by the pill text + the border.
 - **Live search:** a single box below the nav that filters studies as you type (substring over name / TL;DR / NCT / disease-site label). `/` focuses it, `Esc` clears.
 
 ## Disease-site emoji set
