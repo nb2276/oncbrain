@@ -233,7 +233,7 @@ TODOS.md                   deferred work tracker (seeded from CHANGELOG "Not yet
 
 ## Deploy mechanics
 
-- GitHub repo: `nb2276/oncbrain` (private)
+- GitHub repo: `nb2276/oncbrain` (public — repo and all PR/commit contents are world-readable; keep secrets out of code, commits, and PR bodies)
 - DO app: `6ce55877-da68-4a8d-aacd-1b1f244733dd`, region SFO, static site free tier
 - Domain: `oncbrain.oncologytoolkit.com` (PRIMARY, Let's Encrypt cert)
 - Fallback URL: `oncbrain-k4i4q.ondigitalocean.app`
