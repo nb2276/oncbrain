@@ -2,6 +2,15 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.13.2] - 2026-06-09
+
+### Fixed
+
+- **"Trials to watch" titles read as serif links, not heavy code chips.** Each
+  trial title reused the citation-chip style (a monospace box meant for
+  NCT/PMID/DOI identifiers), so a prose title rendered dense and out of register
+  with the Newsreader serif body. Titles now read as plain serif accent links.
+
 ## [0.13.1] - 2026-06-09
 
 ### Fixed
