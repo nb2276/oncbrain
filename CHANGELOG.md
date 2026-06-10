@@ -2,6 +2,30 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.1] - 2026-06-10
+
+### Changed
+
+- **Home is a what's-new slice, not a 71-row scroll.** The home page now shows
+  the latest 12 studies plus a "Browse all N studies →" link to a new
+  **`/studies`** route that holds the full flat index and the filter rail (moved
+  off home). The home is the returning reader's front door; the full filterable
+  corpus lives one click away. A shared `RecentFeed.astro` renders the feed on
+  both pages, so there is one row template. The "N new overall" count and the
+  seen-set still cover the whole corpus even on the sliced home, so a study added
+  below the slice still counts on the home total and gets its NEW pill on
+  `/studies` (the home embeds the full id list; the seen-set logic separates the
+  rendered rows from the corpus).
+
+### Fixed
+
+- **`/studies` inherits the home's filter + cache behaviors.** The single-tag
+  filter → `/tags/<slug>/` canonical redirect now fires on `/studies` (it was
+  keyed to home, which no longer hosts the rail), and `/studies` is classified as
+  an archive route (NetworkFirst, not precache-forever, with the existing `?tag=`
+  cache-key normalization) so an installed PWA does not serve a stale full index
+  offline.
+
 ## [0.14.0] - 2026-06-10
 
 ### Added

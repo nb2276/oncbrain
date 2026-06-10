@@ -311,3 +311,78 @@ describe('setupWhatsNew', () => {
     expect((total as { textContent: string }).textContent).toBe('');
   });
 });
+
+// T3: the home page renders only a slice but passes allIds (the full corpus).
+// The count, baseline, and persisted seen-set must use the corpus, not just the
+// rendered rows, or visiting home would mark the unrendered studies seen and
+// /studies would never flag them.
+describe('setupWhatsNew with a sliced corpus (allIds, T3)', () => {
+  function setup(rows: StubRow[], allIds: string[], deps: { local?: StorageLike | null; session?: StorageLike | null }, total = makeTotal()) {
+    const count = setupWhatsNew(
+      { rows: rows as unknown as ArrayLike<HTMLElement>, totalEl: total as unknown as HTMLElement, allIds },
+      deps,
+    );
+    return { count, total };
+  }
+
+  it('counts the full corpus, marks only rendered new rows, persists the whole corpus', () => {
+    const local = makeStorage({ [SEED]: serializeSeen(new Set(['2026-06-07#a'])) }); // a seen
+    const allIds = ['2026-06-07#a', '2026-06-09#b', '2026-06-09#c']; // b, c are new
+    const rows = [makeRow('2026-06-09#b')]; // home renders only b (a slice)
+    const { count, total } = setup(rows, allIds, { local, session: makeStorage() });
+
+    expect(count).toBe(2); // corpus-wide: both b and c
+    expect(rows[0]!._classes.has('is-new')).toBe(true); // b rendered + new -> pill
+    expect((total as { textContent: string }).textContent).toBe('· 2 new overall');
+    // persisted the FULL corpus, so /studies later won't re-flag the unrendered c
+    const stored = parseSeen(local.data.get(SEED) ?? null)!;
+    expect(stored.has('2026-06-09#c')).toBe(true);
+    expect(stored.has('2026-06-09#b')).toBe(true);
+    expect(stored.has('2026-06-07#a')).toBe(true);
+  });
+
+  it('home then /studies in one session: count on home, pills on /studies, same frozen baseline', () => {
+    const local = makeStorage({ [SEED]: serializeSeen(new Set(['2026-06-07#a'])) });
+    const session = makeStorage();
+    const allIds = ['2026-06-07#a', '2026-06-09#b', '2026-06-09#c'];
+    // HOME renders the latest slice [b].
+    const home = setup([makeRow('2026-06-09#b')], allIds, { local, session });
+    expect(home.count).toBe(2);
+    // /STUDIES (same session) renders the full feed. The frozen sessionStorage
+    // baseline keeps b AND c flagged, even though localStorage advanced on home.
+    const studiesRows = [makeRow('2026-06-09#b'), makeRow('2026-06-09#c'), makeRow('2026-06-07#a')];
+    const studies = setup(studiesRows, allIds, { local, session });
+    expect(studies.count).toBe(2);
+    expect(studiesRows[0]!._classes.has('is-new')).toBe(true); // b
+    expect(studiesRows[1]!._classes.has('is-new')).toBe(true); // c (unrendered on home, still new here)
+    expect(studiesRows[2]!._classes.has('is-new')).toBe(false); // a was seen
+  });
+
+  it('next session after a sliced home visit sees nothing new (corpus persisted)', () => {
+    const local = makeStorage({ [SEED]: serializeSeen(new Set(['2026-06-07#a'])) });
+    const allIds = ['2026-06-07#a', '2026-06-09#b', '2026-06-09#c'];
+    setup([makeRow('2026-06-09#b')], allIds, { local, session: makeStorage() }); // home visit
+    // Fresh session: the full corpus is now seen.
+    const next = setup([makeRow('2026-06-09#b')], allIds, { local, session: makeStorage() });
+    expect(next.count).toBe(0);
+  });
+
+  it('empty allIds falls back to the rendered rows as the corpus', () => {
+    const local = makeStorage();
+    const rows = [makeRow('2026-06-09#a'), makeRow('2026-06-09#b')];
+    const { count } = setup(rows, [], { local, session: makeStorage() }); // empty allIds
+    expect(count).toBe(0); // first visit over the rendered corpus
+    expect(parseSeen(local.data.get(SEED) ?? null)).toEqual(new Set(['2026-06-09#a', '2026-06-09#b']));
+  });
+
+  it('an all-invalid allIds array falls back to the rendered rows (does not yield an empty corpus)', () => {
+    const local = makeStorage({ [SEED]: serializeSeen(new Set(['2026-06-08#old'])) });
+    const rows = [makeRow('2026-06-09#new')];
+    // allIds is non-empty but every entry fails ID_RE -> must NOT collapse to an
+    // empty corpus (which would bail and suppress marking/persistence).
+    const { count } = setup(rows, ['garbage', 'not-an-id', ''], { local, session: makeStorage() });
+    expect(count).toBe(1);
+    expect(rows[0]!._classes.has('is-new')).toBe(true);
+    expect(parseSeen(local.data.get(SEED) ?? null)!.has('2026-06-09#new')).toBe(true);
+  });
+});

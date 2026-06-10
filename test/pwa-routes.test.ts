@@ -15,6 +15,14 @@ describe('isArchivePage', () => {
     expect(isArchivePage('/2026-05-17')).toBe(true);
   });
 
+  it('matches the /studies full index (v0.14 T3, with and without trailing slash)', () => {
+    expect(isArchivePage('/studies/')).toBe(true);
+    expect(isArchivePage('/studies')).toBe(true);
+    // but not a deeper or look-alike path
+    expect(isArchivePage('/studies/extra/')).toBe(false);
+    expect(isArchivePage('/studies-x/')).toBe(false);
+  });
+
   it('matches per-site detail pages', () => {
     expect(isArchivePage('/sites/breast/')).toBe(true);
     expect(isArchivePage('/sites/prostate')).toBe(true);

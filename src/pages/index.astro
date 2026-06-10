@@ -1,20 +1,15 @@
 ---
 import Base from '../layouts/Base.astro';
-import TagFilterRail from '../components/TagFilterRail.astro';
 import Sparkline from '../components/Sparkline.astro';
+import RecentFeed from '../components/RecentFeed.astro';
 import {
   listDigests,
   listConferenceSummaries,
   listRecentStudies,
   listSiteSummaries,
-  stripStudyNamePrefix,
 } from '../lib/digest-data.ts';
 import { linkifyCitations } from '../lib/extract.ts';
-import { DISEASE_SITES, getDiseaseSite } from '../lib/disease-sites.ts';
-import { verdictMetaFor } from '../lib/verdict.ts';
-import { buildShareUrl } from '../lib/share-url.ts';
-import { studyDataTags } from '../lib/study-data-tags.ts';
-import { buildFilterRailOptions } from '../lib/tag-foundations.ts';
+import { DISEASE_SITES } from '../lib/disease-sites.ts';
 import {
   buildTagActivity,
   listTagSummaries,
@@ -41,28 +36,15 @@ const navSites = DISEASE_SITES.map((s) => ({
 const navPopulated = navSites.filter((s) => s.count > 0);
 const navEmpty = navSites.filter((s) => s.count === 0);
 
-// v0.11 PR-2: the home right gutter now hosts the TagFilterRail. The
-// disease-site nav lives in the top chip row below the hero (already
-// present on every viewport), so readers keep their cross-corpus
-// navigation surface; the right rail offers "narrow this feed" — the
-// tighter affordance for a returning reader.
+// v0.14 T3: the home shows the latest HOME_FEED_LIMIT studies as a what's-new
+// slice; the full filterable index moved to /studies (with the TagFilterRail).
+// The disease-site nav stays in the top chip row for cross-corpus wayfinding.
 
-// Studies as a flat feed: every study in date-desc order, no date headers.
-// At current scale (low tens) we show the full archive on home; pagination
-// is a deferred concern (see TODOS.md when the archive grows past ~100).
+// Full corpus, date-desc. The home renders a slice (HOME_FEED_LIMIT) and links
+// to /studies, but passes the full id list to RecentFeed so the "new since last
+// visit" count + seen-set cover every study, not just the rendered slice.
 const feed = listRecentStudies(Number.MAX_SAFE_INTEGER);
-
-// v0.11 PR-2: per-namespace filter options scoped to the studies that
-// will actually render on this page. Empty namespaces (no studies
-// carry that tag type) are dropped by buildFilterRailOptions; the
-// component additionally drops empty namespaces at render time.
-const filterOptions = buildFilterRailOptions(
-  feed.map((r) => ({
-    study: r.study,
-    conferenceSlug: r.conference?.slug ?? null,
-    conferenceLabel: r.conference?.name ?? null,
-  })),
-);
+const HOME_FEED_LIMIT = 12;
 
 // v0.10 home page surfaces (design pass 1 + pass 4 locks):
 //   1. 30-day tag activity histogram: top-5 tags by recency-weighted study
@@ -89,16 +71,6 @@ const tagChipRow = Array.from(tagSummaries.entries())
 ---
 
 <Base title={siteName} description="Curated AI-summarized digests of oncology updates.">
-  {digests.length > 0 && (
-    <TagFilterRail
-      modality={filterOptions.modality}
-      intent={filterOptions.intent}
-      methodology={filterOptions.methodology}
-      verdict={filterOptions.verdict}
-      meeting={filterOptions.meeting}
-      totalCount={feed.length}
-    />
-  )}
   {digests.length > 0 && (
     <nav class="site-nav" aria-label="Browse by disease site">
       {navPopulated.length > 0 && (
@@ -182,71 +154,14 @@ const tagChipRow = Array.from(tagSummaries.entries())
   )}
 
   {feed.length > 0 && (
-    <section class="recent-section">
-      <h2 class="section-label">Studies · {feed.length}<span class="recent-new-total" aria-live="polite"></span></h2>
-      <ul class="recent-list">
-        {feed.map((r) => {
-          const meta = getDiseaseSite(r.disease_site);
-          const tldr = stripStudyNamePrefix(r.study.tldr, r.study.name);
-          const teaser = tldr.length > 200 ? tldr.slice(0, 199).trimEnd() + '…' : tldr;
-          const shareUrl = buildShareUrl({ site: r.disease_site, date: r.date, slug: r.slug });
-          const dataTags = studyDataTags(r.study, r.disease_site, r.conference?.slug ?? null);
-          // T1-A: feed verdict glyph is practice-changing ONLY (a rarity flag).
-          // Other verdicts read as UI controls or collide with site emoji when
-          // shown bare in a dense row (see design review 2026-06-10).
-          const practiceMeta =
-            r.study.verdict?.soc_implication === 'practice-changing'
-              ? verdictMetaFor('practice-changing')
-              : null;
-          // T2: stable per-study id for the "new since last visit" marker.
-          const studyId = `${r.date}#${r.slug}`;
-          return (
-            <li class="recent-li" data-study-id={studyId} data-tags={dataTags || undefined}>
-              <a class="recent-card" href={`/${r.date}/#${r.slug}`}>
-                <div class="recent-meta">
-                  <span class="recent-new-pill">New</span>
-                  {practiceMeta && (
-                    <span class="verdict-flag">
-                      <span aria-hidden="true">{practiceMeta.emoji}</span>
-                      <span class="sr-only">{practiceMeta.label}</span>
-                    </span>
-                  )}
-                  <span class="recent-emoji" aria-hidden="true" title={`${meta.label}: ${meta.rationale}`}>{meta.emoji}</span>
-                  <span class="recent-site">{meta.label}</span>
-                  <span class="recent-dot" aria-hidden="true">·</span>
-                  <span class="recent-date">{r.date}</span>
-                  {r.conference && (
-                    <span class="recent-conf">{r.conference.name}</span>
-                  )}
-                </div>
-                <div class="recent-name">{r.study.name}</div>
-                <div class="recent-tldr" set:html={linkifyCitations(teaser)} />
-              </a>
-              {shareUrl && (
-                <Fragment>
-                  <button
-                    type="button"
-                    class="recent-share"
-                    data-share-url={shareUrl}
-                    data-share-title={r.study.name}
-                    aria-label={`Share link to ${r.study.name}`}
-                    title="Share"
-                  ><svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
-                  <span class="sr-share-status" aria-live="polite"></span>
-                  <input
-                    type="text"
-                    class="share-recovery"
-                    readonly
-                    tabindex={-1}
-                    aria-label="Copy this URL manually"
-                  />
-                </Fragment>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </section>
+    <RecentFeed
+      items={feed.slice(0, HOME_FEED_LIMIT)}
+      totalCount={feed.length}
+      allIds={feed.map((r) => `${r.date}#${r.slug}`)}
+      browseAll={feed.length > HOME_FEED_LIMIT
+        ? { href: '/studies/', label: `Browse all ${feed.length} studies` }
+        : null}
+    />
   )}
 
   {/* v0.10 home page tag surfaces. Both live BELOW the recent-studies feed
@@ -480,177 +395,6 @@ const tagChipRow = Array.from(tagSummaries.entries())
   .conf-chip:hover { border-color: var(--accent); }
   .conf-meta { color: var(--fg-muted); }
 
-  /* Recent N studies list. */
-  .recent-section { margin-top: 2.5rem; }
-  .recent-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
-  }
-  /* Each feed item is a <li class="recent-li"> so the absolutely-positioned
-     share button (sibling of the <a>) can use the li as its containing block.
-     Button-in-anchor would be invalid HTML, hence the sibling layout. */
-  .recent-li { position: relative; }
-  .recent-card {
-    display: block;
-    min-height: 44px;
-    /* Extra bottom padding so the TL;DR text doesn't run under the absolutely
-       positioned share button at bottom-right. */
-    padding: 0.9rem 1.05rem 2.2rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--fg);
-  }
-  /* Card border stays accent while cursor is anywhere over the li OR keyboard
-     focus lands on either the link or the share button — avoids the visual
-     "card disconnect" when the cursor moves from card body to the absolutely-
-     positioned share button (which is outside the <a>'s hover region). */
-  .recent-li:hover .recent-card,
-  .recent-card:focus-within { border-color: var(--accent); }
-  .recent-li:focus-within .recent-card { border-color: var(--accent); }
-  .recent-meta {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    font-family: var(--font-sans);
-    font-size: 0.76rem;
-    color: var(--fg-muted);
-    margin-bottom: 0.25rem;
-  }
-  .recent-emoji { font-size: 0.95rem; }
-  .recent-site { font-weight: 600; color: var(--fg); }
-  .recent-dot { opacity: 0.55; }
-  .recent-conf {
-    margin-left: auto;
-    padding: 0.05rem 0.45rem;
-    background: var(--accent-bg);
-    color: var(--accent);
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 600;
-  }
-  .recent-name {
-    font-weight: 600;
-    font-size: 1.02rem;
-    line-height: 1.35;
-    color: var(--fg);
-    margin-bottom: 0.2rem;
-  }
-  .recent-tldr {
-    color: var(--fg-muted);
-    font-size: 0.93rem;
-    line-height: 1.45;
-  }
-
-  /* T1-A: practice-changing feed flag (🚀). Sits at the head of the meta row,
-     a touch larger than the site emoji so the rare flag reads as the row's
-     priority signal. Only renders for practice-changing studies. */
-  .verdict-flag { font-size: 1.0rem; line-height: 1; }
-
-  /* T2: "new since last visit". The pill ships in markup hidden by default and
-     is revealed by the .is-new class the client script adds to the <li> — never
-     via inline display (the empty-inline-reveal footgun bit this codebase
-     twice). Text pill at .section-label typography, NEUTRAL color, so it can't
-     collide with the emoji vocabulary or imply a verdict. */
-  .recent-new-pill {
-    display: none;
-    font-family: var(--font-sans);
-    font-size: 0.6rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--fg-muted);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 0.04rem 0.32rem;
-    line-height: 1.5;
-    align-self: center;
-  }
-  .recent-li.is-new .recent-new-pill { display: inline-block; }
-
-  /* "N new overall" total beside the Studies heading. Hidden until the script
-     fills it and adds .is-shown (same class-toggle reveal, no inline display). */
-  .recent-new-total {
-    display: none;
-    margin-left: 0.45rem;
-    font-weight: 400;
-    color: var(--fg-muted);
-    text-transform: none;
-    letter-spacing: 0;
-  }
-  .recent-new-total.is-shown { display: inline; }
-
-  /* Visually-hidden label so the bare 🚀 flag is announced ("Practice-changing")
-     to screen readers instead of an emoji name. Same clip pattern as
-     .sr-share-status. */
-  .sr-only {
-    position: absolute;
-    width: 1px; height: 1px;
-    margin: -1px; padding: 0; overflow: hidden;
-    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-  }
-
-  /* Share affordance: absolute bottom-right overlay, sibling of the link
-     (button-in-anchor is invalid HTML). Hidden until share-script.ts confirms
-     navigator.share or navigator.clipboard is available. .is-flipped is added
-     during the Copied / Couldn't copy window for the accent-color flash. */
-  .recent-share {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    bottom: 0.5rem;
-    right: 0.6rem;
-    z-index: 2;
-    background: none;
-    border: none;
-    padding: 0.5rem;
-    color: var(--fg-muted);
-    cursor: pointer;
-    min-width: 44px;
-    min-height: 44px;
-  }
-  .recent-share:hover { color: var(--accent); }
-  .recent-share.is-flipped { color: var(--accent); }
-  .recent-share .share-icon { display: block; }
-
-  /* Screen-reader-only live region for state announcements. Visible label
-     change is the sighted user's signal; this announces the same text to
-     screen readers because mutating button textContent doesn't fire reliably
-     across NVDA / JAWS / VoiceOver. */
-  .sr-share-status {
-    position: absolute;
-    width: 1px; height: 1px;
-    margin: -1px; padding: 0; overflow: hidden;
-    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-  }
-
-  /* Inline URL recovery: appears above the share button (rare path — when
-     clipboard.writeText rejects). Pre-selected for Cmd+A/Cmd+C. Auto-hides
-     after 10s. */
-  .share-recovery {
-    display: none;
-    position: absolute;
-    bottom: calc(0.5rem + 44px + 0.3rem);
-    right: 0.6rem;
-    z-index: 3;
-    padding: 0.3rem 0.45rem;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.75rem;
-    color: var(--fg);
-    background: var(--bg-card);
-    border: 1px solid var(--accent);
-    border-radius: 3px;
-    max-width: calc(100% - 1.2rem);
-    width: 18rem;
-  }
-
   /* ── v0.10 30-day tag activity histogram. Tufte-restrained one-off:
        inline sparkline (Sparkline.astro) + count + trend arrow per row.
        Five rows max (top-N by recency-weighted count). Lives just above the
@@ -743,18 +487,3 @@ const tagChipRow = Array.from(tagSummaries.entries())
     user-select: none;
   }
 </style>
-<script>
-  // Wire the share buttons + the "new since last visit" marker on this page.
-  // Astro hoists + dedupes identical inline scripts across pages.
-  import { initShareButtons } from '../lib/share-script.ts';
-  import { initWhatsNew } from '../lib/whats-new.ts';
-  function init() {
-    initShareButtons();
-    initWhatsNew();
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-</script>

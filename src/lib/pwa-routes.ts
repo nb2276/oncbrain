@@ -6,6 +6,8 @@
 //   /                     home        -> StaleWhileRevalidate (changes daily)
 //   /search-index.json    search idx  -> StaleWhileRevalidate (changes daily)
 //   /about/, /sites/      shell       -> precache (cache-first, revisioned)
+//   /studies/             ARCHIVE     -> NetworkFirst (v0.14 T3 full index;
+//                                       grows with the corpus, ?tag= variants)
 //   /sites/breast/        ARCHIVE     -> NetworkFirst (grows one per site)
 //   /2026-05-17/          ARCHIVE     -> NetworkFirst (grows one per day)
 //   /conferences/asco/    ARCHIVE     -> NetworkFirst
@@ -17,6 +19,7 @@
 // offline footprint without limit, so it is runtime-cached on visit instead.
 
 const DATED = /^\/\d{4}-\d{2}-\d{2}\/?$/;
+const STUDIES = /^\/studies\/?$/;
 const SITE_DETAIL = /^\/sites\/[^/]+\/?$/;
 const CONFERENCE_DETAIL = /^\/conferences\/[^/]+\/?$/;
 // v0.10: tag landing pages (/tags/<slug>/) AND intersection pages
@@ -33,10 +36,11 @@ const CONFERENCE_DETAIL = /^\/conferences\/[^/]+\/?$/;
 const SLUG_PART = '[a-z0-9]+(?:-[a-z0-9]+)*';
 const TAG_DETAIL = new RegExp(`^/tags/${SLUG_PART}(?:\\+${SLUG_PART}){0,2}/?$`);
 
-/** True for the unbounded archive pages (dated digests + per-site + per-conference + per-tag). */
+/** True for the unbounded archive pages (the /studies full index + dated digests + per-site + per-conference + per-tag). */
 export function isArchivePage(pathname: string): boolean {
   return (
     DATED.test(pathname) ||
+    STUDIES.test(pathname) ||
     SITE_DETAIL.test(pathname) ||
     CONFERENCE_DETAIL.test(pathname) ||
     TAG_DETAIL.test(pathname)

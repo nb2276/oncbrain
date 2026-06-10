@@ -108,6 +108,7 @@ export default defineConfig({
         // the per-item archive pages are dropped.
         globIgnores: [
           'index.html', // home -> StaleWhileRevalidate (changes daily)
+          'studies/index.html', // v0.14 T3 full index -> NetworkFirst (grows with corpus)
           '2[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/index.html', // dated digests -> NetworkFirst
           'sites/*/index.html', // per-site detail -> NetworkFirst (keeps sites/index.html)
           'conferences/*/index.html', // per-conference -> NetworkFirst (keeps conferences index)

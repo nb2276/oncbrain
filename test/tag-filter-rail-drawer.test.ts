@@ -18,8 +18,11 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+// v0.14 T3: the home page (dist/index.html) is now a what's-new SLICE and no
+// longer hosts the filter rail; the full filterable index moved to /studies,
+// which is where the rail lives now. Site / date / tag pages keep the rail.
 const PAGES_WITH_RAIL = [
-  'dist/index.html',
+  'dist/studies/index.html',
   'dist/sites/breast/index.html',
   'dist/2026-05-29/index.html',
   'dist/tags/radiation/index.html',
@@ -108,15 +111,17 @@ describe('PR-3 SSR data-active for URL-filtered initial loads', () => {
     );
   });
 
-  it('non-tag pages (e.g. home) emit the trigger WITHOUT data-active by default', () => {
-    const home = resolve(root, 'dist/index.html');
-    if (!existsSync(home)) {
-      expect(existsSync(home)).toBe(true);
+  it('non-tag pages (e.g. /studies) emit the trigger WITHOUT data-active by default', () => {
+    // v0.14 T3: /studies is the full-index page that hosts the rail (home is
+    // now a slice with no rail).
+    const studies = resolve(root, 'dist/studies/index.html');
+    if (!existsSync(studies)) {
+      expect(existsSync(studies)).toBe(true);
       return;
     }
-    const html = readFileSync(home, 'utf-8');
+    const html = readFileSync(studies, 'utf-8');
     // Trigger exists but has no data-active attribute (filter state
-    // is empty by default on home).
+    // is empty by default on a non-tag page).
     const triggerMatch = html.match(/<button[^>]*data-filter-rail-trigger[^>]*>/);
     expect(triggerMatch).not.toBeNull();
     expect(triggerMatch![0]).not.toMatch(/data-active/);
