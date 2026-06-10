@@ -32,6 +32,57 @@ const DOI_URL_RE = /https?:\/\/(?:dx\.)?doi\.org\/(10\.\d{4,9}\/[-._;()/:a-z0-9]
 // non-paper hosts to avoid ingesting tweets-of-tweets etc.
 const JOURNAL_HOST_RE = /https?:\/\/(?:www\.)?(?:thelancet|nejm|jamanetwork|annals|nature|sciencedirect|springer|wiley|onlinelibrary\.wiley|academic\.oup|ascopubs|aacrjournals|bmj|cell|medrxiv|biorxiv|researchsquare|tandfonline|karger|frontiersin|mdpi|journals\.lww|ahajournals|atsjournals|ersjournals|jto|redjournal|practicalradonc)\.(?:org|com|net)\b[^\s]*/i;
 
+// Oncology trade-press outlets (news coverage of meetings/papers, not primary
+// literature). These pages carry NO Highwire citation meta, so enrichment saves
+// them as content-hash-keyed articles with the article text as the analyzable
+// excerpt (see resolveTradeArticle). SINGLE SOURCE OF TRUTH: the host pattern,
+// the display name, and the curator-facing supported-outlets list all derive
+// from this table — add an outlet here and nowhere else. dailynews.ascopubs.org
+// (ASCO Daily News) lives here, not in JOURNAL_HOST_RE: its subdomain doesn't
+// match the (?:www\.)? prefix and its articles are trade coverage, not abstracts.
+const TRADE_PRESS_OUTLETS: Array<{ host: string; label: string }> = [
+  { host: 'ascopost.com', label: 'The ASCO Post' },
+  { host: 'urotoday.com', label: 'UroToday' },
+  { host: 'onclive.com', label: 'OncLive' },
+  { host: 'targetedonc.com', label: 'Targeted Oncology' },
+  { host: 'cancernetwork.com', label: 'Cancer Network' },
+  { host: 'healio.com', label: 'Healio' },
+  { host: 'medpagetoday.com', label: 'MedPage Today' },
+  { host: 'oncodaily.com', label: 'OncoDaily' },
+  { host: 'dailynews.ascopubs.org', label: 'ASCO Daily News' },
+];
+
+// Match on the PARSED hostname (exact, after dropping a leading www.), never a
+// substring/regex against the raw URL — `https://ascopost.com.evil.test/x` must
+// NOT count as The ASCO Post. Returns the outlet entry or null.
+function tradeOutletFor(url: string): { host: string; label: string } | null {
+  let hostname: string;
+  try {
+    hostname = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+  } catch {
+    return null; // not a parseable absolute URL
+  }
+  return TRADE_PRESS_OUTLETS.find((o) => o.host === hostname) ?? null;
+}
+
+// True when the URL points at a known oncology trade-press site.
+export function isTradePressUrl(url: string): boolean {
+  return tradeOutletFor(url) !== null;
+}
+
+// Outlet display name for a trade-press URL, for the papers.journal field —
+// most of these sites omit og:site_name (ASCO Post does), so the host is the
+// only reliable source of the outlet name. Returns null for non-trade URLs.
+export function tradePressLabel(url: string): string | null {
+  return tradeOutletFor(url)?.label ?? null;
+}
+
+// The curator-facing list of supported trade outlets, for the bot's
+// unrecognized-source reply. Derived from the table so it can't drift.
+export function tradePressOutletNames(): string[] {
+  return TRADE_PRESS_OUTLETS.map((o) => o.label);
+}
+
 // Hosts we explicitly do NOT treat as papers (handled elsewhere or noise).
 const NON_PAPER_HOST_RE = /https?:\/\/(?:www\.)?(?:twitter|x|t\.co|youtube|youtu\.be|google|bit\.ly)\.[a-z]+/i;
 
@@ -67,6 +118,42 @@ export function classifyPaperTarget(raw: string): PaperTargetKind | null {
   return null;
 }
 
+// The URL with its query string and fragment removed — the path-bearing prefix.
+// Shared by the DOI-in-path scanners and the trade-press dedup key so they
+// canonicalize identically.
+export function urlPathOnly(url: string): string {
+  return url.split(/[?#]/)[0] ?? url;
+}
+
+// Tracking/share query params that don't identify the article — stripped so a
+// re-send with different campaign tags dedups. Anything else (e.g. a WordPress
+// `?p=123` post id) is KEPT, since dropping all query params would merge
+// distinct query-addressed articles onto one content-hash.
+const TRACKING_PARAM_RE = /^(?:utm_|fbclid$|gclid$|mc_(?:cid|eid)$|igshid$|_hs(?:enc|mi)$|ref(?:_src)?$)/i;
+
+// Canonical form of a trade-press article URL, used as the content-hash dedup
+// key so the SAME article re-sent in a surface variant collapses to one row.
+// Normalizes the parts a re-send commonly varies: scheme → https, host
+// lowercased with a leading www. dropped, a single trailing slash stripped,
+// tracking query params removed (identity params kept, sorted for stability),
+// fragment removed. Path CASE is preserved (some CMSes are case-sensitive, and
+// same-slug-different-case collisions are vanishingly rare). Falls back to a
+// bare query/fragment strip on a URL the WHATWG parser rejects.
+export function canonicalizeTradeUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.toLowerCase().replace(/^www\./, '');
+    const path = u.pathname.replace(/\/+$/, ''); // drop trailing slash(es)
+    const kept = [...u.searchParams.entries()]
+      .filter(([k]) => !TRACKING_PARAM_RE.test(k))
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+    const qs = kept.length ? '?' + kept.map(([k, v]) => `${k}=${v}`).join('&') : '';
+    return `https://${host}${path}${qs}`;
+  } catch {
+    return urlPathOnly(url).replace(/\/+$/, '');
+  }
+}
+
 // Pull a DOI that is embedded in a publisher article URL path so it can be
 // resolved via Crossref WITHOUT fetching the page (dodging publisher bot-blocks
 // and rate limits). Covers the common `/doi/10.x`, `/doi/full/10.x`, and
@@ -77,7 +164,7 @@ export function classifyPaperTarget(raw: string): PaperTargetKind | null {
 // PII-only URLs (Elsevier/ScienceDirect, Lancet, Cell) carry NO DOI in the path
 // and are intentionally not matched here — they need the PDF or a pasted DOI.
 export function firstDoiInUrl(url: string): string | null {
-  let path = url.split(/[?#]/)[0] ?? url;
+  let path = urlPathOnly(url);
   // Decode %2F-encoded DOI paths (e.g. /doi/10.1002%2Fcncr.34567). Keep the raw
   // path if the encoding is malformed (decodeURIComponent throws on a bad %).
   try {
@@ -109,8 +196,13 @@ export function extractPaperUrls(
       // Skip what the existing PMID extractor already handles.
       if (new RegExp(PUBMED_URL_RE.source, 'i').test(url)) continue;
       if (NON_PAPER_HOST_RE.test(url)) continue;
-      // Accept DOI URLs, PMC URLs, and known journal hosts.
-      if (DOI_URL_RE.test(url) || PMC_URL_RE.test(url) || JOURNAL_HOST_RE.test(url)) {
+      // Accept DOI URLs, PMC URLs, known journal hosts, and trade-press hosts.
+      if (
+        DOI_URL_RE.test(url) ||
+        PMC_URL_RE.test(url) ||
+        JOURNAL_HOST_RE.test(url) ||
+        isTradePressUrl(url)
+      ) {
         found.add(url);
       }
     }
