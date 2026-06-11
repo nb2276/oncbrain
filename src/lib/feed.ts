@@ -43,8 +43,15 @@ function toRfc822(dateIso: string): string {
 function studyDescription(s: RecentStudy): string {
   const parts: string[] = [];
   const verdict = s.study.verdict;
+  // v0.14.5 (E5): carry the preprint caveat into the RSS body so off-site
+  // subscribers see "not peer-reviewed" too, not just the (capped) verdict.
   if (verdict) {
-    parts.push(`[${VERDICT_LABEL[verdict.soc_implication]}]`);
+    const tag = s.study.is_preprint
+      ? `${VERDICT_LABEL[verdict.soc_implication]} · PREPRINT, not peer-reviewed`
+      : VERDICT_LABEL[verdict.soc_implication];
+    parts.push(`[${tag}]`);
+  } else if (s.study.is_preprint) {
+    parts.push('[PREPRINT, not peer-reviewed]');
   }
   parts.push(s.study.tldr);
   if (verdict?.audience) parts.push(`Eligible: ${verdict.audience}`);

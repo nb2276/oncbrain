@@ -187,6 +187,11 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
       <a class="citation study-nct" href={`https://clinicaltrials.gov/study/${study.nct}`} target="_blank" rel="noopener">{study.nct}</a>
     )}
   </h4>
+  {study.is_preprint && (
+    <p class="preprint-badge" role="note" title="Preprint server (medRxiv / bioRxiv / Research Square). Findings are not yet peer-reviewed; the verdict is capped at early-signal.">
+      <span class="preprint-badge-tag">PREPRINT</span><span class="preprint-badge-text">not peer-reviewed</span>
+    </p>
+  )}
   {hasAudience && (
     <p class="study-audience study-audience-head"><span class="audience-label">For</span>{study.verdict!.audience}</p>
   )}
@@ -700,6 +705,30 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     font-size: 0.68rem;
     color: var(--fg-muted);
     margin-right: 0.5rem;
+  }
+
+  /* v0.14.5 (E5): preprint caution flag. Caveats-amber so it reads as "treat
+     with care" without being alarmist; sits under the name, above the verdict. */
+  .preprint-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.3rem 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+  .preprint-badge-tag {
+    padding: 0.12rem 0.45rem;
+    background: #8a3a1a;
+    color: #fff;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .preprint-badge-text {
+    color: #8a3a1a;
+    font-weight: 600;
   }
 
   /* SOC-implication verdict block — the 5-second triage signal. */

@@ -54,6 +54,10 @@ export type DigestStudy = {
   // v0.7+ analyst verdict (see VOICE.md "SOC-implication verdict").
   // Optional — older artifacts won't have it.
   verdict?: StudyVerdict;
+  // v0.14.5 (E5): true when any source is a preprint. Drives the "not
+  // peer-reviewed" badge; the verdict was already capped at build. Absent on
+  // older artifacts and on non-preprint studies.
+  is_preprint?: boolean;
   // v0.8.1: per-study open questions (Phase 2). Older artifacts carry these at
   // the site level (DigestSite.open_questions); renderers fall back to that.
   open_questions?: string[] | null;
