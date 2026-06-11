@@ -17,8 +17,12 @@ import {
   markInboxEnriched,
   markInboxFailed,
   markInboxFailedPermanent,
+  setBookmarkConferenceIfEmpty,
+  getConference,
+  upsertConference,
   type InboxItem,
 } from './db.ts';
+import { detectConferenceFromTexts } from './conference-detect.ts';
 import { fetchTweet, TweetFetchError } from './twitter-fetch.ts';
 import { extractCuratorNote, sendMessage } from './telegram-ingest.ts';
 import { fetchPubMedPaper, PubMedClientError } from './pubmed-client.ts';
@@ -68,6 +72,36 @@ export type EnrichmentResult =
   | { status: 'enriched'; enrichedRowId: number; bookmarkCreated: boolean }
   | { status: 'failed'; reason: string; permanent?: boolean }
   | { status: 'deferred'; reason: string };
+
+// Detect a major oncology meeting from a source's text/URLs and, on a hit,
+// ensure the conferences row exists (insert-if-absent — never overwrite a row
+// the curator created with real dates via the admin form) and return its slug to
+// stamp on the enriched bookmark/paper/slide. Returns null when nothing matches.
+// Shared by all four enrichment paths; conference tagging is best-effort and
+// must never throw out of enrichment.
+export function detectAndEnsureConference(
+  db: Database.Database,
+  texts: Array<string | null | undefined>,
+  bookmarkDate: string,
+): string | null {
+  try {
+    const defaultYear = Number(bookmarkDate.slice(0, 4)) || undefined;
+    const hit = detectConferenceFromTexts(texts, { defaultYear });
+    if (!hit) return null;
+    if (!getConference(db, hit.slug)) {
+      upsertConference(db, {
+        slug: hit.slug,
+        name: hit.name,
+        start_date: null,
+        end_date: null,
+        hashtag: hit.hashtag,
+      });
+    }
+    return hit.slug;
+  } catch {
+    return null; // tagging is a courtesy; never fail enrichment over it
+  }
+}
 
 export async function enrichInboxItem(
   db: Database.Database,
@@ -152,6 +186,14 @@ async function enrichSlideItem(
     }
   }
 
+  // A conference slide's footer ("2026 ASCO Annual Meeting") often survives OCR,
+  // and the curator's caption may carry the hashtag — tag the upload from both.
+  const conferenceSlug = detectAndEnsureConference(
+    db,
+    [note, ocrResult?.entry.text],
+    item.bookmark_date,
+  );
+
   try {
     const r = saveSlideUpload(db, {
       file_path: saved.relPath,
@@ -162,6 +204,7 @@ async function enrichSlideItem(
       ocr_text: ocrResult?.entry.text ?? null,
       ocr_version: ocrResult?.entry.version ?? null,
       bookmark_date: item.bookmark_date,
+      conference_slug: conferenceSlug,
       curator_note: note,
       source_batch_key: null, // batched in pull-telegram; this column is set there
       inbox_item_id: item.id,
@@ -237,6 +280,16 @@ async function enrichPaperItem(
       fulltext_excerpt_md: oa.fulltext ? oa.fulltext.slice(0, MAX_FULLTEXT_CHARS) : saveInput.fulltext_excerpt_md,
     };
   }
+
+  // Tag the paper if its source URL is a meeting abstract host, or the curator's
+  // message / the title carries a meeting hashtag or name.
+  saveInput.conference_slug =
+    saveInput.conference_slug ??
+    detectAndEnsureConference(
+      db,
+      [item.raw_target, item.raw_message_text, saveInput.source_url, saveInput.title],
+      item.bookmark_date,
+    );
 
   try {
     const r = savePaper(db, saveInput);
@@ -384,6 +437,14 @@ async function enrichPdfPaper(
     return { status: 'failed', reason: `pdf filing failed: ${(err as Error).message}` };
   }
 
+  // Tag from the curator's message + the title/journal — NOT the full body, whose
+  // intro can cite an unrelated meeting/year and mis-tag the paper.
+  const conferenceSlug = detectAndEnsureConference(
+    db,
+    [item.raw_message_text, meta.title, meta.journal],
+    item.bookmark_date,
+  );
+
   // 6. Save the paper (content_hash keys identifier-less PDFs; merges onto an
   // existing DOI/PMID row when the same paper arrived earlier via URL).
   try {
@@ -399,6 +460,7 @@ async function enrichPdfPaper(
       abstract: meta.abstract,
       fulltext_excerpt_md: extracted.text.slice(0, MAX_FULLTEXT_CHARS),
       bookmark_date: item.bookmark_date,
+      conference_slug: conferenceSlug,
       curator_note: note,
       inbox_item_id: item.id,
       fetched_via: extracted.via === 'ocr' ? 'pdf_ocr' : 'pdf',
@@ -786,12 +848,18 @@ async function enrichTweetItem(
   // fails, the bookmark stays in 'pending' and the next build:day's
   // ensureTweetData() will retry from there. We don't have to drive that
   // here — same as the v0.4 flow.
+  // The tweet text (which carries the meeting hashtag) isn't available until the
+  // oEmbed fetch below, so seed the tag from the curator's message now and refine
+  // it post-fetch. A tweet URL itself (x.com/…) carries no meeting signal.
+  const msgConference = detectAndEnsureConference(db, [item.raw_message_text], item.bookmark_date);
+
   let bookmarkId: number;
   let bookmarkCreated: boolean;
   try {
     const r = saveBookmark(db, {
       url,
       bookmark_date: item.bookmark_date,
+      conference_slug: msgConference,
       notes: note,
       fetched_via: 'pending',
     });
@@ -815,6 +883,10 @@ async function enrichTweetItem(
       tweet_html: tweet.html,
       image_urls: tweet.image_urls,
     });
+    // The fetched tweet text is the strongest conference signal (#ASCO26). Stamp
+    // it only if the curator's message didn't already tag the bookmark.
+    const tweetConference = detectAndEnsureConference(db, [tweet.text], item.bookmark_date);
+    if (tweetConference) setBookmarkConferenceIfEmpty(db, bookmarkId, tweetConference);
   } catch (err) {
     if (err instanceof TweetFetchError) {
       // Soft failure: bookmark stays 'pending'. Caller marks inbox enriched

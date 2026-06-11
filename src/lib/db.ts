@@ -665,6 +665,22 @@ export function updateBookmarkOcrTexts(
   );
 }
 
+// Stamp a bookmark's conference_slug ONLY when it's currently null. Used by the
+// tweet enrichment path, which reserves the bookmark before the oEmbed fetch and
+// then tags it from the fetched tweet text — without clobbering a slug the admin
+// form (or an earlier curator-message hashtag) already set. Returns true if a
+// row was updated.
+export function setBookmarkConferenceIfEmpty(
+  db: Database.Database,
+  id: number,
+  conferenceSlug: string,
+): boolean {
+  const result = db
+    .prepare('UPDATE bookmarks SET conference_slug = ? WHERE id = ? AND conference_slug IS NULL')
+    .run(conferenceSlug, id);
+  return result.changes > 0;
+}
+
 export function upsertConference(db: Database.Database, c: Conference): void {
   db.prepare(`
     INSERT INTO conferences (slug, name, start_date, end_date, hashtag)
