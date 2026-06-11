@@ -2,6 +2,21 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.5] - 2026-06-10
+
+### Added
+
+- **Preprint detection + "not peer-reviewed" badge + verdict cap (E5).** A study
+  sourced from a preprint server (medRxiv, bioRxiv, Research Square — by DOI
+  registrant prefix `10.1101`/`10.21203`, host, or source name) now carries a
+  "PREPRINT · not peer-reviewed" badge, and its standard-of-care verdict is capped
+  at `early-signal` (practice-changing / challenges-soc / confirmatory all
+  downgrade), with the rationale rewritten so it can't argue past the cap. The cap
+  is **deterministic at build** (not prompt-dependent) and re-asserts after curator
+  overrides, so a not-yet-peer-reviewed result can never present as confident
+  standard-of-care. The caveat also rides along in the RSS feed. Closes a
+  clinical-safety gap opened when v0.8 made preprint ingestion first-class.
+
 ## [0.14.4] - 2026-06-10
 
 ### Changed

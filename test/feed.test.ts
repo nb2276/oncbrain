@@ -57,6 +57,18 @@ describe('studiesToRss', () => {
     expect(xml).toContain('Eligible: mCRPC, post-ARPI');
   });
 
+  it('carries the preprint caveat in the description (E5)', () => {
+    const pre = study({
+      study: {
+        ...study().study,
+        is_preprint: true,
+        verdict: { soc_implication: 'early-signal', rationale: 'preprint', audience: null },
+      },
+    });
+    const xml = studiesToRss([pre], 'https://x.example.com');
+    expect(xml).toContain('Early signal · PREPRINT, not peer-reviewed');
+  });
+
   it('escapes special characters in study names', () => {
     const xml = studiesToRss(
       [study({ study: { ...study().study, name: 'A & B <trial>' } })],

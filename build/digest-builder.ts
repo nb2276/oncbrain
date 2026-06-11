@@ -47,6 +47,7 @@ import {
 } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
+import { clampPreprintVerdict } from '../src/lib/preprint.ts';
 import {
   listDigestsStrict,
   assertSlugUniqueness,
@@ -544,6 +545,16 @@ export async function buildOneDate(
     const applied = applyOverrides(digest, overrides, { digestDate: date });
     digest = applied.digest;
     console.log(`  applied overrides: ${formatOverrideSummary(applied.summary)}`);
+  }
+
+  // v0.14.5 (E5): re-assert the preprint verdict cap AFTER overrides. A curator
+  // verdict edit runs after the Phase-2 clamp and could otherwise restore an
+  // over-confident verdict on a flagged preprint — the clinical-safety floor
+  // must hold regardless of override. Idempotent on already-capped verdicts.
+  for (const site of digest.sites) {
+    for (const study of site.studies) {
+      if (study.is_preprint) study.verdict = clampPreprintVerdict(study.verdict) ?? undefined;
+    }
   }
 
   const artifact = buildArtifact(date, confMeta, bookmarks, papersForDate, slidesForDate, digest);

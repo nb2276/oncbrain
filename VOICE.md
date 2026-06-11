@@ -207,6 +207,13 @@ data, or how clean the design otherwise looks:
    analyses) are `methodologically-limited`,** regardless of the
    parent trial's strength. The post-hoc design dominates the read
    even if the parent trial was definitive.
+4. **Preprints cap at `early-signal`.** A study sourced from a
+   preprint server (medRxiv, bioRxiv, Research Square) is not yet
+   peer-reviewed, so it cannot earn `confirmatory`, `challenges-soc`,
+   or `practice-changing` no matter how strong the design reads. This
+   cap is ALSO enforced deterministically at build (`lib/preprint.ts`
+   downgrades the verdict and flags the card), so it holds even if a
+   verdict slips through here.
 
 When in real doubt: prefer `unclear` over a wrong guess.
 

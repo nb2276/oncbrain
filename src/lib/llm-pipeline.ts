@@ -49,6 +49,7 @@ import {
 import { loadStudyContext, isSafeSlug } from './study-retrieval.ts';
 import { isOcrAvailable, isSafeImageUrl } from './vision-ocr.ts';
 import { buildAssociationGraph, renderGroupsForPrompt } from './source-association.ts';
+import { isPreprintSource, clampPreprintVerdict } from './preprint.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -230,6 +231,11 @@ export type DigestStudy = {
   // section for taxonomy and assignment rules. Older artifacts won't have
   // this; renderers should fall back to the bullet-only layout.
   verdict?: StudyVerdict;
+  // v0.14.5 (E5): set true when any source is a preprint (medRxiv / bioRxiv /
+  // Research Square, by DOI prefix or host). Drives the "not peer-reviewed"
+  // badge and a deterministic verdict cap at build (see lib/preprint.ts). Older
+  // artifacts won't have it; absent === not a preprint.
+  is_preprint?: boolean;
   // v0.8.1: unresolved questions this study raises, rendered as a separated
   // block under the study card. Phase 2 (study agent) owns these now; older
   // artifacts carry them at the site level (DigestSite.open_questions), which
@@ -501,6 +507,14 @@ export async function buildDigest(
   // converted to tweet-shape with synthetic ids that round-trip to typed
   // source refs on output.
   const tweets: DigestInputTweet[] = items.map(itemToTweetShape);
+  // v0.14.5 (E5): map each synthetic id back to its ORIGINAL typed item so a
+  // cluster's preprint sources can be detected at the verdict-clamp point
+  // (the tweet-shape conversion drops doi/journal). tweets[i] <-> items[i].
+  const itemById = new Map<number, DigestInputItem>();
+  tweets.forEach((t, i) => {
+    const original = items[i];
+    if (original) itemById.set(t.id, original);
+  });
   // Association hints from NCT + acronym matching across original items.
   // Passed to Phase 1 as a soft prompt addendum.
   const associationGroups = buildAssociationGraph(items);
@@ -596,10 +610,23 @@ export async function buildDigest(
           relatedPopulated += 1;
         }
       }
+      // v0.14.5 (E5): if any PAPER source in this cluster is a preprint, flag
+      // the study and deterministically cap an over-confident verdict (the clamp
+      // also rewrites the rationale so it can't argue past the capped verdict).
+      // Scope: paper sources only — medRxiv/bioRxiv/Research Square links enter
+      // as papers (paper-url.ts), carrying the 10.1101/10.21203 DOI. A tweet
+      // merely *mentioning* a preprint (no paper link) is NOT caught here; the
+      // VOICE.md preprint rule is the LLM-side guard for that case.
+      const isPreprint = cluster.tweet_ids.some((id) => {
+        const it = itemById.get(id);
+        return it?.source_type === 'paper' && isPreprintSource({ doi: it.doi, journal: it.journal });
+      });
       successful.push({
         cluster,
         study: {
           ...study,
+          verdict: isPreprint ? (clampPreprintVerdict(study.verdict) ?? undefined) : study.verdict,
+          is_preprint: isPreprint || undefined,
           related_trials: enriched.related_trials,
           related_trials_provenance: enriched.related_trials_provenance,
         },
