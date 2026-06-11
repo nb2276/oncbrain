@@ -2,6 +2,18 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.10] - 2026-06-11
+
+### Changed
+
+- **Conference badge now covers paper/slide-only days.** `dominantConferenceForDate`
+  previously keyed off tweet bookmarks only, so a conference day made entirely of
+  papers/PDFs/slides got tagged rows (from v0.14.9 auto-detect) but no badge and
+  no `/conferences/<slug>` page. It now unions bookmarks + papers + slides,
+  keeping the unanimous-single-slug semantics (returns null when the day's tagged
+  sources disagree; untagged sources are still ignored). Completes the v0.14.9
+  conference auto-detect feature for non-tweet sources.
+
 ## [0.14.9] - 2026-06-11
 
 ### Added
