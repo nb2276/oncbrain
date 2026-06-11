@@ -184,6 +184,34 @@ describe('db', () => {
       saveBookmark(db, { url: 'https://x.com/a/status/2', bookmark_date: '2026-05-18' });
       expect(dominantConferenceForDate(db, '2026-05-18')).toBeNull();
     });
+
+    it('returns the slug from a paper-only conference day (no tagged tweets)', () => {
+      savePaper(db, { doi: '10.1056/p1', title: 'A paper', bookmark_date: '2026-05-30', conference_slug: 'asco-2026' });
+      expect(dominantConferenceForDate(db, '2026-05-30')).toBe('asco-2026');
+    });
+
+    it('returns the slug from a slide-only conference day', () => {
+      saveSlideUpload(db, {
+        file_path: 'data/slide-photos/2026-05-30/x.jpg',
+        file_hash: 'beef01',
+        mime_type: 'image/jpeg',
+        bookmark_date: '2026-05-30',
+        conference_slug: 'esmo-2025',
+      });
+      expect(dominantConferenceForDate(db, '2026-05-30')).toBe('esmo-2025');
+    });
+
+    it('still resolves when an untagged tweet shares the day with a tagged paper', () => {
+      saveBookmark(db, { url: 'https://x.com/a/status/9', bookmark_date: '2026-05-30' });
+      savePaper(db, { doi: '10.1056/p2', title: 'B paper', bookmark_date: '2026-05-30', conference_slug: 'asco-2026' });
+      expect(dominantConferenceForDate(db, '2026-05-30')).toBe('asco-2026');
+    });
+
+    it('returns null when tagged sources span conferences across source types', () => {
+      saveBookmark(db, { url: 'https://x.com/a/status/1', bookmark_date: '2026-05-30', conference_slug: 'asco-2026' });
+      savePaper(db, { doi: '10.1056/p3', title: 'C paper', bookmark_date: '2026-05-30', conference_slug: 'esmo-2025' });
+      expect(dominantConferenceForDate(db, '2026-05-30')).toBeNull();
+    });
   });
 
   describe('deleteBookmark + updateBookmarkFetched', () => {

@@ -36,7 +36,6 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 ## v0.8 deferred (surfaced in CEO review; not in PR1-3)
 
 - **Email-forwarding from PubMed alerts.** Curator forwards alert emails; bot polls via Gmail OAuth, extracts paper URLs, runs them through v0.8 ingestion. The "curator does nothing" version. (XL, P3 — `docs/plans/v0.8-non-pmid-sources.md`)
-- **Conference badge for paper/slide-only days.** Conference auto-detect (v0.14.9) now stamps `conference_slug` on all four source types, but the day's badge + `/conferences/<slug>` pages still derive from `dominantConferenceForDate`, which queries **bookmarks (tweets) only**. A conference day made entirely of papers/PDFs/slides gets tagged rows in the DB but no badge and no conference page. Extend `dominantConferenceForDate` (src/lib/db.ts:605) to union papers + slides (keeping the "unanimous single slug" semantics). (follow-up from v0.14.9 conference auto-detect review)
 - **Per-source rate-limit messaging.** Tell the curator via Telegram when an ingest is stuck on an upstream rate limit (NCBI, Crossref). (S, P3)
 - **Multi-curator mode.** Reserve `curator_id` on bookmarks/papers so multiple curators can DM the same bot and aggregate. (M, P3)
 - **CORS on the JSON API.** `/api/v1/*` + `/feed.xml` send no `Access-Control-Allow-Origin`. Server-side fetches + feed readers work; browser cross-origin `fetch()` is blocked. Add a DO header rule if a browser app needs it. (v0.8 PR3)
@@ -51,6 +50,10 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 - **OCR is macOS-only.** Linux/CI builds produce uniformly null captions; scanned-PDF OCR (v0.8 PR2) needs the Mac Vision binary + poppler.
 - **Figure caption validator checks numeric tokens only.** Can't catch mislabeled axes or wrong-arm attribution.
 - **Disease-site classification uses MeSH terms / keywords, not author affiliations.** Explicit product decision, not a deferred item.
+
+## Completed (v0.14.10, 2026-06-11)
+
+- **Conference badge for paper/slide-only days.** `dominantConferenceForDate` (src/lib/db.ts:605) now unions bookmarks + papers + slides (unanimous-single-slug semantics preserved), so a paper/PDF/slide-only conference day gets a badge + `/conferences/<slug>` page. Untagged sources still ignored. Tests in `test/db.test.ts`. **Completed:** v0.14.10 (2026-06-11). Completes the v0.14.9 conference auto-detect feature for non-tweet sources.
 
 ## Completed (v0.14.9, 2026-06-11)
 
