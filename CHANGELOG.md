@@ -2,6 +2,23 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.2] - 2026-06-10
+
+### Added
+
+- **Social-preview cards (Open Graph / Twitter).** Every page now carries an
+  `og:image` + `twitter:card` so a shared link renders a branded 1200×630
+  preview instead of a bare URL (previously there were no preview tags at all).
+  The cards are generated at build time (satori → SVG → resvg → PNG) and served
+  from `/og/*.png`: a branded default, a per-digest card (the day's curated
+  top-line + date), and a per-disease-site card. The card is synthesized **text
+  only** (Newsreader serif on warm `#f7f5f0`: wordmark, date · conference, the
+  headline, a study-count or verdict label, the curator handle), so it never
+  embeds a figure or slide pixel and stays inside the publish boundary by
+  construction (a structural test guards every `/og/` endpoint). Verdict colors
+  were lifted into a shared `VERDICT_COLOR` token. Fonts: vendored static
+  Newsreader instances (satori can't read the variable woff2 the site ships).
+
 ## [0.14.1] - 2026-06-10
 
 ### Changed
