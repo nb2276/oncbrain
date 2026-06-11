@@ -2,6 +2,18 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.7] - 2026-06-11
+
+### Fixed
+
+- **HEIC / image-as-document slides no longer fall through.** iOS Photos
+  sometimes sends a slide photo as a HEIC document attachment rather than a
+  compressed photo; the ingestion only recognized `photo[]` (slides) and PDFs
+  (papers), so the image was silently dropped. A new `extractImageDocument`
+  detects an image sent as a document (by MIME or extension: heic/heif/jpg/png/
+  webp/gif/tiff/bmp) and routes it to the slide path. A document carries no
+  dimensions, so width/height store null (the slide path already tolerates it).
+
 ## [0.14.6] - 2026-06-10
 
 Bundles three independent improvements merged together (#39, #40, #41).
