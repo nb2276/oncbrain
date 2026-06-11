@@ -101,3 +101,41 @@ describe('PDF publish boundary — /tags/ surfaces (v0.10)', () => {
     }
   });
 });
+
+// v0.14 T4 — the OG share-image generator. The card is synthesized TEXT only
+// (wordmark, date, top-line, verdict label, handle). It must NEVER reach for a
+// study's figure or slide pixels, or a copyrighted/curator-private image could
+// be baked into a publicly-served PNG. Structural lock on the generator source.
+describe('OG share image publish boundary (v0.14 T4)', () => {
+  const root = resolve(process.cwd());
+
+  it('share-image.ts never references a figure / slide / image source', () => {
+    const src = readFileSync(resolve(root, 'src/lib/share-image.ts'), 'utf-8');
+    // No CODE reference to a figure/slide source (bare words in a comment are
+    // fine; these are the real code-shaped accessors + image hosts).
+    expect(src).not.toMatch(/studyFigures|\.figures\b|\/slides\/|slide-photos|slide_uploads|pbs\.twimg/i);
+    // The only file it reads is the vendored Newsreader font; it reads no image.
+    expect(src).toMatch(/og-fonts/);
+    expect(src).not.toMatch(/\.(png|jpg|jpeg|webp|svg)['"]/i);
+  });
+
+  it('EVERY /og/ endpoint passes only text fields to the renderer', () => {
+    // Glob, not a hardcoded list: a future OG endpoint (e.g. a per-study card)
+    // that fed a figure URL into the card must be auto-covered by this guard.
+    const { readdirSync, statSync } = require('node:fs') as typeof import('node:fs');
+    const ogDir = resolve(root, 'src/pages/og');
+    function* walk(dir: string): IterableIterator<string> {
+      for (const name of readdirSync(dir)) {
+        const full = resolve(dir, name);
+        if (statSync(full).isDirectory()) yield* walk(full);
+        else if (name.endsWith('.png.ts')) yield full;
+      }
+    }
+    const endpoints = [...walk(ogDir)];
+    expect(endpoints.length).toBeGreaterThanOrEqual(3); // default + date + site
+    for (const ep of endpoints) {
+      const src = readFileSync(ep, 'utf-8');
+      expect(src, `${ep}: references a figure/slide source`).not.toMatch(/studyFigures|\.figures\b|\/slides\/|slide-photos|pbs\.twimg/i);
+    }
+  });
+});

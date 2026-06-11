@@ -145,6 +145,7 @@ Twenty-two slugs, ordered roughly head-to-toe for solid tumors, then liquid tumo
 ## Embeds & third-party
 
 - **Twitter/X widget.** `platform.twitter.com/widgets.js` is loaded once in `Base.astro`. Source-card blockquotes become native X cards (images served from Twitter CDN — no IP cost to us). If the widget fails or the user is offline, the blockquote fallback is graceful.
+- **Social preview cards (v0.14 T4).** Every page carries `og:image` + `twitter:card` (summary_large_image) so a shared link renders a branded 1200×630 preview instead of a bare URL. The cards are generated at build time from `src/lib/share-image.ts` (satori → SVG → resvg → PNG) and served from `/og/*.png` (default, per-date, per-site). The card is **synthesized text only** (Newsreader serif on warm `#f7f5f0`: wordmark, date · conference, the curated top-line, a study-count or verdict label, and the curator handle) — never a figure or slide pixel, so it stays inside the publish boundary by construction. The verdict label, when present, uses the shared `VERDICT_COLOR` token (no emoji: satori would need a separate emoji font, and the colored text label reads cleaner). Font: vendored static Newsreader instances (`src/assets/og-fonts/`, OFL) because satori can't read the variable woff2 the site ships.
 - **Footer disclaimer.** Always present. Marks the site as AI-generated summary, not medical advice. Required for the audience and the legal posture.
 
 ## What to fix vs. leave alone
