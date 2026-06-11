@@ -2,6 +2,25 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.3] - 2026-06-10
+
+### Added
+
+- **Disease-site nav on `/studies`.** The disease-site chip row was extracted
+  into a shared `SiteNav` component and added to the full study index, which the
+  T3 home/browse split had left without that cross-corpus wayfinding axis. Home
+  and `/studies` now render the same nav from one source.
+- **In-app "Share image" button (T4 Option B).** The per-study share button now
+  posts the study's card *as an image* where the platform supports it: a tap
+  fetches a build-time 1200×630 PNG (trial name · site · date, the headline
+  number, the colored verdict label) and shares `{files, title, url}` via the
+  Web Share API (iOS-strong); anywhere that can't share files, it falls back to
+  the existing link share. One card per study at `/og/study/<date>/<slug>.png`,
+  synthesized text only (stays inside the publish boundary).
+- **Google Analytics.** Added the gtag.js tag (property `G-PP2FRCMYS1`, shared
+  with the related site oncologytoolkit.com), production-gated alongside the
+  existing Cloudflare Web Analytics beacon.
+
 ## [0.14.2] - 2026-06-10
 
 ### Added

@@ -13,6 +13,8 @@ import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { verdictMetaFor, verdictColorFor } from './verdict.ts';
+import { stripStudyNamePrefix, type SocImplication } from './digest-data.ts';
 
 const W = 1200;
 const H = 630;
@@ -107,6 +109,32 @@ export function siteCard(opts: {
   return {
     eyebrow: `${opts.label} · ${opts.count} ${opts.count === 1 ? 'study' : 'studies'}`,
     headline: opts.headline?.trim() ? opts.headline : opts.label,
+    handle: opts.handle,
+  };
+}
+
+// v0.14 T4 Option B: a single-study card for the in-app "Share image" button.
+// Trial name + site + date lead the eyebrow; the headline is the study's TL;DR
+// (name prefix stripped so it isn't redundant); the verdict is the colored tag.
+// Primitives only (no figures/slides) keep it publish-safe.
+export function studyShareCard(opts: {
+  name: string;
+  tldr: string;
+  soc?: SocImplication | null;
+  siteLabel: string;
+  date: string;
+  conference?: string | null;
+  handle: string;
+}): ShareCard {
+  const conf = opts.conference ? ` · ${opts.conference}` : '';
+  const vmeta = verdictMetaFor(opts.soc ?? null);
+  const stripped = stripStudyNamePrefix(opts.tldr, opts.name);
+  return {
+    eyebrow: `${opts.name} · ${opts.siteLabel} · ${opts.date}${conf}`,
+    // Fall back to the name if stripping a tldr that equals the name left it blank.
+    headline: stripped.trim() ? stripped : opts.name,
+    tagLabel: vmeta ? vmeta.label.toUpperCase() : undefined,
+    tagColor: verdictColorFor(opts.soc ?? null) ?? undefined,
     handle: opts.handle,
   };
 }

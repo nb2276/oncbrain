@@ -3,6 +3,7 @@ import {
   defaultCard,
   digestCard,
   siteCard,
+  studyShareCard,
   headlineSize,
   renderShareImage,
 } from '../src/lib/share-image.ts';
@@ -47,6 +48,35 @@ describe('share-image card builders', () => {
     });
   });
 
+  it('studyShareCard (T4 Option B): name·site·date eyebrow, stripped tldr, colored verdict tag', () => {
+    const c = studyShareCard({
+      name: 'FIRESTORM',
+      tldr: 'FIRESTORM: 5-yr PFS 65.8% vs 38.8%, HR 0.40',
+      soc: 'methodologically-limited',
+      siteLabel: 'CNS',
+      date: '2026-06-09',
+      conference: 'ASCO 2026',
+      handle: '@nb2276',
+    });
+    expect(c.eyebrow).toBe('FIRESTORM · CNS · 2026-06-09 · ASCO 2026');
+    expect(c.headline).not.toMatch(/^FIRESTORM/); // name prefix stripped
+    expect(c.headline).toContain('65.8%');
+    expect(c.tagLabel).toBe('CAVEATS DOMINATE');
+    expect(c.tagColor).toBe('#8a3a1a'); // matches StudyCard .verdict-methodologically-limited
+  });
+
+  it('studyShareCard: no verdict -> no colored tag, no-conf eyebrow', () => {
+    const c = studyShareCard({ name: 'X', tldr: 'some result', soc: null, siteLabel: 'Breast', date: '2026-06-09', handle: '@x' });
+    expect(c.eyebrow).toBe('X · Breast · 2026-06-09');
+    expect(c.tagLabel).toBeUndefined();
+    expect(c.tagColor).toBeUndefined();
+  });
+
+  it('studyShareCard: a tldr equal to the name falls back to the name (no blank headline)', () => {
+    const c = studyShareCard({ name: 'PRESTIGE-PSMA', tldr: 'PRESTIGE-PSMA', soc: null, siteLabel: 'Prostate', date: '2026-06-09', handle: '@x' });
+    expect(c.headline).toBe('PRESTIGE-PSMA');
+  });
+
   it('headlineSize shrinks as the headline grows', () => {
     expect(headlineSize('short')).toBe(58);
     expect(headlineSize('x'.repeat(60))).toBe(50);
@@ -62,6 +92,7 @@ describe('share-image card builders', () => {
       defaultCard('@x'),
       digestCard({ date: '2026-06-09', topLine: 'x', conference: 'ASCO', studyCount: 2, siteCount: 1, handle: '@x' }),
       siteCard({ label: 'Breast', headline: 'y', count: 3, handle: '@x' }),
+      studyShareCard({ name: 'FIRESTORM', tldr: 'a result', soc: 'practice-changing', siteLabel: 'CNS', date: '2026-06-09', handle: '@x' }),
     ];
     const blob = JSON.stringify(cards);
     expect(blob).not.toMatch(/pbs\.twimg\.com|\/slides\/|\.(png|jpg|jpeg|webp)\b/i);

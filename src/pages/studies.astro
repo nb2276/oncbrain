@@ -10,6 +10,7 @@
 import Base from '../layouts/Base.astro';
 import TagFilterRail from '../components/TagFilterRail.astro';
 import RecentFeed from '../components/RecentFeed.astro';
+import SiteNav from '../components/SiteNav.astro';
 import { listRecentStudies } from '../lib/digest-data.ts';
 import { buildFilterRailOptions } from '../lib/tag-foundations.ts';
 
@@ -39,6 +40,10 @@ const filterOptions = buildFilterRailOptions(
   )}
 
   <p class="studies-back"><a href="/">← Home</a></p>
+
+  {/* v0.14.3: disease-site nav, the missing cross-corpus wayfinding axis the
+      T3 reviews flagged. Shared SiteNav so home + /studies stay in sync. */}
+  {feed.length > 0 && <SiteNav />}
 
   {feed.length > 0 ? (
     <RecentFeed items={feed} totalCount={feed.length} heading="All studies" />

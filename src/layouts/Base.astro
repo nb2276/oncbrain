@@ -100,6 +100,18 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
             would dwarf real reads. Custom-event filter telemetry is
             deferred to v0.12 (TODOS.md) per the autoplan revision. */}
         <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "7de09515538540f1b55e9d16c13a1cd4", "spa": false}'></script>
+        {/* Google Analytics (gtag.js), property G-PP2FRCMYS1 shared with the
+            related site oncologytoolkit.com. Production-only (same gate as the
+            CF beacon) so dev / `astro preview` hits don't pollute the shared
+            property. is:inline keeps the gtag bootstrap as a real global
+            (Astro would otherwise bundle it into a module and break window.gtag). */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-PP2FRCMYS1"></script>
+        <script is:inline>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-PP2FRCMYS1');
+        </script>
       </Fragment>
     )}
     {/* v0.11 PR-1a: small inlined JSON blobs the PR-2 filter rail and
