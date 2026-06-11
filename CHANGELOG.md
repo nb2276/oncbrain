@@ -2,6 +2,28 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.4] - 2026-06-10
+
+### Changed
+
+- **`/studies` filters in place.** The full study index no longer auto-redirects
+  to the `/tags/<slug>/` landing when you pick a single filter — it narrows the
+  feed in place and reflects the selection in the URL (`/studies/?tag=…`,
+  shareable + restored on reload). The `/tags/` landing pages still exist as
+  direct/RSS destinations (linked from each study's tag chips).
+- **Verdict filter ordered by clinical importance** (practice-changing → … →
+  unclear) instead of by study count, so the highest-signal verdicts read first.
+
+### Added
+
+- **Brighter filter feedback.** The selected filter option is now clearly
+  highlighted (accent label + a left accent bar), and the matched (still-visible)
+  study cards get a brighter accent edge while a filter is active.
+- **Filter-aware "new" count.** The "N new overall" badge on the feed flips to
+  "N new shown" as the filter narrows the list, and reverts when cleared.
+- **Per-disease-site new counts.** Each disease-site nav chip shows a "·N" badge
+  of how many of its studies are new since your last visit.
+
 ## [0.14.3] - 2026-06-10
 
 ### Added
