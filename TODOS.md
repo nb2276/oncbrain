@@ -12,8 +12,6 @@ Format: `- [scope] description (source)`
 
 ## Now — highest priority
 
-- **Daily-build quality-eval skill (multi-persona, longitudinal, prescriptive).** New in-session skill that runs on each day's `build:day` output and scores it across four axes: (1) accuracy / zero-hallucination (numbers verbatim from source, NCT correctness, comparator claims grounded in tweet/OCR/paper text), (2) voice + readability (VOICE.md compliance, banned-vocab audit, em-dash audit, sentence length, subspecialist register), (3) UI/UX of the rendered card (hierarchy, density, mobile fold, scannability at 375px), (4) clinical relevance + completeness (subspecialist would consider it useful for a 90-second triage). Three personas per run, each scoring + commenting from their own lens: senior product designer (DESIGN.md anchored), expert oncologist (site-matched, e.g. GU subspecialist when prostate dominates the day), early trainee (PGY-2 reading to learn — what's confusing, what's missing context, what an attending would expect them to know). Each persona's prompt assembled from a small persona file + the live DESIGN.md + VOICE.md. Output: dated report (`~/.gstack/projects/$SLUG/quality-reports/YYYY-MM-DD.md`) with per-axis 0-10 scores, the top 3 issues across personas (consensus surfaces first), and 1-3 prescriptive recommendations for tuning the next build's prompts. Each run reads the most recent N reports (default 7) and includes them as longitudinal context; issues that recur across days get escalated to "prompt-change suggested." Bonus: emit a "guidance for next LLM pull" block (concrete prompt-template diffs) that the build pipeline can optionally consume. Pair with existing `test/eval.test.ts` rig (LLM-as-judge primitives) but a separate skill so daily-run cadence is separate from CI regression gate. (this session — user request 2026-06-08)
-
 - **Live end-to-end test of v0.8 ingestion.** PR1/2/3 pass unit + build tests but have never run against real Telegram traffic. DM the bot a journal URL + a PDF, run `pull:telegram → enrich:inbox → build:day`, confirm vault filing + E2/E3 replies + digest output. (this session)
 
 ## v0.14 — verdict triage + what's-new (deferred from 2026-06-09 office-hours design + eng review)
@@ -38,7 +36,7 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 ## v0.8 deferred (surfaced in CEO review; not in PR1-3)
 
 - **Email-forwarding from PubMed alerts.** Curator forwards alert emails; bot polls via Gmail OAuth, extracts paper URLs, runs them through v0.8 ingestion. The "curator does nothing" version. (XL, P3 — `docs/plans/v0.8-non-pmid-sources.md`)
-- **Conference URL auto-detect.** Recognize ASCO/ESMO/ASTRO/AACR URL patterns and auto-apply the conference tag on ingest. (S, P3)
+- **Conference badge for paper/slide-only days.** Conference auto-detect (v0.14.9) now stamps `conference_slug` on all four source types, but the day's badge + `/conferences/<slug>` pages still derive from `dominantConferenceForDate`, which queries **bookmarks (tweets) only**. A conference day made entirely of papers/PDFs/slides gets tagged rows in the DB but no badge and no conference page. Extend `dominantConferenceForDate` (src/lib/db.ts:605) to union papers + slides (keeping the "unanimous single slug" semantics). (follow-up from v0.14.9 conference auto-detect review)
 - **Per-source rate-limit messaging.** Tell the curator via Telegram when an ingest is stuck on an upstream rate limit (NCBI, Crossref). (S, P3)
 - **Multi-curator mode.** Reserve `curator_id` on bookmarks/papers so multiple curators can DM the same bot and aggregate. (M, P3)
 - **CORS on the JSON API.** `/api/v1/*` + `/feed.xml` send no `Access-Control-Allow-Origin`. Server-side fetches + feed readers work; browser cross-origin `fetch()` is blocked. Add a DO header rule if a browser app needs it. (v0.8 PR3)
@@ -53,6 +51,11 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 - **OCR is macOS-only.** Linux/CI builds produce uniformly null captions; scanned-PDF OCR (v0.8 PR2) needs the Mac Vision binary + poppler.
 - **Figure caption validator checks numeric tokens only.** Can't catch mislabeled axes or wrong-arm attribution.
 - **Disease-site classification uses MeSH terms / keywords, not author affiliations.** Explicit product decision, not a deferred item.
+
+## Completed (v0.14.9, 2026-06-11)
+
+- **Conference auto-detect on ingest.** `src/lib/conference-detect.ts` recognizes ASCO/ESMO/ASTRO/AACR/ASH/SABCS + ASCO GU/GI from meeting hashtags (`#ASCO26`), meeting-specific URL hosts, and year-bearing prose; all four enrichment paths (tweet/paper/PDF/slide) stamp `conference_slug` + insert-if-absent the conference row. Closes the gap where bot-ingested sources were never conference-tagged (only the admin form was). Tests in `test/conference-detect.test.ts` + `test/inbox.test.ts`. **Completed:** v0.14.9 (2026-06-11). Follow-up tracked above (badge for paper/slide-only days).
+- **Daily-build quality-eval skill (multi-persona, longitudinal, prescriptive).** Shipped as `build/quality-eval.ts` / `npm run quality-eval` — multi-persona review of a day's digest, dated reports under `~/.gstack/projects/nb2276-oncbrain/quality-reports/<date>.md`. **Completed:** prior release (verified shipped 2026-06-11 during TODOS cleanup).
 
 ## Completed (released in v0.8.0, 2026-05-19)
 

@@ -8,8 +8,13 @@ import {
   markInboxFailed,
   markInboxFailedPermanent,
   countInboxByStatus,
+  saveBookmark,
+  listBookmarks,
+  getConference,
+  upsertConference,
+  setBookmarkConferenceIfEmpty,
 } from '../src/lib/db.ts';
-import { runEnrichmentLoop } from '../src/lib/inbox-enrichment.ts';
+import { runEnrichmentLoop, detectAndEnsureConference } from '../src/lib/inbox-enrichment.ts';
 
 function freshDb(): Database.Database {
   return openDb(':memory:');
@@ -205,5 +210,60 @@ describe('runEnrichmentLoop', () => {
     } finally {
       if (prev) process.env.TELEGRAM_BOT_TOKEN = prev;
     }
+  });
+});
+
+describe('detectAndEnsureConference', () => {
+  it('returns the slug and inserts the conference row on a hit', () => {
+    const db = freshDb();
+    const slug = detectAndEnsureConference(db, ['great data #ASCO26'], '2026-05-18');
+    expect(slug).toBe('asco-2026');
+    const conf = getConference(db, 'asco-2026');
+    expect(conf?.name).toBe('ASCO Annual Meeting 2026');
+    expect(conf?.hashtag).toBe('#ASCO26');
+  });
+
+  it('does not clobber a curator-created conference row (insert-if-absent)', () => {
+    const db = freshDb();
+    // Curator created the row with real dates via the admin form.
+    upsertConference(db, {
+      slug: 'asco-2026',
+      name: 'ASCO 2026 (curated)',
+      start_date: '2026-05-29',
+      end_date: '2026-06-02',
+      hashtag: '#ASCO26',
+    });
+    const slug = detectAndEnsureConference(db, ['#ASCO26'], '2026-05-18');
+    expect(slug).toBe('asco-2026');
+    const conf = getConference(db, 'asco-2026');
+    expect(conf?.name).toBe('ASCO 2026 (curated)'); // preserved
+    expect(conf?.start_date).toBe('2026-05-29'); // not nulled
+  });
+
+  it('uses the bookmark-date year for a host match with no URL year', () => {
+    const db = freshDb();
+    const slug = detectAndEnsureConference(
+      db,
+      ['https://meetings.asco.org/abstracts/9'],
+      '2025-06-01',
+    );
+    expect(slug).toBe('asco-2025');
+  });
+
+  it('returns null for non-conference text', () => {
+    const db = freshDb();
+    expect(detectAndEnsureConference(db, ['just a prostate cancer note'], '2026-05-18')).toBeNull();
+  });
+});
+
+describe('setBookmarkConferenceIfEmpty', () => {
+  it('sets the slug only when conference_slug is null, never clobbering', () => {
+    const db = freshDb();
+    const { id } = saveBookmark(db, { url: 'https://x.com/a/status/1', bookmark_date: '2026-05-18' });
+    expect(setBookmarkConferenceIfEmpty(db, id, 'asco-2026')).toBe(true);
+    expect(listBookmarks(db)[0]!.conference_slug).toBe('asco-2026');
+    // A second attempt with a different slug must NOT overwrite.
+    expect(setBookmarkConferenceIfEmpty(db, id, 'esmo-2025')).toBe(false);
+    expect(listBookmarks(db)[0]!.conference_slug).toBe('asco-2026');
   });
 });

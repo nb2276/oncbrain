@@ -152,7 +152,8 @@ src/
   lib/
     db.ts                  SQLite schema + queries + migrations (bookmarks, papers, slide_uploads, inbox_items, conferences, settings)
     telegram-ingest.ts     Telegram Bot API: extractTweetUrls / extractPaperPmids / extractPaperUrls / extractPdfDocument / extractSlidePhoto + sendMessage
-    inbox-enrichment.ts    Type-dispatched enrichment loop (tweet→bookmark, paper→papers, slide→slides, PDF→papers); E2/E3 replies; cross-day NCT nudge
+    inbox-enrichment.ts    Type-dispatched enrichment loop (tweet→bookmark, paper→papers, slide→slides, PDF→papers); E2/E3 replies; cross-day NCT nudge; conference auto-stamp via detectAndEnsureConference
+    conference-detect.ts   v0.14.9: detect a major oncology meeting (ASCO/ESMO/ASTRO/AACR/ASH/SABCS + ASCO GU/GI) from a source's hashtags / URL-hosts / prose so bot-ingested sources get a conference_slug
     twitter-fetch.ts       oEmbed (text + html) + syndication (images), parallel
     tweet-syndication.ts   Twitter syndication CDN client (token formula derivation)
     pubmed-client.ts       NCBI E-utilities: efetch PubMed metadata + abstract, PMC for Methods/Results

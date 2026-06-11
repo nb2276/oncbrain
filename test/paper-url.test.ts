@@ -128,6 +128,16 @@ describe('extractPaperUrls', () => {
     const urls = extractPaperUrls('see https://doi.org/10.1056/NEJMoa1.');
     expect(urls[0]).toBe('https://doi.org/10.1056/NEJMoa1');
   });
+  it('stays linear on a pathological long token (no catastrophic backtracking)', () => {
+    // A long run of trim chars mid-token made the trailing-punctuation trim
+    // backtrack quadratically; the MAX_URL_LEN cap keeps it near-instant.
+    // Unfixed, this token takes many seconds; fixed, well under the bound.
+    const evil = 'http://a' + '.'.repeat(100_000) + 'b';
+    const start = Date.now();
+    const urls = extractPaperUrls(`see ${evil} here`);
+    expect(Date.now() - start).toBeLessThan(2000);
+    expect(Array.isArray(urls)).toBe(true);
+  });
   it('reads URLs from entities (text_link)', () => {
     const urls = extractPaperUrls('click here', [
       { type: 'text_link', url: 'https://www.thelancet.com/article/x/fulltext' },

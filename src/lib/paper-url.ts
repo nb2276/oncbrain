@@ -88,6 +88,14 @@ const NON_PAPER_HOST_RE = /https?:\/\/(?:www\.)?(?:twitter|x|t\.co|youtube|youtu
 
 const ANY_URL_RE = /https?:\/\/[^\s<>")]+/gi;
 
+// Cap a matched URL token before the trailing-punctuation trim in
+// extractPaperUrls, so the trim stays linear on adversarial input: an unbounded
+// run of trim chars mid-token would otherwise backtrack quadratically (a latent
+// ReDoS). Real paper URLs are far shorter, and the scheme+host live at the
+// front, so capping never affects classification. Mirrors MAX_URL_LEN in
+// conference-detect.ts.
+const MAX_URL_LEN = 2048;
+
 export type PaperTargetKind =
   | { kind: 'pmid'; value: string } // bare digits
   | { kind: 'doi'; value: string } // normalized bare DOI
@@ -192,7 +200,8 @@ export function extractPaperUrls(
   const consider = (s: string | undefined) => {
     if (!s) return;
     for (const m of s.matchAll(ANY_URL_RE)) {
-      const url = m[0].replace(/[.,;)\]]+$/, ''); // trim trailing punctuation
+      const capped = m[0].length > MAX_URL_LEN ? m[0].slice(0, MAX_URL_LEN) : m[0];
+      const url = capped.replace(/[.,;)\]]+$/, ''); // trim trailing punctuation
       // Skip what the existing PMID extractor already handles.
       if (new RegExp(PUBMED_URL_RE.source, 'i').test(url)) continue;
       if (NON_PAPER_HOST_RE.test(url)) continue;
