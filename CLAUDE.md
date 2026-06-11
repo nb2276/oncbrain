@@ -106,9 +106,13 @@ The CLI client (`src/lib/llm-client.ts`) scrubs `ANTHROPIC_API_KEY` from the chi
 
 **Prompt caching (api):** VOICE.md is sent once as a leading cache-flagged content block (`cache: true` on the `LlmTextBlock`), shared across every phase + study-agent call in a build — so a busy day re-uses one cached VOICE block (~10% billing on hits) instead of re-billing it ~20×. No-op on `claude-cli`.
 
-**Per-phase model + thinking (config, not hardcoded):**
+**Per-phase model + thinking (config, not hardcoded):** each of the three phases
+is independently selectable; every per-phase var falls back to `DIGEST_MODEL`,
+then the client default (sonnet).
 - `DIGEST_MODEL` — model for all phases (default sonnet).
+- `DIGEST_GROUPING_MODEL` — Phase 1 (clustering) only. Falls back to `DIGEST_MODEL`.
 - `DIGEST_STUDY_MODEL` — Phase 2 (per-study agents) only, the deep step (e.g. `opus` on cli, `claude-opus-4-7` on api). Falls back to `DIGEST_MODEL`.
+- `DIGEST_SYNTHESIS_MODEL` — Phase 3 (lede + cross-site TL;DR + open questions) only. Falls back to `DIGEST_MODEL`.
 - `DIGEST_THINKING` — Phase 2 extended-thinking token budget (e.g. `8000`). **api backend only** (the builder warns + ignores it on cli). Forces temperature=1 and reserves the budget on top of max_tokens.
 
 ## Schema (digest output, v0.7+ study shape)

@@ -516,11 +516,15 @@ export async function buildOneDate(
       conferenceDay: date,
       client: deps?.client,
       // Optional model overrides (config, not hardcoded). DIGEST_MODEL sets the
-      // default for all phases; DIGEST_STUDY_MODEL overrides Phase 2 only (the
-      // deep per-study analysis — e.g. 'opus' on claude-cli for richer output).
-      // Unset → pipeline/client defaults (sonnet).
+      // default for all phases; each phase can also be selected independently —
+      // DIGEST_GROUPING_MODEL (Phase 1), DIGEST_STUDY_MODEL (Phase 2, the deep
+      // per-study analysis — e.g. 'opus' on claude-cli), DIGEST_SYNTHESIS_MODEL
+      // (Phase 3) — each falling back to DIGEST_MODEL, then the client default
+      // (sonnet) when unset.
       model: process.env.DIGEST_MODEL || undefined,
+      groupingModel: process.env.DIGEST_GROUPING_MODEL || undefined,
       studyModel: process.env.DIGEST_STUDY_MODEL || undefined,
+      synthesisModel: process.env.DIGEST_SYNTHESIS_MODEL || undefined,
       // DIGEST_THINKING: extended-thinking token budget for Phase 2 (api backend
       // only). Deeper reasoning before each study agent answers.
       studyThinkingBudget: parseThinkingBudget(),
