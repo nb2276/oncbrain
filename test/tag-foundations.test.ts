@@ -229,13 +229,31 @@ describe('buildFilterRailOptions', () => {
       ['phase-3-rct', 2],
       ['phase-2-trial', 1],
     ]);
+    // v0.14.4: verdict orders by clinical importance, NOT count — so
+    // practice-changing (count 1) leads confirmatory (count 2).
     expect(out.verdict.map((o) => [o.slug, o.count])).toEqual([
-      ['confirmatory', 2],
       ['practice-changing', 1],
+      ['confirmatory', 2],
     ]);
     expect(out.meeting.map((o) => [o.slug, o.count])).toEqual([
       ['asco-2026', 2],
       ['esmo-2026', 1],
+    ]);
+  });
+
+  it('orders verdict by clinical importance even when a milder verdict has more studies', () => {
+    const out = buildFilterRailOptions([
+      ctx({ verdict: { soc_implication: 'unclear', rationale: '', audience: null } }),
+      ctx({ verdict: { soc_implication: 'unclear', rationale: '', audience: null } }),
+      ctx({ verdict: { soc_implication: 'unclear', rationale: '', audience: null } }),
+      ctx({ verdict: { soc_implication: 'practice-changing', rationale: '', audience: null } }),
+      ctx({ verdict: { soc_implication: 'methodologically-limited', rationale: '', audience: null } }),
+    ]);
+    // practice-changing first despite 'unclear' having the most studies (3).
+    expect(out.verdict.map((o) => o.slug)).toEqual([
+      'practice-changing',
+      'methodologically-limited',
+      'unclear',
     ]);
   });
 

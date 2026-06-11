@@ -285,11 +285,20 @@ export function buildFilterRailOptions(
             : 0,
     );
 
+  // Verdict is the one namespace with an inherent clinical ranking, so it reads
+  // top-to-bottom by SOC importance (practice-changing first) rather than by
+  // study-count. VERDICT_META is declared in that order; map slug -> rank.
+  const VERDICT_RANK = new Map(Object.keys(VERDICT_META).map((slug, i) => [slug, i]));
+  const sortVerdict = (m: Map<string, FilterTagOption>): FilterTagOption[] =>
+    Array.from(m.values()).sort(
+      (a, b) => (VERDICT_RANK.get(a.slug) ?? 99) - (VERDICT_RANK.get(b.slug) ?? 99),
+    );
+
   return {
     modality: sortOptions(modality),
     intent: sortOptions(intent),
     methodology: sortOptions(methodology),
-    verdict: sortOptions(verdict),
+    verdict: sortVerdict(verdict),
     meeting: sortOptions(meeting),
   };
 }

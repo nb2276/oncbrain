@@ -22,6 +22,9 @@ const navEmpty = navSites.filter((s) => s.count === 0);
             <span class="nav-emoji" aria-hidden="true">{s.emoji}</span>
             <span class="nav-label">{s.label}</span>
             <span class="nav-count">{s.count}</span>
+            {/* v0.14.4: count of new-since-last-visit studies for this site,
+                filled client-side by whats-new.ts; hidden when zero. */}
+            <span class="nav-new" data-site={s.slug} hidden></span>
           </a>
         </li>
       ))}
@@ -82,6 +85,15 @@ const navEmpty = navSites.filter((s) => s.count === 0);
     font-size: 0.75rem;
     margin-left: 0.15rem;
   }
+  /* v0.14.4: "·N" new-since-last-visit badge, accent-colored so it stands out
+     from the muted total. Client-toggled (hidden when the site has 0 new). */
+  .nav-new {
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-left: 0.1rem;
+  }
+  .nav-new[hidden] { display: none; }
   .nav-chip-empty {
     color: var(--fg-muted);
     opacity: 0.6;

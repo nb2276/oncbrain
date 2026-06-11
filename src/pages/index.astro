@@ -108,6 +108,7 @@ const tagChipRow = Array.from(tagSummaries.entries())
       items={feed.slice(0, HOME_FEED_LIMIT)}
       totalCount={feed.length}
       allIds={feed.map((r) => `${r.date}#${r.slug}`)}
+      siteById={Object.fromEntries(feed.map((r) => [`${r.date}#${r.slug}`, r.disease_site]))}
       browseAll={feed.length > HOME_FEED_LIMIT
         ? { href: '/studies/', label: `Browse all ${feed.length} studies` }
         : null}
