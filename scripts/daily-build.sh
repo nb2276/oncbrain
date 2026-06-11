@@ -143,6 +143,20 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
     done
   fi
 
+  # T5 distribution: post each changed digest to the public Telegram channel.
+  # No-op until TELEGRAM_CHANNEL_ID is set (notify:channel self-skips), so this
+  # is safe to ship before the channel exists.
+  echo ""
+  echo "→ Posting to channel"
+  if [ -z "$CHANGED_DATES" ]; then
+    echo "  (no digest changed — nothing to post)"
+  else
+    for d in $CHANGED_DATES; do
+      echo "  → $d"
+      npm run notify:channel --silent -- --date="$d" || echo "  ⚠ notify:channel $d exited non-zero (continuing)"
+    done
+  fi
+
   echo ""
   if [ "$FAILED" -ne 0 ]; then
     echo "✗ Done WITH FAILURES at $(date '+%Y-%m-%d %H:%M:%S %Z') — see ✗ lines above"

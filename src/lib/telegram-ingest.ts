@@ -163,8 +163,10 @@ export async function fetchWebhookInfo(
 // Outbound DM to a known chat. Used by notify-curator after a daily build to
 // ping the curator with a "✓ built — here's what shipped" summary.
 export async function sendMessage(
+  // chatId is a numeric chat id OR a channel "@username" (Telegram accepts
+  // both; T5 channel posts use the latter).
   token: string,
-  chatId: number,
+  chatId: number | string,
   text: string,
   opts: { fetchImpl?: typeof fetch; disableWebPagePreview?: boolean } = {},
 ): Promise<void> {
