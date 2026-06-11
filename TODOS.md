@@ -24,7 +24,7 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 ## v0.5.1 — hardening hotfix
 
-- **Source-tagged Phase 2 claims.** Per-claim source attribution in per-study deep-analysis so mixed tweet + paper + slide + PDF inputs can't silently blend numbers across sources. The numeric validator already cross-checks each table cell against source content; v0.5.1 extends that to tag each `details` bullet with its source. (codex amended-plan P1 #6 — `docs/plans/v0.5-multi-source-ingestion.md:286`)
+- **Source-tagged Phase 2 claims.** Per-claim source attribution in per-study deep-analysis so mixed tweet + paper + slide + PDF inputs can't silently blend numbers across sources. The numeric validator already cross-checks each table cell against source content; v0.5.1 extends that to tag each `details` bullet with its source. **Prompt-dependent → needs a real `build:day` to verify (don't ship blind); design + verification gate in `docs/plans/v0.15-entity-resolution-and-source-tagging.md`.** (codex amended-plan P1 #6 — `docs/plans/v0.5-multi-source-ingestion.md:286`)
 
 ## v0.6 — next minor (partially shipped)
 
@@ -46,8 +46,7 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 ## v0.7+ — entity resolution
 
-- **Cross-day study persistence.** A trial seen on day N keeps its identity on day N+1. (v0.8 PR3's NCT coverage index is a partial step: it knows which NCT appeared on which date, but studies aren't merged across days.) (`docs/plans/v0.5-multi-source-ingestion.md:290`)
-- **Slug-based retrieval entity resolution.** "PRESTIGE" vs "prestige-psma" should resolve to the same study so prior-context retrieval works across days. (`CHANGELOG.md`)
+- **Cross-day study persistence + slug-based entity resolution.** A trial seen on day N keeps its identity on day N+1; "PRESTIGE" vs "prestige-psma" resolve to the same study so prior-context dossier retrieval works across days. (NCT coverage index is a partial step.) **WARNING (found 2026-06-11): do NOT auto-strip a trailing `-\d+` suffix to normalize slugs — it cross-links distinct trials whose numbers are identity (`rtog-0539`, `rtog-0848` → `rtog`). The safe path is curator-declared `aliases:` frontmatter on the dossier. Design in `docs/plans/v0.15-entity-resolution-and-source-tagging.md`.** (`docs/plans/v0.5-multi-source-ingestion.md:290`)
 
 ## Known limitations (informational — not on a roadmap)
 
