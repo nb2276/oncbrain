@@ -2,6 +2,29 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.9] - 2026-06-11
+
+### Added
+
+- **Conference auto-detect on ingest.** Until now the bot ingest path
+  (`pull:telegram → enrich:inbox`) never set a `conference_slug` — only the admin
+  form did — so the conference badge (`dominantConferenceForDate`) and the
+  `/conferences/<slug>` pages were dead for anything DM'd to the bot. A new
+  `src/lib/conference-detect.ts` recognizes a major oncology meeting from a
+  source's text/URLs across three precision tiers: a year-bearing meeting hashtag
+  (`#ASCO26`, `#ESMO2025`, `#GU26`), a meeting-specific URL host (matched on the
+  parsed hostname, spoof-proof like the trade-press allowlist), and meeting prose
+  with a nearby year ("2026 ASCO Annual Meeting"). It covers ASCO, ESMO, ASTRO,
+  AACR, ASH, SABCS, and the ASCO GU/GI symposia. All four enrichment paths
+  (tweet, paper, PDF, slide) now stamp the detected slug and insert the
+  conference row if absent — never overwriting a row the curator created with real
+  dates. Tagging is best-effort and never fails enrichment. Years are taken
+  verbatim (no identity-stripping), so distinct years stay distinct conferences.
+  The day's conference badge (`dominantConferenceForDate`) keys off tweet
+  bookmarks, so tagged tweets light it up immediately; paper/PDF/slide tags are
+  stored for cross-source clustering and the conference filter (extending the
+  badge query to those source types is a tracked follow-up in TODOS.md).
+
 ## [0.14.8] - 2026-06-11
 
 ### Added
