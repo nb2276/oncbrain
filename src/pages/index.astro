@@ -58,9 +58,11 @@ const tagChipRow = Array.from(tagSummaries.entries())
   .slice(0, TAG_CHIP_ROW_CAP);
 ---
 
-<Base title={siteName} description="Curated AI-summarized digests of oncology updates.">
+<Base title={siteName} description="Curated AI-summarized digests of oncology updates." wide={true}>
   {digests.length > 0 && <SiteNav />}
 
+  <div class="home-grid">
+    <div class="home-main">
   {latest ? (
     <section class="hero-tldr" aria-label="Latest digest summary">
       <div class="hero-meta">
@@ -88,6 +90,20 @@ const tagChipRow = Array.from(tagSummaries.entries())
     </p>
   )}
 
+  {feed.length > 0 && (
+    <RecentFeed
+      items={feed.slice(0, HOME_FEED_LIMIT)}
+      totalCount={feed.length}
+      allIds={feed.map((r) => `${r.date}#${r.slug}`)}
+      siteById={Object.fromEntries(feed.map((r) => [`${r.date}#${r.slug}`, r.disease_site]))}
+      browseAll={feed.length > HOME_FEED_LIMIT
+        ? { href: '/studies/', label: `Browse all ${feed.length} studies` }
+        : null}
+    />
+  )}
+    </div>
+
+    <aside class="home-aside" aria-label="Browse and activity">
   {conferences.length > 0 && (
     <section class="conf-section">
       <h2 class="section-label">Conferences</h2>
@@ -101,18 +117,6 @@ const tagChipRow = Array.from(tagSummaries.entries())
         ))}
       </ul>
     </section>
-  )}
-
-  {feed.length > 0 && (
-    <RecentFeed
-      items={feed.slice(0, HOME_FEED_LIMIT)}
-      totalCount={feed.length}
-      allIds={feed.map((r) => `${r.date}#${r.slug}`)}
-      siteById={Object.fromEntries(feed.map((r) => [`${r.date}#${r.slug}`, r.disease_site]))}
-      browseAll={feed.length > HOME_FEED_LIMIT
-        ? { href: '/studies/', label: `Browse all ${feed.length} studies` }
-        : null}
-    />
   )}
 
   {/* v0.10 home page tag surfaces. Both live BELOW the recent-studies feed
@@ -168,10 +172,38 @@ const tagChipRow = Array.from(tagSummaries.entries())
       </p>
     </section>
   )}
+    </aside>
+  </div>
 </Base>
 
 <style>
-  /* Hero TL;DR callout — unchanged from previous version. */
+  /* v0.14.8: desktop editorial layout. The home was one narrow column marooned
+     in empty side margin on wide screens; now the primary scan (hero + studies
+     feed) fills a wide main column and the secondary surfaces (conferences, tag
+     activity, tag chips) sit in a sticky right sidebar. Mobile stays a single
+     stacked column (main first, then the sidebar content). */
+  .home-grid { display: block; }
+  .home-main { min-width: 0; }
+  .home-aside { min-width: 0; }
+  @media (min-width: 1024px) {
+    .home-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 3rem;
+      align-items: start;
+    }
+    .home-aside {
+      position: sticky;
+      top: 1.5rem;
+    }
+    /* Top-align the sidebar with the main column. */
+    .home-aside > :first-child { margin-top: 0; }
+    /* Keep the hero callout from stretching uncomfortably wide in the roomier
+       main column; the feed rows below can use the full width. */
+    .hero-tldr { max-width: 760px; }
+  }
+
+  /* Hero TL;DR callout. */
   .hero-tldr {
     margin: 0 0 1.5rem;
     padding: 1.1rem 1.25rem 1rem;
