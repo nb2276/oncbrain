@@ -2,6 +2,17 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.8] - 2026-06-11
+
+### Added
+
+- **iOS "Add to Home Screen" hint.** The PWA (manifest + offline precache) has
+  shipped since v0.6, but iOS Safari has no `beforeinstallprompt`, so the
+  iPhone-heavy audience had no way to discover they could install it. A small,
+  dismissible, iOS-Safari-only banner now nudges "tap Share → Add to Home
+  Screen" (hidden on every other platform, when already installed, and once
+  dismissed).
+
 ## [0.14.7] - 2026-06-11
 
 ### Fixed

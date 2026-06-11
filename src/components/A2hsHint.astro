@@ -1,0 +1,62 @@
+---
+// v0.14.8: iOS "Add to Home Screen" hint. Decision logic in src/lib/pwa-a2hs.ts.
+// Ships hidden; the client script reveals it only on iOS Safari, when not
+// already installed, and not previously dismissed. Dismiss persists.
+---
+<div class="a2hs-hint" data-a2hs hidden role="note">
+  <span class="a2hs-text">
+    Add <strong>onc brain</strong> to your Home Screen: tap Share, then <strong>Add to Home Screen</strong>.
+  </span>
+  <button type="button" class="a2hs-dismiss" data-a2hs-dismiss aria-label="Dismiss this hint">&times;</button>
+</div>
+
+<script>
+  import { shouldShowA2hs } from '../lib/pwa-a2hs.ts';
+
+  const KEY = 'oncbrain:a2hs-dismissed';
+  const hint = document.querySelector('[data-a2hs]');
+  if (hint instanceof HTMLElement) {
+    let dismissed = false;
+    try { dismissed = localStorage.getItem(KEY) === '1'; } catch { /* private mode */ }
+    const standalone =
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true ||
+      (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches);
+    if (shouldShowA2hs({ ua: navigator.userAgent, standalone, dismissed })) {
+      hint.removeAttribute('hidden');
+    }
+    hint.querySelector('[data-a2hs-dismiss]')?.addEventListener('click', () => {
+      hint.setAttribute('hidden', '');
+      try { localStorage.setItem(KEY, '1'); } catch { /* private mode */ }
+    });
+  }
+</script>
+
+<style>
+  .a2hs-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 1.25rem;
+    padding: 0.6rem 0.85rem;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    color: var(--fg);
+  }
+  .a2hs-hint[hidden] { display: none; }
+  .a2hs-text { flex: 1; line-height: 1.35; }
+  .a2hs-dismiss {
+    flex: none;
+    min-width: 32px;
+    min-height: 32px;
+    background: none;
+    border: none;
+    color: var(--fg-muted);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .a2hs-dismiss:hover { color: var(--accent); }
+</style>

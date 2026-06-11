@@ -1,5 +1,6 @@
 ---
 import SearchBox from '../components/SearchBox.astro';
+import A2hsHint from '../components/A2hsHint.astro';
 // Self-hosted Newsreader (variable, optical-size axis + italic). Same-origin so
 // the service worker precaches it for offline fidelity; no Google Fonts CDN
 // round-trip or third-party dependency. unicode-range gates the non-latin
@@ -302,6 +303,7 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
       </div>
     </header>
     <main>
+      <A2hsHint />
       <slot />
     </main>
     <footer>
