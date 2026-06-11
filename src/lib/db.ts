@@ -598,14 +598,23 @@ export function listAllSourceDates(db: Database.Database): string[] {
   return rows.map((r) => r.d);
 }
 
-// For a given date, which conference (if any) had ALL its bookmarks tagged?
+// For a given date, which conference (if any) do its tagged sources agree on?
 // Used by the digest builder to attach a conference badge when the day is
-// unambiguously about one meeting. Returns null when bookmarks span multiple
-// conferences (or none).
+// unambiguously about one meeting. Considers ALL source types (tweets, papers,
+// slides) so a paper/slide-only conference day still gets a badge — conference
+// auto-detect (v0.14.9) stamps the slug across all three. Returns null when the
+// day's tagged sources span multiple conferences, or none is tagged. Untagged
+// sources are ignored (a single tagged source is enough).
 export function dominantConferenceForDate(db: Database.Database, date: string): string | null {
   const rows = db
-    .prepare('SELECT DISTINCT conference_slug FROM bookmarks WHERE bookmark_date = ? AND conference_slug IS NOT NULL')
-    .all(date) as { conference_slug: string }[];
+    .prepare(
+      `SELECT conference_slug FROM bookmarks     WHERE bookmark_date = ? AND conference_slug IS NOT NULL
+       UNION
+       SELECT conference_slug FROM papers        WHERE bookmark_date = ? AND conference_slug IS NOT NULL
+       UNION
+       SELECT conference_slug FROM slide_uploads WHERE bookmark_date = ? AND conference_slug IS NOT NULL`,
+    )
+    .all(date, date, date) as { conference_slug: string }[];
   if (rows.length !== 1) return null;
   return rows[0]!.conference_slug;
 }
