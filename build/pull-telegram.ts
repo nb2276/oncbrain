@@ -28,6 +28,7 @@ import {
   extractPaperPmids,
   extractSlidePhoto,
   extractPdfDocument,
+  extractImageDocument,
   looksLikeAttemptedShare,
   messageOf,
   sendMessage,
@@ -130,13 +131,18 @@ async function main() {
     const paperUrls = extractPaperUrls(text, entities);
     const slidePhoto = extractSlidePhoto(msg);
     const pdfDoc = extractPdfDocument(msg);
+    // An image sent as a document (HEIC/HEIF from iOS Photos, etc.) that isn't a
+    // compressed photo or a PDF. Routed to the slide path below. Skip when a
+    // compressed photo is already present (same image, two encodings).
+    const imageDoc = slidePhoto ? null : extractImageDocument(msg);
 
     if (
       tweetUrls.length === 0 &&
       paperPmids.length === 0 &&
       paperUrls.length === 0 &&
       !slidePhoto &&
-      !pdfDoc
+      !pdfDoc &&
+      !imageDoc
     ) {
       skippedNoTarget++;
       // A silent drop hides a supported-source gap from the curator (an ASCO
@@ -312,6 +318,44 @@ async function main() {
           }
         } catch (err) {
           console.warn(`  failed to inbox slide ${slidePhoto.file_id}: ${(err as Error).message}`);
+        }
+      }
+    }
+
+    // Image-as-document (HEIC/HEIF, etc.) → slide path. A document carries no
+    // image dimensions, so width/height are omitted (the slide enrichment stores
+    // them null and the figure still renders).
+    if (imageDoc) {
+      if (args.dryRun) {
+        console.log(
+          `  [dry-run] would inbox: msg=${msg.message_id} type=slide image-doc=${imageDoc.file_name ?? imageDoc.file_id}`,
+        );
+        savedSlides++;
+      } else {
+        try {
+          const r = saveInboxItem(db, {
+            type: 'slide',
+            raw_target: imageDoc.file_id,
+            raw_message_text: text || null,
+            attachments_json: JSON.stringify({
+              file_unique_id: imageDoc.file_unique_id,
+              file_name: imageDoc.file_name ?? null,
+              mime_type: imageDoc.mime_type ?? null,
+              file_size: imageDoc.file_size ?? null,
+            }),
+            telegram_msg_id: msg.message_id,
+            telegram_chat_id: msg.chat?.id ?? null,
+            source_batch_key: msg.media_group_id ?? null,
+            bookmark_date: date,
+          });
+          if (r.created) {
+            console.log(`  inbox #${r.id}: slide(image-doc) ${date} ${imageDoc.file_name ?? imageDoc.file_id}`);
+            savedSlides++;
+          } else {
+            skippedDuplicate++;
+          }
+        } catch (err) {
+          console.warn(`  failed to inbox image-doc ${imageDoc.file_id}: ${(err as Error).message}`);
         }
       }
     }

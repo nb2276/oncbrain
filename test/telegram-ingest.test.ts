@@ -6,6 +6,7 @@ import {
   extractCuratorNote,
   extractPaperPmids,
   extractPdfDocument,
+  extractImageDocument,
   looksLikeAttemptedShare,
   messageOf,
   unixToLocalDate,
@@ -338,6 +339,38 @@ describe('extractPdfDocument', () => {
 
   it('returns null when there is no document', () => {
     expect(extractPdfDocument({ message_id: 1, date: 0, text: 'hi' })).toBeNull();
+  });
+});
+
+describe('extractImageDocument', () => {
+  const msg = (document?: TelegramMessage['document']): TelegramMessage => ({
+    message_id: 1,
+    date: 0,
+    document,
+  });
+
+  it('detects a HEIC image-as-document by MIME (iOS Photos)', () => {
+    const doc = extractImageDocument(
+      msg({ file_id: 'I1', file_unique_id: 'U1', mime_type: 'image/heic', file_name: 'IMG_4821.HEIC' }),
+    );
+    expect(doc?.file_id).toBe('I1');
+  });
+
+  it('detects a HEIC/HEIF image by filename when MIME is missing', () => {
+    expect(extractImageDocument(msg({ file_id: 'I2', file_unique_id: 'U2', file_name: 'slide.heif' }))?.file_id).toBe('I2');
+    expect(extractImageDocument(msg({ file_id: 'I3', file_unique_id: 'U3', file_name: 'fig.JPEG' }))?.file_id).toBe('I3');
+    expect(extractImageDocument(msg({ file_id: 'I4', file_unique_id: 'U4', file_name: 'chart.png' }))?.file_id).toBe('I4');
+  });
+
+  it('returns null for a PDF document (extractPdfDocument owns those)', () => {
+    expect(
+      extractImageDocument(msg({ file_id: 'P1', file_unique_id: 'U1', mime_type: 'application/pdf', file_name: 'paper.pdf' })),
+    ).toBeNull();
+  });
+
+  it('returns null for a non-image document and when there is no document', () => {
+    expect(extractImageDocument(msg({ file_id: 'D1', file_unique_id: 'U1', file_name: 'notes.docx' }))).toBeNull();
+    expect(extractImageDocument({ message_id: 1, date: 0, text: 'hi' })).toBeNull();
   });
 });
 

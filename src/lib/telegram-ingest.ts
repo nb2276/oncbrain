@@ -351,6 +351,24 @@ export function extractPdfDocument(msg: TelegramMessage): TelegramDocument | nul
   return isPdfMime || isPdfName ? doc : null;
 }
 
+// Extract an IMAGE sent as a document rather than a compressed photo. iOS Photos
+// sometimes delivers HEIC/HEIF (and occasionally PNG/JPEG) as a document
+// attachment, which extractSlidePhoto (photo[] only) and extractPdfDocument
+// (PDF only) both miss — the slide would silently fall through and be lost.
+// Matches an image/* MIME type or a known image filename extension. Returns null
+// for PDFs (extractPdfDocument owns those) and non-image documents, so a document
+// resolves to at most one of {paper(pdf), slide(image)}.
+const IMAGE_DOC_EXT_RE = /\.(?:heic|heif|jpe?g|png|webp|gif|tiff?|bmp)$/i;
+export function extractImageDocument(msg: TelegramMessage): TelegramDocument | null {
+  const doc = msg.document;
+  if (!doc || !doc.file_id) return null;
+  const mime = (doc.mime_type ?? '').toLowerCase();
+  if (mime === 'application/pdf') return null;
+  const isImageMime = mime.startsWith('image/');
+  const isImageName = IMAGE_DOC_EXT_RE.test(doc.file_name ?? '');
+  return isImageMime || isImageName ? doc : null;
+}
+
 export function messageOf(update: TelegramUpdate): TelegramMessage | undefined {
   // Channels POST as channel_post; DMs as message. Both feed the same pipeline.
   return update.message || update.channel_post || update.edited_message || update.edited_channel_post;
