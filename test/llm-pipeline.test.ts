@@ -213,6 +213,46 @@ describe('buildDigest (v0.4 3-pass)', () => {
       expect(call[1].model).toBe('claude-test-model');
     }
   });
+
+  it('routes each phase to its own model override (grouping / study / synthesis)', async () => {
+    const client = mockLlmClient([groupingResponse, studyAgent1, studyAgent2, synthesisResponse]);
+    await buildDigest(sampleTweets, {
+      conferenceName: 'ASCO 2026',
+      conferenceDay: 2,
+      client,
+      model: 'base-model',
+      groupingModel: 'grouping-model',
+      studyModel: 'study-model',
+      synthesisModel: 'synthesis-model',
+    });
+    // @ts-expect-error inspecting the mock
+    const calls = client.complete.mock.calls;
+    // Grouping is always first, synthesis always last; the per-study agents are
+    // every call in between (order between the two agents is concurrency-dependent).
+    expect(calls[0][1].model).toBe('grouping-model');
+    expect(calls[calls.length - 1][1].model).toBe('synthesis-model');
+    for (let i = 1; i < calls.length - 1; i++) {
+      expect(calls[i][1].model).toBe('study-model');
+    }
+  });
+
+  it('per-phase models fall back to `model` when their override is unset', async () => {
+    const client = mockLlmClient([groupingResponse, studyAgent1, studyAgent2, synthesisResponse]);
+    await buildDigest(sampleTweets, {
+      conferenceName: 'ASCO 2026',
+      conferenceDay: 2,
+      client,
+      model: 'base-model',
+      studyModel: 'study-model', // only Phase 2 overridden
+    });
+    // @ts-expect-error inspecting the mock
+    const calls = client.complete.mock.calls;
+    expect(calls[0][1].model).toBe('base-model'); // grouping -> fallback
+    expect(calls[calls.length - 1][1].model).toBe('base-model'); // synthesis -> fallback
+    for (let i = 1; i < calls.length - 1; i++) {
+      expect(calls[i][1].model).toBe('study-model'); // study -> its override
+    }
+  });
 });
 
 describe('parseGroupingResponse', () => {

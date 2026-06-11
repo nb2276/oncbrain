@@ -420,11 +420,16 @@ export type BuildOptions = {
     synthesis?: string;
   };
   model?: string;
-  // Optional model override for Phase 2 (per-study agents) only — the deep
-  // analysis step. Lets you run Opus there (e.g. 'opus' on claude-cli,
-  // 'claude-opus-4-7' on api) while Phase 1/3 stay on the cheaper default.
-  // Falls back to `model` when unset.
+  // Per-phase model overrides, each falling back to `model` when unset, so the
+  // three phases are independently selectable (e.g. a cheaper model for grouping
+  // + synthesis, Opus for the deep per-study analysis). Wired from DIGEST_MODEL /
+  // DIGEST_GROUPING_MODEL / DIGEST_STUDY_MODEL / DIGEST_SYNTHESIS_MODEL.
+  groupingModel?: string; // Phase 1 (clustering)
+  // Phase 2 (per-study agents) — the deep analysis step. Lets you run Opus there
+  // (e.g. 'opus' on claude-cli, 'claude-opus-4-7' on api) while the other phases
+  // stay cheaper. Falls back to `model` when unset.
   studyModel?: string;
+  synthesisModel?: string; // Phase 3 (lede + cross-site TL;DR + open questions)
   // Optional extended-thinking budget (tokens) for Phase 2 only — deeper
   // reasoning before the study agent answers. api backend only (ignored on
   // claude-cli). 0/undefined = off.
@@ -746,7 +751,7 @@ async function runGroupingPhase(
   const { value } = await completeAndParse(
     client,
     content,
-    { model: opts.model, maxTokens: 4096, temperature: 0 },
+    { model: opts.groupingModel ?? opts.model, maxTokens: 4096, temperature: 0 },
     (raw) => parseGroupingResponse(raw, tweets),
     maxRetries,
     'grouping',
@@ -2154,7 +2159,7 @@ async function runSynthesisPhase(
   const { value } = await completeAndParse(
     client,
     content,
-    { model: opts.model, maxTokens: 2048, temperature: 0 },
+    { model: opts.synthesisModel ?? opts.model, maxTokens: 2048, temperature: 0 },
     parseSynthesisResponse,
     maxRetries,
     'synthesis',
