@@ -25,6 +25,15 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   stored for cross-source clustering and the conference filter (extending the
   badge query to those source types is a tracked follow-up in TODOS.md).
 
+### Hardened
+
+- **Linear URL-token trimming on ingest.** Capped the matched-URL length before
+  the trailing-punctuation trim in both `conference-detect.ts` and
+  `paper-url.ts` (`extractPaperUrls`). An unbounded run of trim characters mid
+  token could otherwise make the `…+$` trim backtrack quadratically (a latent
+  ReDoS). Bounded in practice by Telegram's 4096-char message cap; hardened so it
+  stays linear regardless of input source (e.g. unbounded OCR/PDF text).
+
 ## [0.14.8] - 2026-06-11
 
 ### Added
