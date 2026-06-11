@@ -29,16 +29,24 @@ interface Props {
   // Optional "Browse all N studies →" link rendered under the slice (home).
   browseAll?: { href: string; label: string } | null;
   heading?: string;
+  // v0.14.4: full-corpus id -> disease-site map, emitted as a JSON island so the
+  // per-nav-chip new-counts cover studies the home doesn't render (it slices).
+  // Omit on /studies (rows ARE the corpus; the client derives it from data-site).
+  siteById?: Record<string, string>;
 }
 
-const { items, totalCount, allIds, browseAll = null, heading = 'Studies' } = Astro.props as Props;
+const { items, totalCount, allIds, browseAll = null, heading = 'Studies', siteById } = Astro.props as Props;
 const showCorpusIds = Array.isArray(allIds) && allIds.length > 0;
+const showSiteMap = siteById && Object.keys(siteById).length > 0;
 ---
 
 <section class="recent-section">
   <h2 class="section-label">{heading} · {totalCount}<span class="recent-new-total" aria-live="polite"></span></h2>
   {showCorpusIds && (
     <script type="application/json" id="all-study-ids" set:html={jsonForScriptTag(allIds)} />
+  )}
+  {showSiteMap && (
+    <script type="application/json" id="study-sites" set:html={jsonForScriptTag(siteById)} />
   )}
   <ul class="recent-list">
     {items.map((r) => {
@@ -55,7 +63,7 @@ const showCorpusIds = Array.isArray(allIds) && allIds.length > 0;
       // T2: stable per-study id for the "new since last visit" marker.
       const studyId = `${r.date}#${r.slug}`;
       return (
-        <li class="recent-li" data-study-id={studyId} data-tags={dataTags || undefined}>
+        <li class="recent-li" data-study-id={studyId} data-site={r.disease_site} data-tags={dataTags || undefined}>
           <a class="recent-card" href={`/${r.date}/#${r.slug}`}>
             <div class="recent-meta">
               <span class="recent-new-pill">New</span>
@@ -140,6 +148,14 @@ const showCorpusIds = Array.isArray(allIds) && allIds.length > 0;
   .recent-li:hover .recent-card,
   .recent-card:focus-within { border-color: var(--accent); }
   .recent-li:focus-within .recent-card { border-color: var(--accent); }
+  /* v0.14.4: when a filter is active, the matched (still-visible) cards get a
+     brighter accent edge so the filtered results read as "these matched" rather
+     than just "fewer rows". The flag is set on <html> by the filter rail's
+     applyFilter; non-matching rows are [hidden] so only matches light up. */
+  html[data-filtering] .recent-li:not([hidden]) .recent-card {
+    border-color: var(--accent);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
   .recent-meta {
     display: flex;
     align-items: baseline;

@@ -62,6 +62,12 @@ export interface WhatsNewRefs {
   // never flag them). When omitted, the corpus is the rendered rows' ids (the
   // /studies and legacy single-page case where every study renders).
   allIds?: string[];
+  // v0.14.4: id -> disease-site slug for the full corpus, plus the nav-chip
+  // badge elements (each carrying data-site), so each disease-site chip shows
+  // its count of new-since-last-visit studies. Both optional; absent -> no
+  // per-chip counts (the chips just show their static totals).
+  siteById?: Record<string, string>;
+  navBadges?: ArrayLike<HTMLElement>;
 }
 
 export function isValidId(id: string): boolean {
@@ -117,6 +123,72 @@ export function capSeen(ids: Iterable<string>, max: number): Set<string> {
   if (arr.length <= max) return new Set(arr);
   arr.sort(); // ascending: oldest (lowest date prefix) first
   return new Set(arr.slice(arr.length - max)); // keep the newest `max`
+}
+
+// Render the "· N new <scope>" total element. scope is "overall" by default, or
+// "shown" once the filter rail has narrowed the feed. count === 0 clears it.
+// Exported + pure so the filter-aware recount is unit-testable.
+export function renderNewTotal(
+  totalEl: HTMLElement | null | undefined,
+  count: number,
+  filtered: boolean,
+): void {
+  if (!totalEl) return;
+  const next = count > 0 ? `· ${count} new ${filtered ? 'shown' : 'overall'}` : '';
+  // Idempotent: the total carries aria-live="polite", so re-setting the SAME
+  // text on every filter toggle would re-announce it to a screen reader. Skip
+  // the write when nothing changed (mirrors the rail's lastEmptySignature guard).
+  if (totalEl.textContent === next) return;
+  totalEl.textContent = next;
+  if (next) totalEl.classList.add('is-shown');
+  else totalEl.classList.remove('is-shown');
+}
+
+// Count rendered rows that are BOTH new (.is-new) and currently visible (not
+// [hidden] by the filter rail). Pure over the DOM-ish shape -> unit-testable.
+export function countVisibleNew(rows: ArrayLike<HTMLElement>): number {
+  let n = 0;
+  for (const row of Array.from(rows)) {
+    const isNew = row.classList?.contains?.('is-new') ?? false;
+    const hidden = row.hasAttribute?.('hidden') ?? false;
+    if (isNew && !hidden) n++;
+  }
+  return n;
+}
+
+// Bucket the new study ids by disease site, given an id -> site map. Returns a
+// Map of site slug -> count of new studies. Ids with no mapping are skipped.
+// Pure -> unit-testable.
+export function bucketNewBySite(
+  fresh: Set<string>,
+  siteById: Record<string, string>,
+): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const id of fresh) {
+    const site = siteById[id];
+    if (!site) continue;
+    out.set(site, (out.get(site) ?? 0) + 1);
+  }
+  return out;
+}
+
+// Write the per-site new-counts onto the disease-site nav chips. Each badge
+// carries data-site; show "·N" when that site has new studies, else hide it.
+export function applyNavNewCounts(
+  navBadges: ArrayLike<HTMLElement>,
+  bySite: Map<string, number>,
+): void {
+  for (const badge of Array.from(navBadges)) {
+    const site = badge.getAttribute?.('data-site') ?? '';
+    const n = bySite.get(site) ?? 0;
+    if (n > 0) {
+      badge.textContent = `·${n}`;
+      badge.removeAttribute?.('hidden');
+    } else {
+      badge.textContent = '';
+      badge.setAttribute?.('hidden', '');
+    }
+  }
 }
 
 // Wrap a Storage getter so a throw on access OR on the write-probe (Safari
@@ -203,16 +275,15 @@ export function setupWhatsNew(refs: WhatsNewRefs, deps: WhatsNewDeps = {}): numb
     else row.classList.remove('is-new');
   }
 
-  // 4. Total. "N new overall" (filter-agnostic; per-row pills hide with their
-  //    rows under the filter rail, so the count is labeled "overall").
-  if (refs.totalEl) {
-    if (fresh.size > 0) {
-      refs.totalEl.textContent = `· ${fresh.size} new overall`;
-      refs.totalEl.classList.add('is-shown');
-    } else {
-      refs.totalEl.textContent = '';
-      refs.totalEl.classList.remove('is-shown');
-    }
+  // 4. Total. "N new overall" by default; the filter rail flips it live to
+  //    "N new shown" as it narrows the feed (see initWhatsNew's filterchange
+  //    hook + countVisibleNew).
+  renderNewTotal(refs.totalEl, fresh.size, false);
+
+  // 4b. Per-site new-counts on the disease-site nav chips (v0.14.4). Bucket the
+  //     fresh ids by site and badge each chip with "·N".
+  if (refs.siteById && refs.navBadges) {
+    applyNavNewCounts(refs.navBadges, bucketNewBySite(fresh, refs.siteById));
   }
 
   // 5. Advance the stored set immediately. Monotonic union of the prior set and
@@ -252,5 +323,41 @@ export function initWhatsNew(): void {
       // Malformed corpus JSON -> fall back to the rendered rows.
     }
   }
-  setupWhatsNew({ rows, totalEl, allIds });
+  // v0.14.4: id -> disease-site map for the per-chip new-counts. The home emits
+  // a full-corpus map (it renders a slice); /studies and legacy pages derive it
+  // from each rendered row's data-site (rows ARE the corpus there).
+  let siteById: Record<string, string> = {};
+  const sitesTag = document.getElementById('study-sites');
+  if (sitesTag?.textContent) {
+    try {
+      const parsed = JSON.parse(sitesTag.textContent);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        for (const [k, v] of Object.entries(parsed)) {
+          if (typeof v === 'string') siteById[k] = v;
+        }
+      }
+    } catch {
+      // Malformed -> derive from rendered rows below.
+    }
+  }
+  if (Object.keys(siteById).length === 0) {
+    for (const row of Array.from(rows)) {
+      const id = row.getAttribute('data-study-id');
+      const site = row.getAttribute('data-site');
+      if (id && site) siteById[id] = site;
+    }
+  }
+  const navBadges = document.querySelectorAll<HTMLElement>('.nav-new[data-site]');
+
+  const overall = setupWhatsNew({ rows, totalEl, allIds, siteById, navBadges });
+
+  // v0.14.4: the filter rail (TagFilterRail.astro) dispatches `oncbrain:
+  // filterchange` after each narrow. Recompute the total against the visible
+  // rows so it reads "N new shown" while filtered and reverts to "N new overall"
+  // when cleared. Listener is harmless on pages without a filter rail (the
+  // event simply never fires).
+  document.addEventListener('oncbrain:filterchange', (e) => {
+    const filtering = !!(e as CustomEvent).detail?.filtering;
+    renderNewTotal(totalEl, filtering ? countVisibleNew(rows) : overall, filtering);
+  });
 }

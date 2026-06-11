@@ -7,6 +7,10 @@ import {
   partitionNew,
   capSeen,
   setupWhatsNew,
+  renderNewTotal,
+  countVisibleNew,
+  bucketNewBySite,
+  applyNavNewCounts,
   type StorageLike,
 } from '../src/lib/whats-new.ts';
 
@@ -384,5 +388,112 @@ describe('setupWhatsNew with a sliced corpus (allIds, T3)', () => {
     expect(count).toBe(1);
     expect(rows[0]!._classes.has('is-new')).toBe(true);
     expect(parseSeen(local.data.get(SEED) ?? null)!.has('2026-06-09#new')).toBe(true);
+  });
+});
+
+// ── v0.14.4: filter-aware count + per-nav-chip new-counts ──────────────────
+describe('renderNewTotal', () => {
+  function totalStub() {
+    const classes = new Set<string>();
+    return {
+      textContent: '',
+      classList: {
+        add: (c: string) => { classes.add(c); },
+        remove: (c: string) => { classes.delete(c); },
+        contains: (c: string) => classes.has(c),
+      },
+      _classes: classes,
+    };
+  }
+  it('labels "overall" vs "shown" and clears at zero', () => {
+    const t = totalStub();
+    renderNewTotal(t as unknown as HTMLElement, 3, false);
+    expect(t.textContent).toBe('· 3 new overall');
+    expect(t._classes.has('is-shown')).toBe(true);
+
+    renderNewTotal(t as unknown as HTMLElement, 2, true);
+    expect(t.textContent).toBe('· 2 new shown');
+
+    renderNewTotal(t as unknown as HTMLElement, 0, true);
+    expect(t.textContent).toBe('');
+    expect(t._classes.has('is-shown')).toBe(false);
+  });
+  it('null totalEl is a no-op (no throw)', () => {
+    expect(() => renderNewTotal(null, 5, false)).not.toThrow();
+  });
+  it('is idempotent: re-rendering the same value does not rewrite (aria-live guard)', () => {
+    let writes = 0;
+    let value = '';
+    const classes = new Set<string>();
+    const t = {
+      get textContent() { return value; },
+      set textContent(v: string) { value = v; writes++; },
+      classList: { add: (c: string) => { classes.add(c); }, remove: (c: string) => { classes.delete(c); }, contains: (c: string) => classes.has(c) },
+    };
+    renderNewTotal(t as unknown as HTMLElement, 3, false);
+    renderNewTotal(t as unknown as HTMLElement, 3, false); // same -> skipped
+    expect(value).toBe('· 3 new overall');
+    expect(writes).toBe(1);
+  });
+});
+
+describe('countVisibleNew', () => {
+  function row(isNew: boolean, hidden: boolean) {
+    return {
+      classList: { contains: (c: string) => c === 'is-new' && isNew },
+      hasAttribute: (a: string) => a === 'hidden' && hidden,
+    };
+  }
+  it('counts rows that are new AND not hidden', () => {
+    const rows = [row(true, false), row(true, true), row(false, false), row(true, false)];
+    expect(countVisibleNew(rows as unknown as ArrayLike<HTMLElement>)).toBe(2);
+  });
+  it('zero when nothing is new or all new are hidden', () => {
+    expect(countVisibleNew([row(false, false), row(true, true)] as unknown as ArrayLike<HTMLElement>)).toBe(0);
+  });
+});
+
+describe('bucketNewBySite', () => {
+  it('buckets fresh ids by site and skips unmapped ids', () => {
+    const fresh = new Set(['2026-06-09#a', '2026-06-09#b', '2026-06-08#c', '2026-06-08#z']);
+    const siteById: Record<string, string> = {
+      '2026-06-09#a': 'breast',
+      '2026-06-09#b': 'breast',
+      '2026-06-08#c': 'prostate',
+    };
+    const m = bucketNewBySite(fresh, siteById);
+    expect(m.get('breast')).toBe(2);
+    expect(m.get('prostate')).toBe(1);
+    expect(m.size).toBe(2); // unmapped '...#z' dropped
+  });
+  it('empty fresh -> empty map', () => {
+    expect(bucketNewBySite(new Set(), { 'x#y': 'breast' }).size).toBe(0);
+  });
+});
+
+describe('applyNavNewCounts', () => {
+  function badge(site: string) {
+    const attrs = new Map<string, string>([['data-site', site], ['hidden', '']]);
+    return {
+      textContent: '',
+      getAttribute: (a: string) => (attrs.has(a) ? attrs.get(a)! : null),
+      setAttribute: (a: string, v: string) => { attrs.set(a, v); },
+      removeAttribute: (a: string) => { attrs.delete(a); },
+      _attrs: attrs,
+    };
+  }
+  it('writes "·N" + unhides sites with new; clears + hides zero', () => {
+    const b1 = badge('breast');
+    const b2 = badge('prostate');
+    const b3 = badge('lung');
+    applyNavNewCounts(
+      [b1, b2, b3] as unknown as ArrayLike<HTMLElement>,
+      new Map([['breast', 2], ['prostate', 1]]),
+    );
+    expect(b1.textContent).toBe('·2');
+    expect(b1._attrs.has('hidden')).toBe(false);
+    expect(b2.textContent).toBe('·1');
+    expect(b3.textContent).toBe('');
+    expect(b3._attrs.has('hidden')).toBe(true);
   });
 });
