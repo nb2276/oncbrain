@@ -193,6 +193,7 @@ for (const study of allStudiesOnDate) {
               papers={sourcesByStudy.get(study)!.papers}
               slides={sourcesByStudy.get(study)!.slides}
               shareUrl={`/sites/${site.disease_site}/#${date}-${resolvedSlug}`}
+              shareImageUrl={`/og/study/${date}/${resolvedSlug}.png`}
               tagChips={studyTagChips(study, conference)}
               siblings={siblingPreviews.get(siblingKey) ?? []}
               dataTags={studyDataTags(study, site.disease_site, conference?.slug ?? null)}

@@ -1,0 +1,120 @@
+---
+// Disease-site nav chip row: the primary cross-corpus wayfinding surface.
+// Extracted from index.astro (v0.14.3) so the home AND /studies share it (T3
+// dropped the nav from /studies; both adversarial + codex flagged the wayfinding
+// gap). Self-contained: it computes the populated/empty split from the live
+// site summaries, so callers just drop in <SiteNav />.
+import { DISEASE_SITES } from '../lib/disease-sites.ts';
+import { listSiteSummaries } from '../lib/digest-data.ts';
+
+const countBySlug = new Map(listSiteSummaries().map((s) => [s.disease_site, s.occurrences.length]));
+const navSites = DISEASE_SITES.map((s) => ({ ...s, count: countBySlug.get(s.slug) ?? 0 }));
+const navPopulated = navSites.filter((s) => s.count > 0);
+const navEmpty = navSites.filter((s) => s.count === 0);
+---
+
+<nav class="site-nav" aria-label="Browse by disease site">
+  {navPopulated.length > 0 && (
+    <ul class="nav-row">
+      {navPopulated.map((s) => (
+        <li>
+          <a class="nav-chip" href={`/sites/${s.slug}/`} title={`${s.label}: ${s.rationale}`}>
+            <span class="nav-emoji" aria-hidden="true">{s.emoji}</span>
+            <span class="nav-label">{s.label}</span>
+            <span class="nav-count">{s.count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+  {navEmpty.length > 0 && (
+    <details class="nav-empty-toggle">
+      <summary>+{navEmpty.length} sites not yet covered</summary>
+      <ul class="nav-row nav-row-empty">
+        {navEmpty.map((s) => (
+          <li>
+            <span class="nav-chip nav-chip-empty" title={`${s.label}: ${s.rationale} (not yet covered)`}>
+              <span class="nav-emoji" aria-hidden="true">{s.emoji}</span>
+              <span class="nav-label">{s.label}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )}
+</nav>
+
+<style>
+  .site-nav {
+    margin: 0 0 1.5rem;
+  }
+  /* Kept visible at every viewport: the left rail is the TagFilterRail (filter,
+     not site nav), so this chip row is the only disease-site navigation surface
+     on desktop too. */
+  .nav-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .nav-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 44px;
+    padding: 0.45rem 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--fg);
+    text-decoration: none;
+    line-height: 1.2;
+  }
+  .nav-chip:hover { border-color: var(--accent); }
+  .nav-emoji { font-size: 1.05rem; line-height: 1; }
+  .nav-label { font-weight: 500; }
+  .nav-count {
+    color: var(--fg-muted);
+    font-size: 0.75rem;
+    margin-left: 0.15rem;
+  }
+  .nav-chip-empty {
+    color: var(--fg-muted);
+    opacity: 0.6;
+    cursor: default;
+  }
+  .nav-chip-empty:hover { border-color: var(--border); }
+  .nav-chip-empty .nav-label { font-weight: 400; }
+  /* Desaturate the emoji on muted chips so the populated/empty split reads
+     instantly at scanning speed. */
+  .nav-chip-empty .nav-emoji {
+    filter: saturate(0.25) grayscale(0.55);
+  }
+
+  /* Collapsible empty-sites section. */
+  .nav-empty-toggle {
+    margin-top: 0.5rem;
+  }
+  .nav-empty-toggle summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0.35rem 0.7rem;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    cursor: pointer;
+    list-style: none;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    user-select: none;
+  }
+  .nav-empty-toggle summary::-webkit-details-marker { display: none; }
+  .nav-empty-toggle summary:hover { color: var(--fg); border-color: var(--accent); }
+  .nav-empty-toggle[open] summary { color: var(--fg); }
+  .nav-row-empty { margin-top: 0.5rem; }
+</style>

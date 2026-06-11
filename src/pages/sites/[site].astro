@@ -111,6 +111,7 @@ const filterOptions = buildFilterRailOptions(
               papers={occ.papers ?? []}
               slides={occ.slides ?? []}
               shareUrl={`/sites/${summary.disease_site}/#${anchorByOcc.get(occ)}`}
+              shareImageUrl={`/og/study/${occ.date}/${occ.resolvedSlug}.png`}
               tagChips={studyTagChips(occ.study, occ.conference)}
               siblings={siblingPreviews.get(siblingKey) ?? []}
               dataTags={studyDataTags(occ.study, summary.disease_site, occ.conference?.slug ?? null)}
