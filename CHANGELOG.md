@@ -2,6 +2,30 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.14.6] - 2026-06-10
+
+Bundles three independent improvements merged together (#39, #40, #41).
+
+### Added
+
+- **Independently selectable model per pipeline phase.** Each of the three build
+  phases can now run a different model: `DIGEST_GROUPING_MODEL` (Phase 1),
+  `DIGEST_STUDY_MODEL` (Phase 2, the deep per-study analysis), and
+  `DIGEST_SYNTHESIS_MODEL` (Phase 3), each falling back to `DIGEST_MODEL` then the
+  client default. The daily cron now runs Phase 2 on Opus.
+- **Push distribution to a Telegram channel (T5).** After the daily build, a
+  reader-facing announcement of each digest (top-line + verdict-emoji study list
+  + a deep link that previews the OG card) is posted to a public Telegram channel
+  via `notify:channel`. Dormant until `TELEGRAM_CHANNEL_ID` is set; email
+  subscribe remains a later follow-on.
+
+### Changed
+
+- **Desktop two-column home.** The home was one narrow column stranded in empty
+  side margin on wide screens; it now reads as a two-column editorial layout
+  (hero + studies feed in a wide main column, conferences + tag activity + tag
+  chips in a sticky right sidebar). Mobile stays a single stacked column.
+
 ## [0.14.5] - 2026-06-10
 
 ### Added

@@ -18,10 +18,9 @@ Format: `- [scope] description (source)`
 
 ## v0.14 — verdict triage + what's-new (deferred from 2026-06-09 office-hours design + eng review)
 
-Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-distribution.md`. T1 (verdict-as-peripheral-signal) + T2 (what's-new feed) are landing now; the items below were explicitly deferred.
+Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-distribution.md`. T1-T5 shipped (verdict triage, what's-new feed, home/browse split, OG + share-image cards, Telegram channel distribution). Remaining:
 
-- **T3 — home-feed wayfinding rework.** The home feed renders all 71 studies flat (`index.astro:52` `listRecentStudies(MAX)`), but `DESIGN.md` described "~10". Reframe the home around the returning-reader job: latest-digest hero + what's-new, with the full index as a separate browse view (cap + "load more" on one page is the minimal variant; split home/`/browse` route is the cleaner one). **Depends-on / must account for T2:** when the feed is capped, the "N new overall" count can exceed the visible cap (e.g. "20 new" but 15 shown) and the seen-id-set must still see the full current id list to mark correctly. T3 must read the full feed for counting even if it renders a slice. (office-hours design T3 + codex outside-voice #5)
-- **T5 — push distribution (Telegram first, email later).** Telegram channel post step in `scripts/daily-build.sh` reusing existing bot infra (`telegram-ingest.ts`, `notify-curator.ts`) is the cheap proof; email subscribe (Buttondown/Listmonk/SES, daily or 🚀/↔️ weekly roundup) is the scale play but needs a third-party list service + unsubscribe/compliance (static site has no backend). Per-site follow rides on either via the disease-site enum. (office-hours design T5)
+- **Email subscribe distribution (T5 scale play).** The Telegram channel cheap-proof shipped in v0.14.6 (`notify:channel`). Email is the scale play but needs a third-party list service (Buttondown / Listmonk / SES) + unsubscribe/compliance (the static site has no backend). Daily or a 🚀/↔️ weekly roundup; per-site follow rides on the disease-site enum. (office-hours design T5)
 
 ## v0.5.1 — hardening hotfix
 
