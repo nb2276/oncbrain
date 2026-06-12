@@ -622,6 +622,36 @@ describe('validateStudyTables', () => {
     expect(out.details[0]).toEqual(study.details[0]);
   });
 
+  // Parenthetical-comma CI form ("(2.2, 4.0)") — the exact shape figure OCR
+  // emits for KM medians. Verified against source adjacency like any range.
+  it('preserves a parenthetical-comma CI whose bounds are adjacent in source', () => {
+    const localTweets: DigestInputTweet[] = [{
+      id: 1, author: '@a', text: 'Median OS 3.0 (2.2, 4.0) and DFS 1.5',
+      image_ocr_texts: [''], image_urls: [],
+    }];
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [{ text: 'mOS', table: { columns: ['EP', 'Arm'], rows: [['OS', '3.0 yr (2.2, 4.0)']] } }],
+    };
+    expect(validateStudyTables(study, localTweets).details[0]).toEqual(study.details[0]);
+  });
+
+  // "to"-connector range, and the fabrication catch on it.
+  it('drops a "X to Y" range whose bounds are not adjacent in source', () => {
+    const localTweets: DigestInputTweet[] = [{
+      id: 1, author: '@a', text: 'dose 2 Gy in 35 sessions to 70 Gy total then 5 boost',
+      image_ocr_texts: [''], image_urls: [],
+    }];
+    const study: DigestStudy = {
+      ...baseStudy,
+      // 2 and 70 both appear but never adjacent → "2 to 70" is fabricated
+      details: [{ text: 'dose', table: { columns: ['EP', 'Arm'], rows: [['RT', '2 to 70 fractions']] } }],
+    };
+    const out = validateStudyTables(study, localTweets);
+    expect(typeof out.details[0]).toBe('string');
+    expect(out.details[0] as string).toContain('comparison values omitted');
+  });
+
   it('falls back to cluster name if model omits name', () => {
     const localCluster = { slug: 'foo', name: 'PRESTIGE-PSMA', disease_site: 'prostate', tweet_ids: [1] };
     const raw = JSON.stringify({ tldr: 'y', details: [] });
@@ -972,6 +1002,25 @@ describe('validateKeyFigure', () => {
     expect(r.caption).toBeNull();
     expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
     expect(r.reason).toContain('0.99');
+  });
+
+  // v0.15: the multi-token range check also runs on TABLE-form caption cells.
+  // OCR has 0.48 and 0.79 but separated by 0.62 → "0.48-0.79" is fabricated.
+  it('drops a table caption whose CI cell bounds are not adjacent in OCR', () => {
+    const localTweets: DigestInputTweet[] = [{
+      id: 1, author: '@a', text: 't',
+      image_urls: ['https://pbs.twimg.com/media/a.jpg'],
+      image_ocr_texts: ['HR 0.48 then 0.62 then 0.79'],
+    }];
+    const r = validateKeyFigure(
+      { columns: ['Arm', 'HR (95% CI)'], rows: [['Exp', '0.62 (0.48-0.79)']] },
+      'https://pbs.twimg.com/media/a.jpg',
+      localTweets,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+    expect(r.reason).toContain('not traceable');
   });
 
   it('drops a table caption with zero numeric tokens (all-text cells)', () => {
