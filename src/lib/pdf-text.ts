@@ -39,8 +39,21 @@ const HIGH_DISTINCT_FLOOR = 200;
 // Cap rasterized pages — bounds OCR cost on a 200-page thesis PDF. The first
 // pages carry title/abstract/methods, which is what the digest needs.
 const MAX_OCR_PAGES = 15;
+
+// Cap stored figure OCR so it can't crowd out the body excerpt (distinct DB
+// column, distinct Phase 2 prompt section). Single source of truth for both the
+// live-ingest path (inbox-enrichment) and the back-catalog backfill CLI.
+export const MAX_FIGURE_OCR_CHARS = 6000;
 const DEFAULT_TIMEOUT_MS = 60_000;
 const OCR_TMP_PREFIX = 'oncbrain-ocr-pdf-';
+
+// Figure-OCR (Path A): a raster image must clear this pixel area to count as a
+// "figure page" worth OCR'ing. Filters out small logos, journal marks, ORCID
+// icons, and author headshots; a real KM curve / forest plot is ~1300x1000.
+const FIGURE_MIN_IMAGE_AREA = 400 * 300;
+// Cap figure pages OCR'd per paper. A paper rarely has more than a handful of
+// result figures; this bounds cost on a supplement-heavy PDF.
+const MAX_FIGURE_OCR_PAGES = 12;
 
 export type PdfToolErrorKind =
   | 'poppler-missing' // pdftotext / pdftoppm not on PATH
@@ -205,6 +218,130 @@ async function rasterizeAndOcr(
   }
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Figure-OCR (Path A): recover numbers printed INSIDE figures.
+//
+// pdftotext reads the text layer; figures (KM curves, forest plots) and some
+// publisher tables are embedded as raster images, so their numbers (subgroup
+// medians, hazard ratios, 5-yr estimates, n-at-risk) are invisible to it. They
+// often live on the last pages of an accepted manuscript, past the OCR-fallback
+// page cap. This targets only the pages that actually carry a substantial raster
+// image — found via `pdfimages -list` — and OCRs just those, so the build-time
+// study agent can GROUND a figure-locked magnitude instead of flagging it
+// missing. Best-effort throughout: any failure degrades to '' (the summary still
+// ships off the text layer), and it never throws.
+// ────────────────────────────────────────────────────────────────────────────
+
+// 1-based page numbers carrying a raster image at least FIGURE_MIN_IMAGE_AREA in
+// size. Parsed from `pdfimages -list` columns: page, num, type, width, height.
+// Skips 'smask' (soft-mask companion) rows and sub-threshold images. Returns []
+// when pdfimages is missing/fails or the PDF is fully vector (text layer already
+// covers those figures).
+export async function figurePages(
+  absPath: string,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  spawnFn: SpawnFn = spawn as SpawnFn,
+): Promise<number[]> {
+  let listing: string;
+  try {
+    listing = await runPoppler('pdfimages', ['-list', absPath], timeoutMs, spawnFn);
+  } catch {
+    return [];
+  }
+  const pages = new Set<number>();
+  for (const line of listing.split(/\r?\n/)) {
+    const cols = line.trim().split(/\s+/);
+    const page = Number(cols[0]);
+    const type = cols[2];
+    const w = Number(cols[3]);
+    const h = Number(cols[4]);
+    if (!Number.isInteger(page) || page < 1) continue; // header / separator rows
+    if (type !== 'image') continue; // ignore 'smask' / 'stencil' companions
+    if (!Number.isFinite(w) || !Number.isFinite(h)) continue;
+    if (w * h < FIGURE_MIN_IMAGE_AREA) continue;
+    pages.add(page);
+  }
+  return [...pages].sort((a, b) => a - b);
+}
+
+// Rasterize one page to PNG and OCR it. Mirrors rasterizeAndOcr's temp-dir +
+// cleanup pattern but for a single page (pdftoppm -f/-l <page>).
+async function ocrSinglePage(
+  absPath: string,
+  page: number,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  deps: { spawnFn?: SpawnFn; ocr?: (p: string) => Promise<OcrResult> } = {},
+): Promise<string> {
+  const spawnFn = deps.spawnFn ?? (spawn as SpawnFn);
+  const ocr = deps.ocr ?? ocrFile;
+  const dir = mkdtempSync(join(tmpdir(), OCR_TMP_PREFIX));
+  try {
+    await runPoppler(
+      'pdftoppm',
+      ['-png', '-r', '200', '-f', String(page), '-l', String(page), absPath, join(dir, 'page')],
+      timeoutMs,
+      spawnFn,
+    );
+    const pngs = readdirSync(dir)
+      .filter((f) => f.toLowerCase().endsWith('.png'))
+      .sort();
+    const parts: string[] = [];
+    for (const f of pngs) {
+      const result = await ocr(join(dir, f));
+      if (result.entry.text.trim()) parts.push(result.entry.text.trim());
+    }
+    return parts.join('\n\n');
+  } finally {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      // best-effort; the startup sweep self-heals leftover dirs
+    }
+  }
+}
+
+export type ExtractPdfFigureOcrOptions = {
+  // Injection seams for tests; default to the real pdfimages + Vision pipeline.
+  pages?: (absPath: string) => Promise<number[]>;
+  ocrPage?: (absPath: string, page: number) => Promise<string>;
+  ocrAvailable?: () => boolean;
+  timeoutMs?: number;
+  maxPages?: number;
+};
+
+// OCR just the figure pages of a PDF and return their joined text, page-tagged.
+// '' when OCR isn't available, no figure pages exist, or every page fails.
+// NEVER throws — this is additive context layered on top of extractPdfText.
+export async function extractPdfFigureOcr(
+  absPath: string,
+  opts: ExtractPdfFigureOcrOptions = {},
+): Promise<string> {
+  const available = opts.ocrAvailable ?? isOcrAvailable;
+  if (!available()) return '';
+  const listPages = opts.pages ?? ((p: string) => figurePages(p, opts.timeoutMs));
+  const ocrPage = opts.ocrPage ?? ((p: string, page: number) => ocrSinglePage(p, page, opts.timeoutMs));
+  const maxPages = opts.maxPages ?? MAX_FIGURE_OCR_PAGES;
+
+  let pages: number[];
+  try {
+    pages = await listPages(absPath);
+  } catch {
+    return '';
+  }
+  if (pages.length === 0) return '';
+
+  const parts: string[] = [];
+  for (const page of pages.slice(0, maxPages)) {
+    try {
+      const txt = (await ocrPage(absPath, page)).trim();
+      if (txt) parts.push(`[p.${page}]\n${txt}`);
+    } catch {
+      // skip this page; one bad page shouldn't lose the rest
+    }
+  }
+  return parts.join('\n\n');
+}
+
 // Run a poppler binary, resolve stdout. ENOENT (binary missing) → typed
 // poppler-missing; non-zero exit → extract-failed.
 function runPoppler(
@@ -286,4 +423,4 @@ export function sweepOrphanedOcrTmpDirs(maxAgeMs = 60 * 60 * 1000): number {
 
 // Exposed for tests that exercise the real OCR-fallback wiring with injected
 // spawn + ocr stubs (avoids shelling out to poppler/Vision in CI).
-export const __test = { rasterizeAndOcr, runPoppler };
+export const __test = { rasterizeAndOcr, runPoppler, ocrSinglePage };

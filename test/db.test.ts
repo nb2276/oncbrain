@@ -3,6 +3,7 @@ import {
   openDb,
   saveBookmark,
   savePaper,
+  listPapers,
   saveSlideUpload,
   listBookmarks,
   listBookmarkDates,
@@ -163,6 +164,42 @@ describe('db', () => {
 
     it('returns empty array when there are no sources', () => {
       expect(listAllSourceDates(db)).toEqual([]);
+    });
+  });
+
+  describe('savePaper figure_ocr_md (v0.15)', () => {
+    it('round-trips figure OCR through insert and listPapers', () => {
+      savePaper(db, {
+        doi: '10.1200/fig1',
+        title: 'Figure paper',
+        bookmark_date: '2026-06-10',
+        fulltext_excerpt_md: 'Methods and results body text',
+        figure_ocr_md: '[p.38]\nPathologic N Stage\nNO 28.6 (14.9-42.2) 48.1 (33.3-62.9)',
+      });
+      const paper = listPapers(db, { bookmark_date: '2026-06-10' })[0];
+      expect(paper.figure_ocr_md).toContain('48.1 (33.3-62.9)');
+    });
+
+    it('defaults figure_ocr_md to null when not provided (URL-ingested paper)', () => {
+      savePaper(db, { doi: '10.1200/nofig', title: 'No-figure paper', bookmark_date: '2026-06-10' });
+      const paper = listPapers(db, { bookmark_date: '2026-06-10' })[0];
+      expect(paper.figure_ocr_md).toBeNull();
+    });
+
+    it('back-fills figure OCR onto an existing row that lacked it (PDF arrives after URL)', () => {
+      // First ingest via DOI/URL with no figure OCR.
+      const first = savePaper(db, { doi: '10.1200/merge', title: 'Mergeable', bookmark_date: '2026-06-10' });
+      // Same paper later forwarded as a PDF carrying figure OCR → attaches, same row.
+      const second = savePaper(db, {
+        doi: '10.1200/merge',
+        title: 'Mergeable',
+        bookmark_date: '2026-06-10',
+        figure_ocr_md: 'Median OS (95% CI) 3.0 (2.2, 4.0)',
+      });
+      expect(second.id).toBe(first.id);
+      expect(second.created).toBe(false);
+      const paper = listPapers(db, { bookmark_date: '2026-06-10' })[0];
+      expect(paper.figure_ocr_md).toBe('Median OS (95% CI) 3.0 (2.2, 4.0)');
     });
   });
 

@@ -33,6 +33,48 @@ describe('PDF publish boundary', () => {
   });
 });
 
+// v0.15 — the committed digest artifacts (data/digests/<date>.json) are
+// published verbatim (consumed by Astro getStaticPaths + the JSON API). They
+// must NEVER carry copyrighted full text: fulltext_excerpt_md (PDF body) or
+// figure_ocr_md (OCR of figure pages). buildArtifact keeps both out via an
+// explicit field allowlist, but that's hand-maintained — a future `...p` spread
+// would silently start publishing. This guards the real deploy surface so the
+// boundary can't regress without a red test.
+describe('digest artifact publish boundary (v0.15)', () => {
+  const root = resolve(process.cwd());
+  const FORBIDDEN_KEYS = ['fulltext_excerpt_md', 'figure_ocr_md'];
+
+  function digestFiles(): string[] {
+    const { readdirSync } = require('node:fs') as typeof import('node:fs');
+    const dir = resolve(root, 'data/digests');
+    if (!existsSync(dir)) return [];
+    return readdirSync(dir)
+      .filter((n) => n.endsWith('.json'))
+      .map((n) => resolve(dir, n));
+  }
+
+  it('no committed digest paper object carries copyrighted full-text fields', () => {
+    for (const f of digestFiles()) {
+      const artifact = JSON.parse(readFileSync(f, 'utf-8'));
+      for (const paper of artifact.papers ?? []) {
+        for (const key of FORBIDDEN_KEYS) {
+          expect(paper, `${f}: paper ${paper.id} leaks ${key}`).not.toHaveProperty(key);
+        }
+      }
+    }
+  });
+
+  it('covers at least the days that have papers (guard is actually exercised)', () => {
+    // Sanity: at least one committed digest has a papers array, so the loop above
+    // isn't vacuously passing on an empty corpus.
+    const withPapers = digestFiles().filter((f) => {
+      const a = JSON.parse(readFileSync(f, 'utf-8'));
+      return Array.isArray(a.papers) && a.papers.length > 0;
+    });
+    expect(withPapers.length).toBeGreaterThan(0);
+  });
+});
+
 // v0.10 surface — extends the boundary to the new tag pages. A future
 // rendering bug or schema drift could conceivably inject a vault PDF link
 // (data/obsidian/papers/<site>/<slug>.pdf) into /tags/<slug>/ output;

@@ -114,6 +114,7 @@ export type Paper = {
   pub_date: string | null; // YYYY-MM-DD when known
   abstract: string | null;
   fulltext_excerpt_md: string | null; // section-filtered Methods + Results, ≤2000 tokens
+  figure_ocr_md: string | null; // v0.15: Vision OCR of figure pages (numbers printed inside figures); null for non-PDF papers
   mesh_terms_json: string | null;
   bookmark_date: string;
   conference_slug: string | null;
@@ -136,6 +137,7 @@ export type NewPaper = {
   pub_date?: string | null;
   abstract?: string | null;
   fulltext_excerpt_md?: string | null;
+  figure_ocr_md?: string | null;
   mesh_terms_json?: string | null;
   bookmark_date: string;
   conference_slug?: string | null;
@@ -236,6 +238,7 @@ CREATE TABLE IF NOT EXISTS papers (
   pub_date TEXT,
   abstract TEXT,
   fulltext_excerpt_md TEXT,
+  figure_ocr_md TEXT,
   mesh_terms_json TEXT,
   bookmark_date TEXT NOT NULL,
   conference_slug TEXT,
@@ -311,6 +314,7 @@ export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): D
   migrateAddImageOcrTexts(db);
   migratePapersAllowDoiOnly(db, path);
   migratePapersAddPdfColumns(db, path);
+  migratePapersAddFigureOcr(db);
   // content_hash column is guaranteed to exist now (fresh SCHEMA or migration);
   // create its partial unique index here rather than in SCHEMA so an old-shape
   // DB doesn't error on the missing column before the migration runs.
@@ -492,6 +496,18 @@ function migrateAddImageOcrTexts(db: Database.Database): void {
   const cols = db.prepare("PRAGMA table_info(bookmarks)").all() as { name: string }[];
   if (!cols.some((c) => c.name === 'image_ocr_texts')) {
     db.exec('ALTER TABLE bookmarks ADD COLUMN image_ocr_texts TEXT');
+  }
+}
+
+// Non-destructive ALTER for v0.15 (figure-OCR Path A): figure_ocr_md holds the
+// Vision OCR of a paper's figure pages — numbers printed inside figures (KM
+// medians, forest-plot estimates, image-rendered tables) that pdftotext can't
+// see. Runs after the papers-table rebuild migrations, so it lands on whatever
+// shape they produced. Idempotent.
+function migratePapersAddFigureOcr(db: Database.Database): void {
+  const cols = db.prepare('PRAGMA table_info(papers)').all() as { name: string }[];
+  if (cols.length > 0 && !cols.some((c) => c.name === 'figure_ocr_md')) {
+    db.exec('ALTER TABLE papers ADD COLUMN figure_ocr_md TEXT');
   }
 }
 
@@ -883,6 +899,7 @@ type PaperMatch = {
   content_hash: string | null;
   pdf_path: string | null;
   fulltext_excerpt_md: string | null;
+  figure_ocr_md: string | null;
 };
 
 export function savePaper(
@@ -902,7 +919,7 @@ export function savePaper(
   const matchBy = (clause: string, value: string): PaperMatch | undefined =>
     db
       .prepare(
-        `SELECT id, pmid, content_hash, pdf_path, fulltext_excerpt_md FROM papers WHERE ${clause}`,
+        `SELECT id, pmid, content_hash, pdf_path, fulltext_excerpt_md, figure_ocr_md FROM papers WHERE ${clause}`,
       )
       .get(value) as PaperMatch | undefined;
 
@@ -933,6 +950,10 @@ export function savePaper(
       sets.push('fulltext_excerpt_md = ?');
       vals.push(p.fulltext_excerpt_md);
     }
+    if (p.figure_ocr_md && !existing.figure_ocr_md) {
+      sets.push('figure_ocr_md = ?');
+      vals.push(p.figure_ocr_md);
+    }
     if (sets.length > 0) {
       vals.push(existing.id);
       db.prepare(`UPDATE papers SET ${sets.join(', ')} WHERE id = ?`).run(...vals);
@@ -944,9 +965,9 @@ export function savePaper(
     .prepare(
       `INSERT INTO papers
        (pmid, doi, pmc_id, source_url, content_hash, pdf_path, title, authors_json,
-        journal, pub_date, abstract, fulltext_excerpt_md, mesh_terms_json,
+        journal, pub_date, abstract, fulltext_excerpt_md, figure_ocr_md, mesh_terms_json,
         bookmark_date, conference_slug, curator_note, inbox_item_id, fetched_via, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       pmid,
@@ -961,6 +982,7 @@ export function savePaper(
       p.pub_date ?? null,
       p.abstract ?? null,
       p.fulltext_excerpt_md ?? null,
+      p.figure_ocr_md ?? null,
       p.mesh_terms_json ?? null,
       p.bookmark_date,
       p.conference_slug ?? null,

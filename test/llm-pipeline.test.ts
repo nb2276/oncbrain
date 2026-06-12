@@ -590,6 +590,104 @@ describe('validateStudyTables', () => {
     expect(out.details).toEqual(study.details);
   });
 
+  // v0.15 hardening: a fabricated CI whose two bounds each appear in source but
+  // NOT adjacent. The per-token check alone would wave it through.
+  it('drops a table CI whose bounds appear in source but never adjacent (fabricated interval)', () => {
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [{
+        text: 'HRs',
+        // 0.50 and 0.97 both appear in source, but in different tweets — never
+        // as an adjacent pair, so "0.50-0.97" is an invented interval.
+        table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.50 (0.50-0.97)']] },
+      }],
+    };
+    const out = validateStudyTables(study, tweets);
+    expect(typeof out.details[0]).toBe('string');
+    expect(out.details[0] as string).toContain('comparison values omitted');
+  });
+
+  // The flip side: a real CI the model writes with a dash, where source spaced
+  // the bounds. Adjacency (not the delimiter) is the signal, so it must survive.
+  it('preserves a dash-written CI when source has the bounds space-separated', () => {
+    const localTweets: DigestInputTweet[] = [{
+      id: 1, author: '@a', text: 'OS HR 0.62 95% CI 0.48 0.79 median 14.2',
+      image_ocr_texts: [''], image_urls: [],
+    }];
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [{ text: 'OS', table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.62 (0.48-0.79)']] } }],
+    };
+    const out = validateStudyTables(study, localTweets);
+    expect(out.details[0]).toEqual(study.details[0]);
+  });
+
+  // Parenthetical-comma CI form ("(2.2, 4.0)") — the exact shape figure OCR
+  // emits for KM medians. Verified against source adjacency like any range.
+  it('preserves a parenthetical-comma CI whose bounds are adjacent in source', () => {
+    const localTweets: DigestInputTweet[] = [{
+      id: 1, author: '@a', text: 'Median OS 3.0 (2.2, 4.0) and DFS 1.5',
+      image_ocr_texts: [''], image_urls: [],
+    }];
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [{ text: 'mOS', table: { columns: ['EP', 'Arm'], rows: [['OS', '3.0 yr (2.2, 4.0)']] } }],
+    };
+    expect(validateStudyTables(study, localTweets).details[0]).toEqual(study.details[0]);
+  });
+
+  // codex P1: adjacency must be per-source-fragment. 0.50 is the only number in
+  // tweet 1, 0.97 the only one in tweet 2 — joining the sources would make them a
+  // spurious adjacent pair; a fabricated "(0.50-0.97)" must still be rejected.
+  it('rejects a CI pairing one source\'s number with another source\'s (cross-source)', () => {
+    const localTweets: DigestInputTweet[] = [
+      { id: 1, author: '@a', text: 'POP-RT primary HR 0.50', image_ocr_texts: [''], image_urls: [] },
+      { id: 2, author: '@b', text: 'PEACE-2 primary HR 0.97', image_ocr_texts: [''], image_urls: [] },
+    ];
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [{ text: 'HR', table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.50 (0.50-0.97)']] } }],
+    };
+    const out = validateStudyTables(study, localTweets);
+    expect(typeof out.details[0]).toBe('string');
+    expect(out.details[0] as string).toContain('comparison values omitted');
+  });
+
+  // codex P2: a bracketed CI "[lo, hi]" is validated as a unit, like "(lo, hi)".
+  it('validates a bracketed CI "[lo, hi]" as a range unit', () => {
+    const localTweets: DigestInputTweet[] = [
+      { id: 1, author: '@a', text: 'OS HR 0.62 95% CI 0.48 0.79', image_ocr_texts: [''], image_urls: [] },
+    ];
+    // real: bounds adjacent in source → kept
+    const ok: DigestStudy = {
+      ...baseStudy,
+      details: [{ text: 'OS', table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.62 [0.48, 0.79]']] } }],
+    };
+    expect(validateStudyTables(ok, localTweets).details[0]).toEqual(ok.details[0]);
+    // fabricated: 0.48 and 0.62 both in source but NOT adjacent (95 between) → dropped via the range gate
+    const bad: DigestStudy = {
+      ...baseStudy,
+      details: [{ text: 'OS', table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.79 [0.48, 0.62]']] } }],
+    };
+    expect(typeof validateStudyTables(bad, localTweets).details[0]).toBe('string');
+  });
+
+  // "to"-connector range, and the fabrication catch on it.
+  it('drops a "X to Y" range whose bounds are not adjacent in source', () => {
+    const localTweets: DigestInputTweet[] = [{
+      id: 1, author: '@a', text: 'dose 2 Gy in 35 sessions to 70 Gy total then 5 boost',
+      image_ocr_texts: [''], image_urls: [],
+    }];
+    const study: DigestStudy = {
+      ...baseStudy,
+      // 2 and 70 both appear but never adjacent → "2 to 70" is fabricated
+      details: [{ text: 'dose', table: { columns: ['EP', 'Arm'], rows: [['RT', '2 to 70 fractions']] } }],
+    };
+    const out = validateStudyTables(study, localTweets);
+    expect(typeof out.details[0]).toBe('string');
+    expect(out.details[0] as string).toContain('comparison values omitted');
+  });
+
   it('falls back to cluster name if model omits name', () => {
     const localCluster = { slug: 'foo', name: 'PRESTIGE-PSMA', disease_site: 'prostate', tweet_ids: [1] };
     const raw = JSON.stringify({ tldr: 'y', details: [] });
@@ -739,6 +837,25 @@ describe('validateKeyFigure', () => {
     expect(r.caption).toBeNull();
     expect(r.figureUrl).toBeNull();
     expect(r.reason).toContain('hallucinated');
+  });
+
+  // v0.15 hardening: a caption CI whose bounds each appear in the figure OCR but
+  // are not adjacent (a number sits between them) is a fabricated interval.
+  it('drops a caption CI whose bounds are not adjacent in OCR (fabricated interval)', () => {
+    const localTweets: DigestInputTweet[] = [{
+      id: 1, author: '@a', text: 'x',
+      image_urls: ['https://pbs.twimg.com/media/a.jpg'],
+      image_ocr_texts: ['HR 0.48 then 0.62 then 0.79 median 14.2 vs 9.8'],
+    }];
+    const r = validateKeyFigure(
+      'OS HR 0.62 (95% CI 0.48-0.79)',
+      'https://pbs.twimg.com/media/a.jpg',
+      localTweets,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+    expect(r.reason).toContain('not traceable');
   });
 
   it('drops BOTH figure and caption when OCR is unavailable globally (Claude #26)', () => {
@@ -921,6 +1038,25 @@ describe('validateKeyFigure', () => {
     expect(r.caption).toBeNull();
     expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
     expect(r.reason).toContain('0.99');
+  });
+
+  // v0.15: the multi-token range check also runs on TABLE-form caption cells.
+  // OCR has 0.48 and 0.79 but separated by 0.62 → "0.48-0.79" is fabricated.
+  it('drops a table caption whose CI cell bounds are not adjacent in OCR', () => {
+    const localTweets: DigestInputTweet[] = [{
+      id: 1, author: '@a', text: 't',
+      image_urls: ['https://pbs.twimg.com/media/a.jpg'],
+      image_ocr_texts: ['HR 0.48 then 0.62 then 0.79'],
+    }];
+    const r = validateKeyFigure(
+      { columns: ['Arm', 'HR (95% CI)'], rows: [['Exp', '0.62 (0.48-0.79)']] },
+      'https://pbs.twimg.com/media/a.jpg',
+      localTweets,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+    expect(r.reason).toContain('not traceable');
   });
 
   it('drops a table caption with zero numeric tokens (all-text cells)', () => {

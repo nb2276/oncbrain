@@ -40,7 +40,8 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 - **DB**: better-sqlite3 (synchronous), file at `./oncbrain.db`
 - **LLM**: Anthropic Claude Sonnet via `@anthropic-ai/sdk` OR via `claude -p` (subscription path). v0.8 PR2: also called at *enrichment* time (not just build) to extract metadata from PDF text.
 - **Tests**: Vitest (469 tests as of v0.8)
-- **PDF ingestion** (v0.8 PR2): poppler (`brew install poppler`) provides `pdftotext` (text layer) + `pdftoppm` (rasterize scanned pages for Apple Vision OCR). No npm dep. A missing binary yields a clear Telegram reply, not a crash.
+- **PDF ingestion** (v0.8 PR2): poppler (`brew install poppler`) provides `pdftotext` (text layer) + `pdftoppm` (rasterize scanned pages for Apple Vision OCR) + `pdfimages` (v0.15: locate figure pages). No npm dep. A missing binary yields a clear Telegram reply, not a crash.
+- **Figure OCR** (v0.15, Path A): for a text-layer PDF, `pdfimages -list` finds the pages carrying a real figure (large raster image) and `pdftoppm`→Vision OCRs just those, capturing numbers printed *inside* figures (subgroup medians, forest-plot estimates, n-at-risk, image-rendered tables) that `pdftotext` can't see. Stored in `papers.figure_ocr_md` (local-only, never published — same IP boundary as `fulltext_excerpt_md`) and fed to the Phase 2 study agent as labeled lower-confidence source so it can *ground* a figure-locked magnitude instead of flagging it missing. Backfill the back catalog with `npx tsx build/backfill-figure-ocr.ts`.
 - **Deploy**: DigitalOcean App Platform, static-site free tier, GitHub auto-deploy from `main`
 
 ## Conventions
@@ -78,6 +79,7 @@ npm run studio                  # interactive TUI (suppress/edit studies, trials
 # Deeper analysis (optional config — see "LLM backend")
 DIGEST_STUDY_MODEL=opus npm run build:day -- --date=<date>               # Opus on Phase 2 only (works on claude-cli)
 DIGEST_THINKING=8000 LLM_BACKEND=api npm run build:day -- --date=<date>  # + Phase 2 extended thinking (api only)
+DIGEST_PERSPECTIVE=radonc npm run build:day -- --date=<date>            # specialty lens for Phase 2 (radonc | medonc | your own); see prompts/perspectives/
 
 # Tests + eval
 npm test                        # vitest run (1000+ tests)
@@ -114,6 +116,23 @@ then the client default (sonnet).
 - `DIGEST_STUDY_MODEL` — Phase 2 (per-study agents) only, the deep step (e.g. `opus` on cli, `claude-opus-4-7` on api). Falls back to `DIGEST_MODEL`.
 - `DIGEST_SYNTHESIS_MODEL` — Phase 3 (lede + cross-site TL;DR + open questions) only. Falls back to `DIGEST_MODEL`.
 - `DIGEST_THINKING` — Phase 2 extended-thinking token budget (e.g. `8000`). **api backend only** (the builder warns + ignores it on cli). Forces temperature=1 and reserves the budget on top of max_tokens.
+
+**Specialty perspective (Phase 2 lens, config not hardcoded):** `DIGEST_PERSPECTIVE`
+selects a subspecialty lens that biases the per-study analysis toward one
+reader's decision needs without changing the schema. The value is a profile name
+resolved to `prompts/perspectives/<name>.md` and injected into the study-agent
+prompt's `{{PERSPECTIVE}}` slot (Phase 2 only; Phases 1 + 3 stay specialty-neutral).
+Shipped profiles: `radonc` (foregrounds RT role + magnitude, isolates RT's
+contribution from a systemic backbone, surfaces dose/fractionation/target volume
+and local-regional endpoints), `medonc` (foregrounds regimen, biomarker gating,
+sequencing). Unset / blank / unknown name = no bias (byte-identical to the prior
+one-size-fits-all default). The name is sanitized to a single safe path segment.
+Set it per-build (`DIGEST_PERSPECTIVE=radonc npm run build:day -- --date=…`) or
+make it permanent for manual + cron builds via `.env`. Add a new lens by dropping
+a `prompts/perspectives/<name>.md` file (see that dir's README). The lens never
+licenses invented numbers: the VOICE no-fabrication rule outranks it, and a
+magnitude the lens wants but the source text lacks (e.g. a subgroup HR locked in a
+figure) is flagged as missing, not guessed.
 
 ## Schema (digest output, v0.7+ study shape)
 
@@ -152,7 +171,7 @@ src/
   lib/
     db.ts                  SQLite schema + queries + migrations (bookmarks, papers, slide_uploads, inbox_items, conferences, settings)
     telegram-ingest.ts     Telegram Bot API: extractTweetUrls / extractPaperPmids / extractPaperUrls / extractPdfDocument / extractSlidePhoto + sendMessage
-    inbox-enrichment.ts    Type-dispatched enrichment loop (tweet→bookmark, paper→papers, slide→slides, PDF→papers); E2/E3 replies; cross-day NCT nudge; conference auto-stamp via detectAndEnsureConference
+    inbox-enrichment.ts    Type-dispatched enrichment loop (tweet→bookmark, paper→papers, slide→slides, PDF→papers + v0.15 figure OCR); E2/E3 replies; cross-day NCT nudge; conference auto-stamp via detectAndEnsureConference
     conference-detect.ts   v0.14.9: detect a major oncology meeting (ASCO/ESMO/ASTRO/AACR/ASH/SABCS + ASCO GU/GI) from a source's hashtags / URL-hosts / prose so bot-ingested sources get a conference_slug
     twitter-fetch.ts       oEmbed (text + html) + syndication (images), parallel
     tweet-syndication.ts   Twitter syndication CDN client (token formula derivation)
@@ -162,7 +181,7 @@ src/
     html-meta.ts           v0.8 PR1: Highwire + OpenGraph meta extraction from journal pages
     doi.ts                 v0.8 PR1: normalizeDoi (single canonicalization) + extractDois
     ssrf-fetch.ts          v0.8 PR1: SSRF-safe HTTPS fetch (private-IP block, per-hop redirect revalidation)
-    pdf-text.ts            v0.8 PR2: pdftotext + pdftoppm→Vision OCR fallback (poppler)
+    pdf-text.ts            v0.8 PR2: pdftotext + pdftoppm→Vision OCR fallback (poppler). v0.15: extractPdfFigureOcr — pdfimages-targeted OCR of figure pages (numbers printed inside KM curves / forest plots / image-rendered tables that the text layer can't see)
     pdf-meta.ts            v0.8 PR2: LLM metadata extraction from PDF text (+ DOI/PMID regex backstop)
     pdf-storage.ts         v0.8 PR2: file PDFs to the gitignored Obsidian vault (papers/<site>/<slug>.pdf)
     slide-photo-storage.ts Telegram getFile download + magic-byte sniff + disk save

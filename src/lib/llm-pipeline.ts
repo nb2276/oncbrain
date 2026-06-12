@@ -80,6 +80,10 @@ export type DigestInputPaper = {
   pub_date?: string | null;
   abstract?: string | null;
   fulltext_excerpt_md?: string | null;
+  // v0.15: Vision OCR of the paper's figure pages — numbers printed inside
+  // figures (KM medians, forest-plot estimates, image-rendered tables) the text
+  // layer can't see. Fed to Phase 2 as labeled, lower-confidence source context.
+  figure_ocr_md?: string | null;
   doi?: string | null;
   mesh_terms?: string[];
   note?: string | null;
@@ -132,6 +136,15 @@ function itemToTweetShape(item: DigestInputItem): DigestInputTweet {
     if (item.abstract) parts.push(`\nAbstract:\n${item.abstract}`);
     if (item.fulltext_excerpt_md)
       parts.push(`\nMethods/Results excerpt:\n${item.fulltext_excerpt_md}`);
+    if (item.figure_ocr_md)
+      parts.push(
+        // OCR of figure pages: recovers numbers printed inside figures (subgroup
+        // medians, forest-plot 5-yr estimates, n-at-risk, image-rendered tables)
+        // that the text layer omits. It is OCR — may carry character errors and
+        // may duplicate body text. Treat as groundable source for a figure-locked
+        // value, but prefer the body text when the two disagree.
+        `\nFigure OCR (Apple Vision over figure/image pages; numbers printed inside figures, lower confidence than body text):\n${item.figure_ocr_md}`,
+      );
     if (item.mesh_terms && item.mesh_terms.length > 0)
       parts.push(`\nMeSH: ${item.mesh_terms.slice(0, 8).join(', ')}`);
     return {
@@ -434,6 +447,13 @@ export type BuildOptions = {
   // reasoning before the study agent answers. api backend only (ignored on
   // claude-cli). 0/undefined = off.
   studyThinkingBudget?: number;
+  // Specialty-perspective profile name (e.g. 'radonc', 'medonc'). Resolved to
+  // prompts/perspectives/<name>.md and injected into the Phase 2 study-agent
+  // prompt's {{PERSPECTIVE}} slot, so the per-study analysis is framed for one
+  // subspecialty's decision needs (a radiation oncologist foregrounds RT impact,
+  // a med-onc foregrounds regimen). Unset / unknown = no bias (current default).
+  // Wired from DIGEST_PERSPECTIVE. Phase 2 only; Phases 1 + 3 stay neutral.
+  perspectiveName?: string;
   client?: LlmClient;
   maxRetries?: number;
   studyAgentConcurrency?: number;
@@ -486,6 +506,43 @@ function voiceCacheBlock(): LlmContentBlock {
     text: `═══ VOICE & FRAMING RULES (follow exactly) ═══\n\n${loadVoice()}`,
     cache: true,
   };
+}
+
+// Specialty-perspective lens (v0.15): an optional subspecialty bias applied to
+// Phase 2 (per-study) analysis only. The profile name (e.g. 'radonc') resolves
+// to prompts/perspectives/<name>.md and is substituted into the study-agent
+// prompt's {{PERSPECTIVE}} slot, wrapped in its own labelled section. Lets a
+// radiation oncologist foreground RT impact, a med-onc foreground regimen, etc.,
+// from the same pipeline. Selected by DIGEST_PERSPECTIVE; see prompts/perspectives/.
+//
+// Unset / blank / unknown / unsafe name returns '' so the {{PERSPECTIVE}} slot
+// collapses and an unconfigured build is byte-identical to pre-perspective
+// behavior. The name is constrained to one safe path segment (no traversal),
+// and a missing file degrades to '' with a warning rather than throwing.
+const PERSPECTIVES_DIR = resolve(PROMPTS_DIR, 'perspectives');
+const _perspectiveCache = new Map<string, string>();
+export function loadPerspective(name: string | undefined | null): string {
+  const slug = (name ?? '').trim().toLowerCase();
+  if (!slug) return '';
+  if (!/^[a-z0-9][a-z0-9_-]*$/.test(slug)) {
+    console.warn(
+      `  [perspective] ignoring invalid DIGEST_PERSPECTIVE="${name}" (allowed: letters, digits, '-', '_')`,
+    );
+    return '';
+  }
+  const cached = _perspectiveCache.get(slug);
+  if (cached !== undefined) return cached;
+  let block = '';
+  try {
+    const body = readFileSync(resolve(PERSPECTIVES_DIR, `${slug}.md`), 'utf-8').trim();
+    if (body) block = `═══ SPECIALTY PERSPECTIVE (apply throughout this analysis) ═══\n\n${body}\n\n`;
+  } catch {
+    console.warn(
+      `  [perspective] DIGEST_PERSPECTIVE="${slug}" not found at prompts/perspectives/${slug}.md — building with no specialty bias`,
+    );
+  }
+  _perspectiveCache.set(slug, block);
+  return block;
 }
 
 type StudyCluster = {
@@ -902,6 +959,7 @@ async function runStudyAgent(
 
   const prompt = template
     .replace('{{VOICE}}', VOICE_POINTER)
+    .replace('{{PERSPECTIVE}}', loadPerspective(opts.perspectiveName))
     .replace('{{STUDY_NAME}}', cluster.name)
     .replace('{{STUDY_SLUG}}', cluster.slug)
     .replace('{{DISEASE_SITE}}', cluster.disease_site)
@@ -1033,20 +1091,29 @@ export function validateStudyTables(
   tweets: DigestInputTweet[],
   slug?: string,
 ): DigestStudy {
-  const sourceText = collectStudySourceText(tweets);
+  // Token membership is order-free, so the joined text is fine for the loose
+  // check. Adjacency pairs, though, must be computed PER FRAGMENT: joining
+  // sources first would make the last number of one tweet/paper adjacent to the
+  // first number of an unrelated one, minting a spurious pair that a fabricated
+  // cross-source CI could ride through (codex P1). Union the per-fragment sets.
+  const fragments = collectStudySourceFragments(tweets);
   const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
   const sourceTokens = new Set(
-    (sourceText.match(tokenRe) ?? []).map(normalizeNumericToken),
+    (fragments.join(' ').match(tokenRe) ?? []).map(normalizeNumericToken),
   );
+  const sourcePairs = new Set<string>();
+  for (const frag of fragments) {
+    for (const key of sourceAdjacentNumberPairs(frag)) sourcePairs.add(key);
+  }
 
   let dropped = 0;
   const newDetails: DigestDetail[] = study.details.map((d) => {
     if (!isTableDetail(d)) return d;
-    const cellTokens = d.table.rows.flat().flatMap((cell) => cell.match(tokenRe) ?? []);
-    for (const t of cellTokens) {
-      if (!numericTokenInSet(t, sourceTokens)) {
+    for (const cell of d.table.rows.flat()) {
+      const bad = firstUnverifiedCellValue(cell, sourceTokens, sourcePairs);
+      if (bad !== null) {
         dropped++;
-        return `${d.text} — comparison values omitted (cell number "${t}" not verified in source)`;
+        return `${d.text} — comparison values omitted (cell value "${bad}" not verified in source)`;
       }
     }
     return d;
@@ -1058,13 +1125,16 @@ export function validateStudyTables(
   return { ...study, details: newDetails };
 }
 
-function collectStudySourceText(tweets: DigestInputTweet[]): string {
+// Each source's text + each image's OCR as a SEPARATE fragment. Adjacency is
+// computed within a fragment so a number from tweet A and a number from paper B
+// never form a spurious "pair" across the boundary.
+function collectStudySourceFragments(tweets: DigestInputTweet[]): string[] {
   const parts: string[] = [];
   for (const t of tweets) {
     parts.push(t.text);
     for (const ocr of t.image_ocr_texts ?? []) parts.push(ocr);
   }
-  return parts.join(' ');
+  return parts;
 }
 
 export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): DigestStudy {
@@ -2023,48 +2093,50 @@ export function validateKeyFigure(
 
   const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
   const ocrTokenSet = new Set((ocrText.match(tokenRe) ?? []).map(normalizeNumericToken));
+  // v0.15: also verify CI/range groups as units (adjacency in the figure OCR),
+  // so a fabricated interval built from two unrelated OCR numbers is caught.
+  const ocrPairs = sourceAdjacentNumberPairs(ocrText);
 
-  // Table-form caption: per-cell numeric token check. Any unverified
-  // number drops the whole caption. Stricter than string caption because
-  // tables imply higher-trust-than-prose data presentation.
+  // Table-form caption: per-cell value check. Any unverified token OR range
+  // drops the whole caption. Stricter than string caption because tables imply
+  // higher-trust-than-prose data presentation.
   if (typeof caption !== 'string') {
-    const cellTokens = caption.rows.flat().flatMap((c) => c.match(tokenRe) ?? []);
-    if (cellTokens.length === 0) {
+    const cells = caption.rows.flat();
+    if (cells.flatMap((c) => c.match(tokenRe) ?? []).length === 0) {
       return {
         caption: null,
         figureUrl,
         reason: 'caption table has no numeric tokens to validate → dropping (figure kept)',
       };
     }
-    for (const tok of cellTokens) {
-      if (!numericTokenInSet(tok, ocrTokenSet)) {
+    for (const cell of cells) {
+      const bad = firstUnverifiedCellValue(cell, ocrTokenSet, ocrPairs);
+      if (bad !== null) {
         return {
           caption: null,
           figureUrl,
-          reason: `caption-table cell number "${tok}" not in OCR token set → dropping caption (figure kept)`,
+          reason: `caption-table cell value "${bad}" not traceable to figure OCR → dropping caption (figure kept)`,
         };
       }
     }
     return { caption, figureUrl };
   }
 
-  // String-form caption: existing v0.4 behavior.
-  const captionTokens = caption.match(tokenRe) ?? [];
-  if (captionTokens.length === 0) {
+  // String-form caption: same token + range check over the whole string.
+  if ((caption.match(tokenRe) ?? []).length === 0) {
     return {
       caption: null,
       figureUrl,
       reason: 'caption has no numeric tokens to validate → dropping (figure kept)',
     };
   }
-  for (const tok of captionTokens) {
-    if (!numericTokenInSet(tok, ocrTokenSet)) {
-      return {
-        caption: null,
-        figureUrl,
-        reason: `caption number "${tok}" not in OCR token set → dropping caption (figure kept)`,
-      };
-    }
+  const badCaptionValue = firstUnverifiedCellValue(caption, ocrTokenSet, ocrPairs);
+  if (badCaptionValue !== null) {
+    return {
+      caption: null,
+      figureUrl,
+      reason: `caption value "${badCaptionValue}" not traceable to figure OCR → dropping caption (figure kept)`,
+    };
   }
   return { caption, figureUrl };
 }
@@ -2092,6 +2164,90 @@ function numericTokenInSet(captionToken: string, ocrSet: Set<string>): boolean {
     if (ocrSet.has(c.slice(1))) return true;
   }
   return false;
+}
+
+// ── v0.15 hardening: verify multi-token cell VALUES, not just loose tokens ──
+//
+// The per-token check waves through a fabricated CI/range whose two bounds each
+// happen to appear SOMEWHERE in source (the digest mixes thousands of numbers).
+// These helpers add a second gate: a range/CI a cell writes WITH a connector
+// ("0.48-0.79", "(2.2, 4.0)", "2 to 5") must match two numbers that sit ADJACENT
+// in the source's numeric-token stream. Adjacency (not the literal delimiter) is
+// the signal: a real CI's bounds are next to each other however source spaced
+// them ("0.48 0.79", "0.48–0.79", "0.48, 0.79" all qualify), while two numbers
+// glued from unrelated parts of the source never become an adjacent pair. A
+// cross-arm juxtaposition ("28.6 vs 48.1") is NOT a range group, so it stays
+// token-only — combining two separately-sourced arm values is the table's job.
+//
+// Deliberately CONSERVATIVE, in this order of preference for a clinical product:
+// the worst failure is passing a fabricated number (a hallucinated CI shown as
+// real), so the gate errs toward redaction. Two known imperfections, both
+// acceptable under that priority:
+//   - False positive: a real CI whose bounds have another NUMBER between them in
+//     source (e.g. a forest-plot reference line "0.48 1.00 0.79") fails adjacency
+//     and the table redacts to a flat fallback. That's the SAFE failure — omit,
+//     don't hallucinate (VOICE rule) — not silent corruption.
+//   - False negative: two unrelated numbers that happen to sit adjacent in prose
+//     ("OS 28.6 mo and PFS 4.0 mo") can still back a fabricated "28.6-4.0". This
+//     is no weaker than the pre-v0.15 token-only check; adjacency only ADDS a
+//     constraint, never removes one. Fully closing it needs semantic grounding.
+// Number sub-pattern for range extraction. Written so there is exactly ONE way
+// to match a numeric token (`\d+` optionally `.\d+`, OR a bare `.\d+`). The
+// ambiguous `\d*\.?\d+` form lets a long digit run backtrack super-linearly
+// (catastrophic on a garbled OCR cell). The two range regexes are module-scoped
+// (compiled once) and consumed via matchAll, which clones lastIndex per call.
+const RANGE_NUM = String.raw`\d+(?:\.\d+)?|\.\d+`;
+const DASH_RANGE_RE = new RegExp(`(${RANGE_NUM})\\s*(?:[-–—]|to)\\s*(${RANGE_NUM})`, 'g');
+// Comma-separated CI inside () OR [] brackets: "(2.2, 4.0)", "[0.48, 0.79]".
+// (codex P2 — bracketed CIs were only loose-token checked.) Signed bounds are
+// intentionally NOT matched: the source tokenizer drops the sign, so a signed
+// cell pair could never match a source pair and would false-redact; signed CIs
+// fall through to the token check, same as pre-v0.15.
+const PAREN_COMMA_RE = new RegExp(`[([]\\s*(${RANGE_NUM})\\s*,\\s*(${RANGE_NUM})\\s*[)\\]]`, 'g');
+
+// Canonical key for an unordered number pair: normalized + numerically sorted so
+// "0.48-0.79", "0.79 0.48", and "(0.48, 0.79)" all collapse to one key.
+function numberPairKey(a: string, b: string): string {
+  const na = normalizeNumericToken(a);
+  const nb = normalizeNumericToken(b);
+  return [na, nb].sort((x, y) => parseFloat(x) - parseFloat(y)).join('~');
+}
+
+// Every adjacent pair of numeric tokens in source (non-numeric words ignored).
+function sourceAdjacentNumberPairs(text: string): Set<string> {
+  const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
+  const toks = text.match(tokenRe) ?? [];
+  const out = new Set<string>();
+  for (let i = 0; i + 1 < toks.length; i++) out.add(numberPairKey(toks[i], toks[i + 1]));
+  return out;
+}
+
+// Range/CI pairs a cell binds with a connector (dash, "to", or a parenthetical
+// comma). Returns canonical pair keys to check against source adjacency.
+function cellRangeGroupKeys(cell: string): string[] {
+  const out: string[] = [];
+  for (const m of cell.matchAll(DASH_RANGE_RE)) out.push(numberPairKey(m[1], m[2]));
+  for (const m of cell.matchAll(PAREN_COMMA_RE)) out.push(numberPairKey(m[1], m[2]));
+  return out;
+}
+
+// First numeric value in a cell that can't be traced to source: a loose token
+// absent from the token set, OR a CI/range whose bounds aren't adjacent in
+// source. Returns the offending value for the redaction message, or null when
+// every value verifies.
+function firstUnverifiedCellValue(
+  cell: string,
+  sourceTokens: Set<string>,
+  sourcePairs: Set<string>,
+): string | null {
+  const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
+  for (const tok of cell.match(tokenRe) ?? []) {
+    if (!numericTokenInSet(tok, sourceTokens)) return tok;
+  }
+  for (const key of cellRangeGroupKeys(cell)) {
+    if (!sourcePairs.has(key)) return key.replace('~', '-');
+  }
+  return null;
 }
 
 // Cap total images sent to a single Phase 2 agent. Spreads the cap across
@@ -2152,6 +2308,7 @@ async function runSynthesisPhase(
 
   const prompt = template
     .replace('{{VOICE}}', VOICE_POINTER)
+    .replace('{{PERSPECTIVE}}', loadPerspective(opts.perspectiveName))
     .replace('{{STUDIES_JSON}}', JSON.stringify(studiesForPrompt, null, 2));
 
   const content: LlmContentBlock[] = [voiceCacheBlock(), { type: 'text', text: prompt }];

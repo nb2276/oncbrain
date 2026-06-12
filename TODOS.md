@@ -22,7 +22,7 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 ## v0.5.1 — hardening hotfix
 
-- **Source-tagged Phase 2 claims.** Per-claim source attribution in per-study deep-analysis so mixed tweet + paper + slide + PDF inputs can't silently blend numbers across sources. The numeric validator already cross-checks each table cell against source content; v0.5.1 extends that to tag each `details` bullet with its source. **Prompt-dependent → needs a real `build:day` to verify (don't ship blind); design + verification gate in `docs/plans/v0.15-entity-resolution-and-source-tagging.md`.** (codex amended-plan P1 #6 — `docs/plans/v0.5-multi-source-ingestion.md:286`)
+- **Source-tagged Phase 2 claims.** Per-claim source attribution in per-study deep-analysis so mixed tweet + paper + slide + PDF inputs can't silently blend numbers across sources. The numeric validator already cross-checks each table cell against source content; v0.5.1 extends that to tag each `details` bullet with its source. **Prompt-dependent → needs a real `build:day` to verify (don't ship blind); design + verification gate in `docs/plans/v0.16-entity-resolution-and-source-tagging.md`.** (codex amended-plan P1 #6 — `docs/plans/v0.5-multi-source-ingestion.md:286`)
 
 ## v0.6 — next minor (partially shipped)
 
