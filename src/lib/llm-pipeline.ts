@@ -1091,12 +1091,20 @@ export function validateStudyTables(
   tweets: DigestInputTweet[],
   slug?: string,
 ): DigestStudy {
-  const sourceText = collectStudySourceText(tweets);
+  // Token membership is order-free, so the joined text is fine for the loose
+  // check. Adjacency pairs, though, must be computed PER FRAGMENT: joining
+  // sources first would make the last number of one tweet/paper adjacent to the
+  // first number of an unrelated one, minting a spurious pair that a fabricated
+  // cross-source CI could ride through (codex P1). Union the per-fragment sets.
+  const fragments = collectStudySourceFragments(tweets);
   const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
   const sourceTokens = new Set(
-    (sourceText.match(tokenRe) ?? []).map(normalizeNumericToken),
+    (fragments.join(' ').match(tokenRe) ?? []).map(normalizeNumericToken),
   );
-  const sourcePairs = sourceAdjacentNumberPairs(sourceText);
+  const sourcePairs = new Set<string>();
+  for (const frag of fragments) {
+    for (const key of sourceAdjacentNumberPairs(frag)) sourcePairs.add(key);
+  }
 
   let dropped = 0;
   const newDetails: DigestDetail[] = study.details.map((d) => {
@@ -1117,13 +1125,16 @@ export function validateStudyTables(
   return { ...study, details: newDetails };
 }
 
-function collectStudySourceText(tweets: DigestInputTweet[]): string {
+// Each source's text + each image's OCR as a SEPARATE fragment. Adjacency is
+// computed within a fragment so a number from tweet A and a number from paper B
+// never form a spurious "pair" across the boundary.
+function collectStudySourceFragments(tweets: DigestInputTweet[]): string[] {
   const parts: string[] = [];
   for (const t of tweets) {
     parts.push(t.text);
     for (const ocr of t.image_ocr_texts ?? []) parts.push(ocr);
   }
-  return parts.join(' ');
+  return parts;
 }
 
 export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): DigestStudy {
@@ -2187,7 +2198,12 @@ function numericTokenInSet(captionToken: string, ocrSet: Set<string>): boolean {
 // (compiled once) and consumed via matchAll, which clones lastIndex per call.
 const RANGE_NUM = String.raw`\d+(?:\.\d+)?|\.\d+`;
 const DASH_RANGE_RE = new RegExp(`(${RANGE_NUM})\\s*(?:[-–—]|to)\\s*(${RANGE_NUM})`, 'g');
-const PAREN_COMMA_RE = new RegExp(`\\(\\s*(${RANGE_NUM})\\s*,\\s*(${RANGE_NUM})\\s*\\)`, 'g');
+// Comma-separated CI inside () OR [] brackets: "(2.2, 4.0)", "[0.48, 0.79]".
+// (codex P2 — bracketed CIs were only loose-token checked.) Signed bounds are
+// intentionally NOT matched: the source tokenizer drops the sign, so a signed
+// cell pair could never match a source pair and would false-redact; signed CIs
+// fall through to the token check, same as pre-v0.15.
+const PAREN_COMMA_RE = new RegExp(`[([]\\s*(${RANGE_NUM})\\s*,\\s*(${RANGE_NUM})\\s*[)\\]]`, 'g');
 
 // Canonical key for an unordered number pair: normalized + numerically sorted so
 // "0.48-0.79", "0.79 0.48", and "(0.48, 0.79)" all collapse to one key.

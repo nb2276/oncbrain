@@ -636,6 +636,42 @@ describe('validateStudyTables', () => {
     expect(validateStudyTables(study, localTweets).details[0]).toEqual(study.details[0]);
   });
 
+  // codex P1: adjacency must be per-source-fragment. 0.50 is the only number in
+  // tweet 1, 0.97 the only one in tweet 2 — joining the sources would make them a
+  // spurious adjacent pair; a fabricated "(0.50-0.97)" must still be rejected.
+  it('rejects a CI pairing one source\'s number with another source\'s (cross-source)', () => {
+    const localTweets: DigestInputTweet[] = [
+      { id: 1, author: '@a', text: 'POP-RT primary HR 0.50', image_ocr_texts: [''], image_urls: [] },
+      { id: 2, author: '@b', text: 'PEACE-2 primary HR 0.97', image_ocr_texts: [''], image_urls: [] },
+    ];
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [{ text: 'HR', table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.50 (0.50-0.97)']] } }],
+    };
+    const out = validateStudyTables(study, localTweets);
+    expect(typeof out.details[0]).toBe('string');
+    expect(out.details[0] as string).toContain('comparison values omitted');
+  });
+
+  // codex P2: a bracketed CI "[lo, hi]" is validated as a unit, like "(lo, hi)".
+  it('validates a bracketed CI "[lo, hi]" as a range unit', () => {
+    const localTweets: DigestInputTweet[] = [
+      { id: 1, author: '@a', text: 'OS HR 0.62 95% CI 0.48 0.79', image_ocr_texts: [''], image_urls: [] },
+    ];
+    // real: bounds adjacent in source → kept
+    const ok: DigestStudy = {
+      ...baseStudy,
+      details: [{ text: 'OS', table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.62 [0.48, 0.79]']] } }],
+    };
+    expect(validateStudyTables(ok, localTweets).details[0]).toEqual(ok.details[0]);
+    // fabricated: 0.48 and 0.62 both in source but NOT adjacent (95 between) → dropped via the range gate
+    const bad: DigestStudy = {
+      ...baseStudy,
+      details: [{ text: 'OS', table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.79 [0.48, 0.62]']] } }],
+    };
+    expect(typeof validateStudyTables(bad, localTweets).details[0]).toBe('string');
+  });
+
   // "to"-connector range, and the fabrication catch on it.
   it('drops a "X to Y" range whose bounds are not adjacent in source', () => {
     const localTweets: DigestInputTweet[] = [{
