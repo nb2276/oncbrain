@@ -1,6 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import { EventEmitter } from 'node:events';
-import { extractPdfText, PdfToolError, isUsableTextLayer, __test } from '../src/lib/pdf-text.ts';
+import {
+  extractPdfText,
+  extractPdfFigureOcr,
+  figurePages,
+  PdfToolError,
+  isUsableTextLayer,
+  __test,
+} from '../src/lib/pdf-text.ts';
 
 // extractPdfText composes a text-layer attempt with an OCR fallback. We inject
 // runText/runOcr so the unit tests never shell out to poppler or Vision.
@@ -169,5 +176,101 @@ describe('runPoppler error mapping', () => {
     await expect(__test.runPoppler('pdftotext', ['-'], 1000, spawn)).rejects.toMatchObject({
       kind: 'extract-failed',
     });
+  });
+});
+
+// figurePages parses `pdfimages -list` output to find pages carrying a real
+// figure (large raster image), skipping headers, smask companion rows, and
+// sub-threshold logos. A canned listing modeled on the RTOG-0848 manuscript.
+describe('figurePages', () => {
+  const LISTING = [
+    'page   num  type   width height color comp bpc  enc interp  object ID x-ppi y-ppi size ratio',
+    '--------------------------------------------------------------------------------------------',
+    '   1     0 image      80    80  rgb     3   8  image  no        12  0   200   200  2.1K 1.0%', // logo: too small
+    '  36     2 image    1333  1000  rgb     3   8  image  no       419  0   200   200 85.2K 2.2%', // Fig 2 KM
+    '  36     3 smask    1333  1000  gray    1   8  image  no       419  0   200   200 43.5K 3.3%', // companion mask
+    '  38   282 image    1333  1000  rgb     3   8  image  no       529  0   200   200 93.2K 2.4%', // Fig 3 forest
+    '  39   284 image    1333  1000  rgb     3   8  image  no       534  0   200   200 65.4K 1.7%', // Fig 4 KM
+  ].join('\n');
+
+  it('returns the deduped, sorted pages with a large raster image', async () => {
+    const spawn = fakeSpawn((proc) => {
+      proc.stdout.emit('data', Buffer.from(LISTING));
+      proc.emit('close', 0);
+    });
+    expect(await figurePages('/x.pdf', 1000, spawn)).toEqual([36, 38, 39]);
+  });
+
+  it('returns [] when pdfimages is missing (best-effort, no throw)', async () => {
+    const spawn = fakeSpawn((proc) => {
+      const err = new Error('spawn pdfimages ENOENT') as NodeJS.ErrnoException;
+      err.code = 'ENOENT';
+      proc.emit('error', err);
+    });
+    expect(await figurePages('/x.pdf', 1000, spawn)).toEqual([]);
+  });
+});
+
+// extractPdfFigureOcr layers figure-page OCR on top of the text layer. We inject
+// the page-list + per-page OCR seams so it never shells out to poppler/Vision.
+describe('extractPdfFigureOcr', () => {
+  it('returns "" when OCR is unavailable', async () => {
+    const r = await extractPdfFigureOcr('/x.pdf', { ocrAvailable: () => false });
+    expect(r).toBe('');
+  });
+
+  it('returns "" when there are no figure pages (fully vector PDF)', async () => {
+    const r = await extractPdfFigureOcr('/x.pdf', {
+      ocrAvailable: () => true,
+      pages: async () => [],
+      ocrPage: async () => 'should not be called',
+    });
+    expect(r).toBe('');
+  });
+
+  it('OCRs each figure page and page-tags the joined output', async () => {
+    const r = await extractPdfFigureOcr('/x.pdf', {
+      ocrAvailable: () => true,
+      pages: async () => [36, 38],
+      ocrPage: async (_p, page) =>
+        page === 38 ? 'N0 28.6 vs 48.1' : 'Overall Survival',
+    });
+    expect(r).toBe('[p.36]\nOverall Survival\n\n[p.38]\nN0 28.6 vs 48.1');
+  });
+
+  it('skips a page whose OCR throws, keeping the rest', async () => {
+    const r = await extractPdfFigureOcr('/x.pdf', {
+      ocrAvailable: () => true,
+      pages: async () => [36, 38],
+      ocrPage: async (_p, page) => {
+        if (page === 36) throw new Error('rasterize failed');
+        return 'forest plot';
+      },
+    });
+    expect(r).toBe('[p.38]\nforest plot');
+  });
+
+  it('caps the number of figure pages OCRd', async () => {
+    const seen: number[] = [];
+    await extractPdfFigureOcr('/x.pdf', {
+      ocrAvailable: () => true,
+      pages: async () => [1, 2, 3, 4, 5],
+      ocrPage: async (_p, page) => {
+        seen.push(page);
+        return `p${page}`;
+      },
+      maxPages: 2,
+    });
+    expect(seen).toEqual([1, 2]);
+  });
+
+  it('returns "" (no throw) when listing the pages fails', async () => {
+    const r = await extractPdfFigureOcr('/x.pdf', {
+      ocrAvailable: () => true,
+      pages: async () => {
+        throw new Error('pdfimages blew up');
+      },
+    });
+    expect(r).toBe('');
   });
 });

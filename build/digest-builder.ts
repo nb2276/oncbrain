@@ -187,6 +187,7 @@ function papersToDigestInput(papers: Paper[]): DigestInputPaper[] {
     pub_date: p.pub_date,
     abstract: p.abstract,
     fulltext_excerpt_md: p.fulltext_excerpt_md,
+    figure_ocr_md: p.figure_ocr_md,
     doi: p.doi,
     mesh_terms: parseJsonStringArray(p.mesh_terms_json),
     note: p.curator_note,
@@ -378,12 +379,13 @@ function buildArtifact(
           journal: p.journal,
           pub_date: p.pub_date,
           abstract: p.abstract,
-          // NOTE: fulltext_excerpt_md is deliberately NOT written to the
-          // committed artifact — for PDFs it's copyrighted full text, and the
-          // build-time LLM reads it from the DB (not the artifact), so it has
-          // no consumer here. Keeping it out of data/digests keeps copyrighted
-          // text out of git (v0.8 IP constraint). pdf_path is a vault path
-          // string (file itself stays gitignored) used by the Obsidian embed.
+          // NOTE: fulltext_excerpt_md AND figure_ocr_md are deliberately NOT
+          // written to the committed artifact — both are copyrighted full-text /
+          // figure content, and the build-time LLM reads them from the DB (not
+          // the artifact), so they have no consumer here. Keeping them out of
+          // data/digests keeps copyrighted material out of git (v0.8 IP
+          // constraint). pdf_path is a vault path string (file itself stays
+          // gitignored) used by the Obsidian embed.
           pdf_path: p.pdf_path,
           note: p.curator_note,
         }))
@@ -528,6 +530,9 @@ export async function buildOneDate(
       // DIGEST_THINKING: extended-thinking token budget for Phase 2 (api backend
       // only). Deeper reasoning before each study agent answers.
       studyThinkingBudget: parseThinkingBudget(),
+      // DIGEST_PERSPECTIVE: specialty lens for Phase 2 (e.g. 'radonc', 'medonc').
+      // Resolved to prompts/perspectives/<name>.md. Unset = no bias.
+      perspectiveName: process.env.DIGEST_PERSPECTIVE || undefined,
       // v0.13: thread the shared cache + injectable seams.
       relatedTrialsRunCache: deps?.relatedTrialsRunCache,
       relatedTrialsDeps: deps?.relatedTrialsDeps,

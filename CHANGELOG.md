@@ -2,6 +2,40 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.15.0] - 2026-06-12
+
+### Added
+
+- **Configurable specialty perspective (Phase 2 + Phase 3 lens).** A new
+  `DIGEST_PERSPECTIVE` env var selects a subspecialty lens that biases the
+  per-study analysis (and the cross-site synthesis) toward one reader's decision
+  needs, without changing the output schema. The value names a profile resolved
+  to `prompts/perspectives/<name>.md` and injected into the study-agent and
+  synthesis prompts' new `{{PERSPECTIVE}}` slot. Shipped profiles: `radonc`
+  (foregrounds the role and magnitude of radiotherapy, isolates RT's contribution
+  from a systemic backbone, surfaces dose/fractionation/target volume and
+  local-regional endpoints) and `medonc` (regimen, biomarker gating, sequencing).
+  Unset / blank / unknown name = no bias, byte-identical to the prior
+  one-size-fits-all default; the name is sanitized to a single safe path segment.
+  The lens never licenses invented numbers — the VOICE no-fabrication rule
+  outranks it, and a magnitude the lens wants but the source lacks is flagged as
+  missing, not guessed. Add a lens by dropping a file in `prompts/perspectives/`
+  (see that dir's README). Wired through `BuildOptions.perspectiveName`.
+- **Figure OCR (Path A).** Numbers printed *inside* figures (KM-curve medians,
+  forest-plot estimates, n-at-risk, image-rendered tables) are invisible to
+  `pdftotext` and often sit on the last pages of an accepted manuscript, past the
+  scanned-PDF OCR cap. For a text-layer PDF, enrichment now uses `pdfimages -list`
+  to find the pages carrying a real figure (a large raster image) and OCRs just
+  those with Apple Vision (`extractPdfFigureOcr` in `pdf-text.ts`). The result is
+  stored in a new `papers.figure_ocr_md` column and fed to the Phase 2 study agent
+  as labeled, lower-confidence source context, so it can *ground* a figure-locked
+  magnitude instead of flagging it missing. Local-only and excluded from the
+  published artifact, same IP boundary as `fulltext_excerpt_md`. Backfill the
+  existing corpus with `npx tsx build/backfill-figure-ocr.ts`. Together with the
+  radonc lens, this lets a day like RTOG-0848 surface the node-negative survival
+  benefit (5-yr OS 28.6% → 48.1% with chemoRT) that the text-only pipeline could
+  not report.
+
 ## [0.14.10] - 2026-06-11
 
 ### Changed

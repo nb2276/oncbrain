@@ -58,7 +58,7 @@ import {
   findPriorCoverage,
   type NctCoverageIndex,
 } from './nct-coverage.ts';
-import { extractPdfText, PdfToolError } from './pdf-text.ts';
+import { extractPdfText, extractPdfFigureOcr, PdfToolError } from './pdf-text.ts';
 import { extractPaperMetaFromText } from './pdf-meta.ts';
 import { isPdfBuffer, filePdfToVault, filePdfUnfiled } from './pdf-storage.ts';
 import { deriveSlug } from './slug.ts';
@@ -315,6 +315,9 @@ function isPdfInboxItem(item: InboxItem): boolean {
 
 // Cap stored full text so a long PDF doesn't bloat the artifact; ~2000 tokens.
 const MAX_FULLTEXT_CHARS = 8000;
+// Separate cap for figure OCR so it can't crowd out the body excerpt (distinct
+// DB column, distinct Phase 2 prompt section). A handful of result figures fits.
+const MAX_FIGURE_OCR_CHARS = 6000;
 
 // v0.8 PR2: download a PDF, extract its text (poppler text layer, or Apple
 // Vision OCR for scanned PDFs), pull metadata via the LLM, file the PDF into
@@ -356,9 +359,17 @@ async function enrichPdfPaper(
   // 3. Extract text (poppler writes need a file path; OCR fallback is internal).
   const tmpPdf = join(tmpdir(), `oncbrain-pdf-${randomBytes(8).toString('hex')}.pdf`);
   let extracted: { text: string; via: 'text' | 'ocr' };
+  // Figure OCR (Path A): numbers printed inside figures (KM medians, forest-plot
+  // estimates, image-rendered tables) are invisible to pdftotext. When we used
+  // the text layer, OCR just the figure pages so the build-time study agent can
+  // ground a figure-locked magnitude. Best-effort: never blocks enrichment.
+  let figureOcr = '';
   try {
     writeFileSync(tmpPdf, buffer);
     extracted = await extractPdfText(tmpPdf);
+    if (extracted.via === 'text') {
+      figureOcr = await extractPdfFigureOcr(tmpPdf);
+    }
   } catch (err) {
     if (err instanceof PdfToolError) {
       // Keep the unreadable PDF for the curator under _unsorted.
@@ -459,6 +470,7 @@ async function enrichPdfPaper(
       pub_date: meta.pub_date,
       abstract: meta.abstract,
       fulltext_excerpt_md: extracted.text.slice(0, MAX_FULLTEXT_CHARS),
+      figure_ocr_md: figureOcr ? figureOcr.slice(0, MAX_FIGURE_OCR_CHARS) : null,
       bookmark_date: item.bookmark_date,
       conference_slug: conferenceSlug,
       curator_note: note,

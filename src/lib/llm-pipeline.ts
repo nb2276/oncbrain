@@ -80,6 +80,10 @@ export type DigestInputPaper = {
   pub_date?: string | null;
   abstract?: string | null;
   fulltext_excerpt_md?: string | null;
+  // v0.15: Vision OCR of the paper's figure pages — numbers printed inside
+  // figures (KM medians, forest-plot estimates, image-rendered tables) the text
+  // layer can't see. Fed to Phase 2 as labeled, lower-confidence source context.
+  figure_ocr_md?: string | null;
   doi?: string | null;
   mesh_terms?: string[];
   note?: string | null;
@@ -132,6 +136,15 @@ function itemToTweetShape(item: DigestInputItem): DigestInputTweet {
     if (item.abstract) parts.push(`\nAbstract:\n${item.abstract}`);
     if (item.fulltext_excerpt_md)
       parts.push(`\nMethods/Results excerpt:\n${item.fulltext_excerpt_md}`);
+    if (item.figure_ocr_md)
+      parts.push(
+        // OCR of figure pages: recovers numbers printed inside figures (subgroup
+        // medians, forest-plot 5-yr estimates, n-at-risk, image-rendered tables)
+        // that the text layer omits. It is OCR — may carry character errors and
+        // may duplicate body text. Treat as groundable source for a figure-locked
+        // value, but prefer the body text when the two disagree.
+        `\nFigure OCR (Apple Vision over figure/image pages; numbers printed inside figures, lower confidence than body text):\n${item.figure_ocr_md}`,
+      );
     if (item.mesh_terms && item.mesh_terms.length > 0)
       parts.push(`\nMeSH: ${item.mesh_terms.slice(0, 8).join(', ')}`);
     return {
@@ -434,6 +447,13 @@ export type BuildOptions = {
   // reasoning before the study agent answers. api backend only (ignored on
   // claude-cli). 0/undefined = off.
   studyThinkingBudget?: number;
+  // Specialty-perspective profile name (e.g. 'radonc', 'medonc'). Resolved to
+  // prompts/perspectives/<name>.md and injected into the Phase 2 study-agent
+  // prompt's {{PERSPECTIVE}} slot, so the per-study analysis is framed for one
+  // subspecialty's decision needs (a radiation oncologist foregrounds RT impact,
+  // a med-onc foregrounds regimen). Unset / unknown = no bias (current default).
+  // Wired from DIGEST_PERSPECTIVE. Phase 2 only; Phases 1 + 3 stay neutral.
+  perspectiveName?: string;
   client?: LlmClient;
   maxRetries?: number;
   studyAgentConcurrency?: number;
@@ -486,6 +506,43 @@ function voiceCacheBlock(): LlmContentBlock {
     text: `═══ VOICE & FRAMING RULES (follow exactly) ═══\n\n${loadVoice()}`,
     cache: true,
   };
+}
+
+// Specialty-perspective lens (v0.15): an optional subspecialty bias applied to
+// Phase 2 (per-study) analysis only. The profile name (e.g. 'radonc') resolves
+// to prompts/perspectives/<name>.md and is substituted into the study-agent
+// prompt's {{PERSPECTIVE}} slot, wrapped in its own labelled section. Lets a
+// radiation oncologist foreground RT impact, a med-onc foreground regimen, etc.,
+// from the same pipeline. Selected by DIGEST_PERSPECTIVE; see prompts/perspectives/.
+//
+// Unset / blank / unknown / unsafe name returns '' so the {{PERSPECTIVE}} slot
+// collapses and an unconfigured build is byte-identical to pre-perspective
+// behavior. The name is constrained to one safe path segment (no traversal),
+// and a missing file degrades to '' with a warning rather than throwing.
+const PERSPECTIVES_DIR = resolve(PROMPTS_DIR, 'perspectives');
+const _perspectiveCache = new Map<string, string>();
+export function loadPerspective(name: string | undefined | null): string {
+  const slug = (name ?? '').trim().toLowerCase();
+  if (!slug) return '';
+  if (!/^[a-z0-9][a-z0-9_-]*$/.test(slug)) {
+    console.warn(
+      `  [perspective] ignoring invalid DIGEST_PERSPECTIVE="${name}" (allowed: letters, digits, '-', '_')`,
+    );
+    return '';
+  }
+  const cached = _perspectiveCache.get(slug);
+  if (cached !== undefined) return cached;
+  let block = '';
+  try {
+    const body = readFileSync(resolve(PERSPECTIVES_DIR, `${slug}.md`), 'utf-8').trim();
+    if (body) block = `═══ SPECIALTY PERSPECTIVE (apply throughout this analysis) ═══\n\n${body}\n\n`;
+  } catch {
+    console.warn(
+      `  [perspective] DIGEST_PERSPECTIVE="${slug}" not found at prompts/perspectives/${slug}.md — building with no specialty bias`,
+    );
+  }
+  _perspectiveCache.set(slug, block);
+  return block;
 }
 
 type StudyCluster = {
@@ -902,6 +959,7 @@ async function runStudyAgent(
 
   const prompt = template
     .replace('{{VOICE}}', VOICE_POINTER)
+    .replace('{{PERSPECTIVE}}', loadPerspective(opts.perspectiveName))
     .replace('{{STUDY_NAME}}', cluster.name)
     .replace('{{STUDY_SLUG}}', cluster.slug)
     .replace('{{DISEASE_SITE}}', cluster.disease_site)
@@ -2152,6 +2210,7 @@ async function runSynthesisPhase(
 
   const prompt = template
     .replace('{{VOICE}}', VOICE_POINTER)
+    .replace('{{PERSPECTIVE}}', loadPerspective(opts.perspectiveName))
     .replace('{{STUDIES_JSON}}', JSON.stringify(studiesForPrompt, null, 2));
 
   const content: LlmContentBlock[] = [voiceCacheBlock(), { type: 'text', text: prompt }];
