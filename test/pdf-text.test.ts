@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { EventEmitter } from 'node:events';
+import { writeFileSync } from 'node:fs';
 import {
   extractPdfText,
   extractPdfFigureOcr,
@@ -272,5 +273,51 @@ describe('extractPdfFigureOcr', () => {
       },
     });
     expect(r).toBe('');
+  });
+});
+
+// ocrSinglePage is the real rasterize+OCR worker behind extractPdfFigureOcr's
+// ocrPage seam. We inject a fake spawn that writes a PNG into the temp dir
+// (pdftoppm's output prefix is the last arg) and a stub OCR so the temp-dir +
+// PNG-glob + join + cleanup path runs without poppler/Vision.
+describe('ocrSinglePage', () => {
+  function spawnWritingPngs(names: string[]) {
+    return ((_bin: string, args: string[]) => {
+      const proc = new EventEmitter() as EventEmitter & {
+        stdout: EventEmitter;
+        stderr: EventEmitter;
+        kill: () => void;
+      };
+      proc.stdout = new EventEmitter();
+      proc.stderr = new EventEmitter();
+      proc.kill = () => {};
+      const prefix = args[args.length - 1]; // join(dir, 'page')
+      setImmediate(() => {
+        for (const n of names) writeFileSync(`${prefix}-${n}`, 'fakepng');
+        proc.emit('close', 0);
+      });
+      return proc;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }) as any;
+  }
+  const okOcr = (text: string) =>
+    async () => ({ entry: { text, hash: 'h', version: '' }, status: 'ok' as const });
+
+  it('rasterizes the page, OCRs each PNG, and joins the text', async () => {
+    const txt = await __test.ocrSinglePage('/x.pdf', 38, 1000, {
+      spawnFn: spawnWritingPngs(['38.png']),
+      ocr: okOcr('N0 28.6 (14.9-42.2) 48.1 (33.3-62.9)'),
+    });
+    expect(txt).toBe('N0 28.6 (14.9-42.2) 48.1 (33.3-62.9)');
+  });
+
+  it('skips PNGs whose OCR is blank and joins the rest with blank lines', async () => {
+    let call = 0;
+    const txt = await __test.ocrSinglePage('/x.pdf', 1, 1000, {
+      spawnFn: spawnWritingPngs(['1.png', '2.png']),
+      // first PNG empty (skipped), second has text
+      ocr: async () => ({ entry: { text: call++ === 0 ? '   ' : 'forest plot', hash: 'h', version: '' }, status: 'ok' as const }),
+    });
+    expect(txt).toBe('forest plot');
   });
 });

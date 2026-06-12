@@ -39,6 +39,11 @@ const HIGH_DISTINCT_FLOOR = 200;
 // Cap rasterized pages — bounds OCR cost on a 200-page thesis PDF. The first
 // pages carry title/abstract/methods, which is what the digest needs.
 const MAX_OCR_PAGES = 15;
+
+// Cap stored figure OCR so it can't crowd out the body excerpt (distinct DB
+// column, distinct Phase 2 prompt section). Single source of truth for both the
+// live-ingest path (inbox-enrichment) and the back-catalog backfill CLI.
+export const MAX_FIGURE_OCR_CHARS = 6000;
 const DEFAULT_TIMEOUT_MS = 60_000;
 const OCR_TMP_PREFIX = 'oncbrain-ocr-pdf-';
 

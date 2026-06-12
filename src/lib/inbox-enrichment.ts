@@ -58,7 +58,7 @@ import {
   findPriorCoverage,
   type NctCoverageIndex,
 } from './nct-coverage.ts';
-import { extractPdfText, extractPdfFigureOcr, PdfToolError } from './pdf-text.ts';
+import { extractPdfText, extractPdfFigureOcr, MAX_FIGURE_OCR_CHARS, PdfToolError } from './pdf-text.ts';
 import { extractPaperMetaFromText } from './pdf-meta.ts';
 import { isPdfBuffer, filePdfToVault, filePdfUnfiled } from './pdf-storage.ts';
 import { deriveSlug } from './slug.ts';
@@ -315,9 +315,8 @@ function isPdfInboxItem(item: InboxItem): boolean {
 
 // Cap stored full text so a long PDF doesn't bloat the artifact; ~2000 tokens.
 const MAX_FULLTEXT_CHARS = 8000;
-// Separate cap for figure OCR so it can't crowd out the body excerpt (distinct
-// DB column, distinct Phase 2 prompt section). A handful of result figures fits.
-const MAX_FIGURE_OCR_CHARS = 6000;
+// MAX_FIGURE_OCR_CHARS is imported from pdf-text.ts (single source of truth,
+// shared with the backfill CLI).
 
 // v0.8 PR2: download a PDF, extract its text (poppler text layer, or Apple
 // Vision OCR for scanned PDFs), pull metadata via the LLM, file the PDF into

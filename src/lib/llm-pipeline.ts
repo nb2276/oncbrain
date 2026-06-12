@@ -2167,7 +2167,14 @@ function numericTokenInSet(captionToken: string, ocrSet: Set<string>): boolean {
 // glued from unrelated parts of the source never become an adjacent pair. A
 // cross-arm juxtaposition ("28.6 vs 48.1") is NOT a range group, so it stays
 // token-only — combining two separately-sourced arm values is the table's job.
-const RANGE_NUM = String.raw`\d*\.?\d+`;
+// Number sub-pattern for range extraction. Written so there is exactly ONE way
+// to match a numeric token (`\d+` optionally `.\d+`, OR a bare `.\d+`). The
+// ambiguous `\d*\.?\d+` form lets a long digit run backtrack super-linearly
+// (catastrophic on a garbled OCR cell). The two range regexes are module-scoped
+// (compiled once) and consumed via matchAll, which clones lastIndex per call.
+const RANGE_NUM = String.raw`\d+(?:\.\d+)?|\.\d+`;
+const DASH_RANGE_RE = new RegExp(`(${RANGE_NUM})\\s*(?:[-–—]|to)\\s*(${RANGE_NUM})`, 'g');
+const PAREN_COMMA_RE = new RegExp(`\\(\\s*(${RANGE_NUM})\\s*,\\s*(${RANGE_NUM})\\s*\\)`, 'g');
 
 // Canonical key for an unordered number pair: normalized + numerically sorted so
 // "0.48-0.79", "0.79 0.48", and "(0.48, 0.79)" all collapse to one key.
@@ -2190,11 +2197,8 @@ function sourceAdjacentNumberPairs(text: string): Set<string> {
 // comma). Returns canonical pair keys to check against source adjacency.
 function cellRangeGroupKeys(cell: string): string[] {
   const out: string[] = [];
-  const dash = new RegExp(`(${RANGE_NUM})\\s*(?:[-–—]|to)\\s*(${RANGE_NUM})`, 'g');
-  const parenComma = new RegExp(`\\(\\s*(${RANGE_NUM})\\s*,\\s*(${RANGE_NUM})\\s*\\)`, 'g');
-  let m: RegExpExecArray | null;
-  while ((m = dash.exec(cell)) !== null) out.push(numberPairKey(m[1], m[2]));
-  while ((m = parenComma.exec(cell)) !== null) out.push(numberPairKey(m[1], m[2]));
+  for (const m of cell.matchAll(DASH_RANGE_RE)) out.push(numberPairKey(m[1], m[2]));
+  for (const m of cell.matchAll(PAREN_COMMA_RE)) out.push(numberPairKey(m[1], m[2]));
   return out;
 }
 

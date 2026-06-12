@@ -20,10 +20,8 @@ import 'dotenv/config';
 import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import { openDb } from '../src/lib/db.ts';
-import { extractPdfFigureOcr } from '../src/lib/pdf-text.ts';
+import { extractPdfFigureOcr, MAX_FIGURE_OCR_CHARS } from '../src/lib/pdf-text.ts';
 import { isOcrAvailable } from '../src/lib/vision-ocr.ts';
-
-const MAX_FIGURE_OCR_CHARS = 6000;
 
 function arg(name: string): string | undefined {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
