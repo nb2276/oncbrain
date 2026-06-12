@@ -1096,15 +1096,16 @@ export function validateStudyTables(
   const sourceTokens = new Set(
     (sourceText.match(tokenRe) ?? []).map(normalizeNumericToken),
   );
+  const sourcePairs = sourceAdjacentNumberPairs(sourceText);
 
   let dropped = 0;
   const newDetails: DigestDetail[] = study.details.map((d) => {
     if (!isTableDetail(d)) return d;
-    const cellTokens = d.table.rows.flat().flatMap((cell) => cell.match(tokenRe) ?? []);
-    for (const t of cellTokens) {
-      if (!numericTokenInSet(t, sourceTokens)) {
+    for (const cell of d.table.rows.flat()) {
+      const bad = firstUnverifiedCellValue(cell, sourceTokens, sourcePairs);
+      if (bad !== null) {
         dropped++;
-        return `${d.text} — comparison values omitted (cell number "${t}" not verified in source)`;
+        return `${d.text} — comparison values omitted (cell value "${bad}" not verified in source)`;
       }
     }
     return d;
@@ -2081,48 +2082,50 @@ export function validateKeyFigure(
 
   const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
   const ocrTokenSet = new Set((ocrText.match(tokenRe) ?? []).map(normalizeNumericToken));
+  // v0.15: also verify CI/range groups as units (adjacency in the figure OCR),
+  // so a fabricated interval built from two unrelated OCR numbers is caught.
+  const ocrPairs = sourceAdjacentNumberPairs(ocrText);
 
-  // Table-form caption: per-cell numeric token check. Any unverified
-  // number drops the whole caption. Stricter than string caption because
-  // tables imply higher-trust-than-prose data presentation.
+  // Table-form caption: per-cell value check. Any unverified token OR range
+  // drops the whole caption. Stricter than string caption because tables imply
+  // higher-trust-than-prose data presentation.
   if (typeof caption !== 'string') {
-    const cellTokens = caption.rows.flat().flatMap((c) => c.match(tokenRe) ?? []);
-    if (cellTokens.length === 0) {
+    const cells = caption.rows.flat();
+    if (cells.flatMap((c) => c.match(tokenRe) ?? []).length === 0) {
       return {
         caption: null,
         figureUrl,
         reason: 'caption table has no numeric tokens to validate → dropping (figure kept)',
       };
     }
-    for (const tok of cellTokens) {
-      if (!numericTokenInSet(tok, ocrTokenSet)) {
+    for (const cell of cells) {
+      const bad = firstUnverifiedCellValue(cell, ocrTokenSet, ocrPairs);
+      if (bad !== null) {
         return {
           caption: null,
           figureUrl,
-          reason: `caption-table cell number "${tok}" not in OCR token set → dropping caption (figure kept)`,
+          reason: `caption-table cell value "${bad}" not traceable to figure OCR → dropping caption (figure kept)`,
         };
       }
     }
     return { caption, figureUrl };
   }
 
-  // String-form caption: existing v0.4 behavior.
-  const captionTokens = caption.match(tokenRe) ?? [];
-  if (captionTokens.length === 0) {
+  // String-form caption: same token + range check over the whole string.
+  if ((caption.match(tokenRe) ?? []).length === 0) {
     return {
       caption: null,
       figureUrl,
       reason: 'caption has no numeric tokens to validate → dropping (figure kept)',
     };
   }
-  for (const tok of captionTokens) {
-    if (!numericTokenInSet(tok, ocrTokenSet)) {
-      return {
-        caption: null,
-        figureUrl,
-        reason: `caption number "${tok}" not in OCR token set → dropping caption (figure kept)`,
-      };
-    }
+  const badCaptionValue = firstUnverifiedCellValue(caption, ocrTokenSet, ocrPairs);
+  if (badCaptionValue !== null) {
+    return {
+      caption: null,
+      figureUrl,
+      reason: `caption value "${badCaptionValue}" not traceable to figure OCR → dropping caption (figure kept)`,
+    };
   }
   return { caption, figureUrl };
 }
@@ -2150,6 +2153,68 @@ function numericTokenInSet(captionToken: string, ocrSet: Set<string>): boolean {
     if (ocrSet.has(c.slice(1))) return true;
   }
   return false;
+}
+
+// ── v0.15 hardening: verify multi-token cell VALUES, not just loose tokens ──
+//
+// The per-token check waves through a fabricated CI/range whose two bounds each
+// happen to appear SOMEWHERE in source (the digest mixes thousands of numbers).
+// These helpers add a second gate: a range/CI a cell writes WITH a connector
+// ("0.48-0.79", "(2.2, 4.0)", "2 to 5") must match two numbers that sit ADJACENT
+// in the source's numeric-token stream. Adjacency (not the literal delimiter) is
+// the signal: a real CI's bounds are next to each other however source spaced
+// them ("0.48 0.79", "0.48–0.79", "0.48, 0.79" all qualify), while two numbers
+// glued from unrelated parts of the source never become an adjacent pair. A
+// cross-arm juxtaposition ("28.6 vs 48.1") is NOT a range group, so it stays
+// token-only — combining two separately-sourced arm values is the table's job.
+const RANGE_NUM = String.raw`\d*\.?\d+`;
+
+// Canonical key for an unordered number pair: normalized + numerically sorted so
+// "0.48-0.79", "0.79 0.48", and "(0.48, 0.79)" all collapse to one key.
+function numberPairKey(a: string, b: string): string {
+  const na = normalizeNumericToken(a);
+  const nb = normalizeNumericToken(b);
+  return [na, nb].sort((x, y) => parseFloat(x) - parseFloat(y)).join('~');
+}
+
+// Every adjacent pair of numeric tokens in source (non-numeric words ignored).
+function sourceAdjacentNumberPairs(text: string): Set<string> {
+  const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
+  const toks = text.match(tokenRe) ?? [];
+  const out = new Set<string>();
+  for (let i = 0; i + 1 < toks.length; i++) out.add(numberPairKey(toks[i], toks[i + 1]));
+  return out;
+}
+
+// Range/CI pairs a cell binds with a connector (dash, "to", or a parenthetical
+// comma). Returns canonical pair keys to check against source adjacency.
+function cellRangeGroupKeys(cell: string): string[] {
+  const out: string[] = [];
+  const dash = new RegExp(`(${RANGE_NUM})\\s*(?:[-–—]|to)\\s*(${RANGE_NUM})`, 'g');
+  const parenComma = new RegExp(`\\(\\s*(${RANGE_NUM})\\s*,\\s*(${RANGE_NUM})\\s*\\)`, 'g');
+  let m: RegExpExecArray | null;
+  while ((m = dash.exec(cell)) !== null) out.push(numberPairKey(m[1], m[2]));
+  while ((m = parenComma.exec(cell)) !== null) out.push(numberPairKey(m[1], m[2]));
+  return out;
+}
+
+// First numeric value in a cell that can't be traced to source: a loose token
+// absent from the token set, OR a CI/range whose bounds aren't adjacent in
+// source. Returns the offending value for the redaction message, or null when
+// every value verifies.
+function firstUnverifiedCellValue(
+  cell: string,
+  sourceTokens: Set<string>,
+  sourcePairs: Set<string>,
+): string | null {
+  const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
+  for (const tok of cell.match(tokenRe) ?? []) {
+    if (!numericTokenInSet(tok, sourceTokens)) return tok;
+  }
+  for (const key of cellRangeGroupKeys(cell)) {
+    if (!sourcePairs.has(key)) return key.replace('~', '-');
+  }
+  return null;
 }
 
 // Cap total images sent to a single Phase 2 agent. Spreads the cap across

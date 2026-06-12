@@ -36,6 +36,22 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   benefit (5-yr OS 28.6% → 48.1% with chemoRT) that the text-only pipeline could
   not report.
 
+### Changed
+
+- **Numeric validators now verify multi-token cell values, not just loose
+  tokens.** The table (`validateStudyTables`) and figure-caption
+  (`validateKeyFigure`) validators previously checked each number in a cell
+  independently, so a fabricated confidence interval or range whose two bounds
+  each happened to appear *somewhere* in source would pass. They now also verify
+  CI/range groups (`0.48-0.79`, `(2.2, 4.0)`, `2 to 5`) as units: the two bounds
+  must sit *adjacent* in the source's numeric-token stream. Adjacency (not the
+  literal delimiter) is the signal, so a real interval the model rewrites with a
+  dash where source spaced or comma-separated the bounds still verifies, while an
+  interval glued from two unrelated source numbers is redacted. Cross-arm
+  juxtaposition (`28.6 vs 48.1`) stays token-only — pairing two separately-sourced
+  values is the table's job. Matters more now that figure OCR feeds number-dense
+  forest-plot / KM data into tables.
+
 ## [0.14.10] - 2026-06-11
 
 ### Changed

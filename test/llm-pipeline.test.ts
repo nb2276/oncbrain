@@ -590,6 +590,38 @@ describe('validateStudyTables', () => {
     expect(out.details).toEqual(study.details);
   });
 
+  // v0.15 hardening: a fabricated CI whose two bounds each appear in source but
+  // NOT adjacent. The per-token check alone would wave it through.
+  it('drops a table CI whose bounds appear in source but never adjacent (fabricated interval)', () => {
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [{
+        text: 'HRs',
+        // 0.50 and 0.97 both appear in source, but in different tweets — never
+        // as an adjacent pair, so "0.50-0.97" is an invented interval.
+        table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.50 (0.50-0.97)']] },
+      }],
+    };
+    const out = validateStudyTables(study, tweets);
+    expect(typeof out.details[0]).toBe('string');
+    expect(out.details[0] as string).toContain('comparison values omitted');
+  });
+
+  // The flip side: a real CI the model writes with a dash, where source spaced
+  // the bounds. Adjacency (not the delimiter) is the signal, so it must survive.
+  it('preserves a dash-written CI when source has the bounds space-separated', () => {
+    const localTweets: DigestInputTweet[] = [{
+      id: 1, author: '@a', text: 'OS HR 0.62 95% CI 0.48 0.79 median 14.2',
+      image_ocr_texts: [''], image_urls: [],
+    }];
+    const study: DigestStudy = {
+      ...baseStudy,
+      details: [{ text: 'OS', table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.62 (0.48-0.79)']] } }],
+    };
+    const out = validateStudyTables(study, localTweets);
+    expect(out.details[0]).toEqual(study.details[0]);
+  });
+
   it('falls back to cluster name if model omits name', () => {
     const localCluster = { slug: 'foo', name: 'PRESTIGE-PSMA', disease_site: 'prostate', tweet_ids: [1] };
     const raw = JSON.stringify({ tldr: 'y', details: [] });
@@ -739,6 +771,25 @@ describe('validateKeyFigure', () => {
     expect(r.caption).toBeNull();
     expect(r.figureUrl).toBeNull();
     expect(r.reason).toContain('hallucinated');
+  });
+
+  // v0.15 hardening: a caption CI whose bounds each appear in the figure OCR but
+  // are not adjacent (a number sits between them) is a fabricated interval.
+  it('drops a caption CI whose bounds are not adjacent in OCR (fabricated interval)', () => {
+    const localTweets: DigestInputTweet[] = [{
+      id: 1, author: '@a', text: 'x',
+      image_urls: ['https://pbs.twimg.com/media/a.jpg'],
+      image_ocr_texts: ['HR 0.48 then 0.62 then 0.79 median 14.2 vs 9.8'],
+    }];
+    const r = validateKeyFigure(
+      'OS HR 0.62 (95% CI 0.48-0.79)',
+      'https://pbs.twimg.com/media/a.jpg',
+      localTweets,
+      true,
+    );
+    expect(r.caption).toBeNull();
+    expect(r.figureUrl).toBe('https://pbs.twimg.com/media/a.jpg');
+    expect(r.reason).toContain('not traceable');
   });
 
   it('drops BOTH figure and caption when OCR is unavailable globally (Claude #26)', () => {
