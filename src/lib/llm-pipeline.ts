@@ -2167,6 +2167,19 @@ function numericTokenInSet(captionToken: string, ocrSet: Set<string>): boolean {
 // glued from unrelated parts of the source never become an adjacent pair. A
 // cross-arm juxtaposition ("28.6 vs 48.1") is NOT a range group, so it stays
 // token-only — combining two separately-sourced arm values is the table's job.
+//
+// Deliberately CONSERVATIVE, in this order of preference for a clinical product:
+// the worst failure is passing a fabricated number (a hallucinated CI shown as
+// real), so the gate errs toward redaction. Two known imperfections, both
+// acceptable under that priority:
+//   - False positive: a real CI whose bounds have another NUMBER between them in
+//     source (e.g. a forest-plot reference line "0.48 1.00 0.79") fails adjacency
+//     and the table redacts to a flat fallback. That's the SAFE failure — omit,
+//     don't hallucinate (VOICE rule) — not silent corruption.
+//   - False negative: two unrelated numbers that happen to sit adjacent in prose
+//     ("OS 28.6 mo and PFS 4.0 mo") can still back a fabricated "28.6-4.0". This
+//     is no weaker than the pre-v0.15 token-only check; adjacency only ADDS a
+//     constraint, never removes one. Fully closing it needs semantic grounding.
 // Number sub-pattern for range extraction. Written so there is exactly ONE way
 // to match a numeric token (`\d+` optionally `.\d+`, OR a bare `.\d+`). The
 // ambiguous `\d*\.?\d+` form lets a long digit run backtrack super-linearly
