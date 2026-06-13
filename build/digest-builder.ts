@@ -325,6 +325,7 @@ type DigestArtifact = {
     journal: string | null;
     pub_date: string | null;
     abstract: string | null;
+    source_url: string | null; // v0.15.3: curator-submitted article URL — the link for trade-press (no PMID/DOI). A public citation link, not content; safe to publish.
     pdf_path: string | null; // v0.8 PR2: vault location (gitignored, never published)
     note: string | null;
   }>;
@@ -387,6 +388,11 @@ function buildArtifact(
           // constraint). pdf_path is a vault path string (file itself stays
           // gitignored) used by the Obsidian embed.
           pdf_path: p.pdf_path,
+          // v0.15.3: the curator-submitted URL. For trade-press articles
+          // (UroToday, ASCO Post, OncLive) this is the ONLY link — they have no
+          // PMID/DOI/PMC. A public citation link (not copyrighted content), so it
+          // ships in the artifact, unlike fulltext_excerpt_md / figure_ocr_md.
+          source_url: p.source_url,
           note: p.curator_note,
         }))
       : undefined,

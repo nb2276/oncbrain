@@ -218,6 +218,42 @@ describe('renderObsidian — papers + filed PDF (v0.8 PR2)', () => {
     expect(md).toContain('[doi:10.1056/x](https://doi.org/10.1056/x)');
   });
 
+  // v0.15.3: trade-press papers (UroToday/ASCO Post) have no PMID/DOI/PMC — the
+  // source_url is their only link and must render.
+  it('links the source article for a trade-press paper (no PMID/DOI)', () => {
+    const url = 'https://www.urotoday.com/conference-highlights/eau-2026/167454.html';
+    const tradePress: DigestArtifactForExport = {
+      ...withPaper,
+      papers: [
+        {
+          id: 7, pmid: null, doi: null, pmc_id: null,
+          title: 'EAU 2026: SBRT intensification', authors: ['UroToday'],
+          journal: 'UroToday', pub_date: '2026', abstract: null,
+          source_url: url, pdf_path: null, note: null,
+        },
+      ],
+    };
+    const md = renderObsidian(tradePress);
+    expect(md).toContain(`[article](${url})`);
+    expect(md).not.toContain('PMID null');
+  });
+
+  it('suppresses the article link when source_url just duplicates the doi.org link', () => {
+    const dup: DigestArtifactForExport = {
+      ...withPaper,
+      papers: [
+        {
+          id: 7, pmid: null, doi: '10.1016/x', pmc_id: null,
+          title: 'IJROBP paper', authors: ['Smith J'], journal: 'IJROBP', pub_date: '2026',
+          abstract: null, source_url: 'https://doi.org/10.1016/x', pdf_path: null, note: null,
+        },
+      ],
+    };
+    const md = renderObsidian(dup);
+    expect(md).toContain('[doi:10.1016/x](https://doi.org/10.1016/x)');
+    expect(md).not.toContain('[article]'); // no redundant second doi.org link
+  });
+
   it('omits the embed when the paper has no filed PDF', () => {
     const noPdf: DigestArtifactForExport = {
       ...withPaper,

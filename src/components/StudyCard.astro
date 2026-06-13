@@ -533,9 +533,11 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
             </div>
             <div class="paper-title">{p.title}</div>
             <div class="paper-links">
-              <a href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`} target="_blank" rel="noopener">
-                PMID {p.pmid} →
-              </a>
+              {p.pmid && (
+                <a href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`} target="_blank" rel="noopener">
+                  PMID {p.pmid} →
+                </a>
+              )}
               {p.doi && (
                 <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener">
                   doi
@@ -544,6 +546,15 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
               {p.pmc_id && (
                 <a href={`https://www.ncbi.nlm.nih.gov/pmc/articles/${p.pmc_id}/`} target="_blank" rel="noopener">
                   full text (PMC)
+                </a>
+              )}
+              {/* v0.15.3: link to the source article. Essential for trade-press
+                  (UroToday/ASCO Post/OncLive) which have no PMID/DOI/PMC — this is
+                  their only link. Suppressed when it's just the doi.org URL we
+                  already render as "doi". */}
+              {p.source_url && !(p.doi && /(^https?:\/\/)?(www\.)?doi\.org\//i.test(p.source_url)) && (
+                <a href={p.source_url} target="_blank" rel="noopener">
+                  article →
                 </a>
               )}
             </div>

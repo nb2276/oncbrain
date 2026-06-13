@@ -72,6 +72,7 @@ export type DigestArtifactForExport = {
     journal: string | null;
     pub_date: string | null;
     abstract: string | null;
+    source_url?: string | null; // v0.15.3: curator-submitted article URL (the link for trade-press papers)
     pdf_path?: string | null; // v0.8 PR2: filed full-text PDF (local vault)
     note: string | null;
   }>;
@@ -312,10 +313,16 @@ function renderBody(artifact: DigestArtifactForExport): string {
             // the PMID wikilink only when present.
             const idTag = p.pmid ? `[[PMID ${p.pmid}]] ` : '';
             const doiSuffix = p.doi ? `. [doi:${p.doi}](https://doi.org/${p.doi})` : '';
+            // v0.15.3: link the source article when present and not a bare
+            // doi.org URL we already render. The only link for trade-press papers.
+            const articleSuffix =
+              p.source_url && !(p.doi && /(^https?:\/\/)?(www\.)?doi\.org\//i.test(p.source_url))
+                ? `. [article](${p.source_url})`
+                : '';
             lines.push(
               `- 📄 ${idTag}**${p.title}** — ${authorList}${
                 p.journal ? `. *${p.journal}*` : ''
-              }${p.pub_date ? ` (${p.pub_date.slice(0, 7)})` : ''}${doiSuffix}`,
+              }${p.pub_date ? ` (${p.pub_date.slice(0, 7)})` : ''}${doiSuffix}${articleSuffix}`,
             );
             if (p.abstract) {
               lines.push(`  > ${wikilinkify(p.abstract).replace(/\n+/g, '\n  > ')}`);

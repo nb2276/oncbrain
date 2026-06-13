@@ -87,6 +87,7 @@ describe('sanitizeArtifactForApi (IP allowlist)', () => {
         journal: 'J',
         pub_date: '2026',
         abstract: 'public abstract',
+        source_url: 'https://www.urotoday.com/article.html',
         fulltext_excerpt_md: 'SECRET COPYRIGHTED FULL TEXT',
         pdf_path: 'data/obsidian/papers/prostate/t.pdf',
         note: null,
@@ -97,6 +98,9 @@ describe('sanitizeArtifactForApi (IP allowlist)', () => {
     const p = out.papers![0]!;
     expect(p.title).toBe('T');
     expect(p.abstract).toBe('public abstract');
+    // v0.15.3: source_url (a public citation link) IS exposed — it's the link
+    // for trade-press papers — while pdf_path + full text stay stripped.
+    expect(p.source_url).toBe('https://www.urotoday.com/article.html');
     expect((p as Record<string, unknown>).pdf_path).toBeUndefined();
     expect((p as Record<string, unknown>).fulltext_excerpt_md).toBeUndefined();
     // Hard guarantee: neither the path nor the full text leaks anywhere.
