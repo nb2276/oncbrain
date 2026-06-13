@@ -2,6 +2,23 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.15.2] - 2026-06-13
+
+### Changed
+
+- **PWA now prompts to update instead of silently auto-reloading.** The service
+  worker previously called `skipWaiting()` on install, so a new deploy took over
+  on the next navigation but open clients never refreshed (no `controllerchange`
+  handler) — a reader could sit on a stale version indefinitely. The SW now WAITS;
+  when a new version is ready the page shows a non-blocking "New version /
+  Refresh" toast (bottom-center, dismissible, safe-area-aware for iOS standalone),
+  and only posts `SKIP_WAITING` + reloads when the reader taps. No more
+  mid-scroll interruption, and the update is never silently missed.
+  (`src/pwa-sw.ts`, `src/layouts/Base.astro`, `astro.config.ts` registerType
+  `autoUpdate` → `prompt`.) To force an update before this ships: on iOS fully
+  close + reopen the home-screen app (or remove + re-add); on desktop use
+  DevTools → Application → Service Workers → Unregister, then reload.
+
 ## [0.15.1] - 2026-06-12
 
 ### Fixed

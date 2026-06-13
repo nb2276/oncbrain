@@ -94,7 +94,12 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'pwa-sw.ts',
-      registerType: 'autoUpdate',
+      // v0.15.2: prompt-to-update (the SW waits; Base.astro shows a refresh
+      // toast and posts SKIP_WAITING on tap) rather than silent autoUpdate, so a
+      // reader is never reloaded mid-scroll. Registration is wired manually in
+      // Base.astro (the integration's auto-register doesn't fire under Astro 6),
+      // so this mainly documents intent.
+      registerType: 'prompt',
       injectRegister: 'auto',
       // Icons are already precached via globPatterns (png); don't let the
       // integration re-add them (and the manifest once per icon) to the list.
