@@ -33,8 +33,17 @@ declare let self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: (PrecacheEntry | string)[];
 };
 
-// autoUpdate: take over immediately so a new deploy reaches readers on next load.
-self.skipWaiting();
+// Prompt-to-update (v0.15.2): a new SW WAITS instead of taking over silently, so
+// an open reader is never reloaded mid-scroll. The page (Base.astro) detects the
+// waiting worker, shows a "New version - Refresh" toast, and posts SKIP_WAITING
+// when the reader taps. We skipWaiting only then; clientsClaim() (registered at
+// top level, fires on activate) lets the freshly-activated SW control the page
+// immediately, which fires `controllerchange` -> the page reloads once.
+self.addEventListener('message', (event: ExtendableMessageEvent) => {
+  if ((event.data as { type?: string } | null)?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 clientsClaim();
 
 precacheAndRoute(self.__WB_MANIFEST);

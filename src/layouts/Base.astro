@@ -237,6 +237,52 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
       @media (max-width: 600px) {
         body { padding: 1.25rem 1rem 3rem; font-size: 16px; }
       }
+      /* v0.15.2: PWA "new version" toast. Non-blocking, fixed bottom-center,
+         dismissible. Shown only on a service-worker UPDATE (see body script). */
+      .pwa-toast {
+        position: fixed;
+        left: 50%;
+        bottom: 1rem;
+        transform: translateX(-50%);
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        max-width: calc(100vw - 2rem);
+        padding: 0.55rem 0.6rem 0.55rem 1rem;
+        background: var(--bg-card);
+        color: var(--fg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+        font-family: var(--font-sans);
+        font-size: 0.9rem;
+      }
+      .pwa-toast[hidden] { display: none; }
+      .pwa-toast-btn {
+        font: inherit;
+        font-weight: 600;
+        color: #fff;
+        background: var(--accent);
+        border: none;
+        border-radius: 6px;
+        padding: 0.35rem 0.75rem;
+        cursor: pointer;
+      }
+      .pwa-toast-btn:disabled { opacity: 0.6; cursor: default; }
+      .pwa-toast-dismiss {
+        font: inherit;
+        font-size: 1.25rem;
+        line-height: 1;
+        color: var(--fg-muted);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0 0.25rem;
+      }
+      @supports (padding: max(0px)) {
+        .pwa-toast { bottom: max(1rem, env(safe-area-inset-bottom)); }
+      }
       /* Study pages widen to fit a narrative + figure two-column card, but only
          once there's room for both to breathe (≥1200px → 1180px body, paired
          with the StudyCard grid breakpoint). Below 1200 the body stays at the
@@ -453,15 +499,60 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
         });
       })();
     </script>
+    <!-- v0.15.2: PWA update toast. Hidden until a new service worker is waiting. -->
+    <div id="pwa-update-toast" class="pwa-toast" role="status" aria-live="polite" hidden>
+      <span>New version available</span>
+      <button id="pwa-update-refresh" type="button" class="pwa-toast-btn">Refresh</button>
+      <button id="pwa-update-dismiss" type="button" class="pwa-toast-dismiss" aria-label="Dismiss">×</button>
+    </div>
     <script is:inline>
       // Register the @vite-pwa/astro-generated service worker. The integration's
       // auto-registration doesn't fire under Astro 6, so we wire it manually.
-      // The SW itself (skipWaiting + clientsClaim) handles silent autoUpdate.
-      // is:inline keeps it verbatim in every page; the .catch swallows the dev
-      // 404 (the SW is only emitted by `astro build`, not `astro dev`).
+      // v0.15.2: prompt-to-update. The SW now WAITS instead of skipping; on a new
+      // deploy we surface a "New version - Refresh" toast and skipWaiting only when
+      // the reader taps, so nobody is reloaded mid-scroll. is:inline keeps it
+      // verbatim on every page; the .catch swallows the dev 404 (the SW is only
+      // emitted by `astro build`, not `astro dev`).
       if ('serviceWorker' in navigator) {
+        var pwaRefreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (pwaRefreshing) return; // guard against reload loops
+          pwaRefreshing = true;
+          window.location.reload();
+        });
+        var showPwaToast = function (reg) {
+          var toast = document.getElementById('pwa-update-toast');
+          if (!toast || toast.dataset.shown === '1') return;
+          toast.dataset.shown = '1';
+          toast.hidden = false;
+          document.getElementById('pwa-update-refresh').addEventListener('click', function (e) {
+            e.currentTarget.disabled = true;
+            if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+            else window.location.reload();
+          });
+          document.getElementById('pwa-update-dismiss').addEventListener('click', function () {
+            toast.hidden = true;
+          });
+        };
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('/pwa-sw.js', { scope: '/' }).catch(function () {});
+          navigator.serviceWorker
+            .register('/pwa-sw.js', { scope: '/' })
+            .then(function (reg) {
+              // Prompt only on an UPDATE (a controller already runs this page),
+              // never on first install.
+              var maybePrompt = function () {
+                if (navigator.serviceWorker.controller && reg.waiting) showPwaToast(reg);
+              };
+              if (reg.waiting) maybePrompt();
+              reg.addEventListener('updatefound', function () {
+                var installing = reg.installing;
+                if (!installing) return;
+                installing.addEventListener('statechange', function () {
+                  if (installing.state === 'installed') maybePrompt();
+                });
+              });
+            })
+            .catch(function () {});
         });
       }
     </script>
