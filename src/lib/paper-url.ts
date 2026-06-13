@@ -133,6 +133,25 @@ export function urlPathOnly(url: string): string {
   return url.split(/[?#]/)[0] ?? url;
 }
 
+// v0.15.3: the public, publishable form of a curator-submitted article URL.
+// Scheme + host + path only — the query string and fragment are DROPPED, so any
+// tracking tags, session tokens, or signed-access credentials in the curator's
+// URL never reach the committed artifact or the public JSON API (codex review
+// P1). Returns null for a non-http(s) URL (no javascript:/data: in a rendered
+// href — adversarial Finding 1) or unparseable input. Trade-press + publisher
+// article URLs are path-addressed, so dropping the query is lossless for them;
+// the full URL stays in the DB (papers.source_url) as the local audit trail.
+export function toPublicArticleUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+    return `${u.protocol}//${u.host}${u.pathname}`;
+  } catch {
+    return null;
+  }
+}
+
 // Tracking/share query params that don't identify the article — stripped so a
 // re-send with different campaign tags dedups. Anything else (e.g. a WordPress
 // `?p=123` post id) is KEPT, since dropping all query params would merge

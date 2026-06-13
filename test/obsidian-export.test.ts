@@ -254,6 +254,34 @@ describe('renderObsidian — papers + filed PDF (v0.8 PR2)', () => {
     expect(md).not.toContain('[article]'); // no redundant second doi.org link
   });
 
+  it('also dedups the dx.doi.org resolver variant (codex P3)', () => {
+    const dx: DigestArtifactForExport = {
+      ...withPaper,
+      papers: [
+        {
+          id: 7, pmid: null, doi: '10.1016/x', pmc_id: null,
+          title: 'IJROBP paper', authors: ['Smith J'], journal: 'IJROBP', pub_date: '2026',
+          abstract: null, source_url: 'https://dx.doi.org/10.1016/x', pdf_path: null, note: null,
+        },
+      ],
+    };
+    expect(renderObsidian(dx)).not.toContain('[article]');
+  });
+
+  it('does NOT suppress when "doi.org" only appears in the path, not the host (anchored)', () => {
+    const pathDoi: DigestArtifactForExport = {
+      ...withPaper,
+      papers: [
+        {
+          id: 7, pmid: null, doi: '10.1016/x', pmc_id: null,
+          title: 'Real article', authors: ['Smith J'], journal: 'UroToday', pub_date: '2026',
+          abstract: null, source_url: 'https://www.urotoday.com/doi.org/real-article', pdf_path: null, note: null,
+        },
+      ],
+    };
+    expect(renderObsidian(pathDoi)).toContain('[article](https://www.urotoday.com/doi.org/real-article)');
+  });
+
   it('omits the embed when the paper has no filed PDF', () => {
     const noPdf: DigestArtifactForExport = {
       ...withPaper,

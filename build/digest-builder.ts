@@ -55,6 +55,7 @@ import {
   formatTagEmissionStats,
 } from '../src/lib/tag-index.ts';
 import { VERDICT_META } from '../src/lib/verdict.ts';
+import { toPublicArticleUrl } from '../src/lib/paper-url.ts';
 import type { LlmClient } from '../src/lib/llm-client.ts';
 import {
   isOcrAvailable,
@@ -388,11 +389,13 @@ function buildArtifact(
           // constraint). pdf_path is a vault path string (file itself stays
           // gitignored) used by the Obsidian embed.
           pdf_path: p.pdf_path,
-          // v0.15.3: the curator-submitted URL. For trade-press articles
-          // (UroToday, ASCO Post, OncLive) this is the ONLY link — they have no
-          // PMID/DOI/PMC. A public citation link (not copyrighted content), so it
-          // ships in the artifact, unlike fulltext_excerpt_md / figure_ocr_md.
-          source_url: p.source_url,
+          // v0.15.3: the curator-submitted article URL, the ONLY link for
+          // trade-press papers (UroToday/ASCO Post/OncLive — no PMID/DOI/PMC).
+          // toPublicArticleUrl drops the query + fragment (no tracking tags /
+          // session tokens leak into the public artifact, codex P1) and rejects
+          // non-http(s) schemes (no javascript: in a rendered href). The raw URL
+          // stays in the DB as the local audit trail.
+          source_url: toPublicArticleUrl(p.source_url),
           note: p.curator_note,
         }))
       : undefined,

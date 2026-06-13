@@ -312,12 +312,17 @@ function renderBody(artifact: DigestArtifactForExport): string {
             // v0.8: pmid may be null (DOI-only / PDF-only paper) — lead with
             // the PMID wikilink only when present.
             const idTag = p.pmid ? `[[PMID ${p.pmid}]] ` : '';
-            const doiSuffix = p.doi ? `. [doi:${p.doi}](https://doi.org/${p.doi})` : '';
-            // v0.15.3: link the source article when present and not a bare
-            // doi.org URL we already render. The only link for trade-press papers.
+            // Percent-encode ')' so a DOI/URL containing it (e.g. 10.1002/(SICI)…)
+            // doesn't terminate the markdown link target early.
+            const mdUrl = (u: string) => u.replace(/\)/g, '%29');
+            const doiSuffix = p.doi ? `. [doi:${p.doi}](${mdUrl(`https://doi.org/${p.doi}`)})` : '';
+            // v0.15.3: link the source article when present and not the
+            // doi.org/dx.doi.org resolver we already render (anchored so a URL
+            // merely containing "doi.org/" isn't false-suppressed). The only link
+            // for trade-press papers.
             const articleSuffix =
-              p.source_url && !(p.doi && /(^https?:\/\/)?(www\.)?doi\.org\//i.test(p.source_url))
-                ? `. [article](${p.source_url})`
+              p.source_url && !(p.doi && /^https?:\/\/(www\.|dx\.)?doi\.org\//i.test(p.source_url))
+                ? `. [article](${mdUrl(p.source_url)})`
                 : '';
             lines.push(
               `- 📄 ${idTag}**${p.title}** — ${authorList}${
