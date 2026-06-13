@@ -2,6 +2,22 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.15.1] - 2026-06-12
+
+### Fixed
+
+- **Related-trials retrieval conflated sibling `-deruxtecan` ADCs.** For an open
+  question like "sequencing vs dato-DXd", the Phase 2 query generator searched the
+  study's OWN drug (sacituzumab govitecan) instead of the named comparator, and
+  the rerank then accepted trastuzumab deruxtecan (T-DXd) / SG trials as answers
+  to a datopotamab deruxtecan (dato-DXd) question. Two prompt-precision fixes: the
+  query generator now targets the question's named drug by its distinguishing name
+  (`datopotamab`, never the shared `deruxtecan` / `DXd` / `ADC` stem that matches a
+  different molecule), and the rerank now requires drug IDENTITY (not class),
+  abstaining rather than pairing a sibling. Surfaced by the v0.15 quality eval;
+  verified by rebuild (the dato-DXd query now retrieves a real Dato-DXd phase 3
+  trial; mean eval 8.0 → 8.5, factual accuracy 8.0 → 9.0).
+
 ## [0.15.0] - 2026-06-12
 
 ### Added

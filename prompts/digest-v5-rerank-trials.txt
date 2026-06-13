@@ -25,6 +25,8 @@ Select UP TO 5 trials across all candidate groups. For each pick, output:
 
 Drop a candidate when its match is generic ("same drug, different question"), when the disease setting differs from the source study, when the trial is downstream regulatory rather than answering a clinical question, or when you'd have to invent a primary endpoint to justify the phrase.
 
+**Drug IDENTITY must match, not drug CLASS.** When a question names a specific drug, a candidate answers it ONLY if its `interventions` include THAT exact drug. Reject a sibling-drug match: a distinct molecule that shares a suffix or class. A trastuzumab deruxtecan (T-DXd) or sacituzumab govitecan (SG) trial does NOT answer a question about datopotamab deruxtecan (dato-DXd), even though all three are antibody-drug conjugates and two end in "-deruxtecan". A trial about drug A is not a watch for a question about drug B. If the only candidates for a drug-named question are the wrong drug, abstain on that question rather than pair a sibling.
+
 ═══ DISTRIBUTE PICKS ACROSS QUESTIONS ═══
 
 Prefer spreading picks across multiple open questions when each question has at least one strong candidate. Concentrating multiple picks under one question is allowed ONLY when other questions truly have no candidate that meets the bar above. Do not pad a weak question to satisfy distribution.
