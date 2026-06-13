@@ -45,6 +45,10 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 - **Cross-day study persistence + slug-based entity resolution.** A trial seen on day N keeps its identity on day N+1; "PRESTIGE" vs "prestige-psma" resolve to the same study so prior-context dossier retrieval works across days. (NCT coverage index is a partial step.) **WARNING (found 2026-06-11): do NOT auto-strip a trailing `-\d+` suffix to normalize slugs — it cross-links distinct trials whose numbers are identity (`rtog-0539`, `rtog-0848` → `rtog`). The safe path is curator-declared `aliases:` frontmatter on the dossier. Design in `docs/plans/v0.15-entity-resolution-and-source-tagging.md`.** (`docs/plans/v0.5-multi-source-ingestion.md:290`)
 
+## Trade-press format (deferred from 2026-06-13 office-hours + eng review)
+
+- **Approach B — separate the trade pub's commentary into a labeled secondary layer.** **Priority: P3.** After Approach A (classify single-study vs review + provenance + conservative link) proves out in real digests, split the trade pub's distinctive interpretation (KOL take, "what this means for practice") from the reported facts, rendered as a subordinate "🗞️ {outlet}'s take:" block. **Why:** facts-first-then-framing is how a subspecialist reads; the v1 (Approach A) blends commentary into the bullets. **Depends on:** Approach A shipping first. **Context:** design doc `~/.gstack/projects/nb2276-oncbrain/nboehling-fix-trade-press-article-link-design-20260613-135111.md`; eng plan `docs/plans/trade-press-format.md` (note that plan's foundation was reworked per Codex — content_type is a first-class Phase-1 field, not a methodology value).
+
 ## Known limitations (informational — not on a roadmap)
 
 - **OCR is macOS-only.** Linux/CI builds produce uniformly null captions; scanned-PDF OCR (v0.8 PR2) needs the Mac Vision binary + poppler.
