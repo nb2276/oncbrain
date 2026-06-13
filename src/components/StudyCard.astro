@@ -533,9 +533,11 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
             </div>
             <div class="paper-title">{p.title}</div>
             <div class="paper-links">
-              <a href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`} target="_blank" rel="noopener">
-                PMID {p.pmid} →
-              </a>
+              {p.pmid && (
+                <a href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`} target="_blank" rel="noopener">
+                  PMID {p.pmid} →
+                </a>
+              )}
               {p.doi && (
                 <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener">
                   doi
@@ -546,6 +548,19 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
                   full text (PMC)
                 </a>
               )}
+              {/* v0.15.3: link to the source article. Essential for trade-press
+                  (UroToday/ASCO Post/OncLive) which have no PMID/DOI/PMC — this is
+                  their only link. Render only http(s) URLs (defense-in-depth vs a
+                  javascript: href). Suppress when it's just the doi.org/dx.doi.org
+                  resolver we already render as "doi" (anchored so a tracking param
+                  that merely contains "doi.org/" doesn't false-suppress). */}
+              {p.source_url &&
+                /^https?:\/\//i.test(p.source_url) &&
+                !(p.doi && /^https?:\/\/(www\.|dx\.)?doi\.org\//i.test(p.source_url)) && (
+                  <a href={p.source_url} target="_blank" rel="noopener">
+                    article →
+                  </a>
+                )}
             </div>
             {p.abstract && (
               <details class="paper-abstract">

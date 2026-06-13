@@ -8,6 +8,7 @@ import {
   tradePressOutletNames,
   canonicalizeTradeUrl,
   urlPathOnly,
+  toPublicArticleUrl,
 } from '../src/lib/paper-url.ts';
 
 describe('classifyPaperTarget', () => {
@@ -236,6 +237,29 @@ describe('urlPathOnly', () => {
   });
   it('is a no-op when there is no query/fragment', () => {
     expect(urlPathOnly('https://x.org/a/b')).toBe('https://x.org/a/b');
+  });
+});
+
+describe('toPublicArticleUrl (v0.15.3 — publish-safe URL)', () => {
+  it('drops query + fragment so tracking tags / tokens never publish', () => {
+    expect(
+      toPublicArticleUrl('https://www.urotoday.com/conference-highlights/eau-2026/167454-sbrt.html?token=SECRET&utm_source=tw#x'),
+    ).toBe('https://www.urotoday.com/conference-highlights/eau-2026/167454-sbrt.html');
+  });
+  it('keeps a clean path-addressed URL intact', () => {
+    expect(toPublicArticleUrl('https://ascopost.com/news/march-2026/breast/')).toBe(
+      'https://ascopost.com/news/march-2026/breast/',
+    );
+  });
+  it('rejects non-http(s) schemes (no javascript:/data: in a rendered href)', () => {
+    expect(toPublicArticleUrl('javascript:alert(document.domain)')).toBeNull();
+    expect(toPublicArticleUrl('data:text/html,<script>x</script>')).toBeNull();
+    expect(toPublicArticleUrl('ftp://x.org/a')).toBeNull();
+  });
+  it('returns null for null/empty/unparseable input', () => {
+    expect(toPublicArticleUrl(null)).toBeNull();
+    expect(toPublicArticleUrl('')).toBeNull();
+    expect(toPublicArticleUrl('not a url')).toBeNull();
   });
 });
 

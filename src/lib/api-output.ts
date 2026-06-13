@@ -55,6 +55,7 @@ export type ApiPaper = {
   journal: string | null;
   pub_date: string | null;
   abstract: string | null;
+  source_url: string | null; // v0.15.3: public article URL (the link for trade-press papers); safe to expose, unlike pdf_path/fulltext
   note: string | null;
 };
 
@@ -71,6 +72,7 @@ export function sanitizeArtifactForApi(
     journal: p.journal,
     pub_date: p.pub_date,
     abstract: p.abstract,
+    source_url: p.source_url ?? null,
     note: p.note,
   }));
   return {

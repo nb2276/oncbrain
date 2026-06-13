@@ -244,6 +244,7 @@ export type DigestArtifactPaper = {
   journal: string | null;
   pub_date: string | null;
   abstract: string | null;
+  source_url?: string | null; // v0.15.3: curator-submitted article URL (the link for trade-press papers with no PMID/DOI)
   // fulltext_excerpt_md is intentionally absent from the artifact type: it's
   // not written to data/digests (kept out of git for copyright) and nothing
   // renders it. The build-time LLM reads it from the DB instead.

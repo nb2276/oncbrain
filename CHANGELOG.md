@@ -2,6 +2,23 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.15.3] - 2026-06-13
+
+### Fixed
+
+- **Trade-press papers link to the article, not a broken PMID.** Trade-press papers
+  (UroToday, ASCO Post, OncLive) have no PMID/DOI/PMC, yet StudyCard rendered an
+  unconditional `PMID null →` link (pointing at `pubmed.ncbi.nlm.nih.gov/null/`) and
+  offered no path to the actual article. The PMID link is now conditional, and the
+  card/Obsidian export/JSON API surface the article via `source_url`. `source_url`
+  is threaded through the published artifact + API, sanitized by `toPublicArticleUrl`
+  (http(s)-only, query+fragment dropped) so no tracking tags / session tokens leak
+  (codex P1) and no `javascript:` scheme reaches a rendered href (adversarial F1).
+  The doi.org dedup regex is anchored and handles `dx.doi.org` (adversarial F2 /
+  codex P3); Obsidian percent-encodes `)` in link targets (adversarial F3). Affected
+  all 15 papers without a PMID, not just trade press. Existing committed digests are
+  backfilled with `source_url` via `build/backfill-source-url.ts` (no LLM rebuild).
+
 ## [0.15.2] - 2026-06-13
 
 ### Changed
