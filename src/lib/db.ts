@@ -97,6 +97,7 @@ export type FetchedVia =
   | 'trade_html' // trade-press article (ASCO Post, OncLive, …) with no DOI/PMID to key on
   | 'pdf' // PDF with a text layer
   | 'pdf_ocr' // scanned PDF, text recovered via Apple Vision OCR
+  | 'review-resolved' // v0.17: a paper a curator approved from a review's discussed-trials manifest
   | 'pending'
   | 'failed';
 
@@ -301,6 +302,34 @@ CREATE TABLE IF NOT EXISTS inbox_items (
 CREATE INDEX IF NOT EXISTS idx_inbox_status ON inbox_items(enrichment_status);
 CREATE INDEX IF NOT EXISTS idx_inbox_date ON inbox_items(bookmark_date);
 CREATE INDEX IF NOT EXISTS idx_inbox_msg ON inbox_items(telegram_msg_id);
+
+-- v0.17: the review-discussed-trial resolution MANIFEST. When a trade-press
+-- review (content_type:review) names trials by acronym, the resolver writes one
+-- row per (review source paper, acronym) with candidate PubMed papers; the
+-- curator approves/rejects; only an APPROVED row's chosen_pmid enters a later
+-- build as an ordinary paper source. This is a curator-gated manifest, NOT a
+-- column on the papers table (a paper row can't represent a rejected/failed
+-- resolution or a many-to-many review-paper link). The stable freeze key is the underlying
+-- trade-press paper row id + the normalized acronym (NOT the Phase-1 slug, which
+-- changes on rebuild). UNIQUE on that pair = resolve a pair ONCE (the freeze).
+CREATE TABLE IF NOT EXISTS review_trial_resolutions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  review_source_paper_id INTEGER NOT NULL,
+  acronym_norm TEXT NOT NULL,
+  acronym_display TEXT NOT NULL,
+  disease_site TEXT,
+  bookmark_date TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  chosen_pmid TEXT,
+  candidates_json TEXT,
+  confidence REAL,
+  resolver_version TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  decided_at INTEGER,
+  UNIQUE(review_source_paper_id, acronym_norm)
+);
+CREATE INDEX IF NOT EXISTS idx_rtr_date ON review_trial_resolutions(bookmark_date);
+CREATE INDEX IF NOT EXISTS idx_rtr_status ON review_trial_resolutions(status);
 `;
 
 export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): Database.Database {
@@ -1081,4 +1110,187 @@ export function countInboxByStatus(
   };
   for (const r of rows) out[r.status] = r.n;
   return out;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// v0.17: review-discussed-trial resolution manifest (T1)
+//
+// The resolver writes one row per (review source paper, acronym); the curator
+// approves/rejects; only an approved row's chosen_pmid enters a later build as
+// an ordinary source. See docs/plans/review-trial-ingestion.md.
+//
+//   resolve ──upsert(pending|failed)──►  review_trial_resolutions
+//                                              │ (curator)
+//                          ┌── decide(reject) ─┤
+//                          ▼                   ▼ decide(approve, pmid)
+//                      [terminal]      status=approved, chosen_pmid set
+//                                              │ (next build)
+//                                              ▼ savePaper(chosen_pmid) ordinary source
+// ────────────────────────────────────────────────────────────────────────────
+
+export type ResolutionStatus = 'pending' | 'approved' | 'rejected' | 'failed';
+
+// One candidate PubMed paper for an acronym, shown to the curator for approval.
+export type ResolutionCandidate = {
+  pmid: string;
+  title: string;
+  journal: string | null;
+  year: string | null;
+  score: number; // resolver rank score (higher = better); advisory, not a gate
+};
+
+export type ReviewTrialResolution = {
+  id: number;
+  review_source_paper_id: number; // STABLE freeze key (the trade-press paper row id)
+  acronym_norm: string; // normalized (upper, trimmed) — half the UNIQUE freeze key
+  acronym_display: string; // the acronym as the review named it (verbatim)
+  disease_site: string | null;
+  bookmark_date: string; // the review's date (YYYY-MM-DD)
+  status: ResolutionStatus;
+  chosen_pmid: string | null; // set on approve
+  candidates_json: string | null; // JSON ResolutionCandidate[] — use parseResolutionCandidates()
+  confidence: number | null; // resolver advisory confidence 0..1
+  resolver_version: string;
+  created_at: number;
+  decided_at: number | null;
+};
+
+export type NewResolution = {
+  review_source_paper_id: number;
+  acronym_norm: string;
+  acronym_display: string;
+  disease_site?: string | null;
+  bookmark_date: string;
+  status?: ResolutionStatus; // default 'pending'
+  chosen_pmid?: string | null;
+  candidates?: ResolutionCandidate[];
+  confidence?: number | null;
+  resolver_version: string;
+};
+
+// Normalize an acronym to the canonical freeze key (upper-case, whitespace
+// collapsed). The resolver MUST route both the stored `acronym_norm` and every
+// lookup through this so the UNIQUE(review_source_paper_id, acronym_norm) freeze
+// is consistent (e.g. " stomp " and "STOMP" map to the same row).
+export function normalizeAcronym(raw: string): string {
+  return raw.trim().replace(/\s+/g, ' ').toUpperCase();
+}
+
+export function parseResolutionCandidates(json: string | null): ResolutionCandidate[] {
+  if (!json) return [];
+  try {
+    const parsed = JSON.parse(json);
+    return Array.isArray(parsed) ? (parsed as ResolutionCandidate[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+// FREEZE: insert one resolution iff (review_source_paper_id, acronym_norm) has no
+// row yet. If a row already exists (any status — pending/approved/rejected/failed),
+// it is returned UNCHANGED — re-running the resolver never re-resolves or
+// overwrites a frozen pair (and never clobbers a curator decision). Returns the
+// row plus whether it was freshly created. Re-resolution after a resolver upgrade
+// is the explicit job of reopenStaleResolutions(), not this insert.
+export function upsertResolution(
+  db: Database.Database,
+  input: NewResolution,
+): { resolution: ReviewTrialResolution; created: boolean } {
+  const existing = getResolution(db, input.review_source_paper_id, input.acronym_norm);
+  if (existing) return { resolution: existing, created: false };
+
+  const now = Date.now();
+  const info = db
+    .prepare(
+      `INSERT INTO review_trial_resolutions
+         (review_source_paper_id, acronym_norm, acronym_display, disease_site,
+          bookmark_date, status, chosen_pmid, candidates_json, confidence,
+          resolver_version, created_at, decided_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
+    )
+    .run(
+      input.review_source_paper_id,
+      input.acronym_norm,
+      input.acronym_display,
+      input.disease_site ?? null,
+      input.bookmark_date,
+      input.status ?? 'pending',
+      input.chosen_pmid ?? null,
+      input.candidates ? JSON.stringify(input.candidates) : null,
+      input.confidence ?? null,
+      input.resolver_version,
+      now,
+    );
+  const resolution = db
+    .prepare('SELECT * FROM review_trial_resolutions WHERE id = ?')
+    .get(info.lastInsertRowid) as ReviewTrialResolution;
+  return { resolution, created: true };
+}
+
+export function getResolution(
+  db: Database.Database,
+  reviewSourcePaperId: number,
+  acronymNorm: string,
+): ReviewTrialResolution | undefined {
+  return db
+    .prepare(
+      'SELECT * FROM review_trial_resolutions WHERE review_source_paper_id = ? AND acronym_norm = ?',
+    )
+    .get(reviewSourcePaperId, acronymNorm) as ReviewTrialResolution | undefined;
+}
+
+// List manifest rows, optionally filtered by the review's date and/or status.
+// Used by the curator-approval CLI (list pending) and the builder (list approved
+// for a date). Newest first.
+export function listResolutions(
+  db: Database.Database,
+  filter: { date?: string; status?: ResolutionStatus } = {},
+): ReviewTrialResolution[] {
+  const clauses: string[] = [];
+  const params: unknown[] = [];
+  if (filter.date) {
+    clauses.push('bookmark_date = ?');
+    params.push(filter.date);
+  }
+  if (filter.status) {
+    clauses.push('status = ?');
+    params.push(filter.status);
+  }
+  const where = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
+  return db
+    .prepare(`SELECT * FROM review_trial_resolutions ${where} ORDER BY created_at DESC, id DESC`)
+    .all(...params) as ReviewTrialResolution[];
+}
+
+// Curator decision: approve (with the chosen PMID) or reject. Stamps decided_at.
+// Approving requires a chosen_pmid (the curator picks which candidate IS the
+// trial — resolves the "which primary paper" question). Returns the updated row,
+// or undefined if the id doesn't exist.
+export function decideResolution(
+  db: Database.Database,
+  id: number,
+  decision: { status: 'approved'; chosenPmid: string } | { status: 'rejected' },
+): ReviewTrialResolution | undefined {
+  const chosenPmid = decision.status === 'approved' ? decision.chosenPmid : null;
+  db.prepare(
+    'UPDATE review_trial_resolutions SET status = ?, chosen_pmid = ?, decided_at = ? WHERE id = ?',
+  ).run(decision.status, chosenPmid, Date.now(), id);
+  return db
+    .prepare('SELECT * FROM review_trial_resolutions WHERE id = ?')
+    .get(id) as ReviewTrialResolution | undefined;
+}
+
+// Re-open the un-decided rows from an OLDER resolver version so a resolver
+// upgrade re-resolves them on the next run. Deletes only status IN
+// ('pending','failed') with a different resolver_version — curator decisions
+// (approved/rejected) are PRESERVED. Returns the count re-opened. This is the
+// one intentional escape from the freeze.
+export function reopenStaleResolutions(db: Database.Database, currentVersion: string): number {
+  const info = db
+    .prepare(
+      `DELETE FROM review_trial_resolutions
+       WHERE resolver_version != ? AND status IN ('pending','failed')`,
+    )
+    .run(currentVersion);
+  return info.changes;
 }
