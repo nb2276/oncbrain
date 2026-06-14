@@ -992,12 +992,22 @@ async function runStudyAgent(
     ? `═══ PRIOR CONTEXT (read-only curator notes for ${cluster.slug}) ═══\n\n${priorContext}\n\nUse these as anchor context only. The current tweets are still the primary source of truth.`
     : '';
 
+  // v0.16 (codex review P2): pass the AUTHORITATIVE Phase-1 classification down
+  // so Phase 2 doesn't independently re-decide review-ness and silently emit an
+  // empty discussed_trials for a review. Only a review gets a directive; a
+  // study report gets a blank line (byte-stable for the legacy corpus).
+  const contentTypeBlock =
+    cluster.content_type === 'review'
+      ? 'Classification: REVIEW (set by Phase 1). This item is a multi-trial / topic round-up, NOT a single-study report. You MUST populate `discussed_trials` with the trial acronyms it names, copied verbatim. Do not fabricate a single-result analysis.'
+      : '';
+
   const prompt = template
     .replace('{{VOICE}}', VOICE_POINTER)
     .replace('{{PERSPECTIVE}}', loadPerspective(opts.perspectiveName))
     .replace('{{STUDY_NAME}}', cluster.name)
     .replace('{{STUDY_SLUG}}', cluster.slug)
     .replace('{{DISEASE_SITE}}', cluster.disease_site)
+    .replace('{{CONTENT_TYPE_BLOCK}}', contentTypeBlock)
     .replace('{{IMAGE_MANIFEST}}', manifest.text)
     .replace('{{TWEETS_JSON}}', JSON.stringify(tweetsForPrompt, null, 2))
     .replace('{{PRIOR_CONTEXT_BLOCK}}', priorContextBlock);

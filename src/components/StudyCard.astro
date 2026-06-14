@@ -208,7 +208,10 @@ const provenanceUrl = isHttpUrl(provenanceUrlRaw) ? provenanceUrlRaw : null;
 // v0.16 review extras: a content_type:review carries no verdict (stripped at
 // build) and surfaces a plain-text "Trials discussed" acronym list instead.
 const isReview = study.content_type === 'review';
-const discussedTrials = isReview ? (study.discussed_trials ?? []) : [];
+// Array.isArray guard (not just ??): a hand-edited / corrupted artifact with a
+// non-array discussed_trials would otherwise crash .map at build.
+const discussedTrials =
+  isReview && Array.isArray(study.discussed_trials) ? study.discussed_trials : [];
 const hasDiscussedTrials = discussedTrials.length > 0;
 ---
 
