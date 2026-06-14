@@ -9,6 +9,7 @@
 // an APPROVED row's chosen PMID enters a later build (T5). Nothing here mutates
 // a digest or publishes — the curator is the gate.
 
+import 'dotenv/config';
 import { readFileSync, existsSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
