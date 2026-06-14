@@ -11,6 +11,7 @@ import {
   dedupTablesAgainstCaption,
   capStudyImages,
   detectClusterCollisions,
+  parseDiscussedTrials,
   DigestParseError,
   type DigestInputTweet,
   type DigestStudy,
@@ -303,6 +304,36 @@ describe('parseGroupingResponse', () => {
     expect(result[0]!.name).toBe('first');
   });
 
+  it('defaults content_type to study_report when the field is absent (v0.16)', () => {
+    const oneTweet = [sampleTweets[0]!];
+    const raw = JSON.stringify({
+      studies: [{ slug: 'c', name: 'C', disease_site: 'breast', tweet_ids: [1] }],
+    });
+    expect(parseGroupingResponse(raw, oneTweet)[0]!.content_type).toBe('study_report');
+  });
+
+  it('parses an explicit content_type=review (v0.16)', () => {
+    const oneTweet = [sampleTweets[0]!];
+    const raw = JSON.stringify({
+      studies: [
+        { slug: 'c', name: 'C', disease_site: 'breast', content_type: 'review', tweet_ids: [1] },
+      ],
+    });
+    expect(parseGroupingResponse(raw, oneTweet)[0]!.content_type).toBe('review');
+  });
+
+  it('falls back to study_report on an invalid content_type rather than dropping the cluster', () => {
+    const oneTweet = [sampleTweets[0]!];
+    const raw = JSON.stringify({
+      studies: [
+        { slug: 'c', name: 'C', disease_site: 'breast', content_type: 'editorial', tweet_ids: [1] },
+      ],
+    });
+    const result = parseGroupingResponse(raw, oneTweet);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.content_type).toBe('study_report');
+  });
+
   it('rejects unsafe slugs (path traversal) — partition violation surfaces', () => {
     // With unsafe slug rejected and no other cluster, tweet 1 is orphaned.
     // The partition check throws — that's the right surface for an
@@ -355,6 +386,7 @@ describe('parseStudyAgentResponse', () => {
     name: 'PRESTIGE-PSMA',
     disease_site: 'prostate',
     tweet_ids: [1, 2],
+    content_type: 'study_report' as const,
   };
 
   it('parses a valid response', () => {
@@ -689,9 +721,87 @@ describe('validateStudyTables', () => {
   });
 
   it('falls back to cluster name if model omits name', () => {
-    const localCluster = { slug: 'foo', name: 'PRESTIGE-PSMA', disease_site: 'prostate', tweet_ids: [1] };
+    const localCluster = { slug: 'foo', name: 'PRESTIGE-PSMA', disease_site: 'prostate', tweet_ids: [1], content_type: 'study_report' as const };
     const raw = JSON.stringify({ tldr: 'y', details: [] });
     expect(parseStudyAgentResponse(raw, localCluster).name).toBe('PRESTIGE-PSMA');
+  });
+
+  // v0.16: content_type is inherited from the Phase 1 cluster (not re-classified
+  // by Phase 2), and only a review carries discussed_trials.
+  it('omits content_type + discussed_trials for a study_report cluster (back-compat)', () => {
+    const c = { slug: 'foo', name: 'Foo', disease_site: 'prostate', tweet_ids: [1], content_type: 'study_report' as const };
+    const raw = JSON.stringify({ tldr: 'y', details: [], discussed_trials: ['STOMP'] });
+    const out = parseStudyAgentResponse(raw, c);
+    // Absent === study_report; a study report never renders an acronym list,
+    // even when the model spuriously emits one.
+    expect(out.content_type).toBeUndefined();
+    expect(out.discussed_trials).toBeUndefined();
+  });
+
+  it('inherits content_type=review and attaches the discussed_trials list', () => {
+    const c = { slug: 'oligomet-sbrt', name: 'Oligomet SBRT review', disease_site: 'prostate', tweet_ids: [1], content_type: 'review' as const };
+    const raw = JSON.stringify({
+      tldr: 'Landscape of SBRT in oligometastatic prostate cancer.',
+      details: [],
+      discussed_trials: ['STOMP', 'ORIOLE', 'RADIOSA'],
+    });
+    const out = parseStudyAgentResponse(raw, c);
+    expect(out.content_type).toBe('review');
+    expect(out.discussed_trials).toEqual(['STOMP', 'ORIOLE', 'RADIOSA']);
+  });
+
+  it('a review with no extractable acronyms leaves discussed_trials undefined (not [])', () => {
+    const c = { slug: 'topic', name: 'Topic review', disease_site: 'breast', tweet_ids: [1], content_type: 'review' as const };
+    const raw = JSON.stringify({ tldr: 'A general overview.', details: [], discussed_trials: [] });
+    expect(parseStudyAgentResponse(raw, c).discussed_trials).toBeUndefined();
+  });
+});
+
+describe('parseDiscussedTrials (v0.16)', () => {
+  it('returns [] for a non-array', () => {
+    expect(parseDiscussedTrials(undefined)).toEqual([]);
+    expect(parseDiscussedTrials(null)).toEqual([]);
+    expect(parseDiscussedTrials('STOMP')).toEqual([]);
+  });
+
+  it('keeps verbatim acronyms in order, dropping non-strings', () => {
+    expect(parseDiscussedTrials(['STOMP', 7, 'ORIOLE', null, 'RADIOSA'])).toEqual([
+      'STOMP',
+      'ORIOLE',
+      'RADIOSA',
+    ]);
+  });
+
+  it('trims, drops empties + single-char fragments + sentence-length blobs', () => {
+    const longBlob = 'A'.repeat(41);
+    expect(
+      parseDiscussedTrials(['  ARTO  ', '', '   ', 'X', longBlob, '!!', 'STAMPEDE2']),
+    ).toEqual(['ARTO', 'STAMPEDE2']);
+  });
+
+  it('keeps cooperative-group names that are 1 letter + digits (S1207, E2112)', () => {
+    expect(parseDiscussedTrials(['S1207', 'E2112'])).toEqual(['S1207', 'E2112']);
+  });
+
+  it('dedupes case-insensitively, first spelling wins', () => {
+    expect(parseDiscussedTrials(['STOMP', 'stomp', 'Stomp', 'ORIOLE'])).toEqual([
+      'STOMP',
+      'ORIOLE',
+    ]);
+  });
+
+  it('caps at 8 (M0 found ~14 on the exemplar review)', () => {
+    const many = Array.from({ length: 14 }, (_, i) => `TRIAL${i}`);
+    const out = parseDiscussedTrials(many);
+    expect(out).toHaveLength(8);
+    expect(out[0]).toBe('TRIAL0');
+  });
+
+  it('keeps the inclusive length boundaries (2 and 40), drops 41 (pins off-by-one)', () => {
+    const max = 'A'.repeat(40);
+    const over = 'A'.repeat(41);
+    // 'A2' is exactly 2 chars + alphanumeric → kept; 40-char → kept; 41 → dropped.
+    expect(parseDiscussedTrials(['A2', max, over])).toEqual(['A2', max]);
   });
 });
 
@@ -1208,8 +1318,8 @@ describe('detectClusterCollisions', () => {
     ];
     detectClusterCollisions(
       [
-        { slug: 'a', name: 'TrialA', disease_site: 'prostate', tweet_ids: [1] },
-        { slug: 'b', name: 'TrialB', disease_site: 'prostate', tweet_ids: [2] },
+        { slug: 'a', name: 'TrialA', disease_site: 'prostate', tweet_ids: [1], content_type: 'study_report' as const },
+        { slug: 'b', name: 'TrialB', disease_site: 'prostate', tweet_ids: [2], content_type: 'study_report' as const },
       ],
       tweets,
     );
@@ -1223,9 +1333,27 @@ describe('detectClusterCollisions', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     detectClusterCollisions(
       [
-        { slug: 'a', name: 'TrialA', disease_site: 'prostate', tweet_ids: [1] },
+        { slug: 'a', name: 'TrialA', disease_site: 'prostate', tweet_ids: [1], content_type: 'study_report' as const },
       ],
       [{ id: 1, author: null, text: 'NCT04567890 result', note: null }],
+    );
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  // v0.16: a review legitimately shares NCTs with the single-trial cluster it
+  // sits beside (the standalone-review rule). That overlap must NOT warn.
+  it('does not warn when a review shares an NCT with a single-trial cluster', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    detectClusterCollisions(
+      [
+        { slug: 'review', name: 'SBRT landscape review', disease_site: 'prostate', tweet_ids: [1], content_type: 'review' as const },
+        { slug: 'stomp', name: 'STOMP', disease_site: 'prostate', tweet_ids: [2], content_type: 'study_report' as const },
+      ],
+      [
+        { id: 1, author: null, text: 'Review discussing STOMP NCT01558427.', note: null },
+        { id: 2, author: null, text: 'STOMP primary result NCT01558427.', note: null },
+      ],
     );
     expect(warn).not.toHaveBeenCalled();
     warn.mockRestore();
@@ -1239,6 +1367,7 @@ describe('parseStudyAgentResponse — figures[]', () => {
     name: 'PRESTIGE-PSMA',
     disease_site: 'prostate',
     tweet_ids: [1, 2],
+    content_type: 'study_report' as const,
   };
 
   it('parses a figures array with mixed caption shapes', () => {

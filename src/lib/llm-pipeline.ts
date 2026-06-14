@@ -46,6 +46,11 @@ import {
   type IntentTag,
   type MethodologyTag,
 } from './tags.ts';
+import {
+  type ContentType,
+  parseContentType,
+  DEFAULT_CONTENT_TYPE,
+} from './content-type.ts';
 import { loadStudyContext, isSafeSlug } from './study-retrieval.ts';
 import { isOcrAvailable, isSafeImageUrl } from './vision-ocr.ts';
 import { buildAssociationGraph, renderGroupsForPrompt } from './source-association.ts';
@@ -269,6 +274,21 @@ export type DigestStudy = {
   modality?: ModalityTag | null;
   intent?: IntentTag | null;
   methodology?: MethodologyTag | null;
+  // v0.16: study_report (default) vs review. Inherited from the Phase 1
+  // cluster, not emitted by Phase 2. A `review` carries no verdict (forced
+  // null at build, after overrides) and renders `discussed_trials` instead of
+  // a numbers-first card. Older artifacts won't have this; renderers fall back
+  // to the study-report layout (absent === study_report).
+  content_type?: ContentType;
+  // v0.16: trial acronyms a `review` discusses, lifted VERBATIM from the source
+  // text (e.g. ["STOMP", "ORIOLE", "RADIOSA"]). Plain text, NOT linked — the
+  // conservative no-inference rule forbids guessing an NCT for a bare acronym.
+  // Capped + noise-filtered at parse. Empty/absent for study reports.
+  //
+  // Both v0.16 fields are mirrored in src/lib/digest-data.ts:DigestStudy — the
+  // build emits the artifact JSON and the Astro pages re-read it through that
+  // definition, so the two MUST keep these shapes in lockstep.
+  discussed_trials?: string[];
   // v0.13: trials watching each open question. Phase 2 emits per-question
   // search queries internally (consumed by the orchestrator, not retained
   // on this object); the build-time orchestrator hits clinicaltrials.gov
@@ -550,6 +570,10 @@ type StudyCluster = {
   name: string;
   disease_site: string;
   tweet_ids: number[];
+  // v0.16: Phase 1 classifies each cluster as a single-study report or a
+  // multi-trial / topic review. Set at grouping time so a review is recognized
+  // as its own standalone cluster before Phase 2. The study inherits this.
+  content_type: ContentType;
 };
 
 type SiteMeta = {
@@ -852,8 +876,12 @@ export function parseGroupingResponse(raw: string, tweets: DigestInputTweet[]): 
         )
       : [];
     if (tweet_ids.length === 0) continue;
+    // v0.16: study_report (default) vs review. parseContentType falls back to
+    // the default for a missing/invalid value — back-compat for the corpus
+    // of clusters emitted before this field existed.
+    const content_type = parseContentType(c.content_type);
     seenSlugs.add(slugRaw);
-    out.push({ slug: slugRaw, name, disease_site, tweet_ids });
+    out.push({ slug: slugRaw, name, disease_site, tweet_ids, content_type });
   }
 
   // Partition enforcement: every input tweet must appear in exactly one
@@ -897,6 +925,13 @@ export function detectClusterCollisions(
   const tweetById = new Map(tweets.map((t) => [t.id, t]));
   const nctMap = new Map<string, string[]>(); // nct → slugs
   for (const c of clusters) {
+    // v0.16: a `review` cluster is a multi-trial round-up that DELIBERATELY
+    // names (and may share NCTs with) the single-trial clusters it sits beside
+    // — the grouping prompt forces it to stay standalone even when it names a
+    // trial. That overlap is the designed state, not a split/over-cluster, so
+    // excluding reviews here prevents false-positive warnings that would mask
+    // genuine ones.
+    if (c.content_type === 'review') continue;
     const text =
       c.name +
       ' ' +
@@ -957,12 +992,22 @@ async function runStudyAgent(
     ? `═══ PRIOR CONTEXT (read-only curator notes for ${cluster.slug}) ═══\n\n${priorContext}\n\nUse these as anchor context only. The current tweets are still the primary source of truth.`
     : '';
 
+  // v0.16 (codex review P2): pass the AUTHORITATIVE Phase-1 classification down
+  // so Phase 2 doesn't independently re-decide review-ness and silently emit an
+  // empty discussed_trials for a review. Only a review gets a directive; a
+  // study report gets a blank line (byte-stable for the legacy corpus).
+  const contentTypeBlock =
+    cluster.content_type === 'review'
+      ? 'Classification: REVIEW (set by Phase 1). This item is a multi-trial / topic round-up, NOT a single-study report. You MUST populate `discussed_trials` with the trial acronyms it names, copied verbatim. Do not fabricate a single-result analysis.'
+      : '';
+
   const prompt = template
     .replace('{{VOICE}}', VOICE_POINTER)
     .replace('{{PERSPECTIVE}}', loadPerspective(opts.perspectiveName))
     .replace('{{STUDY_NAME}}', cluster.name)
     .replace('{{STUDY_SLUG}}', cluster.slug)
     .replace('{{DISEASE_SITE}}', cluster.disease_site)
+    .replace('{{CONTENT_TYPE_BLOCK}}', contentTypeBlock)
     .replace('{{IMAGE_MANIFEST}}', manifest.text)
     .replace('{{TWEETS_JSON}}', JSON.stringify(tweetsForPrompt, null, 2))
     .replace('{{PRIOR_CONTEXT_BLOCK}}', priorContextBlock);
@@ -1235,6 +1280,14 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
   const intent = parseEnumTag(root.intent, isValidIntent, 'intent', name);
   const methodology = parseEnumTag(root.methodology, isValidMethodology, 'methodology', name);
 
+  // v0.16: content_type is decided at Phase 1 (grouping) and inherited here —
+  // Phase 2 does NOT re-classify. discussed_trials is the one trade-press field
+  // Phase 2 owns (it reads the full source text), and only a review carries it;
+  // a study report never renders an acronym list even if the model emits one.
+  const content_type = cluster.content_type;
+  const discussedTrials =
+    content_type === 'review' ? parseDiscussedTrials(root.discussed_trials) : [];
+
   return {
     name,
     tldr,
@@ -1249,7 +1302,41 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     modality,
     intent,
     methodology,
+    // Omit the default so the committed study-report corpus stays unchanged;
+    // absent === study_report. Only a review records the field.
+    content_type: content_type === DEFAULT_CONTENT_TYPE ? undefined : content_type,
+    discussed_trials: discussedTrials.length > 0 ? discussedTrials : undefined,
   };
+}
+
+// v0.16: parse a review's "trials discussed" acronym list. Lifts trial names
+// the model copied VERBATIM from the source (we never link or infer an NCT for
+// a bare acronym — the dato-DXd lesson). Defensive against the model returning
+// noise: trims, drops empties / single chars / sentence-length fragments,
+// dedupes case-insensitively (first spelling wins), and caps the list so a
+// runaway extraction can't flood the card. M0 found ~14 acronyms on the
+// exemplar incl. a "PP3"-type fragment; the cap is the main control.
+const MAX_DISCUSSED_TRIALS = 8;
+export function parseDiscussedTrials(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const entry of raw) {
+    if (typeof entry !== 'string') continue;
+    const name = entry.trim();
+    // 2..40 chars, must contain ≥1 alphanumeric. Upper bound rejects a
+    // sentence the model pasted instead of an acronym; lower bound rejects a
+    // stray single char. We do NOT require ≥3 letters — cooperative-group
+    // trials (S1207, E2112) are 1 letter + digits and are real names.
+    if (name.length < 2 || name.length > 40) continue;
+    if (!/[A-Za-z0-9]/.test(name)) continue;
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(name);
+    if (out.length >= MAX_DISCUSSED_TRIALS) break;
+  }
+  return out;
 }
 
 const MAX_FIGURES = 4;

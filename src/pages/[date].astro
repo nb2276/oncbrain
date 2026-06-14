@@ -14,7 +14,7 @@ import {
 import { linkifyCitations } from '../lib/extract.ts';
 import { getDiseaseSite } from '../lib/disease-sites.ts';
 import { assignSlugsForDate } from '../lib/slug-resolve.ts';
-import { verdictMetaFor } from '../lib/verdict.ts';
+import { railEmojiForStudy } from '../lib/verdict.ts';
 import { studyDataTags } from '../lib/study-data-tags.ts';
 import { buildFilterRailOptions } from '../lib/tag-foundations.ts';
 import {
@@ -59,11 +59,11 @@ const slugByStudy = new Map<DigestStudy, string>();
 allStudiesOnDate.forEach((s, i) => slugByStudy.set(s, resolvedSlugs[i]!));
 
 // Desktop triage rail: one jump-link per study, in render order, marked with
-// its verdict emoji (neutral dot when a study carries no verdict).
+// its verdict emoji (🗞️ for a verdict-less review, neutral dot otherwise).
 const railItems = allStudiesOnDate.map((study) => ({
   href: `#${slugByStudy.get(study)}`,
   name: study.name,
-  verdictEmoji: verdictMetaFor(study.verdict?.soc_implication)?.emoji ?? '·',
+  verdictEmoji: railEmojiForStudy(study),
 }));
 
 // v0.11 PR-2: filter options scoped to studies on this date.

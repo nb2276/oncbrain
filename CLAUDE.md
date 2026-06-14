@@ -159,6 +159,8 @@ DigestStudy {
   tweet_ids: number[]      // back-compat synthetic ids
   source_ids?: SourceRef[] // v0.5: typed refs → bookmarks / papers / slide_uploads
   verdict?: StudyVerdict   // v0.7: {soc_implication, rationale, audience} SOC-triage pill
+  content_type?: ContentType  // v0.16: 'study_report' (default, absent) | 'review'; decided at Phase 1. A review carries NO verdict (stripped at build) and renders discussed_trials instead of a numbers-first card
+  discussed_trials?: string[] // v0.16: trial acronyms a review names, lifted verbatim, plain text (never linked / no NCT inference). Empty/absent for study reports
 }
 ```
 
@@ -197,7 +199,8 @@ src/
     api-output.ts          v0.8 PR3: JSON API shapers (digests index, per-study, sanitized per-date)
     digest-data.ts         Astro page data loaders (listDigests, listSiteSummaries, listRecentStudies)
     digest-overrides.ts    durable per-date overrides: suppress/edit studies, applied at build time (applyOverrides + saveOverrides)
-    verdict.ts             v0.9: SOC-implication verdict taxonomy (emoji + label), shared by StudyCard + TriageRail
+    verdict.ts             v0.9: SOC-implication verdict taxonomy (emoji + label), shared by StudyCard + TriageRail. v0.16: REVIEW_GLYPH (🗞️) + railEmojiForStudy (verdict emoji, else 🗞️ for a review, else neutral dot)
+    content-type.ts        v0.16: study content_type (study_report | review) — first-class, orthogonal to methodology + verdict; parseContentType + stripReviewVerdicts (a review carries no verdict). Classified at Phase 1; NOT a /tags/ namespace
     disease-sites.ts       22-site enum (slug → label + emoji + rationale; see DESIGN.md)
   pages/
     index.astro            home: disease-site nav + hero TL;DR + recent-studies feed + live search

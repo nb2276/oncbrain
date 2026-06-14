@@ -48,6 +48,7 @@ import {
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
 import { clampPreprintVerdict } from '../src/lib/preprint.ts';
+import { stripReviewVerdicts } from '../src/lib/content-type.ts';
 import {
   listDigestsStrict,
   assertSlugUniqueness,
@@ -569,10 +570,19 @@ export async function buildOneDate(
   // verdict edit runs after the Phase-2 clamp and could otherwise restore an
   // over-confident verdict on a flagged preprint — the clinical-safety floor
   // must hold regardless of override. Idempotent on already-capped verdicts.
+  //
   for (const site of digest.sites) {
     for (const study of site.studies) {
       if (study.is_preprint) study.verdict = clampPreprintVerdict(study.verdict) ?? undefined;
     }
+  }
+  // v0.16: force every `review` study verdict-less in the same post-override
+  // phase (Codex #9). A multi-trial review has no single SOC implication to
+  // triage; it surfaces discussed_trials instead. Runs AFTER overrides so a
+  // curator verdict edit can't reintroduce one. See stripReviewVerdicts.
+  const strippedReviewVerdicts = stripReviewVerdicts(digest);
+  if (strippedReviewVerdicts > 0) {
+    console.log(`  stripped ${strippedReviewVerdicts} verdict(s) from review studies`);
   }
 
   const artifact = buildArtifact(date, confMeta, bookmarks, papersForDate, slidesForDate, digest);

@@ -66,6 +66,7 @@ The unit of the digest. **Triage-first**: the card rests at a triage layer and f
 4. **Verdict pill** — the standard-of-care triage signal, six buckets, each an emoji plus a short label:
    - 🚀 Practice-changing · ↔️ Challenges SOC · 🔄 Confirmatory · 🧪 Early signal · ⚠️ Caveats dominate · ❔ Unclear
    - Carries a one-line rationale. Taxonomy lives in `src/lib/verdict.ts` (shared with the triage rail). Assignment rules and maturity gates are a voice concern (see `VOICE.md`). These six emojis are the *visual* vocabulary; do not reuse them elsewhere.
+   - **🗞️ press round-up / review (v0.16).** A `content_type: review` study (a trade-press / topic round-up surveying multiple trials) carries NO verdict — there is no single SOC implication to triage. In its place it shows a "🗞️ Reported via {outlet}" provenance line and a plain-text "Trials discussed" acronym list, and the triage rail marks it with 🗞️ where a verdict emoji would sit. `REVIEW_GLYPH` (🗞️) is centralized in `src/lib/verdict.ts` alongside the verdict taxonomy so the rail marker and the card provenance icon can't drift. Reserved for reviews; do not reuse.
 5. **"vs leading data" callout** — comparator (🔗) bullets lifted out of the depth, so the reader sees how the result sits against prior evidence at a glance.
 
 **Figures:** their own column on desktop (≥1200px when a card has figures), or stacked under the triage layer on narrower viewports. The first figure is the visual anchor; additional figures fold behind a `+N more figures` summary.

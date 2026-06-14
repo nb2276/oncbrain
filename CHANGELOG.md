@@ -2,6 +2,27 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.16.0] - 2026-06-13
+
+### Added
+
+- **Trade-press topic reviews now render as reviews, not bogus single-study cards.**
+  A trade-press round-up that surveys multiple trials (e.g. a UroToday
+  conference-highlights piece on the oligometastatic-prostate SBRT landscape) is
+  classified `content_type: review` at the grouping phase and rendered as a press
+  round-up: a "🗞️ Reported via {outlet}" provenance line, a plain-text "Trials
+  discussed" list of the acronyms it names (STOMP, ORIOLE, RADIOSA, ARTO,
+  WOLVERINE, ...), and NO standard-of-care verdict, because a multi-trial review
+  has no single SOC implication to triage. Reviews carry a 🗞️ marker in the
+  desktop triage rail in place of a verdict emoji. Single-study trade-press
+  write-ups stay study reports and keep their verdict, and also gain the
+  provenance line (shown only when the sources are trade-press-only, so a mixed
+  cluster is not misattributed). Trade-press trial names are lifted verbatim and
+  rendered as plain text, never linked (no NCT is inferred for a bare acronym).
+  Classification is conservative: an unrecognized type stays a study report, so
+  the existing committed digest corpus is byte-unchanged, and the verdict is
+  stripped after curator overrides so a review can never ship one.
+
 ## [0.15.3] - 2026-06-13
 
 ### Fixed

@@ -161,6 +161,9 @@ describe('backfill smoke (v0.10 T16.5)', () => {
             modality?: string | null;
             intent?: string | null;
             methodology?: string | null;
+            content_type?: string;
+            discussed_trials?: string[];
+            verdict?: { soc_implication: string } | null;
             tweet_ids: number[];
             source_ids?: Array<{ type: 'tweet' | 'paper' | 'slide'; id: number }>;
           }>;
@@ -426,6 +429,65 @@ describe('backfill smoke (v0.10 T16.5)', () => {
     expect(studies[0]!.source_ids).toEqual(
       expect.arrayContaining([{ type: 'paper', id: paper.id }]),
     );
+  });
+
+  // v0.16: the Codex #9 invariant, asserted end-to-end through the real
+  // buildOneDate path (not just the stripReviewVerdicts unit). Phase 1 tags the
+  // cluster `review`; the mock Phase 2 emits a verdict ANYWAY; the builder must
+  // ship the study verdict-less while keeping content_type + the acronym list.
+  it('strips the verdict from a content_type:review study end-to-end', async () => {
+    const date = '2026-05-25';
+    const b = saveBookmark(db, {
+      url: 'https://x.com/uro/status/3001',
+      bookmark_date: date,
+      author_handle: '@uro',
+      author_name: 'UroToday',
+      tweet_text: 'EAU 2026 review: SBRT landscape in oligomet prostate (STOMP, ORIOLE, RADIOSA).',
+      fetched_via: 'manual',
+    });
+    const grouping = JSON.stringify({
+      studies: [
+        {
+          slug: 'oligomet-sbrt-review',
+          name: 'Oligomet SBRT review',
+          disease_site: 'prostate',
+          content_type: 'review',
+          tweet_ids: [b.id],
+        },
+      ],
+    });
+    const studyAgent = JSON.stringify({
+      name: 'Oligomet SBRT review',
+      tldr: 'Narrative review of the oligomet SBRT landscape.',
+      details: [],
+      nct: null,
+      discussed_trials: ['STOMP', 'ORIOLE', 'RADIOSA'],
+      verdict: {
+        soc_implication: 'confirmatory',
+        rationale: 'a review must not ship this',
+        audience: null,
+      },
+    });
+    const synthesis = JSON.stringify({
+      top_line: 'Review day.',
+      tldr: 'One landscape review.',
+      site_meta: [{ disease_site: 'prostate', intro: null, open_questions: null }],
+    });
+
+    const { client } = mockClient({
+      grouping,
+      studies: { 'oligomet-sbrt-review': studyAgent },
+      synthesis,
+    });
+    await buildOneDate(args(), db, date, { client });
+
+    const studies = readArtifact(date).digest.sites.flatMap((s) => s.studies);
+    expect(studies).toHaveLength(1);
+    expect(studies[0]!.content_type).toBe('review');
+    // The invariant: a review NEVER ships a verdict, even though Phase 2 emitted one.
+    expect(studies[0]!.verdict).toBeUndefined();
+    // ...but the acronym list it surfaces instead survives.
+    expect(studies[0]!.discussed_trials).toEqual(['STOMP', 'ORIOLE', 'RADIOSA']);
   });
 
   it('skips a date with zero sources without writing an artifact', async () => {

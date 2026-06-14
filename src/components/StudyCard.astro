@@ -11,7 +11,8 @@
 // behind a native <details> expander. Sources stay in their own collapsible.
 import { linkifyCitations } from '../lib/extract.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
-import { VERDICT_META } from '../lib/verdict.ts';
+import { VERDICT_META, REVIEW_GLYPH } from '../lib/verdict.ts';
+import { tradePressLabel } from '../lib/paper-url.ts';
 import {
   studyFigures,
   stripStudyNamePrefix,
@@ -101,6 +102,12 @@ function isComparatorBullet(d: DigestDetail): boolean {
 function stripComparatorEmoji(text: string): string {
   return text.replace(/^\s*🔗\s*/, '');
 }
+// Render an href only for an http(s) URL — defense-in-depth against a
+// javascript:/data: scheme reaching an anchor. Shared by the v0.15.3 article
+// link and the v0.16 provenance link so the two guards can't drift.
+function isHttpUrl(u: string | null | undefined): u is string {
+  return typeof u === 'string' && /^https?:\/\//i.test(u);
+}
 // "data/slide-photos/<date>/<uuid>.jpg" → "/slides/<date>/<uuid>.jpg"
 function toSlideUrl(filePath: string): string {
   return filePath.startsWith('data/slide-photos/')
@@ -176,6 +183,36 @@ const sourceBadges: string[] = [];
 if (bookmarks.length > 0) sourceBadges.push(`🐦 ${bookmarks.length} tweet${bookmarks.length === 1 ? '' : 's'}`);
 if (papers.length > 0) sourceBadges.push(`📄 ${papers.length} paper${papers.length === 1 ? '' : 's'}`);
 if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.length === 1 ? '' : 's'}`);
+
+// v0.16 trade-press provenance (Codex #5): a "Reported via {outlet}" line
+// renders ONLY when this study's sources are trade-press-ONLY — a single outlet,
+// no tweets/slides/primary papers. On a mixed cluster (trade + primary paper +
+// slides) naming one outlet would misattribute, so it's suppressed there.
+// tradePressLabel() returns the authoritative outlet name from the URL host
+// (null for non-trade), which doubles as the is-trade-press test.
+const tradePressPapers = papers
+  .map((p) => ({ p, label: p.source_url ? tradePressLabel(p.source_url) : null }))
+  .filter((x): x is { p: DigestArtifactPaper; label: string } => x.label !== null);
+const tradeOutlets = new Set(tradePressPapers.map((x) => x.label));
+const isTradePressOnly =
+  bookmarks.length === 0 &&
+  slides.length === 0 &&
+  papers.length > 0 &&
+  tradePressPapers.length === papers.length &&
+  tradeOutlets.size === 1;
+const provenanceOutlet = isTradePressOnly ? tradePressPapers[0]!.label : null;
+const provenanceUrlRaw = provenanceOutlet ? tradePressPapers[0]!.p.source_url : null;
+// Same http(s)-only href guard the Sources block applies to source_url (isHttpUrl).
+const provenanceUrl = isHttpUrl(provenanceUrlRaw) ? provenanceUrlRaw : null;
+
+// v0.16 review extras: a content_type:review carries no verdict (stripped at
+// build) and surfaces a plain-text "Trials discussed" acronym list instead.
+const isReview = study.content_type === 'review';
+// Array.isArray guard (not just ??): a hand-edited / corrupted artifact with a
+// non-array discussed_trials would otherwise crash .map at build.
+const discussedTrials =
+  isReview && Array.isArray(study.discussed_trials) ? study.discussed_trials : [];
+const hasDiscussedTrials = discussedTrials.length > 0;
 ---
 
 <div class:list={['study', hasFigures && 'has-figures', study.verdict?.soc_implication && `verdict-${study.verdict.soc_implication}`]} id={anchorId} data-tags={dataTags || undefined}>
@@ -196,6 +233,29 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     <p class="study-audience study-audience-head"><span class="audience-label">For</span>{study.verdict!.audience}</p>
   )}
   <p class="study-tldr"><span class="tldr-label">TL;DR</span><span set:html={linkifyCitations(stripStudyNamePrefix(study.tldr, study.name))} /></p>
+  {provenanceOutlet && (
+    <p class="study-provenance">
+      <span class="provenance-icon" aria-hidden="true">{REVIEW_GLYPH}</span>
+      <span class="provenance-text">Reported via{' '}
+        {provenanceUrl
+          ? <a class="provenance-link" href={provenanceUrl} target="_blank" rel="noopener">{provenanceOutlet} →</a>
+          : <span class="provenance-outlet">{provenanceOutlet}</span>}
+      </span>
+    </p>
+  )}
+  {hasDiscussedTrials && (
+    <section class="discussed-trials" aria-label="Trials discussed in this review">
+      <div class="discussed-trials-label">Trials discussed</div>
+      <p class="discussed-trials-list">
+        {discussedTrials.map((t, i) => (
+          <Fragment>
+            {i > 0 && <span class="dt-sep" aria-hidden="true">·</span>}
+            <span class="dt-name">{t}</span>
+          </Fragment>
+        ))}
+      </p>
+    </section>
+  )}
   {study.verdict?.rationale && verdictMeta && (
     <aside class:list={['verdict-block', `verdict-${study.verdict.soc_implication}`]}>
       <div class="verdict-pill">
@@ -554,8 +614,7 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
                   javascript: href). Suppress when it's just the doi.org/dx.doi.org
                   resolver we already render as "doi" (anchored so a tracking param
                   that merely contains "doi.org/" doesn't false-suppress). */}
-              {p.source_url &&
-                /^https?:\/\//i.test(p.source_url) &&
+              {isHttpUrl(p.source_url) &&
                 !(p.doi && /^https?:\/\/(www\.|dx\.)?doi\.org\//i.test(p.source_url)) && (
                   <a href={p.source_url} target="_blank" rel="noopener">
                     article →
@@ -819,6 +878,56 @@ if (slides.length > 0) sourceBadges.push(`🩻 ${slides.length} slide${slides.le
     font-size: 0.93rem;
   }
   .comparator-list li { margin: 0.2rem 0; }
+
+  /* v0.16 trade-press provenance: a quiet attribution line under the TL;DR.
+     Metadata weight (sans, muted) — it's a "who reported this," not a result. */
+  .study-provenance {
+    margin: 0 0 0.6rem;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: var(--fg-muted);
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+  .provenance-icon { flex: none; font-size: 0.85rem; line-height: 1; }
+  .provenance-link { color: var(--accent); text-decoration: none; }
+  .provenance-link:hover { text-decoration: underline; }
+  .provenance-outlet { color: var(--fg); }
+
+  /* v0.16 review "Trials discussed": the acronym landscape a press round-up
+     names. Plain text, NOT links (no NCT inference) — same callout shell as the
+     comparator block, dot-separated names that wrap on narrow viewports. */
+  .discussed-trials {
+    margin: 0.65rem 0;
+    padding: 0.55rem 0.85rem 0.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border);
+    border-radius: 4px;
+  }
+  .discussed-trials-label {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+  .discussed-trials-list {
+    margin: 0;
+    color: var(--fg);
+    line-height: 1.6;
+    font-size: 0.92rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.1rem 0.5rem;
+    align-items: baseline;
+  }
+  .dt-name { font-weight: 600; }
+  .dt-sep { color: var(--fg-muted); user-select: none; }
 
   /* CONSORT participant-flow diagram (in a dropdown). Vertical flow with box
      nodes + arrow connectors; arms wrap to a row, stacking on narrow screens. */
