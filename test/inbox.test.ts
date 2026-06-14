@@ -14,7 +14,7 @@ import {
   upsertConference,
   setBookmarkConferenceIfEmpty,
 } from '../src/lib/db.ts';
-import { runEnrichmentLoop, detectAndEnsureConference, paperFailureReply } from '../src/lib/inbox-enrichment.ts';
+import { runEnrichmentLoop, detectAndEnsureConference, paperFailureReply, contentDepthNote } from '../src/lib/inbox-enrichment.ts';
 
 function freshDb(): Database.Database {
   return openDb(':memory:');
@@ -34,6 +34,26 @@ describe('paperFailureReply', () => {
       "Couldn't ingest that paper: crossref parse: no title",
     );
     expect(paperFailureReply('pmid', 'network: timeout')).not.toMatch(/send the DOI/i);
+  });
+});
+
+describe('contentDepthNote', () => {
+  it('reports full text when a fulltext excerpt was captured', () => {
+    expect(contentDepthNote({ abstract: 'a', fulltext_excerpt_md: 'Methods... Results...' })).toBe(
+      'full text available',
+    );
+    // full text wins even if there is also an abstract
+    expect(contentDepthNote({ abstract: null, fulltext_excerpt_md: 'body' })).toBe('full text available');
+  });
+
+  it('reports abstract only when there is an abstract but no full text', () => {
+    expect(contentDepthNote({ abstract: 'Background...', fulltext_excerpt_md: null })).toBe('abstract only');
+  });
+
+  it('reports neither when blank/whitespace or missing', () => {
+    expect(contentDepthNote({ abstract: null, fulltext_excerpt_md: null })).toBe('no abstract or full text');
+    expect(contentDepthNote({ abstract: '   ', fulltext_excerpt_md: '  ' })).toBe('no abstract or full text');
+    expect(contentDepthNote({})).toBe('no abstract or full text');
   });
 });
 

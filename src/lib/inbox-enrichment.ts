@@ -297,7 +297,7 @@ async function enrichPaperItem(
     const r = savePaper(db, saveInput);
     await replyToCurator(
       item,
-      `Got it: ${saveInput.title}${saveInput.abstract ? '' : ' (no abstract available)'}. Appears in the next digest.`,
+      `Got it: ${saveInput.title} (${contentDepthNote(saveInput)}). Appears in the next digest.`,
     );
     return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
   } catch (err) {
@@ -799,6 +799,16 @@ export function paperFailureReply(targetKind: string, message: string): string {
     );
   }
   return base;
+}
+
+// How much analyzable text we actually captured for a paper, so the curator
+// knows up front how deep the digest analysis can go. Full text (a PMC / open-
+// access / PDF excerpt) lets the study agent ground specifics; an abstract-only
+// record is shallower; neither means the agent has only the title + metadata.
+export function contentDepthNote(p: { abstract?: string | null; fulltext_excerpt_md?: string | null }): string {
+  if (p.fulltext_excerpt_md && p.fulltext_excerpt_md.trim()) return 'full text available';
+  if (p.abstract && p.abstract.trim()) return 'abstract only';
+  return 'no abstract or full text';
 }
 
 // The searchable text of a freshly-enriched row, for NCT extraction.
