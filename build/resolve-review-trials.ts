@@ -72,8 +72,10 @@ async function runResolve(date: string): Promise<void> {
     // review fix #2: a RESOLVER_VERSION bump re-opens un-decided (pending/failed)
     // rows so they re-resolve under the new resolver; curator decisions are
     // preserved. This is the documented escape from the freeze — wire it here so
-    // the bump actually takes effect (it was previously dead code).
-    const reopened = reopenStaleResolutions(db, RESOLVER_VERSION);
+    // the bump actually takes effect (it was previously dead code). SCOPED to
+    // this date: we only re-resolve `date` below, so an unscoped delete would
+    // wipe every other date's queue without re-resolving it.
+    const reopened = reopenStaleResolutions(db, RESOLVER_VERSION, date);
     if (reopened > 0) console.log(`  re-opened ${reopened} stale resolution(s) for re-resolve`);
 
     console.log(`Resolving review-discussed trials for ${date}…`);

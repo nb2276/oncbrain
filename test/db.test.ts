@@ -473,6 +473,18 @@ describe('review_trial_resolutions manifest', () => {
     expect(listResolutions(db)).toHaveLength(1);
   });
 
+  it('reopenStaleResolutions SCOPED to a date leaves OTHER dates queues intact (P1 fix)', () => {
+    // Two pending v1 rows on different dates. The CLI resolves one date and only
+    // re-creates that date's rows, so an unscoped delete would wipe the other
+    // date's queue without re-resolving it.
+    upsertResolution(db, { ...base, bookmark_date: '2026-06-12' });
+    upsertResolution(db, { ...base, review_source_paper_id: 9, bookmark_date: '2026-06-13' });
+    const reopened = reopenStaleResolutions(db, 'v2', '2026-06-12');
+    expect(reopened).toBe(1); // only the target date's stale row
+    expect(listResolutions(db, { date: '2026-06-12' })).toHaveLength(0); // re-opened
+    expect(listResolutions(db, { date: '2026-06-13' })).toHaveLength(1); // untouched
+  });
+
   it('parseResolutionCandidates is defensive against null / malformed json', () => {
     expect(parseResolutionCandidates(null)).toEqual([]);
     expect(parseResolutionCandidates('{not json')).toEqual([]);

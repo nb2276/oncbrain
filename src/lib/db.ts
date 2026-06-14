@@ -1308,12 +1308,29 @@ export function decideResolution(
 // ('pending','failed') with a different resolver_version — curator decisions
 // (approved/rejected) are PRESERVED. Returns the count re-opened. This is the
 // one intentional escape from the freeze.
-export function reopenStaleResolutions(db: Database.Database, currentVersion: string): number {
-  const info = db
-    .prepare(
-      `DELETE FROM review_trial_resolutions
-       WHERE resolver_version != ? AND status IN ('pending','failed')`,
-    )
-    .run(currentVersion);
+//
+// SCOPE the delete to a `date` when given (the CLI always resolves ONE date and
+// only re-creates rows for that date): a global delete would wipe every other
+// date's pending/failed queue on a version bump without re-resolving them,
+// silently emptying the curator's backlog. Unscoped (no date) is retained for
+// an explicit whole-DB reopen.
+export function reopenStaleResolutions(
+  db: Database.Database,
+  currentVersion: string,
+  date?: string,
+): number {
+  const info = date
+    ? db
+        .prepare(
+          `DELETE FROM review_trial_resolutions
+           WHERE resolver_version != ? AND status IN ('pending','failed') AND bookmark_date = ?`,
+        )
+        .run(currentVersion, date)
+    : db
+        .prepare(
+          `DELETE FROM review_trial_resolutions
+           WHERE resolver_version != ? AND status IN ('pending','failed')`,
+        )
+        .run(currentVersion);
   return info.changes;
 }

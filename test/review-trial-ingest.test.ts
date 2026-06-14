@@ -92,6 +92,23 @@ describe('ingestApprovedResolutions (T5)', () => {
     expect(papers[0]!.fetched_via).toBe('review-resolved'); // re-tagged → pill renders
   });
 
+  it('re-tags a same-date DOI-only paper that savePaper merges the PMID into (DOI-race, P2 fix)', async () => {
+    // A same-date paper exists with the trial's DOI but no PMID yet → it is in
+    // neither the PMID-keyed same-date map nor getPaperByPmid, so ingest fetches,
+    // and savePaper merges the PMID into the existing DOI row (created:false).
+    // Without the fix it would publish today with NO provenance pill.
+    savePaper(db, { doi: '10.1001/32215577', title: 'DOI-only, no pmid yet', bookmark_date: date });
+    seedApproved(db, { paperId: 7, acronym: 'ORIOLE', date, pmid: '32215577' });
+    const fetchPaper = vi.fn(async (pmid: string) => paper(pmid));
+    const res = await ingestApprovedResolutions(db, date, { fetchPaper });
+    expect(res).toEqual({ ingested: 0, skipped: 1, failed: 0 });
+    expect(fetchPaper).toHaveBeenCalledTimes(1); // not in DB by PMID → fetched
+    const papers = listPapers(db, { bookmark_date: date });
+    expect(papers).toHaveLength(1); // merged, not duplicated
+    expect(papers[0]!.pmid).toBe('32215577');
+    expect(papers[0]!.fetched_via).toBe('review-resolved'); // re-tagged → pill renders
+  });
+
   it('does NOT surface a trial whose paper is on another date (one date per paper), warns + skips (fix #4)', async () => {
     savePaper(db, { pmid: '32215577', title: 'on an earlier date', bookmark_date: '2026-06-01' });
     seedApproved(db, { paperId: 7, acronym: 'ORIOLE', date, pmid: '32215577' });

@@ -121,7 +121,21 @@ export async function ingestApprovedResolutions(
       curator_note: note,
     });
     if (!created) {
-      // Raced into an existing row (e.g. same DOI) — treat as already present.
+      // savePaper matched an existing row by DOI/content-hash (NOT by PMID — the
+      // getPaperByPmid check above already covered that) and attached the PMID,
+      // so re-look-up by PMID now resolves which date that row belongs to.
+      // - same date → re-tag it review-resolved so the provenance pill renders
+      //   (review fix #6b applied to the DOI-race path — without this the study
+      //   would publish today with no pill).
+      // - another date → can't surface here (one date per paper); loud-skip like
+      //   branch (b) above.
+      const matched = getPaperByPmid(db, pmid);
+      if (matched && matched.bookmark_date === date) {
+        if (matched.fetched_via !== 'review-resolved') markPaperReviewResolved(db, matched.id);
+        log(`  [resolve-ingest] PMID ${pmid} (${r.acronym_display}) matched an existing same-date paper by DOI; tagged review-resolved`);
+      } else {
+        log(`  ⚠ [resolve-ingest] PMID ${pmid} (${r.acronym_display}) matched an existing paper on ${matched?.bookmark_date ?? 'another date'} by DOI; can't surface on ${date} — acronym stays plain text here`);
+      }
       skipped += 1;
       continue;
     }
