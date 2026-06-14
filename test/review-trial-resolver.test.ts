@@ -3,11 +3,14 @@ import type Database from 'better-sqlite3';
 import { openDb, getResolution, parseResolutionCandidates } from '../src/lib/db.ts';
 import {
   resolveReviewTrials,
+  resolveReviewsForDate,
+  reviewsFromDigest,
   rankCandidates,
   parseRerankResponse,
   makeRerankFromLlm,
   type ReviewToResolve,
   type ResolverDeps,
+  type DigestArtifactLike,
 } from '../src/lib/review-trial-resolver.ts';
 import type { PubMedSummary } from '../src/lib/pubmed-client.ts';
 
@@ -152,6 +155,72 @@ describe('resolveReviewTrials', () => {
     const s = await resolveReviewTrials(db, { ...review, discussedTrials: ['ORIOLE', ' oriole ', 'ORIOLE'] }, d);
     expect(s.total).toBe(1); // deduped to one
     expect(d.search).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('reviewsFromDigest', () => {
+  const artifact: DigestArtifactLike = {
+    date: '2026-06-12',
+    digest: {
+      sites: [
+        {
+          disease_site: 'prostate',
+          studies: [
+            { name: 'Oligomet review', tldr: 'SBRT landscape', content_type: 'review', discussed_trials: ['STOMP', 'ORIOLE'], source_ids: [{ type: 'paper', id: 7 }] },
+            { name: 'A primary study', tldr: 'HR 0.62', source_ids: [{ type: 'paper', id: 9 }] }, // not a review
+          ],
+        },
+        {
+          disease_site: 'breast',
+          studies: [
+            { name: 'Review no trials', tldr: 'x', content_type: 'review', discussed_trials: [], source_ids: [{ type: 'paper', id: 8 }] },
+            { name: 'Review no paper', tldr: 'y', content_type: 'review', discussed_trials: ['T'], source_ids: [{ type: 'tweet', id: 5 }] },
+          ],
+        },
+      ],
+    },
+  };
+
+  it('extracts only review studies that have discussed_trials AND a paper source', () => {
+    const reviews = reviewsFromDigest(artifact);
+    expect(reviews).toHaveLength(1);
+    expect(reviews[0]).toMatchObject({
+      reviewSourcePaperId: 7,
+      diseaseSite: 'prostate',
+      bookmarkDate: '2026-06-12',
+      reviewName: 'Oligomet review',
+      reviewContext: 'SBRT landscape',
+      discussedTrials: ['STOMP', 'ORIOLE'],
+    });
+  });
+});
+
+describe('resolveReviewsForDate', () => {
+  let db: Database.Database;
+  beforeEach(() => {
+    db = openDb(':memory:');
+  });
+
+  it('resolves every review in a date and returns one summary per review', async () => {
+    const artifact: DigestArtifactLike = {
+      date: '2026-06-12',
+      digest: {
+        sites: [
+          { disease_site: 'prostate', studies: [{ name: 'R1', tldr: 'a', content_type: 'review', discussed_trials: ['ORIOLE'], source_ids: [{ type: 'paper', id: 7 }] }] },
+          { disease_site: 'breast', studies: [{ name: 'R2', tldr: 'b', content_type: 'review', discussed_trials: ['X', 'Y'], source_ids: [{ type: 'paper', id: 8 }] }] },
+        ],
+      },
+    };
+    const deps: ResolverDeps = {
+      search: vi.fn(async () => ({ pmids: ['111'], total: 1 })),
+      summarize: vi.fn(async () => [sum('111', 'a trial')]),
+      rerank: vi.fn(async () => ({ pmid: '111', confidence: 0.8 })),
+    };
+    const summaries = await resolveReviewsForDate(db, artifact, deps);
+    expect(summaries).toHaveLength(2);
+    expect(getResolution(db, 7, 'ORIOLE')!.status).toBe('pending');
+    expect(getResolution(db, 8, 'X')!.status).toBe('pending');
+    expect(getResolution(db, 8, 'Y')!.status).toBe('pending');
   });
 });
 

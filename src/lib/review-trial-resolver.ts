@@ -233,6 +233,71 @@ export function parseRerankResponse(raw: string, candidates: PubMedSummary[]): R
   return { pmid, confidence };
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Digest → reviews orchestration (the `resolve:review-trials --date` entry).
+// ────────────────────────────────────────────────────────────────────────────
+
+// The minimal digest shape this reads — structural so the resolver lib stays
+// decoupled from the heavy digest-data types.
+export type DigestArtifactLike = {
+  date: string;
+  digest: {
+    sites: Array<{
+      disease_site: string;
+      studies: Array<{
+        name: string;
+        slug?: string;
+        tldr: string;
+        content_type?: string;
+        discussed_trials?: string[];
+        source_ids?: Array<{ type: string; id: number }>;
+      }>;
+    }>;
+  };
+};
+
+// Extract one ReviewToResolve per review study that has both discussed_trials AND
+// a paper source (the stable freeze key). A review with no discussed_trials, or
+// none whose source is a paper, is skipped (nothing to resolve / can't freeze).
+export function reviewsFromDigest(artifact: DigestArtifactLike): ReviewToResolve[] {
+  const out: ReviewToResolve[] = [];
+  for (const site of artifact.digest.sites) {
+    for (const study of site.studies) {
+      if (study.content_type !== 'review') continue;
+      const trials = (study.discussed_trials ?? []).filter(
+        (t): t is string => typeof t === 'string' && t.trim().length > 0,
+      );
+      if (trials.length === 0) continue;
+      // The stable freeze key is the review's underlying trade-press paper id.
+      const paperId = study.source_ids?.find((s) => s.type === 'paper')?.id;
+      if (paperId == null) continue;
+      out.push({
+        reviewSourcePaperId: paperId,
+        reviewName: study.name,
+        diseaseSite: site.disease_site,
+        bookmarkDate: artifact.date,
+        discussedTrials: trials,
+        reviewContext: study.tldr,
+      });
+    }
+  }
+  return out;
+}
+
+// Resolve every review in a date's digest. Returns one ResolveSummary per review.
+export async function resolveReviewsForDate(
+  db: Database.Database,
+  artifact: DigestArtifactLike,
+  deps: ResolverDeps,
+): Promise<ResolveSummary[]> {
+  const reviews = reviewsFromDigest(artifact);
+  const summaries: ResolveSummary[] = [];
+  for (const review of reviews) {
+    summaries.push(await resolveReviewTrials(db, review, deps));
+  }
+  return summaries;
+}
+
 // Build a RerankFn backed by a real LLM client + the rerank prompt. The prompt
 // template can be injected (tests pass it inline to stay off the filesystem);
 // production reads prompts/digest-v5-rerank-candidates.txt.
