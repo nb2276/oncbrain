@@ -2,6 +2,20 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.17.3] - 2026-06-14
+
+### Added
+
+- **Double-click launchers for the studio TUI.** `studio.command` (opens the
+  full studio TUI) and `review.command` (jumps straight into the curator
+  review/approval queue for review-discussed trials) at the repo root — runnable
+  from Finder, no terminal needed. Both local-only dev tooling.
+- **Dedicated "Review resolved trials" option in the studio TUI.** The curator
+  approve/reject step is now its own top-level menu entry (the recurring
+  action), separate from "Resolve review trials" (the PubMed search step). The
+  approve sub-option was removed from the resolve submenu to avoid two paths to
+  the same action.
+
 ## [0.17.2] - 2026-06-14
 
 ### Fixed
