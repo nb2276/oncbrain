@@ -27,6 +27,9 @@ import {
   saveBookmark,
   savePaper,
   saveSlideUpload,
+  listPapers,
+  upsertResolution,
+  decideResolution,
 } from '../src/lib/db.ts';
 import { buildOneDate } from '../build/digest-builder.ts';
 import {
@@ -488,6 +491,69 @@ describe('backfill smoke (v0.10 T16.5)', () => {
     expect(studies[0]!.verdict).toBeUndefined();
     // ...but the acronym list it surfaces instead survives.
     expect(studies[0]!.discussed_trials).toEqual(['STOMP', 'ORIOLE', 'RADIOSA']);
+  });
+
+  // v0.17 (T5): a curator-approved review-trial resolution is fetched + ingested
+  // as an ordinary same-date source BY buildOneDate, then clusters as a study.
+  it('ingests a curator-approved review trial as a study', async () => {
+    const date = '2026-05-26';
+    const { resolution } = upsertResolution(db, {
+      review_source_paper_id: 99,
+      acronym_norm: 'ORIOLE',
+      acronym_display: 'ORIOLE',
+      disease_site: 'prostate',
+      bookmark_date: date,
+      status: 'pending',
+      candidates: [{ pmid: '32215577', title: 'ORIOLE', journal: 'JAMA Oncol', year: '2020', score: 1 }],
+      confidence: 0.9,
+      resolver_version: 'v1',
+    });
+    decideResolution(db, resolution.id, { status: 'approved', chosenPmid: '32215577' });
+
+    const ingestPaper = vi.fn(async (pmid: string) => ({
+      metadata: {
+        pmid,
+        doi: null,
+        pmc_id: null,
+        title: 'The ORIOLE trial',
+        authors: [{ name: 'Phillips R' }],
+        journal: 'JAMA Oncol',
+        pub_date: '2020-04-01',
+        mesh_terms: [],
+      },
+      abstract: 'SABR vs observation in oligometastatic prostate cancer.',
+      fulltext_excerpt_md: null,
+    }));
+
+    // The ingested paper is the only paper in this fresh db → id 1 → synthetic id.
+    const synthId = paperIdToSyntheticTweetId(1);
+    const grouping = JSON.stringify({
+      studies: [{ slug: 'oriole', name: 'ORIOLE', disease_site: 'prostate', tweet_ids: [synthId] }],
+    });
+    const studyAgent = JSON.stringify({
+      name: 'ORIOLE',
+      tldr: 'SABR delays progression in oligometastatic prostate.',
+      details: ['SABR'],
+      nct: null,
+      modality: 'radiation',
+      intent: 'curative',
+      methodology: 'phase-2-trial',
+    });
+    const synthesis = JSON.stringify({
+      top_line: 'ORIOLE resolved.',
+      tldr: 'One review-resolved trial.',
+      site_meta: [{ disease_site: 'prostate', intro: null, open_questions: null }],
+    });
+    const { client } = mockClient({ grouping, studies: { oriole: studyAgent }, synthesis });
+
+    await buildOneDate(args(), db, date, { client, ingestPaper });
+
+    // (a) the approved trial is now a review-resolved same-date source…
+    const ingested = listPapers(db, { bookmark_date: date }).find((p) => p.pmid === '32215577');
+    expect(ingested?.fetched_via).toBe('review-resolved');
+    // (b) …and it clustered into a study card in the published artifact.
+    const studies = readArtifact(date).digest.sites.flatMap((s) => s.studies);
+    expect(studies.map((s) => s.slug)).toContain('oriole');
   });
 
   it('skips a date with zero sources without writing an artifact', async () => {

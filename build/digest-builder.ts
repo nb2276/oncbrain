@@ -49,6 +49,8 @@ import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
 import { clampPreprintVerdict } from '../src/lib/preprint.ts';
 import { stripReviewVerdicts } from '../src/lib/content-type.ts';
+import { ingestApprovedResolutions } from '../src/lib/review-trial-ingest.ts';
+import { fetchPubMedPaper, type PubMedPaper } from '../src/lib/pubmed-client.ts';
 import {
   listDigestsStrict,
   assertSlugUniqueness,
@@ -451,8 +453,24 @@ export async function buildOneDate(
     // etc.); production callers omit it.
     relatedTrialsRunCache?: RelatedTrialsRunCache;
     relatedTrialsDeps?: EnrichRelatedTrialsDeps;
+    // v0.17 (T5): injectable PubMed fetch for ingesting curator-approved
+    // review-trial resolutions. Tests pass a mock; production omits it (defaults
+    // to fetchPubMedPaper). The ingest is a no-op when there are no approved
+    // resolutions for the date.
+    ingestPaper?: (pmid: string) => Promise<PubMedPaper>;
   },
 ): Promise<void> {
+  // v0.17 (T5): pull any curator-APPROVED review-trial resolutions into the DB
+  // as ordinary same-date paper sources BEFORE papersForDate is read, so they
+  // cluster as normal study cards through the existing pipeline. No-op when none.
+  const ingest = await ingestApprovedResolutions(db, date, {
+    fetchPaper: deps?.ingestPaper ?? fetchPubMedPaper,
+    log: (m) => console.log(m),
+  });
+  if (ingest.ingested > 0) {
+    console.log(`  ${ingest.ingested} approved review-trial(s) ingested as sources`);
+  }
+
   const allForDate = listBookmarks(db, { bookmark_date: date });
   const papersForDate = listPapers(db, { bookmark_date: date });
   const slidesForDate = listSlideUploads(db, { bookmark_date: date });
