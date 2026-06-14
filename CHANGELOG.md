@@ -2,6 +2,19 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.17.4] - 2026-06-14
+
+### Changed
+
+- **A rejected journal-URL ingest now tells the curator how to integrate it.**
+  When a publisher/journal URL fails permanently (ScienceDirect / Elsevier
+  journals like the Red Journal block automated fetching and return a 403 with
+  no DOI in the page), the Telegram reply now says to send the DOI or the PubMed
+  link / PMID instead, which resolve via the Crossref / PubMed APIs without
+  fetching the publisher page. The hint only fires for journal-URL targets; a
+  DOI or PMID that itself failed keeps the plain message. Local-only (the
+  enrichment bot runs locally).
+
 ## [0.17.3] - 2026-06-14
 
 ### Added

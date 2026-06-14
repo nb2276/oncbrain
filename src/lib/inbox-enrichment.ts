@@ -257,9 +257,11 @@ async function enrichPaperItem(
   } catch (err) {
     const { retryable, message } = classifyResolveError(err);
     // Only reply on a PERMANENT failure — a transient network blip retries
-    // silently, and double-replying on every retry would spam the curator.
+    // silently, and double-replying on every retry would spam the curator. For a
+    // blocked publisher URL the reply tells the curator how to integrate it
+    // (send the DOI / PubMed link instead).
     if (!retryable) {
-      await replyToCurator(item, `Couldn't ingest that paper: ${message}`);
+      await replyToCurator(item, paperFailureReply(target.kind, message));
     }
     return { status: 'failed', reason: message, permanent: !retryable };
   }
@@ -778,6 +780,25 @@ function classifyResolveError(err: unknown): { retryable: boolean; message: stri
     };
   }
   return { retryable: false, message: `unexpected: ${(err as Error).message}` };
+}
+
+// The curator-facing reply for a PERMANENT paper-ingest failure. When the target
+// was a publisher/journal URL, the fetch is often blocked by anti-bot
+// (ScienceDirect / Elsevier journals — including the Red Journal — return a 403
+// with no DOI in the page), so point the curator at the reliable path: send the
+// DOI or the PubMed link / PMID, which resolve via the Crossref / PubMed APIs
+// without ever fetching the publisher page. Only journal-URL targets get the
+// hint; a DOI/PMID that failed would not benefit from "send a DOI".
+export function paperFailureReply(targetKind: string, message: string): string {
+  const base = `Couldn't ingest that paper: ${message}`;
+  if (targetKind === 'url') {
+    return (
+      `${base}\n\n` +
+      `That publisher page may block automated fetching (ScienceDirect / Elsevier journals like the Red Journal often return a 403). ` +
+      `To integrate it, send the DOI (e.g. 10.1016/j.ijrobp.2024.01.001) or the PubMed link / PMID instead and I'll pull it from Crossref / PubMed.`
+    );
+  }
+  return base;
 }
 
 // The searchable text of a freshly-enriched row, for NCT extraction.
