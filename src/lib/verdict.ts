@@ -3,6 +3,7 @@
 // source so the emoji/label can't drift between the two surfaces.
 // Assignment rules + maturity gates are a voice concern (see VOICE.md).
 import type { SocImplication } from './digest-data.ts';
+import type { ContentType } from './content-type.ts';
 
 export const VERDICT_META: Record<SocImplication, { emoji: string; label: string }> = {
   'practice-changing': { emoji: '🚀', label: 'Practice-changing' },
@@ -18,6 +19,22 @@ export function verdictMetaFor(
   soc: SocImplication | undefined | null,
 ): { emoji: string; label: string } | null {
   return soc ? VERDICT_META[soc] ?? null : null;
+}
+
+// v0.16: the triage-rail / jump-list glyph for a study. A verdict-bearing study
+// shows its verdict emoji; a `review` (verdict-less by design — see
+// stripReviewVerdicts) shows 🗞️ so it reads as a press round-up rather than a
+// study still awaiting triage; anything else (a study that simply lacks a
+// verdict) keeps the neutral dot. Shared by all three pages that render
+// TriageRail (DRY — Codex #10) so the fallback can't drift between them.
+export function railEmojiForStudy(study: {
+  verdict?: { soc_implication: SocImplication } | null;
+  content_type?: ContentType | null;
+}): string {
+  const meta = verdictMetaFor(study.verdict?.soc_implication);
+  if (meta) return meta.emoji;
+  if (study.content_type === 'review') return '🗞️';
+  return '·';
 }
 
 // Light-mode verdict accent hex, lifted here (v0.14 T4) so the build-time OG

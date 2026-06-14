@@ -6,7 +6,7 @@ import TagFilterRail from '../../components/TagFilterRail.astro';
 import { listSiteSummaries, type SiteSummary } from '../../lib/digest-data.ts';
 import { getDiseaseSite } from '../../lib/disease-sites.ts';
 import { deriveSlug } from '../../lib/slug.ts';
-import { verdictMetaFor } from '../../lib/verdict.ts';
+import { railEmojiForStudy } from '../../lib/verdict.ts';
 import { studyDataTags } from '../../lib/study-data-tags.ts';
 import { buildFilterRailOptions } from '../../lib/tag-foundations.ts';
 import {
@@ -53,7 +53,7 @@ for (const occ of summary.occurrences) {
 const railItems = summary.occurrences.map((occ) => ({
   href: `#${anchorByOcc.get(occ)}`,
   name: occ.study.name,
-  verdictEmoji: verdictMetaFor(occ.study.verdict?.soc_implication)?.emoji ?? '·',
+  verdictEmoji: railEmojiForStudy(occ.study),
 }));
 
 // v0.11 PR-2: filter options scoped to this site's studies.

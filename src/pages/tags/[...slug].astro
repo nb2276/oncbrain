@@ -41,7 +41,7 @@ import {
   studyTagChips,
   type TagOccurrence,
 } from '../../lib/tag-index.ts';
-import { verdictMetaFor } from '../../lib/verdict.ts';
+import { railEmojiForStudy } from '../../lib/verdict.ts';
 import { studyDataTags } from '../../lib/study-data-tags.ts';
 
 export async function getStaticPaths() {
@@ -133,7 +133,7 @@ function anchorFor(occ: TagOccurrence): string {
 const railItems = occurrences.map((occ) => ({
   href: `#${anchorFor(occ)}`,
   name: occ.study.name,
-  verdictEmoji: verdictMetaFor(occ.study.verdict?.soc_implication)?.emoji ?? '·',
+  verdictEmoji: railEmojiForStudy(occ.study),
 }));
 
 // v0.10: sibling map computed ONCE over the full corpus for this page's
