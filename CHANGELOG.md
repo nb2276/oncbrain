@@ -2,6 +2,18 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.17.5] - 2026-06-14
+
+### Changed
+
+- **The "Got it" ingest reply now says how much text was captured.** A
+  successfully-ingested paper reply reports `full text available` (a PMC /
+  open-access / PDF excerpt was captured, so the study agent can ground
+  specifics), `abstract only` (Crossref/PubMed gave an abstract but no full
+  text), or `no abstract or full text` (title + metadata only). Replaces the
+  bare `(no abstract available)` suffix. Lets the curator see up front how deep
+  the digest analysis can go. Local-only (the enrichment bot runs locally).
+
 ## [0.17.4] - 2026-06-14
 
 ### Changed
