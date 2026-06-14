@@ -17,6 +17,7 @@ For each cluster of tweets that discusses the SAME trial/study/finding, emit one
 - `slug`: short-kebab-case identifier. Trial acronym lowercased ("prestige-psma"), or NCT bare-digits ("nct04855643"), or disease+intervention ("rcc-sbrt-5y-lc"). Local to this build; not yet cross-day persistent.
 - `name`: specific human-readable name as it appears in the tweets (trial acronym, "PRESTIGE-PSMA"; not "Phase III update")
 - `disease_site`: ONE slug from the enum (see below). Pick the most specific.
+- `content_type`: `study_report` (default) or `review` — see OUTPUT SHAPE below.
 - `tweet_ids`: every tweet id in this cluster, including pure-commentary tweets.
 
 Pure-commentary tweets (e.g., "Big PRESTIGE result, will change practice") attach to the study they comment on, not their own cluster.
@@ -46,17 +47,31 @@ If no site fits cleanly: use `multi-site` (cross-cutting), `safety` (AE-focused)
       "slug": "prestige-psma",
       "name": "PRESTIGE-PSMA",
       "disease_site": "prostate",
+      "content_type": "study_report",
       "tweet_ids": [101, 105, 108]
     }
   ]
 }
 ```
 
+`content_type` is one of:
+- `study_report` (DEFAULT — use for the overwhelming majority of clusters): the
+  cluster reports ONE trial / dataset's result. A conference tweet, a primary
+  paper, a slide, OR a trade-press write-up *of a single study*. A meta-analysis
+  that reports its OWN pooled estimate is a `study_report`, not a review.
+- `review`: a single trade-press / survey / state-of-the-art item that discusses
+  MULTIPLE trials or a general topic — naming several trial acronyms rather than
+  reporting one new result (e.g. a UroToday conference-highlights round-up of the
+  oligometastatic-prostate SBRT landscape, naming STOMP / ORIOLE / RADIOSA / ARTO).
+  When genuinely torn between the two, prefer `review`: a lost verdict is safer
+  than a bogus one on a piece that has no single result.
+
 ═══ RULES ═══
 
 - Emit nothing but the JSON object.
 - Every input tweet id MUST appear in exactly one study's `tweet_ids`. Don't drop tweets. Don't repeat ids across clusters. A downstream validator REJECTS your output if either invariant fails — your retry will be more constrained.
 - One tweet = one study. If a tweet seems to discuss two unrelated trials, attach it to the more substantive one.
+- A `review` item stays its OWN cluster. Never merge a multi-trial review into a single-trial cluster, and never fold a single-trial item into a review, even when the review NAMES that trial. They are distinct clusters: the review surveys the landscape; the single-trial item reports the result.
 - Slugs unique within this output.
 
 ═══ TRUST BOUNDARY ═══

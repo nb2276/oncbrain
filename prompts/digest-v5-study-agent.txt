@@ -155,6 +155,7 @@ Examples of INVALID captions (interpretive, would hallucinate):
     "Optimal sequencing vs cabazitaxel",
     "Durability of response beyond 2 years"
   ],
+  "discussed_trials": [],
   "related_search": {
     "queries": [
       {
@@ -209,6 +210,7 @@ Rules:
     - `consensus-guideline` — consensus statement or clinical practice guideline.
     - null — design unclear from the source.
 - `open_questions`: 0-3 short unresolved questions THIS study raises (sequencing, durability, generalizability, confirmatory trial needed). Terse noun phrases or questions, ≤15 words each. Put them HERE, not as ❓ bullets in `details`. Empty array `[]` if none.
+- `discussed_trials`: leave as `[]` for almost every study. Populate it ONLY when THIS item is a multi-trial REVIEW — a trade-press / survey / state-of-the-art round-up that names several trials rather than reporting one new result. Then list the trial ACRONYMS the piece names, copied VERBATIM from the source text (e.g. `["STOMP", "ORIOLE", "RADIOSA", "ARTO"]`). Do NOT invent, expand, or normalize a name; do NOT include a trial you only inferred; do NOT attach an NCT (these render as plain text, never as links). A single-study report — even a trade-press write-up of one trial, even a meta-analysis with its own pooled result — leaves this `[]`.
 - `related_search`: 0-3 clinicaltrials.gov free-text queries, ONE PER open question, that would find currently-open trials answering that question. Shape: `{ "queries": [{ "term": "...", "watches_question": "EXACT text from open_questions" }, ...] }`. Or `null` when no open question maps cleanly to a CT.gov query (e.g., retrospective subgroup speculation; methodology meta-questions).
   - `watches_question` MUST be byte-identical to one of the `open_questions` strings above. Do NOT reword. The build pipeline rejects picks whose `watches_question` does not exactly match.
   - `term` is a free-text query string targeting the CONDITION plus the INTERVENTION class that fits the question: drug name + condition, radiation modality + site, surgical approach + setting, biomarker + line of therapy, or a methodology phrase (e.g., "real-world cohort prostate radiation"). Match the question's nature; do not force a drug+condition shape on a non-drug question.

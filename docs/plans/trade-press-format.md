@@ -40,6 +40,16 @@ Net: capability validated (classify + extract are reliable); the layer placement
 - `src/lib/llm-pipeline.ts`: `content_type` on the cluster→study; parse `discussed_trials: string[]` (cap ~8); **post-override invariant** (Codex #9): a `review` study must end with `verdict: null` AFTER `applyOverrides` (assert/clamp in `digest-builder.ts` after override application, not just at parse).
 - Schema: `content_type` + `discussed_trials` on DigestStudy + the artifact types. `methodology` stays the study design (unchanged).
 
+### M1 RESULT (2026-06-13) — DONE (data/parse/prompt/invariant layer); 1298 tests pass, 0 type errors
+- **New module `src/lib/content-type.ts`**: `ContentType` (`study_report` | `review`), `parseContentType` (normalizes case/separators, conservative `study_report` default), `isValidContentType`, and `stripReviewVerdicts(digest)` — the Codex-#9 invariant as a testable pure helper. Lives OUTSIDE `tags.ts` on purpose (not a `/tags/` namespace → excluded from the global tag-slug uniqueness assertion).
+- **Phase 1**: `StudyCluster.content_type` (required), parsed in `parseGroupingResponse` with the back-compat default. Grouping prompt: classify rule + "a review stays its OWN cluster, never merged" rule (closes Codex #1 at the mechanism level).
+- **Phase 2**: `content_type` INHERITED from the cluster (Phase 2 does not re-classify); `discussed_trials` parsed via `parseDiscussedTrials` (cap 8, dedupe case-insensitive, drop empties/single-char/sentence-blobs, keep S1207/E2112-style names). Only a review attaches it; the default `study_report` omits `content_type` to keep the committed corpus byte-stable. Study-agent prompt: verbatim-acronym, no-NCT, no-inference emission rule.
+- **Builder**: `stripReviewVerdicts(digest)` runs in the post-override sweep next to the preprint clamp.
+- **Schema**: both `DigestStudy` definitions (llm-pipeline + digest-data) carry `content_type?` + `discussed_trials?`; the artifact `digest` block carries them automatically (no `buildArtifact` field-mapping change).
+- **Tests**: `test/content-type.test.ts` (enum/parse/validate + the override-survival invariant) + grouping-content_type / Phase-2-inheritance / `parseDiscussedTrials` cases in `test/llm-pipeline.test.ts`.
+- **Residual carried to M3**: the Phase-1 co-occurrence case (review + single-trial item on an overlapping trial, same day) is covered by the prompt's keep-standalone rule but is confirmed empirically only at the M3 real-build verify — no unit test can exercise live LLM clustering.
+- **Not in M1 (→ M2)**: rendering. A review currently produces `content_type:review` + `discussed_trials` + no verdict, but nothing renders the acronym list / provenance line yet, and the TriageRail no-verdict fallback emoji is still M2.
+
 ## Milestone 2 — Rendering
 - `StudyCard.astro`: "🗞️ Reported via {journal} →" provenance line; trade-press-ONLY card gets the "as reported by {outlet}" label (suppressed on mixed clusters, Codex #5); for `content_type==='review'`, render `discussed_trials` as a plain-text "Trials discussed" list; verdict already suppressed by the existing guards.
 - TriageRail fallback 📋 emoji for a no-verdict study — fix in ALL three builders (Codex #10): `src/pages/[date].astro`, `sites/[site].astro`, `tags/[...slug].astro` (extract a shared helper, DRY).

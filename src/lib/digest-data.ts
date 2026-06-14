@@ -5,6 +5,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { assignSlugsForDate } from './slug-resolve.ts';
 import type { ModalityTag, IntentTag, MethodologyTag } from './tags.ts';
+import type { ContentType } from './content-type.ts';
 
 // Detail union (v0.4.0 → v0.4.2):
 //   - flat string for single statements
@@ -74,6 +75,13 @@ export type DigestStudy = {
   modality?: ModalityTag | null;
   intent?: IntentTag | null;
   methodology?: MethodologyTag | null;
+  // v0.16: study_report (default) vs review, decided at Phase 1. A review
+  // carries no verdict and renders discussed_trials instead of a numbers-first
+  // card. Absent === study_report (back-compat with the pre-v0.16 corpus).
+  content_type?: ContentType;
+  // v0.16: trial acronyms a review names, lifted verbatim — plain text, never
+  // linked (no NCT inference). Empty/absent for study reports.
+  discussed_trials?: string[];
   // v0.13: trials watching each open question. Phase 2 emits per-question
   // search queries; the build-time orchestrator hits clinicaltrials.gov per
   // query and reranks across all candidates to pair each pick with the
