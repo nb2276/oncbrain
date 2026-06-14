@@ -83,6 +83,10 @@ export type DigestStudy = {
   // v0.16: trial acronyms a review names, lifted verbatim — plain text, never
   // linked (no NCT inference). Empty/absent for study reports.
   discussed_trials?: string[];
+  // v0.17 (T6): acronym (normalized) → resolved same-date study slug, for
+  // linking the "Trials discussed" list to the auto-resolved card. Mirrored from
+  // llm-pipeline.ts — keep in lockstep.
+  discussed_trial_links?: Record<string, string>;
   // v0.13: trials watching each open question. Phase 2 emits per-question
   // search queries; the build-time orchestrator hits clinicaltrials.gov per
   // query and reranks across all candidates to pair each pick with the
@@ -254,6 +258,7 @@ export type DigestArtifactPaper = {
   pub_date: string | null;
   abstract: string | null;
   source_url?: string | null; // v0.15.3: curator-submitted article URL (the link for trade-press papers with no PMID/DOI)
+  resolved_from_review?: boolean; // v0.17 (T6): auto-resolved from a review's discussed-trials manifest (curator-approved)
   // fulltext_excerpt_md is intentionally absent from the artifact type: it's
   // not written to data/digests (kept out of git for copyright) and nothing
   // renders it. The build-time LLM reads it from the DB instead.

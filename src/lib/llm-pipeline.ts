@@ -289,6 +289,12 @@ export type DigestStudy = {
   // build emits the artifact JSON and the Astro pages re-read it through that
   // definition, so the two MUST keep these shapes in lockstep.
   discussed_trials?: string[];
+  // v0.17 (T6): on a `review`, maps a discussed-trial acronym (normalized,
+  // upper-case) → the slug of the same-date study auto-resolved from it, so the
+  // "Trials discussed" list can link to the resolved card. Computed at build
+  // time from the resolution manifest; absent when nothing resolved. Mirrored in
+  // digest-data.ts — keep in lockstep.
+  discussed_trial_links?: Record<string, string>;
   // v0.13: trials watching each open question. Phase 2 emits per-question
   // search queries internally (consumed by the orchestrator, not retained
   // on this object); the build-time orchestrator hits clinicaltrials.gov

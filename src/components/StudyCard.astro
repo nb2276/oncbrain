@@ -213,6 +213,16 @@ const isReview = study.content_type === 'review';
 const discussedTrials =
   isReview && Array.isArray(study.discussed_trials) ? study.discussed_trials : [];
 const hasDiscussedTrials = discussedTrials.length > 0;
+// v0.17 (T6): a discussed-trial acronym → resolved same-date study slug, for
+// deep-linking the "Trials discussed" list to the auto-resolved card. Keyed by
+// the normalized (upper, whitespace-collapsed) acronym, matching db.normalizeAcronym.
+const discussedTrialLinks = isReview && study.discussed_trial_links ? study.discussed_trial_links : {};
+const normTrial = (t: string) => t.trim().replace(/\s+/g, ' ').toUpperCase();
+
+// v0.17 (T6): true when any source paper was auto-resolved from a review's
+// discussed trials (curator-approved). Drives the provenance pill that tells a
+// reader this study card appeared because a review named the trial.
+const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
 ---
 
 <div class:list={['study', hasFigures && 'has-figures', study.verdict?.soc_implication && `verdict-${study.verdict.soc_implication}`]} id={anchorId} data-tags={dataTags || undefined}>
@@ -243,6 +253,12 @@ const hasDiscussedTrials = discussedTrials.length > 0;
       </span>
     </p>
   )}
+  {isReviewResolved && (
+    <p class="study-resolved-from">
+      <span class="resolved-icon" aria-hidden="true">↘</span>
+      <span>Surfaced from a review's discussed trials</span>
+    </p>
+  )}
   {hasDiscussedTrials && (
     <section class="discussed-trials" aria-label="Trials discussed in this review">
       <div class="discussed-trials-label">Trials discussed</div>
@@ -250,7 +266,9 @@ const hasDiscussedTrials = discussedTrials.length > 0;
         {discussedTrials.map((t, i) => (
           <Fragment>
             {i > 0 && <span class="dt-sep" aria-hidden="true">·</span>}
-            <span class="dt-name">{t}</span>
+            {discussedTrialLinks[normTrial(t)]
+              ? <a class="dt-name dt-link" href={`#${discussedTrialLinks[normTrial(t)]}`}>{t}</a>
+              : <span class="dt-name">{t}</span>}
           </Fragment>
         ))}
       </p>
@@ -895,6 +913,23 @@ const hasDiscussedTrials = discussedTrials.length > 0;
   .provenance-link { color: var(--accent); text-decoration: none; }
   .provenance-link:hover { text-decoration: underline; }
   .provenance-outlet { color: var(--fg); }
+
+  /* v0.17 (T6): "surfaced from a review" attribution on an auto-resolved study
+     card. Quiet metadata weight, same rhythm as the trade-press provenance. */
+  .study-resolved-from {
+    margin: 0 0 0.6rem;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--fg-muted);
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+  .resolved-icon { flex: none; color: var(--accent); }
+  /* Linked discussed-trial acronym (jumps to the resolved card on this page). */
+  .dt-link { color: var(--accent); text-decoration: none; }
+  .dt-link:hover { text-decoration: underline; }
 
   /* v0.16 review "Trials discussed": the acronym landscape a press round-up
      names. Plain text, NOT links (no NCT inference) — same callout shell as the

@@ -51,6 +51,51 @@ import { clampPreprintVerdict } from '../src/lib/preprint.ts';
 import { stripReviewVerdicts } from '../src/lib/content-type.ts';
 import { ingestApprovedResolutions } from '../src/lib/review-trial-ingest.ts';
 import { fetchPubMedPaper, type PubMedPaper } from '../src/lib/pubmed-client.ts';
+import { listResolutions } from '../src/lib/db.ts';
+
+// v0.17 (T6): on each review study, attach discussed_trial_links — a map from a
+// discussed-trial acronym (normalized) to the slug of the same-date study that
+// was auto-resolved from it. The join is by PMID (robust), not name: the
+// manifest gives (review paper, acronym) → chosen_pmid; we map chosen_pmid →
+// the study whose paper source is that PMID. No-op when nothing was resolved.
+export function linkResolvedTrials(
+  db: ReturnType<typeof openDb>,
+  date: string,
+  digest: DigestOutput,
+  papers: Paper[],
+): void {
+  const approved = listResolutions(db, { date, status: 'approved' }).filter((r) => r.chosen_pmid);
+  if (approved.length === 0) return;
+
+  const pmidByPaperId = new Map(papers.map((p) => [p.id, p.pmid] as const));
+  // chosen PMID → the resolved study's slug.
+  const slugByPmid = new Map<string, string>();
+  for (const site of digest.sites) {
+    for (const study of site.studies) {
+      if (!study.slug) continue;
+      for (const ref of study.source_ids ?? []) {
+        if (ref.type !== 'paper') continue;
+        const pmid = pmidByPaperId.get(ref.id);
+        if (pmid) slugByPmid.set(pmid, study.slug);
+      }
+    }
+  }
+
+  for (const site of digest.sites) {
+    for (const study of site.studies) {
+      if (study.content_type !== 'review') continue;
+      const reviewPaperId = study.source_ids?.find((s) => s.type === 'paper')?.id;
+      if (reviewPaperId == null) continue;
+      const links: Record<string, string> = {};
+      for (const r of approved) {
+        if (r.review_source_paper_id !== reviewPaperId || !r.chosen_pmid) continue;
+        const slug = slugByPmid.get(r.chosen_pmid);
+        if (slug) links[r.acronym_norm] = slug;
+      }
+      if (Object.keys(links).length > 0) study.discussed_trial_links = links;
+    }
+  }
+}
 import {
   listDigestsStrict,
   assertSlugUniqueness,
@@ -332,6 +377,7 @@ type DigestArtifact = {
     source_url: string | null; // v0.15.3: curator-submitted article URL — the link for trade-press (no PMID/DOI). A public citation link, not content; safe to publish.
     pdf_path: string | null; // v0.8 PR2: vault location (gitignored, never published)
     note: string | null;
+    resolved_from_review: boolean; // v0.17 (T6): auto-resolved from a review's discussed trials
   }>;
   slides?: Array<{
     id: number;
@@ -400,6 +446,11 @@ function buildArtifact(
           // stays in the DB as the local audit trail.
           source_url: toPublicArticleUrl(p.source_url),
           note: p.curator_note,
+          // v0.17 (T6): true when this paper was auto-resolved from a review's
+          // discussed-trials manifest (curator-approved). Drives the StudyCard
+          // "surfaced from a review" provenance pill. A boolean, not the raw
+          // fetched_via, so internal fetch methods stay out of the public artifact.
+          resolved_from_review: p.fetched_via === 'review-resolved',
         }))
       : undefined,
     slides: slides.length > 0
@@ -602,6 +653,11 @@ export async function buildOneDate(
   if (strippedReviewVerdicts > 0) {
     console.log(`  stripped ${strippedReviewVerdicts} verdict(s) from review studies`);
   }
+
+  // v0.17 (T6): link each review's discussed-trial acronyms to the same-date
+  // study auto-resolved from it (via the approved manifest), so the rendered
+  // "Trials discussed" list can deep-link to the resolved card.
+  linkResolvedTrials(db, date, digest, papersForDate);
 
   const artifact = buildArtifact(date, confMeta, bookmarks, papersForDate, slidesForDate, digest);
   const paths = writeArtifact(args, artifact);

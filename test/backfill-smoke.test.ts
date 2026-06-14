@@ -31,7 +31,7 @@ import {
   upsertResolution,
   decideResolution,
 } from '../src/lib/db.ts';
-import { buildOneDate } from '../build/digest-builder.ts';
+import { buildOneDate, linkResolvedTrials } from '../build/digest-builder.ts';
 import {
   paperIdToSyntheticTweetId,
   slideIdToSyntheticTweetId,
@@ -554,6 +554,43 @@ describe('backfill smoke (v0.10 T16.5)', () => {
     // (b) …and it clustered into a study card in the published artifact.
     const studies = readArtifact(date).digest.sites.flatMap((s) => s.studies);
     expect(studies.map((s) => s.slug)).toContain('oriole');
+  });
+
+  // v0.17 (T6): linkResolvedTrials joins a review's discussed-trial acronyms to
+  // the same-date study auto-resolved from each (by PMID, via the manifest).
+  it('links a review discussed-trial acronym to its resolved study slug', () => {
+    const date = '2026-05-27';
+    const { resolution } = upsertResolution(db, {
+      review_source_paper_id: 7, // the review's own (trade-press) paper id
+      acronym_norm: 'ORIOLE', acronym_display: 'ORIOLE', disease_site: 'prostate',
+      bookmark_date: date, status: 'pending',
+      candidates: [{ pmid: '32215577', title: 't', journal: 'j', year: '2020', score: 1 }],
+      confidence: 0.9, resolver_version: 'v1',
+    });
+    decideResolution(db, resolution.id, { status: 'approved', chosenPmid: '32215577' });
+
+    // Paper id 7 = the review paper (no pmid); id 9 = the resolved ORIOLE paper.
+    const papers = [
+      { id: 7, pmid: null },
+      { id: 9, pmid: '32215577' },
+    ] as Parameters<typeof linkResolvedTrials>[3];
+
+    const digest = {
+      sites: [
+        {
+          disease_site: 'prostate',
+          studies: [
+            { name: 'Review', slug: 'review', content_type: 'review', discussed_trials: ['ORIOLE'], source_ids: [{ type: 'paper', id: 7 }] },
+            { name: 'ORIOLE', slug: 'oriole-trial', source_ids: [{ type: 'paper', id: 9 }] },
+          ],
+        },
+      ],
+    } as Parameters<typeof linkResolvedTrials>[2];
+
+    linkResolvedTrials(db, date, digest, papers);
+    expect(digest.sites[0]!.studies[0]!.discussed_trial_links).toEqual({ ORIOLE: 'oriole-trial' });
+    // The resolved study itself gets no links.
+    expect(digest.sites[0]!.studies[1]!.discussed_trial_links).toBeUndefined();
   });
 
   it('skips a date with zero sources without writing an artifact', async () => {
