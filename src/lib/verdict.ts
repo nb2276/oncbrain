@@ -21,10 +21,16 @@ export function verdictMetaFor(
   return soc ? VERDICT_META[soc] ?? null : null;
 }
 
+// v0.16: the single glyph that marks a trade-press review as a press round-up.
+// Centralized here (one source) so the triage-rail marker and the StudyCard
+// provenance icon can't drift, the same reason VERDICT_META centralizes the
+// verdict emojis.
+export const REVIEW_GLYPH = '🗞️';
+
 // v0.16: the triage-rail / jump-list glyph for a study. A verdict-bearing study
 // shows its verdict emoji; a `review` (verdict-less by design — see
-// stripReviewVerdicts) shows 🗞️ so it reads as a press round-up rather than a
-// study still awaiting triage; anything else (a study that simply lacks a
+// stripReviewVerdicts) shows REVIEW_GLYPH so it reads as a press round-up rather
+// than a study still awaiting triage; anything else (a study that simply lacks a
 // verdict) keeps the neutral dot. Shared by all three pages that render
 // TriageRail (DRY — Codex #10) so the fallback can't drift between them.
 export function railEmojiForStudy(study: {
@@ -33,7 +39,7 @@ export function railEmojiForStudy(study: {
 }): string {
   const meta = verdictMetaFor(study.verdict?.soc_implication);
   if (meta) return meta.emoji;
-  if (study.content_type === 'review') return '🗞️';
+  if (study.content_type === 'review') return REVIEW_GLYPH;
   return '·';
 }
 

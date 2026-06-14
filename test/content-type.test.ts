@@ -79,6 +79,24 @@ describe('stripReviewVerdicts (Codex #9 post-override invariant)', () => {
     expect(review.verdict).toBeUndefined();
   });
 
+  it('strips reviews across MULTIPLE sites (exercises the outer site loop)', () => {
+    const digest = {
+      sites: [
+        { studies: [{ content_type: 'review' as ContentType, verdict: mkVerdict() }] },
+        {
+          studies: [
+            { content_type: 'study_report' as ContentType, verdict: mkVerdict() },
+            { content_type: 'review' as ContentType, verdict: mkVerdict() },
+          ],
+        },
+      ],
+    };
+    expect(stripReviewVerdicts(digest)).toBe(2);
+    expect(digest.sites[0]!.studies[0]!.verdict).toBeUndefined();
+    expect(digest.sites[1]!.studies[0]!.verdict).toBeDefined(); // study_report kept
+    expect(digest.sites[1]!.studies[1]!.verdict).toBeUndefined(); // review in a later site
+  });
+
   it('is idempotent and a no-op when reviews already lack a verdict', () => {
     const digest = {
       sites: [{ studies: [{ content_type: 'review' as ContentType }] }],

@@ -19,6 +19,17 @@ describe('railEmojiForStudy (v0.16 — shared rail glyph)', () => {
     ).toBe(VERDICT_META['confirmatory'].emoji);
   });
 
+  it('falls through to 🗞️ for a review whose verdict has an unrecognized soc', () => {
+    // verdictMetaFor returns null for an unknown soc_implication, so the review
+    // branch applies — the "verdict wins" path only wins for a KNOWN verdict.
+    expect(
+      railEmojiForStudy({
+        content_type: 'review',
+        verdict: { soc_implication: 'bogus' as never },
+      }),
+    ).toBe('🗞️');
+  });
+
   it('returns the neutral dot for a study that simply lacks a verdict', () => {
     expect(railEmojiForStudy({})).toBe('·');
     expect(railEmojiForStudy({ content_type: 'study_report' })).toBe('·');

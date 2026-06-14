@@ -11,7 +11,7 @@
 // behind a native <details> expander. Sources stay in their own collapsible.
 import { linkifyCitations } from '../lib/extract.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
-import { VERDICT_META } from '../lib/verdict.ts';
+import { VERDICT_META, REVIEW_GLYPH } from '../lib/verdict.ts';
 import { tradePressLabel } from '../lib/paper-url.ts';
 import {
   studyFigures,
@@ -101,6 +101,12 @@ function isComparatorBullet(d: DigestDetail): boolean {
 }
 function stripComparatorEmoji(text: string): string {
   return text.replace(/^\s*🔗\s*/, '');
+}
+// Render an href only for an http(s) URL — defense-in-depth against a
+// javascript:/data: scheme reaching an anchor. Shared by the v0.15.3 article
+// link and the v0.16 provenance link so the two guards can't drift.
+function isHttpUrl(u: string | null | undefined): u is string {
+  return typeof u === 'string' && /^https?:\/\//i.test(u);
 }
 // "data/slide-photos/<date>/<uuid>.jpg" → "/slides/<date>/<uuid>.jpg"
 function toSlideUrl(filePath: string): string {
@@ -196,9 +202,8 @@ const isTradePressOnly =
   tradeOutlets.size === 1;
 const provenanceOutlet = isTradePressOnly ? tradePressPapers[0]!.label : null;
 const provenanceUrlRaw = provenanceOutlet ? tradePressPapers[0]!.p.source_url : null;
-// Reuse the same http(s)-only href guard the Sources block applies to source_url.
-const provenanceUrl =
-  provenanceUrlRaw && /^https?:\/\//i.test(provenanceUrlRaw) ? provenanceUrlRaw : null;
+// Same http(s)-only href guard the Sources block applies to source_url (isHttpUrl).
+const provenanceUrl = isHttpUrl(provenanceUrlRaw) ? provenanceUrlRaw : null;
 
 // v0.16 review extras: a content_type:review carries no verdict (stripped at
 // build) and surfaces a plain-text "Trials discussed" acronym list instead.
@@ -227,7 +232,7 @@ const hasDiscussedTrials = discussedTrials.length > 0;
   <p class="study-tldr"><span class="tldr-label">TL;DR</span><span set:html={linkifyCitations(stripStudyNamePrefix(study.tldr, study.name))} /></p>
   {provenanceOutlet && (
     <p class="study-provenance">
-      <span class="provenance-icon" aria-hidden="true">🗞️</span>
+      <span class="provenance-icon" aria-hidden="true">{REVIEW_GLYPH}</span>
       <span class="provenance-text">Reported via{' '}
         {provenanceUrl
           ? <a class="provenance-link" href={provenanceUrl} target="_blank" rel="noopener">{provenanceOutlet} →</a>
@@ -606,8 +611,7 @@ const hasDiscussedTrials = discussedTrials.length > 0;
                   javascript: href). Suppress when it's just the doi.org/dx.doi.org
                   resolver we already render as "doi" (anchored so a tracking param
                   that merely contains "doi.org/" doesn't false-suppress). */}
-              {p.source_url &&
-                /^https?:\/\//i.test(p.source_url) &&
+              {isHttpUrl(p.source_url) &&
                 !(p.doi && /^https?:\/\/(www\.|dx\.)?doi\.org\//i.test(p.source_url)) && (
                   <a href={p.source_url} target="_blank" rel="noopener">
                     article →

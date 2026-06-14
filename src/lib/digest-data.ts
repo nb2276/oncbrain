@@ -78,6 +78,7 @@ export type DigestStudy = {
   // v0.16: study_report (default) vs review, decided at Phase 1. A review
   // carries no verdict and renders discussed_trials instead of a numbers-first
   // card. Absent === study_report (back-compat with the pre-v0.16 corpus).
+  // Mirrored from src/lib/llm-pipeline.ts:DigestStudy — keep both in lockstep.
   content_type?: ContentType;
   // v0.16: trial acronyms a review names, lifted verbatim — plain text, never
   // linked (no NCT inference). Empty/absent for study reports.

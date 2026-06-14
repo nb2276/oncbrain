@@ -284,6 +284,10 @@ export type DigestStudy = {
   // text (e.g. ["STOMP", "ORIOLE", "RADIOSA"]). Plain text, NOT linked — the
   // conservative no-inference rule forbids guessing an NCT for a bare acronym.
   // Capped + noise-filtered at parse. Empty/absent for study reports.
+  //
+  // Both v0.16 fields are mirrored in src/lib/digest-data.ts:DigestStudy — the
+  // build emits the artifact JSON and the Astro pages re-read it through that
+  // definition, so the two MUST keep these shapes in lockstep.
   discussed_trials?: string[];
   // v0.13: trials watching each open question. Phase 2 emits per-question
   // search queries internally (consumed by the orchestrator, not retained
@@ -921,6 +925,13 @@ export function detectClusterCollisions(
   const tweetById = new Map(tweets.map((t) => [t.id, t]));
   const nctMap = new Map<string, string[]>(); // nct → slugs
   for (const c of clusters) {
+    // v0.16: a `review` cluster is a multi-trial round-up that DELIBERATELY
+    // names (and may share NCTs with) the single-trial clusters it sits beside
+    // — the grouping prompt forces it to stay standalone even when it names a
+    // trial. That overlap is the designed state, not a split/over-cluster, so
+    // excluding reviews here prevents false-positive warnings that would mask
+    // genuine ones.
+    if (c.content_type === 'review') continue;
     const text =
       c.name +
       ' ' +

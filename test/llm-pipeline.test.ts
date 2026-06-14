@@ -796,6 +796,13 @@ describe('parseDiscussedTrials (v0.16)', () => {
     expect(out).toHaveLength(8);
     expect(out[0]).toBe('TRIAL0');
   });
+
+  it('keeps the inclusive length boundaries (2 and 40), drops 41 (pins off-by-one)', () => {
+    const max = 'A'.repeat(40);
+    const over = 'A'.repeat(41);
+    // 'A2' is exactly 2 chars + alphanumeric → kept; 40-char → kept; 41 → dropped.
+    expect(parseDiscussedTrials(['A2', max, over])).toEqual(['A2', max]);
+  });
 });
 
 describe('parseConsort', () => {
@@ -1329,6 +1336,24 @@ describe('detectClusterCollisions', () => {
         { slug: 'a', name: 'TrialA', disease_site: 'prostate', tweet_ids: [1], content_type: 'study_report' as const },
       ],
       [{ id: 1, author: null, text: 'NCT04567890 result', note: null }],
+    );
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  // v0.16: a review legitimately shares NCTs with the single-trial cluster it
+  // sits beside (the standalone-review rule). That overlap must NOT warn.
+  it('does not warn when a review shares an NCT with a single-trial cluster', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    detectClusterCollisions(
+      [
+        { slug: 'review', name: 'SBRT landscape review', disease_site: 'prostate', tweet_ids: [1], content_type: 'review' as const },
+        { slug: 'stomp', name: 'STOMP', disease_site: 'prostate', tweet_ids: [2], content_type: 'study_report' as const },
+      ],
+      [
+        { id: 1, author: null, text: 'Review discussing STOMP NCT01558427.', note: null },
+        { id: 2, author: null, text: 'STOMP primary result NCT01558427.', note: null },
+      ],
     );
     expect(warn).not.toHaveBeenCalled();
     warn.mockRestore();
