@@ -2,6 +2,31 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.17.0] - 2026-06-14
+
+### Added
+
+- **Trials a review names can now be surfaced as their own study cards, curator-gated.**
+  When a trade-press review names trials it doesn't carry as primary sources
+  (the v0.16 "Trials discussed" list: STOMP, ORIOLE, RADIOSA, ARTO, ...), a new
+  resolver searches PubMed for each acronym (esearch/esummary, then an
+  advisory rerank-LLM that must pick a candidate from the returned set or NONE),
+  and records its pick to a `review_trial_resolutions` manifest as `pending`.
+  Nothing publishes automatically: the curator reviews the queue
+  (`npm run resolve:review-trials -- --review`), and only `approved` PMIDs are
+  ingested into the next build as ordinary same-date paper sources, so the
+  existing 3-phase pipeline clusters them into normal study cards. A resolved
+  card shows a "Surfaced from a review's discussed trials" provenance pill, and
+  the review's discussed-trial acronyms link to the resolved card by PMID join.
+  Many trials (ARTO, RADIOSA, ...) are not on ClinicalTrials.gov, so resolution
+  is by literature search, not NCT lookup. The manifest freezes each
+  `(review, acronym)` resolution (UNIQUE), preserves curator decisions across
+  rebuilds, and re-opens only un-decided rows on a resolver-version bump (scoped
+  to the date being resolved). PubMed calls share an rps throttle. A
+  precision-first eval (`npm run eval:resolver`) gates the rerank: zero
+  collision false-positives required, recall above threshold. The curator gate
+  means an unapproved or wrongly-matched trial never reaches the published site.
+
 ## [0.16.0] - 2026-06-13
 
 ### Added
