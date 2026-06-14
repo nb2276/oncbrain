@@ -19,6 +19,7 @@ import {
 import { openDb, listAllSourceDates } from '../src/lib/db.ts';
 import { deriveSlug } from '../src/lib/slug.ts';
 import { verdictMetaFor } from '../src/lib/verdict.ts';
+import { runResolve, runReview, runList } from './resolve-review-trials.ts';
 
 const DIGESTS_DIR = resolve('data/digests');
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -377,6 +378,41 @@ async function ingest(): Promise<void> {
   }
 }
 
+// v0.17 P3: the review-discussed-trial resolution manifest, surfaced in studio
+// (the standalone CLI is `npm run resolve:review-trials`). Resolve searches
+// PubMed for the trials a review names and records candidate picks as `pending`;
+// nothing publishes until the curator approves a pick here, after which it
+// enters the next build as an ordinary source. Calls the CLI's run* functions
+// directly (each manages its own DB connection).
+async function resolveReviewTrials(): Promise<void> {
+  const action = await p.select({
+    message: 'Review-discussed-trial resolution (v0.17)',
+    options: [
+      { value: 'resolve', label: 'Resolve a date', hint: 'PubMed search + rerank → manifest (pending)' },
+      { value: 'review', label: 'Review / approve the queue', hint: 'curator gate; approved trials enter the next build' },
+      { value: 'list', label: 'List the manifest', hint: 'one date' },
+      { value: 'back', label: 'Back' },
+    ],
+  });
+  if (cancelled(action) || action === 'back') return;
+  try {
+    if (action === 'resolve') {
+      const date = await pickDate('Resolve which date? (reviews on a built digest)');
+      if (!date) return;
+      await runResolve(date);
+      p.log.success(`Resolved ${date}. Choose "Review / approve" to gate the picks.`);
+    } else if (action === 'review') {
+      await runReview();
+    } else if (action === 'list') {
+      const date = await pickDate('List the manifest for which date?');
+      if (!date) return;
+      runList(date);
+    }
+  } catch (err) {
+    p.log.error((err as Error).message);
+  }
+}
+
 function localDateStr(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -474,6 +510,7 @@ async function main(): Promise<void> {
         { value: 'daily', label: 'Daily build', hint: 'pull + enrich + build yesterday & today + index' },
         { value: 'build', label: 'Build a day' },
         { value: 'ingest', label: 'Pull + enrich inbox' },
+        { value: 'review-trials', label: 'Resolve review trials', hint: 'v0.17: surface trials a review names' },
         { value: 'quit', label: 'Quit' },
       ],
     });
@@ -482,6 +519,7 @@ async function main(): Promise<void> {
     else if (action === 'daily') await dailyBuild();
     else if (action === 'build') await buildADay();
     else if (action === 'ingest') await ingest();
+    else if (action === 'review-trials') await resolveReviewTrials();
   }
   p.outro('Done.');
 }

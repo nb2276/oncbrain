@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type Database from 'better-sqlite3';
 import { openDb, upsertResolution, decideResolution, listPapers, listResolutions, savePaper } from '../src/lib/db.ts';
-import { ingestApprovedResolutions } from '../src/lib/review-trial-ingest.ts';
+import { ingestApprovedResolutions, crossDateResolvedPapers } from '../src/lib/review-trial-ingest.ts';
 import type { PubMedPaper } from '../src/lib/pubmed-client.ts';
 
 function paper(pmid: string, title = 'The ORIOLE trial'): PubMedPaper {
@@ -133,5 +133,46 @@ describe('ingestApprovedResolutions (T5)', () => {
     const fetchPaper = vi.fn(async (pmid: string) => paper(pmid));
     expect(await ingestApprovedResolutions(db, date, { fetchPaper })).toEqual({ ingested: 0, skipped: 0, failed: 0 });
     expect(fetchPaper).not.toHaveBeenCalled();
+  });
+});
+
+describe('crossDateResolvedPapers (v0.17 P3 cross-date surfacing)', () => {
+  let db: Database.Database;
+  const date = '2026-06-12';
+  beforeEach(() => {
+    db = openDb(':memory:');
+  });
+
+  it('returns an approved trial whose paper is a source on an EARLIER date', () => {
+    savePaper(db, { pmid: '32215577', title: 'ORIOLE on an earlier date', bookmark_date: '2026-06-01' });
+    seedApproved(db, { paperId: 7, acronym: 'ORIOLE', date, pmid: '32215577' });
+    const out = crossDateResolvedPapers(db, date, new Set());
+    expect(out).toHaveLength(1);
+    expect(out[0]!.pmid).toBe('32215577');
+    expect(out[0]!.bookmark_date).toBe('2026-06-01'); // its own (earlier) date
+  });
+
+  it('excludes a PMID that is ALREADY a same-date source (built normally, no injection)', () => {
+    savePaper(db, { pmid: '32215577', title: 'ORIOLE earlier', bookmark_date: '2026-06-01' });
+    seedApproved(db, { paperId: 7, acronym: 'ORIOLE', date, pmid: '32215577' });
+    expect(crossDateResolvedPapers(db, date, new Set(['32215577']))).toHaveLength(0);
+  });
+
+  it('excludes an approved trial whose paper is ON this date (not cross-date)', () => {
+    savePaper(db, { pmid: '32215577', title: 'ORIOLE same date', bookmark_date: date });
+    seedApproved(db, { paperId: 7, acronym: 'ORIOLE', date, pmid: '32215577' });
+    expect(crossDateResolvedPapers(db, date, new Set())).toHaveLength(0);
+  });
+
+  it('is empty when nothing is approved for the date', () => {
+    savePaper(db, { pmid: '32215577', title: 'ORIOLE earlier', bookmark_date: '2026-06-01' });
+    expect(crossDateResolvedPapers(db, date, new Set())).toEqual([]);
+  });
+
+  it('de-dups two acronyms resolving to the same cross-date PMID', () => {
+    savePaper(db, { pmid: '32215577', title: 'ORIOLE earlier', bookmark_date: '2026-06-01' });
+    seedApproved(db, { paperId: 7, acronym: 'ORIOLE', date, pmid: '32215577' });
+    seedApproved(db, { paperId: 7, acronym: 'ORIOLE-2', date, pmid: '32215577' });
+    expect(crossDateResolvedPapers(db, date, new Set())).toHaveLength(1);
   });
 });

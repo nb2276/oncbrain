@@ -9,8 +9,9 @@
 // an APPROVED row's chosen PMID enters a later build (T5). Nothing here mutates
 // a digest or publishes — the curator is the gate.
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import * as p from '@clack/prompts';
 import {
   openDb,
@@ -57,7 +58,7 @@ function readDigest(date: string): DigestArtifactLike {
   return JSON.parse(readFileSync(path, 'utf-8')) as DigestArtifactLike;
 }
 
-async function runResolve(date: string): Promise<void> {
+export async function runResolve(date: string): Promise<void> {
   const db = openDb();
   try {
     const artifact = readDigest(date);
@@ -112,7 +113,7 @@ function candidateLabel(c: { pmid: string; title: string; journal: string | null
   return `${c.pmid} — ${title}${meta ? ` (${meta})` : ''}`;
 }
 
-async function runReview(): Promise<void> {
+export async function runReview(): Promise<void> {
   const db = openDb();
   try {
     // Pending first (resolver-confident), then failed (curator can still rescue).
@@ -154,7 +155,7 @@ async function runReview(): Promise<void> {
   }
 }
 
-function runList(date?: string): void {
+export function runList(date?: string): void {
   const db = openDb();
   try {
     const rows = listResolutions(db, date ? { date } : {});
@@ -190,7 +191,20 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  console.error(`resolve-review-trials failed: ${(err as Error).message}`);
-  process.exit(1);
-});
+// Only run main() when invoked as a CLI, so studio.ts can import the run*
+// functions without triggering an argv parse (mirrors eval-resolver.ts).
+function isInvokedAsScript(): boolean {
+  const arg = process.argv[1];
+  if (!arg) return false;
+  try {
+    return realpathSync(arg) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+if (isInvokedAsScript()) {
+  main().catch((err) => {
+    console.error(`resolve-review-trials failed: ${(err as Error).message}`);
+    process.exit(1);
+  });
+}

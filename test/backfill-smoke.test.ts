@@ -593,6 +593,69 @@ describe('backfill smoke (v0.10 T16.5)', () => {
     expect(digest.sites[0]!.studies[1]!.discussed_trial_links).toBeUndefined();
   });
 
+  // v0.17 P3: a review on this date discusses a trial whose primary paper is a
+  // source on an EARLIER date. papers.pmid is UNIQUE so the row can't be
+  // duplicated here; the builder injects it cross-date so the trial gets a card
+  // on THIS date too, with the provenance pill (resolved_from_review).
+  it('surfaces a cross-date review trial as a card on the discussing date (P3)', async () => {
+    const earlier = '2026-05-19';
+    const date = '2026-05-29';
+    // (1) the trial's primary paper is a NORMAL source on an earlier date
+    //     (fetched_via defaults to 'pending', NOT 'review-resolved' — so the pill
+    //     below must come from the cross-date force-flag, not fetched_via).
+    const trialPaperId = savePaper(db, { pmid: '32215577', title: 'The ORIOLE trial', bookmark_date: earlier }).id;
+    // (2) a trade-press review on `date` is a same-date source (keeps date non-empty)
+    const reviewPaperId = savePaper(db, { title: 'Oligomet SBRT review', source_url: 'https://urotoday.com/x', content_hash: 'review-oligomet-sbrt', bookmark_date: date }).id;
+    // (3) curator approved resolving the review's ORIOLE mention to that paper
+    const { resolution } = upsertResolution(db, {
+      review_source_paper_id: reviewPaperId, acronym_norm: 'ORIOLE', acronym_display: 'ORIOLE',
+      disease_site: 'prostate', bookmark_date: date, status: 'pending',
+      candidates: [{ pmid: '32215577', title: 'ORIOLE', journal: 'JAMA Oncol', year: '2020', score: 1 }],
+      confidence: 0.9, resolver_version: 'v1',
+    });
+    decideResolution(db, resolution.id, { status: 'approved', chosenPmid: '32215577' });
+
+    const trialSynth = paperIdToSyntheticTweetId(trialPaperId);
+    const reviewSynth = paperIdToSyntheticTweetId(reviewPaperId);
+    // Every source must be assigned to exactly one cluster (Phase 1 partition
+    // invariant): the review paper AND the cross-date trial paper both cluster.
+    const grouping = JSON.stringify({
+      studies: [
+        { slug: 'review', name: 'SBRT review', disease_site: 'prostate', tweet_ids: [reviewSynth], content_type: 'review', discussed_trials: ['ORIOLE'] },
+        { slug: 'oriole', name: 'ORIOLE', disease_site: 'prostate', tweet_ids: [trialSynth] },
+      ],
+    });
+    const studyAgent = JSON.stringify({
+      name: 'ORIOLE', tldr: 'SABR delays progression in oligometastatic prostate.',
+      details: ['SABR'], nct: null, modality: 'radiation', intent: 'curative', methodology: 'phase-2-trial',
+    });
+    const reviewAgent = JSON.stringify({
+      name: 'SBRT review', tldr: 'A round-up of oligometastatic SBRT trials.',
+      details: ['Surveys ORIOLE, STOMP.'], nct: null, modality: 'radiation', intent: 'na', methodology: 'review',
+    });
+    const synthesis = JSON.stringify({
+      top_line: 'ORIOLE surfaced.', tldr: 'One cross-date review trial.',
+      site_meta: [{ disease_site: 'prostate', intro: null, open_questions: null }],
+    });
+    const { client } = mockClient({ grouping, studies: { review: reviewAgent, oriole: studyAgent }, synthesis });
+    const ingestPaper = vi.fn(async () => { throw new Error('should not fetch — paper exists cross-date'); });
+
+    await buildOneDate(args(), db, date, { client, ingestPaper });
+
+    // (a) no duplicate row — the trial paper stays on its earlier date only, no fetch
+    expect(listPapers(db, { bookmark_date: date }).some((p) => p.pmid === '32215577')).toBe(false);
+    expect(ingestPaper).not.toHaveBeenCalled();
+    // (b) the cross-date trial is in THIS date's artifact, flagged for the pill
+    const artifact = readArtifact(date);
+    const trialInArtifact = artifact.papers?.find(
+      (p) => (p as { pmid?: string }).pmid === '32215577',
+    ) as { resolved_from_review?: boolean } | undefined;
+    expect(trialInArtifact?.resolved_from_review).toBe(true);
+    // (c) and it clustered into a study card on this date
+    const studies = artifact.digest.sites.flatMap((s) => s.studies);
+    expect(studies.map((s) => s.slug)).toContain('oriole');
+  });
+
   it('skips a date with zero sources without writing an artifact', async () => {
     const date = '2026-05-24';
     const { client, calls } = mockClient({ grouping: '', studies: {}, synthesis: '' });
