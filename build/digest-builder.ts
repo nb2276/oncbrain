@@ -49,7 +49,7 @@ import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
 import { clampPreprintVerdict } from '../src/lib/preprint.ts';
 import { stripReviewVerdicts } from '../src/lib/content-type.ts';
-import { ingestApprovedResolutions } from '../src/lib/review-trial-ingest.ts';
+import { ingestApprovedResolutions, crossDateResolvedPapers } from '../src/lib/review-trial-ingest.ts';
 import { fetchPubMedPaper, type PubMedPaper } from '../src/lib/pubmed-client.ts';
 import { listResolutions } from '../src/lib/db.ts';
 
@@ -399,6 +399,10 @@ function buildArtifact(
   papers: Paper[],
   slides: SlideUpload[],
   digest: DigestOutput,
+  // v0.17 P3: paper ids surfaced cross-date from a review's approved manifest.
+  // Their stored fetched_via reflects their ORIGINAL date's ingestion (which may
+  // not be 'review-resolved'), so force the provenance-pill flag for them.
+  forceResolvedFromReview: Set<number> = new Set(),
 ): DigestArtifact {
   return {
     date,
@@ -450,7 +454,9 @@ function buildArtifact(
           // discussed-trials manifest (curator-approved). Drives the StudyCard
           // "surfaced from a review" provenance pill. A boolean, not the raw
           // fetched_via, so internal fetch methods stay out of the public artifact.
-          resolved_from_review: p.fetched_via === 'review-resolved',
+          // v0.17 P3: also true for papers surfaced cross-date (forceResolvedFromReview),
+          // whose own fetched_via reflects their original date.
+          resolved_from_review: p.fetched_via === 'review-resolved' || forceResolvedFromReview.has(p.id),
         }))
       : undefined,
     slides: slides.length > 0
@@ -534,6 +540,21 @@ export async function buildOneDate(
   const papersForDate = listPapers(db, { bookmark_date: date });
   const slidesForDate = listSlideUploads(db, { bookmark_date: date });
 
+  // v0.17 P3 (cross-date surfacing): a review on this date may discuss a trial
+  // whose primary paper is already a source on an EARLIER date. papers.pmid is
+  // UNIQUE so the row lives on its first date; inject those approved-resolution
+  // papers into THIS date's build inputs so the trial gets a card here too (the
+  // manifest is the many-to-many review-date↔paper link). De-duped against the
+  // date's own paper PMIDs. crossDateIds drives the provenance pill: these
+  // papers' stored fetched_via reflects their ORIGINAL date, so resolved_from_review
+  // can't key on it for them.
+  const sameDatePmids = new Set(
+    papersForDate.filter((p) => p.pmid).map((p) => p.pmid as string),
+  );
+  const crossDatePapers = crossDateResolvedPapers(db, date, sameDatePmids);
+  const allPapers = [...papersForDate, ...crossDatePapers];
+  const crossDateIds = new Set(crossDatePapers.map((p) => p.id));
+
   if (allForDate.length === 0 && papersForDate.length === 0 && slidesForDate.length === 0) {
     console.log(`${date}: no bookmarks/papers/slides, skipping.`);
     return;
@@ -563,11 +584,13 @@ export async function buildOneDate(
   const confMeta = conference ? { slug: conference.slug, name: conference.name } : null;
 
   console.log(
-    `${date}${confMeta ? ` · ${confMeta.name}` : ''}: ${bookmarks.length} tweet(s), ${papersForDate.length} paper(s), ${slidesForDate.length} slide(s) → digest`,
+    `${date}${confMeta ? ` · ${confMeta.name}` : ''}: ${bookmarks.length} tweet(s), ${papersForDate.length} paper(s), ${slidesForDate.length} slide(s)` +
+      (crossDatePapers.length > 0 ? ` + ${crossDatePapers.length} cross-date review-trial(s)` : '') +
+      ` → digest`,
   );
 
   const tweetInputs = toDigestInput(bookmarks);
-  const paperInputs = papersToDigestInput(papersForDate);
+  const paperInputs = papersToDigestInput(allPapers);
   const slideInputs = slidesToDigestInput(slidesForDate);
   const inputs: DigestInputItem[] = [...tweetInputs, ...paperInputs, ...slideInputs];
   let digest: DigestOutput;
@@ -665,9 +688,9 @@ export async function buildOneDate(
   // v0.17 (T6): link each review's discussed-trial acronyms to the same-date
   // study auto-resolved from it (via the approved manifest), so the rendered
   // "Trials discussed" list can deep-link to the resolved card.
-  linkResolvedTrials(db, date, digest, papersForDate);
+  linkResolvedTrials(db, date, digest, allPapers);
 
-  const artifact = buildArtifact(date, confMeta, bookmarks, papersForDate, slidesForDate, digest);
+  const artifact = buildArtifact(date, confMeta, bookmarks, allPapers, slidesForDate, digest, crossDateIds);
   const paths = writeArtifact(args, artifact);
   console.log(`  wrote ${paths.json}`);
   console.log(`  wrote ${paths.obsidian}`);

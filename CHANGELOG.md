@@ -2,6 +2,29 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.17.1] - 2026-06-14
+
+Completes the two v0.17 deferred-scope (P3) follow-ups.
+
+### Added
+
+- **Cross-date review-trial surfacing.** A review can now surface a discussed
+  trial as a card on its OWN date even when that trial's primary paper is already
+  a source on an earlier date. `papers.pmid` is UNIQUE (one row = one date), so
+  the row can't be duplicated; instead the manifest is the many-to-many
+  review-date↔paper link, and the builder injects a date's approved-resolution
+  papers into that date's build inputs (`crossDateResolvedPapers`), de-duped
+  against the date's own sources. Such a card carries the "Surfaced from a
+  review's discussed trials" provenance pill even though the underlying paper's
+  stored `fetched_via` reflects its original date. Replaces the prior
+  loud-skip-with-no-card behavior; nothing changes for existing dates (the
+  injection only fires for curator-approved cross-date resolutions).
+- **Studio entry for review-trial resolution.** `npm run studio` gains a
+  "Resolve review trials" menu (resolve a date / review + approve the queue /
+  list the manifest), calling the `resolve:review-trials` CLI's run-functions
+  directly. The CLI's `main()` is now script-guarded so it can be imported
+  without executing.
+
 ## [0.17.0] - 2026-06-14
 
 ### Added

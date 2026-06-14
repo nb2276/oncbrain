@@ -24,6 +24,7 @@ import {
   savePaper,
   getPaperByPmid,
   markPaperReviewResolved,
+  type Paper,
 } from './db.ts';
 import type { PubMedPaper } from './pubmed-client.ts';
 
@@ -80,14 +81,13 @@ export async function ingestApprovedResolutions(
       continue;
     }
 
-    // (b) Exists on ANOTHER date → can't surface on this date. `papers.pmid` is
-    //     UNIQUE, so one paper row = one date; the trial's card lives on its first
-    //     date and the acronym stays plain text here. Logged loudly so it isn't
-    //     a silent gap (review fix #4). Proper fix (a manifest-as-date-association
-    //     so a paper can appear on multiple dates) is a follow-up — see TODOS.
+    // (b) Exists on ANOTHER date → don't duplicate the row (`papers.pmid` is
+    //     UNIQUE, one row = one date). The build surfaces it on THIS date via
+    //     crossDateResolvedPapers (v0.17 P3 manifest-as-date-association), so the
+    //     trial DOES get a card here; we just skip re-fetching/re-creating it.
     const elsewhere = getPaperByPmid(db, pmid);
     if (elsewhere) {
-      log(`  ⚠ [resolve-ingest] PMID ${pmid} (${r.acronym_display}) already a source on ${elsewhere.bookmark_date}; can't surface on ${date} (one date per paper) — acronym stays plain text here`);
+      log(`  [resolve-ingest] PMID ${pmid} (${r.acronym_display}) already a source on ${elsewhere.bookmark_date}; build will surface it cross-date on ${date} (no row duplicated)`);
       skipped += 1;
       continue;
     }
@@ -143,4 +143,38 @@ export async function ingestApprovedResolutions(
     log(`  [resolve-ingest] ingested ${r.acronym_display} → PMID ${pmid}`);
   }
   return { ingested, skipped, failed };
+}
+
+// v0.17 P3 (cross-date surfacing): a review on `date` may discuss a trial whose
+// primary paper is already a source on an EARLIER date. `papers.pmid` is UNIQUE
+// (one row = one date), so ingestApprovedResolutions can't duplicate the row
+// onto this date — instead the manifest is the many-to-many review-date↔paper
+// link, and the builder injects these papers into THIS date's build inputs so
+// the trial gets a card here too.
+//
+// Returns the approved-resolution papers for `date` that live on ANOTHER date
+// (so a card can be surfaced here), de-duped against the PMIDs already a source
+// for this date (those need no injection — they're built normally). The caller
+// marks them resolved_from_review for the provenance pill (their stored
+// fetched_via reflects their ORIGINAL date's ingestion, which may not be
+// 'review-resolved', so the pill can't key on fetched_via for these).
+export function crossDateResolvedPapers(
+  db: Database.Database,
+  date: string,
+  sameDatePmids: Set<string>,
+): Paper[] {
+  const approved = listResolutions(db, { date, status: 'approved' }).filter((r) => r.chosen_pmid);
+  if (approved.length === 0) return [];
+  const out: Paper[] = [];
+  const seen = new Set<string>();
+  for (const r of approved) {
+    const pmid = r.chosen_pmid as string;
+    if (sameDatePmids.has(pmid) || seen.has(pmid)) continue;
+    const p = getPaperByPmid(db, pmid);
+    if (p && p.bookmark_date !== date) {
+      out.push(p);
+      seen.add(pmid);
+    }
+  }
+  return out;
 }
