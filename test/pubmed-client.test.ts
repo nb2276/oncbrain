@@ -1,9 +1,12 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   fetchPubMedPaper,
   parsePubMedArticleXml,
   parseAbstractFromXml,
   extractMethodsAndResults,
+  searchPubMed,
+  summarizePmids,
+  _resetNcbiThrottleForTests,
   PubMedClientError,
 } from '../src/lib/pubmed-client.ts';
 
@@ -189,5 +192,108 @@ describe('fetchPubMedPaper', () => {
     await expect(
       fetchPubMedPaper('99999999', { fetchImpl: fetchImpl as unknown as typeof fetch }),
     ).rejects.toMatchObject({ kind: 'not_found' });
+  });
+});
+
+// v0.17 (T2): esearch + esummary + the rps throttle.
+describe('searchPubMed (esearch)', () => {
+  // No-op throttle so tests never actually wait.
+  const fast = { sleep: async () => {}, minIntervalMs: 0 };
+  beforeEach(() => _resetNcbiThrottleForTests());
+
+  // Recorded esearch JSON (the real STOMP[Title] AND oligometastatic prostate shape).
+  const ESEARCH_JSON = JSON.stringify({
+    header: { type: 'esearch' },
+    esearchresult: { count: '4', retmax: '10', idlist: ['36001857', '36526472', '39820657'] },
+  });
+
+  it('parses idlist + total count', async () => {
+    const fetchImpl = vi.fn(async (_url: string) => new Response(ESEARCH_JSON));
+    const res = await searchPubMed('STOMP[Title] AND oligometastatic prostate', {
+      ...fast,
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    expect(res.pmids).toEqual(['36001857', '36526472', '39820657']);
+    expect(res.total).toBe(4);
+    expect(fetchImpl.mock.calls[0]![0]).toContain('esearch.fcgi');
+    expect(fetchImpl.mock.calls[0]![0]).toContain('retmode=json');
+  });
+
+  it('returns empty (not an error) when nothing matches', async () => {
+    const empty = JSON.stringify({ esearchresult: { count: '0', idlist: [] } });
+    const fetchImpl = vi.fn(async () => new Response(empty));
+    const res = await searchPubMed('NOSUCHTRIAL[Title]', { ...fast, fetchImpl: fetchImpl as unknown as typeof fetch });
+    expect(res).toEqual({ pmids: [], total: 0 });
+  });
+
+  it('drops non-numeric ids defensively', async () => {
+    const dirty = JSON.stringify({ esearchresult: { count: '2', idlist: ['123', 'abc', 456] } });
+    const fetchImpl = vi.fn(async () => new Response(dirty));
+    const res = await searchPubMed('x', { ...fast, fetchImpl: fetchImpl as unknown as typeof fetch });
+    expect(res.pmids).toEqual(['123']);
+  });
+
+  it('throws parse on non-JSON, network on HTTP error', async () => {
+    const bad = vi.fn(async () => new Response('<html>oops</html>'));
+    await expect(searchPubMed('x', { ...fast, fetchImpl: bad as unknown as typeof fetch })).rejects.toMatchObject({ kind: 'parse' });
+    const err500 = vi.fn(async () => new Response('err', { status: 500 }));
+    await expect(searchPubMed('x', { ...fast, fetchImpl: err500 as unknown as typeof fetch })).rejects.toBeInstanceOf(PubMedClientError);
+  });
+
+  it('throttles: the 2nd call waits ~minIntervalMs (codex #19 rps gate)', async () => {
+    // Fake clock that does not advance; sleep records its argument.
+    const waits: number[] = [];
+    const fetchImpl = vi.fn(async () => new Response(ESEARCH_JSON));
+    const opts = {
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      clock: () => 1000,
+      sleep: async (ms: number) => { waits.push(ms); },
+      minIntervalMs: 334,
+    };
+    await searchPubMed('a', opts);
+    await searchPubMed('b', opts);
+    // 1st reserves slot at t=1000 (no wait); 2nd is pushed to t=1334 → waits 334.
+    expect(waits).toEqual([334]);
+  });
+});
+
+describe('summarizePmids (esummary)', () => {
+  const fast = { sleep: async () => {}, minIntervalMs: 0 };
+  beforeEach(() => _resetNcbiThrottleForTests());
+
+  const ESUMMARY_JSON = JSON.stringify({
+    result: {
+      uids: ['32215577', '36001857'],
+      '32215577': {
+        uid: '32215577',
+        title: 'Outcomes of Observation vs SABR for Oligometastatic Prostate Cancer: The ORIOLE Trial',
+        fulljournalname: 'JAMA Oncology',
+        source: 'JAMA Oncol',
+        pubdate: '2020 Apr 1',
+      },
+      '36001857': {
+        uid: '36001857',
+        title: 'Pooled STOMP/ORIOLE analysis',
+        source: 'J Clin Oncol',
+        pubdate: '2022 Sep',
+      },
+    },
+  });
+
+  it('parses title / journal / year for each pmid in one batched call', async () => {
+    const fetchImpl = vi.fn(async () => new Response(ESUMMARY_JSON));
+    const out = await summarizePmids(['32215577', '36001857'], { ...fast, fetchImpl: fetchImpl as unknown as typeof fetch });
+    expect(fetchImpl).toHaveBeenCalledTimes(1); // batched, not per-id
+    expect(out).toHaveLength(2);
+    expect(out[0]).toMatchObject({ pmid: '32215577', journal: 'JAMA Oncology', year: '2020' });
+    expect(out[0]!.title).toContain('ORIOLE');
+    expect(out[1]).toMatchObject({ pmid: '36001857', journal: 'J Clin Oncol', year: '2022' });
+  });
+
+  it('no-ops on empty / all-non-numeric input (no request)', async () => {
+    const fetchImpl = vi.fn(async () => new Response(ESUMMARY_JSON));
+    expect(await summarizePmids([], { ...fast, fetchImpl: fetchImpl as unknown as typeof fetch })).toEqual([]);
+    expect(await summarizePmids(['abc', 'NCT123'], { ...fast, fetchImpl: fetchImpl as unknown as typeof fetch })).toEqual([]);
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 });
