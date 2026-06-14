@@ -2,6 +2,20 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.17.2] - 2026-06-14
+
+### Fixed
+
+- **`resolve:review-trials` CLI loads `.env`.** The standalone resolver CLI was
+  the only LLM/NCBI build script missing `import 'dotenv/config'`, so run on its
+  own (or via the new studio menu) it never loaded `LLM_BACKEND` /
+  `ANTHROPIC_API_KEY` / `NCBI_API_KEY` — every rerank failed auth ("Could not
+  resolve authentication method") and the run produced only transient errors.
+  The v0.17 transient-freeze handling did the right thing (wrote nothing rather
+  than poisoning the manifest), so no bad data resulted; the CLI just couldn't
+  do useful work. Adding the import (matching every sibling script) fixes it.
+  Local-only: the resolve CLI is never part of the deployed static build.
+
 ## [0.17.1] - 2026-06-14
 
 Completes the two v0.17 deferred-scope (P3) follow-ups.
