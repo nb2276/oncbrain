@@ -14,11 +14,28 @@ import {
   upsertConference,
   setBookmarkConferenceIfEmpty,
 } from '../src/lib/db.ts';
-import { runEnrichmentLoop, detectAndEnsureConference } from '../src/lib/inbox-enrichment.ts';
+import { runEnrichmentLoop, detectAndEnsureConference, paperFailureReply } from '../src/lib/inbox-enrichment.ts';
 
 function freshDb(): Database.Database {
   return openDb(':memory:');
 }
+
+describe('paperFailureReply', () => {
+  it('tells the curator to send a DOI/PMID when a journal URL fetch is rejected', () => {
+    const msg = paperFailureReply('url', 'fetch refused: HTTP 403');
+    expect(msg).toContain("Couldn't ingest that paper: fetch refused: HTTP 403");
+    expect(msg).toMatch(/send the DOI/i);
+    expect(msg).toMatch(/PubMed/);
+    expect(msg).toMatch(/ScienceDirect|Elsevier/);
+  });
+
+  it('does NOT add the send-a-DOI hint when a DOI or PMID target itself failed', () => {
+    expect(paperFailureReply('doi', 'crossref parse: no title')).toBe(
+      "Couldn't ingest that paper: crossref parse: no title",
+    );
+    expect(paperFailureReply('pmid', 'network: timeout')).not.toMatch(/send the DOI/i);
+  });
+});
 
 describe('saveInboxItem', () => {
   it('inserts a new inbox item and returns id with created=true', () => {
