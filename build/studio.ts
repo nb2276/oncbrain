@@ -386,10 +386,9 @@ async function ingest(): Promise<void> {
 // directly (each manages its own DB connection).
 async function resolveReviewTrials(): Promise<void> {
   const action = await p.select({
-    message: 'Review-discussed-trial resolution (v0.17)',
+    message: 'Resolve review-discussed trials (v0.17): search PubMed → manifest',
     options: [
       { value: 'resolve', label: 'Resolve a date', hint: 'PubMed search + rerank → manifest (pending)' },
-      { value: 'review', label: 'Review / approve the queue', hint: 'curator gate; approved trials enter the next build' },
       { value: 'list', label: 'List the manifest', hint: 'one date' },
       { value: 'back', label: 'Back' },
     ],
@@ -400,14 +399,24 @@ async function resolveReviewTrials(): Promise<void> {
       const date = await pickDate('Resolve which date? (reviews on a built digest)');
       if (!date) return;
       await runResolve(date);
-      p.log.success(`Resolved ${date}. Choose "Review / approve" to gate the picks.`);
-    } else if (action === 'review') {
-      await runReview();
+      p.log.success(`Resolved ${date}. Use "Review resolved trials" to approve the picks.`);
     } else if (action === 'list') {
       const date = await pickDate('List the manifest for which date?');
       if (!date) return;
       runList(date);
     }
+  } catch (err) {
+    p.log.error((err as Error).message);
+  }
+}
+
+// v0.17 P3: the curator review/approval process — walk the pending + failed
+// queue and approve/reject each resolved trial. A dedicated top-level option
+// (the recurring curator action, separate from the search step above). Approved
+// trials enter the next build as study cards; nothing publishes until then.
+async function reviewResolvedTrials(): Promise<void> {
+  try {
+    await runReview();
   } catch (err) {
     p.log.error((err as Error).message);
   }
@@ -510,7 +519,8 @@ async function main(): Promise<void> {
         { value: 'daily', label: 'Daily build', hint: 'pull + enrich + build yesterday & today + index' },
         { value: 'build', label: 'Build a day' },
         { value: 'ingest', label: 'Pull + enrich inbox' },
-        { value: 'review-trials', label: 'Resolve review trials', hint: 'v0.17: surface trials a review names' },
+        { value: 'review-trials', label: 'Resolve review trials', hint: 'v0.17: search PubMed for trials a review names' },
+        { value: 'review-approve', label: 'Review resolved trials', hint: 'curator: approve / reject the pending queue' },
         { value: 'quit', label: 'Quit' },
       ],
     });
@@ -520,6 +530,7 @@ async function main(): Promise<void> {
     else if (action === 'build') await buildADay();
     else if (action === 'ingest') await ingest();
     else if (action === 'review-trials') await resolveReviewTrials();
+    else if (action === 'review-approve') await reviewResolvedTrials();
   }
   p.outro('Done.');
 }
