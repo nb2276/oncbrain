@@ -12,12 +12,19 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import * as p from '@clack/prompts';
-import { openDb, listResolutions, decideResolution, parseResolutionCandidates } from '../src/lib/db.ts';
+import {
+  openDb,
+  listResolutions,
+  decideResolution,
+  parseResolutionCandidates,
+  reopenStaleResolutions,
+} from '../src/lib/db.ts';
 import { searchPubMed, summarizePmids } from '../src/lib/pubmed-client.ts';
 import { createLlmClient } from '../src/lib/llm-client.ts';
 import {
   resolveReviewsForDate,
   makeRerankFromLlm,
+  RESOLVER_VERSION,
   type DigestArtifactLike,
   type ResolverDeps,
 } from '../src/lib/review-trial-resolver.ts';
@@ -62,6 +69,13 @@ async function runResolve(date: string): Promise<void> {
       rerank: makeRerankFromLlm(llm),
       log: (m) => console.log(m),
     };
+    // review fix #2: a RESOLVER_VERSION bump re-opens un-decided (pending/failed)
+    // rows so they re-resolve under the new resolver; curator decisions are
+    // preserved. This is the documented escape from the freeze — wire it here so
+    // the bump actually takes effect (it was previously dead code).
+    const reopened = reopenStaleResolutions(db, RESOLVER_VERSION);
+    if (reopened > 0) console.log(`  re-opened ${reopened} stale resolution(s) for re-resolve`);
+
     console.log(`Resolving review-discussed trials for ${date}…`);
     const summaries = await resolveReviewsForDate(db, artifact, deps);
     if (summaries.length === 0) {
@@ -70,14 +84,17 @@ async function runResolve(date: string): Promise<void> {
     }
     let pending = 0,
       failed = 0,
-      frozen = 0;
+      frozen = 0,
+      errored = 0;
     for (const s of summaries) {
       pending += s.pending;
       failed += s.failed;
       frozen += s.frozen;
+      errored += s.errored;
     }
     console.log(
-      `  ${summaries.length} review(s): ${pending} pending · ${failed} failed · ${frozen} frozen (already resolved).`,
+      `  ${summaries.length} review(s): ${pending} pending · ${failed} failed · ${frozen} frozen` +
+        (errored > 0 ? ` · ${errored} transient (re-run to retry)` : ''),
     );
     if (pending > 0 || failed > 0) {
       console.log('  Next: npm run resolve:review-trials -- --review   to approve.');

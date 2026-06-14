@@ -76,6 +76,10 @@ export async function fetchPubMedPaper(
   // efetch with retmode=xml gives us metadata + abstract + MeSH in one call.
   // esummary returns slightly different shape (json) but the XML route is
   // more complete and we already need an XML parser for PMC anyway.
+  // review fix #3: route BOTH efetch legs (article + PMC) through the rps gate
+  // too — codex #19 was only half-closed (search/summary throttled, efetch not),
+  // so a build-time approved-paper fan-out could still exceed NCBI's 3 req/s.
+  await acquireNcbiSlot(opts);
   const articleXml = await fetchUrl(
     `${EUTILS_BASE}/efetch.fcgi?db=pubmed&id=${pmid}&retmode=xml${apiKey ? `&api_key=${apiKey}` : ''}`,
     fetchImpl,
@@ -88,6 +92,7 @@ export async function fetchPubMedPaper(
   let fulltext_excerpt_md: string | null = null;
   if (metadata.pmc_id) {
     try {
+      await acquireNcbiSlot(opts);
       const pmcXml = await fetchUrl(
         `${EUTILS_BASE}/efetch.fcgi?db=pmc&id=${metadata.pmc_id.replace(/^PMC/, '')}&retmode=xml${apiKey ? `&api_key=${apiKey}` : ''}`,
         fetchImpl,

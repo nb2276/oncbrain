@@ -521,6 +521,14 @@ export async function buildOneDate(
   if (ingest.ingested > 0) {
     console.log(`  ${ingest.ingested} approved review-trial(s) ingested as sources`);
   }
+  if (ingest.failed > 0) {
+    // review fix #5: never let a transient NCBI failure silently publish a
+    // digest WITHOUT a curator-approved trial. The approved rows are not
+    // consumed, so the next build retries — but surface it loudly now.
+    console.warn(
+      `  ⚠ ${ingest.failed} approved review-trial(s) FAILED to ingest (transient NCBI error); they will retry on the next build`,
+    );
+  }
 
   const allForDate = listBookmarks(db, { bookmark_date: date });
   const papersForDate = listPapers(db, { bookmark_date: date });

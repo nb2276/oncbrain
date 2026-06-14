@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type Database from 'better-sqlite3';
-import { openDb, upsertResolution, decideResolution, listPapers, savePaper } from '../src/lib/db.ts';
+import { openDb, upsertResolution, decideResolution, listPapers, listResolutions, savePaper } from '../src/lib/db.ts';
 import { ingestApprovedResolutions } from '../src/lib/review-trial-ingest.ts';
 import type { PubMedPaper } from '../src/lib/pubmed-client.ts';
 
@@ -48,7 +48,7 @@ describe('ingestApprovedResolutions (T5)', () => {
     seedApproved(db, { paperId: 7, acronym: 'ORIOLE', date, pmid: '32215577' });
     const fetchPaper = vi.fn(async (pmid: string) => paper(pmid));
     const res = await ingestApprovedResolutions(db, date, { fetchPaper });
-    expect(res).toEqual({ ingested: 1, skipped: 0 });
+    expect(res).toEqual({ ingested: 1, skipped: 0, failed: 0 });
 
     const papers = listPapers(db, { bookmark_date: date });
     expect(papers).toHaveLength(1);
@@ -75,42 +75,46 @@ describe('ingestApprovedResolutions (T5)', () => {
 
     const fetchPaper = vi.fn(async (pmid: string) => paper(pmid));
     const res = await ingestApprovedResolutions(db, date, { fetchPaper });
-    expect(res).toEqual({ ingested: 0, skipped: 0 });
+    expect(res).toEqual({ ingested: 0, skipped: 0, failed: 0 });
     expect(fetchPaper).not.toHaveBeenCalled();
     expect(listPapers(db, { bookmark_date: date })).toHaveLength(0);
   });
 
-  it('dedups when the chosen PMID is already a same-date source', async () => {
-    savePaper(db, { pmid: '32215577', title: 'already here', bookmark_date: date });
+  it('dedups a same-date source AND re-tags it review-resolved for the provenance pill (fix #6b)', async () => {
+    savePaper(db, { pmid: '32215577', title: 'already here', bookmark_date: date }); // fetched_via='pending'
     seedApproved(db, { paperId: 7, acronym: 'ORIOLE', date, pmid: '32215577' });
     const fetchPaper = vi.fn(async (pmid: string) => paper(pmid));
     const res = await ingestApprovedResolutions(db, date, { fetchPaper });
-    expect(res).toEqual({ ingested: 0, skipped: 1 });
+    expect(res).toEqual({ ingested: 0, skipped: 1, failed: 0 });
     expect(fetchPaper).not.toHaveBeenCalled(); // skipped before fetch
-    expect(listPapers(db, { bookmark_date: date })).toHaveLength(1);
+    const papers = listPapers(db, { bookmark_date: date });
+    expect(papers).toHaveLength(1);
+    expect(papers[0]!.fetched_via).toBe('review-resolved'); // re-tagged → pill renders
   });
 
-  it('does NOT duplicate a trial already ingested on another date (global PMID keying)', async () => {
+  it('does NOT surface a trial whose paper is on another date (one date per paper), warns + skips (fix #4)', async () => {
     savePaper(db, { pmid: '32215577', title: 'on an earlier date', bookmark_date: '2026-06-01' });
     seedApproved(db, { paperId: 7, acronym: 'ORIOLE', date, pmid: '32215577' });
     const fetchPaper = vi.fn(async (pmid: string) => paper(pmid));
     const res = await ingestApprovedResolutions(db, date, { fetchPaper });
-    // It fetched, but savePaper matched the existing (other-date) row → created:false → skip.
-    expect(res).toEqual({ ingested: 0, skipped: 1 });
-    expect(listPapers(db, { bookmark_date: date })).toHaveLength(0); // not surfaced today
+    expect(res).toEqual({ ingested: 0, skipped: 1, failed: 0 });
+    expect(fetchPaper).not.toHaveBeenCalled(); // detected by getPaperByPmid, no fetch
+    expect(listPapers(db, { bookmark_date: date })).toHaveLength(0); // stays on its first date
   });
 
-  it('a fetch failure is skipped, never thrown', async () => {
+  it('a fetch failure is counted as failed (NOT consumed → retried next build), never thrown (fix #5)', async () => {
     seedApproved(db, { paperId: 7, acronym: 'ORIOLE', date, pmid: '32215577' });
     const fetchPaper = vi.fn(async () => { throw new Error('NCBI 503'); });
     const res = await ingestApprovedResolutions(db, date, { fetchPaper });
-    expect(res).toEqual({ ingested: 0, skipped: 1 });
+    expect(res).toEqual({ ingested: 0, skipped: 0, failed: 1 });
     expect(listPapers(db, { bookmark_date: date })).toHaveLength(0);
+    // The manifest row stays 'approved' (not consumed), so the next build retries.
+    expect(listResolutions(db, { date, status: 'approved' })).toHaveLength(1);
   });
 
   it('is a no-op (no fetch) when the date has no approved resolutions', async () => {
     const fetchPaper = vi.fn(async (pmid: string) => paper(pmid));
-    expect(await ingestApprovedResolutions(db, date, { fetchPaper })).toEqual({ ingested: 0, skipped: 0 });
+    expect(await ingestApprovedResolutions(db, date, { fetchPaper })).toEqual({ ingested: 0, skipped: 0, failed: 0 });
     expect(fetchPaper).not.toHaveBeenCalled();
   });
 });

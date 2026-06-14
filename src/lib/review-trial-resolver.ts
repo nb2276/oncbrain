@@ -72,12 +72,16 @@ export type ResolverDeps = {
   log?: (msg: string) => void;
 };
 
-export type AcronymOutcome = 'frozen' | 'pending' | 'failed';
+// 'error' = a transient infra failure (NCBI/rerank threw); deliberately NOT
+// written to the manifest, so the next run retries it (review fix #1). 'failed'
+// = a definitive no-match (search succeeded with 0 hits, or rerank said NONE).
+export type AcronymOutcome = 'frozen' | 'pending' | 'failed' | 'error';
 export type ResolveSummary = {
   total: number;
   frozen: number;
   pending: number;
   failed: number;
+  errored: number; // transient failures, left unwritten for retry
   outcomes: Array<{ acronym: string; outcome: AcronymOutcome }>;
 };
 
@@ -119,7 +123,14 @@ export async function resolveReviewTrials(
   const version = deps.resolverVersion ?? RESOLVER_VERSION;
   const log = deps.log ?? (() => {});
   const diseaseQuery = diseaseQueryFromSlug(review.diseaseSite);
-  const summary: ResolveSummary = { total: 0, frozen: 0, pending: 0, failed: 0, outcomes: [] };
+  const summary: ResolveSummary = {
+    total: 0,
+    frozen: 0,
+    pending: 0,
+    failed: 0,
+    errored: 0,
+    outcomes: [],
+  };
 
   const seen = new Set<string>();
   for (const raw of review.discussedTrials) {
@@ -136,14 +147,23 @@ export async function resolveReviewTrials(
     }
 
     // Search title-scoped; broaden if the title query found nothing (codex #10).
+    // A THROWN error here is transient (NCBI down/timeout); we must NOT write a
+    // frozen `failed` row or the trial is permanently stranded (review fix #1) —
+    // leave the pair unwritten so the next --date run retries it.
     let candidates: PubMedSummary[] = [];
+    let transient = false;
     try {
       let res = await deps.search(`${raw}[Title] AND ${diseaseQuery}`);
       if (res.pmids.length === 0) res = await deps.search(`${raw} AND ${diseaseQuery}`);
       if (res.pmids.length > 0) candidates = await deps.summarize(res.pmids);
     } catch (err) {
-      log(`  [resolve] ${acronymNorm}: search failed — ${(err as Error).message}`);
-      candidates = [];
+      log(`  [resolve] ${acronymNorm}: search failed (transient, will retry) — ${(err as Error).message}`);
+      transient = true;
+    }
+    if (transient) {
+      summary.errored += 1;
+      summary.outcomes.push({ acronym: acronymNorm, outcome: 'error' });
+      continue;
     }
 
     let status: 'pending' | 'failed' = 'failed';
@@ -157,6 +177,13 @@ export async function resolveReviewTrials(
         { acronym: raw, diseaseQuery, reviewContext: review.reviewContext, candidates: ordered },
         log,
       );
+      if (verdict.errored) {
+        // A rerank LLM failure is transient too — leave it unwritten to retry
+        // (review fix #1), rather than freezing a `failed` row.
+        summary.errored += 1;
+        summary.outcomes.push({ acronym: acronymNorm, outcome: 'error' });
+        continue;
+      }
       // The LLM MUST pick a PMID from the candidate set (defense vs an invented
       // PMID). A pick outside the list is treated as NONE.
       const validPick =
@@ -201,12 +228,14 @@ async function safeRerank(
   rerank: RerankFn,
   input: RerankInput,
   log: (m: string) => void,
-): Promise<RerankResult> {
+): Promise<RerankResult & { errored?: boolean }> {
   try {
     return await rerank(input);
   } catch (err) {
-    log(`  [resolve] rerank failed for ${input.acronym} — ${(err as Error).message}`);
-    return { pmid: null, confidence: 0 };
+    // errored (transient) is distinct from a clean NONE so the caller can
+    // leave the pair unwritten for retry instead of freezing a failed row.
+    log(`  [resolve] rerank failed for ${input.acronym} (transient) — ${(err as Error).message}`);
+    return { pmid: null, confidence: 0, errored: true };
   }
 }
 

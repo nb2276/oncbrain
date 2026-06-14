@@ -1039,6 +1039,13 @@ export function getPaperByPmid(db: Database.Database, pmid: string): Paper | und
   return db.prepare('SELECT * FROM papers WHERE pmid = ?').get(pmid) as Paper | undefined;
 }
 
+// v0.17 (review fix #6b): re-tag an already-same-date paper as review-resolved so
+// its study card shows the "surfaced from a review" provenance pill when a
+// curator approves a resolution for a trial that was already a source that day.
+export function markPaperReviewResolved(db: Database.Database, id: number): void {
+  db.prepare(`UPDATE papers SET fetched_via = 'review-resolved' WHERE id = ?`).run(id);
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Slide uploads (v0.5 Phase C)
 // ────────────────────────────────────────────────────────────────────────────
@@ -1272,6 +1279,22 @@ export function decideResolution(
   decision: { status: 'approved'; chosenPmid: string } | { status: 'rejected' },
 ): ReviewTrialResolution | undefined {
   const chosenPmid = decision.status === 'approved' ? decision.chosenPmid : null;
+  // v0.17 (review fix #6a): defense in depth — an approved PMID MUST be one of
+  // the row's resolver candidates. The curator CLI already constrains the pick,
+  // but this blocks a future/programmatic caller from approving an arbitrary
+  // (unvetted) PMID that would then enter a build as a published source.
+  if (decision.status === 'approved') {
+    const row = db
+      .prepare('SELECT candidates_json FROM review_trial_resolutions WHERE id = ?')
+      .get(id) as { candidates_json: string | null } | undefined;
+    if (!row) return undefined;
+    const ok = parseResolutionCandidates(row.candidates_json).some((c) => c.pmid === chosenPmid);
+    if (!ok) {
+      throw new Error(
+        `decideResolution: chosenPmid ${chosenPmid} is not a candidate of resolution ${id}`,
+      );
+    }
+  }
   db.prepare(
     'UPDATE review_trial_resolutions SET status = ?, chosen_pmid = ?, decided_at = ? WHERE id = ?',
   ).run(decision.status, chosenPmid, Date.now(), id);

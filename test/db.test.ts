@@ -435,6 +435,15 @@ describe('review_trial_resolutions manifest', () => {
     expect(approved?.decided_at).toBeGreaterThan(0);
   });
 
+  it('decideResolution REJECTS approving a pmid that is not a candidate (fix #6a)', () => {
+    const { resolution } = upsertResolution(db, base); // candidates: 32215577, 36001857
+    expect(() => decideResolution(db, resolution.id, { status: 'approved', chosenPmid: '99999999' })).toThrow(
+      /not a candidate/,
+    );
+    // the row is unchanged (still pending, no chosen_pmid)
+    expect(getResolution(db, 7, 'ORIOLE')!.status).toBe('pending');
+  });
+
   it('decideResolution rejects and clears any chosen pmid', () => {
     const { resolution } = upsertResolution(db, base);
     const rejected = decideResolution(db, resolution.id, { status: 'rejected' });

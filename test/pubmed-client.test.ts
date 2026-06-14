@@ -160,7 +160,7 @@ describe('fetchPubMedPaper', () => {
       '',
     );
     const fetchImpl = vi.fn(async () => new Response(noPmcXml));
-    const paper = await fetchPubMedPaper('42139645', { fetchImpl: fetchImpl as unknown as typeof fetch });
+    const paper = await fetchPubMedPaper('42139645', { fetchImpl: fetchImpl as unknown as typeof fetch, minIntervalMs: 0 });
     expect(fetchImpl).toHaveBeenCalledTimes(1); // no PMC fetch
     expect(paper.metadata.pmc_id).toBeNull();
     expect(paper.fulltext_excerpt_md).toBeNull();
@@ -172,7 +172,7 @@ describe('fetchPubMedPaper', () => {
       if (url.includes('db=pmc')) return new Response(SAMPLE_PMC_XML);
       return new Response(SAMPLE_PUBMED_XML);
     });
-    const paper = await fetchPubMedPaper('42139645', { fetchImpl: fetchImpl as unknown as typeof fetch });
+    const paper = await fetchPubMedPaper('42139645', { fetchImpl: fetchImpl as unknown as typeof fetch, minIntervalMs: 0 });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
     expect(paper.fulltext_excerpt_md).toContain('Median OS was 14.2');
   });
@@ -182,7 +182,7 @@ describe('fetchPubMedPaper', () => {
       if (url.includes('db=pmc')) return new Response('error', { status: 500 });
       return new Response(SAMPLE_PUBMED_XML);
     });
-    const paper = await fetchPubMedPaper('42139645', { fetchImpl: fetchImpl as unknown as typeof fetch });
+    const paper = await fetchPubMedPaper('42139645', { fetchImpl: fetchImpl as unknown as typeof fetch, minIntervalMs: 0 });
     expect(paper.abstract).toContain('Median OS');
     expect(paper.fulltext_excerpt_md).toBeNull();
   });
@@ -190,7 +190,7 @@ describe('fetchPubMedPaper', () => {
   it('throws not_found on 404', async () => {
     const fetchImpl = vi.fn(async () => new Response('not found', { status: 404 }));
     await expect(
-      fetchPubMedPaper('99999999', { fetchImpl: fetchImpl as unknown as typeof fetch }),
+      fetchPubMedPaper('99999999', { fetchImpl: fetchImpl as unknown as typeof fetch, minIntervalMs: 0 }),
     ).rejects.toMatchObject({ kind: 'not_found' });
   });
 });

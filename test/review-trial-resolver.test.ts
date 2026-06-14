@@ -135,11 +135,28 @@ describe('resolveReviewTrials', () => {
     expect(parseResolutionCandidates(getResolution(db, 7, 'ORIOLE')!.candidates_json)).toEqual([]);
   });
 
-  it('a search error becomes a failed row, never throws', async () => {
+  it('a transient search error is left UNWRITTEN (errored), so the next run retries', async () => {
     const search = vi.fn(async () => { throw new Error('NCBI 503'); });
     const s = await resolveReviewTrials(db, review, deps({ search }));
+    expect(s.errored).toBe(1);
+    expect(s.failed).toBe(0);
+    // No frozen row → re-running --date retries it (review fix #1).
+    expect(getResolution(db, 7, 'ORIOLE')).toBeUndefined();
+  });
+
+  it('a transient rerank error is also left unwritten (errored), not frozen', async () => {
+    const rerank = vi.fn(async () => { throw new Error('LLM 529'); });
+    const s = await resolveReviewTrials(db, review, deps({ rerank }));
+    expect(s.errored).toBe(1);
+    expect(getResolution(db, 7, 'ORIOLE')).toBeUndefined();
+  });
+
+  it('a definitive no-match (search empty) DOES write a frozen failed row', async () => {
+    const search = vi.fn(async () => ({ pmids: [], total: 0 }));
+    const s = await resolveReviewTrials(db, review, deps({ search }));
     expect(s.failed).toBe(1);
-    expect(getResolution(db, 7, 'ORIOLE')!.status).toBe('failed');
+    expect(s.errored).toBe(0);
+    expect(getResolution(db, 7, 'ORIOLE')!.status).toBe('failed'); // frozen — a real no-match
   });
 
   it('FREEZE: a second resolve of the same review skips and does not re-search', async () => {
