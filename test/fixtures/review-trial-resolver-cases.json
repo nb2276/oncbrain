@@ -1,0 +1,68 @@
+{
+  "note": "v0.17 (T7) labeled resolution corpus. Each case feeds the rerank LLM a RECORDED candidate set (what esearch+esummary would return for `<acronym>[Title] AND <disease>`) and the expected answer. Positive cases expect the named trial's primary PMID; collision cases expect null (NONE) because the named trial is NOT in the candidate set for that disease — a wrong pick there is the failure we most want to prevent (a curator-gated feature still benefits from precise candidates). Candidates are hand-curated from public metadata of well-known trials; they are FIXED (recorded) so the eval is deterministic on the API side.",
+  "cases": [
+    {
+      "acronym": "ORIOLE",
+      "disease": "prostate",
+      "expected": "32215577",
+      "candidates": [
+        { "pmid": "32215577", "title": "Outcomes of Observation vs Stereotactic Ablative Radiation for Oligometastatic Prostate Cancer: The ORIOLE Phase 2 Randomized Clinical Trial", "journal": "JAMA Oncology", "year": "2020" },
+        { "pmid": "36001857", "title": "Pooled Analysis of Stereotactic Ablative Radiotherapy in Oligometastatic Prostate Cancer (STOMP and ORIOLE)", "journal": "Journal of Clinical Oncology", "year": "2022" }
+      ]
+    },
+    {
+      "acronym": "STOMP",
+      "disease": "prostate",
+      "expected": "29240541",
+      "candidates": [
+        { "pmid": "29240541", "title": "Surveillance or Metastasis-Directed Therapy for Oligometastatic Prostate Cancer Recurrence: A Prospective, Randomized, Multicenter Phase II Trial (STOMP)", "journal": "Journal of Clinical Oncology", "year": "2018" },
+        { "pmid": "36001857", "title": "Pooled Analysis of Stereotactic Ablative Radiotherapy in Oligometastatic Prostate Cancer (STOMP and ORIOLE)", "journal": "Journal of Clinical Oncology", "year": "2022" },
+        { "pmid": "33168451", "title": "American Indians STOp Smoking by Mobile Phone", "journal": "Nicotine & Tobacco Research", "year": "2018" }
+      ]
+    },
+    {
+      "acronym": "ARTO",
+      "disease": "prostate",
+      "expected": "35763249",
+      "candidates": [
+        { "pmid": "35763249", "title": "Stereotactic Body Radiotherapy and Abiraterone in Oligometastatic Castration-Resistant Prostate Cancer (ARTO): A Randomized Phase 2 Trial", "journal": "Journal of Clinical Oncology", "year": "2023" },
+        { "pmid": "37733977", "title": "Quality of life in the ARTO trial of metastasis-directed radiotherapy", "journal": "Radiotherapy and Oncology", "year": "2023" }
+      ]
+    },
+    {
+      "acronym": "RADIOSA",
+      "disease": "prostate",
+      "expected": "40049196",
+      "candidates": [
+        { "pmid": "40049196", "title": "Stereotactic Body Radiotherapy in Oligometastatic Prostate Cancer: The RADIOSA Randomized Phase 2 Trial", "journal": "European Urology", "year": "2025" },
+        { "pmid": "37960236", "title": "Biomarker substudy of the RADIOSA oligometastatic prostate cancer trial", "journal": "Clinical Cancer Research", "year": "2023" }
+      ]
+    },
+    {
+      "acronym": "STOMP",
+      "disease": "breast",
+      "expected": null,
+      "candidates": [
+        { "pmid": "33219658", "title": "STOMP Early Years: A Pilot Randomized Controlled Trial of an Intensive Home Visiting Intervention for Young Children With Severe Obesity", "journal": "BMC Pediatrics", "year": "2020" },
+        { "pmid": "01515904", "title": "Evaluation of the SickKids Team Obesity Management Program (STOMP)", "journal": "Pediatric Obesity", "year": "2019" }
+      ]
+    },
+    {
+      "acronym": "STAMPEDE",
+      "disease": "thoracic",
+      "expected": null,
+      "candidates": [
+        { "pmid": "29976469", "title": "A randomized trial of consolidation chemotherapy in stage III non-small-cell lung cancer", "journal": "Lung Cancer", "year": "2018" },
+        { "pmid": "31562796", "title": "Durvalumab after chemoradiotherapy in stage III NSCLC: outcomes", "journal": "Journal of Thoracic Oncology", "year": "2019" }
+      ]
+    },
+    {
+      "acronym": "PEACE",
+      "disease": "breast",
+      "expected": null,
+      "candidates": [
+        { "pmid": "34289383", "title": "Patient-reported outcomes and end-of-life care in metastatic breast cancer (a cohort study)", "journal": "Supportive Care in Cancer", "year": "2021" }
+      ]
+    }
+  ]
+}

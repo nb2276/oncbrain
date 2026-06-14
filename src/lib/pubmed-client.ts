@@ -49,6 +49,15 @@ export type FetchOptions = {
   fetchImpl?: typeof fetch;
   apiKey?: string; // NCBI_API_KEY for higher rate limit (optional)
   timeoutMs?: number;
+  // v0.17 (T2): a REAL requests-per-second throttle for NCBI (codex review #19:
+  // a concurrency cap is not an rps cap). All E-utility calls below route
+  // through acquireNcbiSlot, which serializes requests to one per
+  // minIntervalMs. Injectable clock + sleep so unit tests run instantly; the
+  // resolver's per-acronym fan-out (T3) is what this protects.
+  sleep?: (ms: number) => Promise<void>;
+  clock?: () => number;
+  minIntervalMs?: number; // override the apiKey-derived default
+  retmax?: number; // esearch page size (default 10)
 };
 
 // Fetch metadata + abstract + (if available) section-filtered full text for
@@ -67,6 +76,10 @@ export async function fetchPubMedPaper(
   // efetch with retmode=xml gives us metadata + abstract + MeSH in one call.
   // esummary returns slightly different shape (json) but the XML route is
   // more complete and we already need an XML parser for PMC anyway.
+  // review fix #3: route BOTH efetch legs (article + PMC) through the rps gate
+  // too — codex #19 was only half-closed (search/summary throttled, efetch not),
+  // so a build-time approved-paper fan-out could still exceed NCBI's 3 req/s.
+  await acquireNcbiSlot(opts);
   const articleXml = await fetchUrl(
     `${EUTILS_BASE}/efetch.fcgi?db=pubmed&id=${pmid}&retmode=xml${apiKey ? `&api_key=${apiKey}` : ''}`,
     fetchImpl,
@@ -79,6 +92,7 @@ export async function fetchPubMedPaper(
   let fulltext_excerpt_md: string | null = null;
   if (metadata.pmc_id) {
     try {
+      await acquireNcbiSlot(opts);
       const pmcXml = await fetchUrl(
         `${EUTILS_BASE}/efetch.fcgi?db=pmc&id=${metadata.pmc_id.replace(/^PMC/, '')}&retmode=xml${apiKey ? `&api_key=${apiKey}` : ''}`,
         fetchImpl,
@@ -289,4 +303,131 @@ function normalizeMonth(m: string): string {
   if (MONTH_MAP[lower]) return MONTH_MAP[lower];
   if (/^\d{1,2}$/.test(m)) return m.padStart(2, '0');
   return '01';
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// v0.17 (T2): PubMed SEARCH layer — esearch + esummary + a real rps throttle.
+//
+// The review-trial resolver (T3) fans out one esearch + one esummary per
+// discussed-trial acronym across every review on a date. NCBI allows 3 req/s
+// without a key (10/s with NCBI_API_KEY); exceeding it earns a 429 + an IP
+// block. A concurrency cap (the ct.gov pattern) does NOT bound rps (codex #19),
+// so this is a min-interval gate: each call reserves the next time slot and
+// waits for it, serializing all E-utility traffic to one request per interval.
+// ────────────────────────────────────────────────────────────────────────────
+
+const NCBI_BASE_INTERVAL_MS = 334; // 3 req/s (no key)
+const NCBI_KEYED_INTERVAL_MS = 110; // ~9 req/s (key; NCBI caps at 10)
+
+// Module-level next-allowed timestamp. Concurrent callers get staggered slots.
+let _ncbiNextAllowedAt = 0;
+
+// Test seam: reset the gate between tests so a prior test's reserved slot
+// doesn't make the next test wait.
+export function _resetNcbiThrottleForTests(): void {
+  _ncbiNextAllowedAt = 0;
+}
+
+async function acquireNcbiSlot(opts: FetchOptions): Promise<void> {
+  const clock = opts.clock ?? Date.now;
+  const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const interval =
+    opts.minIntervalMs ??
+    ((opts.apiKey ?? process.env.NCBI_API_KEY) ? NCBI_KEYED_INTERVAL_MS : NCBI_BASE_INTERVAL_MS);
+  const now = clock();
+  const slot = Math.max(now, _ncbiNextAllowedAt);
+  _ncbiNextAllowedAt = slot + interval;
+  const wait = slot - now;
+  if (wait > 0) await sleep(wait);
+}
+
+export type PubMedSearchResult = {
+  pmids: string[];
+  total: number; // total matches (may exceed pmids.length when capped by retmax)
+};
+
+// esearch: a free-text PubMed query (e.g. `STOMP[Title] AND oligometastatic prostate`)
+// → candidate PMIDs. Returns the PMID list (capped at retmax) + the total count.
+// An empty result is NOT an error (returns { pmids: [], total: 0 }) — that is the
+// resolver's "leave it as plain text" signal.
+export async function searchPubMed(term: string, opts: FetchOptions = {}): Promise<PubMedSearchResult> {
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const apiKey = opts.apiKey ?? process.env.NCBI_API_KEY;
+  const retmax = opts.retmax ?? 10;
+
+  await acquireNcbiSlot(opts);
+  const url =
+    `${EUTILS_BASE}/esearch.fcgi?db=pubmed&retmode=json&retmax=${retmax}` +
+    `&term=${encodeURIComponent(term)}${apiKey ? `&api_key=${apiKey}` : ''}`;
+  const body = await fetchUrl(url, fetchImpl, timeoutMs);
+
+  let json: unknown;
+  try {
+    json = JSON.parse(body);
+  } catch (err) {
+    throw new PubMedClientError(`esearch returned non-JSON: ${(err as Error).message}`, 'parse');
+  }
+  const er = (json as { esearchresult?: { idlist?: unknown; count?: unknown } }).esearchresult;
+  const pmids = Array.isArray(er?.idlist)
+    ? er!.idlist.filter((x): x is string => typeof x === 'string' && /^\d+$/.test(x))
+    : [];
+  const total = typeof er?.count === 'string' ? Number.parseInt(er.count, 10) || 0 : 0;
+  return { pmids, total };
+}
+
+export type PubMedSummary = {
+  pmid: string;
+  title: string;
+  journal: string | null;
+  year: string | null;
+  pub_date: string | null;
+};
+
+// esummary: batch-fetch lightweight metadata (title, journal, year) for a set of
+// PMIDs in ONE request. The resolver shows these to the curator and ranks them
+// BEFORE a heavier efetch (codex #8: gating needs candidate metadata, not just
+// PMIDs). Non-numeric ids are dropped; an empty input is a no-op (no request).
+export async function summarizePmids(pmids: string[], opts: FetchOptions = {}): Promise<PubMedSummary[]> {
+  const ids = pmids.filter((p) => /^\d+$/.test(p));
+  if (ids.length === 0) return [];
+
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const apiKey = opts.apiKey ?? process.env.NCBI_API_KEY;
+
+  await acquireNcbiSlot(opts);
+  const url =
+    `${EUTILS_BASE}/esummary.fcgi?db=pubmed&retmode=json&id=${ids.join(',')}` +
+    `${apiKey ? `&api_key=${apiKey}` : ''}`;
+  const body = await fetchUrl(url, fetchImpl, timeoutMs);
+
+  let json: unknown;
+  try {
+    json = JSON.parse(body);
+  } catch (err) {
+    throw new PubMedClientError(`esummary returned non-JSON: ${(err as Error).message}`, 'parse');
+  }
+  const result = (json as { result?: Record<string, unknown> }).result;
+  if (!result) return [];
+  const uids = Array.isArray((result as { uids?: unknown }).uids)
+    ? ((result as { uids: unknown[] }).uids.filter((u): u is string => typeof u === 'string'))
+    : [];
+
+  const out: PubMedSummary[] = [];
+  for (const uid of uids) {
+    const r = result[uid] as
+      | { title?: string; fulljournalname?: string; source?: string; pubdate?: string }
+      | undefined;
+    if (!r) continue;
+    const pub_date = typeof r.pubdate === 'string' ? r.pubdate : null;
+    out.push({
+      pmid: uid,
+      title: r.title ? decodeHtmlEntities(stripTags(r.title)).trim() : '(no title)',
+      journal: r.fulljournalname || r.source || null,
+      year: pub_date ? (pub_date.match(/\b(\d{4})\b/)?.[1] ?? null) : null,
+      pub_date,
+    });
+  }
+  return out;
 }
