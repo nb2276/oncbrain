@@ -204,6 +204,39 @@ describe('migratePapersAddPdfColumns (content_hash + pdf_path)', () => {
     expect(row.title).toBe('PDFOnly');
     db2.close();
   });
+
+  it('carries figure_ocr_md forward through the rebuild (does not drop populated OCR)', () => {
+    // Out-of-order / restored DB: old shape (no content_hash → triggers the
+    // destructive rebuild) but WITH a populated figure_ocr_md. The rebuild used
+    // to create papers_new without the column and silently lose the OCR.
+    const path = `/tmp/oncbrain-figocr-${Date.now()}.db`;
+    const seed = new Database(path);
+    seed.exec(`
+      CREATE TABLE papers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pmid TEXT NOT NULL UNIQUE, doi TEXT, pmc_id TEXT, title TEXT NOT NULL,
+        authors_json TEXT, journal TEXT, pub_date TEXT, abstract TEXT,
+        fulltext_excerpt_md TEXT, figure_ocr_md TEXT, mesh_terms_json TEXT,
+        bookmark_date TEXT NOT NULL, conference_slug TEXT, curator_note TEXT,
+        inbox_item_id INTEGER, fetched_via TEXT NOT NULL DEFAULT 'pending',
+        created_at INTEGER NOT NULL
+      );
+    `);
+    seed
+      .prepare(
+        `INSERT INTO papers (pmid, title, bookmark_date, figure_ocr_md, fetched_via, created_at)
+         VALUES ('99999999', 'OCR paper', '2026-05-18', 'median OS 41.6 mo', 'pdf_ocr', 1)`,
+      )
+      .run();
+    seed.close();
+
+    const db = openDb(path); // runs allowDoiOnly THEN addPdfColumns
+    const row = db.prepare('SELECT figure_ocr_md FROM papers WHERE pmid = ?').get('99999999') as
+      | { figure_ocr_md: string | null }
+      | undefined;
+    expect(row?.figure_ocr_md).toBe('median OS 41.6 mo'); // preserved, not nulled
+    db.close();
+  });
 });
 
 describe('savePaper content_hash key + PDF merge', () => {

@@ -57,9 +57,19 @@ export async function downloadTelegramFile(
   const fetchImpl = opts.fetchImpl ?? fetch;
   const timeoutMs = opts.timeoutMs ?? 15_000;
 
-  // Step 1: resolve file_id → file_path via getFile.
+  // Step 1: resolve file_id → file_path via getFile. Bound it with the same
+  // timeout as the byte download — a hung getFile (Telegram incident, network
+  // black hole) would otherwise block the whole enrich:inbox run (and the cron
+  // chained behind it) indefinitely, since this call had no AbortController.
   const metaUrl = `https://api.telegram.org/bot${token}/getFile?file_id=${encodeURIComponent(fileId)}`;
-  const metaRes = await fetchImpl(metaUrl);
+  const metaController = new AbortController();
+  const metaTimer = setTimeout(() => metaController.abort(), timeoutMs);
+  let metaRes: Awaited<ReturnType<typeof fetchImpl>>;
+  try {
+    metaRes = await fetchImpl(metaUrl, { signal: metaController.signal });
+  } finally {
+    clearTimeout(metaTimer);
+  }
   if (metaRes.status === 401 || metaRes.status === 403) {
     throw new TelegramFileError(`Telegram getFile auth failed (${metaRes.status})`, 'auth', metaRes.status);
   }

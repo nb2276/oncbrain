@@ -384,6 +384,14 @@ function migratePapersAddPdfColumns(db: Database.Database, dbPath: string): void
     }
   }
 
+  // Carry figure_ocr_md forward IF the source table already has it. In the
+  // normal forward path content_hash (v0.8) predates figure_ocr_md (v0.15), so
+  // the old table lacks the column and we insert NULL — but a restored older
+  // .bak or an out-of-order migration could present a populated figure_ocr_md
+  // here, and the old rebuild silently dropped it (it created papers_new
+  // without the column). Include the column always (migratePapersAddFigureOcr
+  // is idempotent and skips when it exists) and copy the data when present.
+  const hasFigureOcr = cols.some((c) => c.name === 'figure_ocr_md');
   const tx = db.transaction(() => {
     db.exec(`
       CREATE TABLE papers_new (
@@ -400,6 +408,7 @@ function migratePapersAddPdfColumns(db: Database.Database, dbPath: string): void
         pub_date TEXT,
         abstract TEXT,
         fulltext_excerpt_md TEXT,
+        figure_ocr_md TEXT,
         mesh_terms_json TEXT,
         bookmark_date TEXT NOT NULL,
         conference_slug TEXT,
@@ -412,13 +421,13 @@ function migratePapersAddPdfColumns(db: Database.Database, dbPath: string): void
       INSERT INTO papers_new
         (id, pmid, doi, pmc_id, source_url, content_hash, pdf_path, title,
          authors_json, journal, pub_date, abstract, fulltext_excerpt_md,
-         mesh_terms_json, bookmark_date, conference_slug, curator_note,
-         inbox_item_id, fetched_via, created_at)
+         figure_ocr_md, mesh_terms_json, bookmark_date, conference_slug,
+         curator_note, inbox_item_id, fetched_via, created_at)
       SELECT
         id, pmid, doi, pmc_id, source_url, NULL, NULL, title,
         authors_json, journal, pub_date, abstract, fulltext_excerpt_md,
-        mesh_terms_json, bookmark_date, conference_slug, curator_note,
-        inbox_item_id, fetched_via, created_at
+        ${hasFigureOcr ? 'figure_ocr_md' : 'NULL'}, mesh_terms_json, bookmark_date, conference_slug,
+        curator_note, inbox_item_id, fetched_via, created_at
       FROM papers;
       DROP TABLE papers;
       ALTER TABLE papers_new RENAME TO papers;
@@ -454,15 +463,25 @@ function migratePapersAllowDoiOnly(db: Database.Database, dbPath: string): void 
   if (!pmidCol || pmidCol.notnull === 0) return;
 
   // Back up the DB before a destructive rebuild (skip for in-memory tests).
+  // Guard against clobbering a same-day backup the sibling migration already
+  // wrote — that one captures the pristine pre-migration shape; a second
+  // open-in-the-same-day must not overwrite it with an intermediate.
   if (dbPath !== ':memory:' && existsSync(dbPath)) {
     const stamp = new Date().toISOString().slice(0, 10);
-    try {
-      copyFileSync(dbPath, `${dbPath}.bak-${stamp}`);
-    } catch {
-      // Backup is best-effort; the rebuild itself is transactional.
+    const backup = `${dbPath}.bak-${stamp}`;
+    if (!existsSync(backup)) {
+      try {
+        copyFileSync(dbPath, backup);
+      } catch {
+        // Backup is best-effort; the rebuild itself is transactional.
+      }
     }
   }
 
+  // Carry figure_ocr_md forward if the source table has it (same rationale as
+  // migratePapersAddPdfColumns — this earlier rebuild also ran without the
+  // column and silently dropped it on an out-of-order / restored DB).
+  const hasFigureOcr = cols.some((c) => c.name === 'figure_ocr_md');
   const tx = db.transaction(() => {
     db.exec(`
       CREATE TABLE papers_new (
@@ -477,6 +496,7 @@ function migratePapersAllowDoiOnly(db: Database.Database, dbPath: string): void 
         pub_date TEXT,
         abstract TEXT,
         fulltext_excerpt_md TEXT,
+        figure_ocr_md TEXT,
         mesh_terms_json TEXT,
         bookmark_date TEXT NOT NULL,
         conference_slug TEXT,
@@ -488,12 +508,12 @@ function migratePapersAllowDoiOnly(db: Database.Database, dbPath: string): void 
       );
       INSERT INTO papers_new
         (id, pmid, doi, pmc_id, source_url, title, authors_json, journal,
-         pub_date, abstract, fulltext_excerpt_md, mesh_terms_json,
+         pub_date, abstract, fulltext_excerpt_md, figure_ocr_md, mesh_terms_json,
          bookmark_date, conference_slug, curator_note, inbox_item_id,
          fetched_via, created_at)
       SELECT
         id, pmid, doi, pmc_id, NULL, title, authors_json, journal,
-        pub_date, abstract, fulltext_excerpt_md, mesh_terms_json,
+        pub_date, abstract, fulltext_excerpt_md, ${hasFigureOcr ? 'figure_ocr_md' : 'NULL'}, mesh_terms_json,
         bookmark_date, conference_slug, curator_note, inbox_item_id,
         fetched_via, created_at
       FROM papers;
