@@ -79,6 +79,12 @@ export async function downloadTelegramFile(
     try {
       metaJson = await metaRes.json();
     } catch (err) {
+      // A timeout abort during the body read is TRANSIENT (network), not a
+      // permanent parse failure — classifying it 'parse' would permanently
+      // park the PDF (only 'network' is retried by the enrichment loop).
+      if (metaController.signal.aborted) {
+        throw new TelegramFileError('getFile timed out reading body', 'network');
+      }
       throw new TelegramFileError(`getFile JSON parse: ${(err as Error).message}`, 'parse');
     }
   } finally {
