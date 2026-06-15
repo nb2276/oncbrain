@@ -9,6 +9,7 @@ import {
   buildFilterUrl,
   canonicalForActiveFilters,
   isFilterReceptiveRoute,
+  hasClearableFilters,
 } from '../src/lib/filter-store.ts';
 
 describe('parseDataTagsAttr', () => {
@@ -273,5 +274,32 @@ describe('isFilterReceptiveRoute (PR-5)', () => {
   it('returns false for /about and other content pages', () => {
     expect(isFilterReceptiveRoute('/about/')).toBe(false);
     expect(isFilterReceptiveRoute('/api/')).toBe(false);
+  });
+});
+
+describe('hasClearableFilters (Clear-all enable/disable)', () => {
+  it('no active filters → nothing to clear', () => {
+    expect(hasClearableFilters(new Set(), new Set())).toBe(false);
+  });
+
+  it('active filters, none locked → clearable (the /studies browse-index case)', () => {
+    expect(hasClearableFilters(new Set(['breast', 'phase-3-rct']), new Set())).toBe(true);
+  });
+
+  it('active set is EXACTLY the locked filter → NOT clearable (the /tags/<slug>/ landing dead-button bug)', () => {
+    // Regression guard: on /tags/phase-1/ the phase-1 checkbox is SSR-locked
+    // and always in the active set. The old `active.size === 0` toggle left
+    // "Clear all" enabled but dead — onClear rebuilds active from lockedSlugs,
+    // so clicking it changed nothing. It must read as disabled here.
+    expect(hasClearableFilters(new Set(['phase-1']), new Set(['phase-1']))).toBe(false);
+  });
+
+  it('locked filter PLUS an added unlocked filter → clearable (Clear all removes the added one)', () => {
+    expect(hasClearableFilters(new Set(['phase-1', 'curative']), new Set(['phase-1']))).toBe(true);
+  });
+
+  it('accepts array inputs, not just Sets', () => {
+    expect(hasClearableFilters(['phase-1'], ['phase-1'])).toBe(false);
+    expect(hasClearableFilters(['phase-1', 'curative'], ['phase-1'])).toBe(true);
   });
 });

@@ -73,6 +73,27 @@ export function matchesFilter(
 }
 
 /**
+ * Whether the "Clear all" control has anything to clear. On a
+ * /tags/<slug>/ landing the filter for that slug is LOCKED (its checkbox
+ * renders SSR-disabled and is always present in the active set), so the
+ * active set is never empty there. A naive `active.size === 0` disable
+ * check therefore leaves "Clear all" enabled-but-dead on every landing:
+ * clicking it rebuilds the active set from the locked slugs, producing no
+ * change. The control is clearable iff at least one active slug is NOT
+ * locked. Mirrored by the inline disable-toggle in TagFilterRail.astro.
+ */
+export function hasClearableFilters(
+  activeSlugs: ReadonlySet<string> | ReadonlyArray<string>,
+  lockedSlugs: ReadonlySet<string> | ReadonlyArray<string>,
+): boolean {
+  const locked = lockedSlugs instanceof Set ? lockedSlugs : new Set(lockedSlugs);
+  for (const slug of activeSlugs) {
+    if (!locked.has(slug)) return true;
+  }
+  return false;
+}
+
+/**
  * Read the active filter slugs from a URL's `tag` query params,
  * case-folded, deduped, with no preserved order. Multiple `?tag=a&tag=a`
  * collapse to one entry; mixed-case `?Tag=...` normalizes. Values that

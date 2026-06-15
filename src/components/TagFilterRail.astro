@@ -1059,7 +1059,17 @@ function emojiFor(namespace: TagNamespace, slug: string): string | null {
         }
       }
       if (clearBtn) {
-        clearBtn.toggleAttribute('disabled', active.size === 0);
+        // Disable "Clear all" when nothing is clearable. On a /tags/<slug>/
+        // landing the locked filter keeps active.size > 0 forever, so the
+        // old `active.size === 0` check left the button enabled-but-dead:
+        // onClear rebuilds the active set from lockedSlugs, so clicking it
+        // produced no change. Mirror of hasClearableFilters() in
+        // filter-store.ts — clearable iff some active slug is not locked.
+        let hasClearable = false;
+        for (const s of active) {
+          if (!lockedSlugs.has(s)) { hasClearable = true; break; }
+        }
+        clearBtn.toggleAttribute('disabled', !hasClearable);
       }
       // PR-3: mobile trigger reflects the active filter state. Count
       // becomes the visible-card count when filters are on; falls back
