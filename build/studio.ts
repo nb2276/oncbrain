@@ -8,8 +8,9 @@
 // the LLM rebuild — same mechanism as `npm run override -- --suppress`.
 import * as p from '@clack/prompts';
 import { spawn } from 'node:child_process';
-import { readFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, rmSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   loadOverrides,
   saveOverrides,
@@ -99,6 +100,21 @@ function run(cmd: string, args: string[]): Promise<void> {
   });
 }
 
+// Run a command as a labeled step so the TUI shows what is executing under the
+// hood instead of a silent hang. `run` keeps stdio: 'inherit', so the child's
+// own output streams right below this header (a clack spinner would fight the
+// inherited stdout). Pass an optional `[i/N]` counter for multi-step flows.
+async function runStep(
+  label: string,
+  cmd: string,
+  args: string[],
+  counter?: { i: number; n: number },
+): Promise<void> {
+  const prefix = counter ? `[${counter.i}/${counter.n}] ` : '';
+  p.log.step(`${prefix}${label}`);
+  await run(cmd, args);
+}
+
 // Cancel guard: clack returns a symbol on Ctrl+C. Type predicate so the
 // non-cancelled value narrows (drops the symbol) after the guard returns.
 function cancelled<T>(v: T | symbol): v is symbol {
@@ -116,8 +132,8 @@ async function maybeRebuild(date: string): Promise<void> {
     return;
   }
   try {
-    await run('npm', ['run', 'build:day', '--', `--date=${date}`]);
-    await run('npm', ['run', 'build']);
+    await runStep(`build:day ${date} (3-phase LLM digest)`, 'npm', ['run', 'build:day', '--', `--date=${date}`], { i: 1, n: 2 });
+    await runStep('astro build (static site)', 'npm', ['run', 'build'], { i: 2, n: 2 });
     p.log.success(`Rebuilt ${date}. Commit data/digests/${date}.json + data/obsidian/${date}*.md to publish.`);
   } catch (err) {
     p.log.error((err as Error).message);
@@ -360,8 +376,8 @@ async function buildADay(): Promise<void> {
     date = (typed as string).trim();
   }
   try {
-    await run('npm', ['run', 'build:day', '--', `--date=${date}`]);
-    await run('npm', ['run', 'build']);
+    await runStep(`build:day ${date} (3-phase LLM digest)`, 'npm', ['run', 'build:day', '--', `--date=${date}`], { i: 1, n: 2 });
+    await runStep('astro build (static site)', 'npm', ['run', 'build'], { i: 2, n: 2 });
     p.log.success(`Built ${date}.`);
   } catch (err) {
     p.log.error((err as Error).message);
@@ -370,8 +386,8 @@ async function buildADay(): Promise<void> {
 
 async function ingest(): Promise<void> {
   try {
-    await run('npm', ['run', 'pull:telegram']);
-    await run('npm', ['run', 'enrich:inbox']);
+    await runStep('pull:telegram (drain bot DMs into the inbox)', 'npm', ['run', 'pull:telegram'], { i: 1, n: 2 });
+    await runStep('enrich:inbox (tweet/paper/PDF to source tables)', 'npm', ['run', 'enrich:inbox'], { i: 2, n: 2 });
     p.log.success('Ingest complete. Use "Build a day" to publish.');
   } catch (err) {
     p.log.error((err as Error).message);
@@ -429,8 +445,9 @@ function localDateStr(d: Date): string {
   return `${y}-${m}-${dd}`;
 }
 
-// Per-date max source timestamp (Unix seconds) across bookmarks/papers/slides.
-// Used to decide if a digest is stale relative to its sources.
+// Per-date max source timestamp (Unix MILLISECONDS) across bookmarks/papers/
+// slides — every row's created_at is written as Date.now() (see db.ts). Used to
+// decide if a digest is stale relative to its sources.
 function maxSourceTimestampByDate(db: ReturnType<typeof openDb>): Map<string, number> {
   const rows = db
     .prepare(
@@ -457,40 +474,62 @@ function digestGeneratedAt(date: string): number | null {
   }
 }
 
-// Same flow as scripts/daily-build.sh, minus git + notify. After ingest, picks
-// every back date whose sources are unreflected in the published digest:
-//   - missing: source date with no digest JSON at all
+// Decide which dates the daily build should (re)build. Pure + exported so the
+// staleness rule is unit-testable without shelling out (test/studio-staleness.test.ts).
+//   - missing: source date with no digest JSON at all (generatedAtMs === null)
 //   - stale:   digest exists but a source row's created_at is newer than the
 //              digest's generated_at (late-arriving back-dated content)
+// Both sides are Unix MILLISECONDS — created_at and generated_at are each
+// Date.now(). Do NOT rescale one side; mismatched units flag every date stale.
 // Union with yesterday + today (always rebuilt for fresh content).
+export function classifyBuildDates(opts: {
+  sourceDates: string[];
+  sourceMaxAtMs: Map<string, number>;
+  generatedAtMs: (date: string) => number | null;
+  todayStr: string;
+  yesterdayStr: string;
+}): { missing: string[]; stale: string[]; datesToBuild: string[] } {
+  const { sourceDates, sourceMaxAtMs, generatedAtMs, todayStr, yesterdayStr } = opts;
+  const missing: string[] = [];
+  const stale: string[] = [];
+  for (const date of sourceDates) {
+    const genMs = generatedAtMs(date);
+    if (genMs === null) {
+      missing.push(date);
+      continue;
+    }
+    const sourceMs = sourceMaxAtMs.get(date) ?? 0;
+    if (sourceMs > genMs) stale.push(date);
+  }
+  const datesToBuild = Array.from(
+    new Set([...missing, ...stale, yesterdayStr, todayStr]),
+  ).sort();
+  return { missing, stale, datesToBuild };
+}
+
+// Same flow as scripts/daily-build.sh, minus git + notify. After ingest, picks
+// every back date whose sources are unreflected in the published digest, then
+// rebuilds those plus yesterday + today.
 async function dailyBuild(): Promise<void> {
   const today = new Date();
   const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
   const todayStr = localDateStr(today);
   const yesterdayStr = localDateStr(yesterday);
   try {
-    await run('npm', ['run', 'pull:telegram']);
-    await run('npm', ['run', 'enrich:inbox']);
+    await runStep('pull:telegram (drain bot DMs into the inbox)', 'npm', ['run', 'pull:telegram']);
+    await runStep('enrich:inbox (tweet/paper/PDF to source tables)', 'npm', ['run', 'enrich:inbox']);
 
     const db = openDb();
     const sourceDates = listAllSourceDates(db);
-    const sourceMaxAt = maxSourceTimestampByDate(db);
+    const sourceMaxAtMs = maxSourceTimestampByDate(db);
 
-    const missing: string[] = [];
-    const stale: string[] = [];
-    for (const date of sourceDates) {
-      const generatedAtMs = digestGeneratedAt(date);
-      if (generatedAtMs === null) {
-        missing.push(date);
-        continue;
-      }
-      const sourceMaxMs = (sourceMaxAt.get(date) ?? 0) * 1000;
-      if (sourceMaxMs > generatedAtMs) stale.push(date);
-    }
-
-    const datesToBuild = Array.from(
-      new Set([...missing, ...stale, yesterdayStr, todayStr]),
-    ).sort();
+    const { missing, stale, datesToBuild } = classifyBuildDates({
+      sourceDates,
+      sourceMaxAtMs,
+      generatedAtMs: digestGeneratedAt,
+      todayStr,
+      yesterdayStr,
+    });
 
     if (missing.length > 0) {
       p.log.info(`Catching up ${missing.length} unbuilt date(s): ${missing.join(', ')}`);
@@ -498,11 +537,15 @@ async function dailyBuild(): Promise<void> {
     if (stale.length > 0) {
       p.log.info(`Rebuilding ${stale.length} stale date(s): ${stale.join(', ')}`);
     }
+    p.log.info(`Building ${datesToBuild.length} date(s): ${datesToBuild.join(', ')}`);
 
-    for (const date of datesToBuild) {
-      await run('npm', ['run', 'build:day', '--', `--date=${date}`]);
+    // build:day per date + one astro build → numbered so the run is legible.
+    const total = datesToBuild.length + 1;
+    for (let i = 0; i < datesToBuild.length; i++) {
+      const date = datesToBuild[i];
+      await runStep(`build:day ${date} (3-phase LLM digest)`, 'npm', ['run', 'build:day', '--', `--date=${date}`], { i: i + 1, n: total });
     }
-    await run('npm', ['run', 'build']);
+    await runStep('astro build (static site)', 'npm', ['run', 'build'], { i: total, n: total });
     p.log.success(`Daily build complete (${datesToBuild.length} date(s)).`);
   } catch (err) {
     p.log.error((err as Error).message);
@@ -535,4 +578,17 @@ async function main(): Promise<void> {
   p.outro('Done.');
 }
 
-main();
+// Only run the TUI when invoked as a CLI, so tests can import classifyBuildDates
+// without launching the interactive prompt (mirrors resolve-review-trials.ts).
+function isInvokedAsScript(): boolean {
+  const arg = process.argv[1];
+  if (!arg) return false;
+  try {
+    return realpathSync(arg) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+if (isInvokedAsScript()) {
+  main();
+}
