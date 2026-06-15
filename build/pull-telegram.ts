@@ -33,6 +33,9 @@ import {
   messageOf,
   sendMessage,
   unixToLocalDate,
+  parseAllowedChatIds,
+  isChatAuthorized,
+  computeNextTelegramOffset,
 } from '../src/lib/telegram-ingest.ts';
 import { extractPaperUrls, tradePressOutletNames } from '../src/lib/paper-url.ts';
 
@@ -107,17 +110,40 @@ async function main() {
     return;
   }
 
+  // Curator allowlist. When set, only these chat ids are ingested; everything
+  // else is skipped (offset still advances past it, so unknown senders are
+  // neither re-fetched nor replied to). When unset we keep prior behavior
+  // (accept all) but warn — the bot is otherwise open to any Telegram user.
+  const allowedChatIds = parseAllowedChatIds(process.env.TELEGRAM_ALLOWED_CHAT_IDS);
+  if (!allowedChatIds) {
+    console.log(
+      '  ⚠ TELEGRAM_ALLOWED_CHAT_IDS unset — ingesting messages from ANY Telegram user. ' +
+        'Set it (comma-separated chat ids) in .env to lock ingestion to the curator.',
+    );
+  }
+
   let savedTweets = 0;
   let savedPapers = 0;
   let savedSlides = 0;
   let skippedDuplicate = 0;
   let skippedNoTarget = 0;
-  let maxUpdateId = offset ?? 0;
+  let skippedUnauthorized = 0;
+  // Update ids whose inbox write threw — used to hold the offset back so the
+  // message re-fetches next run instead of being silently lost.
+  const failedUpdateIds = new Set<number>();
+  // Chat ids observed this run (for the lock-down hint when no allowlist is set).
+  const seenChatIds = new Set<number>();
 
   for (const update of updates) {
-    maxUpdateId = Math.max(maxUpdateId, update.update_id + 1);
     const msg = messageOf(update);
     if (!msg) continue;
+
+    const chatId = msg.chat?.id ?? null;
+    if (chatId != null) seenChatIds.add(chatId);
+    if (!isChatAuthorized(chatId, allowedChatIds)) {
+      skippedUnauthorized++;
+      continue; // offset advances past it via maxUpdateId/computeNextTelegramOffset
+    }
 
     const text = msg.text ?? msg.caption ?? '';
     const entities = msg.entities ?? msg.caption_entities ?? [];
@@ -190,6 +216,7 @@ async function main() {
         }
       } catch (err) {
         console.warn(`  failed to inbox ${url}: ${(err as Error).message}`);
+        failedUpdateIds.add(update.update_id);
       }
     }
 
@@ -216,6 +243,7 @@ async function main() {
         }
       } catch (err) {
         console.warn(`  failed to inbox PMID:${pmid}: ${(err as Error).message}`);
+        failedUpdateIds.add(update.update_id);
       }
     }
 
@@ -244,6 +272,7 @@ async function main() {
         }
       } catch (err) {
         console.warn(`  failed to inbox ${url}: ${(err as Error).message}`);
+        failedUpdateIds.add(update.update_id);
       }
     }
 
@@ -281,6 +310,7 @@ async function main() {
           }
         } catch (err) {
           console.warn(`  failed to inbox PDF ${pdfDoc.file_id}: ${(err as Error).message}`);
+          failedUpdateIds.add(update.update_id);
         }
       }
     }
@@ -318,6 +348,7 @@ async function main() {
           }
         } catch (err) {
           console.warn(`  failed to inbox slide ${slidePhoto.file_id}: ${(err as Error).message}`);
+          failedUpdateIds.add(update.update_id);
         }
       }
     }
@@ -356,17 +387,36 @@ async function main() {
           }
         } catch (err) {
           console.warn(`  failed to inbox image-doc ${imageDoc.file_id}: ${(err as Error).message}`);
+          failedUpdateIds.add(update.update_id);
         }
       }
     }
   }
 
-  if (!args.dryRun && maxUpdateId > (offset ?? 0)) {
-    setSetting(db, OFFSET_KEY, String(maxUpdateId));
+  // Hold the offset back to the first failed update so a transient write
+  // failure re-fetches next run (the UNIQUE index makes the re-processed
+  // successful updates idempotent) instead of silently dropping the message.
+  const nextOffset = computeNextTelegramOffset(
+    updates.map((u) => u.update_id),
+    failedUpdateIds,
+    offset ?? 0,
+  );
+  if (!args.dryRun && nextOffset > (offset ?? 0)) {
+    setSetting(db, OFFSET_KEY, String(nextOffset));
+  }
+  if (failedUpdateIds.size > 0) {
+    console.warn(
+      `  ⚠ ${failedUpdateIds.size} update(s) failed to inbox — holding offset at ${nextOffset} to retry next run.`,
+    );
+  }
+  if (!allowedChatIds && seenChatIds.size > 0) {
+    console.log(
+      `  ↳ to lock ingestion to the curator, set TELEGRAM_ALLOWED_CHAT_IDS=${[...seenChatIds].join(',')} in .env`,
+    );
   }
 
   console.log(
-    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} next-offset=${maxUpdateId}`,
+    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} unauthorized=${skippedUnauthorized} next-offset=${nextOffset}`,
   );
   console.log(`Next: \`npm run enrich:inbox\` to enrich pending items, then \`npm run build:day\`.`);
 }

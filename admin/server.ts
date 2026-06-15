@@ -338,6 +338,10 @@ function escapeAttr(s: string): string {
   return escapeHtml(s);
 }
 
-serve({ fetch: app.fetch, port: ADMIN_PORT }, (info) => {
+// Bind to loopback explicitly. @hono/node-server defaults to 0.0.0.0 (all
+// interfaces) when no hostname is given, which would expose the unauthenticated
+// admin mutation endpoints (add/delete bookmarks, edit conferences) to every
+// device on the LAN. The admin form is localhost-only by design.
+serve({ fetch: app.fetch, port: ADMIN_PORT, hostname: '127.0.0.1' }, (info) => {
   console.log(`Admin running at http://localhost:${info.port}`);
 });

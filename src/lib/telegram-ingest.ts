@@ -380,3 +380,54 @@ export function messageOf(update: TelegramUpdate): TelegramMessage | undefined {
 export function unixToLocalDate(unixSec: number, now: () => Date = () => new Date(unixSec * 1000)): string {
   return now().toLocaleDateString('en-CA'); // en-CA happens to format as YYYY-MM-DD
 }
+
+// --- Curator allowlist + offset safety (pull:telegram) ---------------------
+// The bot has no other authentication: anyone who finds @<bot> can DM it, and
+// pull:telegram would inbox their content, which the 6am cron then enriches and
+// auto-publishes. TELEGRAM_ALLOWED_CHAT_IDS (comma-separated numeric chat ids)
+// restricts ingestion to the curator. Pure + exported so the gate logic is
+// unit-tested (the CLI main() itself isn't testable — it auto-runs on import).
+
+// Parse the comma-separated allowlist. Returns null when unset/empty (=accept
+// all, with a loud runtime warning) so the caller can distinguish "no policy"
+// from "empty policy".
+export function parseAllowedChatIds(raw: string | undefined | null): Set<number> | null {
+  if (!raw || !raw.trim()) return null;
+  const ids = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => Number(s))
+    .filter((n) => Number.isInteger(n));
+  return ids.length > 0 ? new Set(ids) : null;
+}
+
+// True when an update's chat is allowed to ingest. No allowlist configured =>
+// accept all (the unset-policy case, warned at the call site).
+export function isChatAuthorized(
+  chatId: number | null | undefined,
+  allowed: Set<number> | null,
+): boolean {
+  if (!allowed) return true;
+  return chatId != null && allowed.has(chatId);
+}
+
+// The next Telegram getUpdates offset given which update ids failed to inbox.
+// The offset must NOT advance past the FIRST (lowest) failed update, so a
+// transient write failure (SQLITE_BUSY, disk full) re-fetches next run instead
+// of silently dropping the message; the UNIQUE(telegram_msg_id,type,raw_target)
+// index makes re-processing the already-saved later updates idempotent. With no
+// failures, advance to the high-water mark (max update_id + 1).
+export function computeNextTelegramOffset(
+  updateIds: readonly number[],
+  failedUpdateIds: ReadonlySet<number>,
+  currentOffset: number,
+): number {
+  let highWater = currentOffset;
+  let firstFailed: number | null = null;
+  for (const id of updateIds) {
+    if (id + 1 > highWater) highWater = id + 1;
+    if (failedUpdateIds.has(id)) firstFailed = firstFailed === null ? id : Math.min(firstFailed, id);
+  }
+  return firstFailed ?? highWater;
+}

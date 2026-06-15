@@ -25,6 +25,11 @@ set -uo pipefail
 
 # Tracks whether any critical stage failed. Checked at the very end → exit code.
 FAILED=0
+# Tracks specifically whether a build:day stage failed. Gates publishing: we must
+# NOT auto-commit/push when a digest build failed, or a transient mid-pipeline
+# failure (NCBI flake, LLM ENOENT) could publish a partial-day / stale-day state
+# to the public site while the run still reports FAILED only via exit code.
+DIGEST_FAILED=0
 
 # Run a critical stage. Logs a loud failure line and flips FAILED, but does NOT
 # abort — later stages still run so a single broken date doesn't sink the day.
@@ -35,6 +40,19 @@ critical() {
   if [ "$rc" -ne 0 ]; then
     echo "  ✗ $label FAILED (exit $rc)"
     FAILED=1
+  fi
+}
+
+# Like critical(), but also flips DIGEST_FAILED so the publish stage can refuse
+# to commit/push when any digest build failed (not just astro).
+critical_digest() {
+  local label="$1"; shift
+  "$@"
+  local rc=$?
+  if [ "$rc" -ne 0 ]; then
+    echo "  ✗ $label FAILED (exit $rc)"
+    FAILED=1
+    DIGEST_FAILED=1
   fi
 }
 
@@ -88,11 +106,11 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
 
   echo ""
   echo "→ Building digests for $YESTERDAY"
-  critical "build:day $YESTERDAY" npm run build:day --silent -- --date="$YESTERDAY"
+  critical_digest "build:day $YESTERDAY" npm run build:day --silent -- --date="$YESTERDAY"
 
   echo ""
   echo "→ Building digests for $TODAY"
-  critical "build:day $TODAY" npm run build:day --silent -- --date="$TODAY"
+  critical_digest "build:day $TODAY" npm run build:day --silent -- --date="$TODAY"
 
   echo ""
   echo "→ Building Astro site"
@@ -105,10 +123,12 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   fi
 
   # A failed local astro build means the same build would break on DigitalOcean,
-  # so don't commit/push content that would deploy a broken site. Skip publishing
-  # (FAILED is already set above), but keep running so notify/exit-status still fire.
+  # so don't commit/push content that would deploy a broken site. A failed
+  # build:day means the digest content may be partial/stale, so we must not
+  # auto-publish it either. Skip publishing in both cases (FAILED is already set),
+  # but keep running so notify/exit-status still fire.
   CHANGED_DATES=""
-  if [ "$ASTRO_OK" = 1 ]; then
+  if [ "$ASTRO_OK" = 1 ] && [ "$DIGEST_FAILED" = 0 ]; then
     echo ""
     echo "→ Staging data/ for commit"
     git add data 2>/dev/null || true
@@ -122,7 +142,11 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
     if git diff --cached --quiet -- data; then
       echo "  (no new digest content — nothing to commit)"
     else
-      git commit -m "auto: $TODAY 6am pull"
+      # Scope the commit to the data/ pathspec. Without it, a source file the
+      # curator left staged the night before would ride along into the "auto"
+      # commit and deploy to production. (The repo rule: stage explicit paths,
+      # never let an unscoped commit sweep the whole index.)
+      git commit -m "auto: $TODAY 6am pull" -- data
       if git push 2>&1; then
         echo "  pushed → DigitalOcean will auto-deploy"
       else
@@ -130,6 +154,9 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
         FAILED=1
       fi
     fi
+  elif [ "$DIGEST_FAILED" = 1 ]; then
+    echo ""
+    echo "  ✗ a build:day stage failed — skipping commit/push (no auto-publish of a partial/stale day; build manually + studio-publish)"
   fi
 
   echo ""
