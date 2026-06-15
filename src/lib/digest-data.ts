@@ -1,7 +1,7 @@
 // Read digest artifacts written by build/digest-builder.ts.
 // Astro pages use this at build time to enumerate paths and render content.
 
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { assignSlugsForDate } from './slug-resolve.ts';
 import type { ModalityTag, IntentTag, MethodologyTag } from './tags.ts';
@@ -325,10 +325,47 @@ export type DigestArtifact = {
 
 const DIGEST_ROOT = resolve(process.cwd(), 'data/digests');
 
+// Cheap content-change signature of the digests dir: sorted (name, mtime, size)
+// triples. Re-parsing every artifact's JSON on every page render is the
+// build-time O(pages × files) cliff; caching keyed on this signature skips the
+// re-parse while staying correct outside the immutable-Astro-build context
+// (build:day / studio write files, and the signature changes when they do).
+function digestDirSignature(dir: string): string | null {
+  if (!existsSync(dir)) return null;
+  let entries: string[];
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return null;
+  }
+  const parts: string[] = [];
+  for (const file of entries) {
+    if (!file.endsWith('.json')) continue;
+    try {
+      const st = statSync(join(dir, file));
+      parts.push(`${file}:${st.mtimeMs}:${st.size}`);
+    } catch {
+      /* file vanished between readdir and stat — skip */
+    }
+  }
+  return parts.sort().join('|');
+}
+
+let _listDigestsCache: { sig: string; value: DigestArtifact[] } | null = null;
+
+// Reset the listDigests memo. Tests that mutate data/digests within one process
+// and rely on a same-path rewrite (where coarse mtime granularity could miss a
+// change) call this to force a fresh read.
+export function resetListDigestsCache(): void {
+  _listDigestsCache = null;
+}
+
 // Returns all digest artifacts, newest first. Flat directory layout:
 // data/digests/YYYY-MM-DD.json. Filename matches the artifact's date field.
 export function listDigests(): DigestArtifact[] {
-  if (!existsSync(DIGEST_ROOT)) return [];
+  const sig = digestDirSignature(DIGEST_ROOT);
+  if (sig === null) return [];
+  if (_listDigestsCache && _listDigestsCache.sig === sig) return _listDigestsCache.value;
   const out: DigestArtifact[] = [];
   let entries: string[];
   try {
@@ -346,7 +383,9 @@ export function listDigests(): DigestArtifact[] {
       // Skip malformed files rather than break the entire build.
     }
   }
-  return out.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  const value = out.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  _listDigestsCache = { sig, value };
+  return value;
 }
 
 export function getDigest(date: string): DigestArtifact | null {

@@ -42,15 +42,23 @@ describe('parseVerdict', () => {
     }
   });
 
-  it('falls back to unclear for invalid soc_implication', () => {
+  it('DROPS the verdict for a non-empty invalid soc_implication (no contradictory pill)', () => {
+    // Was coerced to 'unclear' while keeping the rationale, rendering "Unclear"
+    // beside an off-taxonomy rationale. Now drop the whole verdict instead.
     const v = parseVerdict({
       soc_implication: 'super-duper-changing',
-      rationale: 'made-up label, should default',
+      rationale: 'made-up label, should not mislabel as unclear',
     });
-    expect(v?.soc_implication).toBe('unclear');
+    expect(v).toBeUndefined();
   });
 
-  it('treats missing soc_implication as unclear', () => {
+  it('normalizes case/space/underscore to the canonical slug', () => {
+    expect(parseVerdict({ soc_implication: 'Practice Changing', rationale: 'r' })?.soc_implication).toBe(
+      'practice-changing',
+    );
+  });
+
+  it('treats missing soc_implication as unclear (kept)', () => {
     const v = parseVerdict({ rationale: 'no soc field' });
     expect(v?.soc_implication).toBe('unclear');
   });
