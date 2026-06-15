@@ -2,6 +2,35 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.18.0] - 2026-06-14
+
+### Added
+
+- **Studio shows what it's doing under the hood.** The TUI ran builds and ingests
+  by shelling out silently, so a long `build:day` (the 2-5 min 3-phase LLM step)
+  or a hollow/interrupted build looked like a hang with no indication of which
+  phase was running. Each shelled step now prints a labeled header before its
+  output streams (`pull:telegram (drain bot DMs into the inbox)`,
+  `build:day 2026-06-03 (3-phase LLM digest)`, `astro build (static site)`), and
+  the daily-build date loop is numbered `[i/N]` so a multi-date run is legible.
+  A new `runStep()` wrapper keeps `stdio: 'inherit'`, so the child's own output
+  still streams right below the header. Studio-only (local dev tool).
+
+### Fixed
+
+- **Studio's "Daily build" no longer flags every date as stale.** The staleness
+  detector multiplied each date's newest source `created_at` by 1000, treating
+  it as Unix seconds. But `created_at` is written as `Date.now()` (milliseconds),
+  so every date with sources came out ~1000x newer than its digest's
+  `generated_at` and was rebuilt on every run, needlessly re-analyzing the whole
+  back catalog. The fix drops the rescale (both sides are already milliseconds),
+  so a date is only rebuilt when a source genuinely arrived after the digest was
+  last generated, plus the always-rebuilt yesterday + today. The decision logic
+  is extracted into a pure, exported `classifyBuildDates()` with a regression
+  test pinning the milliseconds-on-both-sides semantics, and the TUI entrypoint
+  is guarded so importing the module for the test does not launch the prompt.
+  Studio-only (the 6am cron already rebuilds just yesterday + today).
+
 ## [0.17.5] - 2026-06-14
 
 ### Changed
