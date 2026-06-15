@@ -7,7 +7,7 @@
 // via the durable override sidecar (data/overrides/<date>.json), which survives
 // the LLM rebuild — same mechanism as `npm run override -- --suppress`.
 import * as p from '@clack/prompts';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { readFileSync, existsSync, readdirSync, rmSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,7 +23,9 @@ import { verdictMetaFor } from '../src/lib/verdict.ts';
 import { runResolve, runReview, runList } from './resolve-review-trials.ts';
 
 const DIGESTS_DIR = resolve('data/digests');
+const OBSIDIAN_DIR = resolve('data/obsidian');
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const SITE_BASE_URL = 'https://oncbrain.oncologytoolkit.com';
 
 type DigestArtifactLite = {
   digest: {
@@ -57,15 +59,30 @@ function readArtifact(date: string): DigestArtifactLite | null {
   return JSON.parse(readFileSync(fp, 'utf8')) as DigestArtifactLite;
 }
 
+// Total studies across every site in a digest. A hollow/dry-run/interrupted
+// build yields 0 — the publish guard refuses to push those (an empty day
+// orphans a headline on the site). Pure + exported for tests.
+export function countStudies(art: DigestArtifactLite | null): number {
+  return (art?.digest.sites ?? []).reduce((n, s) => n + s.studies.length, 0);
+}
+
+// The Obsidian note filenames that belong to a date: the bare `<date>.md` plus
+// any conference variant `<date>-<conf>.md`. The trailing hyphen in the prefix
+// match is load-bearing — without it `2026-06-14` would also match
+// `2026-06-140.md`. Pure + exported for tests.
+export function obsidianFilesForDate(date: string, entries: string[]): string[] {
+  return entries.filter(
+    (f) => f.endsWith('.md') && (f === `${date}.md` || f.startsWith(`${date}-`)),
+  );
+}
+
 function listDates(): Array<{ date: string; count: number }> {
   if (!existsSync(DIGESTS_DIR)) return [];
   return readdirSync(DIGESTS_DIR)
     .filter((f) => f.endsWith('.json'))
     .map((f) => {
       const date = f.replace(/\.json$/, '');
-      const art = readArtifact(date);
-      const count = (art?.digest.sites ?? []).reduce((n, s) => n + s.studies.length, 0);
-      return { date, count };
+      return { date, count: countStudies(readArtifact(date)) };
     })
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 }
@@ -113,6 +130,28 @@ async function runStep(
   const prefix = counter ? `[${counter.i}/${counter.n}] ` : '';
   p.log.step(`${prefix}${label}`);
   await run(cmd, args);
+}
+
+// Like `run`, but resolves with the exit code instead of rejecting on non-zero.
+// Used for predicate commands (e.g. `git diff --cached --quiet`) where a
+// non-zero exit is information. A spawn failure or signal-kill resolves to -1
+// (a distinct sentinel) so callers don't mistake it for a meaningful exit 1.
+function runCode(cmd: string, args: string[]): Promise<number> {
+  return new Promise((res) => {
+    const child = spawn(cmd, args, { stdio: 'inherit' });
+    child.on('error', () => res(-1));
+    child.on('close', (code) => res(code ?? -1));
+  });
+}
+
+// Current git branch, or null if it can't be determined. Used to keep content
+// publishes on main (the only branch DigitalOcean deploys).
+function currentBranch(): string | null {
+  try {
+    return execFileSync('git', ['branch', '--show-current'], { encoding: 'utf8' }).trim() || null;
+  } catch {
+    return null;
+  }
 }
 
 // Cancel guard: clack returns a symbol on Ctrl+C. Type predicate so the
@@ -356,31 +395,136 @@ async function manageStudies(): Promise<void> {
   else if (action === 'clear') await clearOverrides(date);
 }
 
-async function buildADay(): Promise<void> {
+// Pick a date to build: the existing digest dates (with study counts) plus an
+// "Other date…" free-text escape. Returns null on cancel. Shared by
+// buildADay + buildAndPublishADay.
+async function pickDateToBuild(message: string): Promise<string | null> {
   const dates = listDates();
   const choice = await p.select({
-    message: 'Build which date?',
+    message,
     options: [
       { value: '__other', label: 'Other date…', hint: 'type YYYY-MM-DD' },
       ...dates.map((d) => ({ value: d.date, label: d.date, hint: `${d.count} stud${d.count === 1 ? 'y' : 'ies'}` })),
     ],
   });
-  if (cancelled(choice)) return;
+  if (cancelled(choice)) return null;
   let date = choice as string;
   if (date === '__other') {
     const typed = await p.text({
       message: 'Date (YYYY-MM-DD)',
       validate: (v) => (DATE_RE.test((v ?? '').trim()) ? undefined : 'Use YYYY-MM-DD'),
     });
-    if (cancelled(typed)) return;
+    if (cancelled(typed)) return null;
     date = (typed as string).trim();
   }
+  return date;
+}
+
+// Run build:day + astro for a date. Returns true on success so callers can
+// gate a follow-on publish on the build actually completing.
+async function buildDate(date: string): Promise<boolean> {
   try {
     await runStep(`build:day ${date} (3-phase LLM digest)`, 'npm', ['run', 'build:day', '--', `--date=${date}`], { i: 1, n: 2 });
     await runStep('astro build (static site)', 'npm', ['run', 'build'], { i: 2, n: 2 });
-    p.log.success(`Built ${date}.`);
+    return true;
   } catch (err) {
     p.log.error((err as Error).message);
+    return false;
+  }
+}
+
+async function buildADay(): Promise<void> {
+  const date = await pickDateToBuild('Build which date?');
+  if (!date) return;
+  if (await buildDate(date)) p.log.success(`Built ${date}.`);
+}
+
+// Build a date AND publish it: build:day + astro, then commit + push only that
+// date's artifacts so DigitalOcean redeploys it. Closes the gap where studio's
+// plain "Build a day" leaves the digest sitting locally, unpublished, until the
+// 6am cron (which only ever rebuilds yesterday + today).
+async function buildAndPublishADay(): Promise<void> {
+  const date = await pickDateToBuild('Build + publish which date?');
+  if (!date) return;
+  if (!(await buildDate(date))) return;
+  await publishDate(date);
+}
+
+// The committed artifacts for a published date, as repo-relative pathspecs: the
+// digest JSON + its Obsidian note(s). The filed-PDF under data/obsidian/papers/
+// is gitignored and never published — staging explicit paths (never
+// `git add -A`) keeps it that way. Paths are relative because studio runs from
+// the repo root, and a relative pathspec passed with `--` is the most portable
+// way to scope git to exactly these files.
+function publishablePaths(date: string): string[] {
+  const paths: string[] = [];
+  if (existsSync(resolve(DIGESTS_DIR, `${date}.json`))) paths.push(`data/digests/${date}.json`);
+  if (existsSync(OBSIDIAN_DIR)) {
+    for (const f of obsidianFilesForDate(date, readdirSync(OBSIDIAN_DIR))) {
+      paths.push(`data/obsidian/${f}`);
+    }
+  }
+  return paths;
+}
+
+// Commit + push a built date's artifacts to main. Guards: a built digest must
+// exist; it must carry >=1 study (never publish an empty day); we must be on
+// main (the only branch DO deploys). Stages explicit per-date paths, skips the
+// commit if nothing changed, and confirms before the push (it goes public).
+async function publishDate(date: string): Promise<void> {
+  // Require main BEFORE touching git. A null/detached branch is not main, so it
+  // blocks too — committing on detached HEAD then failing to push would leave a
+  // dangling commit that vanishes on the next checkout.
+  const branch = currentBranch();
+  if (branch !== 'main') {
+    p.log.warn(`Not on main (on "${branch ?? 'detached HEAD'}"). Content only deploys from main; switch to main, then publish.`);
+    return;
+  }
+  const paths = publishablePaths(date);
+  if (!paths.some((fp) => fp.endsWith(`${date}.json`))) {
+    p.log.error(`No digest for ${date}. Build it first.`);
+    return;
+  }
+  const count = countStudies(readArtifact(date));
+  if (count === 0) {
+    p.log.warn(`${date} has 0 studies. Refusing to publish an empty day (it would orphan a headline on the site).`);
+    return;
+  }
+  const studies = `${count} stud${count === 1 ? 'y' : 'ies'}`;
+  const ok = await p.confirm({
+    message: `Publish ${date} (${studies}) → commit + push to main → live in ~40s?`,
+    initialValue: true,
+  });
+  if (cancelled(ok) || !ok) {
+    p.log.info(`Not published. Publish later: git add -- ${paths.join(' ')} && git commit && git push`);
+    return;
+  }
+  try {
+    await runStep(`git add (${date} digest + note)`, 'git', ['add', '--', ...paths]);
+    // `git diff --cached --quiet` exits 0 = no staged change (already published),
+    // 1 = changes to commit, anything else = git error (abort, don't commit blind).
+    const diff = await runCode('git', ['diff', '--cached', '--quiet', '--', ...paths]);
+    if (diff === 0) {
+      p.log.info(`${date} already published (no changes to commit).`);
+      return;
+    }
+    if (diff !== 1) {
+      p.log.error(`git diff failed (exit ${diff}). Aborting publish; nothing committed.`);
+      return;
+    }
+    // Commit ONLY these pathspecs, so an unrelated staged file can't ride along
+    // (and can't smuggle a second, empty digest past the 0-study guard above).
+    await runStep('git commit', 'git', ['commit', '-m', `content: publish ${date} digest`, '--', ...paths]);
+    // Explicit `origin main` (not implicit upstream). On rejection the commit is
+    // already local on main, so tell the curator how to recover.
+    const pushed = await runCode('git', ['push', 'origin', 'main']);
+    if (pushed !== 0) {
+      p.log.error(`git push failed (exit ${pushed}). The commit is local on main; run \`git pull --rebase && git push\` to recover.`);
+      return;
+    }
+    p.log.success(`Published ${date} → ${SITE_BASE_URL}/${date}/ (live in ~40s).`);
+  } catch (err) {
+    p.log.error(`Publish failed: ${(err as Error).message}`);
   }
 }
 
@@ -560,7 +704,8 @@ async function main(): Promise<void> {
       options: [
         { value: 'manage', label: 'Manage studies (suppress / edit)' },
         { value: 'daily', label: 'Daily build', hint: 'pull + enrich + build yesterday & today + index' },
-        { value: 'build', label: 'Build a day' },
+        { value: 'build', label: 'Build a day', hint: 'build:day + astro, local only' },
+        { value: 'build-publish', label: 'Build + publish a day', hint: 'build:day + astro + commit + push (goes live)' },
         { value: 'ingest', label: 'Pull + enrich inbox' },
         { value: 'review-trials', label: 'Resolve review trials', hint: 'v0.17: search PubMed for trials a review names' },
         { value: 'review-approve', label: 'Review resolved trials', hint: 'curator: approve / reject the pending queue' },
@@ -571,6 +716,7 @@ async function main(): Promise<void> {
     if (action === 'manage') await manageStudies();
     else if (action === 'daily') await dailyBuild();
     else if (action === 'build') await buildADay();
+    else if (action === 'build-publish') await buildAndPublishADay();
     else if (action === 'ingest') await ingest();
     else if (action === 'review-trials') await resolveReviewTrials();
     else if (action === 'review-approve') await reviewResolvedTrials();
