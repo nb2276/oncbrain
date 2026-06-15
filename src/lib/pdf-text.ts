@@ -342,8 +342,18 @@ export async function extractPdfFigureOcr(
   return parts.join('\n\n');
 }
 
+// Cap accumulated child output so a small malicious PDF that expands into
+// enormous pdftotext output can't OOM the enrichment process. A real paper's
+// text layer is tens of KB; 64MB is a generous ceiling that still bounds the
+// pathological case.
+const MAX_POPPLER_OUTPUT_BYTES = 64 * 1024 * 1024;
+// Grace period between SIGTERM and SIGKILL on timeout/overflow.
+const POPPLER_KILL_GRACE_MS = 2000;
+
 // Run a poppler binary, resolve stdout. ENOENT (binary missing) → typed
-// poppler-missing; non-zero exit → extract-failed.
+// poppler-missing; non-zero exit → extract-failed. Bounds output size and
+// escalates SIGTERM→SIGKILL so a child that ignores termination (or floods
+// stdout) can't keep running / consuming memory after we've given up.
 function runPoppler(
   binary: string,
   args: string[],
@@ -360,36 +370,65 @@ function runPoppler(
     }
     let stdout = '';
     let stderr = '';
+    let outBytes = 0;
     let settled = false;
-    const timer = setTimeout(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    let killTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const clearTimers = () => {
+      clearTimeout(timer);
+      if (killTimer) clearTimeout(killTimer);
+    };
+
+    // Terminate the child and reject. SIGTERM first, then SIGKILL after a grace
+    // period in case it ignores SIGTERM (or is stuck in a syscall).
+    const terminate = (message: string) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
       try {
         proc.kill('SIGTERM');
       } catch {
         // already gone
       }
-      if (!settled) {
-        settled = true;
-        reject(new PdfToolError(`${binary} timed out after ${timeoutMs}ms`, 'extract-failed'));
-      }
-    }, timeoutMs);
+      killTimer = setTimeout(() => {
+        try {
+          proc.kill('SIGKILL');
+        } catch {
+          // already gone
+        }
+      }, POPPLER_KILL_GRACE_MS);
+      killTimer.unref?.();
+      reject(new PdfToolError(message, 'extract-failed'));
+    };
+
+    timer = setTimeout(() => terminate(`${binary} timed out after ${timeoutMs}ms`), timeoutMs);
+
     proc.stdout?.on('data', (c: Buffer) => {
+      outBytes += c.length;
+      if (outBytes > MAX_POPPLER_OUTPUT_BYTES) {
+        terminate(`${binary} output exceeded ${MAX_POPPLER_OUTPUT_BYTES} bytes`);
+        return;
+      }
       stdout += c.toString('utf-8');
     });
     proc.stderr?.on('data', (c: Buffer) => {
-      stderr += c.toString('utf-8');
+      // Bound stderr too so a noisy failure can't balloon memory.
+      if (stderr.length < MAX_POPPLER_OUTPUT_BYTES) stderr += c.toString('utf-8');
     });
     proc.on('error', (err: NodeJS.ErrnoException) => {
+      clearTimers();
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
       const kind: PdfToolErrorKind = err.code === 'ENOENT' ? 'poppler-missing' : 'extract-failed';
       const hint = kind === 'poppler-missing' ? ' — install with `brew install poppler`' : '';
       reject(new PdfToolError(`${binary} failed: ${err.message}${hint}`, kind));
     });
     proc.on('close', (code: number | null) => {
+      // The process exited — no further kill needed, so always clear timers.
+      clearTimers();
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
       if (code === 0) resolvePromise(stdout);
       else reject(new PdfToolError(`${binary} exit ${code}: ${stderr.trim() || '(no stderr)'}`, 'extract-failed'));
     });

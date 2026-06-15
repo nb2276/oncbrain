@@ -61,11 +61,23 @@ function isPrivateIPv4(ip: string): boolean {
 function isPrivateIPv6(ip: string): boolean {
   const lower = ip.toLowerCase().replace(/^\[|\]$/g, '');
   if (lower === '::1' || lower === '::') return true; // loopback / unspecified
-  if (lower.startsWith('fe80')) return true; // link-local
+  // Link-local is fe80::/10 — the first hextet ranges fe80..febf, NOT just
+  // fe80. `startsWith('fe80')` missed fe90::/febf:: (codex). Match the /10.
+  if (/^fe[89ab][0-9a-f]:/.test(lower)) return true;
   if (lower.startsWith('fc') || lower.startsWith('fd')) return true; // unique-local fc00::/7
-  // IPv4-mapped IPv6 (::ffff:10.0.0.1) — extract the v4 tail and re-check.
-  const mapped = lower.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped && mapped[1]) return isPrivateIPv4(mapped[1]);
+  // IPv4-mapped IPv6, dotted form (::ffff:10.0.0.1) — re-check the v4 tail.
+  const mappedDotted = lower.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (mappedDotted && mappedDotted[1]) return isPrivateIPv4(mappedDotted[1]);
+  // IPv4-mapped IPv6, HEX form (::ffff:a9fe:a9fe == 169.254.169.254, the AWS
+  // metadata link-local). Node's isIP accepts this shape and it can encode a
+  // private/link-local v4, so decode the two hextets to dotted-quad and re-check.
+  const mappedHex = lower.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  if (mappedHex) {
+    const hi = parseInt(mappedHex[1]!, 16);
+    const lo = parseInt(mappedHex[2]!, 16);
+    const v4 = `${(hi >> 8) & 0xff}.${hi & 0xff}.${(lo >> 8) & 0xff}.${lo & 0xff}`;
+    return isPrivateIPv4(v4);
+  }
   return false;
 }
 
@@ -139,43 +151,82 @@ export async function ssrfSafeFetchText(
     await assertSafeUrl(current, lookupImpl); // re-validate EVERY hop
 
     const controller = new AbortController();
+    // Keep the timer armed across BOTH the fetch AND the body read — a hostile
+    // server can dribble bytes under the connect timeout, so the read needs the
+    // same deadline. The finally clears it on redirect (continue), error, or
+    // success (return).
     const timer = setTimeout(() => controller.abort(), timeoutMs);
-    let res: Response;
     try {
-      res = await fetchImpl(current, {
+      const res = await fetchImpl(current, {
         redirect: 'manual', // we follow + revalidate ourselves
         signal: controller.signal,
         headers: { 'User-Agent': 'oncbrain/0.8 (+https://oncbrain.oncologytoolkit.com)', ...opts.headers },
       });
+
+      // Manual redirect handling: resolve Location against the current URL and
+      // loop so the next hop gets re-validated.
+      if (res.status >= 300 && res.status < 400) {
+        const loc = res.headers.get('location');
+        if (!loc) throw new SsrfError(`redirect with no Location (${res.status})`, current);
+        current = new URL(loc, current).toString();
+        continue; // finally clears the timer before the next hop
+      }
+
+      if (!res.ok) {
+        throw new SsrfError(`HTTP ${res.status}`, current);
+      }
+
+      // Reject up front on an oversized Content-Length, but a chunked response
+      // (no Content-Length) could stream unbounded bytes, so read the body
+      // INCREMENTALLY and stop once we pass the cap rather than buffering the
+      // whole thing via res.text() (the old path → OOM on a hostile/huge body).
+      const lenHeader = res.headers.get('content-length');
+      if (lenHeader && Number(lenHeader) > maxBody) {
+        controller.abort();
+        throw new SsrfError(`response too large (${lenHeader} bytes)`, current);
+      }
+      return await readBodyCapped(res, maxBody);
     } finally {
       clearTimeout(timer);
     }
-
-    // Manual redirect handling: resolve Location against the current URL and
-    // loop so the next hop gets re-validated.
-    if (res.status >= 300 && res.status < 400) {
-      const loc = res.headers.get('location');
-      if (!loc) throw new SsrfError(`redirect with no Location (${res.status})`, current);
-      current = new URL(loc, current).toString();
-      continue;
-    }
-
-    if (!res.ok) {
-      throw new SsrfError(`HTTP ${res.status}`, current);
-    }
-
-    // Cap the body. Read as text but bail if it's absurdly large.
-    const lenHeader = res.headers.get('content-length');
-    if (lenHeader && Number(lenHeader) > maxBody) {
-      throw new SsrfError(`response too large (${lenHeader} bytes)`, current);
-    }
-    const text = await res.text();
-    if (text.length > maxBody) {
-      return text.slice(0, maxBody);
-    }
-    return text;
   }
   throw new SsrfError(`too many redirects (>${MAX_REDIRECTS})`, url);
+}
+
+// Read a response body, stopping once `maxBody` bytes have been seen, so a
+// chunked / no-Content-Length response can't buffer unbounded memory. Matches
+// the prior truncate-not-throw behavior for an over-cap body. Falls back to
+// res.text() when the response has no readable stream (some fetch mocks).
+async function readBodyCapped(res: Response, maxBody: number): Promise<string> {
+  if (!res.body) {
+    const text = await res.text();
+    return text.length > maxBody ? text.slice(0, maxBody) : text;
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let out = '';
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      out += decoder.decode(value, { stream: true });
+      if (total > maxBody) {
+        await reader.cancel();
+        return out.slice(0, maxBody);
+      }
+    }
+  } finally {
+    // Release the lock; cancel is a no-op if the stream already ended.
+    try {
+      reader.releaseLock();
+    } catch {
+      /* already released */
+    }
+  }
+  out += decoder.decode();
+  return out.length > maxBody ? out.slice(0, maxBody) : out;
 }
 
 // Exposed for unit testing the guard in isolation.
