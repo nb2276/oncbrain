@@ -38,7 +38,11 @@ in the fixes themselves; all are resolved and tested.
   the site + JSON API. The LLM-from-PDF abstract is now dropped at ingestion, so
   `papers.abstract` only ever holds an authoritative provider abstract
   (Crossref/PubMed/page meta) or null; a PDF-with-DOI keeps its publishable
-  Crossref abstract.
+  Crossref abstract. A one-time backfill (`build/backfill-pdf-abstracts.ts`)
+  scrubbed the back catalog: 10 already-ingested PDF papers were re-derived from
+  Crossref, removing 7 published LLM-from-PDF abstracts (no Crossref equivalent
+  exists for those publishers) and keeping the 3 that were genuinely Crossref-
+  sourced.
 - **`build:day --dry-run` no longer clobbers the committed digest.** Dry-run
   fabricated a placeholder and fell through to the same write, overwriting the
   real `data/digests/<date>.json` and Obsidian note. It now logs what it would
