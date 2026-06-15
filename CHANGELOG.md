@@ -2,6 +2,23 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.19.0] - 2026-06-14
+
+### Added
+
+- **Studio: "Build + publish a day".** A new menu option that builds a date
+  (build:day + astro) and then commits + pushes just that date's artifacts to
+  main, so DigitalOcean redeploys it. Closes the gap where studio's plain "Build
+  a day" left the digest sitting locally, unpublished, until the 6am cron (which
+  only rebuilds yesterday + today). That was the failure mode where a same-day
+  source silently never reached the live site. Guards make the publish safe: it refuses
+  to publish a 0-study (hollow/interrupted) digest, refuses unless on main (the
+  only branch DO deploys), stages explicit per-date paths and commits only those
+  (`git commit -- <paths>`, never `git add -A`, so an unrelated staged file can't
+  ride along), aborts on a git error instead of committing blind, and on a
+  rejected push tells the curator how to recover. Confirms before pushing, since
+  it goes public.
+
 ## [0.18.0] - 2026-06-14
 
 ### Added
