@@ -114,6 +114,16 @@ describe('PWA build output', () => {
     expect(home).toContain('/pwa-sw.js');
   });
 
+  it('checks for a new service worker on resume, not only on full page load', () => {
+    // Regression: a home-screen PWA is resumed, not reloaded, so the one-shot
+    // `load`-time update check never re-fired and new deploys stayed invisible.
+    // The registration must re-check on foreground (visibilitychange -> update)
+    // and bypass the HTTP/CDN cache for the worker script. Found by /investigate.
+    expect(home).toContain('visibilitychange');
+    expect(home).toContain('.update()');
+    expect(home).toContain("updateViaCache: 'none'");
+  });
+
   it('drops the Google Fonts CDN dependency in favour of self-hosting', () => {
     expect(home).not.toContain('fonts.googleapis.com');
     expect(home).not.toContain('fonts.gstatic.com');
