@@ -50,6 +50,18 @@ describe('buildAssociationGraph', () => {
     expect(buildAssociationGraph(items)).toHaveLength(0);
   });
 
+  it('does not group on staging/grade/version shorthand (FIGO3, PHASE3, COVID19)', () => {
+    // These carry a digit (so the "must have a digit" trial-bias check lets
+    // them through) but are NOT trial names — pattern-blacklisted.
+    for (const tok of ['FIGO3', 'PHASE3', 'COVID19', 'GRADE3', 'ECOG1']) {
+      const items: DigestInputItem[] = [
+        { source_type: 'tweet', id: 1, author: null, text: `cohort with ${tok} disease` },
+        { source_type: 'tweet', id: 2, author: null, text: `unrelated paper, also ${tok}` },
+      ];
+      expect(buildAssociationGraph(items), tok).toHaveLength(0);
+    }
+  });
+
   it('does not duplicate a group when NCT and acronym both match', () => {
     const items: DigestInputItem[] = [
       { source_type: 'tweet', id: 1, author: null, text: 'PRESTIGE-PSMA / NCT04567890 mPFS 14.2' },

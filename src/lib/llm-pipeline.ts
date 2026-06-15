@@ -183,10 +183,26 @@ function itemToTweetShape(item: DigestInputItem): DigestInputTweet {
 // Tweet ids stay as-is. Papers occupy 1e9-2e9. Slides occupy 2e9-3e9.
 const PAPER_ID_OFFSET = 1_000_000_000;
 const SLIDE_ID_OFFSET = 2_000_000_000;
+// The magnitude-based namespacing only holds if raw rowids stay below the
+// offset. SQLite rowids are tiny in practice, but if a paper/slide id ever
+// reached 1e9 the offset math would silently land it in another namespace and
+// syntheticIdToSourceRef would reverse-map it to the wrong source — a
+// mis-attributed clinical citation. Assert the invariant so it fails LOUD
+// instead (the audit's unenforced-invariant finding).
+function assertRowIdInRange(id: number, kind: 'paper' | 'slide'): void {
+  if (!Number.isInteger(id) || id < 0 || id >= PAPER_ID_OFFSET) {
+    throw new Error(
+      `${kind} id ${id} is outside the synthetic-id range [0, ${PAPER_ID_OFFSET}); ` +
+        `the source-ref namespacing would collide. (Reseed of the rowid space?)`,
+    );
+  }
+}
 export function paperIdToSyntheticTweetId(id: number): number {
+  assertRowIdInRange(id, 'paper');
   return PAPER_ID_OFFSET + id;
 }
 export function slideIdToSyntheticTweetId(id: number): number {
+  assertRowIdInRange(id, 'slide');
   return SLIDE_ID_OFFSET + id;
 }
 export function syntheticIdToSourceRef(id: number): DigestSourceRef {
@@ -594,6 +610,18 @@ export async function buildDigest(
 ): Promise<DigestOutput> {
   const ocrAvailable = isOcrAvailable();
 
+  // Extended thinking (DIGEST_THINKING) requires temperature=1 (Anthropic API),
+  // which makes Phase 2 NON-deterministic — two builds of the same date can
+  // diverge and the higher-variance sampling lands exactly on the deep
+  // per-study analysis. Warn once so it's a conscious trade-off, not a silent
+  // determinism break (the no-fabrication grounding still holds).
+  if (opts.studyThinkingBudget && opts.studyThinkingBudget > 0) {
+    console.warn(
+      `  ⚠ DIGEST_THINKING=${opts.studyThinkingBudget}: Phase 2 runs at temperature=1 (non-deterministic). ` +
+        `Builds of the same date may differ; eval scores will vary run-to-run.`,
+    );
+  }
+
   // v0.5 Phase D: accept the typed union. Internal pipeline still operates
   // on tweet-shaped items (text + image arrays); papers and slides are
   // converted to tweet-shape with synthetic ids that round-trip to typed
@@ -689,6 +717,10 @@ export async function buildDigest(
       const resolvedDeps: EnrichRelatedTrialsDeps = {
         ...baseDeps,
         rerankClient: baseDeps.rerankClient ?? client,
+        // Rerank on the same model as the Phase 2 study agent (studyModel, then
+        // the base model), not the client default — keeps the trials-to-watch
+        // step on the model the build was configured for.
+        rerankModel: baseDeps.rerankModel ?? opts.studyModel ?? opts.model,
       };
       const enriched = await enrichStudyWithRelatedTrials(
         study,
@@ -946,7 +978,11 @@ export function detectClusterCollisions(
         .filter((t): t is DigestInputTweet => !!t)
         .map((t) => t.text)
         .join(' ');
-    const matches = text.match(/NCT\d{8}/g) ?? [];
+    // Tolerate a space and lowercase ("NCT 04855643", "nct04855643"); normalize
+    // to canonical NCT\d{8} before keying so spaced/case variants don't slip
+    // past the split/over-cluster safety net. A BARE 8-digit id (no "NCT") is
+    // intentionally NOT matched — far too false-positive-prone in free tweet text.
+    const matches = (text.match(/NCT\s?\d{8}/gi) ?? []).map((m) => m.replace(/\s/g, '').toUpperCase());
     for (const m of new Set(matches)) {
       const existing = nctMap.get(m) ?? [];
       if (!existing.includes(c.slug)) existing.push(c.slug);
@@ -1750,6 +1786,10 @@ export function createRelatedTrialsRunCache(): RelatedTrialsRunCache {
 export type EnrichRelatedTrialsDeps = {
   ctgovFetch?: (term: string) => Promise<FetchCandidateTrialsResult>;
   rerankClient?: LlmClient;
+  // Model for the rerank call. Without it the rerank silently runs on the
+  // client default regardless of DIGEST_MODEL / DIGEST_STUDY_MODEL — a once-
+  // per-eligible-study cost/quality drift. Production threads the Phase 2 model.
+  rerankModel?: string;
   clock?: () => Date;
   promptPath?: string;
   // Cap on candidates surfaced into the rerank prompt per query. Default
@@ -1932,10 +1972,14 @@ export async function enrichStudyWithRelatedTrials(
         group.push(c);
       }
       // If two queries watch the same open question (rare but possible),
-      // concatenate their candidates under that question.
+      // concatenate their candidates under that question — deduping by NCT so a
+      // trial returned by both queries isn't serialized twice into the rerank
+      // prompt (wasted tokens; downstream parseRelatedTrials dedupes too, so
+      // this is efficiency, not correctness).
       const existing = groupedByQuestion.get(q.watches_question);
       if (existing) {
-        existing.push(...group);
+        const seen = new Set(existing.map((c) => c.nct));
+        for (const c of group) if (!seen.has(c.nct)) existing.push(c);
       } else {
         groupedByQuestion.set(q.watches_question, group);
       }
@@ -2074,7 +2118,9 @@ async function runRerankTrialsPhase(
 
   const content: LlmContentBlock[] = [voiceCacheBlock(), { type: 'text', text: rendered }];
   const messages: LlmMessage[] = [{ role: 'user', content }];
-  return client.complete(messages, {});
+  // Honor the configured model (falls back to the client default when unset),
+  // and pin temperature=0 to match the rest of the deterministic pipeline.
+  return client.complete(messages, { model: deps.rerankModel, temperature: 0 });
 }
 
 // Normalize a query term for cache key purposes: trim, lowercase, collapse

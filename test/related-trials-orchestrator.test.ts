@@ -100,6 +100,30 @@ describe('enrichStudyWithRelatedTrials,happy path', () => {
     expect(log).not.toHaveBeenCalledWith(expect.stringContaining('failed'));
   });
 
+  it('passes the configured rerankModel + temperature=0 to the rerank call', async () => {
+    // Was client.complete(messages, {}) → rerank ran on the client default
+    // regardless of DIGEST_MODEL/DIGEST_STUDY_MODEL.
+    const study = makeStudy();
+    const raw = rawWith([
+      { term: 'lutetium PSMA cabazitaxel sequencing', watches_question: QUESTIONS[0]! },
+    ]);
+    const ctgovFetch = vi.fn(async (): Promise<FetchCandidateTrialsResult> => ({
+      ok: true,
+      candidates: [makeCandidate({ nct: 'NCT05000001' })],
+    }));
+    const rerank = stubLlm(
+      JSON.stringify({ picks: [{ nct: 'NCT05000001', answers_question: QUESTIONS[0], relevance_phrase: 'x' }] }),
+    );
+    await enrichStudyWithRelatedTrials(study, raw, createRelatedTrialsRunCache(), {
+      ctgovFetch,
+      rerankClient: rerank,
+      rerankModel: 'opus-test',
+    });
+    const completeMock = rerank.complete as unknown as ReturnType<typeof vi.fn>;
+    expect(completeMock).toHaveBeenCalled();
+    expect(completeMock.mock.calls[0]![1]).toEqual({ model: 'opus-test', temperature: 0 });
+  });
+
   it('caches successful fetches across calls (cross-study dedup)', async () => {
     const ctgovFetch = vi.fn(async (term: string): Promise<FetchCandidateTrialsResult> => {
       return { ok: true, candidates: [makeCandidate({ nct: 'NCT05000001' })] };
