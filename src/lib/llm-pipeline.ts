@@ -1299,7 +1299,12 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     tldr,
     details,
     figures,
-    nct,
+    // v0.16 boundary: a review names trials as plain text and must NEVER carry
+    // an inferred single-study NCT (it would render a clinicaltrials.gov link on
+    // the review card via StudyCard's shared head). Phase 2 inherits the cluster
+    // content_type but parses `nct` ungated, so force it null for reviews here —
+    // the same enforcement posture as stripReviewVerdicts at build time.
+    nct: content_type === 'review' ? null : nct,
     tweet_ids: cluster.tweet_ids,
     slug: cluster.slug,
     verdict: parseVerdict(root.verdict),
@@ -1429,16 +1434,29 @@ export function parseConsort(raw: unknown): ConsortDiagram | null {
 // Parses the optional verdict block emitted by Phase 2. Forgiving: if the
 // field is missing or malformed, return undefined and the renderer falls
 // back to the bullet-only layout (graceful for older artifacts).
-//   - soc_implication: validated against the enum; invalid/missing → 'unclear'
+//   - soc_implication: normalized then validated against the enum. MISSING →
+//     'unclear' (kept). A non-empty but UNRECOGNIZED value → drop the whole
+//     verdict (see below) rather than mislabel a strong rationale as 'unclear'.
 //   - rationale: trimmed; capped at 40 words (prompt asks for 30, allow slop)
 //   - audience: trimmed string or null; capped at 120 chars (prompt asks 80)
 export function parseVerdict(raw: unknown): StudyVerdict | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
   const obj = raw as Record<string, unknown>;
-  const rawSoc = typeof obj.soc_implication === 'string' ? obj.soc_implication.trim() : '';
-  const soc: SocImplication = (SOC_IMPLICATIONS as readonly string[]).includes(rawSoc)
-    ? (rawSoc as SocImplication)
-    : 'unclear';
+  // Normalize before validating (mirror parseEnumTag): lowercase + collapse
+  // whitespace/underscores to hyphens, so "Practice Changing" / "practice_changing"
+  // match the canonical 'practice-changing' slug instead of being mislabeled.
+  const rawSoc =
+    typeof obj.soc_implication === 'string'
+      ? obj.soc_implication.trim().toLowerCase().replace(/[\s_]+/g, '-')
+      : '';
+  const isValidSoc = (SOC_IMPLICATIONS as readonly string[]).includes(rawSoc);
+  // A non-empty value that still fails the enum means the model emitted an
+  // off-taxonomy verdict. Coercing it to 'unclear' while keeping the rationale
+  // renders a self-contradictory pill ("Unclear" beside a practice-changing
+  // rationale), so drop the whole verdict and fall back to the bullet-only
+  // layout. Only a MISSING/empty soc defaults to 'unclear'.
+  if (rawSoc && !isValidSoc) return undefined;
+  const soc: SocImplication = isValidSoc ? (rawSoc as SocImplication) : 'unclear';
   const rationaleRaw = typeof obj.rationale === 'string' ? obj.rationale.trim() : '';
   if (!rationaleRaw) return undefined; // verdict without rationale isn't useful
   const rationaleWords = rationaleRaw.split(/\s+/);
@@ -2507,7 +2525,12 @@ async function completeAndParse<T>(
       attempt === 0
         ? content
         : [
-            ...content,
+            // Repair only needs to fix JSON shape; the model already saw the
+            // images on attempt 0. Re-sending image blocks re-bills them (images
+            // aren't prompt-cached) and bloats what is already the most expensive
+            // call in the build (a truncation-driven failure means a long prompt).
+            // Keep only the text blocks + the feedback.
+            ...content.filter((b) => b.type === 'text'),
             {
               type: 'text' as const,
               text: `\n\nYour previous response could not be parsed. The error was: ${lastError?.message ?? 'unknown'}\n\nRe-emit ONLY the JSON object exactly as specified by the schema. No code fences, no explanation, no leading or trailing text. Your previous response was:\n${lastRaw ?? '(empty)'}`,
@@ -2555,12 +2578,58 @@ async function runConcurrent<T>(
   await Promise.all(workers);
 }
 
+// Extract the first balanced top-level JSON value ({...} or [...]) from a string
+// the model may have wrapped in prose. Brace-counts with string/escape awareness
+// so a brace inside a string literal doesn't skew the depth. Returns the input
+// unchanged when there's no opening brace, and from the first brace to EOF when
+// the value is unbalanced (truncated) — both leave JSON.parse to fail and the
+// caller's repair retry to fire, as before.
+export function extractJsonSpan(s: string): string {
+  let start = -1;
+  let open = '';
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] === '{' || s[i] === '[') {
+      start = i;
+      open = s[i]!;
+      break;
+    }
+  }
+  if (start === -1) return s;
+  const close = open === '{' ? '}' : ']';
+  let depth = 0;
+  let inStr = false;
+  let esc = false;
+  for (let i = start; i < s.length; i++) {
+    const c = s[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') inStr = true;
+    else if (c === open) depth++;
+    else if (c === close) {
+      depth--;
+      if (depth === 0) return s.slice(start, i + 1);
+    }
+  }
+  return s.slice(start);
+}
+
 function stripFences(raw: string): string {
-  return raw
+  const stripped = raw
     .trim()
     .replace(/^```(?:json)?\s*/i, '')
     .replace(/\s*```$/i, '')
     .trim();
+  // Fence-stripping only handles the well-behaved fenced case. The model
+  // (especially the claude-cli backend, which has no JSON mode) often wraps the
+  // object in prose ("Here is the JSON: {...}") or appends a trailing sentence
+  // after the closing fence — the anchored regexes miss both and JSON.parse
+  // throws, dropping the study after one repair retry. Fall back to the first
+  // balanced { } / [ ] span so the common offending shapes still parse.
+  return extractJsonSpan(stripped);
 }
 
 export class DigestParseError extends Error {

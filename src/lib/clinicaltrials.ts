@@ -308,6 +308,11 @@ function parseOneStudy(raw: unknown): CandidateTrial | null {
   const brief_title = typeof ident.briefTitle === 'string' ? ident.briefTitle.trim() : '';
   const overall_status_raw = typeof status.overallStatus === 'string' ? status.overallStatus.trim() : '';
   if (!nct || !brief_title || !overall_status_raw) return null;
+  // Validate the NCT shape before it becomes a candidates-map key, flows into the
+  // rerank prompt ("copy the EXACT NCT id"), and renders as a live
+  // clinicaltrials.gov/study/<id> link. A contract-drifted or garbage identifier
+  // would otherwise publish a broken/garbage deep link. Mirrors the PMID guard.
+  if (!/^NCT\d{8}$/.test(nct)) return null;
   if (!isAcceptedStatus(overall_status_raw)) return null;
 
   const phaseArr = Array.isArray(design.phases)
@@ -318,7 +323,10 @@ function parseOneStudy(raw: unknown): CandidateTrial | null {
   const enrollment = isObject(design.enrollmentInfo)
     ? (design.enrollmentInfo as Record<string, unknown>).count
     : null;
-  const enrollment_count = typeof enrollment === 'number' && Number.isFinite(enrollment) ? enrollment : null;
+  const enrollment_count =
+    typeof enrollment === 'number' && Number.isFinite(enrollment) && enrollment >= 0
+      ? enrollment
+      : null;
 
   const primaryStruct = isObject(status.primaryCompletionDateStruct)
     ? (status.primaryCompletionDateStruct as Record<string, unknown>)

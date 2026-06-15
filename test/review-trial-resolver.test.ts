@@ -124,6 +124,23 @@ describe('resolveReviewTrials', () => {
     expect(getResolution(db, 7, 'ORIOLE')!.status).toBe('pending');
   });
 
+  it('quotes a multi-word acronym so [Title] binds to the whole phrase', async () => {
+    const search = vi.fn(async (_q: string) => ({ pmids: ['32215577'], total: 1 }));
+    const multiWord: ReviewToResolve = { ...review, discussedTrials: ['CheckMate 274'] };
+    await resolveReviewTrials(db, multiWord, deps({ search, summarize: vi.fn(async () => [sum('32215577', 'CheckMate 274')]) }));
+    // The verbatim phrase is quoted: "CheckMate 274"[Title], not CheckMate 274[Title]
+    // (which would title-scope only "274").
+    expect(search.mock.calls[0]![0]).toContain('"CheckMate 274"[Title]');
+  });
+
+  it('neutralizes embedded double-quotes in the acronym', async () => {
+    const search = vi.fn(async (_q: string) => ({ pmids: [], total: 0 }));
+    const weird: ReviewToResolve = { ...review, discussedTrials: ['A"B'] };
+    await resolveReviewTrials(db, weird, deps({ search }));
+    // The embedded quote is stripped so it can't break out of the quoted phrase.
+    expect(search.mock.calls[0]![0]).toContain('"A B"[Title]');
+  });
+
   it('writes a failed row with no candidates when both searches are empty', async () => {
     const search = vi.fn(async () => ({ pmids: [], total: 0 }));
     const summarize = vi.fn();

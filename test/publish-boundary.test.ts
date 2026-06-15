@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { publishableAbstract } from '../build/digest-builder.ts';
 
 // The load-bearing IP constraint (v0.8 PR2): filed full-text PDFs are
 // LOCAL-ONLY. Three locks guarantee they never reach git or DigitalOcean:
@@ -40,6 +41,32 @@ describe('PDF publish boundary', () => {
 // explicit field allowlist, but that's hand-maintained — a future `...p` spread
 // would silently start publishing. This guards the real deploy surface so the
 // boundary can't regress without a red test.
+// A PDF/OCR-sourced abstract is LLM-extracted from the copyrighted, local-only
+// full text and is uncapped — it must never reach the committed/public artifact
+// (a prompt-injected PDF could otherwise emit thousands of chars of full text
+// as "abstract"). publishableAbstract() is the gate; authoritative provider
+// abstracts (PubMed/Crossref/page meta) stay publishable.
+describe('PDF-derived abstract publish boundary', () => {
+  it('drops the abstract for pdf / pdf_ocr sourced papers', () => {
+    expect(publishableAbstract('pdf', 'extracted from the PDF first page')).toBeNull();
+    expect(publishableAbstract('pdf_ocr', 'OCR-extracted blurb')).toBeNull();
+  });
+
+  it('keeps authoritative provider abstracts', () => {
+    expect(publishableAbstract('pubmed_efetch', 'public PubMed abstract')).toBe(
+      'public PubMed abstract',
+    );
+    expect(publishableAbstract('crossref', 'crossref abstract')).toBe('crossref abstract');
+    expect(publishableAbstract('html_meta', 'journal page meta')).toBe('journal page meta');
+    expect(publishableAbstract('trade_html', 'og:description')).toBe('og:description');
+  });
+
+  it('null abstract stays null regardless of source', () => {
+    expect(publishableAbstract('pdf', null)).toBeNull();
+    expect(publishableAbstract('pubmed_efetch', null)).toBeNull();
+  });
+});
+
 describe('digest artifact publish boundary (v0.15)', () => {
   const root = resolve(process.cwd());
   const FORBIDDEN_KEYS = ['fulltext_excerpt_md', 'figure_ocr_md'];
