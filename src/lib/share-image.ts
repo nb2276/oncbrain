@@ -130,7 +130,9 @@ export function studyShareCard(opts: {
   const vmeta = verdictMetaFor(opts.soc ?? null);
   const stripped = stripStudyNamePrefix(opts.tldr, opts.name);
   return {
-    eyebrow: `${opts.name} · ${opts.siteLabel} · ${opts.date}${conf}`,
+    // Lead with site + date (short, always survive the eyebrow truncation) then
+    // the trial name. Name-first meant a long name chopped the date to "20…".
+    eyebrow: `${opts.siteLabel} · ${opts.date}${conf} · ${opts.name}`,
     // Fall back to the name if stripping a tldr that equals the name left it blank.
     headline: stripped.trim() ? stripped : opts.name,
     tagLabel: vmeta ? vmeta.label.toUpperCase() : undefined,
@@ -159,9 +161,11 @@ export async function renderShareImage(card: ShareCard): Promise<Buffer> {
   }
   children.push(
     div(
+      // Top-align (not center): the headline reads top-down from the eyebrow
+      // instead of floating as an island with dead space above AND below.
       // wordBreak so a long UNBROKEN token (no spaces) wraps instead of running
       // off the right edge of the canvas; overflow hidden as a backstop.
-      { flex: 1, alignItems: 'center', fontSize: headlineSize(headline), fontWeight: 700, lineHeight: 1.18, color: FG, marginTop: 24, wordBreak: 'break-word', overflow: 'hidden' },
+      { flex: 1, alignItems: 'flex-start', fontSize: headlineSize(headline), fontWeight: 700, lineHeight: 1.2, color: FG, marginTop: 40, wordBreak: 'break-word', overflow: 'hidden' },
       headline,
     ),
   );

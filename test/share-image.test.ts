@@ -58,7 +58,7 @@ describe('share-image card builders', () => {
       conference: 'ASCO 2026',
       handle: '@nb2276',
     });
-    expect(c.eyebrow).toBe('FIRESTORM · CNS · 2026-06-09 · ASCO 2026');
+    expect(c.eyebrow).toBe('CNS · 2026-06-09 · ASCO 2026 · FIRESTORM');
     expect(c.headline).not.toMatch(/^FIRESTORM/); // name prefix stripped
     expect(c.headline).toContain('65.8%');
     expect(c.tagLabel).toBe('CAVEATS DOMINATE');
@@ -67,9 +67,24 @@ describe('share-image card builders', () => {
 
   it('studyShareCard: no verdict -> no colored tag, no-conf eyebrow', () => {
     const c = studyShareCard({ name: 'X', tldr: 'some result', soc: null, siteLabel: 'Breast', date: '2026-06-09', handle: '@x' });
-    expect(c.eyebrow).toBe('X · Breast · 2026-06-09');
+    expect(c.eyebrow).toBe('Breast · 2026-06-09 · X');
     expect(c.tagLabel).toBeUndefined();
     expect(c.tagColor).toBeUndefined();
+  });
+
+  it('studyShareCard: a long trial name keeps site + date at the front', () => {
+    // Regression: bug — eyebrow led with the name, so a long name chopped
+    // the date to "20…" under the 72-char truncate. Found by /qa on 2026-06-15.
+    const c = studyShareCard({
+      name: 'GEC-ESTRO APBI Patient Selection Guidelines (2026 Update)',
+      tldr: '2026 update expands low-risk APBI eligibility.',
+      soc: null,
+      siteLabel: 'Breast',
+      date: '2026-06-14',
+      handle: '@nb2276',
+    });
+    // Site + date lead so the renderer's end-truncation can never drop them.
+    expect(c.eyebrow.startsWith('Breast · 2026-06-14 · ')).toBe(true);
   });
 
   it('studyShareCard: a tldr equal to the name falls back to the name (no blank headline)', () => {
