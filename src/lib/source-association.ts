@@ -55,6 +55,14 @@ const ACRONYM_BLACKLIST = new Set([
 const ACRONYM_RE = /\b[A-Z][A-Z0-9]{2,}(?:-[A-Z0-9]+)*\b/g;
 const NCT_RE = /\bNCT\d{8}\b/g;
 
+// Staging / grade / version shorthand that carries a digit — so the "must have a
+// digit or hyphen" trial-bias check below lets it through — but is NOT a trial
+// name: FIGO3, PHASE3, GRADE3, WHO2, ECOG1, COVID19. Pattern-based so we don't
+// enumerate every numeric suffix. Two such tokens shared across unrelated items
+// would otherwise produce a spurious medium-strength merge hint.
+const ACRONYM_PATTERN_BLACKLIST =
+  /^(?:(?:FIGO|PHASE|GRADE|WHO|ECOG|RECIST|ASA|NYHA|BCLC|ISUP|AJCC|TNM|KPS)\d+|COVID-?19)$/;
+
 export function buildAssociationGraph(items: DigestInputItem[]): AssociationGroup[] {
   const groups: AssociationGroup[] = [];
   const itemTexts = items.map((i) => ({ id: itemId(i), text: itemTextForExtraction(i) }));
@@ -88,6 +96,7 @@ export function buildAssociationGraph(items: DigestInputItem[]): AssociationGrou
     for (const m of text.matchAll(ACRONYM_RE)) {
       const acr = m[0]!;
       if (ACRONYM_BLACKLIST.has(acr)) continue;
+      if (ACRONYM_PATTERN_BLACKLIST.test(acr)) continue; // FIGO3 / PHASE3 / COVID19, not a trial
       // Require at least one digit or a hyphen to bias toward trial names
       // like "PRESTIGE-PSMA" or "EORTC22922" and away from gene shorthand.
       // This is heuristic — false-positive cost dominates.

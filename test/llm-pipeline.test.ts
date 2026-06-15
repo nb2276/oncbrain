@@ -15,6 +15,8 @@ import {
   parseVerdict,
   extractJsonSpan,
   completeAndParse,
+  paperIdToSyntheticTweetId,
+  slideIdToSyntheticTweetId,
   DigestParseError,
   type DigestInputTweet,
   type DigestStudy,
@@ -1328,6 +1330,18 @@ describe('capStudyImages', () => {
   });
 });
 
+describe('synthetic-id namespace invariant', () => {
+  it('maps normal rowids into the paper/slide ranges', () => {
+    expect(paperIdToSyntheticTweetId(5)).toBe(1_000_000_005);
+    expect(slideIdToSyntheticTweetId(5)).toBe(2_000_000_005);
+  });
+  it('throws (fails loud) when a rowid would collide another namespace', () => {
+    expect(() => paperIdToSyntheticTweetId(1_000_000_000)).toThrow(/synthetic-id range/);
+    expect(() => slideIdToSyntheticTweetId(1_000_000_000)).toThrow(/synthetic-id range/);
+    expect(() => paperIdToSyntheticTweetId(-1)).toThrow(/synthetic-id range/);
+  });
+});
+
 describe('detectClusterCollisions', () => {
   it('warns when 2+ clusters share an NCT', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -1345,6 +1359,23 @@ describe('detectClusterCollisions', () => {
     expect(warn).toHaveBeenCalled();
     const msg = warn.mock.calls[0]![0] as string;
     expect(msg).toContain('NCT04567890');
+    warn.mockRestore();
+  });
+
+  it('normalizes spaced + lowercase NCT forms so they still collide', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    detectClusterCollisions(
+      [
+        { slug: 'a', name: 'TrialA', disease_site: 'prostate', tweet_ids: [1], content_type: 'study_report' as const },
+        { slug: 'b', name: 'TrialB', disease_site: 'prostate', tweet_ids: [2], content_type: 'study_report' as const },
+      ],
+      [
+        { id: 1, author: null, text: 'spaced form NCT 04567890', note: null },
+        { id: 2, author: null, text: 'lowercase nct04567890', note: null },
+      ],
+    );
+    expect(warn).toHaveBeenCalled();
+    expect(warn.mock.calls[0]![0] as string).toContain('NCT04567890');
     warn.mockRestore();
   });
 
