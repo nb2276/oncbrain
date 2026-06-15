@@ -2,6 +2,34 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.19.5] - 2026-06-15
+
+Deferred Low-severity items from the v0.19.4 audit (the bounded ones; the
+DNS-rebinding TOCTOU stays a documented residual — its fix risks TLS breakage on
+the live fetch path and is out of the single-curator threat model).
+
+### Fixed
+
+- **Trials-to-watch rerank honors the configured model.** The rerank LLM call ran
+  on the client default regardless of `DIGEST_MODEL` / `DIGEST_STUDY_MODEL` (a
+  once-per-eligible-study cost/quality drift). It now uses the Phase 2 model at
+  `temperature=0`.
+- **Cluster-collision detection catches spaced/lowercase NCTs.** `NCT 04855643`
+  and `nct04855643` are normalized before keying, so the split/over-cluster
+  warning net no longer misses them (a bare 8-digit id stays excluded — too
+  false-positive-prone in free tweet text).
+- **Synthetic-id namespace invariant enforced.** A paper/slide rowid at or past
+  the 1e9 offset now throws instead of silently reverse-mapping to the wrong
+  source (a mis-attributed clinical citation).
+- **Source-association ignores staging/grade shorthand.** `FIGO3` / `PHASE3` /
+  `GRADE3` / `WHO2` / `ECOG1` / `COVID19` are pattern-blacklisted so two
+  unrelated items sharing one don't seed a spurious merge hint.
+- **Rerank-prompt dedup.** Candidates concatenated under the same open question
+  are deduped by NCT (no double-serialization).
+- **Extended-thinking determinism warning.** `DIGEST_THINKING` logs a one-line
+  notice that Phase 2 runs at `temperature=1` (non-deterministic) instead of
+  silently breaking build reproducibility.
+
 ## [0.19.4] - 2026-06-15
 
 Full-codebase security + correctness audit (6 parallel subsystem reviewers plus
