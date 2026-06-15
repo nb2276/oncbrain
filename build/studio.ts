@@ -100,6 +100,21 @@ function run(cmd: string, args: string[]): Promise<void> {
   });
 }
 
+// Run a command as a labeled step so the TUI shows what is executing under the
+// hood instead of a silent hang. `run` keeps stdio: 'inherit', so the child's
+// own output streams right below this header (a clack spinner would fight the
+// inherited stdout). Pass an optional `[i/N]` counter for multi-step flows.
+async function runStep(
+  label: string,
+  cmd: string,
+  args: string[],
+  counter?: { i: number; n: number },
+): Promise<void> {
+  const prefix = counter ? `[${counter.i}/${counter.n}] ` : '';
+  p.log.step(`${prefix}${label}`);
+  await run(cmd, args);
+}
+
 // Cancel guard: clack returns a symbol on Ctrl+C. Type predicate so the
 // non-cancelled value narrows (drops the symbol) after the guard returns.
 function cancelled<T>(v: T | symbol): v is symbol {
@@ -117,8 +132,8 @@ async function maybeRebuild(date: string): Promise<void> {
     return;
   }
   try {
-    await run('npm', ['run', 'build:day', '--', `--date=${date}`]);
-    await run('npm', ['run', 'build']);
+    await runStep(`build:day ${date} (3-phase LLM digest)`, 'npm', ['run', 'build:day', '--', `--date=${date}`], { i: 1, n: 2 });
+    await runStep('astro build (static site)', 'npm', ['run', 'build'], { i: 2, n: 2 });
     p.log.success(`Rebuilt ${date}. Commit data/digests/${date}.json + data/obsidian/${date}*.md to publish.`);
   } catch (err) {
     p.log.error((err as Error).message);
@@ -361,8 +376,8 @@ async function buildADay(): Promise<void> {
     date = (typed as string).trim();
   }
   try {
-    await run('npm', ['run', 'build:day', '--', `--date=${date}`]);
-    await run('npm', ['run', 'build']);
+    await runStep(`build:day ${date} (3-phase LLM digest)`, 'npm', ['run', 'build:day', '--', `--date=${date}`], { i: 1, n: 2 });
+    await runStep('astro build (static site)', 'npm', ['run', 'build'], { i: 2, n: 2 });
     p.log.success(`Built ${date}.`);
   } catch (err) {
     p.log.error((err as Error).message);
@@ -371,8 +386,8 @@ async function buildADay(): Promise<void> {
 
 async function ingest(): Promise<void> {
   try {
-    await run('npm', ['run', 'pull:telegram']);
-    await run('npm', ['run', 'enrich:inbox']);
+    await runStep('pull:telegram (drain bot DMs into the inbox)', 'npm', ['run', 'pull:telegram'], { i: 1, n: 2 });
+    await runStep('enrich:inbox (tweet/paper/PDF to source tables)', 'npm', ['run', 'enrich:inbox'], { i: 2, n: 2 });
     p.log.success('Ingest complete. Use "Build a day" to publish.');
   } catch (err) {
     p.log.error((err as Error).message);
@@ -501,8 +516,8 @@ async function dailyBuild(): Promise<void> {
   const todayStr = localDateStr(today);
   const yesterdayStr = localDateStr(yesterday);
   try {
-    await run('npm', ['run', 'pull:telegram']);
-    await run('npm', ['run', 'enrich:inbox']);
+    await runStep('pull:telegram (drain bot DMs into the inbox)', 'npm', ['run', 'pull:telegram']);
+    await runStep('enrich:inbox (tweet/paper/PDF to source tables)', 'npm', ['run', 'enrich:inbox']);
 
     const db = openDb();
     const sourceDates = listAllSourceDates(db);
@@ -522,11 +537,15 @@ async function dailyBuild(): Promise<void> {
     if (stale.length > 0) {
       p.log.info(`Rebuilding ${stale.length} stale date(s): ${stale.join(', ')}`);
     }
+    p.log.info(`Building ${datesToBuild.length} date(s): ${datesToBuild.join(', ')}`);
 
-    for (const date of datesToBuild) {
-      await run('npm', ['run', 'build:day', '--', `--date=${date}`]);
+    // build:day per date + one astro build → numbered so the run is legible.
+    const total = datesToBuild.length + 1;
+    for (let i = 0; i < datesToBuild.length; i++) {
+      const date = datesToBuild[i];
+      await runStep(`build:day ${date} (3-phase LLM digest)`, 'npm', ['run', 'build:day', '--', `--date=${date}`], { i: i + 1, n: total });
     }
-    await run('npm', ['run', 'build']);
+    await runStep('astro build (static site)', 'npm', ['run', 'build'], { i: total, n: total });
     p.log.success(`Daily build complete (${datesToBuild.length} date(s)).`);
   } catch (err) {
     p.log.error((err as Error).message);
