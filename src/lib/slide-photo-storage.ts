@@ -57,20 +57,38 @@ export async function downloadTelegramFile(
   const fetchImpl = opts.fetchImpl ?? fetch;
   const timeoutMs = opts.timeoutMs ?? 15_000;
 
-  // Step 1: resolve file_id → file_path via getFile.
+  // Step 1: resolve file_id → file_path via getFile. Bound it with the same
+  // timeout as the byte download — a hung getFile (Telegram incident, network
+  // black hole) would otherwise block the whole enrich:inbox run (and the cron
+  // chained behind it) indefinitely, since this call had no AbortController.
   const metaUrl = `https://api.telegram.org/bot${token}/getFile?file_id=${encodeURIComponent(fileId)}`;
-  const metaRes = await fetchImpl(metaUrl);
-  if (metaRes.status === 401 || metaRes.status === 403) {
-    throw new TelegramFileError(`Telegram getFile auth failed (${metaRes.status})`, 'auth', metaRes.status);
-  }
-  if (!metaRes.ok) {
-    throw new TelegramFileError(`Telegram getFile HTTP ${metaRes.status}`, 'network', metaRes.status);
-  }
+  const metaController = new AbortController();
+  const metaTimer = setTimeout(() => metaController.abort(), timeoutMs);
+  // Keep the timer active through the JSON body read, not just the fetch: a
+  // server can send headers then stall during the body, which would hang
+  // metaRes.json() indefinitely if the timer were already cleared.
   let metaJson: { ok?: boolean; result?: { file_path?: string; file_size?: number } };
   try {
-    metaJson = await metaRes.json();
-  } catch (err) {
-    throw new TelegramFileError(`getFile JSON parse: ${(err as Error).message}`, 'parse');
+    const metaRes = await fetchImpl(metaUrl, { signal: metaController.signal });
+    if (metaRes.status === 401 || metaRes.status === 403) {
+      throw new TelegramFileError(`Telegram getFile auth failed (${metaRes.status})`, 'auth', metaRes.status);
+    }
+    if (!metaRes.ok) {
+      throw new TelegramFileError(`Telegram getFile HTTP ${metaRes.status}`, 'network', metaRes.status);
+    }
+    try {
+      metaJson = await metaRes.json();
+    } catch (err) {
+      // A timeout abort during the body read is TRANSIENT (network), not a
+      // permanent parse failure — classifying it 'parse' would permanently
+      // park the PDF (only 'network' is retried by the enrichment loop).
+      if (metaController.signal.aborted) {
+        throw new TelegramFileError('getFile timed out reading body', 'network');
+      }
+      throw new TelegramFileError(`getFile JSON parse: ${(err as Error).message}`, 'parse');
+    }
+  } finally {
+    clearTimeout(metaTimer);
   }
   if (!metaJson.ok || !metaJson.result?.file_path) {
     throw new TelegramFileError('getFile response missing file_path', 'not_found');

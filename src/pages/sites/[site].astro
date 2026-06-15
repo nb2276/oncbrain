@@ -5,7 +5,6 @@ import TriageRail from '../../components/TriageRail.astro';
 import TagFilterRail from '../../components/TagFilterRail.astro';
 import { listSiteSummaries, type SiteSummary } from '../../lib/digest-data.ts';
 import { getDiseaseSite } from '../../lib/disease-sites.ts';
-import { deriveSlug } from '../../lib/slug.ts';
 import { railEmojiForStudy } from '../../lib/verdict.ts';
 import { studyDataTags } from '../../lib/study-data-tags.ts';
 import { buildFilterRailOptions } from '../../lib/tag-foundations.ts';
@@ -48,7 +47,12 @@ const dates = Array.from(byDate.keys());
 // doesn't collide) — used for both the card id and the triage-rail jump link.
 const anchorByOcc = new Map<(typeof summary.occurrences)[number], string>();
 for (const occ of summary.occurrences) {
-  anchorByOcc.set(occ, `${occ.date}-${occ.study.slug ?? deriveSlug(occ.study.name)}`);
+  // Use the COLLISION-RESOLVED slug (assignSlugsForDate, computed by
+  // listSiteSummaries), not a bare deriveSlug. Inbound share/deep links from
+  // the date page + home feed are built with the resolved slug (e.g. "-2"); a
+  // bare slug here would emit duplicate ids and a "#...-2" link that lands on
+  // the wrong card / nowhere when two studies on a date share a base slug.
+  anchorByOcc.set(occ, `${occ.date}-${occ.resolvedSlug}`);
 }
 const railItems = summary.occurrences.map((occ) => ({
   href: `#${anchorByOcc.get(occ)}`,

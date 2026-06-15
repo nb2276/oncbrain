@@ -12,6 +12,9 @@ import {
   capStudyImages,
   detectClusterCollisions,
   parseDiscussedTrials,
+  parseVerdict,
+  extractJsonSpan,
+  completeAndParse,
   DigestParseError,
   type DigestInputTweet,
   type DigestStudy,
@@ -410,6 +413,22 @@ describe('parseStudyAgentResponse', () => {
   it('rejects malformed nct', () => {
     const raw = JSON.stringify({ name: 'X', tldr: 'y', details: [], nct: 'NCT123' });
     expect(parseStudyAgentResponse(raw, cluster).nct).toBeNull();
+  });
+
+  it('forces nct null for a review even if the model emits a valid one', () => {
+    // Boundary: a review names trials as plain text and must never render an
+    // inferred clinicaltrials.gov link (StudyCard's shared head links study.nct).
+    const reviewCluster = {
+      slug: 'r',
+      name: 'R',
+      disease_site: 'breast',
+      tweet_ids: [1],
+      content_type: 'review' as const,
+    };
+    const raw = JSON.stringify({ name: 'X', tldr: 'y', details: [], nct: 'NCT04567890' });
+    expect(parseStudyAgentResponse(raw, reviewCluster).nct).toBeNull();
+    // A study report with the same nct keeps it.
+    expect(parseStudyAgentResponse(raw, cluster).nct).toBe('NCT04567890');
   });
 
   it('filters non-string details', () => {
@@ -1520,5 +1539,115 @@ describe('dedupTablesAgainstCaption — figures[]', () => {
     };
     const out = dedupTablesAgainstCaption(study);
     expect(out.details).toEqual(['flat bullet', 'LF by primary']);
+  });
+});
+
+describe('parseVerdict', () => {
+  it('accepts a canonical enum value', () => {
+    const v = parseVerdict({ soc_implication: 'practice-changing', rationale: 'OS benefit' });
+    expect(v?.soc_implication).toBe('practice-changing');
+  });
+
+  it('normalizes spacing/underscore/case to the canonical slug', () => {
+    expect(parseVerdict({ soc_implication: 'Practice Changing', rationale: 'r' })?.soc_implication).toBe(
+      'practice-changing',
+    );
+    expect(parseVerdict({ soc_implication: 'practice_changing', rationale: 'r' })?.soc_implication).toBe(
+      'practice-changing',
+    );
+  });
+
+  it('DROPS the verdict on a non-empty unrecognized value (no contradictory pill)', () => {
+    // Was silently coerced to 'unclear' while keeping a strong rationale →
+    // "Unclear" beside a practice-changing rationale. Now drop the whole verdict.
+    expect(
+      parseVerdict({ soc_implication: 'likely-practice-changing', rationale: 'definitive phase III' }),
+    ).toBeUndefined();
+  });
+
+  it('defaults a MISSING soc to unclear (kept)', () => {
+    expect(parseVerdict({ rationale: 'some context' })?.soc_implication).toBe('unclear');
+  });
+
+  it('returns undefined without a rationale', () => {
+    expect(parseVerdict({ soc_implication: 'practice-changing' })).toBeUndefined();
+  });
+});
+
+describe('extractJsonSpan (prose-wrapped LLM JSON)', () => {
+  it('returns clean JSON unchanged', () => {
+    expect(extractJsonSpan('{"a":1}')).toBe('{"a":1}');
+  });
+
+  it('strips leading prose ("Here is the JSON: ...")', () => {
+    expect(JSON.parse(extractJsonSpan('Here is the JSON:\n{"a":1}'))).toEqual({ a: 1 });
+  });
+
+  it('strips a trailing sentence after the object', () => {
+    expect(JSON.parse(extractJsonSpan('{"a":1}\n\nLet me know if you want changes.'))).toEqual({
+      a: 1,
+    });
+  });
+
+  it('is not fooled by braces inside string values', () => {
+    expect(JSON.parse(extractJsonSpan('prefix {"a":"}{"} suffix'))).toEqual({ a: '}{' });
+  });
+
+  it('handles a top-level array', () => {
+    expect(JSON.parse(extractJsonSpan('result: [1,2,3] done'))).toEqual([1, 2, 3]);
+  });
+
+  it('returns from the first brace to EOF when unbalanced (truncated) — parse still fails', () => {
+    const truncated = extractJsonSpan('{"a":1, "b":');
+    expect(truncated).toBe('{"a":1, "b":');
+    expect(() => JSON.parse(truncated)).toThrow();
+  });
+
+  it('returns input unchanged when there is no JSON', () => {
+    expect(extractJsonSpan('no json here')).toBe('no json here');
+  });
+});
+
+describe('completeAndParse retry image handling', () => {
+  const content = [
+    { type: 'text' as const, text: 'analyze this study' },
+    { type: 'image' as const, url: 'https://pbs.twimg.com/media/x.jpg' },
+  ];
+  const opts = { maxTokens: 100, temperature: 0 };
+  const hasImage = (c: unknown) =>
+    Array.isArray(c) && c.some((b) => (b as { type?: string }).type === 'image');
+
+  function recordingClient(responses: Array<string | Error>) {
+    const calls: unknown[] = [];
+    let i = 0;
+    const client = {
+      complete: async (messages: Array<{ content: unknown }>) => {
+        calls.push(messages[0]!.content);
+        const r = responses[i++];
+        if (r instanceof Error) throw r;
+        return r as string;
+      },
+    } as unknown as Parameters<typeof completeAndParse>[0];
+    return { client, calls };
+  }
+
+  it('KEEPS images on a network-error retry (model never saw them) [codex /ship P1]', async () => {
+    // attempt 0 fails BEFORE responding → the repair must re-send the images,
+    // or it analyzes image-dependent content blind.
+    const { client, calls } = recordingClient([new Error('ETIMEDOUT'), '{"ok":true}']);
+    const { value } = await completeAndParse(client, content, opts, (r) => JSON.parse(r), 1, 'test');
+    expect(value).toEqual({ ok: true });
+    expect(calls).toHaveLength(2);
+    expect(hasImage(calls[1])).toBe(true);
+  });
+
+  it('DROPS images on a parse-error retry (model already saw them)', async () => {
+    // attempt 0 RESPONDED but unparseable → model already saw the images, so
+    // the repair drops them to avoid re-billing.
+    const { client, calls } = recordingClient(['not valid json', '{"ok":true}']);
+    const { value } = await completeAndParse(client, content, opts, (r) => JSON.parse(r), 1, 'test');
+    expect(value).toEqual({ ok: true });
+    expect(calls).toHaveLength(2);
+    expect(hasImage(calls[1])).toBe(false);
   });
 });

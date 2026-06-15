@@ -11,6 +11,9 @@ import {
   messageOf,
   unixToLocalDate,
   TelegramApiError,
+  parseAllowedChatIds,
+  isChatAuthorized,
+  computeNextTelegramOffset,
   type TelegramMessage,
 } from '../src/lib/telegram-ingest.ts';
 
@@ -491,5 +494,72 @@ describe('looksLikeAttemptedShare', () => {
         msg({ text: 'https://youtu.be/x and https://some-journal.org/article/5' }),
       ),
     ).toBe(true);
+  });
+});
+
+describe('parseAllowedChatIds', () => {
+  it('returns null when unset / blank (no policy = accept all + warn)', () => {
+    expect(parseAllowedChatIds(undefined)).toBeNull();
+    expect(parseAllowedChatIds(null)).toBeNull();
+    expect(parseAllowedChatIds('')).toBeNull();
+    expect(parseAllowedChatIds('   ')).toBeNull();
+  });
+
+  it('parses a comma-separated numeric list (with whitespace + negatives)', () => {
+    const s = parseAllowedChatIds(' 123 , -456,789 ');
+    expect(s).toEqual(new Set([123, -456, 789]));
+  });
+
+  it('drops non-integer tokens (keeps the valid ones)', () => {
+    expect(parseAllowedChatIds('abc, 12')).toEqual(new Set([12]));
+  });
+
+  it('a configured-but-all-invalid value fails CLOSED (empty set = deny-all, not null)', () => {
+    // Regression (codex /ship review): "abc" used to return null → accept-all.
+    // A non-blank value is a configured policy; if it has no valid ids it must
+    // deny all, not silently open the bot to everyone.
+    const s = parseAllowedChatIds('abc, , xyz');
+    expect(s).toEqual(new Set());
+    expect(s).not.toBeNull();
+    expect(isChatAuthorized(123, s)).toBe(false); // denies everyone
+  });
+});
+
+describe('isChatAuthorized', () => {
+  it('accepts everything when no allowlist is configured', () => {
+    expect(isChatAuthorized(123, null)).toBe(true);
+    expect(isChatAuthorized(null, null)).toBe(true);
+  });
+
+  it('accepts only listed chat ids when an allowlist is set', () => {
+    const allow = new Set([111, 222]);
+    expect(isChatAuthorized(111, allow)).toBe(true);
+    expect(isChatAuthorized(333, allow)).toBe(false);
+    expect(isChatAuthorized(null, allow)).toBe(false);
+  });
+});
+
+describe('computeNextTelegramOffset', () => {
+  it('advances to the high-water mark when nothing failed', () => {
+    expect(computeNextTelegramOffset([10, 11, 12], new Set(), 10)).toBe(13);
+  });
+
+  it('holds at the first (lowest) failed update so it re-fetches next run', () => {
+    // 11 failed → offset 11 (re-fetches 11 and the idempotent 12 next run),
+    // never advancing past the lost message.
+    expect(computeNextTelegramOffset([10, 11, 12], new Set([11]), 10)).toBe(11);
+  });
+
+  it('uses the lowest failed id even if a later one also failed', () => {
+    expect(computeNextTelegramOffset([10, 11, 12], new Set([12, 11]), 10)).toBe(11);
+  });
+
+  it('does not advance below the current offset (re-fetch on first-update failure)', () => {
+    // First update itself failed: offset stays put so getUpdates re-returns it.
+    expect(computeNextTelegramOffset([10, 11], new Set([10]), 10)).toBe(10);
+  });
+
+  it('returns the current offset for an empty update batch', () => {
+    expect(computeNextTelegramOffset([], new Set(), 42)).toBe(42);
   });
 });

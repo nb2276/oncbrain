@@ -160,7 +160,7 @@ DigestStudy {
   source_ids?: SourceRef[] // v0.5: typed refs → bookmarks / papers / slide_uploads
   verdict?: StudyVerdict   // v0.7: {soc_implication, rationale, audience} SOC-triage pill
   content_type?: ContentType  // v0.16: 'study_report' (default, absent) | 'review'; decided at Phase 1. A review carries NO verdict (stripped at build) and renders discussed_trials instead of a numbers-first card
-  discussed_trials?: string[] // v0.16: trial acronyms a review names, lifted verbatim, plain text (never linked / no NCT inference). Empty/absent for study reports
+  discussed_trials?: string[] // v0.16: trial acronyms a review names, lifted verbatim. Hard rule: NO NCT is ever inferred/linked for a bare acronym, and a review study itself carries no nct (forced null at parse, v0.audit). v0.17 (T6) DOES deep-link an acronym to a same-date study card the curator approved-resolved from it, via an in-page #slug anchor (discussed_trial_links) — never a clinicaltrials.gov URL. Empty/absent for study reports
 }
 ```
 

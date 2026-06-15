@@ -433,6 +433,12 @@ function buildArtifact(
           authors: parseJsonStringArray(p.authors_json, 'name'),
           journal: p.journal,
           pub_date: p.pub_date,
+          // papers.abstract is publishable: the PDF enrichment path nulls the
+          // LLM-from-PDF abstract at the source (inbox-enrichment) so only
+          // authoritative provider abstracts (Crossref/PubMed/page meta) are
+          // ever stored here. See that IP-boundary comment for why the gate is
+          // at ingestion, not here (fetched_via can't tell a Crossref abstract
+          // from a leaked one on a pdf-with-DOI row).
           abstract: p.abstract,
           // NOTE: fulltext_excerpt_md AND figure_ocr_md are deliberately NOT
           // written to the committed artifact — both are copyrighted full-text /
@@ -593,37 +599,20 @@ export async function buildOneDate(
   const paperInputs = papersToDigestInput(allPapers);
   const slideInputs = slidesToDigestInput(slidesForDate);
   const inputs: DigestInputItem[] = [...tweetInputs, ...paperInputs, ...slideInputs];
-  let digest: DigestOutput;
+  // Dry-run must NOT write: the committed data/digests/<date>.json and the
+  // Obsidian note are publish-on-push artifacts, and the old placeholder-digest
+  // path fell through to writeArtifact below, clobbering the real committed
+  // digest with a hollow one (a documented footgun). Log what would happen and
+  // return before any LLM call, override application, or disk write.
   if (args.dryRun) {
-    digest = {
-      top_line: '[dry-run] LLM not called',
-      tldr: '[dry-run] LLM not called',
-      sites: [
-        {
-          disease_site: 'other',
-          intro: '[dry-run] no LLM call was made.',
-          studies: [
-            {
-              name: '[dry-run] placeholder study',
-              tldr: `${inputs.length} bookmarks would be processed.`,
-              details: [],
-              figures: [],
-              nct: null,
-              tweet_ids: inputs.map((t) => t.id),
-            },
-          ],
-          open_questions: null,
-        },
-      ],
-      meta: {
-        clusters_total: 0,
-        studies_analyzed: 0,
-        dropped: [],
-        ocr_available: false,
-      },
-    };
-  } else {
-    digest = await buildDigest(inputs, {
+    console.log(
+      `  [dry-run] LLM not called; would process ${inputs.length} input(s) ` +
+        `(${tweetInputs.length} tweet, ${paperInputs.length} paper, ${slideInputs.length} slide) ` +
+        `→ would write data/digests/${date}.json (committed artifact left untouched)`,
+    );
+    return;
+  }
+  let digest: DigestOutput = await buildDigest(inputs, {
       conferenceName: confMeta?.name ?? `Day digest — ${date}`,
       conferenceDay: date,
       client: deps?.client,
@@ -647,15 +636,12 @@ export async function buildOneDate(
       relatedTrialsRunCache: deps?.relatedTrialsRunCache,
       relatedTrialsDeps: deps?.relatedTrialsDeps,
     });
-  }
 
   // T18: build-time tag emission summary so the curator can see at a glance
   // whether Phase 2 produced the expected distribution. Logged before override
   // application — these are the raw LLM emissions, separate from curator-
   // applied corrections (override summary logs immediately after).
-  if (!args.dryRun) {
-    console.log(`  tag emissions: ${formatTagEmissionStats(summarizeTagEmissions(digest))}`);
-  }
+  console.log(`  tag emissions: ${formatTagEmissionStats(summarizeTagEmissions(digest))}`);
 
   // Apply durable curator overrides last, so suppressed/edited studies survive
   // every rebuild (the LLM regenerates the digest from scratch each run).

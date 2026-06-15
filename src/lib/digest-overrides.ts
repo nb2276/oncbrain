@@ -14,6 +14,7 @@ import type {
 } from './llm-pipeline.ts';
 import { RELATED_TRIAL_STATUSES } from './digest-data.ts';
 import { deriveSlug } from './slug.ts';
+import { assignSlugsForDate } from './slug-resolve.ts';
 import {
   isValidModality,
   isValidIntent,
@@ -429,11 +430,24 @@ export function applyOverrides(
   const seenSlugs = new Set<string>();
   const droppedStudies: Array<{ slug: string; name: string; reason: string }> = [];
 
+  // Match overrides against the COLLISION-RESOLVED slug (assignSlugsForDate over
+  // the flattened per-date study list, in the SAME order the renderer uses),
+  // not the raw per-study slug. Raw matching meant two studies sharing a base
+  // slug were BOTH dropped by a single suppress (and double-counted), while the
+  // curator could never target the "-2" one shown on the page. The resolved
+  // slug is unique per study, so a suppress/edit hits exactly one. Keyed by
+  // object identity.
+  const allStudies = digest.sites.flatMap((s) => s.studies);
+  const resolvedSlugList = assignSlugsForDate(allStudies);
+  const slugByStudy = new Map<DigestStudy, string>();
+  allStudies.forEach((st, i) => slugByStudy.set(st, resolvedSlugList[i] ?? studySlug(st)));
+  const slugFor = (study: DigestStudy): string => slugByStudy.get(study) ?? studySlug(study);
+
   const sites = digest.sites
     .map((site) => {
       const studies = site.studies
         .filter((study) => {
-          const slug = studySlug(study);
+          const slug = slugFor(study);
           seenSlugs.add(slug);
           if (suppress.has(slug)) {
             summary.suppressed.push(slug);
@@ -443,7 +457,7 @@ export function applyOverrides(
           return true;
         })
         .map((study) => {
-          const slug = studySlug(study);
+          const slug = slugFor(study);
           let next = study;
           const edit = edits[slug];
           if (edit) {

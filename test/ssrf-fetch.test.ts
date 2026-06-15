@@ -27,8 +27,20 @@ describe('isPrivateIP', () => {
       expect(isPrivateIP(ip), ip).toBe(true);
     }
   });
+  it('flags the full fe80::/10 link-local range, not just fe80 (codex)', () => {
+    for (const ip of ['fe90::1', 'fea0::1', 'feb0::1', 'febf::1']) {
+      expect(isPrivateIP(ip), ip).toBe(true);
+    }
+  });
+  it('flags hex-encoded IPv4-mapped link-local (::ffff:a9fe:a9fe = 169.254.169.254)', () => {
+    expect(isPrivateIP('::ffff:a9fe:a9fe')).toBe(true); // AWS metadata
+    expect(isPrivateIP('::ffff:7f00:1')).toBe(true); // 127.0.0.1
+  });
   it('allows public v6', () => {
     expect(isPrivateIP('2606:4700:4700::1111')).toBe(false);
+    // fec0::/10 (site-local, deprecated) is not link-local; the regex is scoped
+    // to fe80..febf so a public-ish fe00 prefix outside the range isn't flagged.
+    expect(isPrivateIP('2001:4860:4860::8888')).toBe(false);
   });
   it('treats malformed input as unsafe', () => {
     expect(isPrivateIP('not-an-ip')).toBe(true);

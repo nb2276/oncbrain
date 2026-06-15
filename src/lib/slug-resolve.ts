@@ -35,17 +35,27 @@ export function assignSlugsForDate<T extends WithName>(studies: readonly T[]): s
     } else {
       // Suffix -2, -3, ... Truncate the base if the suffix would push past
       // MAX_SLUG_LEN so the resulting id stays inside the safe-slug regex.
-      const suffix = `-${count + 1}`;
-      const trimmedBase = base.length + suffix.length > MAX_SLUG_LEN
-        ? base.slice(0, MAX_SLUG_LEN - suffix.length).replace(/-+$/, '')
-        : base;
-      const resolved = `${trimmedBase}${suffix}`;
+      // LOOP until the candidate is actually unused: the old code reserved the
+      // resolved slug AFTER pushing it, which only guarded a FUTURE base — an
+      // explicit slug like "x-2" appearing before two "x" studies still
+      // collided ("x","x" → "x-2" duplicating the explicit "x-2"), producing
+      // duplicate DOM ids + ambiguous anchors/API/search links. Increment the
+      // suffix past any already-emitted candidate.
+      let n = count + 1;
+      let resolved: string;
+      do {
+        const suffix = `-${n}`;
+        const trimmedBase = base.length + suffix.length > MAX_SLUG_LEN
+          ? base.slice(0, MAX_SLUG_LEN - suffix.length).replace(/-+$/, '')
+          : base;
+        resolved = `${trimmedBase}${suffix}`;
+        n++;
+      } while (seen.has(resolved));
       out.push(resolved);
       seen.set(base, count + 1);
-      // Also reserve the resolved slug so a name that derives directly to
-      // "foo-2" won't double-collide with the suffixed form. Edge case but
-      // cheap to guard.
-      seen.set(resolved, (seen.get(resolved) ?? 0) + 1);
+      // Reserve the resolved slug so a later base that derives directly to it
+      // won't collide.
+      seen.set(resolved, 1);
     }
   }
   return out;

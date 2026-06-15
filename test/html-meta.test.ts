@@ -164,17 +164,21 @@ describe('extractArticleText', () => {
     expect(text).not.toContain('NCT09999999');
   });
 
-  it('stays bounded on a huge malformed input (ReDoS guard — completes fast)', () => {
+  it('stays bounded on a huge malformed input (ReDoS guard — does not hang)', () => {
     // Many unmatched open tags would be O(n^2) on the lazy subtree-strip regex
-    // without the size cap. Assert it returns quickly rather than hanging.
+    // without the size cap. Assert it COMPLETES (returns a string) rather than
+    // hanging, and within a generous ceiling.
     const huge = '<nav>'.repeat(400_000) + '<article><p>body NCT05000002</p></article>';
     const start = Date.now();
     const text = extractArticleText(huge);
-    // Uncapped this is ~90s on 2M chars; the 128KB cap brings it to ~300ms. A
-    // 3s ceiling proves the cap engaged without flaking on slow CI.
-    expect(Date.now() - start).toBeLessThan(3000);
     expect(typeof text).toBe('string');
-  });
+    // Uncapped this is ~90s on 2M chars; the 128KB cap bounds it to well under a
+    // second nominally. The ceiling is deliberately generous (was 3s, which
+    // flaked under full-suite parallel load at ~4.5s) — it only needs to
+    // distinguish "cap engaged" from "uncapped multi-minute hang", not assert a
+    // tight latency. The 20s explicit test timeout below is the hang backstop.
+    expect(Date.now() - start).toBeLessThan(15000);
+  }, 20000);
 });
 
 describe('extractOgDescription', () => {

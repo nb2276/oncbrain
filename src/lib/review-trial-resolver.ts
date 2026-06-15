@@ -153,8 +153,15 @@ export async function resolveReviewTrials(
     let candidates: PubMedSummary[] = [];
     let transient = false;
     try {
-      let res = await deps.search(`${raw}[Title] AND ${diseaseQuery}`);
-      if (res.pmids.length === 0) res = await deps.search(`${raw} AND ${diseaseQuery}`);
+      // Quote the verbatim acronym so [Title] binds to the WHOLE phrase: PubMed
+      // binds a field tag to only the immediately-preceding token, so an unquoted
+      // `CheckMate 274[Title]` title-scopes just "274" and silently mis-resolves;
+      // quoting also neutralizes embedded boolean tokens (NOT/OR/AND) and field
+      // tags that would otherwise reshape the query. Strip any embedded
+      // double-quotes first so they can't break out of the quoted phrase.
+      const quoted = `"${raw.replace(/"/g, ' ').trim()}"`;
+      let res = await deps.search(`${quoted}[Title] AND ${diseaseQuery}`);
+      if (res.pmids.length === 0) res = await deps.search(`${quoted} AND ${diseaseQuery}`);
       if (res.pmids.length > 0) candidates = await deps.summarize(res.pmids);
     } catch (err) {
       log(`  [resolve] ${acronymNorm}: search failed (transient, will retry) — ${(err as Error).message}`);

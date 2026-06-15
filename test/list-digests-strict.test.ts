@@ -121,4 +121,35 @@ describe('listDigestsStrict', () => {
     writeArtifact('2026-05-27.json', '{}');
     expect(() => listDigestsStrict(tempDir)).toThrowError(/delete the file and rerun/);
   });
+
+  it('memo invalidates when the corpus changes (new file picked up on next read)', () => {
+    const art = (date: string) =>
+      JSON.stringify({
+        date,
+        conference: null,
+        generated_at: 0,
+        digest: { top_line: '', tldr: '', sites: [] },
+        bookmarks: [],
+      });
+    writeArtifact('2026-05-26.json', art('2026-05-26'));
+    expect(listDigestsStrict(tempDir).map((d) => d.date)).toEqual(['2026-05-26']);
+    // Add a second file to the SAME dir — the (name,mtime,size) signature
+    // changes, so the cached result must NOT be returned stale.
+    writeArtifact('2026-05-27.json', art('2026-05-27'));
+    expect(listDigestsStrict(tempDir).map((d) => d.date)).toEqual(['2026-05-27', '2026-05-26']);
+  });
+
+  it('a newly-malformed file is NOT masked by a prior valid cache', () => {
+    const valid = JSON.stringify({
+      date: '2026-05-26',
+      conference: null,
+      generated_at: 0,
+      digest: { top_line: '', tldr: '', sites: [] },
+      bookmarks: [],
+    });
+    writeArtifact('2026-05-26.json', valid);
+    expect(listDigestsStrict(tempDir)).toHaveLength(1); // caches a valid read
+    writeArtifact('2026-05-27.json', 'not json'); // corpus changed → re-read
+    expect(() => listDigestsStrict(tempDir)).toThrowError(/malformed JSON/);
+  });
 });

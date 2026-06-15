@@ -308,6 +308,11 @@ function parseOneStudy(raw: unknown): CandidateTrial | null {
   const brief_title = typeof ident.briefTitle === 'string' ? ident.briefTitle.trim() : '';
   const overall_status_raw = typeof status.overallStatus === 'string' ? status.overallStatus.trim() : '';
   if (!nct || !brief_title || !overall_status_raw) return null;
+  // Validate the NCT shape before it becomes a candidates-map key, flows into the
+  // rerank prompt ("copy the EXACT NCT id"), and renders as a live
+  // clinicaltrials.gov/study/<id> link. A contract-drifted or garbage identifier
+  // would otherwise publish a broken/garbage deep link. Mirrors the PMID guard.
+  if (!/^NCT\d{8}$/.test(nct)) return null;
   if (!isAcceptedStatus(overall_status_raw)) return null;
 
   const phaseArr = Array.isArray(design.phases)
@@ -318,7 +323,10 @@ function parseOneStudy(raw: unknown): CandidateTrial | null {
   const enrollment = isObject(design.enrollmentInfo)
     ? (design.enrollmentInfo as Record<string, unknown>).count
     : null;
-  const enrollment_count = typeof enrollment === 'number' && Number.isFinite(enrollment) ? enrollment : null;
+  const enrollment_count =
+    typeof enrollment === 'number' && Number.isFinite(enrollment) && enrollment >= 0
+      ? enrollment
+      : null;
 
   const primaryStruct = isObject(status.primaryCompletionDateStruct)
     ? (status.primaryCompletionDateStruct as Record<string, unknown>)
@@ -371,10 +379,12 @@ function trimToYearMonth(raw: string | null): string | null {
   if (!raw) return null;
   const trimmed = raw.trim();
   if (!trimmed) return null;
-  // YYYY, YYYY-MM, YYYY-MM-DD
+  // YYYY, YYYY-MM, YYYY-MM-DD — month must be 01..12 (a dirty CT.gov record
+  // could carry "2027-13"; fall back to year-only rather than publish it).
   const m = trimmed.match(/^(\d{4})(?:-(\d{2}))?(?:-\d{2})?$/);
   if (!m) return null;
-  return m[2] ? `${m[1]}-${m[2]}` : m[1]!;
+  const month = m[2] ? Number(m[2]) : null;
+  return month && month >= 1 && month <= 12 ? `${m[1]}-${m[2]}` : m[1]!;
 }
 
 function truncate(s: string, cap: number): string {

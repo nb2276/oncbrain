@@ -40,6 +40,14 @@ describe('PDF publish boundary', () => {
 // explicit field allowlist, but that's hand-maintained — a future `...p` spread
 // would silently start publishing. This guards the real deploy surface so the
 // boundary can't regress without a red test.
+// PDF-derived abstracts: the LLM-from-PDF abstract is dropped at the SOURCE
+// (inbox-enrichment nulls meta.abstract before savePaper) so it never reaches
+// papers.abstract, which is published. Only an authoritative Crossref abstract
+// repopulates it on a PDF-with-DOI row. The gate is at ingestion (not build)
+// because fetched_via can't distinguish a publishable Crossref abstract from a
+// leaked LLM one on the same fetched_via='pdf' row — codex /ship review caught
+// that a build-time fetched_via gate would wrongly drop legit Crossref abstracts.
+
 describe('digest artifact publish boundary (v0.15)', () => {
   const root = resolve(process.cwd());
   const FORBIDDEN_KEYS = ['fulltext_excerpt_md', 'figure_ocr_md'];

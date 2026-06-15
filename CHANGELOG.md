@@ -2,6 +2,75 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.19.4] - 2026-06-15
+
+Full-codebase security + correctness audit (6 parallel subsystem reviewers plus
+two independent Codex adversarial passes). No new features; hardening, bug fixes,
+and ~80 new regression tests. The Codex pre-landing review caught five regressions
+in the fixes themselves; all are resolved and tested.
+
+### Security
+
+- **Telegram ingestion can be locked to the curator.** `pull:telegram` had no
+  sender check, so anyone who found the bot could submit content the 6am cron
+  then enriched and auto-published. New `TELEGRAM_ALLOWED_CHAT_IDS` (comma-
+  separated chat ids) restricts ingestion; a non-matching update is skipped and
+  the offset still advances past it. Unset keeps prior behavior but logs a
+  warning plus the chat ids seen, so locking down is one copy-paste. A
+  configured-but-invalid value fails closed (deny-all), never open.
+- **Admin server binds loopback.** `@hono/node-server` defaults to `0.0.0.0`, so
+  the unauthenticated bookmark/conference mutation endpoints were reachable from
+  the LAN despite the "localhost only" intent. It now binds `127.0.0.1`.
+- **SSRF guard hardened.** IPv6 link-local detection now covers the full
+  `fe80::/10` range (was only `fe80`, missing `fe90..febf`) and decodes hex-form
+  IPv4-mapped addresses (`::ffff:a9fe:a9fe` = the `169.254.169.254` metadata IP).
+  The response body is read incrementally and capped instead of buffered whole
+  via `res.text()`, so a chunked / no-Content-Length response can't exhaust
+  memory; the timeout now also spans the body read.
+- **Poppler shell-outs bounded.** `pdftotext`/`pdftoppm` output is capped (64MB)
+  and termination escalates SIGTERM to SIGKILL, so a malicious PDF that floods
+  stdout or ignores SIGTERM can't exhaust memory or keep running.
+
+### Fixed
+
+- **IP boundary: PDF full text can no longer leak via the abstract.** A PDF's
+  abstract is LLM-extracted from the copyrighted full text and was published to
+  the site + JSON API. The LLM-from-PDF abstract is now dropped at ingestion, so
+  `papers.abstract` only ever holds an authoritative provider abstract
+  (Crossref/PubMed/page meta) or null; a PDF-with-DOI keeps its publishable
+  Crossref abstract.
+- **`build:day --dry-run` no longer clobbers the committed digest.** Dry-run
+  fabricated a placeholder and fell through to the same write, overwriting the
+  real `data/digests/<date>.json` and Obsidian note. It now logs what it would
+  do and returns before any write.
+- **6am cron is safer.** The auto-commit is scoped to `data/` (a stray staged
+  source file could otherwise ride to production), and commit/push is skipped
+  when a `build:day` stage failed (no auto-publish of a partial/stale day).
+- **Reviews never render an inferred trial link.** A `content_type: review` study
+  could carry an `nct` that the shared card head rendered as a ClinicalTrials.gov
+  link; `nct` is now forced null for reviews at parse.
+- **Telegram messages aren't lost on a transient write failure.** The poll offset
+  is held at the first failed inbox write so the message re-fetches next run
+  (idempotent via the unique index) instead of being skipped.
+- **Robustness + correctness:** `getFile` now has a timeout spanning its body
+  read; slug disambiguation no longer emits a duplicate id when an explicit
+  `-N` slug precedes a colliding base; `/sites/<site>` anchors and curator
+  override matching use the collision-resolved slug; the per-study verdict
+  normalizes its value and drops (rather than mislabels as "unclear") an
+  off-taxonomy one; malformed/prose-wrapped LLM JSON is recovered via a
+  balanced-span fallback before a study is dropped; CT.gov ids are validated
+  (`NCT\d{8}`, non-negative enrollment, month 01-12); the review-to-trial
+  resolver quotes the verbatim acronym in its PubMed query; the papers-table
+  migrations carry `figure_ocr_md` forward.
+
+### Performance
+
+- **Digest-corpus loaders are memoized.** `listDigests`/`listDigestsStrict`
+  re-read and re-parsed every artifact on every per-page render (an
+  O(pages x files) build cliff); they now cache by a cheap directory
+  (name, mtime, size) signature that auto-invalidates when a file changes. The
+  LLM schema-repair retry also no longer re-sends (re-bills) image blocks.
+
 ## [0.19.3] - 2026-06-15
 
 ### Removed
