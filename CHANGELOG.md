@@ -2,6 +2,23 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.19.2] - 2026-06-15
+
+### Fixed
+
+- **The installed PWA now picks up new deploys on its own.** A home-screen PWA is
+  resumed, not reloaded, so the service-worker registration's one-shot update
+  check (wired to the `load` event) never re-fired. The old worker kept serving
+  its frozen cache, so a new deploy stayed invisible until a rare full reload or
+  the browser's infrequent ~24h background check — the root cause behind several
+  "I shipped it but don't see it in the app" reports. The registration now
+  re-checks for a new worker on every foreground (`visibilitychange`) and hourly
+  while open, and registers with `updateViaCache: 'none'` so the worker script
+  bypasses the HTTP/CDN cache (it ships with `s-maxage=86400` at the edge). Both
+  feed the existing "New version · Refresh" toast; nothing reloads mid-scroll
+  until the reader taps. (One manual hard-refresh is still needed for an existing
+  install to load this registration change the first time.)
+
 ## [0.19.1] - 2026-06-15
 
 ### Fixed
