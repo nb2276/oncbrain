@@ -536,7 +536,10 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
         };
         window.addEventListener('load', function () {
           navigator.serviceWorker
-            .register('/pwa-sw.js', { scope: '/' })
+            // updateViaCache:'none' so the worker script (and its imports) are
+            // always byte-checked against the network, never served from the
+            // HTTP/CDN cache (the SW ships with s-maxage=86400 at the edge).
+            .register('/pwa-sw.js', { scope: '/', updateViaCache: 'none' })
             .then(function (reg) {
               // Prompt only on an UPDATE (a controller already runs this page),
               // never on first install.
@@ -551,6 +554,18 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
                   if (installing.state === 'installed') maybePrompt();
                 });
               });
+              // v0.19.2: a home-screen PWA is RESUMED, not reloaded, so the
+              // `load` handler's one-shot update check never re-fires and a new
+              // deploy stays invisible until a rare full reload. Re-check for a
+              // new SW whenever the app is brought to the foreground, and hourly
+              // while it stays open. Both feed the updatefound -> toast flow
+              // above; nothing reloads until the reader taps Refresh.
+              var checkForUpdate = function () {
+                if (document.visibilityState !== 'visible') return;
+                try { reg.update(); } catch (e) { /* update() can throw if the SW is unregistering */ }
+              };
+              document.addEventListener('visibilitychange', checkForUpdate);
+              setInterval(checkForUpdate, 60 * 60 * 1000);
             })
             .catch(function () {});
         });
