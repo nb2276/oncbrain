@@ -2,6 +2,20 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.19.3] - 2026-06-15
+
+### Removed
+
+- **Dropped the orphaned per-study share image.** The v0.19.1 switch to URL-first
+  sharing stopped reading `data-share-image`, which left the whole per-study OG
+  path dead: the `/og/study/<date>/<slug>.png` endpoint (74 unused PNGs rendered
+  on every build), the `studyShareCard` builder that fed it, and the
+  `data-share-image` attribute emitted by StudyCard + the recent feed (plus the
+  `shareImageUrl` prop threaded through the date and site pages). Removed all of
+  it. The page-level OG cards (`/og/<date>.png`, `/og/sites/<site>.png`) are
+  unchanged and still drive the link-unfurl previews, so there is no behavior
+  change — just a smaller, faster build.
+
 ## [0.19.2] - 2026-06-15
 
 ### Fixed

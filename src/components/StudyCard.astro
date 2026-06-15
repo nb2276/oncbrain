@@ -49,10 +49,6 @@ interface Props {
   // Optional canonical share URL (per-site page anchor: /sites/{site}/#{date}-{slug}).
   // Absent → share button is not rendered. Absolutized at click time in share-script.ts.
   shareUrl?: string;
-  // v0.14 T4 Option B: optional per-study share-card image (/og/study/<date>/<slug>.png).
-  // When present + the platform can share files, the share button posts the card
-  // image; otherwise it falls back to the URL share. Absent → URL share only.
-  shareImageUrl?: string;
   // v0.10: pre-resolved cross-cutting tag chips. Caller passes via
   // studyTagChips() so the label resolution happens where conference
   // context lives (meeting labels need digest.conference.name, which the
@@ -82,7 +78,6 @@ const {
   anchorId,
   authors = [],
   shareUrl,
-  shareImageUrl,
   tagChips = [],
   siblings = [],
   dataTags,
@@ -319,7 +314,6 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
         type="button"
         class="study-share"
         data-share-url={shareUrl}
-        data-share-image={shareImageUrl || undefined}
         data-share-title={study.name}
         aria-label={`Share ${study.name}`}
         title="Share"
