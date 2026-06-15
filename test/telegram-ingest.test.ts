@@ -510,9 +510,18 @@ describe('parseAllowedChatIds', () => {
     expect(s).toEqual(new Set([123, -456, 789]));
   });
 
-  it('drops non-integer tokens; null if none survive', () => {
+  it('drops non-integer tokens (keeps the valid ones)', () => {
     expect(parseAllowedChatIds('abc, 12')).toEqual(new Set([12]));
-    expect(parseAllowedChatIds('abc, , xyz')).toBeNull();
+  });
+
+  it('a configured-but-all-invalid value fails CLOSED (empty set = deny-all, not null)', () => {
+    // Regression (codex /ship review): "abc" used to return null → accept-all.
+    // A non-blank value is a configured policy; if it has no valid ids it must
+    // deny all, not silently open the bot to everyone.
+    const s = parseAllowedChatIds('abc, , xyz');
+    expect(s).toEqual(new Set());
+    expect(s).not.toBeNull();
+    expect(isChatAuthorized(123, s)).toBe(false); // denies everyone
   });
 });
 

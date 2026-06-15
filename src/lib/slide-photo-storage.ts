@@ -64,23 +64,25 @@ export async function downloadTelegramFile(
   const metaUrl = `https://api.telegram.org/bot${token}/getFile?file_id=${encodeURIComponent(fileId)}`;
   const metaController = new AbortController();
   const metaTimer = setTimeout(() => metaController.abort(), timeoutMs);
-  let metaRes: Awaited<ReturnType<typeof fetchImpl>>;
-  try {
-    metaRes = await fetchImpl(metaUrl, { signal: metaController.signal });
-  } finally {
-    clearTimeout(metaTimer);
-  }
-  if (metaRes.status === 401 || metaRes.status === 403) {
-    throw new TelegramFileError(`Telegram getFile auth failed (${metaRes.status})`, 'auth', metaRes.status);
-  }
-  if (!metaRes.ok) {
-    throw new TelegramFileError(`Telegram getFile HTTP ${metaRes.status}`, 'network', metaRes.status);
-  }
+  // Keep the timer active through the JSON body read, not just the fetch: a
+  // server can send headers then stall during the body, which would hang
+  // metaRes.json() indefinitely if the timer were already cleared.
   let metaJson: { ok?: boolean; result?: { file_path?: string; file_size?: number } };
   try {
-    metaJson = await metaRes.json();
-  } catch (err) {
-    throw new TelegramFileError(`getFile JSON parse: ${(err as Error).message}`, 'parse');
+    const metaRes = await fetchImpl(metaUrl, { signal: metaController.signal });
+    if (metaRes.status === 401 || metaRes.status === 403) {
+      throw new TelegramFileError(`Telegram getFile auth failed (${metaRes.status})`, 'auth', metaRes.status);
+    }
+    if (!metaRes.ok) {
+      throw new TelegramFileError(`Telegram getFile HTTP ${metaRes.status}`, 'network', metaRes.status);
+    }
+    try {
+      metaJson = await metaRes.json();
+    } catch (err) {
+      throw new TelegramFileError(`getFile JSON parse: ${(err as Error).message}`, 'parse');
+    }
+  } finally {
+    clearTimeout(metaTimer);
   }
   if (!metaJson.ok || !metaJson.result?.file_path) {
     throw new TelegramFileError('getFile response missing file_path', 'not_found');

@@ -392,16 +392,6 @@ type DigestArtifact = {
   }>;
 };
 
-// Publish-boundary gate for a paper abstract. A PDF/OCR-sourced abstract is
-// LLM-extracted from the copyrighted, local-only full text (pdf-meta) and is
-// uncapped, so it must not reach the committed/public artifact — publishing it
-// leaks PDF content the same way fulltext_excerpt_md would (v0.8 IP boundary).
-// Authoritative public-metadata providers (PubMed/Crossref/journal+trade page
-// meta) yield a publishable abstract. Exported for the publish-boundary test.
-export function publishableAbstract(fetchedVia: string, abstract: string | null): string | null {
-  return fetchedVia === 'pdf' || fetchedVia === 'pdf_ocr' ? null : abstract;
-}
-
 function buildArtifact(
   date: string,
   conference: { slug: string; name: string } | null,
@@ -443,14 +433,13 @@ function buildArtifact(
           authors: parseJsonStringArray(p.authors_json, 'name'),
           journal: p.journal,
           pub_date: p.pub_date,
-          // PDF-derived abstracts are LLM-extracted from the copyrighted,
-          // local-only full text (pdf-meta) and are UNCAPPED — publishing them
-          // would leak PDF content the same way fulltext_excerpt_md would
-          // (v0.8 IP boundary). Only authoritative public-metadata providers
-          // (PubMed/Crossref/journal+trade page meta) yield a publishable
-          // abstract; a PDF/OCR-sourced abstract stays in the DB for the local
-          // Obsidian note but is dropped from the committed/public artifact.
-          abstract: publishableAbstract(p.fetched_via, p.abstract),
+          // papers.abstract is publishable: the PDF enrichment path nulls the
+          // LLM-from-PDF abstract at the source (inbox-enrichment) so only
+          // authoritative provider abstracts (Crossref/PubMed/page meta) are
+          // ever stored here. See that IP-boundary comment for why the gate is
+          // at ingestion, not here (fetched_via can't tell a Crossref abstract
+          // from a leaked one on a pdf-with-DOI row).
+          abstract: p.abstract,
           // NOTE: fulltext_excerpt_md AND figure_ocr_md are deliberately NOT
           // written to the committed artifact — both are copyrighted full-text /
           // figure content, and the build-time LLM reads them from the DB (not

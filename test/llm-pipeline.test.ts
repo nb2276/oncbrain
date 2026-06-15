@@ -14,6 +14,7 @@ import {
   parseDiscussedTrials,
   parseVerdict,
   extractJsonSpan,
+  completeAndParse,
   DigestParseError,
   type DigestInputTweet,
   type DigestStudy,
@@ -1604,5 +1605,49 @@ describe('extractJsonSpan (prose-wrapped LLM JSON)', () => {
 
   it('returns input unchanged when there is no JSON', () => {
     expect(extractJsonSpan('no json here')).toBe('no json here');
+  });
+});
+
+describe('completeAndParse retry image handling', () => {
+  const content = [
+    { type: 'text' as const, text: 'analyze this study' },
+    { type: 'image' as const, url: 'https://pbs.twimg.com/media/x.jpg' },
+  ];
+  const opts = { maxTokens: 100, temperature: 0 };
+  const hasImage = (c: unknown) =>
+    Array.isArray(c) && c.some((b) => (b as { type?: string }).type === 'image');
+
+  function recordingClient(responses: Array<string | Error>) {
+    const calls: unknown[] = [];
+    let i = 0;
+    const client = {
+      complete: async (messages: Array<{ content: unknown }>) => {
+        calls.push(messages[0]!.content);
+        const r = responses[i++];
+        if (r instanceof Error) throw r;
+        return r as string;
+      },
+    } as unknown as Parameters<typeof completeAndParse>[0];
+    return { client, calls };
+  }
+
+  it('KEEPS images on a network-error retry (model never saw them) [codex /ship P1]', async () => {
+    // attempt 0 fails BEFORE responding → the repair must re-send the images,
+    // or it analyzes image-dependent content blind.
+    const { client, calls } = recordingClient([new Error('ETIMEDOUT'), '{"ok":true}']);
+    const { value } = await completeAndParse(client, content, opts, (r) => JSON.parse(r), 1, 'test');
+    expect(value).toEqual({ ok: true });
+    expect(calls).toHaveLength(2);
+    expect(hasImage(calls[1])).toBe(true);
+  });
+
+  it('DROPS images on a parse-error retry (model already saw them)', async () => {
+    // attempt 0 RESPONDED but unparseable → model already saw the images, so
+    // the repair drops them to avoid re-billing.
+    const { client, calls } = recordingClient(['not valid json', '{"ok":true}']);
+    const { value } = await completeAndParse(client, content, opts, (r) => JSON.parse(r), 1, 'test');
+    expect(value).toEqual({ ok: true });
+    expect(calls).toHaveLength(2);
+    expect(hasImage(calls[1])).toBe(false);
   });
 });

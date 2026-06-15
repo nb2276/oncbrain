@@ -120,6 +120,11 @@ async function main() {
       '  ⚠ TELEGRAM_ALLOWED_CHAT_IDS unset — ingesting messages from ANY Telegram user. ' +
         'Set it (comma-separated chat ids) in .env to lock ingestion to the curator.',
     );
+  } else if (allowedChatIds.size === 0) {
+    console.warn(
+      '  ⚠ TELEGRAM_ALLOWED_CHAT_IDS is set but has no valid chat ids — DENYING ALL ingestion ' +
+        '(fail-closed). Fix the value in .env (comma-separated numeric chat ids).',
+    );
   }
 
   let savedTweets = 0;

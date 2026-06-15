@@ -405,6 +405,17 @@ async function enrichPdfPaper(
     return { status: 'failed', reason: `pdf metadata LLM error: ${(err as Error).message}` };
   }
 
+  // IP boundary (audit 2026-06-15): the LLM-extracted abstract is derived from
+  // the copyrighted PDF full text and is uncapped, so it must NEVER reach
+  // papers.abstract, which IS published (site + JSON API). Drop it here; only an
+  // authoritative Crossref abstract (fetched below when the PDF carries a DOI)
+  // may repopulate a publishable abstract. The full text stays local-only in
+  // fulltext_excerpt_md. (This is why the abstract is gated at the source rather
+  // than at build: a PDF-with-DOI legitimately carries a publishable Crossref
+  // abstract on the same fetched_via='pdf' row, so fetched_via alone can't tell
+  // a safe abstract from a leaked one.)
+  meta = { ...meta, abstract: null };
+
   // 4b. When the PDF carries a DOI, prefer authoritative bibliographic metadata
   // from Crossref over text-derived values. Image/scanned PDFs (e.g. a Wiley
   // download-watermarked scan) can leave the extractor reading only the watermark,

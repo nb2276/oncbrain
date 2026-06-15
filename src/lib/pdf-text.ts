@@ -405,6 +405,11 @@ function runPoppler(
     timer = setTimeout(() => terminate(`${binary} timed out after ${timeoutMs}ms`), timeoutMs);
 
     proc.stdout?.on('data', (c: Buffer) => {
+      // Once we've terminated (timeout/overflow/close), ignore further data —
+      // the child can still emit during the SIGTERM→SIGKILL grace window, and
+      // appending it would defeat the memory cap on the timeout path (where
+      // outBytes hasn't crossed MAX yet).
+      if (settled) return;
       outBytes += c.length;
       if (outBytes > MAX_POPPLER_OUTPUT_BYTES) {
         terminate(`${binary} output exceeded ${MAX_POPPLER_OUTPUT_BYTES} bytes`);
@@ -413,6 +418,7 @@ function runPoppler(
       stdout += c.toString('utf-8');
     });
     proc.stderr?.on('data', (c: Buffer) => {
+      if (settled) return;
       // Bound stderr too so a noisy failure can't balloon memory.
       if (stderr.length < MAX_POPPLER_OUTPUT_BYTES) stderr += c.toString('utf-8');
     });

@@ -2509,7 +2509,7 @@ function buildImageManifest(tweets: DigestInputTweet[]): { text: string; urls: s
 // (currently: runStudyAgent surfaces the raw to the related-trials
 // orchestrator so it can read `related_search`). Existing callers that
 // don't need the raw destructure { value } and ignore raw.
-async function completeAndParse<T>(
+export async function completeAndParse<T>(
   client: LlmClient,
   content: LlmContentBlock[],
   opts: { model?: string; maxTokens: number; temperature: number; thinkingBudget?: number },
@@ -2521,21 +2521,25 @@ async function completeAndParse<T>(
   let lastRaw: string | undefined;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const feedbackBlock = {
+      type: 'text' as const,
+      text: `\n\nYour previous response could not be parsed. The error was: ${lastError?.message ?? 'unknown'}\n\nRe-emit ONLY the JSON object exactly as specified by the schema. No code fences, no explanation, no leading or trailing text. Your previous response was:\n${lastRaw ?? '(empty)'}`,
+    };
     const attemptContent =
       attempt === 0
         ? content
-        : [
-            // Repair only needs to fix JSON shape; the model already saw the
-            // images on attempt 0. Re-sending image blocks re-bills them (images
-            // aren't prompt-cached) and bloats what is already the most expensive
-            // call in the build (a truncation-driven failure means a long prompt).
-            // Keep only the text blocks + the feedback.
-            ...content.filter((b) => b.type === 'text'),
-            {
-              type: 'text' as const,
-              text: `\n\nYour previous response could not be parsed. The error was: ${lastError?.message ?? 'unknown'}\n\nRe-emit ONLY the JSON object exactly as specified by the schema. No code fences, no explanation, no leading or trailing text. Your previous response was:\n${lastRaw ?? '(empty)'}`,
-            },
-          ];
+        : lastRaw !== undefined
+          ? // Prior attempt RESPONDED but failed to PARSE — the model already
+            // saw the images on that attempt, so drop them on the repair to
+            // avoid re-billing (images aren't prompt-cached) and to keep what is
+            // already the most expensive call in the build small. Repair only
+            // needs to fix JSON shape.
+            [...content.filter((b) => b.type === 'text'), feedbackBlock]
+          : // Prior attempt failed BEFORE producing a response (network/backend
+            // error) — the model never saw the images, so keep the FULL content
+            // incl. image blocks, or the retry would analyze image-dependent
+            // content blind and fabricate / report "image not accessible".
+            [...content, feedbackBlock];
     try {
       const raw = await client.complete([{ role: 'user', content: attemptContent }], {
         model: opts.model,

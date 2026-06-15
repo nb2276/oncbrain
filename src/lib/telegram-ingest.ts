@@ -392,14 +392,18 @@ export function unixToLocalDate(unixSec: number, now: () => Date = () => new Dat
 // all, with a loud runtime warning) so the caller can distinguish "no policy"
 // from "empty policy".
 export function parseAllowedChatIds(raw: string | undefined | null): Set<number> | null {
-  if (!raw || !raw.trim()) return null;
+  if (!raw || !raw.trim()) return null; // truly unset → no policy (accept-all, warned)
   const ids = raw
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
     .map((s) => Number(s))
     .filter((n) => Number.isInteger(n));
-  return ids.length > 0 ? new Set(ids) : null;
+  // A NON-BLANK value is a configured policy. If it parses to zero valid ids
+  // (e.g. a typo'd "abc"), return an EMPTY set (deny-all) — a misconfigured
+  // allowlist must fail CLOSED, not silently fall back to accept-all. Only a
+  // truly blank/unset var (above) means "no policy".
+  return new Set(ids);
 }
 
 // True when an update's chat is allowed to ingest. No allowlist configured =>
