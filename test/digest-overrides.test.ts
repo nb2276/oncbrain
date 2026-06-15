@@ -62,6 +62,48 @@ describe('applyOverrides', () => {
     });
   });
 
+  it('suppress targets the COLLISION-RESOLVED slug, not both colliding studies', () => {
+    // Two studies share base slug "dup" → rendered/anchored as "dup" + "dup-2"
+    // (assignSlugsForDate). A suppress of "dup-2" must drop ONLY the second.
+    // Previously raw-slug matching dropped BOTH (and double-counted).
+    const dupDigest: DigestOutput = {
+      top_line: 't',
+      tldr: 't',
+      sites: [
+        {
+          disease_site: 'breast',
+          intro: null,
+          open_questions: null,
+          studies: [study('Dup One', 'dup'), study('Dup Two', 'dup')],
+        },
+      ],
+      meta: { clusters_total: 2, studies_analyzed: 2, dropped: [], ocr_available: false },
+    };
+    const { digest, summary } = applyOverrides(dupDigest, { suppress: ['dup-2'] });
+    const names = digest.sites.flatMap((s) => s.studies.map((st) => st.name));
+    expect(names).toEqual(['Dup One']); // only the second dropped
+    expect(summary.suppressed).toEqual(['dup-2']);
+    expect(summary.suppressMissing).toEqual([]); // "dup-2" actually matched
+  });
+
+  it('suppressing the base "dup" drops only the first of a colliding pair', () => {
+    const dupDigest: DigestOutput = {
+      top_line: 't',
+      tldr: 't',
+      sites: [
+        {
+          disease_site: 'breast',
+          intro: null,
+          open_questions: null,
+          studies: [study('Dup One', 'dup'), study('Dup Two', 'dup')],
+        },
+      ],
+      meta: { clusters_total: 2, studies_analyzed: 2, dropped: [], ocr_available: false },
+    };
+    const { digest } = applyOverrides(dupDigest, { suppress: ['dup'] });
+    expect(digest.sites.flatMap((s) => s.studies.map((st) => st.name))).toEqual(['Dup Two']);
+  });
+
   it('edits study fields by slug (shallow merge; other fields untouched)', () => {
     const { digest, summary } = applyOverrides(sampleDigest(), {
       edits: { 'study-a': { tldr: 'new tldr', name: 'Study A v2' } },

@@ -80,4 +80,23 @@ describe('assignSlugsForDate', () => {
   it('returns empty for empty input', () => {
     expect(assignSlugsForDate([])).toEqual([]);
   });
+
+  it('does not duplicate when an explicit -N slug precedes a colliding base (loop-until-unused)', () => {
+    // Regression: explicit "x-2" first, then two studies that both derive to
+    // "x" — the suffix run must skip the already-taken "x-2" → "x-3", not
+    // re-emit a duplicate "x-2" (duplicate DOM ids / ambiguous anchors).
+    const out = assignSlugsForDate([{ name: 'Y', slug: 'x-2' }, { name: 'X' }, { name: 'X' }]);
+    expect(out).toEqual(['x-2', 'x', 'x-3']);
+    expect(new Set(out).size).toBe(out.length);
+  });
+
+  it('stays unique across a longer collision run with a pre-taken suffix', () => {
+    const out = assignSlugsForDate([
+      { name: 'Y', slug: 'x-2' },
+      { name: 'X' },
+      { name: 'X' },
+      { name: 'X' },
+    ]);
+    expect(new Set(out).size).toBe(out.length);
+  });
 });
