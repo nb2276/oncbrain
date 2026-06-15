@@ -379,10 +379,12 @@ function trimToYearMonth(raw: string | null): string | null {
   if (!raw) return null;
   const trimmed = raw.trim();
   if (!trimmed) return null;
-  // YYYY, YYYY-MM, YYYY-MM-DD
+  // YYYY, YYYY-MM, YYYY-MM-DD — month must be 01..12 (a dirty CT.gov record
+  // could carry "2027-13"; fall back to year-only rather than publish it).
   const m = trimmed.match(/^(\d{4})(?:-(\d{2}))?(?:-\d{2})?$/);
   if (!m) return null;
-  return m[2] ? `${m[1]}-${m[2]}` : m[1]!;
+  const month = m[2] ? Number(m[2]) : null;
+  return month && month >= 1 && month <= 12 ? `${m[1]}-${m[2]}` : m[1]!;
 }
 
 function truncate(s: string, cap: number): string {
