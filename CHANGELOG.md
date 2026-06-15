@@ -2,6 +2,22 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.19.1] - 2026-06-15
+
+### Fixed
+
+- **Share copies the link, not a linkless image.** The share button attached the
+  per-study card PNG via `navigator.share({files})`, and many share targets keep
+  the image and drop the URL, so a pasted "copied link" was an image with no link
+  back to the digest. Sharing is URL-first now: the link always travels, and
+  link-unfurling apps (iMessage, Slack, X) render the page's OG card as the rich
+  preview, so you still get a visual plus a working link. (Found by /qa.)
+- **Share card keeps the date and reads top-down.** The card eyebrow led with the
+  trial name, so a long name chopped the date to `20…` under the 72-char limit;
+  it now leads with `site · date` (which always survive) and the name truncates
+  instead. The headline was vertically centered, leaving dead space above and
+  below; it is top-aligned now so the card fills from the eyebrow down.
+
 ## [0.19.0] - 2026-06-14
 
 ### Added

@@ -26,9 +26,11 @@
 // shipping a non-functional button to insecure contexts and very-old browsers.
 
 interface ShareNav {
-  // v0.14 T4 Option B: url is optional and files may accompany an image share.
-  share?: (data: { title?: string; url?: string; files?: File[] }) => Promise<void>;
-  canShare?: (data: { title?: string; url?: string; files?: File[] }) => boolean;
+  // URL-first share: the link always travels (and link-unfurling apps render the
+  // page's OG card as a rich preview). We deliberately do NOT attach image files
+  // — many share targets keep the file and drop the URL, leaving the recipient
+  // with an image and no link back to the digest.
+  share?: (data: { title?: string; url?: string }) => Promise<void>;
   clipboard?: { writeText?: (s: string) => Promise<void> };
 }
 
@@ -37,10 +39,6 @@ export interface ShareDeps {
   origin?: string;
   setTimeoutFn?: (cb: () => void, ms: number) => number;
   clearTimeoutFn?: (id: number) => void;
-  // v0.14 T4 Option B: injectable for the image-share path so it can be unit
-  // tested without a real network or File constructor.
-  fetchFn?: (url: string) => Promise<{ ok: boolean; blob: () => Promise<Blob> }>;
-  fileCtor?: (parts: BlobPart[], name: string, opts?: { type?: string }) => File;
 }
 
 interface ButtonState {
@@ -94,9 +92,6 @@ export function setupShareButton(
   const setTimeoutFn = deps.setTimeoutFn ?? ((cb, ms) => (globalThis.setTimeout as unknown as (cb: () => void, ms: number) => number)(cb, ms));
   const clearTimeoutFn = deps.clearTimeoutFn ?? ((id: number) => (globalThis.clearTimeout as unknown as (id: number) => void)(id));
   const origin = deps.origin ?? (typeof window !== 'undefined' ? window.location.origin : '');
-  const fetchFn = deps.fetchFn ?? ((url: string) => (globalThis.fetch as unknown as (u: string) => Promise<{ ok: boolean; blob: () => Promise<Blob> }>)(url));
-  const fileCtor = deps.fileCtor ?? ((parts: BlobPart[], name: string, opts?: { type?: string }) => new (globalThis as unknown as { File: new (p: BlobPart[], n: string, o?: { type?: string }) => File }).File(parts, name, opts));
-  const hasCanShare = typeof nav.canShare === 'function';
 
   button.addEventListener('click', (event) => {
     // Stop the home-feed card link from also firing. Harmless on StudyCard
@@ -128,32 +123,6 @@ export function setupShareButton(
       } else if (hasClipboard) {
         tryClipboard(button, refs, absoluteUrl, nav, setTimeoutFn, clearTimeoutFn);
       }
-    }
-
-    // v0.14 T4 Option B: when the button carries a share image AND the platform
-    // can share files (iOS-strong, desktop patchy), attach the study card PNG so
-    // a tap posts the card itself (plus the link). Any failure — fetch error,
-    // canShare rejects the files, non-Abort share rejection — falls back to the
-    // URL share above. AbortError (user dismissed) is silent.
-    const relativeImage = button.dataset.shareImage ?? '';
-    if (relativeImage && hasShare && hasCanShare) {
-      const absoluteImage = origin ? new URL(relativeImage, origin).href : relativeImage;
-      fetchFn(absoluteImage)
-        .then((res) => { if (!res.ok) throw new Error('image fetch failed'); return res.blob(); })
-        .then((blob) => {
-          const file = fileCtor([blob], 'oncbrain-card.png', { type: 'image/png' });
-          const data = { files: [file], title, url: absoluteUrl };
-          if (!nav.canShare!(data)) { shareUrlOrClipboard(); return; }
-          return nav.share!(data)
-            .then(() => { /* shared OK */ })
-            .catch((err: unknown) => {
-              const name = (err && typeof err === 'object' && 'name' in err) ? String((err as { name: unknown }).name) : '';
-              if (name === 'AbortError') return; // user dismissed — silent
-              shareUrlOrClipboard();
-            });
-        })
-        .catch(() => shareUrlOrClipboard()); // fetch / File error → URL path
-      return;
     }
 
     shareUrlOrClipboard();

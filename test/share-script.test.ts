@@ -104,7 +104,7 @@ function makeDeps(opts: {
   let nextTimerId = 1;
 
   const shareFn = opts.hasShare
-    ? vi.fn((_data: { title?: string; url?: string; files?: File[] }) =>
+    ? vi.fn((_data: { title?: string; url?: string }) =>
         opts.shareReject ? Promise.reject(opts.shareReject) : Promise.resolve(),
       )
     : undefined;
@@ -315,117 +315,17 @@ describe('setupShareButton — stopPropagation + edge cases', () => {
     await b.click();
     expect(shareFn).not.toHaveBeenCalled();
   });
-});
 
-// v0.14 T4 Option B: the image-share path. When the button carries a
-// data-share-image AND navigator.canShare exists, the handler fetches the PNG,
-// wraps it in a File, and shares {files, title, url}; any failure falls back to
-// the URL share.
-describe('setupShareButton — image share (T4 Option B)', () => {
-  // Deeper promise chain than the URL path (fetch -> blob -> canShare -> share),
-  // so flush extra microtasks after a click.
-  async function flush(): Promise<void> {
-    for (let i = 0; i < 8; i++) await Promise.resolve();
-  }
-  function imgButton(): StubButton {
-    const b = makeButton({ shareUrl: '/sites/cns/#2026-06-09-firestorm', shareTitle: 'FIRESTORM' });
+  it('never attaches files to navigator.share (URL-first — link must survive)', async () => {
+    // Regression: bug — image-file share dropped the link on paste.
+    // Found by /qa on 2026-06-15.
+    const b = attachListenerAPI(makeButton());
     (b.dataset as Record<string, string>).shareImage = '/og/study/2026-06-09/firestorm.png';
-    return attachListenerAPI(b);
-  }
-  function imgDeps(opts: { canShare?: boolean; fetchOk?: boolean; fetchThrow?: boolean; shareReject?: Error } = {}) {
-    const shareFn = vi.fn((_d: { title?: string; url?: string; files?: unknown[] }) =>
-      opts.shareReject ? Promise.reject(opts.shareReject) : Promise.resolve(),
-    );
-    const canShareFn = vi.fn((_d: unknown) => opts.canShare ?? true);
-    const fetchFn = vi.fn((_u: string) =>
-      opts.fetchThrow
-        ? Promise.reject(new Error('network'))
-        : Promise.resolve({ ok: opts.fetchOk ?? true, blob: () => Promise.resolve({} as Blob) }),
-    );
-    const fileCtor = vi.fn(() => ({ __isFile: true } as unknown as File));
-    const deps: ShareDeps = {
-      nav: { share: shareFn, canShare: canShareFn, clipboard: { writeText: vi.fn(() => Promise.resolve()) } },
-      origin: 'https://oncbrain.test',
-      fetchFn,
-      fileCtor,
-    };
-    return { deps, shareFn, canShareFn, fetchFn, fileCtor };
-  }
-
-  it('files supported + fetch ok + canShare true -> shares the image file (+ url)', async () => {
-    const b = imgButton();
-    const { deps, shareFn, fileCtor } = imgDeps({ canShare: true, fetchOk: true });
+    const { deps, shareFn } = makeDeps({ hasShare: true });
     setupShareButton(asButton(b), {}, deps);
     await b.click();
-    await flush();
-    expect(fileCtor).toHaveBeenCalled();
-    expect(shareFn).toHaveBeenCalledTimes(1);
-    expect(shareFn).toHaveBeenCalledWith(
-      expect.objectContaining({ files: expect.any(Array), url: expect.stringContaining('/sites/cns/') }),
-    );
-  });
-
-  it('canShare(files) === false -> falls back to URL share', async () => {
-    const b = imgButton();
-    const { deps, shareFn } = imgDeps({ canShare: false, fetchOk: true });
-    setupShareButton(asButton(b), {}, deps);
-    await b.click();
-    await flush();
-    expect(shareFn).toHaveBeenCalledWith(expect.objectContaining({ url: expect.stringContaining('/sites/cns/') }));
+    expect(shareFn).toHaveBeenCalledOnce();
     expect(shareFn).not.toHaveBeenCalledWith(expect.objectContaining({ files: expect.anything() }));
-  });
-
-  it('image fetch not ok -> URL share fallback', async () => {
-    const b = imgButton();
-    const { deps, shareFn } = imgDeps({ fetchOk: false });
-    setupShareButton(asButton(b), {}, deps);
-    await b.click();
-    await flush();
-    expect(shareFn).toHaveBeenCalledWith(expect.objectContaining({ url: expect.stringContaining('/sites/cns/') }));
-    expect(shareFn).not.toHaveBeenCalledWith(expect.objectContaining({ files: expect.anything() }));
-  });
-
-  it('image fetch throws -> URL share fallback', async () => {
-    const b = imgButton();
-    const { deps, shareFn } = imgDeps({ fetchThrow: true });
-    setupShareButton(asButton(b), {}, deps);
-    await b.click();
-    await flush();
-    expect(shareFn).toHaveBeenCalledWith(expect.objectContaining({ url: expect.stringContaining('/sites/cns/') }));
-  });
-
-  it('no navigator.canShare -> image path skipped, no fetch, URL share', async () => {
-    const b = imgButton();
-    const shareFn = vi.fn(() => Promise.resolve());
-    const fetchFn = vi.fn();
-    const deps: ShareDeps = { nav: { share: shareFn }, origin: 'https://oncbrain.test', fetchFn };
-    setupShareButton(asButton(b), {}, deps);
-    await b.click();
-    await flush();
-    expect(fetchFn).not.toHaveBeenCalled();
-    expect(shareFn).toHaveBeenCalledWith(expect.objectContaining({ url: expect.stringContaining('/sites/cns/') }));
-  });
-
-  it('files-share AbortError (user dismissed) -> silent, no URL fallback', async () => {
-    const b = imgButton();
-    const abort = Object.assign(new Error('dismissed'), { name: 'AbortError' });
-    const { deps, shareFn } = imgDeps({ canShare: true, fetchOk: true, shareReject: abort });
-    setupShareButton(asButton(b), {}, deps);
-    await b.click();
-    await flush();
-    expect(shareFn).toHaveBeenCalledTimes(1); // the files share; no fallback url share
-    expect(shareFn).toHaveBeenCalledWith(expect.objectContaining({ files: expect.any(Array) }));
-  });
-
-  it('files-share NON-Abort rejection -> falls back to URL share', async () => {
-    const b = imgButton();
-    const { deps, shareFn } = imgDeps({ canShare: true, fetchOk: true, shareReject: new Error('share failed') });
-    setupShareButton(asButton(b), {}, deps);
-    await b.click();
-    await flush();
-    // 1st call shares the files (rejects non-Abort); 2nd is the URL fallback.
-    expect(shareFn).toHaveBeenCalledTimes(2);
-    expect(shareFn).toHaveBeenNthCalledWith(1, expect.objectContaining({ files: expect.any(Array) }));
-    expect(shareFn).toHaveBeenNthCalledWith(2, expect.objectContaining({ url: expect.stringContaining('/sites/cns/') }));
+    expect(shareFn).toHaveBeenCalledWith(expect.not.objectContaining({ files: expect.anything() }));
   });
 });
