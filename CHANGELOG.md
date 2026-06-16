@@ -2,6 +2,17 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.19.6] - 2026-06-16
+
+### Changed
+
+- **PWA update prompt promoted to a top banner.** The "New version available"
+  service-worker update notice was a small dismissible toast pinned bottom-center;
+  it now renders as a prominent full-width accent banner pinned across the top of
+  the screen (slide-down entrance, notch-safe, white Refresh button). Trigger
+  logic is unchanged — it still appears only on an actual SW update and nothing
+  reloads until the reader taps Refresh.
+
 ## [0.19.5] - 2026-06-15
 
 Deferred Low-severity items from the v0.19.4 audit (the bounded ones; the
