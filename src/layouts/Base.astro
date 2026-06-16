@@ -237,51 +237,63 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
       @media (max-width: 600px) {
         body { padding: 1.25rem 1rem 3rem; font-size: 16px; }
       }
-      /* v0.15.2: PWA "new version" toast. Non-blocking, fixed bottom-center,
-         dismissible. Shown only on a service-worker UPDATE (see body script). */
+      /* v0.15.2: PWA "new version" prompt. Shown only on a service-worker UPDATE
+         (see body script). v0.19.6: promoted from a bottom-center toast to a
+         prominent full-width banner pinned across the top of the screen. */
       .pwa-toast {
         position: fixed;
-        left: 50%;
-        bottom: 1rem;
-        transform: translateX(-50%);
-        z-index: 100;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1100;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        max-width: calc(100vw - 2rem);
-        padding: 0.55rem 0.6rem 0.55rem 1rem;
-        background: var(--bg-card);
-        color: var(--fg);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+        justify-content: center;
+        gap: 0.85rem;
+        width: 100%;
+        padding: 0.7rem 1rem;
+        background: var(--accent);
+        color: #fff;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        box-shadow: 0 2px 14px rgba(0, 0, 0, 0.2);
         font-family: var(--font-sans);
-        font-size: 0.9rem;
+        font-size: 0.92rem;
+        font-weight: 500;
+        animation: pwa-toast-in 0.25s ease-out;
+      }
+      @keyframes pwa-toast-in {
+        from { transform: translateY(-100%); }
+        to { transform: translateY(0); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .pwa-toast { animation: none; }
       }
       .pwa-toast[hidden] { display: none; }
       .pwa-toast-btn {
         font: inherit;
-        font-weight: 600;
-        color: #fff;
-        background: var(--accent);
+        font-weight: 700;
+        color: var(--accent);
+        background: #fff;
         border: none;
         border-radius: 6px;
-        padding: 0.35rem 0.75rem;
+        padding: 0.35rem 0.85rem;
         cursor: pointer;
       }
       .pwa-toast-btn:disabled { opacity: 0.6; cursor: default; }
       .pwa-toast-dismiss {
         font: inherit;
-        font-size: 1.25rem;
+        font-size: 1.35rem;
         line-height: 1;
-        color: var(--fg-muted);
+        color: #fff;
+        opacity: 0.85;
         background: none;
         border: none;
         cursor: pointer;
         padding: 0 0.25rem;
       }
+      .pwa-toast-dismiss:hover { opacity: 1; }
       @supports (padding: max(0px)) {
-        .pwa-toast { bottom: max(1rem, env(safe-area-inset-bottom)); }
+        .pwa-toast { padding-top: max(0.7rem, env(safe-area-inset-top)); }
       }
       /* Study pages widen to fit a narrative + figure two-column card, but only
          once there's room for both to breathe (≥1200px → 1180px body, paired
