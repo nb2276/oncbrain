@@ -57,8 +57,8 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 # Ingestion
 npm run pull:telegram           # drain @oncbrain_bot DMs into the inbox_items queue (offset-safe, no enrichment)
 npm run enrich:inbox            # process the queue: tweet→oEmbed, paper→PubMed/Crossref, PDF→text/OCR + figure-structure + vault filing
-npm run figure-extract -- --image=<png>                 # v0.20: grounded figure extraction (Vision+Qwen→Opus) on one image
-npm run figure-extract -- --pdf=<pdf> --page=<n> [--json]  # or one PDF page; needs poppler + a running Ollama with qwen2.5vl
+npm run figure-extract -- --image=<png> [--json] [--model=...]            # v0.20: grounded figure extraction (Vision+Qwen→Opus) on one image
+npm run figure-extract -- --pdf=<pdf> --page=<n> [--dpi=300] [--json]     # or one PDF page (poppler renders it); Ollama is optional — Vision-only without it
 npm run admin                   # localhost:3001 admin form (date picker, conference tag, manual paste fallback)
 
 # Build
