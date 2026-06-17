@@ -300,6 +300,44 @@ async function ocrSinglePage(
   }
 }
 
+// Rasterize one PDF page to PNG(s) in a fresh temp dir under OCR_TMP_PREFIX (so
+// sweepOrphanedOcrTmpDirs reclaims a crashed run). Returns the dir + page PNG
+// paths; the CALLER must rmSync(dir) when done. Exposed for the figure-OCR
+// structured pipeline (figure-extract.ts), which needs the page IMAGE — not just
+// its OCR text — to run Vision + Qwen + Opus over it. Uses the hardened runPoppler
+// (memory cap, SIGTERM→SIGKILL) like the rest of this module.
+export async function rasterizePageToPngs(
+  absPath: string,
+  page: number,
+  opts: { dpi?: number; timeoutMs?: number; spawnFn?: SpawnFn } = {},
+): Promise<{ dir: string; pngs: string[] }> {
+  const spawnFn = opts.spawnFn ?? (spawn as SpawnFn);
+  const dir = mkdtempSync(join(tmpdir(), OCR_TMP_PREFIX));
+  try {
+    await runPoppler(
+      'pdftoppm',
+      ['-png', '-r', String(opts.dpi ?? 200), '-f', String(page), '-l', String(page), absPath, join(dir, 'page')],
+      opts.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      spawnFn,
+    );
+    const pngs = readdirSync(dir)
+      .filter((f) => f.toLowerCase().endsWith('.png'))
+      .sort()
+      .map((f) => join(dir, f));
+    return { dir, pngs };
+  } catch (err) {
+    // pdftoppm failed/timed out AFTER mkdtemp: the caller never receives `dir`
+    // and can't clean it, so remove it here before rethrowing (else repeated
+    // enrichment attempts on a bad PDF accumulate oncbrain-ocr-* temp dirs).
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      // best-effort; the startup sweep self-heals leftover dirs
+    }
+    throw err;
+  }
+}
+
 export type ExtractPdfFigureOcrOptions = {
   // Injection seams for tests; default to the real pdfimages + Vision pipeline.
   pages?: (absPath: string) => Promise<number[]>;

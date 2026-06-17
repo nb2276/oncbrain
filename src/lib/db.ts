@@ -116,6 +116,7 @@ export type Paper = {
   abstract: string | null;
   fulltext_excerpt_md: string | null; // section-filtered Methods + Results, ≤2000 tokens
   figure_ocr_md: string | null; // v0.15: Vision OCR of figure pages (numbers printed inside figures); null for non-PDF papers
+  figure_structured_md: string | null; // v0.20: Vision+Qwen→Opus grounded per-panel figure extraction (local-only, same IP boundary as figure_ocr_md); null when unavailable
   mesh_terms_json: string | null;
   bookmark_date: string;
   conference_slug: string | null;
@@ -139,6 +140,7 @@ export type NewPaper = {
   abstract?: string | null;
   fulltext_excerpt_md?: string | null;
   figure_ocr_md?: string | null;
+  figure_structured_md?: string | null;
   mesh_terms_json?: string | null;
   bookmark_date: string;
   conference_slug?: string | null;
@@ -240,6 +242,7 @@ CREATE TABLE IF NOT EXISTS papers (
   abstract TEXT,
   fulltext_excerpt_md TEXT,
   figure_ocr_md TEXT,
+  figure_structured_md TEXT,
   mesh_terms_json TEXT,
   bookmark_date TEXT NOT NULL,
   conference_slug TEXT,
@@ -344,6 +347,7 @@ export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): D
   migratePapersAllowDoiOnly(db, path);
   migratePapersAddPdfColumns(db, path);
   migratePapersAddFigureOcr(db);
+  migratePapersAddFigureStructured(db);
   // content_hash column is guaranteed to exist now (fresh SCHEMA or migration);
   // create its partial unique index here rather than in SCHEMA so an old-shape
   // DB doesn't error on the missing column before the migration runs.
@@ -392,6 +396,7 @@ function migratePapersAddPdfColumns(db: Database.Database, dbPath: string): void
   // without the column). Include the column always (migratePapersAddFigureOcr
   // is idempotent and skips when it exists) and copy the data when present.
   const hasFigureOcr = cols.some((c) => c.name === 'figure_ocr_md');
+  const hasFigureStructured = cols.some((c) => c.name === 'figure_structured_md');
   const tx = db.transaction(() => {
     db.exec(`
       CREATE TABLE papers_new (
@@ -409,6 +414,7 @@ function migratePapersAddPdfColumns(db: Database.Database, dbPath: string): void
         abstract TEXT,
         fulltext_excerpt_md TEXT,
         figure_ocr_md TEXT,
+        figure_structured_md TEXT,
         mesh_terms_json TEXT,
         bookmark_date TEXT NOT NULL,
         conference_slug TEXT,
@@ -421,12 +427,12 @@ function migratePapersAddPdfColumns(db: Database.Database, dbPath: string): void
       INSERT INTO papers_new
         (id, pmid, doi, pmc_id, source_url, content_hash, pdf_path, title,
          authors_json, journal, pub_date, abstract, fulltext_excerpt_md,
-         figure_ocr_md, mesh_terms_json, bookmark_date, conference_slug,
+         figure_ocr_md, figure_structured_md, mesh_terms_json, bookmark_date, conference_slug,
          curator_note, inbox_item_id, fetched_via, created_at)
       SELECT
         id, pmid, doi, pmc_id, source_url, NULL, NULL, title,
         authors_json, journal, pub_date, abstract, fulltext_excerpt_md,
-        ${hasFigureOcr ? 'figure_ocr_md' : 'NULL'}, mesh_terms_json, bookmark_date, conference_slug,
+        ${hasFigureOcr ? 'figure_ocr_md' : 'NULL'}, ${hasFigureStructured ? 'figure_structured_md' : 'NULL'}, mesh_terms_json, bookmark_date, conference_slug,
         curator_note, inbox_item_id, fetched_via, created_at
       FROM papers;
       DROP TABLE papers;
@@ -482,6 +488,7 @@ function migratePapersAllowDoiOnly(db: Database.Database, dbPath: string): void 
   // migratePapersAddPdfColumns — this earlier rebuild also ran without the
   // column and silently dropped it on an out-of-order / restored DB).
   const hasFigureOcr = cols.some((c) => c.name === 'figure_ocr_md');
+  const hasFigureStructured = cols.some((c) => c.name === 'figure_structured_md');
   const tx = db.transaction(() => {
     db.exec(`
       CREATE TABLE papers_new (
@@ -497,6 +504,7 @@ function migratePapersAllowDoiOnly(db: Database.Database, dbPath: string): void 
         abstract TEXT,
         fulltext_excerpt_md TEXT,
         figure_ocr_md TEXT,
+        figure_structured_md TEXT,
         mesh_terms_json TEXT,
         bookmark_date TEXT NOT NULL,
         conference_slug TEXT,
@@ -508,12 +516,12 @@ function migratePapersAllowDoiOnly(db: Database.Database, dbPath: string): void 
       );
       INSERT INTO papers_new
         (id, pmid, doi, pmc_id, source_url, title, authors_json, journal,
-         pub_date, abstract, fulltext_excerpt_md, figure_ocr_md, mesh_terms_json,
+         pub_date, abstract, fulltext_excerpt_md, figure_ocr_md, figure_structured_md, mesh_terms_json,
          bookmark_date, conference_slug, curator_note, inbox_item_id,
          fetched_via, created_at)
       SELECT
         id, pmid, doi, pmc_id, NULL, title, authors_json, journal,
-        pub_date, abstract, fulltext_excerpt_md, ${hasFigureOcr ? 'figure_ocr_md' : 'NULL'}, mesh_terms_json,
+        pub_date, abstract, fulltext_excerpt_md, ${hasFigureOcr ? 'figure_ocr_md' : 'NULL'}, ${hasFigureStructured ? 'figure_structured_md' : 'NULL'}, mesh_terms_json,
         bookmark_date, conference_slug, curator_note, inbox_item_id,
         fetched_via, created_at
       FROM papers;
@@ -557,6 +565,18 @@ function migratePapersAddFigureOcr(db: Database.Database): void {
   const cols = db.prepare('PRAGMA table_info(papers)').all() as { name: string }[];
   if (cols.length > 0 && !cols.some((c) => c.name === 'figure_ocr_md')) {
     db.exec('ALTER TABLE papers ADD COLUMN figure_ocr_md TEXT');
+  }
+}
+
+// Non-destructive ALTER for v0.20 (figure-OCR Vision+Qwen→Opus pipeline):
+// figure_structured_md holds the grounded per-panel extraction (HR/CI/p/n-at-risk
+// reconciled from Apple Vision + Qwen2.5-VL, every number gated against the OCR
+// token stream). Local-only, same IP boundary as figure_ocr_md. Runs after the
+// table rebuilds + migratePapersAddFigureOcr, so it lands on their shape. Idempotent.
+function migratePapersAddFigureStructured(db: Database.Database): void {
+  const cols = db.prepare('PRAGMA table_info(papers)').all() as { name: string }[];
+  if (cols.length > 0 && !cols.some((c) => c.name === 'figure_structured_md')) {
+    db.exec('ALTER TABLE papers ADD COLUMN figure_structured_md TEXT');
   }
 }
 
@@ -949,6 +969,7 @@ type PaperMatch = {
   pdf_path: string | null;
   fulltext_excerpt_md: string | null;
   figure_ocr_md: string | null;
+  figure_structured_md: string | null;
 };
 
 export function savePaper(
@@ -968,7 +989,7 @@ export function savePaper(
   const matchBy = (clause: string, value: string): PaperMatch | undefined =>
     db
       .prepare(
-        `SELECT id, pmid, content_hash, pdf_path, fulltext_excerpt_md, figure_ocr_md FROM papers WHERE ${clause}`,
+        `SELECT id, pmid, content_hash, pdf_path, fulltext_excerpt_md, figure_ocr_md, figure_structured_md FROM papers WHERE ${clause}`,
       )
       .get(value) as PaperMatch | undefined;
 
@@ -1003,6 +1024,10 @@ export function savePaper(
       sets.push('figure_ocr_md = ?');
       vals.push(p.figure_ocr_md);
     }
+    if (p.figure_structured_md && !existing.figure_structured_md) {
+      sets.push('figure_structured_md = ?');
+      vals.push(p.figure_structured_md);
+    }
     if (sets.length > 0) {
       vals.push(existing.id);
       db.prepare(`UPDATE papers SET ${sets.join(', ')} WHERE id = ?`).run(...vals);
@@ -1014,9 +1039,9 @@ export function savePaper(
     .prepare(
       `INSERT INTO papers
        (pmid, doi, pmc_id, source_url, content_hash, pdf_path, title, authors_json,
-        journal, pub_date, abstract, fulltext_excerpt_md, figure_ocr_md, mesh_terms_json,
+        journal, pub_date, abstract, fulltext_excerpt_md, figure_ocr_md, figure_structured_md, mesh_terms_json,
         bookmark_date, conference_slug, curator_note, inbox_item_id, fetched_via, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       pmid,
@@ -1032,6 +1057,7 @@ export function savePaper(
       p.abstract ?? null,
       p.fulltext_excerpt_md ?? null,
       p.figure_ocr_md ?? null,
+      p.figure_structured_md ?? null,
       p.mesh_terms_json ?? null,
       p.bookmark_date,
       p.conference_slug ?? null,

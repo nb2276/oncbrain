@@ -237,6 +237,7 @@ function papersToDigestInput(papers: Paper[]): DigestInputPaper[] {
     abstract: p.abstract,
     fulltext_excerpt_md: p.fulltext_excerpt_md,
     figure_ocr_md: p.figure_ocr_md,
+    figure_structured_md: p.figure_structured_md,
     doi: p.doi,
     mesh_terms: parseJsonStringArray(p.mesh_terms_json),
     note: p.curator_note,
@@ -440,13 +441,13 @@ function buildArtifact(
           // at ingestion, not here (fetched_via can't tell a Crossref abstract
           // from a leaked one on a pdf-with-DOI row).
           abstract: p.abstract,
-          // NOTE: fulltext_excerpt_md AND figure_ocr_md are deliberately NOT
-          // written to the committed artifact — both are copyrighted full-text /
-          // figure content, and the build-time LLM reads them from the DB (not
-          // the artifact), so they have no consumer here. Keeping them out of
-          // data/digests keeps copyrighted material out of git (v0.8 IP
-          // constraint). pdf_path is a vault path string (file itself stays
-          // gitignored) used by the Obsidian embed.
+          // NOTE: fulltext_excerpt_md, figure_ocr_md, AND figure_structured_md are
+          // deliberately NOT written to the committed artifact — all are
+          // copyrighted full-text / near-verbatim figure content, and the
+          // build-time LLM reads them from the DB (not the artifact), so they have
+          // no consumer here. Keeping them out of data/digests keeps copyrighted
+          // material out of git (v0.8 IP constraint). pdf_path is a vault path
+          // string (file itself stays gitignored) used by the Obsidian embed.
           pdf_path: p.pdf_path,
           // v0.15.3: the curator-submitted article URL, the ONLY link for
           // trade-press papers (UroToday/ASCO Post/OncLive — no PMID/DOI/PMC).

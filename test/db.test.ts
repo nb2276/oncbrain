@@ -211,6 +211,38 @@ describe('db', () => {
     });
   });
 
+  describe('savePaper figure_structured_md (v0.20)', () => {
+    it('round-trips the grounded structured figure extraction', () => {
+      savePaper(db, {
+        doi: '10.1200/struct1',
+        title: 'Structured figure paper',
+        bookmark_date: '2026-06-17',
+        figure_structured_md: '[p.6]\n### Panel A\n- HR: 0.62 (80% CI 0.44–0.86); p=0.063',
+      });
+      const paper = listPapers(db, { bookmark_date: '2026-06-17' })[0];
+      expect(paper.figure_structured_md).toContain('80% CI 0.44–0.86');
+    });
+
+    it('defaults figure_structured_md to null when not provided', () => {
+      savePaper(db, { doi: '10.1200/nostruct', title: 'No struct', bookmark_date: '2026-06-17' });
+      const paper = listPapers(db, { bookmark_date: '2026-06-17' })[0];
+      expect(paper.figure_structured_md).toBeNull();
+    });
+
+    it('back-fills structured extraction onto an existing row that lacked it', () => {
+      const first = savePaper(db, { doi: '10.1200/sm', title: 'M', bookmark_date: '2026-06-17' });
+      const second = savePaper(db, {
+        doi: '10.1200/sm',
+        title: 'M',
+        bookmark_date: '2026-06-17',
+        figure_structured_md: '### Panel A\n- HR: 0.45 (80% CI 0.31–0.65)',
+      });
+      expect(second.id).toBe(first.id);
+      const paper = listPapers(db, { bookmark_date: '2026-06-17' })[0];
+      expect(paper.figure_structured_md).toContain('0.45');
+    });
+  });
+
   describe('dominantConferenceForDate', () => {
     it('returns the slug when all bookmarks for that date share one conference', () => {
       saveBookmark(db, { url: 'https://x.com/a/status/1', bookmark_date: '2026-05-30', conference_slug: 'asco2026' });
