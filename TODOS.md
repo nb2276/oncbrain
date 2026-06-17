@@ -12,6 +12,15 @@ Format: `- [scope] description (source)`
 
 ## Now — highest priority
 
+- **Backfill `figure_structured_md` on the back catalog (v0.20 follow-up).** The
+  grounded figure pipeline (Vision + Qwen → Opus) shipped in v0.20 and runs on
+  *new* PDF ingests when a local Qwen/Ollama is up, but already-filed PDFs have
+  `figure_structured_md = NULL`. ~5 filed PDFs have raster figure pages. Mirror
+  `build/backfill-figure-ocr.ts` (a `backfill-figure-structured` that re-runs
+  `extractPdfFigureStructured` over papers where the column is NULL and a PDF
+  exists), gated on `isQwenAvailable()`. Also: `ollama serve` must be running for
+  the enrichment pass to fire — make it a login item / `brew services` or accept
+  graceful degradation. (v0.20 ship)
 - **Live end-to-end test of v0.8 ingestion.** PR1/2/3 pass unit + build tests but have never run against real Telegram traffic. DM the bot a journal URL + a PDF, run `pull:telegram → enrich:inbox → build:day`, confirm vault filing + E2/E3 replies + digest output. (this session)
 
 ## v0.14 — verdict triage + what's-new (deferred from 2026-06-09 office-hours design + eng review)

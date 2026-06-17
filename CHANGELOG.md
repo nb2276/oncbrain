@@ -2,6 +2,51 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.20.0] - 2026-06-17
+
+### Added
+
+- **Grounded figure extraction (Vision + Qwen → Opus).** Reads the numbers printed
+  inside trial figures (Kaplan-Meier, cumulative-incidence, forest plots,
+  image-rendered tables) into a per-panel structured extraction where **every
+  number is grounded against the Apple Vision OCR token stream**. Established by a
+  spike comparing Qwen2.5-VL vs the existing Vision OCR on a real KM figure: the
+  two are complementary (Vision = high recall, Qwen = clean per-panel structure +
+  honest "not legible"), reconciled by Opus.
+  - `src/lib/qwen-client.ts`: local Qwen2.5-VL via an Ollama HTTP server (base64
+    image, `num_ctx` raised for full-page figures). Guards against placeholder /
+    oversized image files; `isQwenAvailable()` probe; `FIGURE_STRUCTURED=off` kill
+    switch. Graceful-degrade, never throws.
+  - `src/lib/figure-extract.ts`: Vision (recall) + Qwen (structure) → Opus merge,
+    with a deterministic **grounding gate**. The gate audits the WHOLE merged
+    output (no spoofable heading boundary) and, if any number is absent from the
+    OCR, **withholds the entire merge and falls back to raw OCR** so a fabricated
+    magnitude can never reach the digest. Grounding is **role-aware** for
+    percentage/CI labels (a "95% CI" claim must match a printed "95%", so a "95"
+    that exists only as a number-at-risk count can't ground a fabricated CI), with
+    a magnitude fallback when the OCR captured no percent tokens.
+  - `prompts/figure-reconcile-v1.txt`: Opus merge prompt (treat-input-as-data +
+    the grounding rule; omit any number not in the OCR).
+  - New local-only `papers.figure_structured_md` column (idempotent migration,
+    carried forward through both table rebuilds). Fed to the Phase 2 study agent
+    as the **preferred** figure-number source; guarded out of the published
+    artifact + JSON API (`test/publish-boundary.test.ts`), same IP boundary as
+    `figure_ocr_md`.
+  - Wired into PDF enrichment: computed when a paper has figure pages **and** a
+    local Qwen/Ollama is reachable (otherwise the existing `figure_ocr_md` is
+    unaffected — a machine without Ollama loses nothing).
+  - `npm run figure-extract` CLI (image or PDF+page) for manual runs / spikes.
+  - Verified end-to-end on a real Lancet Oncology KM figure: the gate passes
+    correct Opus output (grounds the genuine 80% CI) and catches a live Opus
+    hallucination (a fabricated "95% CI" → withheld to raw OCR). 34 new tests
+    across `test/figure-extract.test.ts` + `test/qwen-client.test.ts`; all 1485
+    tests pass.
+  - Shipped after a full `/ship` review: pre-landing specialists + cross-model
+    adversarial review (Claude + Codex) caught a gate-bypass (heading-spoofable
+    audit boundary), a flags-but-doesn't-block leak, context-free percent
+    grounding, a `String.replace` `$`-pattern corruption, and a temp-dir leak —
+    all fixed with regression tests before merge.
+
 ## [0.19.7] - 2026-06-16
 
 ### Added
