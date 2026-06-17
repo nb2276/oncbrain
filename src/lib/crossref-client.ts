@@ -80,6 +80,8 @@ export async function fetchCrossrefPaper(
 }
 
 type CrossrefWork = {
+  DOI?: string; // present on /works search items (not echoed by /works/<doi>)
+  score?: number; // relevance score on a bibliographic search
   title?: string[];
   author?: Array<{ given?: string; family?: string; name?: string }>;
   'container-title'?: string[];
@@ -88,6 +90,79 @@ type CrossrefWork = {
   'published-online'?: { 'date-parts'?: number[][] };
   abstract?: string; // JATS XML when present
 };
+
+// A lightweight bibliographic-search hit. Used by the failed-paper suggester to
+// propose an accessible copy (a DOI that resolves via Crossref, no publisher
+// fetch) for a paper whose URL was blocked and that PubMed didn't surface
+// (preprints, non-MEDLINE journals).
+export type CrossrefCandidate = {
+  doi: string; // normalized
+  title: string | null;
+  journal: string | null;
+  year: string | null;
+  score: number; // Crossref relevance score (higher is a closer match)
+};
+
+export type CrossrefSearchOptions = CrossrefFetchOptions & { rows?: number };
+
+// Free-text bibliographic search (api.crossref.org/works?query.bibliographic=…).
+// Returns the top candidates ranked by Crossref's own relevance score. Callers
+// MUST still gate on their own title-similarity check before suggesting a hit —
+// Crossref returns its best guess even for a weak query. Throws CrossrefError on
+// transport/parse failure; the suggester treats the whole step as best-effort.
+export async function searchCrossrefByTitle(
+  query: string,
+  opts: CrossrefSearchOptions = {},
+): Promise<CrossrefCandidate[]> {
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  const rows = Math.min(Math.max(opts.rows ?? 5, 1), 20);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+
+  const params = new URLSearchParams({
+    'query.bibliographic': query,
+    rows: String(rows),
+    select: 'DOI,title,container-title,issued,score',
+  });
+
+  let res: Response;
+  try {
+    res = await fetchImpl(`${CROSSREF_BASE}?${params.toString()}`, {
+      signal: controller.signal,
+      headers: { 'User-Agent': POLITE_UA, Accept: 'application/json' },
+    });
+  } catch (err) {
+    throw new CrossrefError(`network error: ${(err as Error).message}`, 'network');
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (res.status === 429) throw new CrossrefError('Crossref rate limit', 'rate_limit', 429);
+  if (!res.ok) throw new CrossrefError(`Crossref returned ${res.status}`, 'network', res.status);
+
+  let body: { message?: { items?: CrossrefWork[] } };
+  try {
+    body = (await res.json()) as { message?: { items?: CrossrefWork[] } };
+  } catch (err) {
+    throw new CrossrefError(`bad JSON: ${(err as Error).message}`, 'parse');
+  }
+
+  const items = body.message?.items ?? [];
+  const out: CrossrefCandidate[] = [];
+  for (const work of items) {
+    const doi = normalizeDoi(work.DOI ?? null);
+    if (!doi) continue;
+    const parsed = parseCrossrefWork(work, doi);
+    out.push({
+      doi,
+      title: parsed.title,
+      journal: parsed.journal,
+      year: parsed.pub_date ? (parsed.pub_date.match(/\b(\d{4})\b/)?.[1] ?? null) : null,
+      score: typeof work.score === 'number' ? work.score : 0,
+    });
+  }
+  return out;
+}
 
 export function parseCrossrefWork(work: CrossrefWork, doi: string): CrossrefPaper {
   const title = work.title?.[0]?.trim() ?? null;

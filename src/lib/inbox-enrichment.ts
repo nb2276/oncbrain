@@ -43,6 +43,7 @@ import {
   type PaperMeta,
 } from './html-meta.ts';
 import { fetchCrossrefPaper, CrossrefError } from './crossref-client.ts';
+import { suggestAccessibleSource, formatSuggestionReply } from './paper-suggest.ts';
 import type { NewPaper } from './db.ts';
 import {
   downloadTelegramFile,
@@ -258,10 +259,11 @@ async function enrichPaperItem(
     const { retryable, message } = classifyResolveError(err);
     // Only reply on a PERMANENT failure — a transient network blip retries
     // silently, and double-replying on every retry would spam the curator. For a
-    // blocked publisher URL the reply tells the curator how to integrate it
-    // (send the DOI / PubMed link instead).
+    // blocked publisher URL, first try to find an accessible copy of the same
+    // paper (PubMed/Crossref by title) and offer a clean re-ingest link; only if
+    // that turns up nothing do we fall back to the canned "send the DOI" reply.
     if (!retryable) {
-      await replyToCurator(item, paperFailureReply(target.kind, message));
+      await replyToCurator(item, await buildPaperFailureReply(target.kind, message, item, err));
     }
     return { status: 'failed', reason: message, permanent: !retryable };
   }
@@ -606,8 +608,10 @@ async function resolveFromUrl(
     if (isTradePressUrl(url)) {
       return resolveTradeArticle(url, html, meta, item, note);
     }
-    // Need at least one identifier for the papers CHECK + dedup key.
-    throw new MetaNotFoundError('page had a title but no DOI or PMID to key on');
+    // Need at least one identifier for the papers CHECK + dedup key. Carry the
+    // page title so the failure path can search for an accessible copy of the
+    // same paper (paper-suggest.ts) before falling back to the canned reply.
+    throw new MetaNotFoundError('page had a title but no DOI or PMID to key on', meta.title ?? undefined);
   }
   return {
     pmid: meta.pmid,
@@ -810,6 +814,39 @@ export function paperFailureReply(targetKind: string, message: string): string {
     );
   }
   return base;
+}
+
+// The reply for a permanent paper failure. For a blocked/unkeyable journal URL,
+// try to find an accessible copy of the same paper (by title, via PubMed then
+// Crossref) and offer a clean re-ingest link the curator forwards back to
+// confirm; if nothing confident turns up, fall back to paperFailureReply. The
+// title comes from the page itself when it parsed (MetaNotFoundError.pageTitle)
+// or, on a hard 403 where the page never loaded, from the curator's message
+// text (mobile shares commonly carry "Title - Publisher"). Best-effort: any
+// failure in the lookup degrades to the canned reply.
+async function buildPaperFailureReply(
+  targetKind: string,
+  message: string,
+  item: InboxItem,
+  err: unknown,
+): Promise<string> {
+  if (targetKind !== 'url') return paperFailureReply(targetKind, message);
+  try {
+    const pageTitle = err instanceof MetaNotFoundError ? err.pageTitle ?? null : null;
+    const suggestion = await suggestAccessibleSource({
+      messageText: item.raw_message_text,
+      pageTitle,
+    });
+    if (suggestion) {
+      console.log(
+        `  [enrich] suggested accessible source for item #${item.id}: ${suggestion.source} ${suggestion.identifier} (score ${suggestion.score.toFixed(2)})`,
+      );
+      return formatSuggestionReply(message, suggestion);
+    }
+  } catch {
+    // best-effort: any lookup failure falls back to the canned reply
+  }
+  return paperFailureReply(targetKind, message);
 }
 
 // How much analyzable text we actually captured for a paper, so the curator
