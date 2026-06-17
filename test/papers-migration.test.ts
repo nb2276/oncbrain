@@ -237,6 +237,41 @@ describe('migratePapersAddPdfColumns (content_hash + pdf_path)', () => {
     expect(row?.figure_ocr_md).toBe('median OS 41.6 mo'); // preserved, not nulled
     db.close();
   });
+
+  it('carries figure_structured_md forward through the rebuild (does not drop populated extraction)', () => {
+    // Same restored-.bak hazard for the v0.20 column: old shape (no content_hash →
+    // triggers the destructive rebuild) WITH both figure columns populated. Exercises
+    // the `${hasFigureStructured ? 'figure_structured_md' : 'NULL'}` true-arm in both
+    // rebuild paths, which no other test hits.
+    const path = `/tmp/oncbrain-figstruct-${Date.now()}.db`;
+    const seed = new Database(path);
+    seed.exec(`
+      CREATE TABLE papers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pmid TEXT NOT NULL UNIQUE, doi TEXT, pmc_id TEXT, title TEXT NOT NULL,
+        authors_json TEXT, journal TEXT, pub_date TEXT, abstract TEXT,
+        fulltext_excerpt_md TEXT, figure_ocr_md TEXT, figure_structured_md TEXT,
+        mesh_terms_json TEXT, bookmark_date TEXT NOT NULL, conference_slug TEXT,
+        curator_note TEXT, inbox_item_id INTEGER,
+        fetched_via TEXT NOT NULL DEFAULT 'pending', created_at INTEGER NOT NULL
+      );
+    `);
+    seed
+      .prepare(
+        `INSERT INTO papers (pmid, title, bookmark_date, figure_ocr_md, figure_structured_md, fetched_via, created_at)
+         VALUES ('88888888', 'Struct paper', '2026-06-17', 'raw OCR 0.62', '### Panel A\n- HR: 0.62 (80% CI 0.44-0.86)', 'pdf_ocr', 1)`,
+      )
+      .run();
+    seed.close();
+
+    const db = openDb(path); // runs allowDoiOnly THEN addPdfColumns (both rebuilds)
+    const row = db.prepare('SELECT figure_ocr_md, figure_structured_md FROM papers WHERE pmid = ?').get('88888888') as
+      | { figure_ocr_md: string | null; figure_structured_md: string | null }
+      | undefined;
+    expect(row?.figure_ocr_md).toBe('raw OCR 0.62'); // both columns survive together
+    expect(row?.figure_structured_md).toContain('80% CI 0.44-0.86');
+    db.close();
+  });
 });
 
 describe('savePaper content_hash key + PDF merge', () => {

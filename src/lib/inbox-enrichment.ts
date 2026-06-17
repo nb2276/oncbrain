@@ -60,6 +60,8 @@ import {
   type NctCoverageIndex,
 } from './nct-coverage.ts';
 import { extractPdfText, extractPdfFigureOcr, MAX_FIGURE_OCR_CHARS, PdfToolError } from './pdf-text.ts';
+import { extractPdfFigureStructured, MAX_FIGURE_STRUCTURED_CHARS } from './figure-extract.ts';
+import { isQwenAvailable } from './qwen-client.ts';
 import { extractPaperMetaFromText } from './pdf-meta.ts';
 import { isPdfBuffer, filePdfToVault, filePdfUnfiled } from './pdf-storage.ts';
 import { deriveSlug } from './slug.ts';
@@ -367,11 +369,21 @@ async function enrichPdfPaper(
   // the text layer, OCR just the figure pages so the build-time study agent can
   // ground a figure-locked magnitude. Best-effort: never blocks enrichment.
   let figureOcr = '';
+  // Figure structuring (v0.20): Vision+Qwen→Opus grounded per-panel extraction,
+  // layered on top of the raw figure OCR. Gated on a reachable local Qwen/Ollama
+  // (it makes Opus reconcile calls per page) so a machine without it just keeps
+  // figure_ocr_md. Runs while tmpPdf still exists (before the finally unlink).
+  let figureStructured = '';
   try {
     writeFileSync(tmpPdf, buffer);
     extracted = await extractPdfText(tmpPdf);
     if (extracted.via === 'text') {
       figureOcr = await extractPdfFigureOcr(tmpPdf);
+      // Only worth the Qwen+Opus pass when the paper actually has figure pages
+      // (figureOcr non-empty) AND the local vision stack is up.
+      if (figureOcr && (await isQwenAvailable())) {
+        figureStructured = await extractPdfFigureStructured(tmpPdf);
+      }
     }
   } catch (err) {
     if (err instanceof PdfToolError) {
@@ -485,6 +497,7 @@ async function enrichPdfPaper(
       abstract: meta.abstract,
       fulltext_excerpt_md: extracted.text.slice(0, MAX_FULLTEXT_CHARS),
       figure_ocr_md: figureOcr ? figureOcr.slice(0, MAX_FIGURE_OCR_CHARS) : null,
+      figure_structured_md: figureStructured ? figureStructured.slice(0, MAX_FIGURE_STRUCTURED_CHARS) : null,
       bookmark_date: item.bookmark_date,
       conference_slug: conferenceSlug,
       curator_note: note,

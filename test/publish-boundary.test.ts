@@ -35,11 +35,12 @@ describe('PDF publish boundary', () => {
 
 // v0.15 — the committed digest artifacts (data/digests/<date>.json) are
 // published verbatim (consumed by Astro getStaticPaths + the JSON API). They
-// must NEVER carry copyrighted full text: fulltext_excerpt_md (PDF body) or
-// figure_ocr_md (OCR of figure pages). buildArtifact keeps both out via an
-// explicit field allowlist, but that's hand-maintained — a future `...p` spread
-// would silently start publishing. This guards the real deploy surface so the
-// boundary can't regress without a red test.
+// must NEVER carry copyrighted full text: fulltext_excerpt_md (PDF body),
+// figure_ocr_md (OCR of figure pages), or figure_structured_md (v0.20 grounded
+// per-panel figure extraction — near-verbatim figure content). buildArtifact
+// keeps all out via an explicit field allowlist, but that's hand-maintained — a
+// future `...p` spread would silently start publishing. This guards the real
+// deploy surface so the boundary can't regress without a red test.
 // PDF-derived abstracts: the LLM-from-PDF abstract is dropped at the SOURCE
 // (inbox-enrichment nulls meta.abstract before savePaper) so it never reaches
 // papers.abstract, which is published. Only an authoritative Crossref abstract
@@ -50,7 +51,7 @@ describe('PDF publish boundary', () => {
 
 describe('digest artifact publish boundary (v0.15)', () => {
   const root = resolve(process.cwd());
-  const FORBIDDEN_KEYS = ['fulltext_excerpt_md', 'figure_ocr_md'];
+  const FORBIDDEN_KEYS = ['fulltext_excerpt_md', 'figure_ocr_md', 'figure_structured_md'];
 
   function digestFiles(): string[] {
     const { readdirSync } = require('node:fs') as typeof import('node:fs');

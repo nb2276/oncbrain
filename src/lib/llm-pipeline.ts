@@ -89,6 +89,10 @@ export type DigestInputPaper = {
   // figures (KM medians, forest-plot estimates, image-rendered tables) the text
   // layer can't see. Fed to Phase 2 as labeled, lower-confidence source context.
   figure_ocr_md?: string | null;
+  // v0.20: Vision+Qwen→Opus grounded per-panel figure extraction. Every number is
+  // gated against the figure's own Vision OCR token stream, so it is the PREFERRED
+  // figure-number source over the raw figure_ocr_md when both are present.
+  figure_structured_md?: string | null;
   doi?: string | null;
   mesh_terms?: string[];
   note?: string | null;
@@ -149,6 +153,17 @@ function itemToTweetShape(item: DigestInputItem): DigestInputTweet {
         // may duplicate body text. Treat as groundable source for a figure-locked
         // value, but prefer the body text when the two disagree.
         `\nFigure OCR (Apple Vision over figure/image pages; numbers printed inside figures, lower confidence than body text):\n${item.figure_ocr_md}`,
+      );
+    if (item.figure_structured_md)
+      parts.push(
+        // Grounded per-panel figure extraction (Vision recall + Qwen structure,
+        // reconciled by Opus; every number deterministically verified present in
+        // that page's own OCR token stream). PREFER this over the raw Figure OCR
+        // above for figure-locked magnitudes — it is structured and grounded. A
+        // page headed "reconciliation withheld — raw transcription only" means the
+        // grounding gate rejected the merge; treat that page as raw OCR, not as a
+        // structured claim.
+        `\nFigure (structured, OCR-grounded — preferred for figure-locked numbers):\n${item.figure_structured_md}`,
       );
     if (item.mesh_terms && item.mesh_terms.length > 0)
       parts.push(`\nMeSH: ${item.mesh_terms.slice(0, 8).join(', ')}`);
