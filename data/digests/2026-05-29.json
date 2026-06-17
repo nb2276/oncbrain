@@ -1,27 +1,52 @@
 {
   "date": "2026-05-29",
-  "conference": null,
-  "generated_at": 1780195819788,
+  "conference": {
+    "slug": "asco-2026",
+    "name": "ASCO Annual Meeting 2026"
+  },
+  "generated_at": 1781724805718,
   "digest": {
-    "top_line": "Wait or Treat: upfront brain RT halves icPD (HR 0.35, p<0.001) but 2yr OS favors delayed arm (60% vs 48%) in EGFR/ALK+ mNSCLC.",
-    "tldr": "First RCT on RT timing in oncogene-driven mNSCLC: intracranial control improves with upfront RT but OS signal runs the other way. Supports TKI-first, defer-RT approach in asymptomatic BM pts on CNS-penetrant TKIs.",
+    "top_line": "Wait or Treat: upfront cranial RT cut intracranial progression (sub-HR 0.35) but not OS (2y 48% vs 60%); pre-emptive brain RT hard to justify in asymptomatic EGFR/ALK BM.",
+    "tldr": "First phase III on timing of brain RT for asymptomatic BM in oncogene-driven NSCLC: upfront cranial RT improves intracranial control (sub-HR 0.35) but not survival, with ~6% radiation necrosis. Thoracic carried the day's only signal, and it argues for delaying RT until intracranial progression on CNS-active TKIs.",
     "sites": [
       {
         "disease_site": "thoracic",
-        "intro": "First RCT on brain RT timing in EGFR/ALK+ mNSCLC challenges reflexive upfront irradiation in asymptomatic BM.",
+        "intro": null,
         "studies": [
           {
-            "name": "Wait or Treat — NCT05236946 (Upfront vs Delayed Brain RT in Oncogene-mutated NSCLC)",
-            "tldr": "Upfront brain RT halves icPD (HR 0.35, p<0.001) but OS numerically favors delayed (HR 1.45, 2yr 60% vs 48%) in EGFR/ALK+ mNSCLC.",
+            "name": "Wait or Treat",
+            "tldr": "Upfront cranial RT cut intracranial progression (sub-HR 0.35) but didn't improve OS; 2y OS 48% vs 60% favored delayed RT.",
             "details": [
-              "📊 OS HR 1.45 favoring delayed; 2yr OS 48% upfront vs 60% delayed (secondary endpoint)",
-              "⚠️ Radiation necrosis: 6% upfront vs 0% delayed",
-              "🔍 Phase III open-label RCT, N=208; EGFR/ALK+ mNSCLC, completely asymptomatic BM, ECOG 0-2",
-              "🔍 Both arms: TKIs + chemotherapy; delayed arm: RT at intracranial PD or patient request",
-              "🔍 Stratification: GPA score (0-2 vs >2); synchronous vs metachronous BM",
-              "🔗 First RCT on this question; supports emerging TKI-first approach (osimertinib/alectinib CNS penetration)",
-              "⚠️ OS HR p-value not reported in source; trial takeaway: 'timing of RT does not affect survival'",
-              "⚠️ TKI + chemo backbone may not reflect current osimertinib or alectinib monotherapy practice"
+              {
+                "text": "📊 OS: no upfront benefit (secondary EP, per @StephenVLiu)",
+                "table": {
+                  "columns": [
+                    "",
+                    "Upfront RT",
+                    "Delayed RT"
+                  ],
+                  "rows": [
+                    [
+                      "2-yr OS",
+                      "48%",
+                      "60%"
+                    ],
+                    [
+                      "OS HR",
+                      "1.45 (favors delayed)",
+                      "ref"
+                    ]
+                  ]
+                }
+              },
+              "⚠️ Radiation necrosis ~6% with upfront RT; not observed in delayed arm (per @DrRiyazShah, @StephenVLiu)",
+              "⚠️ Upfront RT improved intracranial control but not survival; pre-emptive cranial RT hard to justify in asymptomatic BM on CNS-active TKIs",
+              "🔗 First completed phase III RCT on timing of brain RT for asymptomatic BM in oncogene-mutated NSCLC",
+              "🔍 Phase III open-label RCT, N=208 (105 vs 103), 1:1; stratified by GPA score and synchronous vs metachronous BM",
+              "🔍 Population: metastatic EGFR/ALK+ NSCLC, completely asymptomatic measurable BM, ECOG 0-2, on TKI + chemo",
+              "🔍 Delayed arm: cranial RT withheld until intracranial progression or patient request",
+              "🔍 Surveillance: MRI brain every 3 months for year 1, then every 6 months",
+              "⚠️ RT modality, dose, fractionation (WBRT vs SRS) not reported in source, gating transferability"
             ],
             "figures": [
               {
@@ -39,31 +64,31 @@
                       "47"
                     ],
                     [
-                      "1-yr cumulative icPD",
-                      "8.7% (2.9%, 14.5%)",
-                      "25.7% (16.8%, 34.7%)"
+                      "1-yr IC progression",
+                      "8.7% (2.9-14.5)",
+                      "25.7% (16.8-34.7)"
                     ],
                     [
-                      "2-yr cumulative icPD",
-                      "21.7% (12.6%, 30.8%)",
-                      "50% (39.2%, 60.9%)"
+                      "2-yr IC progression",
+                      "21.7% (12.6-30.8)",
+                      "50% (39.2-60.9)"
                     ],
                     [
-                      "Sub-HR (95% CI)",
-                      "0.35 (0.21, 0.59)",
+                      "Sub-HR",
+                      "0.35 (0.21-0.59)",
                       "ref"
                     ],
                     [
-                      "p-value",
+                      "p",
                       "<0.001",
-                      "—"
+                      ""
                     ]
                   ]
                 }
               },
               {
-                "url": "https://pbs.twimg.com/media/HJgfW24WMAgfDlr.jpg",
-                "caption": null
+                "url": "https://pbs.twimg.com/media/HJgd507XkAEV3X5.jpg",
+                "caption": "Phase III open-label RCT, 1:1: upfront RT (n=105) vs delayed RT (n=103) + TKI/chemo"
               }
             ],
             "nct": "NCT05236946",
@@ -72,16 +97,16 @@
               35,
               36
             ],
-            "slug": "wait-or-treat-abm",
+            "slug": "wait-or-treat-bm-egfr-alk-nsclc",
             "verdict": {
-              "soc_implication": "challenges-soc",
-              "rationale": "Phase III RCT; upfront RT cuts icPD but OS numerically worse (HR 1.45, 2yr 48% vs 60%) and 6% radiation necrosis vs 0%.",
-              "audience": "Metastatic NSCLC, EGFR or ALK mutant, completely asymptomatic BM, ECOG 0-2"
+              "soc_implication": "confirmatory",
+              "rationale": "Randomized phase III, prespecified primary endpoint met; no OS cost and less necrosis with deferral backs the emerging CNS-active-TKI 'wait' approach.",
+              "audience": "Metastatic EGFR/ALK+ NSCLC, asymptomatic brain mets, on TKI+chemo"
             },
             "open_questions": [
-              "Does icPD reduction with upfront RT translate to QoL or neurocognitive benefit?",
-              "SRS vs WBRT in upfront arm: impact on radiation necrosis rate?",
-              "Which pts (high GPA, many lesions) benefit most from upfront cranial RT?"
+              "Durability of the OS difference favoring delayed RT with longer follow-up",
+              "Does SRS vs WBRT change the intracranial control vs necrosis tradeoff?",
+              "Neurocognition and PROM outcomes by RT timing, not reported in source"
             ],
             "consort": {
               "enrolled": null,
@@ -89,12 +114,12 @@
               "randomized": 208,
               "arms": [
                 {
-                  "label": "Upfront Cranial RT",
+                  "label": "Upfront cranial RT + TKI/chemo",
                   "allocated": 105,
                   "analyzed": null
                 },
                 {
-                  "label": "Delayed Cranial RT",
+                  "label": "Delayed cranial RT + TKI/chemo",
                   "allocated": 103,
                   "analyzed": null
                 }
@@ -103,6 +128,167 @@
             "modality": "radiation",
             "intent": "palliative",
             "methodology": "phase-3-rct",
+            "related_trials": [
+              {
+                "nct": "NCT05522660",
+                "brief_title": "Immunotherapy or Targeted Therapy With or Without Stereotactic Radiosurgery for Patients With Brain Metastases From Melanoma or Non-small Cell Lung Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 180,
+                "primary_completion_date": "2026-09",
+                "brief_summary": "The primary objective of the study is to assess the efficacy in terms of CNS-specific PFS of the combination of standard systemic treatment plus SRS vs. standard systemic treatment alone in patients with newly diagnosed and untreated (except for surgery) asymptomatic or oligosymptomatic brain metastases from melanoma or NSCLC. This proposed randomised phase III clinical study addresses one of the most controversial issues in the current approach to patients with brain mets: the timing of SRS in…",
+                "conditions": [
+                  "Non-Small Cell Lung Cancer",
+                  "Melanoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic radiosurgery",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Immune checkpoint inhibitor",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Most important inclusion criteria:\n\n* Newly diagnosed, previously untreated (except for surgery, see below) asymptomatic or oligo-symptomatic brain metastases, e.g., controlled symptomatic seizure disorder. Note: patients with neurological symptoms or signs that require more than a stable dose of 4…",
+                "answers_question": "Durability of the OS difference favoring delayed RT with longer follow-up",
+                "relevance_phrase": "phase 3: upfront SRS + systemic vs systemic alone"
+              },
+              {
+                "nct": "NCT05768490",
+                "brief_title": "Early or Delayed Intervention of Brain Radiotherapy Combined With Almonertinib in EGFR Mutated NSCLC With Brain Metastases",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 232,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "This is a prospective, multicenter, randomized, controlled clinical study of NSCLC patients with intracranial oligo-metastatic EGFR-sensitive mutations treated with EGFR-TKI Almonertinib , according to the implementation time of brain radiotherapy. Patients were randomly divided into two groups, experimental group (early intervention group of brain radiotherapy) : the brain radiotherapy started within 1 month of TKI treatment, the brain radiotherapy here specifically refers to stereotactic…",
+                "conditions": [
+                  "Brain Metastases",
+                  "Radiotherapy",
+                  "EGFR Activating Mutation"
+                ],
+                "interventions": [
+                  {
+                    "name": "brain radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Almonertinib",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients with histologically or cytologically confirmed non-small cell lung cancer;\n* Initial diagnosis of intracranial oligometastases (no treatment after brain metastases) was defined as brain parenchymal metastases confirmed by MRI, the number of intracranial parenchymal…",
+                "answers_question": "Durability of the OS difference favoring delayed RT with longer follow-up",
+                "relevance_phrase": "randomized phase 3, early vs delayed brain RT"
+              },
+              {
+                "nct": "NCT03075072",
+                "brief_title": "Hippocampal Sparing Whole Brain Radiation Versus Stereotactic Radiation in Patients With 5-20 Brain Metastases: A Phase III, Randomized Trial",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 196,
+                "primary_completion_date": "2024-11",
+                "brief_summary": "This research study is studying two different types of radiation as treatment for brain metastases (tumors in the brain that spread from a cancer that originated elsewhere in the body)",
+                "conditions": [
+                  "Brain Metastases"
+                ],
+                "interventions": [
+                  {
+                    "name": "Whole brain radiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Stereotactic radiation (SRS)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Participants must have a biopsy proven solid malignancy with untreated (by radiation) intracranial lesions radiographically consistent with or pathologically proven to be brain metastases. Patients who have undergone prior systemic therapy are eligible\n* Five-twenty…",
+                "answers_question": "Does SRS vs WBRT change the intracranial control vs necrosis tradeoff?",
+                "relevance_phrase": "phase 3 hippocampal-sparing WBRT vs SRS, 5-20 mets"
+              },
+              {
+                "nct": "NCT05378633",
+                "brief_title": "The CyberChallenge Trial How Much is Too Much - What is the Role of Cyberknife Radiosurgery in Patients With Multiple Brain Metastases?",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 190,
+                "primary_completion_date": "2027-02",
+                "brief_summary": "Patients suffering from malignancies in advanced stages often develop brain metastases, which limit both the life span and the quality of life.\n\nTherapy options for multiple brain metastases may vary and range from stereotactic radiosurgery (SRS), whole-brain radiotherapy (WBRT), chemotherapy, immunotherapy to palliative best supportive care. Especially the efficacy and toxicity of SRS compared to WBRT in patients with extensive brain metastases (\\>4) is not yet clear but of incremental…",
+                "conditions": [
+                  "Brain Metastases",
+                  "Nsclc"
+                ],
+                "interventions": [
+                  {
+                    "name": "SRS",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Whole Brain Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* histologically confirmed malignant illness\n* 4-15 suspect intracranial lesions, taking into consideration all available MRI series\n* age ≥ 18 years of age\n* For women with childbearing potential, (and men) adequate contraception.\n* Ability of subject to understand character…",
+                "answers_question": "Does SRS vs WBRT change the intracranial control vs necrosis tradeoff?",
+                "relevance_phrase": "SRS vs WBRT head-to-head, efficacy + toxicity"
+              },
+              {
+                "nct": "NCT03184038",
+                "brief_title": "Neurocognition in Patients With Multiple Brain Metastases Treated With Radiosurgery",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 90,
+                "primary_completion_date": "2026-09",
+                "brief_summary": "This phase II trial studies the neurological function in patients with multiple brain metastases undergoing stereotactic radiosurgery (SRS) or stereotactic body radiation therapy (SBRT). Stereotactic body radiation therapy uses special equipment to position a patient and deliver radiation to tumors with high precision. This method can kill tumor cells with fewer doses over a shorter period and cause less damage to normal tissue. Assessment of neurocognitive function may help show that SRS…",
+                "conditions": [
+                  "Metastatic Malignant Neoplasm in the Brain",
+                  "Metastatic Malignant Solid Neoplasm"
+                ],
+                "interventions": [
+                  {
+                    "name": "Cognitive Assessment",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Stereotactic Radiosurgery",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Stereotactic Body Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Quality-of-Life Assessment",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically proven solid tumor malignancy (except for small cell lung cancer \\[SCLC\\], germ cell tumor)\n* Karnofsky performance status \\>= 60\n* 1 to 10 brain metastases (mets) (no more than two lesions and/or cavities \\>= 3 cm in maximum diameter)\n* Maximum diameter of…",
+                "answers_question": "Neurocognition and PROM outcomes by RT timing, not reported in source",
+                "relevance_phrase": "neurocognition + QoL endpoints after radiosurgery"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "brain metastases EGFR radiation",
+                "radiosurgery brain metastases NSCLC",
+                "neurocognition brain radiation metastases"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 39,
+              "fetched_at": "2026-06-17T19:31:02.572Z",
+              "rerank_outcome": "picked_N"
+            },
             "source_ids": [
               {
                 "type": "tweet",
@@ -150,7 +336,7 @@
       ],
       "note": null,
       "fetched_via": "oembed",
-      "conference_slug": null
+      "conference_slug": "asco-2026"
     },
     {
       "id": 35,
@@ -174,7 +360,7 @@
       ],
       "note": null,
       "fetched_via": "oembed",
-      "conference_slug": null
+      "conference_slug": "asco-2026"
     },
     {
       "id": 34,
@@ -198,7 +384,7 @@
       ],
       "note": null,
       "fetched_via": "oembed",
-      "conference_slug": null
+      "conference_slug": "asco-2026"
     }
   ]
 }
