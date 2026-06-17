@@ -42,6 +42,7 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 - **Tests**: Vitest (469 tests as of v0.8)
 - **PDF ingestion** (v0.8 PR2): poppler (`brew install poppler`) provides `pdftotext` (text layer) + `pdftoppm` (rasterize scanned pages for Apple Vision OCR) + `pdfimages` (v0.15: locate figure pages). No npm dep. A missing binary yields a clear Telegram reply, not a crash.
 - **Figure OCR** (v0.15, Path A): for a text-layer PDF, `pdfimages -list` finds the pages carrying a real figure (large raster image) and `pdftoppm`→Vision OCRs just those, capturing numbers printed *inside* figures (subgroup medians, forest-plot estimates, n-at-risk, image-rendered tables) that `pdftotext` can't see. Stored in `papers.figure_ocr_md` (local-only, never published — same IP boundary as `fulltext_excerpt_md`) and fed to the Phase 2 study agent as labeled lower-confidence source so it can *ground* a figure-locked magnitude instead of flagging it missing. Backfill the back catalog with `npx tsx build/backfill-figure-ocr.ts`.
+- **Grounded figure extraction** (v0.20, Vision + Qwen → Opus): a structured layer on top of the raw figure OCR. The figure page goes to *both* Apple Vision (high recall) and a local Qwen2.5-VL (`qwen2.5vl:7b` via an Ollama HTTP server — clean per-panel structure + honest "not legible"), and Opus reconciles the two into per-panel markdown (KM / cumulative-incidence / forest plots / image-rendered tables). A deterministic **grounding gate** then audits the *whole* merged output: if any number isn't in the figure's own Vision OCR token stream it **withholds the entire merge and falls back to raw OCR**, so a fabricated magnitude can't reach the digest. Grounding is role-aware for percentage/CI labels (a "95% CI" claim must match a printed "95%"). Stored in `papers.figure_structured_md` (local-only, same IP boundary as `figure_ocr_md`; guarded out of the published artifact + JSON API by `test/publish-boundary.test.ts`) and fed to the Phase 2 study agent as the *preferred* figure-number source over `figure_ocr_md`. Runs in PDF enrichment only when the paper has figure pages **and** a local Qwen/Ollama is reachable (`isQwenAvailable()`); a machine without Ollama just keeps `figure_ocr_md` and loses nothing. Kill switch `FIGURE_STRUCTURED=off`; reconcile model is Opus by default, override with `FIGURE_RECONCILE_MODEL`; `QWEN_MODEL` / `OLLAMA_HOST` configurable. Run one manually with `npm run figure-extract`.
 - **Deploy**: DigitalOcean App Platform, static-site free tier, GitHub auto-deploy from `main`
 
 ## Conventions
@@ -55,7 +56,9 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 ```bash
 # Ingestion
 npm run pull:telegram           # drain @oncbrain_bot DMs into the inbox_items queue (offset-safe, no enrichment)
-npm run enrich:inbox            # process the queue: tweet→oEmbed, paper→PubMed/Crossref, PDF→text/OCR + vault filing
+npm run enrich:inbox            # process the queue: tweet→oEmbed, paper→PubMed/Crossref, PDF→text/OCR + figure-structure + vault filing
+npm run figure-extract -- --image=<png>                 # v0.20: grounded figure extraction (Vision+Qwen→Opus) on one image
+npm run figure-extract -- --pdf=<pdf> --page=<n> [--json]  # or one PDF page; needs poppler + a running Ollama with qwen2.5vl
 npm run admin                   # localhost:3001 admin form (date picker, conference tag, manual paste fallback)
 
 # Build
@@ -173,7 +176,7 @@ src/
   lib/
     db.ts                  SQLite schema + queries + migrations (bookmarks, papers, slide_uploads, inbox_items, conferences, settings)
     telegram-ingest.ts     Telegram Bot API: extractTweetUrls / extractPaperPmids / extractPaperUrls / extractPdfDocument / extractSlidePhoto + sendMessage
-    inbox-enrichment.ts    Type-dispatched enrichment loop (tweet→bookmark, paper→papers, slide→slides, PDF→papers + v0.15 figure OCR); E2/E3 replies; cross-day NCT nudge; conference auto-stamp via detectAndEnsureConference
+    inbox-enrichment.ts    Type-dispatched enrichment loop (tweet→bookmark, paper→papers, slide→slides, PDF→papers + v0.15 figure OCR + v0.20 grounded figure structuring when a local Qwen/Ollama is up); E2/E3 replies; cross-day NCT nudge; conference auto-stamp via detectAndEnsureConference
     conference-detect.ts   v0.14.9: detect a major oncology meeting (ASCO/ESMO/ASTRO/AACR/ASH/SABCS + ASCO GU/GI) from a source's hashtags / URL-hosts / prose so bot-ingested sources get a conference_slug
     twitter-fetch.ts       oEmbed (text + html) + syndication (images), parallel
     tweet-syndication.ts   Twitter syndication CDN client (token formula derivation)
@@ -183,7 +186,9 @@ src/
     html-meta.ts           v0.8 PR1: Highwire + OpenGraph meta extraction from journal pages
     doi.ts                 v0.8 PR1: normalizeDoi (single canonicalization) + extractDois
     ssrf-fetch.ts          v0.8 PR1: SSRF-safe HTTPS fetch (private-IP block, per-hop redirect revalidation)
-    pdf-text.ts            v0.8 PR2: pdftotext + pdftoppm→Vision OCR fallback (poppler). v0.15: extractPdfFigureOcr — pdfimages-targeted OCR of figure pages (numbers printed inside KM curves / forest plots / image-rendered tables that the text layer can't see)
+    pdf-text.ts            v0.8 PR2: pdftotext + pdftoppm→Vision OCR fallback (poppler). v0.15: extractPdfFigureOcr — pdfimages-targeted OCR of figure pages (numbers printed inside KM curves / forest plots / image-rendered tables that the text layer can't see). v0.20: rasterizePageToPngs (caller-cleaned page images for the structured pipeline)
+    qwen-client.ts         v0.20: local Qwen2.5-VL via an Ollama HTTP server (base64 image, raised num_ctx). isQwenAvailable() probe + FIGURE_STRUCTURED=off kill switch + placeholder/oversize guards. Graceful-degrade, never throws
+    figure-extract.ts      v0.20: grounded figure extraction — Vision (recall) + Qwen (structure) → Opus reconcile, with a deterministic role-aware grounding gate that withholds the whole merge to raw OCR if any number isn't in the OCR. extractFigure (image) + extractPdfFigureStructured (PDF page). Output → papers.figure_structured_md (local-only)
     pdf-meta.ts            v0.8 PR2: LLM metadata extraction from PDF text (+ DOI/PMID regex backstop)
     pdf-storage.ts         v0.8 PR2: file PDFs to the gitignored Obsidian vault (papers/<site>/<slug>.pdf)
     slide-photo-storage.ts Telegram getFile download + magic-byte sniff + disk save
@@ -225,6 +230,7 @@ prompts/
   digest-v5-synthesis.txt    CURRENT Phase 3: lede + cross-site TL;DR + open questions
   digest-v1..v4.txt          retained for diff / rollback
   pdf-meta-v1.txt            v0.8 PR2: PDF metadata extraction (treat-text-as-data guard)
+  figure-reconcile-v1.txt    v0.20: Opus merge prompt — reconcile Vision + Qwen figure reads (treat-input-as-data + the grounding rule: omit any number not in the OCR)
   eval-judge-v1.txt          LLM-as-judge rubric
 build/
   digest-builder.ts        CLI: pull pending sources → build sites/studies → write JSON + Obsidian
@@ -232,6 +238,7 @@ build/
   studio.ts                CLI (npm run studio): interactive @clack/prompts TUI over overrides + build:day + pull/enrich
   pull-telegram.ts         CLI: poll Telegram bot, write inbox_items
   enrich-inbox.ts          CLI: drain pending inbox_items into typed source tables (sweeps orphaned OCR temp dirs)
+  figure-extract.ts        CLI (npm run figure-extract): grounded figure extraction on one image or PDF page (Vision+Qwen→Opus); manual runs / spikes
   notify-curator.ts        CLI: Telegram "build done" summary to the curator
   eval.ts                  CLI: run eval, score against rubric
   seed-dev.ts              dev fixture

@@ -49,9 +49,11 @@ cp .env.example .env
 npm install
 brew install poppler                            # PDF text + scanned-page rasterize (for PDF ingestion)
 npm run setup:vision                            # compile the Apple Vision OCR binary (macOS only)
+# Optional: a local Ollama running qwen2.5vl:7b unlocks grounded figure extraction
+#   brew install ollama && ollama serve && ollama pull qwen2.5vl:7b
 ```
 
-`poppler` and the Vision binary are only needed for PDF + slide ingestion; the rest runs without them (a missing binary yields a clear Telegram reply, not a crash).
+`poppler` and the Vision binary are only needed for PDF + slide ingestion; the rest runs without them (a missing binary yields a clear Telegram reply, not a crash). A local Ollama (`qwen2.5vl:7b`) is optional: when it's reachable, PDF figure pages also get a grounded Vision+Qwen→Opus per-panel extraction; without it, ingestion keeps the plain figure OCR and loses nothing.
 
 ## Adding content
 
@@ -66,7 +68,7 @@ Two ingestion paths, both write to the same SQLite inbox queue. Use either or bo
 
 ```bash
 npm run pull:telegram   # writes each new message to the inbox_items queue (offset-safe, no enrichment)
-npm run enrich:inbox    # tweets → oEmbed, papers → PubMed/Crossref, PDFs → text/OCR + vault filing
+npm run enrich:inbox    # tweets → oEmbed, papers → PubMed/Crossref, PDFs → text/OCR (+ grounded figure structuring when Ollama is up) + vault filing
 ```
 
 The bot also recognizes a `/note <text>` command on the same message to attach a curator note, and replies with what it ingested (or a named reason if it could not). If a forwarded message carries a link it can't ingest, it replies with the source types it accepts instead of dropping the message silently; conversational text and obvious non-source links (YouTube, shorteners) stay unanswered.
