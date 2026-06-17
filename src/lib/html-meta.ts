@@ -11,9 +11,15 @@
 import { normalizeDoi } from './doi.ts';
 
 export class MetaNotFoundError extends Error {
-  constructor(message = 'no paper metadata found on page') {
+  // The page title, when the page DID expose one but carried no DOI/PMID to key
+  // on. The enrichment failure path uses it to search for an accessible copy of
+  // the same paper (see paper-suggest.ts) before falling back to the canned
+  // "send the DOI" reply.
+  readonly pageTitle?: string;
+  constructor(message = 'no paper metadata found on page', pageTitle?: string) {
     super(message);
     this.name = 'MetaNotFoundError';
+    this.pageTitle = pageTitle;
   }
 }
 

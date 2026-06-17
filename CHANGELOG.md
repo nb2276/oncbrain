@@ -2,6 +2,36 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.19.7] - 2026-06-16
+
+### Added
+
+- **Accessible-source suggester for papers that can't be ingested.** When a paper
+  URL fails permanently (a publisher page that 403s, e.g. ScienceDirect / Elsevier
+  journals like the Red Journal, or a fetched page that has a title but no DOI /
+  PMID to key on), the bot now tries to find an accessible copy of the SAME paper
+  and replies with a clean re-ingest link instead of only telling the curator to
+  go find a DOI themselves. The curator confirms by forwarding that link back,
+  which re-runs ingestion through the reliable id path (PubMed efetch / Crossref
+  by DOI, never a second publisher fetch). No new reply-tracking state: the
+  suggestion IS a `pubmed.ncbi.nlm.nih.gov/<pmid>` or `doi.org/<doi>` link the
+  existing pipeline already handles on forward-back.
+  - Title recovery: from the page itself when it parsed but lacked an id
+    (`MetaNotFoundError` now carries `pageTitle`), or from the curator's message
+    text on a hard 403 (mobile shares commonly prepend "Title - Publisher").
+  - Two sources, in order: PubMed (`searchPubMed` + `summarizePmids`, covers the
+    MEDLINE-indexed journals that are nearly every blocked-publisher case) then a
+    new Crossref bibliographic search (`searchCrossrefByTitle`, catches preprints
+    / non-MEDLINE journals PubMed lacks).
+  - Safety: never auto-ingests a fuzzy match. A candidate is suggested only when
+    its title clears an overlap-coefficient gate (>= 0.6) AND shares >= 3
+    significant tokens with the recovered query; the reply is framed "likely the
+    same paper, forward to confirm" so a near-miss is caught by the curator's eye.
+    Entirely best-effort: any lookup failure degrades to the prior canned reply,
+    and it never blocks or fails enrichment.
+  - New `src/lib/paper-suggest.ts`; `test/paper-suggest.test.ts` (11 tests) plus
+    Crossref search tests. All 1442 tests pass.
+
 ## [0.19.6] - 2026-06-16
 
 ### Changed

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { fetchCrossrefPaper, parseCrossrefWork, CrossrefError } from '../src/lib/crossref-client.ts';
+import {
+  fetchCrossrefPaper,
+  parseCrossrefWork,
+  searchCrossrefByTitle,
+  CrossrefError,
+} from '../src/lib/crossref-client.ts';
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -82,5 +87,56 @@ describe('fetchCrossrefPaper', () => {
 
   it('rejects a non-DOI input', async () => {
     await expect(fetchCrossrefPaper('not-a-doi')).rejects.toBeInstanceOf(CrossrefError);
+  });
+});
+
+describe('searchCrossrefByTitle', () => {
+  it('queries query.bibliographic and parses candidates with normalized DOIs + year', async () => {
+    let seenUrl = '';
+    const fetchImpl = (async (url: string) => {
+      seenUrl = url;
+      return jsonResponse({
+        message: {
+          items: [
+            {
+              DOI: '10.1016/J.IJROBP.2024.01.001',
+              title: ['Reduced-dose preoperative radiotherapy in myxoid liposarcoma'],
+              'container-title': ['Int J Radiat Oncol Biol Phys'],
+              issued: { 'date-parts': [[2024, 3]] },
+              published: { 'date-parts': [[2024, 3]] },
+              score: 42.5,
+            },
+          ],
+        },
+      });
+    }) as unknown as typeof fetch;
+    const out = await searchCrossrefByTitle('reduced dose preoperative radiotherapy myxoid liposarcoma', {
+      fetchImpl,
+    });
+    expect(seenUrl).toContain('query.bibliographic=');
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({
+      doi: '10.1016/j.ijrobp.2024.01.001', // normalized (lowercased)
+      journal: 'Int J Radiat Oncol Biol Phys',
+      year: '2024',
+      score: 42.5,
+    });
+  });
+
+  it('skips items with no DOI and clamps rows', async () => {
+    let seenUrl = '';
+    const fetchImpl = (async (url: string) => {
+      seenUrl = url;
+      return jsonResponse({ message: { items: [{ title: ['No DOI here'] }, { DOI: '10.1056/x', title: ['Has DOI'] }] } });
+    }) as unknown as typeof fetch;
+    const out = await searchCrossrefByTitle('q', { fetchImpl, rows: 999 });
+    expect(seenUrl).toContain('rows=20'); // clamped to the 20 max
+    expect(out).toHaveLength(1);
+    expect(out[0]!.doi).toBe('10.1056/x');
+  });
+
+  it('throws rate_limit on 429', async () => {
+    const fetchImpl = (async () => jsonResponse({}, 429)) as unknown as typeof fetch;
+    await expect(searchCrossrefByTitle('q', { fetchImpl })).rejects.toMatchObject({ kind: 'rate_limit' });
   });
 });
