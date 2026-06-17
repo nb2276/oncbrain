@@ -12,15 +12,6 @@ Format: `- [scope] description (source)`
 
 ## Now — highest priority
 
-- **Backfill `figure_structured_md` on the back catalog (v0.20 follow-up).** The
-  grounded figure pipeline (Vision + Qwen → Opus) shipped in v0.20 and runs on
-  *new* PDF ingests when a local Qwen/Ollama is up, but already-filed PDFs have
-  `figure_structured_md = NULL`. ~5 filed PDFs have raster figure pages. Mirror
-  `build/backfill-figure-ocr.ts` (a `backfill-figure-structured` that re-runs
-  `extractPdfFigureStructured` over papers where the column is NULL and a PDF
-  exists), gated on `isQwenAvailable()`. Also: `ollama serve` must be running for
-  the enrichment pass to fire — make it a login item / `brew services` or accept
-  graceful degradation. (v0.20 ship)
 - **Live end-to-end test of v0.8 ingestion.** PR1/2/3 pass unit + build tests but have never run against real Telegram traffic. DM the bot a journal URL + a PDF, run `pull:telegram → enrich:inbox → build:day`, confirm vault filing + E2/E3 replies + digest output. (this session)
 
 ## v0.14 — verdict triage + what's-new (deferred from 2026-06-09 office-hours design + eng review)
@@ -65,6 +56,16 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 - **OCR is macOS-only.** Linux/CI builds produce uniformly null captions; scanned-PDF OCR (v0.8 PR2) needs the Mac Vision binary + poppler.
 - **Figure caption validator checks numeric tokens only.** Can't catch mislabeled axes or wrong-arm attribution.
 - **Disease-site classification uses MeSH terms / keywords, not author affiliations.** Explicit product decision, not a deferred item.
+
+## Completed (v0.20.1, 2026-06-17)
+
+- **Back-catalog backfill for grounded figure extraction + persistent Ollama.**
+  `npm run backfill:figure-structured` (`build/backfill-figure-structured.ts`)
+  re-runs the v0.20 Vision + Qwen → Opus pipeline over filed PDFs whose
+  `figure_structured_md` is NULL (gated on `isQwenAvailable()`, idempotent,
+  `--date`/`--id`/`--force`/`--dry-run`). Ollama is now a persistent `brew
+  services` login item so new-ingest enrichment + the backfill always find it.
+  **Completed:** v0.20.1 (2026-06-17). Closes the v0.20 ship follow-up.
 
 ## Completed (v0.14.10, 2026-06-11)
 

@@ -2,6 +2,19 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.20.1] - 2026-06-17
+
+### Added
+
+- **Back-catalog backfill for grounded figure extraction.** `npm run
+  backfill:figure-structured` (`build/backfill-figure-structured.ts`) re-runs the
+  v0.20 Vision + Qwen → Opus pipeline over every filed PDF whose
+  `figure_structured_md` is still NULL, so papers ingested before v0.20 (or before
+  a local Ollama was up) get the grounded per-panel extraction. Mirrors
+  `backfill-figure-ocr.ts`: gated on `isQwenAvailable()`, best-effort per paper
+  (PDF-missing / vector-figure / gate-withheld rows are skipped, not failed),
+  idempotent, with `--date` / `--id` / `--force` / `--dry-run`.
+
 ## [0.20.0] - 2026-06-17
 
 ### Added
