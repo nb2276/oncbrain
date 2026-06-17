@@ -2,6 +2,25 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.20.2] - 2026-06-17
+
+### Added
+
+- **Conference backfill CLI.** `npm run backfill:conference`
+  (`build/backfill-conference.ts`) re-runs the conference auto-detector
+  (`detectAndEnsureConference`) over stored bookmarks / papers / slides whose
+  `conference_slug` is NULL and stamps the year-specific meeting slug
+  (`asco-2026`, `astro-2025`, …) wherever a real meeting signal exists, so the
+  `meeting` tag-filter namespace, `/tags/<meeting>` pages, and per-day conference
+  badges light up for content ingested before auto-detect (v0.14.9). Mirrors the
+  per-type detection fields used at enrichment (papers: title/journal/source_url/
+  note — not the body; slides: note + OCR; tweets: text + url + image OCR).
+  Read-only `--dry-run`, plus `--date` / `--force`; idempotent, never throws.
+  Journal-only content with no meeting signal stays untagged, by design. (On the
+  back catalog this tagged 36 bookmarks across the ASCO 2026 / ESMO 2025 windows;
+  surfacing the tags then requires a `build:day` rebuild of the affected dates so
+  the digest artifacts carry the conference.)
+
 ## [0.20.1] - 2026-06-17
 
 ### Added
