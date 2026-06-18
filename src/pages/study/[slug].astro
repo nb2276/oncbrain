@@ -1,0 +1,100 @@
+---
+// v0.21: standalone per-study page. This is what a SHARED study link resolves
+// to, so it carries the study's own og:title (the study name) and og:image
+// (/og/study/<param>.png) instead of falling back to the site-level card the
+// old fragment-anchor share URL produced. Renders the SAME StudyCard the date
+// + site pages use; the in-page anchors on those pages still work for local
+// jump-links, only the share button now points here.
+import Base from '../../layouts/Base.astro';
+import StudyCard from '../../components/StudyCard.astro';
+import {
+  listStudyPages,
+  stripStudyNamePrefix,
+  type StudyPageEntry,
+} from '../../lib/digest-data.ts';
+import { getDiseaseSite } from '../../lib/disease-sites.ts';
+import { studyDataTags } from '../../lib/study-data-tags.ts';
+import {
+  buildSiblingPreviews,
+  listDigestsStrict,
+  studyKeyString,
+  studyTagChips,
+  type SiblingPreview,
+} from '../../lib/tag-index.ts';
+
+export async function getStaticPaths() {
+  // Sibling map built ONCE over the full corpus here (not per-page in the
+  // frontmatter, which would be O(pages × corpus)); each study's slice is
+  // passed through props.
+  const siblingPreviews = buildSiblingPreviews(listDigestsStrict());
+  return listStudyPages().map((entry) => {
+    const siblingKey = studyKeyString({ date: entry.date, resolvedSlug: entry.resolvedSlug });
+    return {
+      params: { slug: entry.param },
+      props: {
+        entry,
+        siblings: siblingPreviews.get(siblingKey) ?? [],
+        tagChips: studyTagChips(entry.study, entry.conference),
+        dataTags: studyDataTags(entry.study, entry.disease_site, entry.conference?.slug ?? null),
+      },
+    };
+  });
+}
+
+interface Props {
+  entry: StudyPageEntry;
+  siblings: SiblingPreview[];
+  tagChips: Array<{ slug: string; label: string }>;
+  dataTags: string;
+}
+
+const { entry, siblings, tagChips, dataTags } = Astro.props as Props;
+const meta = getDiseaseSite(entry.disease_site);
+const description =
+  stripStudyNamePrefix(entry.study.tldr ?? '', entry.study.name) ||
+  entry.study.tldr ||
+  `${meta.label} study from ${entry.date}.`;
+---
+
+<Base
+  title={`${entry.study.name} — oncbrain`}
+  description={description}
+  wide={true}
+  ogImage={`/og/study/${entry.param}.png`}
+>
+  <nav class="crumb">
+    <a href="/">← all dates</a>
+    {entry.conference && <a href={`/conferences/${entry.conference.slug}/`}>{entry.conference.name}</a>}
+    <a href={`/${entry.date}/`}>{entry.date}</a>
+    <a href={`/sites/${entry.disease_site}/`}>
+      <span class="crumb-emoji" aria-hidden="true">{meta.emoji}</span>{meta.label}
+    </a>
+  </nav>
+
+  <StudyCard
+    study={entry.study}
+    anchorId={entry.param}
+    bookmarks={entry.bookmarks}
+    papers={entry.papers}
+    slides={entry.slides}
+    shareUrl={`/study/${entry.param}/`}
+    tagChips={tagChips}
+    siblings={siblings}
+    dataTags={dataTags}
+  />
+</Base>
+
+<style>
+  .crumb {
+    margin: 0 0 1.25rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+  }
+  .crumb a { color: var(--fg-muted); text-decoration: none; margin-right: 0.5rem; }
+  .crumb a + a::before { content: '· '; color: var(--border); margin-right: 0.25rem; }
+  .crumb a:hover { color: var(--accent); }
+  .crumb-emoji { margin-right: 0.3rem; }
+</style>

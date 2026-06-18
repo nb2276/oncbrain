@@ -32,6 +32,15 @@ describe('isArchivePage', () => {
     expect(isArchivePage('/conferences/asco-2026/')).toBe(true);
   });
 
+  it('v0.21: matches per-study detail pages (the share-link target)', () => {
+    expect(isArchivePage('/study/2026-05-17-prestige-psma/')).toBe(true);
+    expect(isArchivePage('/study/2026-05-17-prestige-psma')).toBe(true);
+    // Bare /study/ index would be a fixed shell page, not the unbounded set.
+    expect(isArchivePage('/study/')).toBe(false);
+    // An OG image is an asset (extension), not a navigation archive page.
+    expect(isArchivePage('/og/study/2026-05-17-prestige-psma.png')).toBe(false);
+  });
+
   it('v0.10: matches per-tag landing pages (single tag)', () => {
     expect(isArchivePage('/tags/radiation/')).toBe(true);
     expect(isArchivePage('/tags/palliative')).toBe(true);

@@ -3,6 +3,7 @@ import {
   defaultCard,
   digestCard,
   siteCard,
+  studyCard,
   headlineSize,
   renderShareImage,
 } from '../src/lib/share-image.ts';
@@ -47,6 +48,49 @@ describe('share-image card builders', () => {
     });
   });
 
+  it('studyCard: date·conf eyebrow, name-led headline, verdict tag in its color', () => {
+    const c = studyCard({
+      name: 'PRESTIGE-PSMA',
+      tldr: 'PRESTIGE-PSMA: mPFS 14.2 vs 9.8 mo, HR 0.62',
+      date: '2026-05-17',
+      conference: 'ASCO GU',
+      verdict: { soc_implication: 'practice-changing', rationale: 'x', audience: null },
+      handle: '@nb2276',
+    });
+    expect(c.eyebrow).toBe('2026-05-17 · ASCO GU');
+    // Name leads; the name-prefix is stripped from the restated TL;DR so it
+    // isn't duplicated ("PRESTIGE-PSMA: PRESTIGE-PSMA: ...").
+    expect(c.headline).toBe('PRESTIGE-PSMA: mPFS 14.2 vs 9.8 mo, HR 0.62');
+    expect(c.tagLabel).toBe('PRACTICE-CHANGING');
+    expect(c.tagColor).toBe('#1a5e3a');
+  });
+
+  it('studyCard: no-conf eyebrow, no verdict → no tag (review path)', () => {
+    const c = studyCard({
+      name: 'A narrative review of PARP inhibitors',
+      tldr: 'Survey of PARP inhibitor trials across solid tumors.',
+      date: '2026-06-01',
+      conference: null,
+      verdict: null,
+      handle: '@x',
+    });
+    expect(c.eyebrow).toBe('2026-06-01');
+    expect(c.tagLabel).toBeUndefined();
+    expect(c.tagColor).toBeUndefined();
+    expect(c.headline).toContain('A narrative review of PARP inhibitors');
+  });
+
+  it('studyCard: headline fallbacks — tldr not led by name keeps full tldr; empty tldr → bare name', () => {
+    // TL;DR does not restate the name → nothing is stripped, headline = "NAME: <full tldr>".
+    expect(
+      studyCard({ name: 'TRIAL-7', tldr: 'mPFS 14.2 vs 9.8 mo', date: '2026-01-01', handle: '@x' }).headline,
+    ).toBe('TRIAL-7: mPFS 14.2 vs 9.8 mo');
+    // Empty/whitespace tldr → headline falls back to the bare name, no dangling colon.
+    const nameOnly = studyCard({ name: 'TRIAL-7', tldr: '   ', date: '2026-01-01', handle: '@x' });
+    expect(nameOnly.headline).toBe('TRIAL-7');
+    expect(nameOnly.headline).not.toContain(':');
+  });
+
   it('headlineSize shrinks as the headline grows', () => {
     expect(headlineSize('short')).toBe(58);
     expect(headlineSize('x'.repeat(60))).toBe(50);
@@ -62,6 +106,7 @@ describe('share-image card builders', () => {
       defaultCard('@x'),
       digestCard({ date: '2026-06-09', topLine: 'x', conference: 'ASCO', studyCount: 2, siteCount: 1, handle: '@x' }),
       siteCard({ label: 'Breast', headline: 'y', count: 3, handle: '@x' }),
+      studyCard({ name: 'TRIAL-1', tldr: 'TRIAL-1: ORR 42%', date: '2026-06-09', conference: 'ASCO', verdict: { soc_implication: 'early-signal', rationale: 'x', audience: null }, handle: '@x' }),
     ];
     const blob = JSON.stringify(cards);
     expect(blob).not.toMatch(/pbs\.twimg\.com|\/slides\/|\.(png|jpg|jpeg|webp)\b/i);

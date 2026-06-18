@@ -470,6 +470,46 @@ export function listSiteSummaries(): SiteSummary[] {
   }));
 }
 
+// v0.21: one entry per study, the data behind the standalone /study/{param}/
+// page + its /og/study/{param}.png card. `param` is `${date}-${resolvedSlug}`,
+// which is the SAME date-prefixed key the date page + site page use as an
+// in-page anchor and is globally unique (assignSlugsForDate disambiguates every
+// study on a date, so no two studies share it). The standalone page is what a
+// SHARED study link unfurls to — a URL fragment (the old `/sites/{site}/#anchor`
+// share target) is invisible to link unfurlers, so they fell back to the
+// site-level OG card; a real page gives the study its own og:title + og:image.
+export type StudyPageEntry = {
+  param: string;
+  date: string;
+  conference: DigestArtifact['conference'];
+  disease_site: string;
+  study: DigestStudy;
+  resolvedSlug: string;
+  bookmarks: DigestArtifact['bookmarks'];
+  papers: DigestArtifactPaper[];
+  slides: DigestArtifactSlide[];
+};
+
+export function listStudyPages(): StudyPageEntry[] {
+  const out: StudyPageEntry[] = [];
+  for (const summary of listSiteSummaries()) {
+    for (const occ of summary.occurrences) {
+      out.push({
+        param: `${occ.date}-${occ.resolvedSlug}`,
+        date: occ.date,
+        conference: occ.conference,
+        disease_site: summary.disease_site,
+        study: occ.study,
+        resolvedSlug: occ.resolvedSlug,
+        bookmarks: occ.bookmarks,
+        papers: occ.papers ?? [],
+        slides: occ.slides ?? [],
+      });
+    }
+  }
+  return out;
+}
+
 export type RecentStudy = {
   date: string;
   conference: DigestArtifact['conference'];

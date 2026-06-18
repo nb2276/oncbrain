@@ -128,6 +128,14 @@ export default defineConfig({
           // would re-create the dir-matches-itself bug documented above
           // (would evict the bare tags/index.html shell page).
           'tags/*/index.html', // single-tag + intersection landings (one-segment-deep)
+          // v0.21: per-study pages + their OG cards are the largest unbounded set
+          // (one each per study). They route through NetworkFirst (isArchivePage's
+          // STUDY_DETAIL), so keep them OUT of precache — same treatment as the
+          // dated/site/tag archive pages above. Without these, Workbox would
+          // precache all per-study HTML + PNGs and grow the offline footprint
+          // without limit (Codex #P2).
+          'study/*/index.html', // per-study share-link pages -> NetworkFirst
+          'og/study/*.png', // per-study OG share cards -> served on demand, not precached
           '**/*-latin-ext-*.woff2', // unused font subsets; unicode-range gates runtime fetch
           '**/*-vietnamese-*.woff2',
         ],
