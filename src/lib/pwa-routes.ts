@@ -22,6 +22,11 @@ const DATED = /^\/\d{4}-\d{2}-\d{2}\/?$/;
 const STUDIES = /^\/studies\/?$/;
 const SITE_DETAIL = /^\/sites\/[^/]+\/?$/;
 const CONFERENCE_DETAIL = /^\/conferences\/[^/]+\/?$/;
+// v0.21: standalone per-study pages (/study/<date>-<slug>/), the share-link
+// target. Unbounded (one per study, grows with the corpus), so NetworkFirst
+// like the other archive routes — never precached. Single segment like
+// /sites/ and /conferences/, so the same permissive `[^/]+` shape.
+const STUDY_DETAIL = /^\/study\/[^/]+\/?$/;
 // v0.10: tag landing pages (/tags/<slug>/) AND intersection pages
 // (/tags/<a>+<b>/, /tags/<a>+<b>+<c>/) all route through NetworkFirst archive
 // caching. NOT the bare /tags/ index — that stays on the shell path because
@@ -36,14 +41,15 @@ const CONFERENCE_DETAIL = /^\/conferences\/[^/]+\/?$/;
 const SLUG_PART = '[a-z0-9]+(?:-[a-z0-9]+)*';
 const TAG_DETAIL = new RegExp(`^/tags/${SLUG_PART}(?:\\+${SLUG_PART}){0,2}/?$`);
 
-/** True for the unbounded archive pages (the /studies full index + dated digests + per-site + per-conference + per-tag). */
+/** True for the unbounded archive pages (the /studies full index + dated digests + per-site + per-conference + per-tag + per-study). */
 export function isArchivePage(pathname: string): boolean {
   return (
     DATED.test(pathname) ||
     STUDIES.test(pathname) ||
     SITE_DETAIL.test(pathname) ||
     CONFERENCE_DETAIL.test(pathname) ||
-    TAG_DETAIL.test(pathname)
+    TAG_DETAIL.test(pathname) ||
+    STUDY_DETAIL.test(pathname)
   );
 }
 

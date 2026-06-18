@@ -46,8 +46,10 @@ interface Props {
   anchorId?: string;
   // Optional "Sourced from …" attribution line (per-date page only).
   authors?: StudyAuthor[];
-  // Optional canonical share URL (per-site page anchor: /sites/{site}/#{date}-{slug}).
-  // Absent → share button is not rendered. Absolutized at click time in share-script.ts.
+  // Optional canonical share URL (standalone per-study page: /study/{date}-{slug}/).
+  // A real page (not a #fragment) so a shared link unfurls with the study's own
+  // og:title + og:image. Absent → share button is not rendered. Absolutized at
+  // click time in share-script.ts.
   shareUrl?: string;
   // v0.10: pre-resolved cross-cutting tag chips. Caller passes via
   // studyTagChips() so the label resolution happens where conference

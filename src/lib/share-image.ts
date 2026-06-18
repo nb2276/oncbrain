@@ -13,6 +13,8 @@ import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { VERDICT_META, VERDICT_COLOR } from './verdict.ts';
+import { stripStudyNamePrefix, type StudyVerdict } from './digest-data.ts';
 
 const W = 1200;
 const H = 630;
@@ -107,6 +109,37 @@ export function siteCard(opts: {
   return {
     eyebrow: `${opts.label} · ${opts.count} ${opts.count === 1 ? 'study' : 'studies'}`,
     headline: opts.headline?.trim() ? opts.headline : opts.label,
+    handle: opts.handle,
+  };
+}
+
+// Per-study card: the preview a SHARED study link unfurls to. The headline
+// leads with the study name and rides the (name-prefix-stripped) TL;DR behind a
+// colon so the headline number travels with it — the card has no body slot for
+// the TL;DR. The bottom-left tag is the SOC verdict in its own color (so a
+// recipient sees "PRACTICE-CHANGING" / "CAVEATS DOMINATE" at a glance); a
+// review (no verdict) gets no tag. Takes only primitives + the verdict enum —
+// never a figure/slide source — so it stays inside the publish boundary by
+// construction (guarded by test/publish-boundary.test.ts).
+export function studyCard(opts: {
+  name: string;
+  tldr: string;
+  date: string;
+  conference?: string | null;
+  verdict?: StudyVerdict | null;
+  handle: string;
+}): ShareCard {
+  const conf = opts.conference ? ` · ${opts.conference}` : '';
+  const name = opts.name.trim();
+  const stripped = stripStudyNamePrefix(opts.tldr ?? '', name);
+  const headline = stripped ? `${name}: ${stripped}` : name || (opts.tldr ?? '').trim();
+  const meta = opts.verdict ? VERDICT_META[opts.verdict.soc_implication] ?? null : null;
+  const color = opts.verdict ? VERDICT_COLOR[opts.verdict.soc_implication] ?? undefined : undefined;
+  return {
+    eyebrow: `${opts.date}${conf}`,
+    headline,
+    tagLabel: meta ? meta.label.toUpperCase() : undefined,
+    tagColor: color,
     handle: opts.handle,
   };
 }

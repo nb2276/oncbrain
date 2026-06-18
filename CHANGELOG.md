@@ -2,6 +2,37 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.21.0] - 2026-06-17
+
+### Added
+
+- **Shareable per-study pages with study-specific link previews.** Every study
+  now has its own page at `/study/<date>-<slug>/` and its own social-preview card
+  at `/og/study/<date>-<slug>.png`. Share a study from anywhere (a digest day, a
+  disease-site page, a tag page, or the home feed) and the link a recipient
+  receives now unfurls with the **study's name and headline number** plus a
+  study-specific card showing the study's SOC verdict in its color (e.g.
+  CONFIRMATORY, PRACTICE-CHANGING; a review carries no verdict, so it shows no
+  tag) — not the section header and a generic site card.
+
+### Fixed
+
+- **Shared study links showed the section header, not the study.** The share
+  button pointed at the disease-site page with a `#<date>-<slug>` URL fragment.
+  Link unfurlers (iMessage, Slack, X, WhatsApp, Discord, LinkedIn) strip URL
+  fragments before fetching a page for its preview, so a shared study fell back to
+  the disease-site page's Open Graph card (site label + study count). Study share
+  links now target a real per-study page that carries the study's own `og:title`
+  and `og:image`, so the preview is always the study. In-page jump anchors on the
+  date/site/tag pages are unchanged.
+
+### Changed
+
+- The per-study pages (NetworkFirst) and their OG cards (served on demand) are
+  both excluded from the PWA precache, the same treatment as the per-date,
+  per-site, per-conference, and per-tag archive pages, so the offline footprint
+  stays bounded as the corpus grows.
+
 ## [0.20.2] - 2026-06-17
 
 ### Added

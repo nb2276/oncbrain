@@ -202,7 +202,7 @@ src/
     obsidian-export.ts     Markdown export: YAML frontmatter + wikilinks + source-type pills + filed-PDF embed
     feed.ts                v0.8 PR3: RSS 2.0 builder
     api-output.ts          v0.8 PR3: JSON API shapers (digests index, per-study, sanitized per-date)
-    digest-data.ts         Astro page data loaders (listDigests, listSiteSummaries, listRecentStudies)
+    digest-data.ts         Astro page data loaders (listDigests, listSiteSummaries, listRecentStudies; v0.21: listStudyPages + StudyPageEntry — one entry per study behind the standalone /study/ page + its OG card)
     digest-overrides.ts    durable per-date overrides: suppress/edit studies, applied at build time (applyOverrides + saveOverrides)
     verdict.ts             v0.9: SOC-implication verdict taxonomy (emoji + label), shared by StudyCard + TriageRail. v0.16: REVIEW_GLYPH (🗞️) + railEmojiForStudy (verdict emoji, else 🗞️ for a review, else neutral dot)
     content-type.ts        v0.16: study content_type (study_report | review) — first-class, orthogonal to methodology + verdict; parseContentType + stripReviewVerdicts (a review carries no verdict). Classified at Phase 1; NOT a /tags/ namespace
@@ -213,14 +213,16 @@ src/
     [date].astro           daily digest, grouped by disease site; per-study verdict pills
     sites/index.astro      browse-by-site grid
     sites/[site].astro     all studies for one site across dates, newest first
+    study/[slug].astro     v0.21: standalone per-study page at /study/<date>-<slug>/ — the share-button target; og:title is the study name (+ " — oncbrain") and og:image is the per-study card, so a shared link unfurls with the study, not the site card. Renders the same StudyCard the date/site pages use
     conferences/[slug]/    conference index (all days tagged with a conference)
+    og/study/[slug].png.ts v0.21: per-study OG card at /og/study/<date>-<slug>.png (share-image.ts studyCard: study name + headline number + verdict pill); og:image for the standalone study page
     search-index.json.ts   v0.6: build-time search index (one entry per study)
     feed.xml.ts            v0.8 PR3: RSS 2.0 feed (latest 30 studies)
     api/index.astro        v0.8 PR3: public RSS + JSON API docs page
     api/v1/digests.json.ts        v0.8 PR3: index of published days + counts
     api/v1/digest/[date].json.ts  v0.8 PR3: one day's artifact (papers sanitized, no full text)
     api/v1/study/[slug].json.ts   v0.8 PR3: one study, cross-date resolved
-  components/StudyCard.astro  v0.9: the single dense study card (triage-first — rests at name/TL;DR/verdict/comparator, folds depth); rendered by [date] + sites/[site]
+  components/StudyCard.astro  v0.9: the single dense study card (triage-first — rests at name/TL;DR/verdict/comparator, folds depth); rendered by [date] + sites/[site] + tags/[...slug] + (v0.21) study/[slug]
   components/TriageRail.astro v0.9: desktop-only (>=1200px) sticky jump-list (verdict emoji + name) in the left gutter
   components/SearchBox.astro  live search input + results dropdown; lives in the global header (Base.astro), lazy-loads the index
   layouts/Base.astro       shell: Newsreader font, RSS <link>, widgets.js, header (title + search + About/curator on one line), desktop depth-auto-expand script (>=1024px), disclaimer + API/RSS footer
