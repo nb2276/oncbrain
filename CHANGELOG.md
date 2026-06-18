@@ -11,8 +11,9 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   at `/og/study/<date>-<slug>.png`. Share a study from anywhere (a digest day, a
   disease-site page, a tag page, or the home feed) and the link a recipient
   receives now unfurls with the **study's name and headline number** plus a
-  study-specific card showing the SOC verdict in its color (e.g. CONFIRMATORY,
-  PRACTICE-CHANGING) — not the section header and a generic site card.
+  study-specific card showing the study's SOC verdict in its color (e.g.
+  CONFIRMATORY, PRACTICE-CHANGING; a review carries no verdict, so it shows no
+  tag) — not the section header and a generic site card.
 
 ### Fixed
 
@@ -27,10 +28,10 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
 
 ### Changed
 
-- The per-study pages are runtime-cached (NetworkFirst) and excluded from the PWA
-  precache, the same treatment as the per-date, per-site, per-conference, and
-  per-tag archive pages, so the offline footprint stays bounded as the corpus
-  grows.
+- The per-study pages (NetworkFirst) and their OG cards (served on demand) are
+  both excluded from the PWA precache, the same treatment as the per-date,
+  per-site, per-conference, and per-tag archive pages, so the offline footprint
+  stays bounded as the corpus grows.
 
 ## [0.20.2] - 2026-06-17
 
