@@ -133,7 +133,7 @@ const tagChipRow = Array.from(tagSummaries.entries())
           const arrow = row.trend === 'up' ? '↑' : row.trend === 'down' ? '↓' : '→';
           return (
             <li class="tag-activity-row">
-              <a href={`/tags/${row.slug}/`} class="tag-activity-name">{row.label}</a>
+              <a href={`/tags/${row.slug}/`} class="tag-activity-name" title={row.label}>{row.label}</a>
               <Sparkline counts={row.counts} label={row.label} trend={row.trend} />
               <span class="tag-activity-count">{row.totalRecent}</span>
               <span class="tag-activity-arrow" aria-hidden="true">{arrow}</span>
@@ -323,8 +323,17 @@ const tagChipRow = Array.from(tagSummaries.entries())
   .tag-activity-name {
     color: var(--fg);
     text-decoration: none;
-    flex: 0 0 auto;
-    min-width: 6.5rem;
+    /* Fixed-width column so every row's sparkline starts at the same x.
+       A long meeting label ("ASCO Annual Meeting 2026") now truncates with an
+       ellipsis instead of growing the flex item and shoving the sparkline +
+       count + arrow right. min-width:0 defeats the flex min-content floor that
+       white-space:nowrap would otherwise impose. Full label stays available
+       via the title attr + the sparkline aria-label. */
+    flex: 0 0 6.5rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .tag-activity-name:hover { color: var(--accent); }
   .tag-activity-row .sparkline {
