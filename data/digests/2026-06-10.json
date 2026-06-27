@@ -1,23 +1,46 @@
 {
   "date": "2026-06-10",
   "conference": null,
-  "generated_at": 1781719048203,
+  "generated_at": 1782542189819,
   "digest": {
-    "top_line": "NRG/RTOG 0848: adjuvant chemoRT after chemo missed OS overall (HR 0.96, p=0.38); node-negative subgroup gained 5yr OS 48.1% vs 28.6% (hypothesis-generating).",
-    "tldr": "Upper-GI carried the only signal: NRG/RTOG 0848 adds adjuvant CXRT after gemcitabine-based chemo in resected pancreatic cancer, missing OS overall (HR 0.96) but showing a node-negative subgroup OS gain (interaction p=0.022). Hypothesis-generating on a pre-FOLFIRINOX backbone; adjuvant chemoRT stays off the standard pathway.",
+    "top_line": "NRG/RTOG 0848: adjuvant chemoRT misses OS overall (HR 0.96, p=0.38), but node-negative subgroup 5-yr OS doubles 28.6%→48.1% (interaction p=0.022).",
+    "tldr": "Sole signal of the day, from upper-GI: RTOG 0848's negative primary (chemoRT adds nothing to adjuvant gemcitabine on OS, HR 0.96) masks a node-negative subgroup where 5-yr OS nearly doubled (28.6%→48.1%, interaction p=0.022). Margin-positive pts saw no gain; hypothesis-generating, needs FOLFIRINOX-era confirmation.",
     "sites": [
       {
         "disease_site": "upper-gi",
-        "intro": "Resected pancreatic adenocarcinoma: does consolidative chemoRT after adjuvant chemo earn a role over chemo alone?",
+        "intro": "Adjuvant pancreatic chemoRT stays unproven overall; the live RT question is whether node-negative pts are the subgroup that benefits.",
         "studies": [
           {
             "name": "NRG Oncology/RTOG 0848",
-            "tldr": "Adjuvant chemoRT did not improve OS overall (HR 0.96, p=0.38); node-negative subgroup gained OS (5yr 48.1% vs 28.6%).",
+            "tldr": "Adjuvant chemoRT did not improve OS overall (HR 0.96, p=0.38); node-negative subgroup 5-yr OS 28.6%→48.1% (interaction p=0.022).",
             "details": [
-              "📊 1° EP negative — OS, all pts (N=354): median 2.6 vs 2.3 yr, HR 0.96 (90% CI 0.79-1.18), p=0.38 (1-sided log-rank)",
-              "🔍 Phase III RT randomization: post-resection + completed gemcitabine-based adjuvant chemo, then randomized ± fluoropyrimidine-sensitized CXRT",
+              "📊 1° EP OS not improved by adding CXRT: median 2.3 vs 2.6 yr (Chemo+CXRT vs Chemo)",
+              "📐 OS HR 0.96 (90% CI 0.79-1.18), p=0.38 (1-sided log-rank)",
               {
-                "text": "📊 Node-negative subgroup (N=91): Chemo vs Chemo+CXRT",
+                "text": "📊 5-yr OS by pathologic N stage (Chemo vs Chemo+CXRT)",
+                "table": {
+                  "columns": [
+                    "N stage",
+                    "Chemo 5-yr OS",
+                    "Chemo+CXRT 5-yr OS"
+                  ],
+                  "rows": [
+                    [
+                      "N0 (55/91 events)",
+                      "28.6% (14.9-42.2)",
+                      "48.1% (33.3-62.9)"
+                    ],
+                    [
+                      "N1 (215/263 events)",
+                      "21.2% (13.8-28.5)",
+                      "20.9% (13.8-28.0)"
+                    ]
+                  ]
+                }
+              },
+              "📐 N-stage interaction p=0.022, the only significant treatment interaction across tested subgroups",
+              {
+                "text": "📊 Node-negative subgroup medians (n=91)",
                 "table": {
                   "columns": [
                     "Endpoint",
@@ -34,35 +57,30 @@
                       "Median DFS",
                       "1.5 yr (0.8-2.7)",
                       "2.3 yr (1.4-NR)"
-                    ],
-                    [
-                      "5-yr OS",
-                      "28.6% (14.9-42.2)",
-                      "48.1% (33.3-62.9)"
                     ]
                   ]
                 }
               },
-              "⚠️ Node-negative OS benefit is a subgroup signal (interaction p=0.022); hypothesis-generating, needs confirmation",
-              "📊 Node-positive (N1, n=263): no signal — 5yr OS 21.2% vs 20.9%",
-              "⚠️ Gemcitabine-based backbone (pre-FOLFIRINOX); generalizability to current mFOLFIRINOX adjuvant standard uncertain",
-              "⚠️ RT dose / fractionation / target volume not reported in source text",
-              "🔗 Consistent with ESPAC-1's case against adjuvant chemoRT; modern adjuvant SOC is chemo alone (mFOLFIRINOX, PRODIGE-24)"
+              "🔍 RT randomization of RTOG 0848: N=354 randomized after gemcitabine-based adjuvant chemo (174 Chemo, 180 Chemo+CXRT)",
+              "🔍 CXRT = fluoropyrimidine-sensitized chemoradiotherapy; dose, fractionation, target volume not reported in source",
+              "🔗 Margin-positive pts (n=59) showed no CXRT gain: 5-yr OS 17.3%→14.3%, counter to RT-for-positive-margin rationale",
+              "⚠️ Gemcitabine-era backbone; node-negative signal untested vs modern FOLFIRINOX, needs independent confirmation"
             ],
             "figures": [],
             "nct": "NCT01013649",
             "tweet_ids": [
               1000000023
             ],
-            "slug": "nrg-rtog-0848",
+            "slug": "rtog-0848",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Definitive phase III negative on primary OS; reinforces chemo-alone adjuvant standard. Node-negative benefit is a subgroup signal, not enough to change practice.",
+              "rationale": "Prespecified primary endpoint (OS, all pts) negative, HR 0.96; reinforces chemo-alone practice. Node-negative subgroup benefit is exploratory (interaction p=0.022), needs independent confirmation.",
               "audience": "Resected pancreatic head adenocarcinoma, post-gemcitabine adjuvant chemo"
             },
+            "significance": "The RT read is the node-negative subgroup (n=91), not the null primary: 5-yr OS 28.6% vs 48.1% with CXRT (interaction p=0.022), median 3.0 vs 3.9 yr. Omit adjuvant CXRT broadly, but node-negative resected pancreatic head is the population for a confirmatory RT trial. CXRT dose and target not in source text.",
             "open_questions": [
-              "Does node-negative chemoRT benefit hold on a modern FOLFIRINOX adjuvant backbone?",
-              "Independent confirmation of OS benefit in node-negative resected pancreatic adenocarcinoma"
+              "Does node-negative CXRT benefit replicate with FOLFIRINOX backbone",
+              "RT dose, fractionation, and target volume for node-negative resected pancreatic head"
             ],
             "consort": {
               "enrolled": null,
@@ -84,40 +102,8 @@
             "modality": "radiation",
             "intent": "curative",
             "methodology": "phase-3-rct",
+            "significance_perspective": "Radiation oncology",
             "related_trials": [
-              {
-                "nct": "NCT05083247",
-                "brief_title": "Preoperative mFOLFIRINOX (or Gem-Nab-P) +/- Isotoxic High-dose SBRT for Borderline Resectable Pancreatic Adenocarcinoma",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 256,
-                "primary_completion_date": "2027-12",
-                "brief_summary": "Surgical resection is the only potentially curative treatment for patients with pancreatic cancer with the aim of curative R0 resection and related improvement of survival. As a standard, surgery is usually followed by adjuvant therapy that improves survival but neoadjuvant therapy (NAT) is a rapidly emerging concept that needs to be explored and validated in terms of therapeutic options in borderline resectable pancreatic tumors. In this setting, preoperative FFX seems to be feasible and can…",
-                "conditions": [
-                  "Pancreatic Neoplasm",
-                  "Pancreatic Adenocarcinoma",
-                  "Borderline Resectable Pancreatic Adenocarcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "mFOLFIRINOX or Gemcitabine nab-paclitaxel",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Isotoxic High-Dose (iHD)-SBRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Surgery",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion criteria:\n\n* Cytologic or histologic proof of adenocarcinoma of the pancreatic head or uncinated process or body or tail. Diagnosis should be verified by local pathologist\n* cTNM stage: T1-4N0-2M0\n* Confirmation of clinical and radiographic stage as borderline resectable (CT scan and/or…",
-                "answers_question": "Does node-negative chemoRT benefit hold on a modern FOLFIRINOX adjuvant backbone?",
-                "relevance_phrase": "neoadj FOLFIRINOX ± SBRT, isolates RT effect"
-              },
               {
                 "nct": "NCT06427447",
                 "brief_title": "Adjuvant Chemoradiotherapy Versus Chemotherapy for Pancreatic Cancer (ADJUPANC)",
@@ -142,45 +128,41 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Aged 18-75 years\n* Pathologically confirmed pancreatic ductal adenocarcinoma\n* Pathologically confirmed lymph node metastasis, R1 or R2 resection or lymphovascular invasion (one of the risk factors)\n* No history of cancer treatment after surgical resection\n* No disease…",
-                "answers_question": "Independent confirmation of OS benefit in node-negative resected pancreatic adenocarcinoma",
-                "relevance_phrase": "phase 3 adjuvant chemoRT vs chemo, resected PDAC"
+                "answers_question": "Does node-negative CXRT benefit replicate with FOLFIRINOX backbone",
+                "relevance_phrase": "phase 3 adjuvant chemoRT vs chemo in resected PDAC"
               },
               {
-                "nct": "NCT07632118",
-                "brief_title": "Radiotherapy With GX Regimen as Adjuvant Therapy for High-risk Patients Following Pancreatic Cancer Surgery",
-                "overall_status": "RECRUITING",
+                "nct": "NCT05043857",
+                "brief_title": "Stereotactic PAncreatic RadioTherapy Adjuvant Therapy",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
-                  "PHASE3"
+                  "NA"
                 ],
-                "enrollment_count": 288,
-                "primary_completion_date": "2029-05",
-                "brief_summary": "Pancreatic cancer is a highly fatal malignant tumor. Simple surgical operations can no longer meet the treatment needs of pancreatic cancer patients. Postoperative adjuvant chemotherapy has a significant effect, which can effectively prevent or delay tumor recurrence and prolong the overall survival period of pancreatic cancer patients. Based on this, many guidelines both at home and abroad actively recommend that pancreatic cancer patients receive adjuvant chemotherapy after surgery (if there…",
+                "enrollment_count": 50,
+                "primary_completion_date": "2026-05",
+                "brief_summary": "While surgery is considered the only potentially curative therapy for pancreatic cancer, 5-year overall survival (OS) is typically \\<25%. Following surgical resection of pancreatic cancer, adjuvant conventionally fractionated RT (CRT, delivering 45-54 Gy in 1.8-2.0 Gy per fraction) with 5-FU chemotherapy is recommended in high-risk patients (positive lymph nodes and/or R1-R2 resection margin status). However, the benefit of CRT in this setting is controversial due to lack of prospective…",
                 "conditions": [
-                  "Pancreatic Cancer"
+                  "Pancreas Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "Radiotherapy + GX",
+                    "name": "Stereotactic Body Radiotherapy (SBRT)",
                     "type": "RADIATION"
-                  },
-                  {
-                    "name": "GX group",
-                    "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Understand and voluntarily participate in this study and sign the informed consent form\n* Age ≥18 years old and ≤75 years old, male and female.\n* Confirmed as pancreatic ductal adenocarcinoma by histopathology or cytology, with no evidence of distant metastasis confirmed by…",
-                "answers_question": "Independent confirmation of OS benefit in node-negative resected pancreatic adenocarcinoma",
-                "relevance_phrase": "phase 3 adjuvant RT+GX vs GX, high-risk resected"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Surgically treated T1-T4 adenocarcinoma with or without prior chemotherapy AND close (\\<2.5mm)/positive resection margin AND/OR N1 staging at lymphadenectomy\n* ECOG performance status \\<2\n* Age \\> 18\n* Estimated life expectancy \\> 6 months\n* Ability to provide written…",
+                "answers_question": "RT dose, fractionation, and target volume for node-negative resected pancreatic head",
+                "relevance_phrase": "adjuvant SBRT vs 45-54Gy conventional, resected PDAC"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "FOLFIRINOX pancreatic adjuvant",
-                "adjuvant chemoradiation pancreatic"
+                "adjuvant chemoradiation pancreatic",
+                "adjuvant radiotherapy resected pancreatic"
               ],
               "queries_failed": [],
-              "candidates_returned": 20,
-              "fetched_at": "2026-06-17T17:54:52.513Z",
+              "candidates_returned": 21,
+              "fetched_at": "2026-06-27T06:34:52.988Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [

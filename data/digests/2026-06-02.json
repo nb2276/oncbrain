@@ -4,34 +4,27 @@
     "slug": "asco-2026",
     "name": "ASCO Annual Meeting 2026"
   },
-  "generated_at": 1781792911367,
+  "generated_at": 1782563807524,
   "digest": {
-    "top_line": "mRCAT-III: pCR 61% vs 28.6% (P<0.0001) adding node-sparing SCRT + tislelizumab in pMMR/MSS LARC, but confounded by the added PD-1.",
-    "tldr": "RT-systemic integration is the day's thread across three sites. mRCAT-III doubled pCR in pMMR LARC (61 vs 28.6%) but bundled node-sparing RT with PD-1, so the RT-volume effect is unattributable. Concurrent TRT added nothing to chemoIO in ES-SCLC (HR 1.14). Breast offered a practical traffic-light for timing systemic agents around RT.",
+    "top_line": "mRCAT-III: pCR 61.0% vs 28.6% (P<0.0001) for node-sparing SCRT + CAPOX + tislelizumab in pMMR LARC, though node-sparing and added IO are confounded.",
+    "tldr": "Two trials probe RT subtraction. In ES-SCLC, adding concurrent thoracic RT to 1L chemoIO missed (OS 10.0 vs 11.8mo, HR 1.14): the CREST-era consolidation signal doesn't carry into the IO era. In LARC, dropping elective nodal RT alongside added tislelizumab doubled pCR, but the two changes are confounded and locoregional control is unreported. Thoracic and lower-GI carried the day.",
     "sites": [
       {
         "disease_site": "thoracic",
-        "intro": "A negative randomized test of concurrent thoracic RT layered onto first-line chemoimmunotherapy in ES-SCLC.",
+        "intro": "A clean negative for concurrent thoracic RT in ES-SCLC: the consolidation-RT benefit seen in CREST's chemo-only era doesn't transfer to 1L chemoimmunotherapy.",
         "studies": [
           {
             "name": "LBA8005: Concurrent TRT + Chemoimmunotherapy in ES-SCLC",
-            "tldr": "OS 10.0 vs 11.8mo HR 1.14 (p=0.40): adding concurrent thoracic RT to chemoIO did not improve survival in ES-SCLC.",
+            "tldr": "OS 10.0 vs 11.8mo, HR 1.14 (0.84-1.56), p=0.40: concurrent thoracic RT added no survival benefit to 1L chemoimmunotherapy in ES-SCLC.",
             "details": [
-              "📊 Adding concurrent thoracic RT to chemoIO improved neither OS nor PFS, with both endpoints numerically favoring chemoIO alone",
-              "⚠️ Null even in subgroups predicted to favor TRT: no brain/liver mets, and completers of all 4 chemoIO courses",
-              "🔍 Randomized phase III, 1° endpoint OS; treatment-naive ES-SCLC, stage IV or III unfit for curative CRT",
-              "📐 N=115 (+TRT) vs 113 (chemoIO alone); stratified by liver and brain metastases",
-              {
-                "text": "🔍 Regimen and RT design",
-                "subdetails": [
-                  "Durvalumab 1500mg + carboplatin (AUC5)/etoposide ×4, then durvalumab maintenance until PD",
-                  "TRT 30 Gy/10 fractions concurrent, starting day 21-28 (~cycle 2), not consolidative",
-                  "PCI 25-30 Gy to responders; optional WBRT 20-30 Gy for brain mets"
-                ]
-              },
-              "🔗 vs CREST (Slotman, Lancet 2015): same 30 Gy/10 fx but consolidative post-chemo, and suggested a thoracic-RT survival benefit",
-              "⚠️ Key difference: TRT here is concurrent (day 21-28), not CREST-style consolidation, so doesn't directly refute consolidative TRT",
-              "⚠️ Toxicity (a key 2° endpoint) not reported in source; can't weigh added RT harm vs any benefit"
+              "🔍 Randomized phase III, concurrent TRT n=115 vs chemoIO alone n=113, 1° endpoint OS",
+              "🔍 TRT 30 Gy/10 fx given concurrently (start day 21-28, cycle 2), not as post-chemo consolidation",
+              "💊 Backbone: durvalumab 1500mg + carboplatin AUC5 + etoposide x4, then durvalumab maintenance to PD",
+              "🔍 PCI 25-30 Gy optional to responders",
+              "📊 Even in the subgroups most likely to benefit (chemoIO completers, no brain/liver mets), TRT showed no OS advantage",
+              "🔗 vs CREST (Slotman, Lancet 2015): same 30Gy/10fx but consolidative in the chemo-only era; that late-OS signal does not carry into the IO era here",
+              "⚠️ Concurrent timing and an unselected (not response-enriched) population differ from CREST's design; not a clean replication",
+              "⚠️ Toxicity was a key secondary; no AE numbers reported in source"
             ],
             "figures": [
               {
@@ -53,8 +46,8 @@
                     [
                       "ChemoIO",
                       "11.8 mo (10.0-13.6)",
-                      "n/a",
-                      "n/a"
+                      "ref",
+                      "—"
                     ]
                   ]
                 }
@@ -78,8 +71,8 @@
                     [
                       "ChemoIO",
                       "5.0 mo (4.6-5.4)",
-                      "n/a",
-                      "n/a"
+                      "ref",
+                      "—"
                     ]
                   ]
                 }
@@ -89,14 +82,14 @@
                 "caption": {
                   "columns": [
                     "Subgroup",
-                    "+TRT median",
-                    "ChemoIO median",
+                    "TRT median OS",
+                    "ChemoIO median OS",
                     "HR (95% CI)",
                     "p"
                   ],
                   "rows": [
                     [
-                      "Completed all 4 courses",
+                      "Completed all 4 chemoIO courses",
                       "11.9 mo (9.7-14.1)",
                       "12.1 mo (9.4-14.8)",
                       "1.02 (0.72-1.44)",
@@ -117,69 +110,45 @@
             "tweet_ids": [
               68
             ],
-            "slug": "es-sclc-trt-chemoio",
+            "slug": "es-sclc-concurrent-trt-chemoio",
             "verdict": {
               "soc_implication": "challenges-soc",
-              "rationale": "Randomised phase III with OS primary endpoint; null TRT effect diverges from CREST-era expectation that consolidative thoracic RT benefits ES-SCLC.",
-              "audience": "Treatment-naive ES-SCLC, stage IV or III ineligible for curative CRT"
+              "rationale": "Randomized phase III, OS primary endpoint null (numerically worse with TRT); contradicts CREST-era rationale for adding thoracic RT in the chemoimmunotherapy setting.",
+              "audience": "Extensive-stage SCLC, treatment-naive, ECOG 0-1, stable brain mets allowed"
             },
+            "significance": "Concurrent thoracic RT (30 Gy/10 fx) adds nothing to 1L chemoimmunotherapy in ES-SCLC, and the subgroups where CREST's late benefit would be expected (chemoIO completers, no brain/liver mets) were null too. But this tested concurrent-during-induction RT in an unselected population, not CREST's consolidative-to-responders design, so consolidative TRT stays an open question.",
             "open_questions": [
-              "Does consolidative (sequential) thoracic RT still benefit ES-SCLC in the IO era?",
-              "Role of thoracic RT for residual intrathoracic disease after chemoimmunotherapy?"
+              "Does consolidative (not concurrent) thoracic RT still benefit ES-SCLC responders in the IO era?",
+              "Any role for TRT in oligometastatic or low-burden ES-SCLC subsets?"
             ],
             "consort": null,
             "modality": "radiation",
             "intent": "palliative",
             "methodology": "phase-3-rct",
+            "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT05552846",
-                "brief_title": "Phase II Trial of Consolidative Thoracic Radiotherapy for ES-SCLC After Standard Care of Chemo-immunotherapy",
+                "nct": "NCT07425795",
+                "brief_title": "Tislelizumab Combined With Chemotherapy Followed by Thoracic Consolidation Radiotherapy in the First-line Treatment of Extensive Stage Small Cell Lung Cancer",
                 "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 104,
-                "primary_completion_date": "2025-09",
-                "brief_summary": "This is an open-label, single arm Phase II study designed to evaluate the efficacy and safety of thoracic radiotherapy for extensive-stage small-cell lung cancer treated with PD-1/PD-L1 plus etoposide platinum followed by PD-1/PD-L1 maintenance therapy",
-                "conditions": [
-                  "Small-cell Lung Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "thoracic radiotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Age between18 years and 80 years at time of study entry\n2. ECOG performance status of 0 or 1\n3. Body weight \\>30 kg\n4. Adequate bone marrow, liver and kidney function\n5. Life expectancy of at least 3 months\n6. At least one measurable (RECIST 1.1), thoracic lesion that can be…",
-                "answers_question": "Does consolidative (sequential) thoracic RT still benefit ES-SCLC in the IO era?",
-                "relevance_phrase": "phase 2 consolidative TRT after PD-L1 + EP"
-              },
-              {
-                "nct": "NCT06768307",
-                "brief_title": "Assessment of Adebelizumab Combined with Chemotherapy in Concurrent Radiotherapy Versus Sequential Radiotherapy As First-Line Treatment for Extensive-Stage Small Cell Lung Cancer",
-                "overall_status": "NOT_YET_RECRUITING",
                 "phase": [
                   "PHASE2"
                 ],
-                "enrollment_count": 60,
-                "primary_completion_date": "2027-01",
-                "brief_summary": "Immunotherapy combined with chemotherapy has emerged as the standard of care for patients with extensive-stage small cell lung cancer (ES-SCLC). The incorporation of thoracic radiotherapy can enhance treatment efficacy. Currently, the main types of research investigating immunotherapy combined with thoracic radiotherapy for untreated ES-SCLC are concurrent radiotherapy and sequential radiotherapy. The aim of this study is to evaluate the efficacy of adebelizumab in combination with…",
+                "enrollment_count": 36,
+                "primary_completion_date": "2027-12",
+                "brief_summary": "This study is a prospective, single arm, phase II clinical trial. We plan to include 36 newly diagnosed ES-SCLC patients who meet the inclusion criteria and receive induction therapy (tislelizumab+EP regimen, 4-6 cycles). After completing the induction therapy, efficacy evaluation will be conducted. Patients with remission will receive tislelizumab combined with consolidation chest radiotherapy (TRT) sequentially. After the consolidation therapy is completed, they will receive tislelizumab…",
                 "conditions": [
-                  "SCLC, Extensive Stage",
-                  "Immunotherapy",
-                  "Chemotherapy",
-                  "Radiotherapy"
+                  "Extensive Stage Small Cell Lung Cancer (ES-SCLC)"
                 ],
                 "interventions": [
                   {
-                    "name": "First-line Immunotherapy Combined with Chemoradiotherapy for ES-SCLC",
+                    "name": "Tislelizumab Combined With Chemotherapy",
                     "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥18 years, no gender restrictions;\n* Confirmed pathological diagnosis of extensive-stage small cell lung cancer (ES-SCLC), defined as disease extending beyond one hemithorax, including malignant pleural and pericardial effusions or hematogenous metastases (according to…",
-                "answers_question": "Does consolidative (sequential) thoracic RT still benefit ES-SCLC in the IO era?",
-                "relevance_phrase": "RCT concurrent vs sequential TRT, ES-SCLC"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Signed informed consent;\n* Age 18-75 years;\n* According to the judgment of the investigator, the patient was able to comply with the study protocol;\n* Histologically or cytologically confirmed extensive stage small cell lung cancer (es-sclc) (according to the Veterans…",
+                "answers_question": "Does consolidative (not concurrent) thoracic RT still benefit ES-SCLC responders in the IO era?",
+                "relevance_phrase": "consolidation TRT only in induction responders"
               },
               {
                 "nct": "NCT04472949",
@@ -214,73 +183,105 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Written informed consent according to Swiss law and ICH-GCP E6(R2) regulations before registration and prior to any trial specific procedures\n* Histologically or cytologically1 confirmed extensive disease stage IV SCLC (T any, N any, M1 a/b) or T3-4 due to multiple lung…",
-                "answers_question": "Does consolidative (sequential) thoracic RT still benefit ES-SCLC in the IO era?",
-                "relevance_phrase": "consolidative TRT + durvalumab maintenance, ED-SCLC"
+                "answers_question": "Does consolidative (not concurrent) thoracic RT still benefit ES-SCLC responders in the IO era?",
+                "relevance_phrase": "sequential TRT + durvalumab maintenance post-1L"
               },
               {
-                "nct": "NCT06479473",
-                "brief_title": "Radiotherapy to All Residual Lesions After Chemoimmunotherapy",
-                "overall_status": "RECRUITING",
+                "nct": "NCT06672133",
+                "brief_title": "Adebrelimab Combined with Chemotherapy and Thoracic Radiotherapy for First-line Treatment of ES-SCLC",
+                "overall_status": "NOT_YET_RECRUITING",
                 "phase": [
-                  "PHASE1",
-                  "PHASE2"
+                  "PHASE3"
                 ],
-                "enrollment_count": 150,
-                "primary_completion_date": "2025-03",
-                "brief_summary": "Extensive-stage small-cell lung cancer is a lethal malignancy with an extremely poor prognosis. First-line chemotherapy could only achieve an overall survival of approximately 10 months. CREST study demonstrated that the addition of thoracic radiotherapy to the patients who responded to chemotherapy could increase the 2-year survival rate from 3% to 13%. CASPIAN and IMpower 133 trials have established the standard modality of first-line chemoimmunotherapy for extensive-stage small-cell lung…",
+                "enrollment_count": 524,
+                "primary_completion_date": "2029-06",
+                "brief_summary": "This phase III trial compares the effect of adding radiation therapy to the usual maintenance therapy with adebrelimab versus adebrelimab alone in patients who have already received debrelimab plus chemotherapy for the treatment of extensive stage small cell lung cancer.",
                 "conditions": [
-                  "Extensive-stage Small Cell Lung Cancer"
+                  "Extensive Stage Lung Small Cell Carcinoma"
                 ],
                 "interventions": [
                   {
-                    "name": "Radiotherapy to all residual lesions",
+                    "name": "Adebrelimab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Radiation Therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Aged 18-75 years, male or female;\n2. Histologically or cytologically confirmed extensive stage small cell lung cancer (according to the Veterans Lung Administration Lung Study Group, VALG stage);\n3. ECOG performance status score 0 \\~ 1;\n4. No prior line of systemic therapy…",
+                "answers_question": "Does consolidative (not concurrent) thoracic RT still benefit ES-SCLC responders in the IO era?",
+                "relevance_phrase": "phase 3 consolidative TRT vs IO maintenance alone"
+              },
+              {
+                "nct": "NCT05484583",
+                "brief_title": "Durvalumab Combined With Consolidation Radiotherapy After First-line Treatment in Extensive Stage Small Cell Lung Cancer With Oligometastases",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 58,
+                "primary_completion_date": "2024-08",
+                "brief_summary": "In patients with oligometastatic (1-5 lesions) extensive-stage small cell lung cancer, to explore the efficacy and safety of Durvalumab immunotherapy combined with chemotherapy followed by consolidation radiotherapy, to provide scientific basis for the formulation of the best comprehensive treatment plan in the future.",
+                "conditions": [
+                  "Lung Cancer",
+                  "Extensive-stage Small-cell Lung Cancer",
+                  "Radiotherapy"
+                ],
+                "interventions": [
+                  {
+                    "name": "Durvalumab + carboplatin/cisplatin + etoposide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Consolidation radiotherapy",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "Chemoimmunotherapy",
+                    "name": "Durvalumab",
                     "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* 18-70 years old;\n* ECOG 0-1;\n* Adequate organ function to tolerate chemotherapy, immunotherapy and radiotherapy;\n* Small-cell lung cancer;\n* Extensive stage confirmed by cranial MRI, chest CT, abdominal ultrasonograph, bone scan or cranial MRI and PET-CT;\n* Signature of…",
-                "answers_question": "Role of thoracic RT for residual intrathoracic disease after chemoimmunotherapy?",
-                "relevance_phrase": "TRT to all residual lesions post chemo-IO"
+                "eligibility_brief": "1. Histology or cytology confirmed small cell lung cancer\n2. The number of metastatic lesions is less than 5 (oligometastatic)\n3. According to the seventh edition of the American Joint Cancer Board, IV or T3-4 cannot be included in the same tolerable radiation program due to the widespread…",
+                "answers_question": "Any role for TRT in oligometastatic or low-burden ES-SCLC subsets?",
+                "relevance_phrase": "consolidation RT in 1-5 lesion oligomet ES-SCLC"
               },
               {
-                "nct": "NCT06529081",
-                "brief_title": "Radiotherapy Strategies for Use in Combined Treatment of Small-cell Lung Cancer",
-                "overall_status": "RECRUITING",
+                "nct": "NCT06851819",
+                "brief_title": "Tislelizumab in Combination with Chemotherapy ± Radiotherapy for Extensive-Stage Oligometastatic Small Cell Lung Cancer.",
+                "overall_status": "NOT_YET_RECRUITING",
                 "phase": [
-                  "NA"
+                  "PHASE2"
                 ],
-                "enrollment_count": 165,
-                "primary_completion_date": "2028-12",
-                "brief_summary": "The purpose of this study is to evaluate the efficacy of radiotherapy as part of the combined treatment approach for patients diagnosed with histopathologically confirmed small cell lung cancer (SCLC) in the advanced stage of extensive disease (ED) who are undergoing chemo-immunotherapy. The planned study aims to assess the impact of incorporating consolidative radiotherapy into the treatment strategy, focusing on residual changes following chemo-immunotherapy (during immunotherapy) and its…",
+                "enrollment_count": 64,
+                "primary_completion_date": "2027-01",
+                "brief_summary": "The goal of this clinical trial is to learn the efficacy and safety of tislelizumab in combination with chemotherapy(etoposide/cisplatin ) ± concurrent radiotherapy for extensive-stage oligometastatic small cell lung cancer. 64 Patients with Extensive-Stage Oligometastatic Small Cell Lung Cancer will be randomly divided into the experimental group (tislelizumab combined with chemotherapy and radiotherapy) and the control group (tislelizumab combined with chemotherapy).Researchers will compare…",
                 "conditions": [
-                  "Small Cell Lung Carcinoma"
+                  "Small Cell Lung Cancer Extensive Stage"
                 ],
                 "interventions": [
                   {
-                    "name": "Palliative Radiotherapy",
+                    "name": "radiotherapy",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "Radical/Ablative Radiotherapy",
-                    "type": "RADIATION"
+                    "name": "immunechemotherapy",
+                    "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histopathological confirmation of small cell lung cancer based on histological or cytological examination.\n* Primary clinical stage: Extensive stage of the disease according to VASLG classification or stage IV according to TNM classification.\n* Eastern Cooperative Oncology…",
-                "answers_question": "Role of thoracic RT for residual intrathoracic disease after chemoimmunotherapy?",
-                "relevance_phrase": "consolidative RT for residual post chemo-IO"
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients must be ≥ 18 years old;\n2. Signed written informed consent;\n3. Histologically or cytologically confirmed oligometastatic extensive-stage small cell lung cancer (oligometastasis is defined as the number of distant metastatic organs≤ 3, and the number of metastases ≤…",
+                "answers_question": "Any role for TRT in oligometastatic or low-burden ES-SCLC subsets?",
+                "relevance_phrase": "randomized RT vs no RT in oligomet ES-SCLC"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "consolidative radiotherapy small cell",
-                "radiotherapy small cell immunotherapy"
+                "thoracic radiotherapy extensive-stage SCLC",
+                "oligometastatic SCLC radiotherapy"
               ],
               "queries_failed": [],
-              "candidates_returned": 39,
-              "fetched_at": "2026-06-18T14:25:39.305Z",
+              "candidates_returned": 37,
+              "fetched_at": "2026-06-27T12:30:59.210Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -295,99 +296,120 @@
       },
       {
         "disease_site": "breast",
-        "intro": "An educational round-up on continuing, holding, or sequencing systemic agents around breast/CW + nodal RT.",
+        "intro": "A practical concurrency map for RT + systemic therapy with RNI, gating which agents continue, pause, or hold during breast/chest-wall RT.",
         "studies": [
           {
-            "name": "RT + Systemic Therapy Combinations in Breast Cancer (Speers)",
-            "tldr": "Educational round-up on continuing, holding, or sequencing systemic agents around breast/chest-wall + nodal RT; PK-based washout the default outside protocols.",
+            "name": "RT + Systemic Therapy Concurrency in Breast Cancer (Speers)",
+            "tldr": "Concurrency map for breast/CW + RNI: continue endocrine, trastuzumab/pertuzumab, T-DM1; caution T-DXd and CDK4/6i; hold cytotoxics, capecitabine, veliparib/talazoparib.",
             "details": [
-              "🔍 Traffic-light guidance for concurrent systemic therapy with breast/CW + nodal RT (ASCO Educ Book 2026, Table 5)",
               {
-                "text": "💊 Concurrency with breast/CW + nodal RT, by agent",
+                "text": "🔍 Default outside protocols: PK washout (5×t½) → RT → resume; t½ gates hold duration",
+                "subdetails": [
+                  "T-DM1 5t½ ~20 days; T-DXd 5t½ ~30 days",
+                  "Talazoparib 5t½ ~19 days (long PK tail complicates brief holds)",
+                  "Olaparib 5t½ ~3 days; pembrolizumab 5t½ ~110 days (holding by PK rarely practical)"
+                ]
+              },
+              {
+                "text": "📊 Traffic-light: concurrent systemic therapy with breast/CW + RNI (ASCO Educ Book 2026, Table 5)",
                 "table": {
                   "columns": [
                     "Agent",
-                    "With concurrent RT"
+                    "Concurrency",
+                    "Note"
                   ],
                   "rows": [
                     [
                       "Endocrine therapy",
-                      "Continue (minimal radiosensitization)"
+                      "Continue",
+                      "Minimal radiosensitization"
                     ],
                     [
                       "Trastuzumab ± pertuzumab",
-                      "Continue (modern heart-sparing)"
+                      "Continue",
+                      "Standard practice; modern heart-sparing"
                     ],
                     [
                       "T-DM1",
-                      "Continue; dermatitis/pneumonitis vigilance, caution CNS SRS"
+                      "Continue",
+                      "Dermatitis/pneumonitis vigilance; caution CNS SRS"
+                    ],
+                    [
+                      "Immunotherapy (pembro)",
+                      "Continue",
+                      "Pneumonitis vigilance; immune-tox workflow"
                     ],
                     [
                       "T-DXd",
-                      "Caution; sequence/hold for high lung-dose or active pulmonary disease"
+                      "Caution",
+                      "Sequence/hold for high lung-dose or active pulmonary disease"
                     ],
                     [
-                      "CDK4/6 inhibitors",
-                      "Usually hold large fields; concurrent only in protocol"
+                      "CDK4/6i",
+                      "Caution/hold",
+                      "Hold large fields; concurrent only in protocol"
                     ],
                     [
                       "Olaparib",
-                      "Limited fields reasonable; concurrent only in protocol"
-                    ],
-                    [
-                      "Pembrolizumab",
-                      "Generally tolerable; pneumonitis vigilance"
+                      "Caution",
+                      "Limited fields; concurrent only in protocol"
                     ],
                     [
                       "Cytotoxic chemo",
-                      "Hold/sequence (anthracycline, taxane, platinum)"
+                      "Hold",
+                      "Anthracyclines, taxanes, platinum: sequence"
                     ],
                     [
-                      "Capecitabine / veliparib / talazoparib",
-                      "Hold; severe acute/late tox concurrent"
+                      "Capecitabine",
+                      "Hold",
+                      "Adjuvant paradigm sequential; resume after RT"
+                    ],
+                    [
+                      "Veliparib / talazoparib",
+                      "Hold",
+                      "Severe acute/late tox concurrent"
+                    ],
+                    [
+                      "mTOR / PI3K",
+                      "Caution",
+                      "ESMO-ESTRO advises caution"
                     ]
                   ]
                 }
               },
               {
-                "text": "📊 T-DXd ILD signal (the highest-stakes thoracic concurrency)",
+                "text": "📊 ADC ILD signal: T-DXd vs T-DM1 (the dominant RT-relevant toxicity)",
                 "table": {
                   "columns": [
-                    "Source",
-                    "ILD / tox signal"
+                    "ILD metric",
+                    "T-DXd",
+                    "T-DM1"
                   ],
                   "rows": [
                     [
-                      "T-DXd PI (5.4 mg/kg)",
-                      "ILD ~12%, fatal ~0.9%"
+                      "DESTINY-Breast05 ILD",
+                      "9.6%",
+                      "1.6%"
                     ],
                     [
-                      "DESTINY-Breast05",
-                      "ILD 9.6% T-DXd vs 1.6% T-DM1"
+                      "Per-PI ILD (5.4 mg/kg)",
+                      "~12%",
+                      "n/a"
                     ],
                     [
-                      "RT timing (T-DXd arm)",
-                      "10.7% seq vs 9.6% concurrent, no effect"
-                    ],
-                    [
-                      "COMBART (n=40, concurrent RT/SRT)",
-                      "acute tox 20%"
+                      "Fatal ILD",
+                      "~0.9%",
+                      "n/a"
                     ]
                   ]
                 }
               },
-              "💊 KEYNOTE-522 post-hoc (1,174 pts, 715 got RT): concurrent pembro+RT well tolerated, numerically fewer G3-5 and immune AEs vs sequential",
-              "📊 P-RAD (TBCRC-053): preop RT 0/9/24 Gy + pembro; 24 Gy arm raised T-cell infiltration + TLS at 2 wks (HR+/HER2-)",
-              {
-                "text": "⚠️ PARPi + RT: sequence, don't run concurrent outside trials",
-                "subdetails": [
-                  "Veliparib (TBCRC 024): severe acute/late tox concurrent — avoid (moist desquamation, fibrosis)",
-                  "Olaparib (OlympiA): RT must finish 2-12 wks before; RadioPARP hints concurrent safety",
-                  "Talazoparib: long t½ (90 hr) complicates brief holds; favors sequential"
-                ]
-              },
-              "⚠️ CDK4/6i (abemaciclib/ribociclib/palbociclib): hold for large fields; concurrent only in protocol; evidence mostly retrospective",
-              "⚠️ Educational synthesis of largely retrospective + PK data, not new RCT evidence; PK washout → RT → resume is the default"
+              "📊 T-DXd + RT timing (DESTINY-Breast05): ILD 10.7% sequential vs 9.6% concurrent, no effect",
+              "📊 COMBART: 40 pts concurrent RT/SRT, acute toxicity 20%",
+              "💊 KEYNOTE-522 post-hoc (1,174 pts, 715 received RT): concurrent pembro + RT well tolerated, numerically fewer G3-5 AEs vs sequential",
+              "💊 P-RAD (TBCRC-053): preop RT 0/9/24 Gy + pembro; 24 Gy arm → significant T-cell infiltration at 2 wks (RT as biologic stress test)",
+              "⚠️ Veliparib: avoid concurrency, dose-limiting moist desquamation + fibrosis (TBCRC 024)",
+              "⚠️ Olaparib: RT must complete 2-12 wks before; concurrent only in limited fields (RadioPARP signal)"
             ],
             "figures": [
               {
@@ -403,11 +425,12 @@
             "tweet_ids": [
               69
             ],
-            "slug": "breast-rt-systemic-review",
+            "slug": "breast-rt-systemic-concurrency-review",
+            "significance": "The actionable read is T-DXd: DESTINY-Breast05's RT-timing data (ILD 10.7% sequential vs 9.6% concurrent, no effect) licenses concurrent T-DXd + RT with monitoring rather than a blanket hold, except for high lung-dose plans or baseline ILD. PK washout, not reflexive holding, governs the rest.",
             "open_questions": [
-              "Concurrent vs sequential T-DXd with thoracic RT given ILD risk",
-              "Safety of concurrent CDK4/6 inhibitors with large-field RT",
-              "Concurrent olaparib with breast/chest-wall RT outside protocol"
+              "Prospective concurrent-RT safety data for CDK4/6 inhibitors",
+              "Optimal T-DXd RT timing in high lung-dose plans",
+              "Concurrent olaparib + RT safety beyond RadioPARP"
             ],
             "consort": null,
             "modality": "combined",
@@ -418,43 +441,14 @@
               "HERA",
               "NCCTG N9831",
               "APHINITY",
+              "DESTINY-Breast05",
               "KATHERINE",
               "ATEMPT",
-              "DESTINY-Breast05",
               "COMBART",
               "KEYNOTE-522"
             ],
+            "significance_perspective": "Radiation oncology",
             "related_trials": [
-              {
-                "nct": "NCT06197581",
-                "brief_title": "Safety Assessment of Concurrent Radiotherapy and Novel Systemic Therapy for Breast Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 148,
-                "primary_completion_date": "2026-01",
-                "brief_summary": "Radiation therapy is a crucial part in the comprehensive treatment of breast cancer. In recent years, emerging systemic treatment regimens such as HER 2 inhibitors, CDK 4/6 inhibitors, PARP inhibitors, capecitabine and PD1 inhibitors have greatly improved the prognosis of breast cancer and has become the standard treatment for specific populations. A considerable number of patients require both radiotherapy and maintenance systemic therapy. However, it is not clear whether systemic therapy…",
-                "conditions": [
-                  "Breast Cancer, Familial Male",
-                  "Radiotherapy; Complications",
-                  "Chemotherapeutic Toxicity",
-                  "Immune Checkpoint Inhibitor",
-                  "CDK4/6 Inhibitor",
-                  "Trastuzumab",
-                  "Pertuzumab",
-                  "PARP Inhibitor"
-                ],
-                "interventions": [
-                  {
-                    "name": "Chest wall / breast radiation with or without lymph node region radiation.(For all of the enrolled patients)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\nECOG 0-2. Aged 18-70 years old. Pathologically diagnosed as breast cancer. Need to receive radiotherapy according to guidelines. Radiotherapy target volume included chest wall/breast with or without lymph node regions.\n\nNeed to receive one of the following therapies according…",
-                "answers_question": "Safety of concurrent CDK4/6 inhibitors with large-field RT",
-                "relevance_phrase": "concurrent CDK4/6 + chest wall/nodal RT safety"
-              },
               {
                 "nct": "NCT06139107",
                 "brief_title": "RADIANT: Pre-op Radiation With Abemaciclib and Letrozole",
@@ -479,8 +473,68 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Histologically and/or cytologically confirmed diagnosis of invasive (ductal, lobular or mixed histology), Clinically inapparent tumor that is not palpable. (cT1-T2N0)disease. Minimum tumor size of 1.5 cm\n* Expression of ER or progesterone receptors (PR)and negative expression…",
-                "answers_question": "Safety of concurrent CDK4/6 inhibitors with large-field RT",
-                "relevance_phrase": "phase 1b pre-op breast RT + abemaciclib safety"
+                "answers_question": "Prospective concurrent-RT safety data for CDK4/6 inhibitors",
+                "relevance_phrase": "phase 1b: preop RT concurrent with abemaciclib"
+              },
+              {
+                "nct": "NCT07446686",
+                "brief_title": "Study on the Safety and Tolerability of Postoperative Radiotherapy Concurrent With CDK4/6 Inhibitors in HR+/HER2- High-Risk Breast Cancer",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "EARLY_PHASE1"
+                ],
+                "enrollment_count": 30,
+                "primary_completion_date": "2027-04",
+                "brief_summary": "The investigators combined postoperative radiotherapy with CDK4/6 inhibitors ± endocrine adjuvant therapy to explore the tolerability and safety of this treatment regimen in HR+/HER2- postoperative high-risk breast cancer patients. During the study, investigators also utilized PRO scales (FACT-B, FACT-ES, FACT-F) to evaluate patients' multidimensional experiences, such as physical function, emotional state, and treatment-related symptoms, thereby obtaining more authentic and reliable data for…",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "CDK4/6 inhibitor±endocrine therapy drug±OFS treatment combined with synchronous radiotherapy",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age is 18-75 years old, gender is female\n* Postoperative pathological examination confirmed HR+, HER2- invasive breast cancer:\n\n  1. ER positivity and/or PR positivity is defined as: all positively stained tumor cells The proportion of tumor cells is ≥10%;\n  2. HER2…",
+                "answers_question": "Prospective concurrent-RT safety data for CDK4/6 inhibitors",
+                "relevance_phrase": "postop RT concurrent w/ CDK4/6i, tolerability EP"
+              },
+              {
+                "nct": "NCT04711824",
+                "brief_title": "Study of Stereotactic Radiosurgery With Olaparib Followed by Durvalumab and Physician's Choice Systemic Therapy in Subjects With Breast Cancer Brain Metastases",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE1",
+                  "PHASE2"
+                ],
+                "enrollment_count": 41,
+                "primary_completion_date": "2026-02",
+                "brief_summary": "This study is a Phase I/II study evaluating the safety and effectiveness of focused radiation therapy (radiosurgery) together with olaparib, followed by immunotherapy, for patients with brain metastases from triple negative or BRCA-mutated breast cancers.\n\nThis study will have a Phase I portion in which subjects will be enrolled based on 3+3 dose escalation rules. Three dose levels of olaparib will be studied.\n\nCycle 1 of study treatment will consist of Olaparib given twice daily concurrently…",
+                "conditions": [
+                  "Breast Cancer",
+                  "Brain Metastases, Adult"
+                ],
+                "interventions": [
+                  {
+                    "name": "Olaparib",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Stereotactic Radiosurgery",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Durvalumab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Physicians Choice systemic chemotherapy",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Able and willing to provide written informed consent and HIPAA authorization for release of personal health information prior to registration. NOTE: HIPAA authorization may be included in the informed consent or obtained separately.\n2. Subject has histologically confirmed…",
+                "answers_question": "Concurrent olaparib + RT safety beyond RadioPARP",
+                "relevance_phrase": "SRS + concurrent olaparib, breast brain mets"
               },
               {
                 "nct": "NCT04683679",
@@ -513,8 +567,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Female participants who are at least 18 years of age on the day of signing informed consent with histologically confirmed diagnosis of triple negative breast cancer or ER+/Her2 will be enrolled in this study.\n* Have an Eastern Cooperative Oncology Group (ECOG) performance…",
-                "answers_question": "Concurrent olaparib with breast/chest-wall RT outside protocol",
-                "relevance_phrase": "concurrent RT + olaparib, metastatic breast"
+                "answers_question": "Concurrent olaparib + RT safety beyond RadioPARP",
+                "relevance_phrase": "RT + olaparib (+pembro), metastatic breast"
               },
               {
                 "nct": "NCT03598257",
@@ -548,19 +602,19 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Patients must have inflammatory breast cancer without distant metastases. All biomarker subtype groups (estrogen receptor \\[ER\\], progesterone receptor \\[PR\\], HER2) are eligible. Inflammatory disease will be defined per American Joint Committee on Cancer (AJCC) 8th edition…",
-                "answers_question": "Concurrent olaparib with breast/chest-wall RT outside protocol",
-                "relevance_phrase": "randomized RT ± olaparib, inflammatory breast"
+                "answers_question": "Concurrent olaparib + RT safety beyond RadioPARP",
+                "relevance_phrase": "phase 2 RT +/- olaparib in inflammatory breast"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
+                "CDK4/6 inhibitor breast radiation",
                 "trastuzumab deruxtecan radiation",
-                "abemaciclib radiation breast",
-                "olaparib radiation breast"
+                "olaparib breast radiation"
               ],
               "queries_failed": [],
-              "candidates_returned": 40,
-              "fetched_at": "2026-06-18T14:24:56.539Z",
+              "candidates_returned": 43,
+              "fetched_at": "2026-06-27T12:31:13.324Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -575,21 +629,20 @@
       },
       {
         "disease_site": "lower-gi",
-        "intro": "A node-sparing short-course RT + PD-1 strategy nearly doubled pCR in MSS rectal cancer, though RT volume and IO are confounded.",
+        "intro": "A pCR doubling with PD-1 in typically IO-refractory pMMR rectal, but node-sparing and added tislelizumab are confounded and locoregional endpoints are unreported.",
         "studies": [
           {
             "name": "mRCAT-III",
-            "tldr": "pCR 61.0% vs 28.6% (P<0.0001) adding node-sparing SCRT + tislelizumab vs conventional SCRT+CAPOX in pMMR LARC.",
+            "tldr": "pCR 61.0% vs 28.6% (P<0.0001) for node-sparing SCRT + CAPOX + tislelizumab vs conventional SCRT + CAPOX in pMMR LARC.",
             "details": [
-              "🔍 Phase 3 open-label RCT, 17 sites in China, N=154 (77/arm), stratified by clinical N stage",
-              "🔍 Population: pMMR/MSS LARC, cT3-4N0/+M0, tumor ≤10cm from anal verge, no positive lateral nodes",
-              "📐 Identical RT dose both arms (short-course 5Gy×5); sole difference is target volume",
-              "🔍 Experimental RT spares tumor-draining nodes (tumor bed only) vs conventional elective-nodal coverage",
-              "⚠️ Confounded: experimental adds tislelizumab (PD-1) plus node-sparing, control has neither; pCR gain not attributable to RT volume alone",
-              "🔗 pMMR/MSS rectal ca: PD-1 usually inactive (unlike dMMR); an IO signal in MSS is the surprising element if it holds",
-              "⚠️ pCR is a surrogate; organ preservation, EFS, OS (secondary) unreported, so durability and clinical benefit unknown",
-              "🔍 Open-label trial, but pCR/MPR adjudicated by blinded independent central review",
-              "Authors report fewer severe GI AEs in the experimental arm; no AE numbers in source"
+              "🔍 Phase 3 open-label RCT, N=154 (77/arm), 17 China sites; primary pCR by blinded independent central review",
+              "🔍 RT: short-course 5Gy×5d (25Gy/5fx) both arms; experimental spared elective nodal RT (tumor bed only, no draining nodes)",
+              "💊 Experimental added tislelizumab 200mg IV to the CAPOX backbone; control got CAPOX alone",
+              "⚠️ Confounded: experimental arm both spared nodal RT AND added tislelizumab, so pCR gain can't be attributed to node-sparing alone",
+              "⚠️ pCR can't detect nodal failure, the risk omitting elective nodal RT creates; locoregional control and EFS unreported",
+              "🔗 Control pCR 28.6% matches SCRT + consolidation-chemo TNT benchmarks (e.g. RAPIDO); increment reflects added IO plus node-sparing",
+              "⚠️ Fewer severe GI AEs reported in experimental arm; no effect size reported in source",
+              "🔍 MSS/pMMR rectal is typically IO-refractory; a pCR doubling with PD-1 here is the provocative signal, pending confirmation"
             ],
             "figures": [
               {
@@ -597,8 +650,8 @@
                 "caption": {
                   "columns": [
                     "Endpoint",
-                    "Experimental (N=77)",
-                    "Control (N=77)",
+                    "Experimental (n=77)",
+                    "Control (n=77)",
                     "P"
                   ],
                   "rows": [
@@ -628,14 +681,15 @@
             ],
             "slug": "mrcat-iii",
             "verdict": {
-              "soc_implication": "challenges-soc",
-              "rationale": "Randomized phase 3, primary endpoint via blinded central review, result diverges from MSS-LARC standard. Arms differ by two variables (node-sparing RT + added IO); pCR surrogate, EFS/OS unreported.",
-              "audience": "pMMR/MSS LARC, cT3-4N0/+M0, ≤10cm from anal verge"
+              "soc_implication": "methodologically-limited",
+              "rationale": "Experimental arm confounds node-sparing RT with added tislelizumab, so the RT contribution can't be isolated; pCR surrogate, locoregional control and survival unreported.",
+              "audience": "pMMR/MSS LARC, cT3-4N0/+, tumor ≤10cm from anal verge"
             },
+            "significance": "The RT read is target volume: the experimental arm both spared elective nodal RT (tumor bed only) and added tislelizumab, so the pCR doubling can't isolate node-sparing's contribution. pCR is also blind to nodal failure, the very risk nodal omission creates, so EFS (pending), not pCR, gates whether to drop elective nodal coverage with IO.",
             "open_questions": [
-              "Does node-sparing RT specifically (vs adding IO) drive the pCR benefit?",
-              "Do pCR gains translate to organ preservation, EFS, OS?",
-              "Does the MSS IO signal replicate outside China / single regimen?"
+              "Is the pCR gain from node-sparing RT or added tislelizumab?",
+              "Does omitting elective nodal RT compromise locoregional control?",
+              "Will the pCR benefit translate to organ preservation, EFS, OS?"
             ],
             "consort": {
               "enrolled": null,
@@ -657,7 +711,40 @@
             "modality": "combined",
             "intent": "curative",
             "methodology": "phase-3-rct",
+            "significance_perspective": "Radiation oncology",
             "related_trials": [
+              {
+                "nct": "NCT07458529",
+                "brief_title": "Neoadjuvant Chemoradiotherapy Plus Tislelizumab With or Without Probio-M9 in pMMR/MSS Locally Advanced Rectal Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 50,
+                "primary_completion_date": "2027-05",
+                "brief_summary": "This prospective, single-center, randomized controlled trial aims to assessing the efficacy and safety of neoadjuvant chemoradiation plus Tislelizumab (PD-1 inhibitor) with or without Probio-M9 and subsequent TME surgery, by comparing assorted endpoints between two experiment groups (Experiment group 1: chemoradiation+PD-1 inhibitor+Probio-M9; Experiment group 2: chemoradiation+PD-1 inhibitor+placebo) with a control group (chemoradiation only).",
+                "conditions": [
+                  "Rectal Cancer, Adenocarcinoma",
+                  "Neoadjuvant Therapy",
+                  "Immunotherapy",
+                  "Probio-M9",
+                  "Tislelizumab",
+                  "Randomized"
+                ],
+                "interventions": [
+                  {
+                    "name": "CRT+PD-1 inhibitor+Probio-M9",
+                    "type": "COMBINATION_PRODUCT"
+                  },
+                  {
+                    "name": "CRT+PD-1 inhibitor+placebo",
+                    "type": "COMBINATION_PRODUCT"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years\n* ECOG performance status 0-2\n* Biopsy-proven rectal adenocarcinoma\n* Distal tumor margin within 10 cm of the anal verge\n* No distant metastasis\n* Clinical stage II or III based on MRI (T4b excluded)\n* Maximum diameter of rectal tumor ≥ 10 mm on baseline CT or…",
+                "answers_question": "Is the pCR gain from node-sparing RT or added tislelizumab?",
+                "relevance_phrase": "tislelizumab+CRT vs CRT-only isolates PD-1 effect"
+              },
               {
                 "nct": "NCT06958432",
                 "brief_title": "Node-Sparing Short-Course Radiotherapy Sequential Chemotherapy and PD-1 Inhibitor for Mid/Low pMMR/MSS Rectal Cancer (MODIFI-RC-II)",
@@ -686,8 +773,39 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* • Voluntarily signs a written informed consent form.\n\n  * Aged between 18 and 75 years at the time of enrollment.\n  * Eastern Cooperative Oncology Group (ECOG) performance status of 0 or 1.\n  * Expected survival of more than 2 years.\n  * Histologically confirmed rectal…",
-                "answers_question": "Does node-sparing RT specifically (vs adding IO) drive the pCR benefit?",
-                "relevance_phrase": "randomizes node-sparing vs conventional RT, IO fixed"
+                "answers_question": "Is the pCR gain from node-sparing RT or added tislelizumab?",
+                "relevance_phrase": "node-sparing vs conventional RT, PD-1 held constant"
+              },
+              {
+                "nct": "NCT06958432",
+                "brief_title": "Node-Sparing Short-Course Radiotherapy Sequential Chemotherapy and PD-1 Inhibitor for Mid/Low pMMR/MSS Rectal Cancer (MODIFI-RC-II)",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2",
+                  "PHASE3"
+                ],
+                "enrollment_count": 430,
+                "primary_completion_date": "2030-12",
+                "brief_summary": "Most rectal cancers are microsatellite stable (MSS) or mismatch repair-proficient (pMMR) and respond poorly to PD-1 inhibitors. Radiotherapy can enhance tumor antigen release and improve responsiveness to PD-1 blockade in MSS/pMMR rectal cancer. Tumor-draining lymph nodes (TDLNs) are critical sites for anti-tumor immune activation, but radiation-induced damage and fibrosis may impair lymphatic drainage and immune responses. Previous studies have reported a remarkable pathologic complete…",
+                "conditions": [
+                  "Rectal Cancer",
+                  "Neoadjuvant Therapies",
+                  "Immune Checkpoint Therapy",
+                  "Radiotherapy"
+                ],
+                "interventions": [
+                  {
+                    "name": "Node-Sparing Radiotherapy plus Chemotherapy and PD-1 inhibitor",
+                    "type": "COMBINATION_PRODUCT"
+                  },
+                  {
+                    "name": "Conventional Radiotherapy plus Chemotherapy and PD-1 inhibitor",
+                    "type": "COMBINATION_PRODUCT"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* • Voluntarily signs a written informed consent form.\n\n  * Aged between 18 and 75 years at the time of enrollment.\n  * Eastern Cooperative Oncology Group (ECOG) performance status of 0 or 1.\n  * Expected survival of more than 2 years.\n  * Histologically confirmed rectal…",
+                "answers_question": "Does omitting elective nodal RT compromise locoregional control?",
+                "relevance_phrase": "node-sparing vs conventional RT, head-to-head RCT"
               },
               {
                 "nct": "NCT05972655",
@@ -721,8 +839,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Patients who have a strong willingness to preserve the anus and are willing to receive neoadjuvant therapy.\n2. Male or Female aged 18-75.\n3. Patients diagnosed with low rectal cancer within 10 cm from the lower edge of the tumor to the anal verge by pelvic MRI and…",
-                "answers_question": "Do pCR gains translate to organ preservation, EFS, OS?",
-                "relevance_phrase": "organ-preservation 2° endpoint, same node-spare regimen"
+                "answers_question": "Will the pCR benefit translate to organ preservation, EFS, OS?",
+                "relevance_phrase": "same regimen; tracks organ-preservation rate"
               },
               {
                 "nct": "NCT06840665",
@@ -752,86 +870,18 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Age 18-70 years old, male or female\n2. Pathologically confirmed rectal adenocarcinoma\n3. The distance from anal verge ≤ 10 cm\n4. Clinical stage T3-4 and/or N+\n5. No evidence of distance metastases\n6. MSI/MMR status: MSS/pMMR\n7. Karnofsky score \\>=70\n8. Adequate organ…",
-                "answers_question": "Do pCR gains translate to organ preservation, EFS, OS?",
-                "relevance_phrase": "3y LRFS/DFS/OS 2° endpoints in SCRT+PD-1 TNT"
-              },
-              {
-                "nct": "NCT06843434",
-                "brief_title": "A Study of Botensilimab and Balstilimab for Rectal Adenocarcinoma",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 40,
-                "primary_completion_date": "2028-02",
-                "brief_summary": "The purpose of this study is to find out whether the combination of botensilimab and balstilimab (BOT/BAL) is a safe and effective treatment that causes few or mild side effects for people with mismatch repair proficient (MMRp)/microsatellite stable (MSS) locally advanced rectal adenocarcinoma. The investigators will also find out whether BOT/BAL is an effective treatment when given in combination with standard chemotherapy.",
-                "conditions": [
-                  "Microsatellite Stable Rectal Carcinoma",
-                  "Locally Advanced Rectal Adenocarcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "Balstilimab",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Botensilimab",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Willing and able to provide written informed consent for trial.\n\n  a. If participant is unable to provide written informed consent, the legally authorized representative (LAR) of the person who is being asked to participate in this research study may give consent on the…",
-                "answers_question": "Does the MSS IO signal replicate outside China / single regimen?",
-                "relevance_phrase": "US MSS LARC, botensilimab/balstilimab non-China IO"
-              },
-              {
-                "nct": "NCT07281768",
-                "brief_title": "Capecitabine/Oxaliplatin Chemotherapy and Cemiplimab With or Without Fianlimab or REGN7075 in Locally Advanced Rectal Cancer",
-                "overall_status": "NOT_YET_RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 66,
-                "primary_completion_date": "2030-07",
-                "brief_summary": "The purpose of this study is to evaluate the safety and clinical activity of combining cemiplimab, cemiplimab/fianlimab, or cemiplimab/REGN7075 with capecitabine/oxaliplatin (CAPOX) for the neoadjuvant treatment of patients with microsatellite stable (MSS) locally advanced rectal cancer (T2 node-positive, T3 node-negative, T3 node-positive).",
-                "conditions": [
-                  "Colorectal Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Oxaliplatin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Capecitabine",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Cemiplimab",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Fianlimab",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "REGN7075",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥18 years.\n* Eastern Cooperative Oncology Group (ECOG) performance status 0 - 1.\n* Rectal cancer (with tumor tissue present at or below the peritoneal reflection) as determined by MRI pelvis or endoscopic ultrasound.\n* Have histologically proven mismatch repair proficient…",
-                "answers_question": "Does the MSS IO signal replicate outside China / single regimen?",
-                "relevance_phrase": "Western MSS LARC, cemiplimab±fianlimab+CAPOX"
+                "answers_question": "Will the pCR benefit translate to organ preservation, EFS, OS?",
+                "relevance_phrase": "reports 3y DFS/OS after PD-1+CAPOX neoadjuvant"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
                 "node-sparing radiotherapy rectal",
-                "rectal organ preservation radiotherapy",
-                "immunotherapy MSS rectal cancer"
+                "neoadjuvant immunotherapy rectal"
               ],
               "queries_failed": [],
-              "candidates_returned": 47,
-              "fetched_at": "2026-06-18T14:26:01.250Z",
+              "candidates_returned": 32,
+              "fetched_at": "2026-06-27T12:32:51.792Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
