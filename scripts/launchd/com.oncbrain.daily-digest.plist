@@ -5,9 +5,10 @@
   Templated at install time by scripts/launchd/install.sh — placeholders below
   get replaced with absolute paths discovered on the installing machine.
 
-  Schedule: 6:00 AM local, every day.
-  Mac asleep at 6am? Pair with:
-    sudo pmset repeat wakeorpoweron MTWRFSU 05:55:00
+  Schedule: 1:00 AM local, every day. (Early so the cron's claude-cli usage
+  clears the rolling 5-hour subscription window well before the morning.)
+  Mac asleep at 1am? Pair with:
+    sudo pmset repeat wakeorpoweron MTWRFSU 00:55:00
   That wakes the Mac 5 minutes before this fires.
 -->
 <plist version="1.0">
@@ -27,7 +28,7 @@
     <key>StartCalendarInterval</key>
     <dict>
         <key>Hour</key>
-        <integer>6</integer>
+        <integer>1</integer>
         <key>Minute</key>
         <integer>0</integer>
     </dict>

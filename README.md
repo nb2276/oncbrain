@@ -117,11 +117,12 @@ Disease-site emoji anchors live in `DESIGN.md`; the per-study bullet + verdict e
 
 ## Autopilot (optional)
 
-Run the full chain every day at 06:00 local without touching anything:
+Run the full chain every day at 01:00 local without touching anything (early so the
+cron's claude-cli usage clears the rolling 5-hour subscription window before morning):
 
 ```bash
 npm run cron:install                                          # registers macOS launchd job
-sudo pmset repeat wakeorpoweron MTWRFSU 05:55:00              # wake laptop 5 min before (sleep guard)
+sudo pmset repeat wakeorpoweron MTWRFSU 00:55:00              # wake laptop 5 min before (sleep guard)
 ```
 
 Each run: `pull:telegram → enrich:inbox → build:day (yesterday + today) → astro build → git push`. Idempotent — empty days are no-ops. Logs append to `~/Library/Logs/oncbrain-cron.log`. Uninstall with `npm run cron:uninstall`; test manually with `npm run cron:test`; diagnose a missed run with `npm run cron:doctor`.

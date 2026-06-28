@@ -85,7 +85,7 @@ async function main() {
     console.log('No new updates.');
     // Catch Telegram Bot API stale-read failure mode: getUpdates returns result:[]
     // while the server actually has updates queued. We saw this on 2026-05-27 when
-    // a message sat in the queue ~12h yet the 06:00 cron got empty. Crossing
+    // a message sat in the queue ~12h yet the 01:00 cron got empty. Crossing
     // getUpdates against getWebhookInfo.pending_update_count proves it next time.
     try {
       const info = await fetchWebhookInfo(token);

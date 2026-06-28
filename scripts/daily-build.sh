@@ -1,5 +1,5 @@
 #!/bin/bash
-# Daily oncbrain pipeline. Runs from launchd at 6am local (or manually).
+# Daily oncbrain pipeline. Runs from launchd at 1am local (or manually).
 #
 # Pipeline (v0.5+):
 #   1. pull:telegram    — drain new bot messages into inbox_items queue
@@ -146,7 +146,7 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
       # curator left staged the night before would ride along into the "auto"
       # commit and deploy to production. (The repo rule: stage explicit paths,
       # never let an unscoped commit sweep the whole index.)
-      git commit -m "auto: $TODAY 6am pull" -- data
+      git commit -m "auto: $TODAY 1am pull" -- data
       if git push 2>&1; then
         echo "  pushed → DigitalOcean will auto-deploy"
       else

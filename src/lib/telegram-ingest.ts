@@ -383,7 +383,7 @@ export function unixToLocalDate(unixSec: number, now: () => Date = () => new Dat
 
 // --- Curator allowlist + offset safety (pull:telegram) ---------------------
 // The bot has no other authentication: anyone who finds @<bot> can DM it, and
-// pull:telegram would inbox their content, which the 6am cron then enriches and
+// pull:telegram would inbox their content, which the 1am cron then enriches and
 // auto-publishes. TELEGRAM_ALLOWED_CHAT_IDS (comma-separated numeric chat ids)
 // restricts ingestion to the curator. Pure + exported so the gate logic is
 // unit-tested (the CLI main() itself isn't testable — it auto-runs on import).

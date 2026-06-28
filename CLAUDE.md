@@ -93,8 +93,8 @@ npm run quality-eval -- --date=2026-06-05 --dry-run # print the persona prompts,
 # Reports land at ~/.gstack/projects/nb2276-oncbrain/quality-reports/<date>.md
 
 # Autopilot
-npm run cron:install            # macOS launchd job at 06:00 local daily
-sudo pmset repeat wakeorpoweron MTWRFSU 05:55:00   # wake laptop 5min before 6am cron (sleep guard)
+npm run cron:install            # macOS launchd job at 01:00 local daily
+sudo pmset repeat wakeorpoweron MTWRFSU 00:55:00   # wake laptop 5min before 1am cron (sleep guard)
 
 # Local preview
 npm run preview                 # Astro preview (after npm run build)
@@ -248,7 +248,7 @@ build/
   seed-dev.ts              dev fixture
 admin/server.ts            Hono server, localhost only, port 3001
 scripts/
-  daily-build.sh           6am autopilot: pull → enrich → build:day → build → push
+  daily-build.sh           1am autopilot: pull → enrich → build:day → build → push
   link-slides.sh           pre-build hook: ensures public/slides symlink → data/slide-photos
   cron-doctor.sh           diagnose a missed overnight run
   launchd/                 plist template + install/uninstall
@@ -280,9 +280,9 @@ TODOS.md                   deferred work tracker (seeded from CHANGELOG "Not yet
 
 ## Operational notes
 
-- **Working dir is in Dropbox** (`/Users/nboehling/Library/CloudStorage/Dropbox/dev/oncbrain`). `node_modules` and `dist` are `xattr com.dropbox.ignored` to avoid sync churn. Reapply if reinstalling. If this directory is renamed, re-run `npm run cron:install` — the launchd plist bakes the absolute path, so a rename without reinstall silently breaks the 6am cron.
+- **Working dir is in Dropbox** (`/Users/nboehling/Library/CloudStorage/Dropbox/dev/oncbrain`). `node_modules` and `dist` are `xattr com.dropbox.ignored` to avoid sync churn. Reapply if reinstalling. If this directory is renamed, re-run `npm run cron:install` — the launchd plist bakes the absolute path, so a rename without reinstall silently breaks the 1am cron.
 - **Local DB** (`oncbrain.db`) is gitignored. Phone-bookmarking is via Telegram bot, NOT remote DB — admin runs locally only.
-- **Cron** at 6am Pacific via launchd. If Mac is asleep, pmset wake at 5:55 is required.
+- **Cron** at 1am Pacific via launchd (early enough that its claude-cli usage clears the rolling 5-hour subscription window before the morning). If Mac is asleep, pmset wake at 00:55 is required.
 - **Channel distribution (v0.14.7 T5).** After the build + push, the cron runs `npm run notify:channel` per changed date, posting a reader-facing announcement (top-line + verdict-emoji study list + deep link, which Telegram previews with the T4 OG card) to a public Telegram channel. Config: `TELEGRAM_CHANNEL_ID` (`.env`) = the channel `@username` or numeric id, with `@oncbrain_bot` added as a channel ADMIN. Unset → the step self-skips (ships dormant). Distinct from `notify:curator` (the curator's private "build done" DM). `npm run notify:channel -- --dry-run` previews the post without sending.
 - **Curator name** (`PUBLIC_CURATOR_NAME`, `PUBLIC_CURATOR_HANDLE`) is local-only — DO's build doesn't see `.env`. Set these as DO app env vars to attribute on the live site.
 - **Filed PDFs are local-only** (v0.8 PR2). Full-text PDFs forwarded to the bot are filed under `data/obsidian/papers/<site>/<slug>.pdf` (gitignored, no `public/` symlink, never in the Astro build) and embedded in the Obsidian daily note. The public site carries only the summary. This is a hard IP constraint — never publish the PDFs (a test in `test/publish-boundary.test.ts` guards it).

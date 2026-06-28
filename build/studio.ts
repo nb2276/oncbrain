@@ -442,7 +442,7 @@ async function buildADay(): Promise<void> {
 // Build a date AND publish it: build:day + astro, then commit + push only that
 // date's artifacts so DigitalOcean redeploys it. Closes the gap where studio's
 // plain "Build a day" leaves the digest sitting locally, unpublished, until the
-// 6am cron (which only ever rebuilds yesterday + today).
+// 1am cron (which only ever rebuilds yesterday + today).
 async function buildAndPublishADay(): Promise<void> {
   const date = await pickDateToBuild('Build + publish which date?');
   if (!date) return;
