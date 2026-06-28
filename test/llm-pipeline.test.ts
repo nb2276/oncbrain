@@ -13,6 +13,7 @@ import {
   detectClusterCollisions,
   parseDiscussedTrials,
   parseVerdict,
+  parseSignificance,
   extractJsonSpan,
   completeAndParse,
   paperIdToSyntheticTweetId,
@@ -442,6 +443,32 @@ describe('parseStudyAgentResponse', () => {
     expect(parseStudyAgentResponse(raw, cluster).details).toEqual(['real', 'another']);
   });
 
+  it('parses significance prose when present (v0.22)', () => {
+    const prose =
+      'For an RT reader the actionable signal is local control, not the OS-negative headline: node-positive in-field control reached 91% at 3y (Fig 3).';
+    const raw = JSON.stringify({ name: 'X', tldr: 'y', details: [], significance: prose });
+    expect(parseStudyAgentResponse(raw, cluster).significance).toBe(prose);
+  });
+
+  it('leaves significance null when absent or too thin (v0.22)', () => {
+    const noField = JSON.stringify({ name: 'X', tldr: 'y', details: [] });
+    expect(parseStudyAgentResponse(noField, cluster).significance).toBeNull();
+    const thin = JSON.stringify({ name: 'X', tldr: 'y', details: [], significance: 'too short' });
+    expect(parseStudyAgentResponse(thin, cluster).significance).toBeNull();
+  });
+
+  it('does not stamp significance_perspective at parse time (v0.22)', () => {
+    // The lens label is stamped at build assembly (where DIGEST_PERSPECTIVE is
+    // known), not by the pure parser — so it stays undefined here.
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [],
+      significance: 'a'.repeat(60),
+    });
+    expect(parseStudyAgentResponse(raw, cluster).significance_perspective).toBeUndefined();
+  });
+
   it('preserves structured {text, subdetails} bullets (v0.4.1 hotfix)', () => {
     const raw = JSON.stringify({
       name: 'POP-RT vs PEACE-2',
@@ -823,6 +850,45 @@ describe('parseDiscussedTrials (v0.16)', () => {
     const over = 'A'.repeat(41);
     // 'A2' is exactly 2 chars + alphanumeric → kept; 40-char → kept; 41 → dropped.
     expect(parseDiscussedTrials(['A2', max, over])).toEqual(['A2', max]);
+  });
+});
+
+describe('parseSignificance (v0.22)', () => {
+  const valid =
+    'For an RT reader the actionable signal is local control, not the OS-negative headline.';
+
+  it('returns null for non-string, non-array input', () => {
+    expect(parseSignificance(undefined)).toBeNull();
+    expect(parseSignificance(null)).toBeNull();
+    expect(parseSignificance(42)).toBeNull();
+    expect(parseSignificance({ text: valid })).toBeNull();
+  });
+
+  it('returns null below the short floor (nothing additive)', () => {
+    expect(parseSignificance('')).toBeNull();
+    expect(parseSignificance('   ')).toBeNull();
+    expect(parseSignificance('too short to matter')).toBeNull();
+  });
+
+  it('trims and collapses internal whitespace', () => {
+    expect(parseSignificance(`  ${valid.replace(' ', '   ')}\n\n`)).toBe(valid);
+  });
+
+  it('joins a string[] the model might emit', () => {
+    const joined = parseSignificance(['For an RT reader the actionable', 'signal is local control here.']);
+    expect(joined).toBe('For an RT reader the actionable signal is local control here.');
+  });
+
+  it('hard-caps a runaway generation at the max length', () => {
+    const huge = 'word '.repeat(400); // ~2000 chars
+    const out = parseSignificance(huge)!;
+    expect(out.length).toBeLessThanOrEqual(900);
+  });
+
+  it('preserves a numeric en-dash range (does NOT scrub it as an em dash)', () => {
+    const withRange =
+      'In-field control reached 91% at 3y with median OS 14.2–9.8mo across the two arms here.';
+    expect(parseSignificance(withRange)).toContain('14.2–9.8');
   });
 });
 

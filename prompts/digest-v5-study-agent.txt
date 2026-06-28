@@ -90,6 +90,51 @@ Examples of INVALID captions (interpretive, would hallucinate):
 - "Curves separate at month 6 with sustained plateau" ❌
 - "Clear and durable benefit visible" ❌
 
+═══ SIGNIFICANCE (why it matters, for the perspective reader) ═══
+
+Emit a `significance` string: the ONE long-form prose field on the card. Where
+the bullets are a terse scan, this is 2 to 3 sentences (aim ≤ 55 words, hard
+ceiling 70) that answer "why does this study matter, and what should I do with
+it?" for the reader of the SPECIALTY PERSPECTIVE above. If no perspective is
+set, write it for a general oncology subspecialist. Short is the point: if two
+strong sentences carry the additive fact and the decision, stop there.
+
+This is the place to surface the SUBTLE, ADDITIVE detail that a busy reader
+would miss skimming the bullets, the kind of thing that lives in a table cell, a
+forest-plot row, a KM subgroup, or a figure's small print:
+- the subgroup or secondary signal that changes the read (e.g. a node-positive
+  in-field control benefit under an OS-negative headline);
+- the technique / dose / fractionation / target-volume / sequencing parameter
+  that gates whether the result transfers to THIS reader's practice;
+- the local-regional / pattern-of-failure endpoint behind a systemic primary;
+- the comparator or magnitude that reframes the bullets' headline;
+- the single decision the study moves for the perspective reader (omit vs add,
+  escalate vs de-escalate, cover nodes or not, hypofractionate, sequence).
+
+Hard rules for `significance`:
+- GROUNDED. Every number is verbatim from the tweets / images / OCR, same bar as
+  the bullets. The no-fabrication rule OUTRANKS the lens. If the additive detail
+  is a magnitude locked in a figure or supplement NOT in the source text, say so
+  ("subgroup HR not reported in source text"); never substitute a guessed number.
+- VOICE. Peer-review register, no em dashes (use commas, parentheses, or ·), none
+  of the banned vocabulary, no promotional tone. Prose, but tight: no throat-
+  clearing ("This study is important because"), no restating the trial name.
+- ADDITIVE, not a recap. Do not just re-narrate the TL;DR and bullets in
+  paragraph form. If you have nothing beyond the bullets, that is the abstain
+  signal.
+- LEAD WITH THE SUBSTANCE. Open on the additive fact (the subgroup number, the
+  dose/parameter, the decision), not a preamble. A one-clause framing is fine
+  ("The RT-relevant read is local control:"); a whole preamble sentence ("For
+  an RT reader, this study matters because…") is wasted words.
+- DON'T RESTATE THE VERDICT. The verdict pill and its rationale already carry
+  the maturity / design caveat (single-arm, small N, surrogate endpoint,
+  post-hoc). Do not spend a sentence repeating it. If a limitation earns a word,
+  fold it into the clause about the SPECIFIC decision it gates, not its own
+  closing sentence.
+- When RT (or the active specialty) is not in play and there is no specialty-
+  specific "so what," ABSTAIN: set `significance` to null. A forced angle is
+  worse than none.
+
 ═══ OUTPUT SHAPE ═══
 
 ```json
@@ -148,6 +193,7 @@ Examples of INVALID captions (interpretive, would hallucinate):
     "rationale": "Single-arm phase 2 in inoperable pts only; no randomised comparator vs partial nephrectomy. Consistent with prior SAFIR / STAR-TRK signals.",
     "audience": "Inoperable primary RCC, T1b-dominant, median age 77"
   },
+  "significance": "Local control, not the OS-negative headline, is the RT read: the node-positive subgroup reached 91% in-field control at 3y (Fig 3). Dose was 60Gy/20fx to involved nodes, transferable to standard practice, so this moves the elective-nodal-coverage decision.",
   "modality": "radiation",
   "intent": "curative",
   "methodology": "phase-2-trial",
@@ -188,6 +234,7 @@ Rules:
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
 - `figures`: 0-4 items, ordered most-informative first. Each `url` must be EXACTLY one of the image URLs in the manifest below — don't invent URLs, don't repeat the same URL twice. Abstain (empty array `[]`) rather than promote weak images.
 - `verdict` is REQUIRED. Pick `soc_implication` from the taxonomy in the VOICE block above (6 enums). When uncertain, default conservatively (prefer `unclear` over guessing; prefer `early-signal` or `confirmatory` over `practice-changing`). `rationale` ≤30 words and explains the VERDICT CHOICE (not the trial result). `audience` ≤80 chars, one-line eligibility gate, or null when applicability is too broad to compress.
+- `significance` is the perspective-framed "why it matters" prose (see the SIGNIFICANCE section above). 2 to 3 sentences, aim ≤55 words (ceiling 70), written for the SPECIALTY PERSPECTIVE reader. Lead with the SUBTLE additive detail the bullets drop (subgroup/figure/table signal, technique parameter, local-regional endpoint) and name the decision it moves; do NOT restate the verdict's maturity caveat or open with a preamble sentence. Grounded (no fabricated numbers, no em dashes, no banned vocab). Set to **null** when there is nothing additive beyond the bullets or no specialty-specific "so what". A forced angle is worse than none.
 - `modality`, `intent`, `methodology`: cross-cutting tag fields, OPTIONAL — emit `null` when the source doesn't make the classification unambiguous. Pick exactly ONE value per field from the enums below; never invent a new value. These drive cross-corpus navigation pages (`/tags/<slug>/`), so a conservative null is much better than a guess that puts the study on a wrong landing page.
   - `modality`: the primary treatment modality being evaluated. Enum:
     - `radiation` — RT is a primary intervention or comparator (definitive, salvage, palliative, SBRT, brachytherapy, proton, hypofractionation studies, dose-escalation).

@@ -41,6 +41,9 @@ export type DigestArtifactForExport = {
         tweet_ids: number[];
         // v0.5+: typed source refs; renderer falls back to tweet_ids when absent.
         source_ids?: Array<{ type: 'tweet' | 'paper' | 'slide'; id: number }>;
+        // v0.22: perspective-framed "Why it matters" prose + its lens label.
+        significance?: string | null;
+        significance_perspective?: string | null;
         open_questions?: string[] | null;
       }>;
       open_questions: string[] | null;
@@ -233,6 +236,22 @@ function renderBody(artifact: DigestArtifactForExport): string {
       const nctSuffix = study.nct ? ` · [[${study.nct}]]` : '';
       lines.push(`### ${study.name}${nctSuffix}`, '');
       lines.push(`> ${wikilinkify(study.tldr)}`, '');
+
+      // v0.22: perspective-framed "Why it matters" prose as an Obsidian callout,
+      // heading carrying the active lens label when stamped. Faithful twin of
+      // the site's significance callout.
+      if (typeof study.significance === 'string' && study.significance.trim()) {
+        const lens =
+          typeof study.significance_perspective === 'string' &&
+          study.significance_perspective.trim()
+            ? ` · ${study.significance_perspective.trim()}`
+            : '';
+        lines.push(`> [!info] Why it matters${lens}`);
+        for (const line of wikilinkify(study.significance.trim()).split('\n')) {
+          lines.push(`> ${line}`);
+        }
+        lines.push('');
+      }
 
       // v0.10: render the figure gallery. Normalize the v0.4 single-figure
       // shape (key_figure_url/caption) into the array so old artifacts export

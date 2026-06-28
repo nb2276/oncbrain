@@ -116,6 +116,20 @@ const comparatorBullets = study.details.filter(isComparatorBullet);
 const otherBullets = study.details.filter((d) => !isComparatorBullet(d));
 const verdictMeta = study.verdict ? VERDICT_META[study.verdict.soc_implication] : null;
 
+// v0.22: perspective-framed "Why it matters" prose — an always-visible callout
+// under the verdict. The heading is "Why it matters", suffixed with the active
+// lens label ("· Radiation oncology") when the build stamped one. Both fields
+// are absent on the pre-v0.22 corpus and when Phase 2 abstained, so the block
+// simply doesn't render.
+const significanceText =
+  typeof study.significance === 'string' && study.significance.trim()
+    ? study.significance.trim()
+    : null;
+const significanceLabel =
+  typeof study.significance_perspective === 'string' && study.significance_perspective.trim()
+    ? study.significance_perspective.trim()
+    : null;
+
 // IMRD-style section bucketing for the depth fold. The leading emoji on each
 // bullet already encodes the section (VOICE.md): 🔍/💊 are Methods, 📊/📐 are
 // Results, ⚠️ is Critique. Bullets without a recognized emoji prefix fall to
@@ -279,6 +293,16 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       </div>
       <p class="verdict-rationale">{study.verdict.rationale}</p>
     </aside>
+  )}
+  {significanceText && (
+    <section class="significance-block" aria-label="Why this study matters">
+      <div class="significance-label">
+        Why it matters{significanceLabel && (
+          <Fragment><span class="significance-sep" aria-hidden="true"> · </span>{significanceLabel}</Fragment>
+        )}
+      </div>
+      <p class="significance-text" set:html={linkifyCitations(significanceText)} />
+    </section>
   )}
   {comparatorBullets.length > 0 && (
     <section class="comparator-block">
@@ -892,6 +916,37 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     font-size: 0.93rem;
   }
   .comparator-list li { margin: 0.2rem 0; }
+
+  /* v0.22 "Why it matters": the one long-form prose callout. Same quiet
+     bordered shell as the verdict + comparator callouts so the head reads as a
+     consistent stack; the prose is serif body (matching the verdict rationale),
+     the small-caps label carries the active specialty lens. It earns its width
+     because it's the one surface holding the subtle figure/table detail the
+     terse bullets drop. */
+  .significance-block {
+    margin: 0.65rem 0 0.7rem;
+    padding: 0.6rem 0.85rem 0.65rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+  }
+  .significance-label {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+  .significance-sep { color: var(--fg-muted); user-select: none; }
+  .significance-text {
+    margin: 0;
+    font-size: 0.97rem;
+    line-height: 1.55;
+    color: var(--fg);
+  }
 
   /* v0.16 trade-press provenance: a quiet attribution line under the TL;DR.
      Metadata weight (sans, muted) — it's a "who reported this," not a result. */

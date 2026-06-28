@@ -2,6 +2,35 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.22.0] - 2026-06-26
+
+### Added
+
+- **"Why it matters" per-study significance callout, framed by the specialty
+  lens.** Each study card now carries one long-form prose surface, an
+  always-visible callout under the verdict that answers "why does this matter and
+  what do I do with it?" for the reader of the active `DIGEST_PERSPECTIVE` lens
+  (radiation oncology by default). Where the bullets are a terse 90-second scan,
+  this is 2 to 4 sentences that surface the subtle, additive detail the bullets
+  drop, the kind that lives in a table cell, a forest-plot row, a KM subgroup, or
+  a figure's small print: a node-positive in-field control benefit under an
+  OS-negative headline, the dose/fractionation/target-volume parameter that gates
+  whether the result transfers, the local-regional endpoint behind a systemic
+  primary, and the single decision the study moves (omit vs add, escalate vs
+  de-escalate, cover nodes or not, sequence). The heading carries the lens, e.g.
+  **WHY IT MATTERS · RADIATION ONCOLOGY**; swap `DIGEST_PERSPECTIVE` (e.g.
+  `medonc`) and the framing and label follow. The Phase 2 study agent generates
+  it under the same hard rules as the bullets: every number verbatim from source
+  (no-fabrication outranks the lens, a figure-locked magnitude not in the source
+  text is flagged missing, never guessed), no em dashes, no banned vocabulary,
+  and it **abstains** (renders nothing) when there is no specialty-specific "so
+  what" beyond the bullets, so the angle is never forced. New `significance` +
+  `significance_perspective` fields on `DigestStudy` (mirrored across
+  `llm-pipeline.ts` and `digest-data.ts`); shipped in the artifact JSON, the
+  `/api/v1` payloads, and the Obsidian twin (a `> [!info] Why it matters` callout).
+  The pre-0.22 corpus has no significance and renders unchanged; rebuild a date to
+  populate it.
+
 ## [0.21.0] - 2026-06-17
 
 ### Added

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { loadPerspective } from '../src/lib/llm-pipeline.ts';
+import { loadPerspective, perspectiveDisplayName } from '../src/lib/llm-pipeline.ts';
 
 const STUDY_AGENT_PROMPT = resolve(__dirname, '../prompts/digest-v5-study-agent.txt');
 const SYNTHESIS_PROMPT = resolve(__dirname, '../prompts/digest-v5-synthesis.txt');
@@ -60,5 +60,35 @@ describe('loadPerspective', () => {
     for (const name of ['radonc', 'medonc']) {
       expect(loadPerspective(name)).not.toContain('—');
     }
+  });
+
+  it('study-agent prompt carries the significance field + section (v0.22)', () => {
+    const template = readFileSync(STUDY_AGENT_PROMPT, 'utf-8');
+    expect(template).toContain('"significance"');
+    expect(template).toContain('SIGNIFICANCE');
+  });
+});
+
+describe('perspectiveDisplayName (v0.22)', () => {
+  it('maps known lenses to a curated label', () => {
+    expect(perspectiveDisplayName('radonc')).toBe('Radiation oncology');
+    expect(perspectiveDisplayName('medonc')).toBe('Medical oncology');
+  });
+
+  it('is case-insensitive on the slug', () => {
+    expect(perspectiveDisplayName('RadOnc')).toBe('Radiation oncology');
+  });
+
+  it('returns null for unset / blank / unsafe slugs', () => {
+    expect(perspectiveDisplayName(undefined)).toBeNull();
+    expect(perspectiveDisplayName(null)).toBeNull();
+    expect(perspectiveDisplayName('  ')).toBeNull();
+    expect(perspectiveDisplayName('../voice')).toBeNull();
+    expect(perspectiveDisplayName('foo/bar')).toBeNull();
+  });
+
+  it('title-cases an unmapped-but-valid slug as a graceful fallback', () => {
+    expect(perspectiveDisplayName('gyn-onc')).toBe('Gyn Onc');
+    expect(perspectiveDisplayName('neuro_onc')).toBe('Neuro Onc');
   });
 });

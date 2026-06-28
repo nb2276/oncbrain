@@ -280,6 +280,18 @@ export type DigestStudy = {
   // section for taxonomy and assignment rules. Older artifacts won't have
   // this; renderers should fall back to the bullet-only layout.
   verdict?: StudyVerdict;
+  // v0.22: perspective-framed "Why it matters" prose (Phase 2). The one
+  // long-form surface on the card: a 2-4 sentence interpretive paragraph
+  // written under the active DIGEST_PERSPECTIVE lens that surfaces the
+  // additive figure/table/results detail the terse bullets drop and names the
+  // decision the study moves for that reader. No-fabrication outranks the
+  // lens. `significance_perspective` is the lens display label ("Radiation
+  // oncology"), stamped at build time from DIGEST_PERSPECTIVE — null when no
+  // perspective was set. Both mirrored in digest-data.ts:DigestStudy — the
+  // build emits the artifact JSON and the Astro pages re-read it through that
+  // definition, so the two MUST stay in lockstep.
+  significance?: string | null;
+  significance_perspective?: string | null;
   // v0.14.5 (E5): set true when any source is a preprint (medRxiv / bioRxiv /
   // Research Square, by DOI prefix or host). Drives the "not peer-reviewed"
   // badge and a deterministic verdict cap at build (see lib/preprint.ts). Older
@@ -602,6 +614,29 @@ export function loadPerspective(name: string | undefined | null): string {
   return block;
 }
 
+// v0.22: human-readable display name for a perspective slug, used as the
+// "WHY IT MATTERS · {label}" callout heading on the study card. Known lenses
+// get a curated label; an unmapped-but-valid slug falls back to a title-cased
+// form of the slug (so a new prompts/perspectives/<name>.md works without a
+// code change, and the maintainer can add a nicer label here later). Returns
+// null for an unset / blank / invalid slug — the card then renders the generic
+// "Why it matters" heading with no specialty suffix.
+const PERSPECTIVE_DISPLAY_NAMES: Record<string, string> = {
+  radonc: 'Radiation oncology',
+  medonc: 'Medical oncology',
+};
+export function perspectiveDisplayName(name: string | undefined | null): string | null {
+  const slug = (name ?? '').trim().toLowerCase();
+  if (!slug || !/^[a-z0-9][a-z0-9_-]*$/.test(slug)) return null;
+  if (PERSPECTIVE_DISPLAY_NAMES[slug]) return PERSPECTIVE_DISPLAY_NAMES[slug];
+  // Title-case the slug as a graceful fallback ("gyn-onc" → "Gyn Onc").
+  return slug
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
 type StudyCluster = {
   slug: string;
   name: string;
@@ -766,6 +801,13 @@ export async function buildDigest(
           ...study,
           verdict: isPreprint ? (clampPreprintVerdict(study.verdict) ?? undefined) : study.verdict,
           is_preprint: isPreprint || undefined,
+          // v0.22: stamp the lens display label onto any study that produced a
+          // "Why it matters" paragraph, so the card heading reads "· Radiation
+          // oncology". Only when a perspective is set (else the generic heading
+          // renders) and only when there's prose to label.
+          significance_perspective: study.significance
+            ? (perspectiveDisplayName(opts.perspectiveName) ?? undefined)
+            : undefined,
           related_trials: enriched.related_trials,
           related_trials_provenance: enriched.related_trials_provenance,
         },
@@ -1359,6 +1401,10 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     tweet_ids: cluster.tweet_ids,
     slug: cluster.slug,
     verdict: parseVerdict(root.verdict),
+    // v0.22: the perspective-framed "Why it matters" prose. The lens display
+    // label (significance_perspective) is stamped later, at build assembly,
+    // where opts.perspectiveName is known — the parser only sees the raw text.
+    significance: parseSignificance(root.significance),
     open_questions: parseOpenQuestions(root.open_questions),
     consort: parseConsort(root.consort),
     modality,
@@ -1526,6 +1572,32 @@ export function parseVerdict(raw: unknown): StudyVerdict | undefined {
       ? audienceRaw.slice(0, 80).trimEnd()
       : audienceRaw;
   return { soc_implication: soc, rationale, audience };
+}
+
+// v0.22: parse the optional perspective-framed "Why it matters" prose. The one
+// long-form field, so it's the one allowed to be a paragraph — but still
+// bounded. Forgiving: accepts a string (joins a string[] the model might emit
+// with spaces), trims, collapses internal whitespace, and hard-caps length so a
+// runaway generation can't blow up the card. Below a short floor (nothing
+// meaningfully additive) it returns null and the callout doesn't render. The
+// VOICE em-dash ban is enforced upstream (prompt); we don't scrub here because a
+// numeric en-dash range (e.g. "14.2–9.8") is meaningful and must survive.
+const SIGNIFICANCE_MAX_CHARS = 900;
+const SIGNIFICANCE_MIN_CHARS = 40;
+export function parseSignificance(raw: unknown): string | null {
+  let text: string;
+  if (typeof raw === 'string') {
+    text = raw;
+  } else if (Array.isArray(raw)) {
+    text = raw.filter((s): s is string => typeof s === 'string').join(' ');
+  } else {
+    return null;
+  }
+  const cleaned = text.replace(/\s+/g, ' ').trim();
+  if (cleaned.length < SIGNIFICANCE_MIN_CHARS) return null;
+  return cleaned.length > SIGNIFICANCE_MAX_CHARS
+    ? cleaned.slice(0, SIGNIFICANCE_MAX_CHARS).trimEnd()
+    : cleaned;
 }
 
 // Parse the optional per-study open_questions (v0.8.1). Forgiving: trims, drops
