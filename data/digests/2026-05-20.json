@@ -1,93 +1,24 @@
 {
   "date": "2026-05-20",
   "conference": null,
-  "generated_at": 1780196684054,
+  "generated_at": 1782603109444,
   "digest": {
-    "top_line": "LS-SCLC: mOS 60.7 vs 39.5mo (HR 0.55, p=0.003); 54 Gy BID SIB challenges the 45 Gy CONVERT-era ceiling.",
-    "tldr": "Thoracic led: phase 3 RCT shows mOS +21mo with 54 Gy BID SIB vs 45 Gy in LS-SCLC, contrasting CONVERT's null result. Breast added a hypothesis-generating retrospective signal: proton PMRT may raise capsular contracture risk vs photon (DTI 50% vs 35%, MVA P=0.083), relevant to reconstruction planning but not yet practice-changing.",
+    "top_line": "LS-SCLC 54Gy twice-daily SIB beats 45Gy: mOS 60.7 vs 39.5mo (HR 0.55, p=0.003), though early-stopped and single-country (N=224).",
+    "tldr": "Thoracic carried the day: a Chinese phase 3 escalating the twice-daily LS-SCLC schedule to 54Gy nearly doubled mOS (60.7 vs 39.5mo), though early stopping and modest N temper it. Breast offered a proton trade-off, higher capsular contracture vs photon PMRT, but the signal washed out on multivariable adjustment.",
     "sites": [
       {
-        "disease_site": "thoracic",
-        "intro": "Dose escalation in LS-SCLC BID RT gets its strongest prospective evidence to date, though early DSMB stop and single-country design warrant caution before protocol change.",
-        "studies": [
-          {
-            "name": "LS-SCLC 54 Gy Hyperfractionated RT",
-            "tldr": "mOS 60.7 vs 39.5mo (HR 0.55, p=0.003) favoring 54 Gy hyperfractionated RT in LS-SCLC; no added toxicity.",
-            "details": [
-              "📊 1° EP (OS): mOS 60.7mo (95% CI 49.2–62.0) vs 39.5mo (27.5–51.4), HR 0.55 (0.37–0.72), p=0.003",
-              "🔍 Phase 3 open-label RCT; N=224; 16 centers in China; 1:1 randomization; median f/u 46mo",
-              "🔍 54 Gy SIB to GTV in 30 BID fractions vs 45 Gy in 30 BID fractions; both arms VMAT; PTV 45 Gy both arms",
-              "🔍 Chemo-naive or ≤1 prior cisplatin/carboplatin+etoposide cycle; ECOG 0–1; age 18–70",
-              "💊 Concurrent chemotherapy + PCI (25 Gy/10 fx) for responders in both arms",
-              {
-                "text": "⚠️ G3–4 RT toxicity by type",
-                "subdetails": [
-                  "Oesophagitis: 13% (54 Gy) vs 12% (45 Gy), p=0.84",
-                  "Pneumonitis: 5% (54 Gy) vs 6% (45 Gy), p=0.663",
-                  "1 treatment-related death in 54 Gy arm (MI)"
-                ]
-              },
-              "🔗 vs CONVERT trial (Lancet Oncol 2017): CONVERT also BID 45 Gy SIB to 66 Gy failed to show OS benefit over 45 Gy — this trial's positive result contrasts CONVERT's null, likely due to SIB technique differences and PTV homogeneity approach",
-              "⚠️ Trial stopped early by DSMB (April 2021) on clinical benefit grounds; early termination inflates effect estimates",
-              "⚠️ Single-country (China), age-capped at 70, open-label; generalizability to Western populations uncertain",
-              "⚠️ 45 Gy BID (not OD) control — aligns with historical standard but not universally practiced globally"
-            ],
-            "figures": [],
-            "nct": "NCT03214003",
-            "tweet_ids": [
-              1000000007
-            ],
-            "slug": "ls-sclc-54gy-hyperfractionated-rt",
-            "verdict": {
-              "soc_implication": "challenges-soc",
-              "rationale": "Phase 3 RCT, OS primary endpoint hit; challenges 45 Gy BID as the fixed standard, though early termination and China-only population limit direct generalizability.",
-              "audience": "LS-SCLC, ECOG 0–1, age 18–70, chemo-naive or ≤1 prior platinum-etoposide cycle"
-            },
-            "open_questions": [
-              "Confirmatory data needed in non-Asian populations",
-              "Optimal dose escalation with modern immunotherapy combinations",
-              "Late cardiac/pulmonary toxicity beyond 46mo median f/u"
-            ],
-            "consort": {
-              "enrolled": 224,
-              "excluded": null,
-              "randomized": 224,
-              "arms": [
-                {
-                  "label": "54 Gy SIB",
-                  "allocated": 108,
-                  "analyzed": 108
-                },
-                {
-                  "label": "45 Gy",
-                  "allocated": 116,
-                  "analyzed": 116
-                }
-              ]
-            },
-            "modality": "radiation",
-            "intent": "curative",
-            "methodology": "phase-3-rct",
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 7
-              }
-            ]
-          }
-        ],
-        "open_questions": null
-      },
-      {
         "disease_site": "breast",
-        "intro": "Proton PMRT carries a non-significant but directionally concerning CC signal vs photon, particularly with DTI reconstruction; hypothesis-generating, not practice-changing.",
+        "intro": "Proton PMRT's cardiac/pulmonary dosimetry edge may carry a capsular-contracture cost, though the association attenuates to NS after multivariable adjustment.",
         "studies": [
           {
-            "name": "Proton vs Photon PMRT Capsular Contracture (Zerey et al.)",
-            "tldr": "MVA HR 1.76 (P=0.083) proton vs photon CC, non-significant; proton+DTI 2yr CC 50% vs photon+DTI 35%.",
+            "name": "Proton vs Photon PMRT and Capsular Contracture",
+            "tldr": "CC risk HR 2.3 (1.26-4.30) for proton vs photon PMRT univariately, NS on multivariable (1.76, p=.083).",
             "details": [
+              "📊 1° comparison: proton vs photon capsular contracture. Univariate HR 2.3 (95% CI 1.26-4.30), p=.007",
+              "📐 Multivariable: proton HR 1.76 (0.93-3.32), p=.083; attenuates to non-significant after adjustment",
+              "📊 Strongest predictor on MVA: DTI vs TE/I reconstruction, HR 3.0 (1.7-5.5), p<.001",
               {
-                "text": "📊 2-year CC rates by modality and reconstruction type",
+                "text": "📊 2-year CC rate by modality × reconstruction (p<.001 across groups)",
                 "table": {
                   "columns": [
                     "Reconstruction",
@@ -97,25 +28,22 @@
                   "rows": [
                     [
                       "DTI",
-                      "50%",
-                      "35%"
+                      "50% (n=36)",
+                      "35% (n=15)"
                     ],
                     [
                       "TE/I",
-                      "23%",
-                      "12%"
+                      "23% (n=53)",
+                      "12% (n=71)"
                     ]
                   ]
                 }
               },
-              "📐 MVA HR 1.76 (95% CI 0.93-3.32), P=0.083 for proton vs photon",
-              "📐 Univariate HR 2.3 (95% CI 1.26-4.30), P=0.007 for proton vs photon",
-              "📐 DTI vs TE/I in MVA: HR 3.0 (95% CI 1.7-5.5), P<.001",
-              "🔍 Retrospective, 2 centers/single institution, N=175 (89 proton, 86 photon), Jan 2017-Dec 2023; median f/u 42 vs 47 mo",
-              "⚠️ Groups unbalanced for reconstruction type (TE/I vs DTI, P<.001); this is the dominant confounder and MVA adjustment may be insufficient",
-              "⚠️ Groups also unbalanced for tumor laterality (P<.001); uncontrolled institutional practice patterns, not randomization",
-              "⚠️ MVA primary result is P=0.083, below conventional significance; framed as a trend, not a confirmed signal",
-              "🔗 Proton PMRT improves cardiac/pulmonary dosimetry vs photon; this CC signal is the risk to weigh in reconstruction planning"
+              "🔍 Retrospective, 2 centers within single institution, N=175 (89 proton, 86 photon), treated 2017-2023",
+              "🔍 Median f/u 42mo proton vs 47mo photon; median age 49, 63% Hispanic",
+              "🔍 All TE/I pts had the tissue expander irradiated",
+              "⚠️ Groups imbalanced: tumor laterality (p<.001) and reconstruction type (p<.001), residual confounding likely",
+              "🔗 Proton PMRT adopted for better cardiac/pulmonary dosimetry; CC may be the trade-off"
             ],
             "figures": [],
             "nct": null,
@@ -123,20 +51,116 @@
               1000000008,
               1000000006
             ],
-            "slug": "breast-pmrt-proton-vs-photon-cc",
+            "slug": "pmrt-proton-photon-capsular-contracture",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective with unbalanced reconstruction types between arms; MVA trend only (P=0.083), not significant. Insufficient to change selection.",
-              "audience": "Post-mastectomy breast cancer, subpectoral TE/I or DTI reconstruction, PMRT cand"
+              "rationale": "Retrospective, single-institution; proton CC effect lost significance on multivariable (HR 1.76, p=.083) with baseline imbalances in reconstruction type and laterality.",
+              "audience": "Post-mastectomy breast cancer, implant reconstruction, receiving PMRT"
             },
+            "significance": "The proton signal concentrates in DTI reconstruction (50% vs 35% photon 2yr CC); on multivariable the proton HR falls to 1.76 (p=.083) while DTI itself carries HR 3.0, so reconstruction type, not beam, may drive most of the risk. For protons' cardiopulmonary dosimetric edge, this argues for staged TE/I over DTI when CC risk weighs on the choice.",
             "open_questions": [
-              "Does proton-CC signal replicate in a prospective matched or randomized cohort?",
-              "Optimal reconstruction type (TE/I vs DTI) when proton PMRT is indicated for cardiac/pulmonary dosimetry reasons?"
+              "Does proton CC penalty persist after adjustment in prospective data",
+              "Optimal reconstruction approach (TE/I vs DTI) with proton PMRT"
             ],
             "consort": null,
             "modality": "radiation",
             "intent": "curative",
             "methodology": "retrospective",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT06677879",
+                "brief_title": "A Prospective Cohort Study of Proton and Photon Therapy for Left-sided Breast Cancer.",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 780,
+                "primary_completion_date": "2026-07",
+                "brief_summary": "The goal of this study is to investigate the differences in toxicity and efficacy between proton and photon hypofractionated radiotherapy following lumpectomy or mastectomy for breast cancer. The main questions it aims to answer are:\n\n1. What is the difference in the incidence of radiation-related grade 2 or higher adverse events within two years following proton versus photon therapy after breast-conserving surgery?\n2. What is the difference in the incidence of radiation-related grade 2 or…",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Proton radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Photon radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically confirmed invasive breast cancer.\n2. Indications for adjuvant radiotherapy following lumpectomy or mastectomy for left breast cancer:\n\n   1. Post lumpectomy: Patients who have undergone lumpectomy with postoperative pathology staged as pT1-3 N1-3, excluding…",
+                "answers_question": "Does proton CC penalty persist after adjustment in prospective data",
+                "relevance_phrase": "prospective proton vs photon, grade 2+ AE at 2y"
+              },
+              {
+                "nct": "NCT02603341",
+                "brief_title": "Pragmatic Randomized Trial of Proton vs. Photon Therapy for Patients With Non-Metastatic Breast Cancer: A Radiotherapy Comparative Effectiveness (RADCOMP) Consortium Trial",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 1238,
+                "primary_completion_date": "2036-11",
+                "brief_summary": "A pragmatic randomized clinical trial of patients with locally advanced breast cancer randomized to either proton or photon therapy and followed longitudinally for cardiovascular morbidity and mortality, health-related quality of life, and cancer control outcomes. Quality of life is the outcome measure for the estimated primary completion date of December, 2024, www.radcomp.org.",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Photon",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Proton",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Females or males diagnosed with pathologically (histologically) proven invasive mammary carcinoma (ductal, lobular or other) of the breast who have undergone either mastectomy or lumpectomy with any type of axillary surgery or axillary sampling.\n* For patients who have…",
+                "answers_question": "Does proton CC penalty persist after adjustment in prospective data",
+                "relevance_phrase": "randomized proton vs photon breast, prospective"
+              },
+              {
+                "nct": "NCT05692674",
+                "brief_title": "A Prospective Phase II Study for Adjuvant Hypofractionated Intensity-modulated Proton Radiotherapy for Post Operative Breast Cancer With Implantation Reconstruction",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 67,
+                "primary_completion_date": "2028-09",
+                "brief_summary": "The incidence of breast reconstruction failure after conventional photon radiotherapy for breast cancer is about 18.7%. At present, there is limited data on proton radiotherapy for post operative breast cancer with implantation reconstruction. Proton radiotherapy for breast cancer can significantly reduce the radiation dose of the ipsilateral heart and lung, thereby reducing the incidence of cardiac events and radiation pneumonia. This study is aimed at the study of adjuvant hypofractionated…",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "adjuvant hypofractionated intensity-modulated proton radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* 1: Patients with pathologically confirmed breast cancer\n\n  2: Indications: patients who need adjuvant radiotherapy after mastectomy and implant reconstruction\n\n  3: No distant metastasis\n\n  4: Had no chest and breast radiotherapy history\n\n  5: Between the ages of 18 and 80…",
+                "answers_question": "Optimal reconstruction approach (TE/I vs DTI) with proton PMRT",
+                "relevance_phrase": "phase 2 proton RT in implant reconstruction pts"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "proton photon breast radiation",
+                "proton postmastectomy reconstruction"
+              ],
+              "queries_failed": [
+                {
+                  "term": "proton postmastectomy reconstruction",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 16,
+              "fetched_at": "2026-06-27T23:28:21.883Z",
+              "rerank_outcome": "picked_N"
+            },
             "source_ids": [
               {
                 "type": "paper",
@@ -145,6 +169,130 @@
               {
                 "type": "paper",
                 "id": 6
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "thoracic",
+        "intro": "First positive dose-escalation signal for the twice-daily LS-SCLC schedule itself (GTV boost to 54Gy), where CONVERT's once-daily escalation was null.",
+        "studies": [
+          {
+            "name": "LS-SCLC High-Dose Hyperfractionated RT (54 Gy vs 45 Gy) Phase 3",
+            "tldr": "mOS 60.7 vs 39.5mo, HR 0.55 (0.37-0.72), p=0.003 favoring 54Gy twice-daily SIB over 45Gy in LS-SCLC.",
+            "details": [
+              "📊 1° EP OS (ITT): mOS 60.7mo (95% CI 49.2-62.0) with 54Gy vs 39.5mo (27.5-51.4) with 45Gy",
+              "📐 OS HR 0.55 (95% CI 0.37-0.72), p=0.003",
+              "🔍 Phase 3 open-label RCT, 16 Chinese sites, N=224 (54Gy 108 / 45Gy 116); median f/u 46mo",
+              "🔍 SIB technique: 54Gy/30fx boost to GTV only; PTV held at 45Gy/30fx in both arms",
+              "🔍 Both arms accelerated twice-daily VMAT, 10fx/week, concurrent platinum-etoposide; PCI 25Gy/10fx for responders",
+              "📊 G3-4 radiotherapy toxicity by arm — comparison values omitted (cell value \"0.84\" not verified in source)",
+              "⚠️ DSMB-terminated early (Apr 2021) for sufficient benefit; early stopping can overestimate effect size",
+              "⚠️ Open-label, modest N=224, single-country (China); the unusually large OS gain warrants Western confirmation",
+              "🔗 Standard LS-SCLC RT is 45Gy twice-daily (Turrisi, NEJM 1999); CONVERT found no OS gain from once-daily dose escalation. This escalates the twice-daily schedule itself to 54Gy"
+            ],
+            "figures": [],
+            "nct": "NCT03214003",
+            "tweet_ids": [
+              1000000007
+            ],
+            "slug": "ls-sclc-54gy-vs-45gy-phase3",
+            "verdict": {
+              "soc_implication": "challenges-soc",
+              "rationale": "Randomised phase 3, OS primary endpoint met with adequate f/u, but open-label, N=224, single-country, and DSMB-terminated early (can inflate effect); diverges from the 45Gy BID standard.",
+              "audience": "Limited-stage SCLC, ECOG 0-1, age 18-70, untreated or 1 prior chemo cycle"
+            },
+            "significance": "The transferable detail: the 54Gy boost hit only the GTV, the PTV stayed at 45Gy/30fx, so G3-4 oesophagitis (13 vs 12%) and pneumonitis (5 vs 6%) held flat despite the mOS jump to 60.7 vs 39.5mo. The lever here is SIB dose-escalation of the twice-daily schedule, not once-daily escalation.",
+            "open_questions": [
+              "Generalizability beyond Chinese single-country cohort",
+              "Comparison vs once-daily high-dose thoracic RT (66-70Gy)",
+              "Dose escalation value with durvalumab consolidation (ADRIATIC era)"
+            ],
+            "consort": {
+              "enrolled": 224,
+              "excluded": null,
+              "randomized": 224,
+              "arms": [
+                {
+                  "label": "54 Gy SIB",
+                  "allocated": 108,
+                  "analyzed": null
+                },
+                {
+                  "label": "45 Gy",
+                  "allocated": 116,
+                  "analyzed": null
+                }
+              ]
+            },
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "phase-3-rct",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT06992609",
+                "brief_title": "Durvalumab After Chemoradiotherapy in Limited Stage Small Cell Lung Cancer.",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 70,
+                "primary_completion_date": "2029-06",
+                "brief_summary": "Lung cancer is a highly prevalent disease worldwide in women and men. In 2022, lung cancer stood as the most frequently diagnosed cancer with approximately 2.48 million new cases on a global scale, followed by cancers of the female breast (11.6%), colorectum (9.6%), prostate (7.3%), and stomach (4.9%).\n\nLung cancer is the leading cause of cancer death worldwide according to data provided by the International Agency for Research on Cancer. In 2022 they estimated a 1.8 million deaths across the…",
+                "conditions": [
+                  "Small Cell Lung Carcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Durvalumab",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Female or male patients aged ≥18 years at the time of signing the Informed Consent Form (ICF).\n* Written informed consent obtained from the patient/legal representative prior to performing any protocol-related procedures. Additionally, signed and dated written genetic and/or…",
+                "answers_question": "Dose escalation value with durvalumab consolidation (ADRIATIC era)",
+                "relevance_phrase": "phase 3 durvalumab consolidation after CRT in LS-SCLC"
+              },
+              {
+                "nct": "NCT07055581",
+                "brief_title": "Durvalumab as Consolidation for Patients LS-SCLC",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 100,
+                "primary_completion_date": "2029-07",
+                "brief_summary": "Small-Cell Lung Cancer (SCLC) accounts for 10% to 15% of new lung cancers and is a highly aggressive neuroendocrine tumor. In the past 30 years, the treatment of SCLC has made very limited progress, and basically made breakthroughs in radiotherapy and chemotherapy. With the advent of the immune era, immunotherapy has achieved initial results in the treatment of SCLC. Approximately one-third of patients with small cell lung cancer are in limited-stage (LS-SCLC) disease at first diagnosis. Except…",
+                "conditions": [
+                  "Small Cell Lung Cancer Limited Stage"
+                ],
+                "interventions": [
+                  {
+                    "name": "Induction Durvalumab +etoposide/platinum +Radiochemotherapy+ durvalumab maintenance",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* 1.Capable of giving signed informed consent which includes compliance with the requirements and restrictions listed in the informed consent form (ICF) and in this protocol.\n* 2.Histologically or cytologically confirmed small cell lung cancer\n* 3.Limited-stage, defined as…",
+                "answers_question": "Dose escalation value with durvalumab consolidation (ADRIATIC era)",
+                "relevance_phrase": "durvalumab induction + chemoRT + maintenance, LS-SCLC"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "small cell radiotherapy dose",
+                "small cell durvalumab radiotherapy"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 38,
+              "fetched_at": "2026-06-27T23:29:53.899Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 7
               }
             ]
           }
@@ -183,7 +331,9 @@
       "pub_date": "2026-04-19",
       "abstract": "BACKGROUND: Postmastectomy radiation therapy (PMRT) may cause adverse events in the reconstruction setting. Proton-based PMRT is increasingly used and has been shown to improve cardiac and pulmonary dosimetry. Data on the risk of capsular contracture (CC) with proton versus photon PMRT remain scarce. We compared the CC rate of the largest cohort of patients undergoing reconstruction after pencil beam scanning proton PMRT reported to date with an intensity modulated radiation therapy photon cohort, hypothesizing that the proton cohort would have a higher rate of CC.\n\nMETHODS AND MATERIALS: An institutional review board -approved retrospective study was conducted on patients with breast cancer who underwent subpectoral 2-stage tissue expander/implant (TE/I) or direct-to-implant (DTI) breast reconstruction and received either pencil beam scanning proton or intensity modulated radiation therapy photon PMRT between January 2017 and December 2023 at 2 centers within a single institution. All patients undergoing TE/I had the TE irradiated. CC rates were estimated using the Kaplan-Meier method. Cox proportional hazards analysis, denoted as hazard ratios (HRs) with 95% CIs, was used to assess variables potentially associated with the outcome, and a binary logistic regression model was used to verify the results.\n\nRESULTS: The study cohort comprised 175 patients (89 proton; 86 photon). The median age was 49 years (range, 24-78), 63% were Hispanic. Patient demographics were well balanced between the groups, except in tumor laterality (P < .001) and reconstruction type (TE/I vs DTI; P < .001). The median follow-up was 42 and 47 months for the proton and photon groups, respectively. In a multivariable analysis, DTI patients had a significantly higher risk of CC compared with TE/I patients (HR, 3.0; 95% CI, 1.7-5.5; P < .001). Proton patients had a higher risk of developing CC compared with the photon group in univariate analysis (HR, 2.3; 95% CI, 1.26-4.30; P = .007), although this effect did not reach statistical significance in the multivariable model (HR, 1.76; 95% CI, 0.93-3.32; P = .083). The 2-year CC rate for patients treated with protons and DTI (n = 36), photons and DTI (n = 15), protons and TE/I (n = 53), and photons and TE/I (n = 71) was 50%, 35%, 23%, 12%, respectively (P < .001). No other factors were significantly associated with CC development.\n\nCONCLUSION: In this contemporary large proton versus photon PMRT cohort, patients treated with proton showed a trend toward an increased risk of CC. Patients undergoing DTI who were treated with protons had the highest risk of CC (50%). Careful consideration of reconstruction and radiation therapy modalities, assessing CC risk, and also involving patient input, is important for treatment selection.",
       "pdf_path": null,
-      "note": null
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
     },
     {
       "id": 7,
@@ -217,7 +367,9 @@
       "pub_date": "2024-08-12",
       "abstract": null,
       "pdf_path": "data/obsidian/papers/thoracic/high-dose-hyperfractionated-simultaneous-integrated-boost-radiot.pdf",
-      "note": null
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
     },
     {
       "id": 6,
@@ -244,7 +396,8 @@
       "abstract": null,
       "pdf_path": null,
       "source_url": "https://doi.org/10.1016/j.ijrobp.2025.07.1298",
-      "note": "https://doi.org/10.1016/j.ijrobp.2025.07.1298"
+      "note": "https://doi.org/10.1016/j.ijrobp.2025.07.1298",
+      "resolved_from_review": false
     }
   ]
 }
