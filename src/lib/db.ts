@@ -333,6 +333,19 @@ CREATE TABLE IF NOT EXISTS review_trial_resolutions (
 );
 CREATE INDEX IF NOT EXISTS idx_rtr_date ON review_trial_resolutions(bookmark_date);
 CREATE INDEX IF NOT EXISTS idx_rtr_status ON review_trial_resolutions(status);
+
+-- v0.23: rebuild queue. Dates whose ALREADY-PUBLISHED digest needs regenerating
+-- because a source gained richer data AFTER the digest was built: a full-paper
+-- PDF merged figures / full text onto a study first ingested as an abstract, or
+-- a late conference slide arrived for a past date. Enrichment writes here;
+-- "npm run rebuild:queued" (also run by the daily cron) drains it and rebuilds
+-- each date. Keyed by date so re-queuing the same date coalesces to one entry.
+CREATE TABLE IF NOT EXISTS rebuild_queue (
+  bookmark_date TEXT PRIMARY KEY,
+  reason TEXT,
+  queued_at INTEGER NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0
+);
 `;
 
 export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): Database.Database {
@@ -967,15 +980,40 @@ type PaperMatch = {
   pmid: string | null;
   content_hash: string | null;
   pdf_path: string | null;
+  abstract: string | null;
   fulltext_excerpt_md: string | null;
   figure_ocr_md: string | null;
   figure_structured_md: string | null;
+  bookmark_date: string | null;
 };
 
-export function savePaper(
-  db: Database.Database,
-  p: NewPaper,
-): { id: number; created: boolean } {
+// v0.23: savePaper reports what a collision did. `created` is a fresh INSERT;
+// otherwise `mergedFields` lists the columns a richer re-send UPGRADED on the
+// existing row (empty when the collision added nothing new), and `bookmarkDate`
+// is that row's publish date, so the caller can queue exactly that digest for a
+// rebuild. Content-bearing merges (figures, full text, abstract) are what make a
+// rebuild worthwhile; identifier attaches (pmid/content_hash) are bookkeeping.
+export type SavePaperResult = {
+  id: number;
+  created: boolean;
+  mergedFields: string[];
+  bookmarkDate: string | null;
+};
+
+// The PUBLISHED-artifact / study-agent-input fields whose arrival on an existing
+// row means the digest for that date should be regenerated. pdf_path is
+// deliberately NOT here: it only changes the gitignored Obsidian twin's
+// filed-PDF embed, so a pdf_path-only merge produces a byte-identical published
+// digest and must not trigger a wasted LLM rebuild (adversarial-review #A7).
+// pmid/content_hash are likewise absent (pure bookkeeping, no output change).
+export const PAPER_CONTENT_FIELDS = [
+  'abstract',
+  'fulltext_excerpt_md',
+  'figure_ocr_md',
+  'figure_structured_md',
+] as const;
+
+export function savePaper(db: Database.Database, p: NewPaper): SavePaperResult {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(p.bookmark_date)) {
     throw new Error(`bookmark_date must be YYYY-MM-DD, got: ${p.bookmark_date}`);
   }
@@ -989,7 +1027,7 @@ export function savePaper(
   const matchBy = (clause: string, value: string): PaperMatch | undefined =>
     db
       .prepare(
-        `SELECT id, pmid, content_hash, pdf_path, fulltext_excerpt_md, figure_ocr_md, figure_structured_md FROM papers WHERE ${clause}`,
+        `SELECT id, pmid, content_hash, pdf_path, abstract, fulltext_excerpt_md, figure_ocr_md, figure_structured_md, bookmark_date FROM papers WHERE ${clause}`,
       )
       .get(value) as PaperMatch | undefined;
 
@@ -1001,38 +1039,61 @@ export function savePaper(
   if (existing) {
     const sets: string[] = [];
     const vals: (string | number)[] = [];
+    const mergedFields: string[] = [];
+    const set = (col: string, value: string) => {
+      sets.push(`${col} = ?`);
+      vals.push(value);
+      mergedFields.push(col);
+    };
     // Guard unique-index columns: only attach if no different row holds the
     // value (a clash means two rows describe the same paper — leave both
     // rather than crash on the unique index; a rare manual-merge case).
-    if (pmid && !existing.pmid && !matchBy('pmid = ?', pmid)) {
-      sets.push('pmid = ?');
-      vals.push(pmid);
-    }
+    if (pmid && !existing.pmid && !matchBy('pmid = ?', pmid)) set('pmid', pmid);
     if (contentHash && !existing.content_hash && !matchBy('content_hash = ?', contentHash)) {
-      sets.push('content_hash = ?');
-      vals.push(contentHash);
+      set('content_hash', contentHash);
     }
-    if (p.pdf_path && !existing.pdf_path) {
-      sets.push('pdf_path = ?');
-      vals.push(p.pdf_path);
-    }
-    if (p.fulltext_excerpt_md && !existing.fulltext_excerpt_md) {
-      sets.push('fulltext_excerpt_md = ?');
-      vals.push(p.fulltext_excerpt_md);
-    }
-    if (p.figure_ocr_md && !existing.figure_ocr_md) {
-      sets.push('figure_ocr_md = ?');
-      vals.push(p.figure_ocr_md);
-    }
+    if (p.pdf_path && !existing.pdf_path) set('pdf_path', p.pdf_path);
+    // Abstract + figures: fill-if-missing. These are the additive value of a
+    // richer re-send (a PDF of a study first ingested as an abstract has no
+    // figures; a DOI resolve can fill a missing abstract).
+    if (p.abstract && !existing.abstract) set('abstract', p.abstract);
+    if (p.figure_ocr_md && !existing.figure_ocr_md) set('figure_ocr_md', p.figure_ocr_md);
     if (p.figure_structured_md && !existing.figure_structured_md) {
-      sets.push('figure_structured_md = ?');
-      vals.push(p.figure_structured_md);
+      set('figure_structured_md', p.figure_structured_md);
+    }
+    // Full text: fill-if-missing (any source is better than nothing), AND
+    // upgrade in ONE narrow case: a clean text-layer PDF (fetched_via === 'pdf')
+    // that is MEANINGFULLY longer than what's on file, e.g. the whole-paper body
+    // replacing an abstract or a short PMC Methods/Results excerpt. Guards
+    // (adversarial-review / codex #A2,C3):
+    //   - NEVER upgrade from OCR (fetched_via === 'pdf_ocr'): Vision-OCR of a
+    //     scanned PDF is noisy, and a longer noisy body must not overwrite a
+    //     clean pdftotext/PMC excerpt (that would feed the study agent garbage).
+    //   - NEVER upgrade from a non-PDF re-fetch (URL/DOI/PMID): no pdf_path.
+    //   - Require a real size jump (>15%), not >0, so a near-equal re-extract
+    //     doesn't churn the row.
+    // Stays local-only (fulltext_excerpt_md is never published; guarded by
+    // publish-boundary.test.ts).
+    if (p.fulltext_excerpt_md) {
+      const existingLen = existing.fulltext_excerpt_md?.length ?? 0;
+      const fill = !existing.fulltext_excerpt_md;
+      const incomingIsCleanPdf = Boolean(p.pdf_path) && p.fetched_via === 'pdf';
+      const upgrade =
+        incomingIsCleanPdf &&
+        p.fulltext_excerpt_md.length > existingLen * 1.15 &&
+        p.fulltext_excerpt_md !== existing.fulltext_excerpt_md;
+      if (fill || upgrade) set('fulltext_excerpt_md', p.fulltext_excerpt_md);
     }
     if (sets.length > 0) {
       vals.push(existing.id);
       db.prepare(`UPDATE papers SET ${sets.join(', ')} WHERE id = ?`).run(...vals);
     }
-    return { id: existing.id, created: false };
+    return {
+      id: existing.id,
+      created: false,
+      mergedFields,
+      bookmarkDate: existing.bookmark_date,
+    };
   }
 
   const result = db
@@ -1066,7 +1127,86 @@ export function savePaper(
       p.fetched_via ?? 'pending',
       Date.now(),
     );
-  return { id: result.lastInsertRowid as number, created: true };
+  return { id: result.lastInsertRowid as number, created: true, mergedFields: [], bookmarkDate: null };
+}
+
+// v0.23: rebuild queue helpers. Enrichment queues a date when a source gains
+// richer data after that date's digest was published; `npm run rebuild:queued`
+// drains it. queueRebuild coalesces per date: a re-queue bumps queued_at and
+// RESETS attempts to 0 (the newer richer merge deserves a fresh set of tries).
+export function queueRebuild(db: Database.Database, bookmarkDate: string, reason: string): void {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(bookmarkDate)) {
+    throw new Error(`queueRebuild bookmark_date must be YYYY-MM-DD, got: ${bookmarkDate}`);
+  }
+  // queued_at is the coalescing generation the drain compare-and-deletes on
+  // (#C1,A3). Force it to STRICTLY increase on a re-queue, even two in the same
+  // millisecond (Date.now() resolution), so a re-queue that lands while the
+  // drain is mid-build always gets a distinct generation the stale dequeue won't
+  // match.
+  db.prepare(
+    `INSERT INTO rebuild_queue (bookmark_date, reason, queued_at, attempts)
+     VALUES (?, ?, ?, 0)
+     ON CONFLICT(bookmark_date) DO UPDATE SET
+       reason = excluded.reason,
+       queued_at = MAX(excluded.queued_at, rebuild_queue.queued_at + 1),
+       attempts = 0`,
+  ).run(bookmarkDate, reason, Date.now());
+}
+
+export type RebuildQueueEntry = {
+  bookmark_date: string;
+  reason: string | null;
+  queued_at: number;
+  attempts: number;
+};
+
+export function listRebuildQueue(db: Database.Database): RebuildQueueEntry[] {
+  return db
+    .prepare(
+      'SELECT bookmark_date, reason, queued_at, attempts FROM rebuild_queue ORDER BY bookmark_date ASC',
+    )
+    .all() as RebuildQueueEntry[];
+}
+
+// Compare-and-delete on queued_at (codex/adversarial #C1,A3): if enrichment
+// re-queued this date WHILE the drain was rebuilding it, the row now carries a
+// newer queued_at, so this DELETE no-ops and the fresher upgrade survives to the
+// next drain. Pass the queued_at observed when the drain claimed the row. Omit
+// it only for an unconditional delete (e.g. dead-letter give-up).
+export function dequeueRebuild(
+  db: Database.Database,
+  bookmarkDate: string,
+  queuedAt?: number,
+): void {
+  if (queuedAt === undefined) {
+    db.prepare('DELETE FROM rebuild_queue WHERE bookmark_date = ?').run(bookmarkDate);
+  } else {
+    db.prepare('DELETE FROM rebuild_queue WHERE bookmark_date = ? AND queued_at = ?').run(
+      bookmarkDate,
+      queuedAt,
+    );
+  }
+}
+
+// Record a failed rebuild attempt; returns the new attempt count so the drain
+// can dead-letter a date that will never build (adversarial-review #A5), instead
+// of retrying a doomed date every night forever. No-ops (returns 0) if the row
+// was re-queued away (queued_at changed) between claim and failure.
+export function bumpRebuildAttempt(
+  db: Database.Database,
+  bookmarkDate: string,
+  queuedAt: number,
+): number {
+  // Atomic bump-and-read (UPDATE ... RETURNING): if the row was re-queued away
+  // (queued_at changed) between the drain's claim and this failure, the UPDATE
+  // matches 0 rows and RETURNING yields nothing, so we report 0 — the fresh
+  // generation keeps its own attempt budget and is NOT dead-lettered.
+  const row = db
+    .prepare(
+      'UPDATE rebuild_queue SET attempts = attempts + 1 WHERE bookmark_date = ? AND queued_at = ? RETURNING attempts',
+    )
+    .get(bookmarkDate, queuedAt) as { attempts: number } | undefined;
+  return row?.attempts ?? 0;
 }
 
 export function listPapers(

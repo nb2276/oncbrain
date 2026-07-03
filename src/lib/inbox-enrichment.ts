@@ -20,7 +20,10 @@ import {
   setBookmarkConferenceIfEmpty,
   getConference,
   upsertConference,
+  queueRebuild,
+  PAPER_CONTENT_FIELDS,
   type InboxItem,
+  type SavePaperResult,
 } from './db.ts';
 import { detectConferenceFromTexts } from './conference-detect.ts';
 import { fetchTweet, TweetFetchError } from './twitter-fetch.ts';
@@ -198,20 +201,31 @@ async function enrichSlideItem(
   );
 
   try {
-    const r = saveSlideUpload(db, {
-      file_path: saved.relPath,
-      file_hash: saved.hash,
-      mime_type: downloaded.mime_type,
-      width,
-      height,
-      ocr_text: ocrResult?.entry.text ?? null,
-      ocr_version: ocrResult?.entry.version ?? null,
-      bookmark_date: item.bookmark_date,
-      conference_slug: conferenceSlug,
-      curator_note: note,
-      source_batch_key: null, // batched in pull-telegram; this column is set there
-      inbox_item_id: item.id,
-    });
+    // v0.23: conference images should ADD information to a study even after its
+    // digest is published. Save the slide AND (atomically, #C2) queue a rebuild
+    // when the date is ALREADY published, so the new image reaches the card. A
+    // slide for a not-yet-built date (today at enrich time) is picked up by the
+    // normal build, so it's not queued; the drain's --skip covers yesterday.
+    const r = db.transaction(() => {
+      const saved2 = saveSlideUpload(db, {
+        file_path: saved.relPath,
+        file_hash: saved.hash,
+        mime_type: downloaded.mime_type,
+        width,
+        height,
+        ocr_text: ocrResult?.entry.text ?? null,
+        ocr_version: ocrResult?.entry.version ?? null,
+        bookmark_date: item.bookmark_date,
+        conference_slug: conferenceSlug,
+        curator_note: note,
+        source_batch_key: null, // batched in pull-telegram; this column is set there
+        inbox_item_id: item.id,
+      });
+      if (listDigests().some((d) => d.date === item.bookmark_date)) {
+        queueRebuild(db, item.bookmark_date, 'conference slide added');
+      }
+      return saved2;
+    })();
     return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
   } catch (err) {
     return { status: 'failed', reason: `slide row insert failed: ${(err as Error).message}` };
@@ -298,11 +312,11 @@ async function enrichPaperItem(
     );
 
   try {
-    const r = savePaper(db, saveInput);
-    await replyToCurator(
-      item,
-      `Got it: ${saveInput.title} (${contentDepthNote(saveInput)}). Appears in the next digest.`,
-    );
+    const { r, queuedDate } = savePaperAndQueueRebuild(db, saveInput);
+    const reply = r.created
+      ? `Got it: ${saveInput.title} (${contentDepthNote(saveInput)}). Appears in the next digest.`
+      : replyForPaperMerge(saveInput.title, r, queuedDate);
+    await replyToCurator(item, reply);
     return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
   } catch (err) {
     return { status: 'failed', reason: `paper insert failed: ${(err as Error).message}` };
@@ -317,6 +331,68 @@ function isPdfInboxItem(item: InboxItem): boolean {
   } catch {
     return false;
   }
+}
+
+// v0.23: human-readable summary of what a richer re-send added to an existing
+// paper row, for the curator reply. Returns null when only bookkeeping columns
+// (pmid / content_hash) changed, i.e. nothing the reader would see.
+function describeMerge(mergedFields: string[]): string | null {
+  const bits: string[] = [];
+  if (mergedFields.includes('figure_ocr_md') || mergedFields.includes('figure_structured_md')) {
+    bits.push('figures');
+  }
+  if (mergedFields.includes('fulltext_excerpt_md')) bits.push('full text');
+  if (mergedFields.includes('abstract')) bits.push('the abstract');
+  if (mergedFields.includes('pdf_path')) bits.push('the filed PDF');
+  if (bits.length === 0) return null;
+  if (bits.length === 1) return bits[0]!;
+  return `${bits.slice(0, -1).join(', ')} and ${bits[bits.length - 1]}`;
+}
+
+// v0.23: save a paper AND, in the SAME transaction, queue a rebuild when the
+// collision UPGRADED published content on an ALREADY-PUBLISHED past date. One
+// transaction so a crash can't persist the merge yet lose the rebuild (codex
+// #C2): a retry after a partial would see mergedFields empty (data already
+// merged) and never re-queue. Only an already-published date is queued (mirrors
+// the slide guard): today's digest isn't built yet at enrich time so it's
+// excluded here, and the cron's today/yesterday build stages plus the drain's
+// --skip cover the recent dates without a wasted double build (#A6).
+function savePaperAndQueueRebuild(
+  db: Database.Database,
+  input: NewPaper,
+): { r: SavePaperResult; queuedDate: string | null } {
+  return db.transaction(() => {
+    const r = savePaper(db, input);
+    let queuedDate: string | null = null;
+    if (!r.created && r.bookmarkDate) {
+      const contentFields = r.mergedFields.filter((f) =>
+        (PAPER_CONTENT_FIELDS as readonly string[]).includes(f),
+      );
+      const alreadyPublished = listDigests().some((d) => d.date === r.bookmarkDate);
+      if (contentFields.length > 0 && alreadyPublished) {
+        queueRebuild(db, r.bookmarkDate, `paper upgrade (${contentFields.join(',')})`);
+        queuedDate = r.bookmarkDate;
+      }
+    }
+    return { r, queuedDate };
+  })();
+}
+
+// v0.23: collision reply for a paper already on file. Pure (no side effects; the
+// queue write happens in savePaperAndQueueRebuild). When a rebuild was queued,
+// tell the curator what landed and that the date is queued; when content merged
+// but no rebuild was needed (date not yet published, or only the filed PDF
+// changed), say it merged; a collision that added nothing is a plain "already on
+// file". Called only when !r.created.
+function replyForPaperMerge(title: string, r: SavePaperResult, queuedDate: string | null): string {
+  const desc = describeMerge(r.mergedFields);
+  if (queuedDate && desc) {
+    return `Already on file: ${title}. This adds ${desc} · merged, and queued ${queuedDate} for rebuild.`;
+  }
+  if (desc) {
+    return `Already on file: ${title}. This adds ${desc} · merged.`;
+  }
+  return `Already on file: ${title}. Nothing new to add.`;
 }
 
 // Cap stored full text so a long PDF doesn't bloat the artifact; ~2000 tokens.
@@ -483,9 +559,10 @@ async function enrichPdfPaper(
   );
 
   // 6. Save the paper (content_hash keys identifier-less PDFs; merges onto an
-  // existing DOI/PMID row when the same paper arrived earlier via URL).
+  // existing DOI/PMID row when the same paper arrived earlier via URL). The
+  // merge + any rebuild-queue write happen atomically (v0.23 #C2).
   try {
-    const r = savePaper(db, {
+    const { r, queuedDate } = savePaperAndQueueRebuild(db, {
       pmid: meta.pmid,
       doi: meta.doi,
       content_hash: contentHash,
@@ -504,10 +581,10 @@ async function enrichPdfPaper(
       inbox_item_id: item.id,
       fetched_via: extracted.via === 'ocr' ? 'pdf_ocr' : 'pdf',
     });
-    await replyToCurator(
-      item,
-      `Got it: ${meta.title} (filed to your vault${extracted.via === 'ocr' ? ', via OCR' : ''}). Appears in the next digest.`,
-    );
+    const reply = r.created
+      ? `Got it: ${meta.title} (filed to your vault${extracted.via === 'ocr' ? ', via OCR' : ''}). Appears in the next digest.`
+      : replyForPaperMerge(meta.title, r, queuedDate);
+    await replyToCurator(item, reply);
     return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
   } catch (err) {
     return { status: 'failed', reason: `paper insert failed: ${(err as Error).message}` };

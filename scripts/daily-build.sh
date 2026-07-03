@@ -8,8 +8,11 @@
 #   3. build:day        — regenerate yesterday's + today's digests
 #                         (covers the late-evening-message case where a
 #                          tweet sent at 11pm local got dated to yesterday)
-#   4. astro build      — static site
-#   5. git commit/push  — DigitalOcean auto-deploys
+#   4. rebuild:queued   — rebuild any PAST date whose enrichment gained richer
+#                         data (a full-paper PDF merged figures onto an
+#                         abstract-only study, a late conference slide)
+#   5. astro build      — static site
+#   6. git commit/push  — DigitalOcean auto-deploys
 #
 # All output goes to ~/Library/Logs/oncbrain-cron.log.
 #
@@ -113,6 +116,16 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   critical_digest "build:day $TODAY" npm run build:day --silent -- --date="$TODAY"
 
   echo ""
+  echo "→ Rebuilding any dates queued by enrichment (richer re-sends: full-paper PDFs, late slides)"
+  # Non-publish-gating: a queued OLD date that fails to rebuild keeps its last
+  # published digest and stays queued for retry; it must not block committing
+  # today's fresh build. `critical` surfaces failures in the exit code only.
+  # --skip today+yesterday: the stages above already rebuilt those fresh, so the
+  # drain drops (not re-runs) any queue entry for them (avoids a wasted double
+  # build).
+  critical "rebuild:queued" npm run rebuild:queued --silent -- --skip="$TODAY,$YESTERDAY"
+
+  echo ""
   echo "→ Building Astro site"
   if npm run build --silent; then
     ASTRO_OK=1
@@ -159,26 +172,39 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
     echo "  ✗ a build:day stage failed — skipping commit/push (no auto-publish of a partial/stale day; build manually + studio-publish)"
   fi
 
+  # ANNOUNCE only the dates this run freshly curated: today + yesterday. A date
+  # rebuilt from the rebuild_queue (a late PDF/slide upgrading a PAST study) is
+  # also in CHANGED_DATES and still gets committed + deployed, but re-DMing the
+  # curator and re-posting a weeks-old date to the public channel as if new is
+  # wrong (adversarial-review #A1). So filter to today/yesterday for the
+  # announcements while keeping the full commit above.
+  ANNOUNCE_DATES=""
+  for d in $CHANGED_DATES; do
+    if [ "$d" = "$TODAY" ] || [ "$d" = "$YESTERDAY" ]; then
+      ANNOUNCE_DATES="$ANNOUNCE_DATES $d"
+    fi
+  done
+
   echo ""
   echo "→ Notifying curator"
-  if [ -z "$CHANGED_DATES" ]; then
-    echo "  (no digest changed — nothing to notify)"
+  if [ -z "$ANNOUNCE_DATES" ]; then
+    echo "  (no fresh today/yesterday digest — nothing to notify)"
   else
-    for d in $CHANGED_DATES; do
+    for d in $ANNOUNCE_DATES; do
       echo "  → $d"
       npm run notify:curator --silent -- --date="$d" || echo "  ⚠ notify:curator $d exited non-zero (continuing)"
     done
   fi
 
-  # T5 distribution: post each changed digest to the public Telegram channel.
-  # No-op until TELEGRAM_CHANNEL_ID is set (notify:channel self-skips), so this
-  # is safe to ship before the channel exists.
+  # T5 distribution: post each freshly-curated digest to the public Telegram
+  # channel. No-op until TELEGRAM_CHANNEL_ID is set (notify:channel self-skips),
+  # so this is safe to ship before the channel exists.
   echo ""
   echo "→ Posting to channel"
-  if [ -z "$CHANGED_DATES" ]; then
-    echo "  (no digest changed — nothing to post)"
+  if [ -z "$ANNOUNCE_DATES" ]; then
+    echo "  (no fresh today/yesterday digest — nothing to post)"
   else
-    for d in $CHANGED_DATES; do
+    for d in $ANNOUNCE_DATES; do
       echo "  → $d"
       npm run notify:channel --silent -- --date="$d" || echo "  ⚠ notify:channel $d exited non-zero (continuing)"
     done

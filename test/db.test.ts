@@ -24,6 +24,10 @@ import {
   decideResolution,
   reopenStaleResolutions,
   parseResolutionCandidates,
+  queueRebuild,
+  listRebuildQueue,
+  dequeueRebuild,
+  bumpRebuildAttempt,
   type ResolutionCandidate,
 } from '../src/lib/db.ts';
 import type Database from 'better-sqlite3';
@@ -240,6 +244,188 @@ describe('db', () => {
       expect(second.id).toBe(first.id);
       const paper = listPapers(db, { bookmark_date: '2026-06-17' })[0];
       expect(paper.figure_structured_md).toContain('0.45');
+    });
+  });
+
+  describe('savePaper richness-aware merge (v0.23)', () => {
+    it('a full-paper PDF UPGRADES an abstract-only study: figures + fuller text merged, date reported', () => {
+      // First ingest as a PMID/abstract: short PMC excerpt, no figures, no PDF.
+      const first = savePaper(db, {
+        pmid: '42114027',
+        doi: '10.1200/JCO-25-02465',
+        title: 'RTOG 1005',
+        bookmark_date: '2026-05-18',
+        abstract: 'Abstract text.',
+        fulltext_excerpt_md: 'Short PMC Methods/Results excerpt.',
+      });
+      expect(first.created).toBe(true);
+      expect(first.mergedFields).toEqual([]);
+
+      // Same paper later arrives as the full-paper (clean text-layer) PDF
+      // (matches by DOI): carries figures + a longer full-text body + a filed PDF.
+      const longBody = 'Full PDF body. '.repeat(200); // >> the PMC excerpt
+      const second = savePaper(db, {
+        doi: '10.1200/JCO-25-02465',
+        content_hash: 'deadbeef'.repeat(8),
+        pdf_path: 'papers/breast/rtog-1005.pdf',
+        title: 'RTOG 1005',
+        bookmark_date: '2026-07-01', // the re-send date differs...
+        fulltext_excerpt_md: longBody,
+        figure_ocr_md: 'Cosmesis Excellent/Good 92% vs 88%',
+        fetched_via: 'pdf', // clean text layer → eligible to upgrade the excerpt
+      });
+      expect(second.created).toBe(false);
+      expect(second.id).toBe(first.id);
+      // ...but the rebuild date is the EXISTING (published) row's date, not the re-send's.
+      expect(second.bookmarkDate).toBe('2026-05-18');
+      expect(second.mergedFields).toContain('figure_ocr_md');
+      expect(second.mergedFields).toContain('fulltext_excerpt_md');
+      expect(second.mergedFields).toContain('pdf_path');
+
+      const paper = listPapers(db, { bookmark_date: '2026-05-18' })[0];
+      expect(paper.figure_ocr_md).toContain('92% vs 88%');
+      expect(paper.fulltext_excerpt_md).toBe(longBody); // upgraded from the short excerpt
+    });
+
+    it('a non-PDF re-fetch never clobbers an existing full-text excerpt', () => {
+      savePaper(db, {
+        doi: '10.1200/keep',
+        title: 'Keeper',
+        bookmark_date: '2026-06-01',
+        fulltext_excerpt_md: 'Original curated PMC excerpt.',
+      });
+      // A later DOI/URL resolve (no pdf_path) with different, even longer text.
+      const r = savePaper(db, {
+        doi: '10.1200/keep',
+        title: 'Keeper',
+        bookmark_date: '2026-06-01',
+        fulltext_excerpt_md: 'A different and longer body from a URL scrape. '.repeat(20),
+      });
+      expect(r.created).toBe(false);
+      expect(r.mergedFields).not.toContain('fulltext_excerpt_md');
+      expect(listPapers(db, { bookmark_date: '2026-06-01' })[0].fulltext_excerpt_md).toBe(
+        'Original curated PMC excerpt.',
+      );
+    });
+
+    it('a longer OCR body never overwrites a clean text-layer excerpt (#A2)', () => {
+      savePaper(db, {
+        doi: '10.1200/ocr',
+        title: 'Scanned',
+        bookmark_date: '2026-06-04',
+        fulltext_excerpt_md: 'Clean pdftotext / PMC excerpt.',
+      });
+      // A re-sent SCANNED pdf (fetched_via pdf_ocr): its Vision-OCR body is longer
+      // but noisy — it must NOT clobber the clean excerpt.
+      const r = savePaper(db, {
+        doi: '10.1200/ocr',
+        title: 'Scanned',
+        bookmark_date: '2026-06-04',
+        pdf_path: 'papers/x/scanned.pdf',
+        fetched_via: 'pdf_ocr',
+        fulltext_excerpt_md: 'Noisy OCR body with l0ts of g4rbage. '.repeat(30),
+      });
+      expect(r.mergedFields).not.toContain('fulltext_excerpt_md');
+      // pdf_path still attaches (it was missing) — that's harmless bookkeeping.
+      expect(r.mergedFields).toContain('pdf_path');
+      expect(listPapers(db, { bookmark_date: '2026-06-04' })[0].fulltext_excerpt_md).toBe(
+        'Clean pdftotext / PMC excerpt.',
+      );
+    });
+
+    it('a barely-longer clean PDF does not churn the excerpt (needs a real size jump)', () => {
+      const base = 'A'.repeat(1000);
+      savePaper(db, { doi: '10.1200/churn', title: 'C', bookmark_date: '2026-06-05', fulltext_excerpt_md: base });
+      const r = savePaper(db, {
+        doi: '10.1200/churn',
+        title: 'C',
+        bookmark_date: '2026-06-05',
+        pdf_path: 'p.pdf',
+        fetched_via: 'pdf',
+        fulltext_excerpt_md: 'A'.repeat(1050), // only +5%, below the 15% floor
+      });
+      expect(r.mergedFields).not.toContain('fulltext_excerpt_md');
+    });
+
+    it('fills a missing abstract on collision', () => {
+      savePaper(db, { doi: '10.1200/noabs', title: 'No abstract', bookmark_date: '2026-06-02' });
+      const r = savePaper(db, {
+        doi: '10.1200/noabs',
+        title: 'No abstract',
+        bookmark_date: '2026-06-02',
+        abstract: 'Now with an authoritative abstract.',
+      });
+      expect(r.mergedFields).toContain('abstract');
+      expect(listPapers(db, { bookmark_date: '2026-06-02' })[0].abstract).toContain('authoritative');
+    });
+
+    it('reports no content merge when the collision adds nothing new', () => {
+      savePaper(db, {
+        doi: '10.1200/full',
+        title: 'Complete',
+        bookmark_date: '2026-06-03',
+        abstract: 'Has abstract.',
+        fulltext_excerpt_md: 'Has full text.',
+      });
+      const r = savePaper(db, { doi: '10.1200/full', title: 'Complete', bookmark_date: '2026-06-03' });
+      expect(r.created).toBe(false);
+      expect(r.mergedFields).toEqual([]);
+    });
+  });
+
+  describe('rebuild_queue (v0.23)', () => {
+    it('queues, coalesces per date, lists, and dequeues', () => {
+      queueRebuild(db, '2026-05-18', 'paper upgrade (figure_ocr_md)');
+      queueRebuild(db, '2026-05-20', 'conference slide added');
+      // Re-queue the same date: coalesces to one row with the latest reason.
+      queueRebuild(db, '2026-05-18', 'paper upgrade (fulltext_excerpt_md)');
+
+      const q = listRebuildQueue(db);
+      expect(q.map((e) => e.bookmark_date)).toEqual(['2026-05-18', '2026-05-20']);
+      expect(q.find((e) => e.bookmark_date === '2026-05-18')!.reason).toBe(
+        'paper upgrade (fulltext_excerpt_md)',
+      );
+
+      dequeueRebuild(db, '2026-05-18');
+      expect(listRebuildQueue(db).map((e) => e.bookmark_date)).toEqual(['2026-05-20']);
+    });
+
+    it('rejects a malformed date', () => {
+      expect(() => queueRebuild(db, '2026-5-1', 'bad')).toThrow(/YYYY-MM-DD/);
+    });
+
+    it('compare-and-delete on queued_at: a re-queue mid-drain survives dequeue (#C1,A3)', () => {
+      queueRebuild(db, '2026-05-18', 'first');
+      const claimed = listRebuildQueue(db)[0]!.queued_at; // the drain's snapshot
+      // Enrichment re-queues the SAME date with a newer richer merge → new queued_at.
+      queueRebuild(db, '2026-05-18', 'second (richer)');
+      const newer = listRebuildQueue(db)[0]!.queued_at;
+      expect(newer).not.toBe(claimed);
+      // The drain finishes its (stale) build and dequeues against the OLD queued_at:
+      dequeueRebuild(db, '2026-05-18', claimed);
+      // The fresher entry must survive to be rebuilt next run.
+      expect(listRebuildQueue(db).map((e) => e.bookmark_date)).toEqual(['2026-05-18']);
+      expect(listRebuildQueue(db)[0]!.reason).toBe('second (richer)');
+    });
+
+    it('bumpRebuildAttempt increments and re-queue resets attempts to 0 (#A5)', () => {
+      queueRebuild(db, '2026-05-18', 'r');
+      const qa = listRebuildQueue(db)[0]!.queued_at;
+      expect(bumpRebuildAttempt(db, '2026-05-18', qa)).toBe(1);
+      expect(bumpRebuildAttempt(db, '2026-05-18', qa)).toBe(2);
+      expect(listRebuildQueue(db)[0]!.attempts).toBe(2);
+      // A newer richer merge re-queues and deserves a fresh set of tries.
+      queueRebuild(db, '2026-05-18', 'r2');
+      expect(listRebuildQueue(db)[0]!.attempts).toBe(0);
+    });
+
+    it('bumpRebuildAttempt no-ops when the row was re-queued away (queued_at changed)', () => {
+      queueRebuild(db, '2026-05-18', 'r');
+      const stale = listRebuildQueue(db)[0]!.queued_at;
+      queueRebuild(db, '2026-05-18', 'r2'); // new queued_at, attempts reset to 0
+      // A late failure from the stale claim must not bump the fresh entry.
+      bumpRebuildAttempt(db, '2026-05-18', stale);
+      expect(listRebuildQueue(db)[0]!.attempts).toBe(0);
     });
   });
 

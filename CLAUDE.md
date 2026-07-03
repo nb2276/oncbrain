@@ -66,6 +66,7 @@ npm run build:day               # rebuild today's digest
 npm run build:day -- --date=2026-05-17
 npm run build:day -- --backfill # rebuild every date that has bookmarks
 npm run build:day -- --dry-run  # no LLM call, see what would happen
+npm run rebuild:queued          # v0.23: rebuild PAST dates the enrichment layer flagged after a richer re-send (full-paper PDF merged figures onto an abstract-only study, late slide); drains rebuild_queue. --skip=d1,d2 drops already-rebuilt dates. Run by the daily cron.
 npm run build                   # Astro static build
 
 # Durable digest overrides (survive build:day regeneration)

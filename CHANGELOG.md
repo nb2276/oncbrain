@@ -2,6 +2,43 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.23.0] - 2026-07-02
+
+### Added
+
+- **Richness-aware collision upgrade: a re-sent full paper now enriches a study
+  already on file.** Previously, forwarding the full-text PDF of a study first
+  ingested as an abstract (a PMID / DOI) was a silent no-op, so the paper's
+  figures (KM curves, cosmesis / toxicity tables) never reached the digest. Now
+  a collision on DOI / PMID / content-hash **merges the richer data**: it fills
+  missing figures (`figure_ocr_md`, `figure_structured_md`) and abstract, and
+  **upgrades** `fulltext_excerpt_md` when a clean text-layer PDF carries a fuller
+  body than the stored PMC excerpt. When that upgrade lands on an
+  already-published past date, the date is queued for rebuild so the richer input
+  reaches the card, and the curator gets a specific reply ("Already on file: X.
+  This adds figures and full text · merged, and queued 2026-05-18 for rebuild")
+  instead of nothing. Conference slides are additive the same way: a slide for a
+  past published date queues that date. `savePaper()` returns
+  `{id, created, mergedFields, bookmarkDate}`; new `rebuild_queue` table +
+  `npm run rebuild:queued` drains it (wired into the daily cron between the
+  today/yesterday build and the Astro build).
+- **New command `npm run rebuild:queued`** — rebuilds every date the enrichment
+  layer flagged as needing regeneration after a richer re-send, then dequeues.
+
+### Guardrails (from adversarial + codex review)
+
+- The full-text **upgrade never overwrites a clean excerpt with OCR noise**: it
+  fires only for a `fetched_via === 'pdf'` (text-layer) source that is >15%
+  longer, never for a scanned `pdf_ocr` body or a non-PDF re-fetch.
+- Merge + rebuild-enqueue are **one transaction**, so a crash can't persist the
+  merge yet lose the rebuild. The rebuild queue is generation-tracked
+  (`queued_at`), so a richer re-send that lands mid-drain survives the dequeue;
+  a date that can never build is **dead-lettered** after 3 attempts instead of
+  burning an LLM build nightly. Fulltext / figure fields stay local-only (never
+  published). A rebuilt PAST date is committed + deployed but **not**
+  re-announced to the curator or the public channel (only fresh today/yesterday
+  digests are).
+
 ## [0.22.0] - 2026-06-26
 
 ### Added
