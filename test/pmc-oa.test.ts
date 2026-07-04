@@ -61,6 +61,10 @@ describe('resolvePmcIdForDoi (v0.25 #1 DOI→PMCID)', () => {
     const json = JSON.stringify({ records: [{ doi: '10.9999/other', pmcid: 'PMC111' }] });
     expect(await resolvePmcIdForDoi('10.1200/x', async () => json)).toBeNull();
   });
+  it('rejects a record with a pmcid but NO echoed DOI (unverified) (#P2 re-review)', async () => {
+    const json = JSON.stringify({ records: [{ pmcid: 'PMC111' }] });
+    expect(await resolvePmcIdForDoi('10.1200/x', async () => json)).toBeNull();
+  });
   it('returns null on malformed JSON or a fetch failure', async () => {
     expect(await resolvePmcIdForDoi('10.1200/x', async () => 'not json')).toBeNull();
     expect(

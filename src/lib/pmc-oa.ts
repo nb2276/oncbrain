@@ -77,9 +77,10 @@ export async function resolvePmcIdForDoi(
     const rec = json.records?.[0];
     const pmcid = rec?.pmcid;
     if (!pmcid || !/^PMC\d+$/i.test(pmcid)) return null;
-    // Verify the record is actually for the DOI we asked about (idconv echoes
-    // it): don't ship a mis-mapped PMCID as a published PMC link (#P2).
-    if (rec.doi && rec.doi.trim().toLowerCase() !== clean.toLowerCase()) return null;
+    // REQUIRE the record to echo the DOI we queried (idconv always does for a
+    // successful record). Reject a missing OR mismatched echo, so we never ship
+    // an unverified / mis-mapped PMCID as a published PMC link (#P2, re-review).
+    if (!rec.doi || rec.doi.trim().toLowerCase() !== clean.toLowerCase()) return null;
     return pmcid.toUpperCase();
   } catch {
     return null;

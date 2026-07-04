@@ -155,8 +155,10 @@ export async function enrichHtmlFigures(
     if (!isHtmlFigureOcrEnabled()) return none;
     const ocrAvailable = deps.ocrAvailable ?? isOcrAvailable;
     if (!ocrAvailable()) return none;
-    // Grounded-only requires the Qwen+Opus reconciliation stack; without it we
-    // will NOT feed raw copyrighted OCR to the publishing LLM.
+    // Preflight the Qwen stack: grounded reconciliation needs it, and we will
+    // NOT feed raw copyrighted OCR to the publishing LLM. (The hard guarantee is
+    // the status==='ok' check below — only a grounded reconciliation is kept, so
+    // even a per-image Vision-only reconcile stays numbers-grounded, never raw.)
     const qwenUp = deps.qwenAvailable ? await deps.qwenAvailable() : await isQwenAvailable();
     if (!qwenUp) return none;
 
@@ -165,7 +167,11 @@ export async function enrichHtmlFigures(
 
     const pageDomain = registrableDomain(new URL(pageUrl).hostname);
     if (!pageDomain) return none;
-    const allowed = [`.${pageDomain}`]; // pin every image fetch to the article's domain
+    // Pin every image fetch to the article's REGISTRABLE domain: its own host or
+    // a sibling CDN subdomain of it (media.urotoday.com), never off-domain. The
+    // trade-press-only caller restriction keeps this a 2-label host, and the
+    // private-IP guard in ssrfSafeFetchBuffer still applies on every hop.
+    const allowed = [`.${pageDomain}`];
 
     const fetchBuffer =
       deps.fetchBuffer ??
