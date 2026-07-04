@@ -1,24 +1,24 @@
 {
   "date": "2026-06-29",
   "conference": null,
-  "generated_at": 1782806712455,
+  "generated_at": 1783182199350,
   "digest": {
-    "top_line": "BART: adjuvant pelvic RT post-cystectomy cuts 2yr locoregional failure (LRFFS 87.1% vs 76.0%, HR 0.43, p=0.04); no OS benefit (HR 0.78, ns).",
-    "tldr": "Bladder carried the day. BART, the first phase III of adjuvant pelvic RT after radical cystectomy, roughly halves locoregional failure (8% vs 26%) in high-risk MIBC, benefit concentrating in N+/T3+ pts. OS unchanged, and the trial predates adjuvant nivolumab, so the RT+IO question stays open.",
+    "top_line": "BART: 2-yr locoregional FFS 87.1% vs 76.0%, HR 0.43 (p=0.04); adjuvant pelvic RT post-cystectomy cuts LR recurrence to 8% vs 26%, OS flat.",
+    "tldr": "Bladder is the day's only signal: BART, the largest RCT of adjuvant RT after radical cystectomy for high-risk MIBC, delivers a locoregional-control win (8% vs 26% recurrence, HR 0.43) that doesn't reach OS (HR 0.78, p=0.31). Underpowered, marginal primary p; OS awaits the MERCY IPD meta-analysis.",
     "sites": [
       {
         "disease_site": "bladder",
-        "intro": "First randomised evidence for adjuvant RT after radical cystectomy, though underpowered and analyzed per-protocol.",
+        "intro": "First modern RCT of adjuvant pelvic RT after radical cystectomy; the win is locoregional control, not survival.",
         "studies": [
           {
             "name": "BART",
-            "tldr": "2yr locoregional FFS 87.1% vs 76.0% with adjuvant RT post-cystectomy, HR 0.43 (0.20-0.96), p=0.04; OS not improved (HR 0.78, ns).",
+            "tldr": "2-yr locoregional FFS 87.1% vs 76.0% (HR 0.43, p=0.04) favoring adjuvant RT post-cystectomy; OS not significant.",
             "details": [
               {
-                "text": "📊 2yr outcomes, adjuvant RT vs observation (LRFFS primary, rest secondary)",
+                "text": "📊 2-yr outcomes, adjuvant RT vs observation (ITT)",
                 "table": {
                   "columns": [
-                    "Endpoint (2yr)",
+                    "Endpoint (2-yr)",
                     "RT",
                     "Obs",
                     "HR (95% CI)",
@@ -26,7 +26,7 @@
                   ],
                   "rows": [
                     [
-                      "LRFFS",
+                      "LRFFS (1°)",
                       "87.1%",
                       "76.0%",
                       "0.43 (0.20-0.96)",
@@ -56,20 +56,22 @@
                   ]
                 }
               },
-              "📊 LR recurrence 8% (RT) vs 26% (obs), p=0.006; no isolated locoregional recurrences with RT",
-              "🔍 Phase III RCT, N=153 (RT 77 / obs 76), high-risk (T3-4, N1-3, R+) MIBC post-cystectomy + chemo, 2016-2024",
-              "🔍 RT: cystectomy bed + pelvic nodes (common/internal/external iliac, presacral, obturator), 50.4Gy/28fx, stoma/bowel-sparing IMRT, daily IGRT",
+              "📊 Locoregional recurrence 8% (RT) vs 26% (obs), p=0.006; no isolated locoregional recurrences in the RT arm",
               {
-                "text": "📊 2yr LRFFS benefit concentrates in high-risk subsets (and per-protocol)",
+                "text": "📊 2-yr LRFFS HR by analysis/subgroup (per-protocol 93.2% vs 75.0%)",
                 "table": {
                   "columns": [
-                    "2yr LRFFS analysis/subgroup",
+                    "2-yr LRFFS",
                     "HR (95% CI)"
                   ],
                   "rows": [
                     [
-                      "Per-protocol",
-                      "0.27 (0.10-0.71), p=0.008"
+                      "ITT overall",
+                      "0.43 (0.20-0.96)"
+                    ],
+                    [
+                      "Per-protocol overall",
+                      "0.27 (0.10-0.71)"
                     ],
                     [
                       "T3+ and N+",
@@ -82,57 +84,58 @@
                   ]
                 }
               },
+              "🔍 Phase III RCT, N=153 (RT 77 / obs 76), accrued 2016-2024; largest RCT in this setting, stratified by nodal stage + chemo",
+              "🔍 High-risk pT3-4/N+/R+ non-metastatic MIBC post-radical cystectomy; 62% pT3-4, 41% pN+, 28% variant histology, median age 57",
+              "🔍 RT 50.4 Gy/28 fx stoma/bowel-sparing IMRT to cystectomy bed + pelvic nodes (iliac, presacral, obturator), daily IGRT",
+              "🔍 Chemo neoadjuvant 71%, adjuvant 20%, none 9%; no immunotherapy in either arm",
+              "⚠️ Underpowered ('fell short in sample size goal'); primary LRFFS CI 0.20-0.96 upper bound near 1, p=0.04 marginal",
+              "⚠️ 14/77 RT-arm pts (refused 8, progressed 4, unfeasible 2) analyzed with observation; per-protocol HR 0.27 vs ITT 0.43",
+              "⚠️ OS not significant (HR 0.78, p=0.31); benefit is locoregional control, OS awaits MERCY IPD meta-analysis",
+              "⚠️ No IO tested; adjuvant nivolumab (Bajorin, NEJM 2021) now eligible, untested with/against RT",
               {
-                "text": "📊 Toxicity, RT vs observation",
+                "text": "📊 Toxicity, adjuvant RT vs observation",
                 "table": {
                   "columns": [
                     "AE",
                     "RT",
-                    "Obs",
-                    "p"
+                    "Obs"
                   ],
                   "rows": [
                     [
-                      "Grade 3 GI",
-                      "1.6%",
-                      "4.1%",
-                      "n/a"
-                    ],
-                    [
-                      "Grade 2 GI",
-                      "17.5%",
-                      "1.4%",
-                      "n/a"
-                    ],
-                    [
-                      "Late grade 3+",
+                      "Late G3+ toxicity",
                       "8.4%",
-                      "10.5%",
-                      "0.60"
+                      "10.5% (p=0.60)"
+                    ],
+                    [
+                      "Acute G3 GI",
+                      "1.6%",
+                      "4.1%"
+                    ],
+                    [
+                      "Acute G2 GI",
+                      "17.5%",
+                      "1.4%"
                     ]
                   ]
                 }
-              },
-              "⚠️ Primary analysis per-protocol, not ITT: 14 RT-assigned pts (refused 8, progression 4, unfeasible 2) analyzed in observation arm",
-              "⚠️ Underpowered: trial missed its accrual target",
-              "⚠️ No immunotherapy given; predates adjuvant nivolumab as SOC, so doesn't address the RT+IO question"
+              }
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
               1000000035
             ],
-            "slug": "bart",
+            "slug": "bart-bladder-adjuvant-rt",
             "verdict": {
               "soc_implication": "challenges-soc",
-              "rationale": "Randomised phase III, prespecified primary endpoint (2yr LRFFS) met, contesting the observation-only standard for high-risk pts. Per-protocol analysis and missed accrual are caveats, not enough to discount the divergence.",
-              "audience": "Urothelial MIBC, high-risk (≥pT3 / N+ / R+), post-cystectomy + chemo, M0"
+              "rationale": "Randomized phase III, prespecified LRFFS primary endpoint hit (HR 0.43); diverges from observation-only practice. Underpowered and OS not significant, but design valid for the locoregional claim.",
+              "audience": "High-risk pT3-4/N+/R+ MIBC, post-radical cystectomy + chemo"
             },
-            "significance": "Offer adjuvant pelvic RT (50.4Gy/28fx, cystectomy bed plus iliac/presacral/obturator nodes) to ≥pT3, N+, or margin-positive pts, where benefit concentrates (N+ HR 0.22) and isolated locoregional failure was eliminated. Late grade 3+ toxicity matched observation (8.4% vs 10.5%, p=0.60), answering the late-morbidity fear. Read it as local control: OS was unchanged.",
+            "significance": "The RT decision is adjuvant pelvic RT for the highest-risk post-cystectomy pts: benefit concentrates in N+ (HR 0.22) and T3+/N+ (HR 0.25), and RT cut isolated locoregional recurrence to zero (LR 8% vs 26%). Technique is standard 50.4 Gy/28 fx stoma-sparing IMRT, transferable; OS gain awaits the MERCY meta-analysis.",
             "open_questions": [
-              "OS benefit unconfirmed pending MERCY individual-patient-data meta-analysis",
-              "Adjuvant RT plus immunotherapy combinations with non-overlapping toxicity",
-              "Generalizability without immunotherapy and in younger cohort (median age 57)"
+              "OS benefit of adjuvant RT (MERCY IPD meta-analysis pending)",
+              "RT plus immunotherapy with non-overlapping toxicity",
+              "Generalizability beyond single high-volume center"
             ],
             "consort": {
               "enrolled": null,
@@ -142,12 +145,12 @@
                 {
                   "label": "Adjuvant RT",
                   "allocated": 77,
-                  "analyzed": 63
+                  "analyzed": null
                 },
                 {
                   "label": "Observation",
                   "allocated": 76,
-                  "analyzed": 90
+                  "analyzed": null
                 }
               ]
             },
@@ -157,37 +160,149 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT06586255",
-                "brief_title": "Adjuvant Concurrent Immunotherapy and Radiotherapy for the Treatment of Bladder Cancer",
-                "overall_status": "RECRUITING",
+                "nct": "NCT02397434",
+                "brief_title": "Adjuvant Radiotherapy After Cystectomy for Muscle Invasive Bladder Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
-                  "PHASE1"
+                  "NA"
                 ],
-                "enrollment_count": 10,
-                "primary_completion_date": "2027-04",
-                "brief_summary": "The primary objective of this Phase I study is to establish the safety of adjuvant concurrent immunotherapy and radiation therapy for urothelial bladder cancer.",
+                "enrollment_count": 76,
+                "primary_completion_date": "2018-10",
+                "brief_summary": "A radical cystectomy + extended pelvic lymph node dissection is considered to be the treatment of choice for patients with muscle invasive bladder cancer (MIBC). Despite this aggressive treatment the outcome is poor and ultimately, 30% of the patients with ≥pT3 tumors develop a pelvic recurrence. One- and 2-years survival for patients developing a local recurrence after cystectomy is only 8% and 3% respectively, with a median survival of \\<4 months. For patients with lymph node recurrence…",
                 "conditions": [
-                  "Urothelial Carcinoma Bladder",
-                  "Bladder Cancer"
+                  "Toxicity"
                 ],
                 "interventions": [
                   {
-                    "name": "Concurrent Immunotherapy and Radiation Therapy",
+                    "name": "Adjuvant EBRT",
                     "type": "RADIATION"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Pure or mixed variant urothelial carcinoma\n\n  o Allowable mixed variant subtypes include:\n  * squamous differentiation\n  * glandular differentiation\n  * nested pattern\n  * microcystic\n  * micropapillary\n  * lymphoepthelioma-like\n  * plasmacytoid and lymphoma-like\n  *…",
-                "answers_question": "Adjuvant RT plus immunotherapy combinations with non-overlapping toxicity",
-                "relevance_phrase": "phase 1 adjuvant concurrent IO + RT safety in bladder"
+                "eligibility_brief": "Inclusion Criteria: muscle invasive bladder cancer with:\n\n* ≥ pathological tumor stage (p)T3 stage + presence of lymphovascular invasion on pathological examination\n* pT4\n* \\<10 lymph nodes removed\n* positive lymph nodes\n* positive surgical margins\n\nExclusion Criteria:\n\n\\-",
+                "answers_question": "OS benefit of adjuvant RT (MERCY IPD meta-analysis pending)",
+                "relevance_phrase": "adjuvant EBRT in ≥pT3/margin+/node+ post-cystectomy"
+              },
+              {
+                "nct": "NCT03333356",
+                "brief_title": "Adjuvant Radiotherapy in Patients With Pathological High-risk Bladder Cancer (GETUG-AFU 30)",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 81,
+                "primary_completion_date": "2027-12",
+                "brief_summary": "This is a randomized multicentre study in patients with high-risk MIBC to investigate adjuvant radiotherapy after radical cystectomy and pelvic lymph node dissection.\n\nThe objective of the study is to provide evidence that adjuvant radiotherapy improves loco-regional control with potential benefits in survival. The study will also evaluate the quality of life of patients and the tolerance of the treatment.",
+                "conditions": [
+                  "Patients With High-risk MIBC"
+                ],
+                "interventions": [
+                  {
+                    "name": "pelvic radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\nTo be eligible, the patients must fulfil all of the following inclusion criteria:\n\n1. Patients with histologically-confirmed muscle-invasive bladder cancer, either with pure urothelial carcinomas, or dominant urothelial carcinomas (\\>50%) combined with other histological…",
+                "answers_question": "OS benefit of adjuvant RT (MERCY IPD meta-analysis pending)",
+                "relevance_phrase": "randomized adjuvant post-cystectomy RT, survival aim"
+              },
+              {
+                "nct": "NCT05241340",
+                "brief_title": "Neoadjuvant Sasanlimab With Radiation as an in Situ Vaccine for Cisplatin-ineligible Muscle Invasive Bladder Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 33,
+                "primary_completion_date": "2025-08",
+                "brief_summary": "This is a prospective, single-institution, single-arm, phase II clinical trial that tests a novel strategy of neoadjuvant Sasanlimab, an immune checkpoint inhibitor (ICI), in combination with stereotactic body radiation therapy as an in-situ vaccination in patients, who are ineligible to receive cisplatin-based chemotherapy and undergoing radical cystectomy for muscle-invasive bladder cancer.",
+                "conditions": [
+                  "Urothelial Carcinoma Bladder"
+                ],
+                "interventions": [
+                  {
+                    "name": "Sasanlimab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Stereotactic Body Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Radical Cystectomy + pelvic lymph node dissection + urinary diversion",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Capable of giving signed informed consent\n2. Age ≥ 18 years\n3. ECOG Eastern Cooperative Oncology Group performance status 0-2\n4. Predominant (\\>50%) urothelial carcinoma histology\n5. Muscle-invasive bladder cancer (cT2-4a, cN0, cM0)\n6. Decline/refuse OR Ineligible to receive…",
+                "answers_question": "RT plus immunotherapy with non-overlapping toxicity",
+                "relevance_phrase": "SBRT + sasanlimab, cisplatin-ineligible MIBC"
+              },
+              {
+                "nct": "NCT07414992",
+                "brief_title": "A Study of Radiation Therapy and Cemiplimab With or Without Fianlimab In People With Bladder Cancer",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 44,
+                "primary_completion_date": "2028-03",
+                "brief_summary": "The researchers are doing this study to find out whether stereotactic body radiation therapy (SBRT) in combination with immunotherapy (cemiplimab with or without fianlimab) before cystectomy is an effective and safe treatment for people with muscle-invasive bladder cancer (MIBC).",
+                "conditions": [
+                  "Bladder Urothelial Carcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic body radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Cemiplimab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Cemiplimab and Fianlimab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Radical cystectomy",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years at the time of informed consent\n* ECOG 0-1\n* Histologically confirmed diagnosis of urothelial carcinoma.\n\n  ° Variant histology is acceptable if there is a predominant urothelial component. Any neuroendocrine / small cell components are excluded (Investigators…",
+                "answers_question": "RT plus immunotherapy with non-overlapping toxicity",
+                "relevance_phrase": "SBRT plus cemiplimab ± fianlimab pre-cystectomy"
+              },
+              {
+                "nct": "NCT03333356",
+                "brief_title": "Adjuvant Radiotherapy in Patients With Pathological High-risk Bladder Cancer (GETUG-AFU 30)",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 81,
+                "primary_completion_date": "2027-12",
+                "brief_summary": "This is a randomized multicentre study in patients with high-risk MIBC to investigate adjuvant radiotherapy after radical cystectomy and pelvic lymph node dissection.\n\nThe objective of the study is to provide evidence that adjuvant radiotherapy improves loco-regional control with potential benefits in survival. The study will also evaluate the quality of life of patients and the tolerance of the treatment.",
+                "conditions": [
+                  "Patients With High-risk MIBC"
+                ],
+                "interventions": [
+                  {
+                    "name": "pelvic radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\nTo be eligible, the patients must fulfil all of the following inclusion criteria:\n\n1. Patients with histologically-confirmed muscle-invasive bladder cancer, either with pure urothelial carcinomas, or dominant urothelial carcinomas (\\>50%) combined with other histological…",
+                "answers_question": "Generalizability beyond single high-volume center",
+                "relevance_phrase": "multicentre randomized adjuvant RT trial"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "adjuvant radiotherapy immunotherapy bladder"
+                "adjuvant radiotherapy bladder cystectomy",
+                "radiotherapy immunotherapy bladder"
               ],
               "queries_failed": [],
-              "candidates_returned": 9,
-              "fetched_at": "2026-06-30T08:04:11.064Z",
+              "candidates_returned": 27,
+              "fetched_at": "2026-07-04T16:21:53.837Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
