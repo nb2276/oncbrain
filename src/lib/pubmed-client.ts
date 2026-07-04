@@ -99,6 +99,16 @@ export async function fetchPubMedPaper(
         timeoutMs,
       );
       fulltext_excerpt_md = extractMethodsAndResults(pmcXml, FULLTEXT_CHAR_CAP);
+      // v0.24 (Tier A): append figure + table CAPTIONS (dropped from the
+      // Methods/Results excerpt) so caption-embedded numbers reach the study
+      // agent. Given their own budget so they don't crowd out Methods/Results.
+      const captions = extractFigureCaptions(pmcXml);
+      if (captions) {
+        const block = `## Figure & table captions\n\n${captions}`;
+        fulltext_excerpt_md = fulltext_excerpt_md
+          ? `${fulltext_excerpt_md}\n\n${block}`
+          : block;
+      }
     } catch (err) {
       // PMC fetch failure is non-fatal — paper still ships with abstract.
       // The error becomes a degraded-state disclosure in Phase E.
@@ -256,6 +266,44 @@ export function extractMethodsAndResults(pmcXml: string, maxChars: number = FULL
     combined += chunk;
   }
   return combined.trim() || null;
+}
+
+// v0.24 (Tier A): pull FIGURE + TABLE captions out of the PMC nxml. Authors
+// routinely print the numbers we want (KM medians, HRs, n-at-risk, effect sizes)
+// in figure/table caption text, and stripJatsBodyToText drops <fig>/<table-wrap>
+// from the Methods/Results excerpt, so they'd otherwise be lost. This is a
+// text-only, no-fetch, cross-platform win (works for ANY PMC full text, not just
+// the OA subset). Returns a labeled bullet list capped at maxChars, or null.
+export function extractFigureCaptions(pmcXml: string, maxChars = 2000): string | null {
+  const items: string[] = [];
+  const blockRe = /<(fig|table-wrap)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+  for (const m of pmcXml.matchAll(blockRe)) {
+    const inner = m[2] ?? '';
+    const labelRaw = pickText(inner, /<label>([\s\S]*?)<\/label>/i);
+    const capMatch = inner.match(/<caption>([\s\S]*?)<\/caption>/i);
+    if (!capMatch) continue;
+    // Replace tags with a SPACE (not ''), so an inner <title>…</title><p>…</p>
+    // doesn't concatenate into one run-on word.
+    const captionText = decodeHtmlEntities((capMatch[1] ?? '').replace(/<[^>]+>/g, ' '))
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!captionText) continue;
+    const label = labelRaw ? decodeHtmlEntities(stripTags(labelRaw)).replace(/\s+/g, ' ').trim() : '';
+    items.push(label ? `- ${label}: ${captionText}` : `- ${captionText}`);
+  }
+  if (items.length === 0) return null;
+  let out = '';
+  for (const line of items) {
+    if (out.length + line.length + 1 > maxChars) {
+      // Truncate this over-long line to the remaining room rather than breaking
+      // outright — otherwise a single huge first caption would drop ALL captions.
+      const room = maxChars - out.length - (out ? 1 : 0);
+      if (room > 40) out += (out ? '\n' : '') + line.slice(0, room);
+      break;
+    }
+    out += (out ? '\n' : '') + line;
+  }
+  return out || null;
 }
 
 function stripJatsBodyToText(jats: string): string {

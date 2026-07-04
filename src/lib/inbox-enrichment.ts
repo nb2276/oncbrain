@@ -21,6 +21,7 @@ import {
   getConference,
   upsertConference,
   queueRebuild,
+  paperHasFigures,
   PAPER_CONTENT_FIELDS,
   type InboxItem,
   type SavePaperResult,
@@ -64,6 +65,7 @@ import {
 } from './nct-coverage.ts';
 import { extractPdfText, extractPdfFigureOcr, MAX_FIGURE_OCR_CHARS, PdfToolError } from './pdf-text.ts';
 import { extractPdfFigureStructured, MAX_FIGURE_STRUCTURED_CHARS } from './figure-extract.ts';
+import { enrichPmcOaFigures } from './pmc-oa.ts';
 import { isQwenAvailable } from './qwen-client.ts';
 import { extractPaperMetaFromText } from './pdf-meta.ts';
 import { isPdfBuffer, filePdfToVault, filePdfUnfiled } from './pdf-storage.ts';
@@ -299,6 +301,27 @@ async function enrichPaperItem(
       abstract: oa.abstract,
       fulltext_excerpt_md: oa.fulltext ? oa.fulltext.slice(0, MAX_FULLTEXT_CHARS) : saveInput.fulltext_excerpt_md,
     };
+  }
+
+  // v0.24 (Tier B): for a PMC OPEN-ACCESS article ingested without a PDF, OCR its
+  // figure images so figure-locked numbers (KM medians, forest-plot HRs) reach
+  // the study agent. Best-effort + gated (OA subset + macOS Vision +
+  // PMC_OA_FIGURES). Skip when this ingest already has figures, OR when the paper
+  // is already on file WITH figures (a prior PDF) — avoids re-downloading +
+  // re-OCRing on a re-send (#P2). Wrapped: never fail the paper on a surprise
+  // throw, even though enrichPmcOaFigures is designed not to throw (#P2).
+  if (
+    saveInput.pmc_id &&
+    !saveInput.figure_ocr_md &&
+    !paperHasFigures(db, { pmid: saveInput.pmid, doi: saveInput.doi, pmc_id: saveInput.pmc_id })
+  ) {
+    try {
+      const oaFigs = await enrichPmcOaFigures(saveInput.pmc_id);
+      if (oaFigs.figure_ocr_md) saveInput.figure_ocr_md = oaFigs.figure_ocr_md;
+      if (oaFigs.figure_structured_md) saveInput.figure_structured_md = oaFigs.figure_structured_md;
+    } catch (err) {
+      console.warn(`  [pmc-oa] figure enrichment failed for ${saveInput.pmc_id}: ${(err as Error).message}`);
+    }
   }
 
   // Tag the paper if its source URL is a meeting abstract host, or the curator's

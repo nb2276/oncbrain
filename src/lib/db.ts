@@ -1209,6 +1209,38 @@ export function bumpRebuildAttempt(
   return row?.attempts ?? 0;
 }
 
+// v0.24: true when a paper already on file (matched by ANY identifier) already
+// carries figure OCR. Lets enrichment skip the expensive PMC-OA figure fetch +
+// OCR on a re-ingest of a paper whose figures a prior PDF already supplied (the
+// savePaper merge is fill-if-missing, so it would discard the re-fetch anyway).
+export function paperHasFigures(
+  db: Database.Database,
+  ids: { pmid?: string | null; doi?: string | null; pmc_id?: string | null },
+): boolean {
+  const clauses: string[] = [];
+  const vals: string[] = [];
+  if (ids.pmid) {
+    clauses.push('pmid = ?');
+    vals.push(ids.pmid);
+  }
+  const doi = normalizeDoi(ids.doi);
+  if (doi) {
+    clauses.push('lower(doi) = ?');
+    vals.push(doi);
+  }
+  if (ids.pmc_id) {
+    clauses.push('pmc_id = ?');
+    vals.push(ids.pmc_id);
+  }
+  if (clauses.length === 0) return false;
+  const row = db
+    .prepare(
+      `SELECT 1 FROM papers WHERE (${clauses.join(' OR ')}) AND figure_ocr_md IS NOT NULL LIMIT 1`,
+    )
+    .get(...vals);
+  return row !== undefined;
+}
+
 export function listPapers(
   db: Database.Database,
   filter: { bookmark_date?: string } = {},

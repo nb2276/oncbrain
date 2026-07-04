@@ -88,9 +88,17 @@ function isPrivateIP(ip: string): boolean {
   return true; // not a valid IP → unsafe
 }
 
-// Validate a single URL: https, named host (not an IP literal), and every
-// DNS-resolved address is public. Throws SsrfError on any violation.
-async function assertSafeUrl(rawUrl: string, lookupImpl: LookupAllFn = defaultLookup): Promise<void> {
+// Validate a single URL: https, named host (not an IP literal), every
+// DNS-resolved address public, and (when an allowlist is given) the host matches
+// it. Throws SsrfError on any violation. `allowedHostSuffixes` pins a download to
+// an expected origin (e.g. ['.ncbi.nlm.nih.gov']) and is re-checked on EVERY
+// redirect hop, so a hijacked response body / 302 can't steer the fetch to an
+// attacker host (v0.24 review #P1).
+async function assertSafeUrl(
+  rawUrl: string,
+  lookupImpl: LookupAllFn = defaultLookup,
+  allowedHostSuffixes?: string[],
+): Promise<void> {
   let u: URL;
   try {
     u = new URL(rawUrl);
@@ -99,6 +107,16 @@ async function assertSafeUrl(rawUrl: string, lookupImpl: LookupAllFn = defaultLo
   }
   if (u.protocol !== 'https:') {
     throw new SsrfError(`refused non-https URL (${u.protocol})`, rawUrl);
+  }
+  if (allowedHostSuffixes && allowedHostSuffixes.length > 0) {
+    const h = u.hostname.toLowerCase().replace(/\.$/, '');
+    const ok = allowedHostSuffixes.some((s) => {
+      const suf = s.toLowerCase();
+      // '.ncbi.nlm.nih.gov' matches host === 'ncbi.nlm.nih.gov' or *.ncbi.nlm.nih.gov;
+      // a bare 'ncbi.nlm.nih.gov' matches only that exact host.
+      return suf.startsWith('.') ? h === suf.slice(1) || h.endsWith(suf) : h === suf;
+    });
+    if (!ok) throw new SsrfError(`host not in allowlist (${u.hostname})`, rawUrl);
   }
   // Reject IP-literal hosts in any form — we only fetch named journal hosts.
   // Strip brackets for IPv6 literals before the check.
@@ -132,6 +150,9 @@ export type SsrfFetchOptions = {
   fetchImpl?: typeof fetch;
   lookupImpl?: LookupAllFn;
   headers?: Record<string, string>;
+  // Pin the fetch (and every redirect hop) to these host suffixes, e.g.
+  // ['.ncbi.nlm.nih.gov']. Omit for the general curator-URL case.
+  allowedHostSuffixes?: string[];
 };
 
 // Fetch a curator-pasted URL with SSRF protection + manual redirect
@@ -148,7 +169,7 @@ export async function ssrfSafeFetchText(
 
   let current = url;
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-    await assertSafeUrl(current, lookupImpl); // re-validate EVERY hop
+    await assertSafeUrl(current, lookupImpl, opts.allowedHostSuffixes); // re-validate EVERY hop
 
     const controller = new AbortController();
     // Keep the timer armed across BOTH the fetch AND the body read — a hostile
@@ -191,6 +212,84 @@ export async function ssrfSafeFetchText(
     }
   }
   throw new SsrfError(`too many redirects (>${MAX_REDIRECTS})`, url);
+}
+
+// v0.24: binary sibling of ssrfSafeFetchText for downloading a file (the PMC OA
+// package tarball). Same per-hop revalidation + private-IP guard; returns the
+// body as a Buffer with a HARD cap (an over-cap body throws rather than
+// truncating — a truncated .tar.gz is corrupt and untar would fail confusingly).
+// maxBodyBytes defaults higher than the text path since an OA figure package is
+// legitimately several MB.
+export async function ssrfSafeFetchBuffer(
+  url: string,
+  opts: SsrfFetchOptions = {},
+): Promise<Buffer> {
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  const lookupImpl = opts.lookupImpl ?? defaultLookup;
+  const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const maxBody = opts.maxBodyBytes ?? MAX_BODY_BYTES;
+
+  let current = url;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    await assertSafeUrl(current, lookupImpl, opts.allowedHostSuffixes); // re-validate EVERY hop
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetchImpl(current, {
+        redirect: 'manual',
+        signal: controller.signal,
+        headers: { 'User-Agent': 'oncbrain/0.8 (+https://oncbrain.oncologytoolkit.com)', ...opts.headers },
+      });
+      if (res.status >= 300 && res.status < 400) {
+        const loc = res.headers.get('location');
+        if (!loc) throw new SsrfError(`redirect with no Location (${res.status})`, current);
+        current = new URL(loc, current).toString();
+        continue;
+      }
+      if (!res.ok) throw new SsrfError(`HTTP ${res.status}`, current);
+      const lenHeader = res.headers.get('content-length');
+      if (lenHeader && Number(lenHeader) > maxBody) {
+        controller.abort();
+        throw new SsrfError(`response too large (${lenHeader} bytes)`, current);
+      }
+      return await readBodyCappedBuffer(res, maxBody, current);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw new SsrfError(`too many redirects (>${MAX_REDIRECTS})`, url);
+}
+
+async function readBodyCappedBuffer(res: Response, maxBody: number, url: string): Promise<Buffer> {
+  if (!res.body) {
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.byteLength > maxBody) throw new SsrfError(`response too large (${buf.byteLength} bytes)`, url);
+    return buf;
+  }
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      // Throw (not truncate) on overflow: a partial tarball is corrupt.
+      if (total > maxBody) {
+        await reader.cancel();
+        throw new SsrfError(`response exceeded cap (${maxBody} bytes)`, url);
+      }
+      chunks.push(value);
+    }
+  } finally {
+    try {
+      reader.releaseLock();
+    } catch {
+      /* already released */
+    }
+  }
+  return Buffer.concat(chunks);
 }
 
 // Read a response body, stopping once `maxBody` bytes have been seen, so a

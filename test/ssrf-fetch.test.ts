@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { assertSafeUrl, isPrivateIP, ssrfSafeFetchText, SsrfError } from '../src/lib/ssrf-fetch.ts';
+import {
+  assertSafeUrl,
+  isPrivateIP,
+  ssrfSafeFetchText,
+  ssrfSafeFetchBuffer,
+  SsrfError,
+} from '../src/lib/ssrf-fetch.ts';
 
 // A fake DNS lookup so the guard tests don't hit the network. Maps hostnames
 // to controlled IPs.
@@ -130,5 +136,69 @@ describe('ssrfSafeFetchText', () => {
       maxBodyBytes: 10,
     });
     expect(out.length).toBe(10);
+  });
+});
+
+describe('ssrfSafeFetchBuffer (v0.24)', () => {
+  const lk = fakeLookup({ 'ftp.ncbi.nlm.nih.gov': ['130.14.29.110'] });
+
+  it('returns the body as a Buffer on a safe 200', async () => {
+    const fetchImpl = (async () =>
+      new Response(new Uint8Array([1, 2, 3, 4]), { status: 200 })) as unknown as typeof fetch;
+    const buf = await ssrfSafeFetchBuffer('https://ftp.ncbi.nlm.nih.gov/x.tar.gz', {
+      fetchImpl,
+      lookupImpl: lk,
+    });
+    expect(Buffer.isBuffer(buf)).toBe(true);
+    expect([...buf]).toEqual([1, 2, 3, 4]);
+  });
+
+  it('THROWS (not truncates) on an over-cap body — a partial tarball is corrupt', async () => {
+    const fetchImpl = (async () =>
+      new Response(new Uint8Array(100), {
+        status: 200,
+        headers: { 'content-length': '100' },
+      })) as unknown as typeof fetch;
+    await expect(
+      ssrfSafeFetchBuffer('https://ftp.ncbi.nlm.nih.gov/x', {
+        fetchImpl,
+        lookupImpl: lk,
+        maxBodyBytes: 10,
+      }),
+    ).rejects.toThrow(/too large/);
+  });
+
+  it('applies the same private-IP guard as the text path', async () => {
+    const lkPriv = fakeLookup({ 'evil.example.com': ['10.0.0.5'] });
+    const fetchImpl = (async () => new Response(new Uint8Array(1), { status: 200 })) as unknown as typeof fetch;
+    await expect(
+      ssrfSafeFetchBuffer('https://evil.example.com/x', { fetchImpl, lookupImpl: lkPriv }),
+    ).rejects.toThrow(/private address/);
+  });
+
+  it('enforces an allowlist and re-checks it on redirect (#P1 host-pin)', async () => {
+    const lkAll = fakeLookup({
+      'ftp.ncbi.nlm.nih.gov': ['130.14.29.110'],
+      'evil.com': ['1.2.3.4'], // public, but not on the allowlist
+    });
+    const fetchImpl = (async () => new Response(new Uint8Array([1]), { status: 200 })) as unknown as typeof fetch;
+    const allow = { allowedHostSuffixes: ['.ncbi.nlm.nih.gov'] };
+    // On-allowlist host is fine.
+    await expect(
+      ssrfSafeFetchBuffer('https://ftp.ncbi.nlm.nih.gov/x', { fetchImpl, lookupImpl: lkAll, ...allow }),
+    ).resolves.toBeInstanceOf(Buffer);
+    // A public host NOT on the allowlist is refused even though its IP is public.
+    await expect(
+      ssrfSafeFetchBuffer('https://evil.com/x', { fetchImpl, lookupImpl: lkAll, ...allow }),
+    ).rejects.toThrow(/allowlist/);
+    // Look-alike host (suffix-appended) must not slip through.
+    const lkLookalike = fakeLookup({ 'ftp.ncbi.nlm.nih.gov.evil.com': ['1.2.3.4'] });
+    await expect(
+      ssrfSafeFetchBuffer('https://ftp.ncbi.nlm.nih.gov.evil.com/x', {
+        fetchImpl,
+        lookupImpl: lkLookalike,
+        ...allow,
+      }),
+    ).rejects.toThrow(/allowlist/);
   });
 });

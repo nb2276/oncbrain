@@ -4,6 +4,7 @@ import {
   parsePubMedArticleXml,
   parseAbstractFromXml,
   extractMethodsAndResults,
+  extractFigureCaptions,
   searchPubMed,
   summarizePmids,
   _resetNcbiThrottleForTests,
@@ -146,6 +147,39 @@ describe('extractMethodsAndResults', () => {
   it('returns null when no Methods/Results sections exist', () => {
     const xml = `<article><body><sec><title>Other</title><p>x</p></sec></body></article>`;
     expect(extractMethodsAndResults(xml)).toBeNull();
+  });
+});
+
+describe('extractFigureCaptions (v0.24 Tier A)', () => {
+  it('pulls figure + table captions with their labels', () => {
+    const xml = `<article>
+      <fig><label>Figure 2</label><caption><title>KM curve</title><p>OS HR 0.62 (0.48-0.79).</p></caption><graphic xlink:href="f2"/></fig>
+      <table-wrap><label>Table 1</label><caption><p>Baseline characteristics.</p></caption></table-wrap>
+    </article>`;
+    const out = extractFigureCaptions(xml)!;
+    expect(out).toContain('Figure 2: KM curve OS HR 0.62');
+    expect(out).toContain('Table 1: Baseline characteristics');
+  });
+
+  it('returns null when there are no captions', () => {
+    expect(extractFigureCaptions('<article><body><p>plain body</p></body></article>')).toBeNull();
+  });
+
+  it('respects the char cap (whole-line granularity)', () => {
+    const many = Array.from(
+      { length: 50 },
+      (_, i) => `<fig><label>Figure ${i}</label><caption><p>${'x'.repeat(100)}</p></caption></fig>`,
+    ).join('');
+    const out = extractFigureCaptions(`<article>${many}</article>`, 300)!;
+    expect(out.length).toBeLessThanOrEqual(300);
+  });
+
+  it('truncates a single over-budget caption instead of dropping all (#P2)', () => {
+    const xml = `<article><fig><label>Figure 1</label><caption><p>${'y'.repeat(5000)}</p></caption></fig></article>`;
+    const out = extractFigureCaptions(xml, 200);
+    expect(out).not.toBeNull();
+    expect(out!.length).toBeLessThanOrEqual(200);
+    expect(out!).toContain('Figure 1');
   });
 });
 

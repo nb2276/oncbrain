@@ -2,6 +2,42 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.24.0] - 2026-07-03
+
+### Added
+
+- **Figures from PMC open-access articles, no forwarded PDF needed.** Previously,
+  figure OCR (the numbers printed *inside* KM curves, forest plots, image-rendered
+  tables) ran only on a forwarded PDF, so a paper ingested via a PMID / DOI / PMC
+  link got text only. Two tiers now close that gap for PMC papers:
+  - **Tier A (figure + table captions).** The PMC full-text nxml we already fetch
+    for Methods/Results has `<fig>` / `<table-wrap>` captions that authors often
+    load with the numbers we want (KM medians, HRs, n-at-risk). We used to drop
+    them; now they're parsed and appended to the study agent's input
+    (`extractFigureCaptions`). Text-only, no extra fetch, works for **any** PMC
+    full text.
+  - **Tier B (figure-image OCR, open-access subset).** For a PMC **open-access**
+    article, `pmc-oa.ts` queries the OA service, downloads + unpacks the OA
+    package, picks the figure images from the nxml, and runs them through the
+    **existing** Vision + grounded-structuring pipeline (`ocrFile` /
+    `extractFigure`, same v0.20 grounding gate that withholds any number not in
+    the figure's own OCR). Output lands in the local-only `figure_ocr_md` /
+    `figure_structured_md` fields. Wired into paper enrichment (best-effort,
+    gated on the OA subset + macOS Vision + `PMC_OA_FIGURES`), and backfillable
+    with **`npm run backfill:pmc-oa-figures`**.
+- Composes with v0.23: a later forwarded PDF still upgrades over PMC-OA figures.
+
+### Notes
+
+- **Coverage is the OA subset only.** JCO / Lancet Onc / NEJM are usually paywalled
+  and *not* in the PMC OA subset, so they still need the forwarded PDF (a non-OA
+  article is skipped cleanly, verified live against NCBI). This is additive
+  coverage, not a general figures-without-PDF path.
+- New SSRF-safe **binary** fetch (`ssrfSafeFetchBuffer`) for the OA package
+  download (private-IP guard + per-hop revalidation, throws rather than truncating
+  a partial tarball); untar via the system `tar` (no npm dep). Local-only figure
+  fields stay guarded out of the published artifact + JSON API.
+
 ## [0.23.0] - 2026-07-02
 
 ### Added

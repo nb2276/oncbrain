@@ -59,6 +59,7 @@ npm run pull:telegram           # drain @oncbrain_bot DMs into the inbox_items q
 npm run enrich:inbox            # process the queue: tweet→oEmbed, paper→PubMed/Crossref, PDF→text/OCR + figure-structure + vault filing
 npm run figure-extract -- --image=<png> [--json] [--model=...]            # v0.20: grounded figure extraction (Vision+Qwen→Opus) on one image
 npm run figure-extract -- --pdf=<pdf> --page=<n> [--dpi=300] [--json]     # or one PDF page (poppler renders it); Ollama is optional — Vision-only without it
+npm run backfill:pmc-oa-figures                                          # v0.24: OCR PMC open-access figure images for papers ingested via PMID/DOI/PMC (no PDF). --id / --date / --force. Non-OA papers skipped.
 npm run admin                   # localhost:3001 admin form (date picker, conference tag, manual paste fallback)
 
 # Build
@@ -192,6 +193,7 @@ src/
     pdf-text.ts            v0.8 PR2: pdftotext + pdftoppm→Vision OCR fallback (poppler). v0.15: extractPdfFigureOcr — pdfimages-targeted OCR of figure pages (numbers printed inside KM curves / forest plots / image-rendered tables that the text layer can't see). v0.20: rasterizePageToPngs (caller-cleaned page images for the structured pipeline)
     qwen-client.ts         v0.20: local Qwen2.5-VL via an Ollama HTTP server (base64 image, raised num_ctx). isQwenAvailable() probe + FIGURE_STRUCTURED=off kill switch + placeholder/oversize guards. Graceful-degrade, never throws
     figure-extract.ts      v0.20: grounded figure extraction — Vision (recall) + Qwen (structure) → Opus reconcile, with a deterministic role-aware grounding gate that withholds the whole merge to raw OCR if any number isn't in the OCR. extractFigure (image) + extractPdfFigureStructured (PDF page). Output → papers.figure_structured_md (local-only)
+    pmc-oa.ts              v0.24: figures for PMC papers ingested WITHOUT a PDF. Tier A (pubmed-client extractFigureCaptions): figure/table captions from the already-fetched nxml → study-agent input. Tier B (this file): for the PMC OPEN-ACCESS subset, query oa.fcgi → download+untar the OA package → pick figure images from the nxml → reuse ocrFile + extractFigure (same v0.20 grounding gate) → local-only figure_ocr_md/figure_structured_md. Best-effort, gated (OA subset + macOS Vision + PMC_OA_FIGURES=off kill switch). Non-OA (JCO/Lancet/NEJM) skipped. Backfill: npm run backfill:pmc-oa-figures
     pdf-meta.ts            v0.8 PR2: LLM metadata extraction from PDF text (+ DOI/PMID regex backstop)
     pdf-storage.ts         v0.8 PR2: file PDFs to the gitignored Obsidian vault (papers/<site>/<slug>.pdf)
     slide-photo-storage.ts Telegram getFile download + magic-byte sniff + disk save

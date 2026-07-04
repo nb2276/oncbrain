@@ -28,6 +28,7 @@ import {
   listRebuildQueue,
   dequeueRebuild,
   bumpRebuildAttempt,
+  paperHasFigures,
   type ResolutionCandidate,
 } from '../src/lib/db.ts';
 import type Database from 'better-sqlite3';
@@ -426,6 +427,25 @@ describe('db', () => {
       // A late failure from the stale claim must not bump the fresh entry.
       bumpRebuildAttempt(db, '2026-05-18', stale);
       expect(listRebuildQueue(db)[0]!.attempts).toBe(0);
+    });
+  });
+
+  describe('paperHasFigures (v0.24)', () => {
+    it('is true only when a matching row already carries figure OCR', () => {
+      savePaper(db, {
+        doi: '10.1200/withfig',
+        pmid: '111',
+        title: 'A',
+        bookmark_date: '2026-06-01',
+        figure_ocr_md: '[Fig 1] HR 0.5',
+      });
+      savePaper(db, { doi: '10.1200/nofig', pmid: '222', title: 'B', bookmark_date: '2026-06-01' });
+      expect(paperHasFigures(db, { doi: '10.1200/withfig' })).toBe(true);
+      expect(paperHasFigures(db, { pmid: '111' })).toBe(true);
+      expect(paperHasFigures(db, { doi: '10.1200/nofig' })).toBe(false);
+      expect(paperHasFigures(db, { pmid: '222' })).toBe(false);
+      expect(paperHasFigures(db, { doi: '10.1200/unknown' })).toBe(false);
+      expect(paperHasFigures(db, {})).toBe(false);
     });
   });
 
