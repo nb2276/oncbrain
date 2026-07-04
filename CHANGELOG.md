@@ -2,6 +2,41 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.25.0] - 2026-07-03
+
+### Added
+
+- **DOI-only papers now reach the PMC open-access figure path.** A DOI-only
+  ingest never resolved a PMCID, so the v0.24 OA-figure path never fired for it.
+  `resolvePmcIdForDoi` now resolves DOI → PMCID via NCBI's ID converter
+  (host-pinned, DOI-verified) in `resolveFromDoi`, so a DOI-only open-access
+  paper flows into the figure OCR automatically (and gains a "full text (PMC)"
+  link). Best-effort; default on.
+- **Opt-in figure OCR for trade-press articles (`HTML_FIGURE_OCR=on`).**
+  Conference coverage from UroToday / ASCO Post / OncLive embeds figure/slide
+  images. When enabled, `html-figures.ts` extracts figure-candidate images from
+  the (already-fetched) article HTML and grounded-OCRs them, so figure-locked
+  numbers reach the study agent. **Default OFF** and deliberately narrow because
+  the source is copyrighted:
+  - **trade-press hosts only** (the curated 2-label allowlist), so the image
+    domain-pin can't be defeated by a multi-part public suffix;
+  - image fetches are **pinned to the article's own domain** (SSRF-safe, every
+    redirect hop re-validated), figure-heuristic filtered, size-bounded;
+  - **grounded-only**: emits ONLY the v0.20 grounded, per-panel structured
+    extract (numbers verified against the image's own OCR, via the Qwen+Opus
+    reconciliation) — never raw OCR, so no copyrighted figure/table prose can be
+    paraphrased into the digest. No Qwen stack → no HTML figures, by design.
+  - output stays in the local-only `figure_structured_md` field (guarded out of
+    the published artifact + JSON API); images never leave the machine.
+
+### Notes
+
+- Both features reviewed (adversarial + codex). The trade-press restriction +
+  a multi-part-public-suffix guard in `registrableDomain` close a host-pin bypass
+  the last-2-labels heuristic would otherwise have on `.co.uk` / `.com.au` pages;
+  the grounded-only design enforces the "numbers only" IP posture that a raw-OCR
+  path could not.
+
 ## [0.24.0] - 2026-07-03
 
 ### Added

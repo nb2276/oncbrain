@@ -65,7 +65,8 @@ import {
 } from './nct-coverage.ts';
 import { extractPdfText, extractPdfFigureOcr, MAX_FIGURE_OCR_CHARS, PdfToolError } from './pdf-text.ts';
 import { extractPdfFigureStructured, MAX_FIGURE_STRUCTURED_CHARS } from './figure-extract.ts';
-import { enrichPmcOaFigures } from './pmc-oa.ts';
+import { enrichPmcOaFigures, resolvePmcIdForDoi } from './pmc-oa.ts';
+import { enrichHtmlFigures, isHtmlFigureOcrEnabled } from './html-figures.ts';
 import { isQwenAvailable } from './qwen-client.ts';
 import { extractPaperMetaFromText } from './pdf-meta.ts';
 import { isPdfBuffer, filePdfToVault, filePdfUnfiled } from './pdf-storage.ts';
@@ -659,8 +660,12 @@ async function resolveFromDoi(
 ): Promise<NewPaper> {
   const p = await fetchCrossrefPaper(doi);
   if (!p.title) throw new CrossrefError('Crossref returned no title', 'parse');
+  // v0.25 (#1): resolve the DOI → PMCID (best-effort) so a DOI-only OA paper
+  // flows into the v0.24 PMC-OA figure path (the wire-in gates on pmc_id).
+  const pmc_id = p.doi ? await resolvePmcIdForDoi(p.doi) : null;
   return {
     doi: p.doi,
+    pmc_id,
     source_url: item.raw_target.startsWith('http') ? item.raw_target : null,
     title: p.title,
     authors_json: JSON.stringify(p.authors.map((a) => ({ name: a.name }))),
@@ -719,13 +724,17 @@ async function resolveFromUrl(
     // Trade-press coverage (ASCO Post, OncLive, …) never carries citation
     // meta — resolve it from the article body instead of giving up.
     if (isTradePressUrl(url)) {
-      return resolveTradeArticle(url, html, meta, item, note);
+      return attachHtmlFigures(await resolveTradeArticle(url, html, meta, item, note), html, url);
     }
     // Need at least one identifier for the papers CHECK + dedup key. Carry the
     // page title so the failure path can search for an accessible copy of the
     // same paper (paper-suggest.ts) before falling back to the canned reply.
     throw new MetaNotFoundError('page had a title but no DOI or PMID to key on', meta.title ?? undefined);
   }
+  // NOTE: HTML figure OCR (#2) is intentionally NOT attached here — this
+  // arbitrary-journal-page fallback can be on a multi-part-TLD host where the
+  // domain-pin heuristic is unsafe (#P1). It runs ONLY on the trade-press path
+  // above, whose hosts are the curated 2-label allowlist.
   return {
     pmid: meta.pmid,
     doi: meta.doi,
@@ -740,6 +749,26 @@ async function resolveFromUrl(
     inbox_item_id: item.id,
     fetched_via: 'html_meta',
   };
+}
+
+// v0.25 (#2): OPT-IN, best-effort, TRADE-PRESS ONLY. When HTML_FIGURE_OCR=on and
+// the paper has no figures yet, grounded-OCR the article page's own figure images
+// (local-only, numbers only). Never throws; returns the paper unchanged on any
+// failure. See html-figures.ts for the IP posture (default off, trade-press only,
+// article-domain-pinned, grounded-only, local-only).
+async function attachHtmlFigures(paper: NewPaper, html: string, url: string): Promise<NewPaper> {
+  if (!isHtmlFigureOcrEnabled() || paper.figure_ocr_md) return paper;
+  try {
+    const figs = await enrichHtmlFigures(html, url);
+    if (!figs.figure_ocr_md && !figs.figure_structured_md) return paper;
+    return {
+      ...paper,
+      figure_ocr_md: figs.figure_ocr_md ?? paper.figure_ocr_md,
+      figure_structured_md: figs.figure_structured_md ?? paper.figure_structured_md,
+    };
+  } catch {
+    return paper;
+  }
 }
 
 // Below these, a trade page has nothing for the study agent to analyze.

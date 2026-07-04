@@ -33,6 +33,7 @@ import { isQwenAvailable } from './qwen-client.ts';
 import { MAX_FIGURE_OCR_CHARS } from './pdf-text.ts';
 
 const OA_SERVICE = 'https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi';
+const IDCONV_SERVICE = 'https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/';
 // Pin the OA package download to NCBI (the tgz href comes from the oa.fcgi
 // RESPONSE body, so it must not be trusted to steer the fetch anywhere; #P1).
 const NCBI_HOST_SUFFIXES = ['.ncbi.nlm.nih.gov'];
@@ -50,6 +51,39 @@ const EXT_PREFERENCE = ['.jpg', '.jpeg', '.png', '.tif', '.tiff', '.gif'];
 
 export function isPmcOaFiguresEnabled(): boolean {
   return process.env.PMC_OA_FIGURES !== 'off';
+}
+
+// v0.25 (#1): resolve a DOI → its PMCID via NCBI's ID converter, so a DOI-only
+// ingest of an open-access paper (which today never resolves a pmc_id, so Tier B
+// never fires) flows into the PMC-OA figure path automatically. Best-effort:
+// null on any failure or when the DOI isn't in PMC. Host-pinned to NCBI.
+export async function resolvePmcIdForDoi(
+  doi: string,
+  fetchText: (url: string) => Promise<string> = (u) =>
+    ssrfSafeFetchText(u, { allowedHostSuffixes: NCBI_HOST_SUFFIXES }),
+): Promise<string | null> {
+  const clean = doi.trim();
+  if (!clean) return null;
+  let body: string;
+  try {
+    body = await fetchText(
+      `${IDCONV_SERVICE}?ids=${encodeURIComponent(clean)}&format=json&tool=oncbrain`,
+    );
+  } catch {
+    return null;
+  }
+  try {
+    const json = JSON.parse(body) as { records?: Array<{ pmcid?: string; doi?: string }> };
+    const rec = json.records?.[0];
+    const pmcid = rec?.pmcid;
+    if (!pmcid || !/^PMC\d+$/i.test(pmcid)) return null;
+    // Verify the record is actually for the DOI we asked about (idconv echoes
+    // it): don't ship a mis-mapped PMCID as a published PMC link (#P2).
+    if (rec.doi && rec.doi.trim().toLowerCase() !== clean.toLowerCase()) return null;
+    return pmcid.toUpperCase();
+  } catch {
+    return null;
+  }
 }
 
 export type PmcFigure = { imagePath: string; label: string; caption: string };

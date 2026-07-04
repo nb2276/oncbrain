@@ -7,6 +7,7 @@ import {
   enrichPmcOaFigures,
   isPmcOaFiguresEnabled,
   assertSafeTarListing,
+  resolvePmcIdForDoi,
 } from '../src/lib/pmc-oa.ts';
 
 const OA_XML = `<OA><records><record id="PMC13901" license="CC BY">
@@ -44,6 +45,38 @@ describe('resolvePmcOaPackageUrl (v0.24)', () => {
     expect(await resolvePmcOaPackageUrl('PMC1', async () => evil)).toBeNull();
     const evil2 = `<OA><records><record><link format="tgz" href="https://evil.com/x.tar.gz"/></record></records></OA>`;
     expect(await resolvePmcOaPackageUrl('PMC1', async () => evil2)).toBeNull();
+  });
+});
+
+describe('resolvePmcIdForDoi (v0.25 #1 DOI→PMCID)', () => {
+  it('returns the PMCID for a DOI that is in PMC', async () => {
+    const json = JSON.stringify({ status: 'ok', records: [{ doi: '10.1200/x', pmcid: 'PMC7654321' }] });
+    expect(await resolvePmcIdForDoi('10.1200/x', async () => json)).toBe('PMC7654321');
+  });
+  it('returns null when the DOI is not in PMC (error record)', async () => {
+    const json = JSON.stringify({ records: [{ doi: '10.1200/x', status: 'error', errmsg: 'invalid' }] });
+    expect(await resolvePmcIdForDoi('10.1200/x', async () => json)).toBeNull();
+  });
+  it('rejects a mis-mapped record whose echoed DOI differs from the query (#P2)', async () => {
+    const json = JSON.stringify({ records: [{ doi: '10.9999/other', pmcid: 'PMC111' }] });
+    expect(await resolvePmcIdForDoi('10.1200/x', async () => json)).toBeNull();
+  });
+  it('returns null on malformed JSON or a fetch failure', async () => {
+    expect(await resolvePmcIdForDoi('10.1200/x', async () => 'not json')).toBeNull();
+    expect(
+      await resolvePmcIdForDoi('10.1200/x', async () => {
+        throw new Error('net');
+      }),
+    ).toBeNull();
+  });
+  it('returns null for a blank doi (no query)', async () => {
+    let queried = false;
+    const r = await resolvePmcIdForDoi('  ', async () => {
+      queried = true;
+      return '';
+    });
+    expect(r).toBeNull();
+    expect(queried).toBe(false);
   });
 });
 
