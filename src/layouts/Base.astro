@@ -24,6 +24,9 @@ const { title, description, wide = false, ogImage = '/og/default.png' } = Astro.
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'onc brain';
 const curatorName = import.meta.env.PUBLIC_CURATOR_NAME || '';
 const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
+// v0.26 (E5): a mailto to measure "can you do this for my field?" demand — the
+// honest, backendless (static-site) input to the curated-replication question.
+const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'oncbrain@oncologytoolkit.com';
 
 // v0.11 PR-1a: canonical URL emission. Strip every filter param so search
 // engines don't index the per-page filter URLs as duplicates of the
@@ -381,6 +384,8 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
         <a href="/api">API &amp; RSS</a>
         {' · '}
         <a href="/feed.xml">RSS feed</a>
+        {' · '}
+        <a href={`mailto:${contactEmail}?subject=${encodeURIComponent('oncbrain for my subspecialty')}`}>Curating another subspecialty? Get in touch</a>
       </p>
     </footer>
     <script is:inline>
