@@ -438,10 +438,15 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
                 if (typeof d === 'string') {
                   return <li set:html={linkifyCitations(d)} />;
                 }
+                // v0.26 (Thread 1): a figure-sourced bullet earns a citation
+                // mark. Named for what value-membership PROVES ("read from a
+                // figure"), never "verified". Non-emoji per DESIGN.md's reserved
+                // vocabulary, like the text-neutral NEW pill.
+                const isFig = 'source_tier' in d && d.source_tier === 'figure';
                 if ('table' in d) {
                   return (
                     <li>
-                      <span set:html={linkifyCitations(d.text)} />
+                      <span set:html={linkifyCitations(d.text)} />{isFig && <sup class="src-fig" title="Read from a figure, not the abstract">†</sup>}
                       <div class="study-table-wrap">
                         <table class="study-table">
                           <thead>
@@ -461,14 +466,22 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
                     </li>
                   );
                 }
+                if ('subdetails' in d) {
+                  return (
+                    <li>
+                      <span set:html={linkifyCitations(d.text)} />{isFig && <sup class="src-fig" title="Read from a figure, not the abstract">†</sup>}
+                      {d.subdetails.length > 0 && (
+                        <ul class="study-subdetails">
+                          {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                }
+                // v0.26: plain { text, source_tier? }
                 return (
                   <li>
-                    <span set:html={linkifyCitations(d.text)} />
-                    {d.subdetails.length > 0 && (
-                      <ul class="study-subdetails">
-                        {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
-                      </ul>
-                    )}
+                    <span set:html={linkifyCitations(d.text)} />{isFig && <sup class="src-fig" title="Read from a figure, not the abstract">†</sup>}
                   </li>
                 );
               })}
@@ -714,6 +727,15 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   .study-figures .study-figure { margin: 0; }
   /* Figures open full-screen on click (lightbox wired in Base.astro). */
   .study-zoom { cursor: zoom-in; }
+
+  /* v0.26 (Thread 1): figure-sourced citation mark. Muted, non-emoji, scholarly
+     — the tooltip carries the meaning ("read from a figure, not the abstract"). */
+  .src-fig {
+    color: var(--fg-muted);
+    font-size: 0.72em;
+    margin-left: 0.1em;
+    cursor: help;
+  }
 
   .more-figures { margin-top: 0.85rem; }
   .more-figures > summary {

@@ -12,10 +12,14 @@ import type { ContentType } from './content-type.ts';
 //   - {text, subdetails[]} for 1D nested rows (v0.4.1)
 //   - {text, table:{columns, rows}} for 2D matrix comparisons (v0.4.2)
 export type DigestTable = { columns: string[]; rows: string[][] };
+// v0.26 (Thread 1): a bullet's figure-locked number was read from a figure, not
+// the abstract (see llm-pipeline SourceTier). Rendered as a citation mark.
+export type SourceTier = 'figure';
 export type DigestDetail =
   | string
-  | { text: string; subdetails: string[] }
-  | { text: string; table: DigestTable };
+  | { text: string; subdetails: string[]; source_tier?: SourceTier }
+  | { text: string; table: DigestTable; source_tier?: SourceTier }
+  | { text: string; source_tier?: SourceTier };
 
 // v0.10: a single promoted figure (image URL + numeric caption or comparison
 // table). Studies carry an ordered array of these; see studyFigures().

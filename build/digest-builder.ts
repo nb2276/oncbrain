@@ -46,6 +46,7 @@ import {
   type EnrichRelatedTrialsDeps,
 } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
+import { markFigureSourcedDetails } from '../src/lib/source-tier.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
 import { clampPreprintVerdict } from '../src/lib/preprint.ts';
 import { stripReviewVerdicts } from '../src/lib/content-type.ts';
@@ -57,6 +58,35 @@ import { listResolutions } from '../src/lib/db.ts';
 // discussed-trial acronym (normalized) to the slug of the same-date study that
 // was auto-resolved from it. The join is by PMID (robust), not name: the
 // manifest gives (review paper, acronym) → chosen_pmid; we map chosen_pmid →
+// v0.26 (Thread 1): after Phase 2, deterministically mark each bullet whose
+// significant number was read from a figure — union figure OCR (structured
+// preferred over raw) across the study's SOURCE papers, minus the abstract. The
+// trust signal on the shareable card never depends on the LLM. Mutates
+// study.details in place; studies with no figure OCR on any source are left
+// untouched (fresh Phase-2 details carry no tier). Exported for testing.
+export function markFigureSourcedStudies(digest: DigestOutput, papers: Paper[]): void {
+  const byId = new Map(papers.map((p) => [p.id, p] as const));
+  for (const site of digest.sites) {
+    for (const study of site.studies) {
+      const figParts: string[] = [];
+      const absParts: string[] = [];
+      for (const ref of study.source_ids ?? []) {
+        if (ref.type !== 'paper') continue;
+        const p = byId.get(ref.id);
+        if (!p) continue;
+        const fig = p.figure_structured_md || p.figure_ocr_md;
+        if (fig) figParts.push(fig);
+        if (p.abstract) absParts.push(p.abstract);
+      }
+      if (figParts.length === 0) continue; // no figure OCR → nothing to vouch for
+      study.details = markFigureSourcedDetails(study.details, {
+        figureText: figParts.join('\n'),
+        abstractText: absParts.join('\n'),
+      });
+    }
+  }
+}
+
 // the study whose paper source is that PMID. No-op when nothing was resolved.
 export function linkResolvedTrials(
   db: ReturnType<typeof openDb>,
@@ -637,6 +667,11 @@ export async function buildOneDate(
       relatedTrialsRunCache: deps?.relatedTrialsRunCache,
       relatedTrialsDeps: deps?.relatedTrialsDeps,
     });
+
+  // v0.26 (Thread 1): mark figure-sourced bullets deterministically, before
+  // overrides + publish. The union figure OCR / abstract come from this date's
+  // source papers.
+  markFigureSourcedStudies(digest, papersForDate);
 
   // T18: build-time tag emission summary so the curator can see at a glance
   // whether Phase 2 produced the expected distribution. Logged before override
