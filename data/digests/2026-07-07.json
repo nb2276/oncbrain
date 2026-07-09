@@ -1,73 +1,211 @@
 {
   "date": "2026-07-07",
   "conference": null,
-  "generated_at": 1783497993035,
+  "generated_at": 1783586136647,
   "digest": {
-    "top_line": "ARTO: adding SBRT to abi+ADT in oligomet CRPC → OS NR vs 50mo, HR 0.55 (0.33-0.92, unplanned); metastasis-directed RT signal extends into castration-resistance.",
-    "tldr": "Prostate and CNS both interrogate RT's role. ARTO pushes metastasis-directed SBRT past the hormone-sensitive setting into oligomet CRPC (OS HR 0.55, unplanned endpoint), while EORTC 22033's mature LGG data show RT and dose-dense TMZ monotherapy interchangeable as first-line. Combined-modality, now SOC, went untested there.",
+    "top_line": "SUPREMO: 10-yr OS 81.4% vs 81.9% (HR 1.04, p=0.80); post-mastectomy chest-wall RT adds no survival in intermediate-risk disease.",
+    "tldr": "RT's value split by setting: SUPREMO (breast) and EORTC (CNS) both show broad-field/single-modality RT adds nothing over modern systemic therapy, while ARTO (prostate) shows metastasis-directed SBRT extends OS in oligomet CRPC (HR 0.55). Breast and prostate carried the day; the signal favors targeted ablation over reflexive adjuvant fields.",
     "sites": [
       {
-        "disease_site": "cns",
-        "intro": "RT and dose-dense TMZ monotherapy interchangeable for high-risk grade 2 LGG; the modern combined-modality question stays open.",
+        "disease_site": "breast",
+        "intro": "SUPREMO reopens the PMRT question in intermediate-risk disease: chest-wall control improves (HR 0.45) but survival doesn't in the modern-systemic era.",
         "studies": [
           {
-            "name": "EORTC 22033-26033/NCIC-CTG/TROG/MRC-CTU",
-            "tldr": "No PFS or OS difference between RT (28×1.8Gy) and dose-dense TMZ as first-line monotherapy for high-risk WHO grade 2 LGG, across all molecular subtypes.",
+            "name": "SUPREMO",
+            "tldr": "10-yr OS 81.4% vs 81.9% (HR 1.04, p=0.80): no survival benefit from post-mastectomy chest-wall RT in intermediate-risk disease.",
             "details": [
-              "📊 No significant PFS or OS difference between RT and TMZ arms, regardless of molecular subtype",
-              "🔍 Phase III, N=478 high-risk WHO grade 2 LGG; RT 28×1.8Gy vs dose-dense TMZ 75mg/m² ×21/28d (≤12 cycles)",
               {
-                "text": "📊 Median OS by molecular subtype (RT vs TMZ)",
+                "text": "📊 RT vs no-RT across endpoints (ITT, 10-yr estimates)",
                 "table": {
                   "columns": [
-                    "Subtype (n)",
-                    "OS RT",
-                    "OS TMZ",
-                    "HR (95% CI), p"
+                    "Endpoint",
+                    "RT",
+                    "No RT",
+                    "HR (95% CI)"
                   ],
                   "rows": [
                     [
-                      "Astrocytoma IDHmt-noncodel (178)",
-                      "6.6-6.7y",
-                      "6.6-6.7y",
-                      "0.67-1.44, P=.93"
+                      "OS (10y)",
+                      "81.4%",
+                      "81.9%",
+                      "1.04 (0.82-1.30)"
                     ],
                     [
-                      "Oligo IDHmt-codel (109)",
-                      "12.9y",
-                      "14.9y",
-                      "0.88 (0.52-1.49), P=.63"
+                      "DFS (10y)",
+                      "76.2%",
+                      "75.5%",
+                      "0.97 (0.79-1.18)"
                     ],
                     [
-                      "IDH-wildtype (64)",
-                      "2.5y",
-                      "4.7y",
-                      "0.47 (0.27-0.82), P=.0068"
+                      "DMFS (10y)",
+                      "78.2%",
+                      "79.2%",
+                      "1.06 (0.86-1.31)"
+                    ],
+                    [
+                      "Chest-wall recurrence",
+                      "1.1%",
+                      "2.5%",
+                      "0.45 (0.20-0.99)"
                     ]
                   ]
                 }
               },
-              "⚠️ IDH-wildtype OS favored TMZ (HR 0.47) but n=64 and post-hoc; these tumors reclassify/treat as GBM today",
-              "🔍 Post-hoc 2021 WHO reclassification; analyzable tissue in 73% (351/478)",
-              "🔗 Combined-modality (RT + adjuvant chemo) untested here; authors note it is now SOC for IDH-mutant astrocytoma",
-              "⚠️ Pts ≥40 fared better than <40, challenging age alone as a negative prognostic factor (exploratory)"
+              "📐 OS p=0.80; 295 death events (150 RT, 145 no RT), trial powered on OS",
+              "🔍 Phase 3 RCT, ITT N=1607 (808 RT, 799 no RT), median f/u 9.6y, recruited 2006-2013",
+              "🔍 Eligibility: intermediate-risk post-mastectomy (pT1-2N1, pT3N0, or pT2N0 grade 3/LVI)",
+              "🔍 CWI dose 40-50 Gy; mostly chest-wall only (supraclav 97/808, IMC 12/808 in RT arm)",
+              "💊 Contemporary systemic backbone: 85% chemo, 79% endocrine, 19% trastuzumab",
+              "⚠️ CW recurrence benefit (HR 0.45) is real but absolute difference <2pp, with no OS/DFS/DMFS gain",
+              "🔗 vs EBCTCG 2014 meta-analysis (1-3 node+, older RT eras): showed locoregional + mortality benefit. SUPREMO's modern-systemic era shows no OS signal"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000039
+            ],
+            "slug": "supremo",
+            "verdict": {
+              "soc_implication": "challenges-soc",
+              "rationale": "Phase 3 RCT, prespecified OS primary, mature 9.6y f/u, 295 events; null OS contests routine PMRT for intermediate-risk pN1 despite the lower chest-wall recurrence.",
+              "audience": "Post-mastectomy intermediate-risk breast: pT1-2N1, pT3N0, or pT2N0 grade3/LVI"
+            },
+            "significance": "The RT read is local control, not the null OS: chest-wall recurrence fell to 1.1% vs 2.5% (HR 0.45), but the absolute gain is under 2 points. Most pts got chest-wall-only RT (supraclav in 97/808), so this licenses omitting CWI, not comprehensive nodal RT, in intermediate-risk disease.",
+            "open_questions": [
+              "CW recurrence benefit in higher nodal burden or high-risk pN1?",
+              "Omission safety by molecular subtype (TNBC, HER2+)?",
+              "Genomic assay to select who can safely omit chest-wall RT?"
+            ],
+            "consort": {
+              "enrolled": null,
+              "excluded": null,
+              "randomized": 1607,
+              "arms": [
+                {
+                  "label": "Chest-wall irradiation",
+                  "allocated": 808,
+                  "analyzed": 808
+                },
+                {
+                  "label": "No irradiation",
+                  "allocated": 799,
+                  "analyzed": 799
+                }
+              ]
+            },
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "phase-3-rct",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT06378294",
+                "brief_title": "Locoregional Control With Radiotherapy of Breast Cancer Patients With MACrometastases Treated With MAstectomy (MACMA)",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": null,
+                "enrollment_count": 82,
+                "primary_completion_date": "2024-12",
+                "brief_summary": "Sentinel lymph node biopsy (SLNB) is the standard procedure to stage the axilla in clinically node-negative invasive breast cancer (IBC) patients undergoing upfront surgery.\n\nThe ACOSOG-Z0011 and the AMAROS trial demonstrated that SLNB with or without radiotherapy provided equivalent local control and survival to axillary lymph node dissection (ALND) in early-stage breast cancer patients with 1 or 2 positive SLNs. However, the ACOSOG-Z0011 trial did not included patients treated with…",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Mastectomy",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients with T1-2 primary invasive breast cancer\n* No suspicion of lymph node involvement prior to sentinel lymph node biopsy\n* Patients undergoing upfront mastectomy\n* Macrometastasis in not more than 2 lymph nodes at sentinel lymph node biopsy\n* Patients treated with…",
+                "answers_question": "CW recurrence benefit in higher nodal burden or high-risk pN1?",
+                "relevance_phrase": "locoregional control w/ RT in pN1 macromets, post-mastx"
+              },
+              {
+                "nct": "NCT05440149",
+                "brief_title": "The Postoperative Radiotherapy in N1 Breast Cancer Patients",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 1106,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "This study is a multicenter, randomized, phase 3 clinical trial in patients with breast cancer, randomizing radiotherapy group (postmastectomy radiation therapy (PMRT)/whole breast irradiation plus regional radiotherapy (WBI+regional RT) versus and no PMRT/WBI alone group. This is a non-inferiority study aiming that there is no significant difference in the 7-year disease-free survival rate between the two groups.",
+                "conditions": [
+                  "Radiotherapy",
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "No PMRT for mastectomy / No regional RT for BCS",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "PMRT for mastectomy / WBI + Regional RT for BCS",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients aged 19 years or older.\n* A female patient who underwent breast-conserving surgery or mastectomy for invasive breast cancer.\n* Patient with stage pN1 after surgery on histopathologic examination.\n\n  * However, if mastectomy was performed, 5 or more nodes should be…",
+                "answers_question": "CW recurrence benefit in higher nodal burden or high-risk pN1?",
+                "relevance_phrase": "phase 3 PMRT vs omission in pN1, 7y DFS"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "postmastectomy radiation node-positive breast",
+                "postmastectomy radiation omission",
+                "genomic assay postmastectomy radiation"
+              ],
+              "queries_failed": [
+                {
+                  "term": "genomic assay postmastectomy radiation",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 3,
+              "fetched_at": "2026-07-09T08:30:59.585Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 39
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "cns",
+        "intro": "Single-modality RT vs TMZ is now a largely historical head-to-head (combined-modality is SOC), but the molecular-subtype prognostic signal endures.",
+        "studies": [
+          {
+            "name": "EORTC 22033-26033/NCIC-CTG/TROG/MRC-CTU",
+            "tldr": "No PFS/OS difference between RT (28×1.8 Gy) and dose-dense TMZ monotherapy in high-risk WHO grade 2 glioma; molecular subtype drives outcome.",
+            "details": [
+              "📊 1° EP null: no PFS or OS difference between the RT and TMZ arms, regardless of molecular subtype",
+              "🔍 Phase III randomized, N=478, clinical high-risk WHO grade 2 glioma (LGG), first-line single-modality",
+              "🔍 RT arm 28 × 1.8 Gy (50.4 Gy total, standard LGG dose); TMZ arm dose-dense 75 mg/m² daily 21/28d, up to 12 cycles",
+              "📊 Median OS by 2021-WHO molecular subtype (RT vs TMZ) — comparison values omitted (cell value \"95\" not verified in source)",
+              "⚠️ Molecular subtypes assigned post hoc (2021 WHO) on 73% (351/478) with analyzable tissue; IDH-wt subgroup only n=64",
+              "🔗 Combined-modality RT+chemo not tested here but has since become SOC for IDH-mutant astrocytoma, so this single-modality read is now largely historical",
+              "📊 Pts age ≥40 fared better than <40 once molecularly classified, challenging age alone as a negative prognostic factor"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
               1000000038
             ],
-            "slug": "eortc-22033-lgg-tmz-vs-rt",
+            "slug": "eortc-22033-26033",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Mature phase III confirms no RT-vs-TMZ monotherapy OS/PFS difference; molecular subgroups are post-hoc (73% tissue). Combined-modality, now SOC, went untested, so this is confirmatory not practice-changing.",
-              "audience": "High-risk WHO grade 2 low-grade glioma, first-line, treatment-naive"
+              "rationale": "Mature randomized phase 3 with a valid null primary (RT vs TMZ, no PFS/OS difference). Molecular subtype effects are post hoc (2021 WHO, 73% tissue); combined-modality has since superseded single-modality.",
+              "audience": "Clinical high-risk WHO grade 2 glioma (LGG), treatment-naive"
             },
-            "significance": "Within IDH-mutant subtypes RT (28×1.8Gy) and TMZ gave equivalent OS (astrocytoma 6.6-6.7y both arms; oligo HR 0.88, P=.63), so modality choice alone doesn't move survival. IDH-wildtype favored TMZ (HR 0.47), and combined-modality (now SOC for IDH-mut astrocytoma) went untested, so RT monotherapy isn't the modern read.",
+            "significance": "The RT read is subtype-specific: RT monotherapy (50.4 Gy/28fx) matched TMZ only in IDH-mutant glioma, but underperformed it in IDH-wildtype tumors (OS 2.5 vs 4.7 yr, HR 0.47, post-hoc n=64). With combined-modality RT+chemo now SOC for IDH-mt astrocytoma, the practical read is RT as part of, not versus, systemic therapy.",
             "open_questions": [
-              "Optimal combined-modality regimen for IDH-mutant astrocytoma",
-              "Can RT be safely deferred in codeleted oligodendroglioma?",
-              "Long-term neurocognitive toxicity of RT vs TMZ"
+              "Prospective confirmation IDH-wildtype grade 2 glioma favors TMZ over RT",
+              "Optimal combined-modality RT plus chemo for IDH-mutant grade 2 glioma",
+              "Whether age-40 cutoff retains prognostic value after molecular classification"
             ],
             "consort": null,
             "modality": "radiation",
@@ -76,99 +214,38 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT03528642",
-                "brief_title": "Telaglenastat With Radiation Therapy and Temozolomide in Treating Patients With IDH-Mutated Diffuse Astrocytoma or Anaplastic Astrocytoma",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE1"
-                ],
-                "enrollment_count": 40,
-                "primary_completion_date": "2026-09",
-                "brief_summary": "This phase 1b trial studies the side effects and best dose of telaglenastat in combination with radiation therapy and temozolomide in treating patients with IDH-mutated diffuse or anaplastic astrocytoma. Telaglenastat may stop the growth of tumor cells by blocking some of the enzymes needed for cell growth. Radiation therapy uses high energy x-rays to kill tumor cells and shrink tumors. Chemotherapy drugs, such as temozolomide, work in different ways to stop the growth of tumor cells, either by…",
-                "conditions": [
-                  "Astrocytoma, IDH-Mutant, Grade 2",
-                  "Astrocytoma, IDH-Mutant, Grade 3"
-                ],
-                "interventions": [
-                  {
-                    "name": "Questionnaire Administration",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Telaglenastat Hydrochloride",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Temozolomide",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patients must have histopathologic or molecular confirmation of either IDH-mutant DA or IDH-mutant AA. Acceptable IDH mutations for study eligibility include any IDH1 mutation at codon 132 or any IDH2 mutation at codon 172.\n* Age \\>= 16 years. The intended neurocognitive…",
-                "answers_question": "Optimal combined-modality regimen for IDH-mutant astrocytoma",
-                "relevance_phrase": "telaglenastat + RT + TMZ in IDH-mut astrocytoma"
-              },
-              {
-                "nct": "NCT07215910",
-                "brief_title": "Testing Addition of an Anti-cancer Drug, Vorasidenib to Temozolomide, After Radiation for Advanced Brain Cancer",
+                "nct": "NCT05303519",
+                "brief_title": "SIGMA (Safusidenib in IDH1 Mutant Glioma Maintenance)",
                 "overall_status": "RECRUITING",
                 "phase": [
                   "PHASE3"
                 ],
-                "enrollment_count": 408,
-                "primary_completion_date": "2033-05",
-                "brief_summary": "This phase III trial compares the effect of vorasidenib to placebo in combination with usual treatment, temozolomide, in treating patients with newly diagnosed grade 3 astrocytoma after radiation. Temozolomide is in a class of medications called alkylating agents. It works by damaging the cell's deoxyribonucleic acid and may kill tumor cells and slow down or stop tumor growth. Vorasidenib citrate blocks the proteins made by the mutated IDH1 and IDH2 genes, which may help keep tumor cells from…",
+                "enrollment_count": 365,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "This is a 3-part study. The purpose of Part 1 of the study is to evaluate the efficacy, safety, and pharmacokinetic (PK) characteristics of safusidenib in participants with recurrent/progressive IDH1-mutant World Health Organization (WHO) Grade 2 or Grade 3 glioma.\n\nThe purpose of Part 2 will be to evaluate the efficacy of maintenance safusidenib treatment versus placebo in IDH1-mutant Grade 2 or Grade 3 astrocytoma with high-risk features or IDH1-mutant Grade 4 astrocytoma, following…",
                 "conditions": [
-                  "Astrocytoma, IDH-Mutant, Grade 3"
+                  "Glioma",
+                  "Astrocytoma, Grade IV",
+                  "IDH1-mutant Glioma",
+                  "Astrocytoma, IDH-Mutant, Grade 3",
+                  "Astrocytoma, IDH-Mutant, Grade 4",
+                  "Astrocytoma, IDH-Mutant, Grade 2",
+                  "Oligodendroglioma",
+                  "Oligodendroglioma, IDH-Mutant and 1p/19q-Codeleted"
                 ],
                 "interventions": [
                   {
-                    "name": "Intensity-Modulated Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Volume Modulated Arc Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Pencil Beam Scanning",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Intensity-Modulated Proton Therapy",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Temozolomide",
+                    "name": "safusidenib",
                     "type": "DRUG"
                   },
                   {
-                    "name": "Vorasidenib",
+                    "name": "Placebo",
                     "type": "DRUG"
-                  },
-                  {
-                    "name": "Placebo Administration",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Biospecimen Collection",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Magnetic Resonance Imaging",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Questionnaire Administration",
-                    "type": "OTHER"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* STEP 0: Histologic diagnosis of astrocytoma, IDH-mutant (central nervous system \\[CNS\\] WHO grade 3)\n* STEP 0: Available diagnostic slides (hematoxylin and eosin staining method \\[H\\&E\\] and immunohistochemical stains for central review)\n* STEP 0: Tissue available for central…",
-                "answers_question": "Optimal combined-modality regimen for IDH-mutant astrocytoma",
-                "relevance_phrase": "vorasidenib added to TMZ post-RT in IDH-mut astro"
+                "eligibility_brief": "Key Inclusion Criteria for Part 1:\n\n1. Patient must be ≥ 18 years of age at the time of signing the informed consent form (ICF).\n2. Patient must have histologically confirmed recurrent or progressive WHO Grade 2 glioma or Grade 3 glioma with IDH1 R132H or R132C mutation confirmed by…",
+                "answers_question": "Optimal combined-modality RT plus chemo for IDH-mutant grade 2 glioma",
+                "relevance_phrase": "phase 3 safusidenib maintenance in IDH-mut G2/3"
               },
               {
                 "nct": "NCT06809322",
@@ -194,80 +271,18 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Before participant's enrolment, written informed consent must be given according to ICH/GCP, and national/local regulations.\n* Age ≥ 18 years\n* Integrated diagnosis of astrocytoma, IDH-mutant, WHO CNS5 grade 2 or 3, per local assessment\n* Documented IDH1 or IDH2 mutation…",
-                "answers_question": "Optimal combined-modality regimen for IDH-mutant astrocytoma",
-                "relevance_phrase": "vorasidenib maintenance after chemoRT, IDH-mut astro"
-              },
-              {
-                "nct": "NCT04702581",
-                "brief_title": "A Randomized Trial of Delayed Radiotherapy in Patients Low-grade Oligodendrogliomas Requiring a Treatment Other Than Surgery",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 280,
-                "primary_completion_date": "2030-12",
-                "brief_summary": "Because of their prolonged survival, patients with 1p/19q-codeleted low-grade oligodendrogliomas treated with RT + PCV are at risk of neurocognitive deterioration. We make the hypothesis that withholding radiotherapy until tumor progression could reduce the risk of neurocognitive deterioration without impairing overall survival.",
-                "conditions": [
-                  "Oligodendroglioma",
-                  "Low-grade Oligodendroglioma",
-                  "1p19q Codeletion"
-                ],
-                "interventions": [
-                  {
-                    "name": "PCV chemotherapy",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Radiotherapy and PCV chemotherapy",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Tumor is co-deleted for 1p and 19q based and IDH-mutant (IDH1 or IDH2) according to local diagnosis\n* Histological confirmation of low-grade oligodendroglioma by central pathological review according to WHO 2016 classification\n* Age ≥ 18 years\n* Patients with one or several…",
-                "answers_question": "Can RT be safely deferred in codeleted oligodendroglioma?",
-                "relevance_phrase": "randomized delayed vs upfront RT in codeleted LGG"
-              },
-              {
-                "nct": "NCT00978458",
-                "brief_title": "Radiation Therapy With or Without Temozolomide in Treating Patients With Low-Grade Glioma",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 540,
-                "primary_completion_date": "2026-12",
-                "brief_summary": "RATIONALE: Radiation therapy uses high-energy x-rays to kill tumor cells. Specialized radiation therapy that delivers a high dose of radiation directly to the tumor may kill more tumor cells and cause less damage to normal tissue. Drugs used in chemotherapy, such as temozolomide, work in different ways to stop the growth of tumor cells, either by killing the cells or by stopping them from dividing. It is not yet known whether radiation therapy is more effective when given together with or…",
-                "conditions": [
-                  "Brain and Central Nervous System Tumors",
-                  "Neurotoxicity"
-                ],
-                "interventions": [
-                  {
-                    "name": "temozolomide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "3-dimensional conformal radiation therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "intensity-modulated radiation therapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "DISEASE CHARACTERISTICS:\n\n* Histologically confirmed\\* supratentorial low-grade glioma, including 1 of the following:\n\n  * Grade 2 astrocytoma\n  * Grade 2 oligodendroglioma\n  * Grade 2 oligoastrocytoma (mixed glioma containing astrocytoma and oligodendroglioma)\n* NOTE: \\*If the pathology from…",
-                "answers_question": "Long-term neurocognitive toxicity of RT vs TMZ",
-                "relevance_phrase": "RT ± TMZ in grade 2 glioma, tracks neurotoxicity"
+                "answers_question": "Optimal combined-modality RT plus chemo for IDH-mutant grade 2 glioma",
+                "relevance_phrase": "phase 3 vorasidenib maintenance post-chemoRT"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "IDH-mutant astrocytoma radiotherapy",
-                "oligodendroglioma radiation observation",
-                "glioma neurocognitive radiation"
+                "IDH wildtype glioma temozolomide",
+                "IDH-mutant glioma chemoradiation"
               ],
               "queries_failed": [],
-              "candidates_returned": 39,
-              "fetched_at": "2026-07-08T08:02:47.419Z",
+              "candidates_returned": 25,
+              "fetched_at": "2026-07-09T08:31:52.388Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -282,22 +297,28 @@
       },
       {
         "disease_site": "prostate",
-        "intro": "First randomised OS signal for adding SBRT to systemic Rx in oligomet CRPC, beyond the hormone-sensitive MDT setting.",
+        "intro": "ARTO pushes metastasis-directed SBRT past the hormone-sensitive setting into CRPC, on a positive but unplanned OS analysis.",
         "studies": [
           {
             "name": "ARTO",
-            "tldr": "Unplanned OS: NR vs 50mo, HR 0.55 (0.33-0.92), p=0.021 adding SBRT to abi+ADT in oligomet CRPC.",
+            "tldr": "mOS NR vs 50mo, HR 0.55 (0.33-0.92) p=0.021 adding SBRT to all mets over abiraterone+ADT in oligomet CRPC.",
             "details": [
-              "📊 mOS NR (95% CI 55-NR) with SBRT vs 50 mo (36-NR) control",
-              "📐 OS HR 0.55 (95% CI 0.33-0.92), p=0.021",
-              "🔍 Phase 2 open-label RCT, N=157 (75 SBRT / 82 control), 16 Italian centres",
-              "🔍 Median f/u 53 mo (IQR 43-60), ITT analysis",
-              "🔍 SBRT to all sites of disease, 1-5 fx, BED ≥100 Gy",
-              "🔍 Eligibility: oligomet CRPC, ≤3 mets, no prior systemic Rx for mCRPC (all on abi+ADT)",
-              "📊 Grade 3-4 AEs by arm — comparison values omitted (cell value \"5\" not verified in source)",
-              "⚠️ Sole treatment-related death was in the control arm (myocardial failure); none with SBRT",
-              "⚠️ OS unplanned: 1° EP was 6-mo PSA response (≥50% drop), met previously; OS power recalc'd post-hoc",
-              "🔗 Setting differs from STOMP/ORIOLE (hormone-sensitive oligomet); ARTO tests MDT in CRPC"
+              "📊 Overall survival by arm (unplanned long-term analysis) — comparison values omitted (cell value \"0.55\" not verified in source)",
+              "🔍 Phase 2, open-label, randomised 1:1, N=157 (SBRT arm 75, control 82), 16 Italian centres",
+              "🔍 SBRT to ALL metastatic sites, 1-5 fractions, BED ≥100 Gy",
+              "🔍 Eligibility: oligomet CRPC, ≤3 metastatic sites, no prior systemic therapy for mCRPC",
+              "📊 1° endpoint (reported previously) was 6-month biochemical response, not OS",
+              "⚠️ OS unplanned: power recalculated post-hoc before unmasking; trial not powered for OS",
+              "⚠️ Open-label, small N=157, single-country (Italy); needs phase 3 confirmation",
+              {
+                "text": "📊 Grade 3-4 AEs, no excess in the SBRT arm",
+                "subdetails": [
+                  "Infectious complications: 5 control vs 0 SBRT",
+                  "Cardiovascular disorders: 3 control vs 3 SBRT",
+                  "1 treatment-related death, in the control arm (myocardial failure)"
+                ]
+              },
+              "🔗 Extends oligometastatic MDT (STOMP, ORIOLE) from hormone-sensitive/biochemical-recurrence into the CRPC setting"
             ],
             "figures": [],
             "nct": "NCT03449719",
@@ -306,15 +327,14 @@
             ],
             "slug": "arto",
             "verdict": {
-              "soc_implication": "early-signal",
-              "rationale": "Small randomised phase 2 (N=157), open-label; OS was an unplanned analysis (1° EP was 6-mo PSA response), post-hoc powered. Needs phase 3 confirmation.",
-              "audience": "Oligometastatic CRPC, ≤3 mets, no prior mCRPC systemic Rx, on abi+ADT"
+              "soc_implication": "methodologically-limited",
+              "rationale": "OS was an unplanned, post-hoc analysis (1° EP was 6-mo biochemical response); open-label phase 2, N=157. Randomised signal, but OS not the powered endpoint.",
+              "audience": "Oligometastatic CRPC, ≤3 mets, no prior systemic tx for mCRPC"
             },
-            "significance": "The toxicity signal favors RT: zero grade 3-4 infectious events in the SBRT arm vs 5 in control, and the sole treatment-related death was in control, so ablative MDT (BED ≥100 Gy, 1-5 fx to all sites) added OS without added harm. Moves the offer-MDT decision into the CRPC setting, beyond hormone-sensitive oligomets.",
+            "significance": "Both arms got identical abiraterone/ADT, so the OS HR 0.55 isolates SBRT's contribution, and MDT added no G3-4 toxicity (the lone treatment-related death and excess infections were both in the control arm). Technique was 1-5 fractions, BED ≥100 Gy to all sites. This moves the add-MDT decision in oligomet CRPC (≤3 mets).",
             "open_questions": [
-              "Phase 3 confirmation of OS benefit for MDT in CRPC",
-              "Optimal oligometastatic definition (PSMA-PET vs conventional imaging)",
-              "Durability of benefit with newer systemic backbones beyond abiraterone"
+              "Phase 3 confirmation of the OS benefit for MDT in oligomet CRPC",
+              "Optimal SBRT dose and fractionation for oligometastatic CRPC"
             ],
             "consort": {
               "enrolled": null,
@@ -327,7 +347,7 @@
                   "analyzed": null
                 },
                 {
-                  "label": "Abiraterone/ADT alone",
+                  "label": "Abiraterone/ADT",
                   "allocated": 82,
                   "analyzed": null
                 }
@@ -339,184 +359,114 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT02685397",
-                "brief_title": "Management of Castration-Resistant Prostate Cancer with Oligometastases",
+                "nct": "NCT04115007",
+                "brief_title": "Prostate-cancer Treatment Using Stereotactic Radiotherapy for Oligometastases Ablation in Hormone-sensitive Patients",
                 "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
-                  "PHASE2",
                   "PHASE3"
                 ],
-                "enrollment_count": 102,
-                "primary_completion_date": "2027-04",
-                "brief_summary": "This adaptive phase II/III randomized trial is designed to demonstrate that eradication of oligometastases by SBRT is a promising and emerging way to delay disease progression and postpone second line systemic therapies in castration-resistant prostate cancer (CRPC) patients. Only CRPC patients with an oligometastatic recurrence will be eligible to take part in this trial. All participating patients will receive either the standard of care (i.e. LHRH agonist in combination with the new…",
+                "enrollment_count": 550,
+                "primary_completion_date": "2026-06",
+                "brief_summary": "INDICATION: Oligometastatic hormone-sensitive prostate cancer patients. METHODOLOGY: Open label, double arm, randomized 1:1, multicenter phase III study.\n\nPRIMARY OBJECTIVE: To assess the efficacy of ablative radiotherapy (SBRT applied to all oligometastases) administered to all gross tumor sites (metastases and prostate if applicable), in oligometastatic hormone-sensitive prostate cancer patients.",
                 "conditions": [
-                  "Castration-resistant Prostate Cancer Patients with Oligometastases"
+                  "Oligometastatic Hormone Sensitive Prostate Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "Leuprolide Acetate",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Goserelin Acetate",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Triptorelin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Enzalutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Stereotactic Body Radiation Therapy",
+                    "name": "Stereotactic Body Radiotherapy (SBRT) + Standard of care",
                     "type": "RADIATION"
+                  },
+                  {
+                    "name": "Standard of care",
+                    "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Age 18 or older and willing and able to provide informed consent;\n2. Histologically confirmed adenocarcinoma of the prostate without neuroendocrine differentiation or small cell features;\n3. Ongoing androgen deprivation therapy with a Gonadotropin-releasing hormone (GnRH)…",
-                "answers_question": "Phase 3 confirmation of OS benefit for MDT in CRPC",
-                "relevance_phrase": "randomized ph2/3 SBRT for oligomet CRPC"
+                "eligibility_brief": "DIAGNOSIS AND INCLUSION CRITERIA:\n\n1. Histologically proven adenocarcinoma of the prostate (any T stage, Gleason score, or prostate specific antigen (PSA) level);\n2. Defined as M1 based on the presence of at least one bone metastasis;\n3. Diagnostic workup including functional imaging (F or…",
+                "answers_question": "Phase 3 confirmation of the OS benefit for MDT in oligomet CRPC",
+                "relevance_phrase": "phase 3 SBRT to all oligomets vs standard of care"
               },
               {
-                "nct": "NCT06276465",
-                "brief_title": "Treatment With Darolutamide +/- Radiation Therapy for Patients With a Castration Resistant Cancer and Metastases Detected by Functional Imaging",
+                "nct": "NCT04787744",
+                "brief_title": "Veterans Affairs Seamless Phase II/III Randomized Trial of STAndard Systemic theRapy With or Without PET-directed Local Therapy for Oligometastatic pRosTate Cancer",
                 "overall_status": "RECRUITING",
                 "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 336,
-                "primary_completion_date": "2029-10",
-                "brief_summary": "In earlier stages of prostate cancer, male sexual hormones (androgens) stimulate the growth of cancer cells. Castration-resistant prostate cancer (CRPC) means that the prostate cancer continued to grow despite patients are taking hormone therapy to control the disease. One of the standard treatments for these patients is so-called 'new generation' hormonal therapy. These hormone therapies include apalutamide, enzalutamide, or darolutamide. They work by blocking androgen receptors that play an…",
-                "conditions": [
-                  "Prostatic Cancer, Castration-Resistant"
-                ],
-                "interventions": [
-                  {
-                    "name": "Darolutamide 300 mg",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Stereotactic body radiation therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Androgen deprivation therapy",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Patient must have signed a written informed consent prior to any trial specific procedures. When the patient is physically unable to give their written consent, a trusted person of their choice, independent from the investigator or the sponsor, can confirm in writing the…",
-                "answers_question": "Phase 3 confirmation of OS benefit for MDT in CRPC",
-                "relevance_phrase": "phase 3 darolutamide ± SBRT in mCRPC"
-              },
-              {
-                "nct": "NCT03525288",
-                "brief_title": "PSMA-PET Guided Radiotherapy",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
                   "PHASE2",
                   "PHASE3"
                 ],
-                "enrollment_count": 130,
-                "primary_completion_date": "2026-05",
-                "brief_summary": "PSMA PET/CT has demonstrated higher sensitivity in detecting metastases than current imaging standard of care (CT and bone scan). \\[18F\\]DCFPyL is a promising high-sensitivity second generation PSMA-targeted urea-based PET probe. The hypothesis is that definitive radiotherapy (RT) informed by PSMA-PET findings will lead to improved cancer control outcomes compared to RT guided by conventional staging only. This study utilizes cmRCT design in companion to PERA (Partnership initiative for the…",
+                "enrollment_count": 464,
+                "primary_completion_date": "2026-09",
+                "brief_summary": "This is a prospective, open-label, multi-center seamless phase II to phase III randomized clinical trial designed to compare SST with or without PET-directed local therapy in improving the castration-resistant prostate cancer-free survival (CRPC-free survival) for Veterans with oligometastatic prostate cancer. Oligometastasis will be defined as 1-10 sites of metastatic disease based on the clinical determination of the LSI which incorporates all imaging, clinical, and pathologic data available.",
                 "conditions": [
-                  "Prostate Cancer"
+                  "Prostate Cancer",
+                  "Oligometastasis",
+                  "Oligorecurrence",
+                  "Recurrent Prostate Cancer",
+                  "Metastatic Prostate Cancer",
+                  "De Novo Prostate Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "PSMA -PET/CT simulation",
+                    "name": "PET-directed Local Therapy using Surgery",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "PET-directed Local Therapy using Radiation",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "Standard-care simulation",
+                    "name": "Salvage Local Therapy for locally recurrent disease",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Goserelin, Histrelin, Leuprolide & Triptorelin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Nilutamide, Flutamide, & Bicalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Degarelix & Relugolix",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Docetaxel +/- prednisone",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Abiraterone + Prednisone",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Abiraterone + Methylprednisolone",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Apalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Enzalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Prostate-directed Radiation for De novo oligometastatic prostate cancer",
                     "type": "RADIATION"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Enrolled in PERA (CHUM CER 17.0.32) and consented to contact for investigational trials.\n2. Histological diagnosis of prostate cancer planned for curative-intent radiotherapy.\n3. ECOG 0-1\n4. Charlson Cormobidity Index ≤ 4\n5. High-risk of distant metastases as defined by any…",
-                "answers_question": "Optimal oligometastatic definition (PSMA-PET vs conventional imaging)",
-                "relevance_phrase": "RT guided by PSMA-PET vs conventional staging"
-              },
-              {
-                "nct": "NCT02685397",
-                "brief_title": "Management of Castration-Resistant Prostate Cancer with Oligometastases",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE2",
-                  "PHASE3"
-                ],
-                "enrollment_count": 102,
-                "primary_completion_date": "2027-04",
-                "brief_summary": "This adaptive phase II/III randomized trial is designed to demonstrate that eradication of oligometastases by SBRT is a promising and emerging way to delay disease progression and postpone second line systemic therapies in castration-resistant prostate cancer (CRPC) patients. Only CRPC patients with an oligometastatic recurrence will be eligible to take part in this trial. All participating patients will receive either the standard of care (i.e. LHRH agonist in combination with the new…",
-                "conditions": [
-                  "Castration-resistant Prostate Cancer Patients with Oligometastases"
-                ],
-                "interventions": [
-                  {
-                    "name": "Leuprolide Acetate",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Goserelin Acetate",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Triptorelin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Enzalutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Stereotactic Body Radiation Therapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Age 18 or older and willing and able to provide informed consent;\n2. Histologically confirmed adenocarcinoma of the prostate without neuroendocrine differentiation or small cell features;\n3. Ongoing androgen deprivation therapy with a Gonadotropin-releasing hormone (GnRH)…",
-                "answers_question": "Durability of benefit with newer systemic backbones beyond abiraterone",
-                "relevance_phrase": "enzalutamide backbone + SBRT in oligomet CRPC"
-              },
-              {
-                "nct": "NCT06276465",
-                "brief_title": "Treatment With Darolutamide +/- Radiation Therapy for Patients With a Castration Resistant Cancer and Metastases Detected by Functional Imaging",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 336,
-                "primary_completion_date": "2029-10",
-                "brief_summary": "In earlier stages of prostate cancer, male sexual hormones (androgens) stimulate the growth of cancer cells. Castration-resistant prostate cancer (CRPC) means that the prostate cancer continued to grow despite patients are taking hormone therapy to control the disease. One of the standard treatments for these patients is so-called 'new generation' hormonal therapy. These hormone therapies include apalutamide, enzalutamide, or darolutamide. They work by blocking androgen receptors that play an…",
-                "conditions": [
-                  "Prostatic Cancer, Castration-Resistant"
-                ],
-                "interventions": [
-                  {
-                    "name": "Darolutamide 300 mg",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Stereotactic body radiation therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Androgen deprivation therapy",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Patient must have signed a written informed consent prior to any trial specific procedures. When the patient is physically unable to give their written consent, a trusted person of their choice, independent from the investigator or the sponsor, can confirm in writing the…",
-                "answers_question": "Durability of benefit with newer systemic backbones beyond abiraterone",
-                "relevance_phrase": "SBRT + darolutamide backbone, newer than abi"
+                "eligibility_brief": "Inclusion Criteria:\n\nAge 18 years. Ability to provide Informed Consent for participation in the study ECOG Performance Status 2 at time of enrollment. Prostate cancer, confirmed histologically or cytologically. If original documentation of histology and cytology are not available, documentation of…",
+                "answers_question": "Phase 3 confirmation of the OS benefit for MDT in oligomet CRPC",
+                "relevance_phrase": "randomized phase 2/3 MDT vs systemic therapy alone"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "oligometastatic prostate radiotherapy",
-                "PSMA oligometastatic prostate"
+                "SBRT oligometastatic prostate",
+                "stereotactic prostate metastases"
               ],
               "queries_failed": [],
-              "candidates_returned": 33,
-              "fetched_at": "2026-07-08T08:03:42.950Z",
+              "candidates_returned": 35,
+              "fetched_at": "2026-07-09T08:32:10.589Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -531,14 +481,76 @@
       }
     ],
     "meta": {
-      "clusters_total": 2,
-      "studies_analyzed": 2,
+      "clusters_total": 3,
+      "studies_analyzed": 3,
       "dropped": [],
       "ocr_available": true
     }
   },
   "bookmarks": [],
   "papers": [
+    {
+      "id": 39,
+      "pmid": "41191939",
+      "doi": "10.1056/nejmoa2412225",
+      "pmc_id": "PMC7618363",
+      "title": "Ten-Year Survival after Postmastectomy Chest-Wall Irradiation in Breast Cancer.",
+      "authors": [
+        "Kunkler",
+        "Russell",
+        "Anderson",
+        "Sainsbury",
+        "Dixon",
+        "Cameron",
+        "Loncaster",
+        "Hatton",
+        "Westenberg",
+        "Clarke",
+        "McCarty",
+        "Evans",
+        "Geropantas",
+        "Wolstenholme",
+        "Alhasso",
+        "Woodings",
+        "Barraclough",
+        "Bayman",
+        "Welch",
+        "Muturi",
+        "McEleney",
+        "Burns",
+        "Riddle",
+        "Macdonald",
+        "Dunlop",
+        "Sergenson",
+        "van Tienhoven",
+        "Taylor",
+        "Bartlett",
+        "Piper",
+        "Velikova",
+        "Aird",
+        "Chua",
+        "Hurkmans",
+        "Venables",
+        "Williams",
+        "Thomas",
+        "Hanby",
+        "Maclennan",
+        "Cleator",
+        "Verghese",
+        "Li",
+        "Wang",
+        "Canney",
+        "SUPREMO Trial Investigators",
+        "Sunil"
+      ],
+      "journal": "The New England journal of medicine",
+      "pub_date": "2025-11-06",
+      "abstract": "BACKGROUND: The role of postmastectomy chest-wall irradiation in patients with breast cancer classified as pN1 (with involvement of one to three axillary nodes) or pN0 (pathologically node negative) with additional risk factors is uncertain.\n\nMETHODS: In this international, phase 3, randomized trial, we evaluated the omission of chest-wall irradiation in women with \"intermediate-risk\" breast cancer - defined as cancer that was stage pT1N1, pT2N1, or pT3N0 or stage pT2N0 with a histologic grade of 3, lymphovascular invasion, or both (tumor size: T1, &#x2264;2 cm; T2, >2 cm to 5 cm; or T3, >5 cm) - that was treated with mastectomy, an axillary procedure, and systemic therapy. Patients were assigned to undergo chest-wall irradiation (40 to 50 Gy; the irradiation group) or not to undergo chest-wall irradiation (the no-irradiation group). The primary end point was overall survival, with 10 years of follow-up. Chest-wall recurrence, regional recurrence, disease-free survival, distant metastasis-free survival, causes of death, and radiation-related adverse events were also assessed.\n\nRESULTS: The intention-to-treat population included 808 patients in the irradiation group and 799 in the no-irradiation group. The median follow up was 9.6 years. Overall survival was 81.4% with chest-wall irradiation and 81.9% with no chest-wall irradiation according to 10-year Kaplan-Meier estimates (hazard ratio for death, 1.04; 95% confidence interval [CI], 0.82 to 1.30; P&#x2009;=&#x2009;0.80). A total of 29 patients had a chest-wall recurrence - 9 (1.1%) in the irradiation group and 20 (2.5%) in the no-irradiation group (between-group difference, <2 percentage points; hazard ratio, 0.45; 95% CI, 0.20 to 0.99). Disease-free survival was 76.2% in the irradiation group and 75.5% in the no-irradiation group (hazard ratio for recurrence or death, 0.97; 95% CI, 0.79 to 1.18), and distant metastasis-free survival was 78.2% and 79.2%, respectively (hazard ratio for distant metastasis or death, 1.06; 95% CI, 0.86 to 1.31).\n\nCONCLUSIONS: In this trial, chest-wall irradiation did not result in higher overall survival than no chest-wall irradiation among patients with intermediate-risk, early breast cancer treated with mastectomy and contemporary adjuvant systemic therapy. (Funded by the Medical Research Council and others; SUPREMO ISRCTN Clinical Study Registry number, 61145589.).",
+      "pdf_path": null,
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7618363/",
+      "note": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7618363/",
+      "resolved_from_review": false
+    },
     {
       "id": 38,
       "pmid": null,
