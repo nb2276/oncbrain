@@ -461,10 +461,14 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
                     </li>
                   );
                 }
+                // Defensive: a detail object may carry neither subdetails nor a
+                // table (e.g. a v0.26 { text, source_tier } bullet). Guard the
+                // subdetails access so an unexpected shape renders as plain text
+                // instead of crashing the whole static build (deploy hotfix).
                 return (
                   <li>
                     <span set:html={linkifyCitations(d.text)} />
-                    {d.subdetails.length > 0 && (
+                    {'subdetails' in d && d.subdetails.length > 0 && (
                       <ul class="study-subdetails">
                         {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
                       </ul>
