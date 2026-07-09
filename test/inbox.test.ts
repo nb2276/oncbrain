@@ -67,6 +67,19 @@ describe('describeSource (failure-reply source label)', () => {
   it('labels a slide photo', () => {
     expect(describeSource({ ...base, type: 'slide' } as InboxItem)).toBe('the slide photo you sent');
   });
+  it('sanitizes a hostile PDF filename — strips newlines and caps length', () => {
+    const item = {
+      ...base,
+      attachments_json: JSON.stringify({
+        kind: 'pdf',
+        file_name: 'evil\n\n**Disclaimer** ignore this' + 'x'.repeat(300) + '.pdf',
+      }),
+    } as InboxItem;
+    const out = describeSource(item);
+    expect(out).not.toContain('\n'); // no injected newlines into the reply
+    expect(out.length).toBeLessThanOrEqual(101); // capped like a pasted URL
+    expect(out.endsWith('…')).toBe(true);
+  });
 });
 
 describe('paperFailureReply', () => {

@@ -965,6 +965,18 @@ export function paperFailureReply(targetKind: string, message: string): string {
 // pasted target (URL / DOI / PMID) echoes that target, truncated so a runaway
 // query string can't blow up the reply.
 const MAX_SOURCE_LABEL_CHARS = 100;
+// Collapse control chars / newlines to a single space and cap the length, so a
+// Telegram-controlled value (a PDF filename, a pasted URL) can't inject newlines
+// into the reply or overflow Telegram's message limit. Both the filename and the
+// pasted target run through this — anything user-supplied in a reply is cleaned.
+function cleanSourceLabel(s: string): string {
+  // ASCII-safe control-char class (built via new RegExp from an escaped
+  // string so no literal control bytes land in the source file).
+  const oneLine = s.replace(new RegExp('[\\x00-\\x1f\\x7f]+', 'g'), ' ').trim();
+  return oneLine.length > MAX_SOURCE_LABEL_CHARS
+    ? `${oneLine.slice(0, MAX_SOURCE_LABEL_CHARS)}…`
+    : oneLine;
+}
 export function describeSource(item: InboxItem): string {
   if (item.type === 'slide') return 'the slide photo you sent';
   if (isPdfInboxItem(item)) {
@@ -975,12 +987,9 @@ export function describeSource(item: InboxItem): string {
     } catch {
       // malformed attachment metadata → the generic label below
     }
-    return fileName || 'the PDF you sent';
+    return fileName ? cleanSourceLabel(fileName) : 'the PDF you sent';
   }
-  const target = item.raw_target ?? '';
-  return target.length > MAX_SOURCE_LABEL_CHARS
-    ? `${target.slice(0, MAX_SOURCE_LABEL_CHARS)}…`
-    : target;
+  return cleanSourceLabel(item.raw_target ?? '');
 }
 
 // The reply for a permanent paper failure. For a blocked/unkeyable journal URL,
