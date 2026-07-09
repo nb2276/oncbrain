@@ -958,6 +958,31 @@ export function paperFailureReply(targetKind: string, message: string): string {
   return base;
 }
 
+// A short human label for the source in a failure/status reply, so a per-source
+// reply names WHICH item it's about when the curator forwarded a batch at once
+// (paired with the threaded reply_to_message_id). A slide and an unnamed PDF get
+// a generic phrase; a PDF with a filename gets the filename; anything keyed by a
+// pasted target (URL / DOI / PMID) echoes that target, truncated so a runaway
+// query string can't blow up the reply.
+const MAX_SOURCE_LABEL_CHARS = 100;
+export function describeSource(item: InboxItem): string {
+  if (item.type === 'slide') return 'the slide photo you sent';
+  if (isPdfInboxItem(item)) {
+    let fileName: string | null = null;
+    try {
+      const meta = JSON.parse(item.attachments_json ?? '{}') as { file_name?: string | null };
+      fileName = meta.file_name ?? null;
+    } catch {
+      // malformed attachment metadata → the generic label below
+    }
+    return fileName || 'the PDF you sent';
+  }
+  const target = item.raw_target ?? '';
+  return target.length > MAX_SOURCE_LABEL_CHARS
+    ? `${target.slice(0, MAX_SOURCE_LABEL_CHARS)}…`
+    : target;
+}
+
 // The reply for a permanent paper failure. For a blocked/unkeyable journal URL,
 // try to find an accessible copy of the same paper (by title, via PubMed then
 // Crossref) and offer a clean re-ingest link the curator forwards back to

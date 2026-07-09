@@ -14,11 +14,60 @@ import {
   upsertConference,
   setBookmarkConferenceIfEmpty,
 } from '../src/lib/db.ts';
-import { runEnrichmentLoop, detectAndEnsureConference, paperFailureReply, contentDepthNote } from '../src/lib/inbox-enrichment.ts';
+import { runEnrichmentLoop, detectAndEnsureConference, paperFailureReply, contentDepthNote, describeSource } from '../src/lib/inbox-enrichment.ts';
+import type { InboxItem } from '../src/lib/db.ts';
 
 function freshDb(): Database.Database {
   return openDb(':memory:');
 }
+
+describe('describeSource (failure-reply source label)', () => {
+  const base: InboxItem = {
+    id: 1,
+    type: 'paper',
+    raw_target: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7618363/',
+    raw_message_text: null,
+    attachments_json: null,
+    telegram_msg_id: 100,
+    telegram_chat_id: 5,
+    source_batch_key: null,
+    received_at: 0,
+    bookmark_date: '2026-07-07',
+    enrichment_status: 'pending',
+    enrichment_attempts: 0,
+    enrichment_attempted_at: null,
+    enrichment_error: null,
+    enriched_row_id: null,
+    created_at: 0,
+  } as unknown as InboxItem;
+
+  it('uses the pasted URL for a paper', () => {
+    expect(describeSource(base)).toBe('https://pmc.ncbi.nlm.nih.gov/articles/PMC7618363/');
+  });
+  it('truncates an overlong target', () => {
+    const long = 'https://example.com/' + 'a'.repeat(200);
+    const out = describeSource({ ...base, raw_target: long } as InboxItem);
+    expect(out.endsWith('…')).toBe(true);
+    expect(out.length).toBeLessThanOrEqual(101);
+  });
+  it('uses the PDF filename when present', () => {
+    const item = {
+      ...base,
+      attachments_json: JSON.stringify({ kind: 'pdf', file_name: 'supremo-nejm.pdf' }),
+    } as InboxItem;
+    expect(describeSource(item)).toBe('supremo-nejm.pdf');
+  });
+  it('falls back to a generic label for a PDF with no filename', () => {
+    const item = {
+      ...base,
+      attachments_json: JSON.stringify({ kind: 'pdf', file_name: null }),
+    } as InboxItem;
+    expect(describeSource(item)).toBe('the PDF you sent');
+  });
+  it('labels a slide photo', () => {
+    expect(describeSource({ ...base, type: 'slide' } as InboxItem)).toBe('the slide photo you sent');
+  });
+});
 
 describe('paperFailureReply', () => {
   it('tells the curator to send a DOI/PMID when a journal URL fetch is rejected', () => {
