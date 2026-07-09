@@ -301,6 +301,14 @@ export type DigestStudy = {
   // definition, so the two MUST stay in lockstep.
   significance?: string | null;
   significance_perspective?: string | null;
+  // v0.26 (E3): the "Monday clinic" decision line — ONE grounded sentence naming
+  // which patient in tomorrow's clinic this study moves, and which it does NOT.
+  // The peer-forward trigger (the sentence a subspecialist screenshots) and the
+  // decision content E1 pulls into the share body. Distinct from significance
+  // (which names what's ADDITIVE to the literature); abstains (null) when it
+  // would just repeat significance or when there's no clinic-actionable read.
+  // No-fabrication outranks the framing. Mirrored in digest-data.ts:DigestStudy.
+  monday_clinic?: string | null;
   // v0.14.5 (E5): set true when any source is a preprint (medRxiv / bioRxiv /
   // Research Square, by DOI prefix or host). Drives the "not peer-reviewed"
   // badge and a deterministic verdict cap at build (see lib/preprint.ts). Older
@@ -1433,6 +1441,10 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     // label (significance_perspective) is stamped later, at build assembly,
     // where opts.perspectiveName is known — the parser only sees the raw text.
     significance: parseSignificance(root.significance),
+    // v0.26 (E3): the Monday-clinic decision line. Same prose sanitizer as
+    // significance (trim / min+max chars / null on empty); the agent keeps it to
+    // one short sentence and abstains when it would just repeat significance.
+    monday_clinic: parseSignificance(root.monday_clinic),
     open_questions: parseOpenQuestions(root.open_questions),
     consort: parseConsort(root.consort),
     modality,

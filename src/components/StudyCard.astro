@@ -130,6 +130,35 @@ const significanceLabel =
     ? study.significance_perspective.trim()
     : null;
 
+// v0.26 (E3): the Monday-clinic decision line. Design decision Y: significance
+// holds the resting long-form slot and the clinic line folds into the depth; but
+// when there is NO significance, PROMOTE the clinic line into the resting slot so
+// the card keeps one long-form surface. The clinic line folds (below) only when
+// significance already occupies the resting slot, so it never renders twice.
+const mondayClinicText =
+  typeof study.monday_clinic === 'string' && study.monday_clinic.trim()
+    ? study.monday_clinic.trim()
+    : null;
+const restingProse: { text: string; label: string; sublabel: string | null } | null = significanceText
+  ? { text: significanceText, label: 'Why it matters', sublabel: significanceLabel }
+  : mondayClinicText
+    ? { text: mondayClinicText, label: 'Monday clinic', sublabel: null }
+    : null;
+const foldedClinic = significanceText ? mondayClinicText : null;
+
+// v0.26 (E1): the text-ready share body — the decision content a colleague sees
+// when the card is forwarded, not a bare title+URL. Name-led headline (the TL;DR,
+// verbatim) + verdict + the Monday-clinic line when present. The deep link rides
+// the Web Share `url` field (data-share-url), so it isn't duplicated here.
+const shareHeadline = (study.tldr ?? '').trim();
+const shareText = [
+  shareHeadline && shareHeadline.toLowerCase().startsWith(study.name.toLowerCase())
+    ? shareHeadline
+    : [study.name, shareHeadline].filter(Boolean).join(': '),
+  verdictMeta ? `${verdictMeta.emoji} ${verdictMeta.label}` : null,
+  mondayClinicText,
+].filter((l): l is string => Boolean(l && l.trim())).join('\n');
+
 // IMRD-style section bucketing for the depth fold. The leading emoji on each
 // bullet already encodes the section (VOICE.md): 🔍/💊 are Methods, 📊/📐 are
 // Results, ⚠️ is Critique. Bullets without a recognized emoji prefix fall to
@@ -294,14 +323,14 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       <p class="verdict-rationale">{study.verdict.rationale}</p>
     </aside>
   )}
-  {significanceText && (
+  {restingProse && (
     <section class="significance-block" aria-label="Why this study matters">
       <div class="significance-label">
-        Why it matters{significanceLabel && (
-          <Fragment><span class="significance-sep" aria-hidden="true"> · </span>{significanceLabel}</Fragment>
+        {restingProse.label}{restingProse.sublabel && (
+          <Fragment><span class="significance-sep" aria-hidden="true"> · </span>{restingProse.sublabel}</Fragment>
         )}
       </div>
-      <p class="significance-text" set:html={linkifyCitations(significanceText)} />
+      <p class="significance-text" set:html={linkifyCitations(restingProse.text)} />
     </section>
   )}
   {comparatorBullets.length > 0 && (
@@ -341,6 +370,7 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
         class="study-share"
         data-share-url={shareUrl}
         data-share-title={study.name}
+        data-share-text={shareText}
         aria-label={`Share ${study.name}`}
         title="Share"
       ><svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
@@ -429,6 +459,12 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
           </Fragment>
         )}
       </summary>
+      {foldedClinic && (
+        <section class="depth-section clinic-section" aria-label="Monday clinic decision">
+          <div class="section-label">Monday clinic</div>
+          <p class="clinic-text" set:html={linkifyCitations(foldedClinic)} />
+        </section>
+      )}
       {depthSections.map((sec) => (
         <section class="depth-section">
           <div class="section-label">{sec.label}</div>
@@ -967,6 +1003,15 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     margin: 0;
     font-size: 0.97rem;
     line-height: 1.55;
+    color: var(--fg);
+  }
+
+  /* v0.26 (E3): the folded Monday-clinic decision line — serif prose like the
+     significance callout, sitting under its section label in the depth fold. */
+  .clinic-text {
+    margin: 0.3rem 0 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
     color: var(--fg);
   }
 

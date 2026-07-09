@@ -76,6 +76,11 @@ export type DigestStudy = {
   // perspective was set (significance then renders under the generic heading)
   // or when there is no significance.
   significance_perspective?: string | null;
+  // v0.26 (E3): the "Monday clinic" decision line — one grounded sentence naming
+  // which patient this study moves and which it does not. Peer-forward trigger +
+  // E1 share-body content. Distinct from significance; abstains when it would
+  // repeat it. Mirrored in llm-pipeline.ts:DigestStudy — keep in lockstep.
+  monday_clinic?: string | null;
   // v0.14.5 (E5): true when any source is a preprint. Drives the "not
   // peer-reviewed" badge; the verdict was already capped at build. Absent on
   // older artifacts and on non-preprint studies.
