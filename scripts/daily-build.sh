@@ -12,7 +12,10 @@
 #                         data (a full-paper PDF merged figures onto an
 #                         abstract-only study, a late conference slide)
 #   5. astro build      — static site
-#   6. git commit/push  — DigitalOcean auto-deploys
+#   6. git commit/push  — ALWAYS to main (DigitalOcean deploys only main; if the
+#                         working tree is parked on a feature branch overnight,
+#                         content is published through a temp main worktree —
+#                         see the branch guard in the publish stage)
 #
 # All output goes to ~/Library/Logs/oncbrain-cron.log.
 #
@@ -142,28 +145,103 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   # but keep running so notify/exit-status still fire.
   CHANGED_DATES=""
   if [ "$ASTRO_OK" = 1 ] && [ "$DIGEST_FAILED" = 0 ]; then
-    echo ""
-    echo "→ Staging data/ for commit"
-    git add data 2>/dev/null || true
+    # BRANCH GUARD: content must ALWAYS land on main — DigitalOcean deploys only
+    # main, so a digest committed to whatever branch happens to be checked out
+    # never reaches the site (bit us 2026-07-08 and 2026-07-10: the repo sat on a
+    # feature branch overnight and the auto commit stranded there). On main we
+    # commit in place as before; on any other branch (or detached HEAD) we publish
+    # through a throwaway main worktree instead — the working tree is left alone,
+    # no branch switch under the curator's feet.
+    CURRENT_BRANCH="$(git symbolic-ref --short -q HEAD || echo DETACHED)"
+    if [ "$CURRENT_BRANCH" = "main" ]; then
+      echo ""
+      echo "→ Staging data/ for commit"
+      git add data 2>/dev/null || true
 
-    # Which digest dates actually changed this run? A late-evening tweet can land
-    # on yesterday's date, so notifying only $TODAY would miss it. Derive the
-    # changed dates from the staged digest files (capture before the commit).
-    CHANGED_DATES="$(git diff --cached --name-only -- data/digests 2>/dev/null \
-      | sed -nE 's|.*/([0-9]{4}-[0-9]{2}-[0-9]{2})\.json$|\1|p' | sort -u)"
+      # Which digest dates actually changed this run? A late-evening tweet can land
+      # on yesterday's date, so notifying only $TODAY would miss it. Derive the
+      # changed dates from the staged digest files (capture before the commit).
+      CHANGED_DATES="$(git diff --cached --name-only -- data/digests 2>/dev/null \
+        | sed -nE 's|.*/([0-9]{4}-[0-9]{2}-[0-9]{2})\.json$|\1|p' | sort -u)"
 
-    if git diff --cached --quiet -- data; then
-      echo "  (no new digest content — nothing to commit)"
-    else
-      # Scope the commit to the data/ pathspec. Without it, a source file the
-      # curator left staged the night before would ride along into the "auto"
-      # commit and deploy to production. (The repo rule: stage explicit paths,
-      # never let an unscoped commit sweep the whole index.)
-      git commit -m "auto: $TODAY 1am pull" -- data
-      if git push 2>&1; then
-        echo "  pushed → DigitalOcean will auto-deploy"
+      if git diff --cached --quiet -- data; then
+        echo "  (no new digest content — nothing to commit)"
       else
-        echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
+        # Scope the commit to the data/ pathspec. Without it, a source file the
+        # curator left staged the night before would ride along into the "auto"
+        # commit and deploy to production. (The repo rule: stage explicit paths,
+        # never let an unscoped commit sweep the whole index.)
+        git commit -m "auto: $TODAY 1am pull" -- data
+        if git push 2>&1; then
+          echo "  pushed → DigitalOcean will auto-deploy"
+        else
+          echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
+          FAILED=1
+        fi
+      fi
+    else
+      echo ""
+      echo "→ Branch guard: on '$CURRENT_BRANCH' — publishing content to main via temp worktree"
+      PUBLISH_WT="$(mktemp -d "${TMPDIR:-/tmp}/oncbrain-publish.XXXXXX")"
+      git worktree prune 2>/dev/null
+      # mktemp already created the dir; worktree add needs it absent (or empty —
+      # it is), so --force only covers the pre-existing-empty-dir case.
+      if git worktree add --force "$PUBLISH_WT" main >/dev/null 2>&1; then
+        # Best-effort: fast-forward local main to origin first so the push can't
+        # fail non-FF just because a hand-fix was pushed from elsewhere. If the
+        # fetch fails (offline) or main diverged, continue — the push below still
+        # reports loudly on failure.
+        if ! git -C "$PUBLISH_WT" fetch origin main >/dev/null 2>&1 \
+          || ! git -C "$PUBLISH_WT" merge --ff-only FETCH_HEAD >/dev/null 2>&1; then
+          echo "  ⚠ could not fast-forward main from origin (continuing with local main)"
+        fi
+        # Copy into the worktree ONLY what this pipeline can vouch for:
+        #   (a) data/ files modified or created in this working tree — the fresh
+        #       build output (status is ignore-aware, so filed PDFs / slide
+        #       photos never publish: the IP boundary holds), and
+        #   (b) data/ files committed on this branch that main lacks entirely —
+        #       a digest a previous run stranded on the branch (self-heal).
+        #       Additive only, so it can never regress main.
+        # A file tracked on BOTH but differing is deliberately left alone: this
+        # run didn't build it, the branch checkout may simply be stale, and
+        # main's copy (e.g. a hand-fix pushed from a rescue worktree) must win.
+        # Deletions never propagate either — unpublishing a day stays manual.
+        git status --porcelain -uall -z -- data \
+          | while IFS= read -r -d '' rec; do
+              f="${rec:3}"
+              [ -f "$f" ] || continue
+              mkdir -p "$PUBLISH_WT/$(dirname "$f")"
+              cp "$f" "$PUBLISH_WT/$f"
+            done
+        git ls-files -z -- data \
+          | while IFS= read -r -d '' f; do
+              [ -f "$f" ] || continue
+              if ! git -C "$PUBLISH_WT" cat-file -e "HEAD:$f" 2>/dev/null; then
+                mkdir -p "$PUBLISH_WT/$(dirname "$f")"
+                cp "$f" "$PUBLISH_WT/$f"
+              fi
+            done
+        git -C "$PUBLISH_WT" add data 2>/dev/null || true
+
+        CHANGED_DATES="$(git -C "$PUBLISH_WT" diff --cached --name-only -- data/digests 2>/dev/null \
+          | sed -nE 's|.*/([0-9]{4}-[0-9]{2}-[0-9]{2})\.json$|\1|p' | sort -u)"
+
+        if git -C "$PUBLISH_WT" diff --cached --quiet -- data; then
+          echo "  (no new digest content vs main — nothing to commit)"
+        else
+          git -C "$PUBLISH_WT" commit -m "auto: $TODAY 1am pull" -- data
+          if git -C "$PUBLISH_WT" push origin main 2>&1; then
+            echo "  pushed main → DigitalOcean will auto-deploy"
+          else
+            echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
+            FAILED=1
+          fi
+        fi
+        git worktree remove --force "$PUBLISH_WT" 2>/dev/null \
+          || echo "  ⚠ could not remove temp worktree at $PUBLISH_WT"
+      else
+        echo "  ✗ could not create a main worktree — content NOT published"
+        rmdir "$PUBLISH_WT" 2>/dev/null
         FAILED=1
       fi
     fi
