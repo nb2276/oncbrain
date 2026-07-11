@@ -2,6 +2,32 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+
+- **Cross-day duplicate detection (`npm run find:dups`).** The same trial could
+  get two study cards on two dates — a conference-tweet preview (no NCT) then a
+  full-paper card weeks later — because the NCT-only cross-day nudge couldn't
+  link them. `src/lib/study-dedup.ts` derives a discriminating acronym key from a
+  curated study name (cooperative-group and society guarded: bare EORTC/NRG/ARS
+  yield no key, `EORTC 22922` ≠ `EORTC 22033`, `PEACE-2` ≠ `PEACE-V`) and
+  `findCrossDateDuplicates` groups published cards by shared NCT and by key
+  across dates. The CLI is read-only: it prints suggested `--suppress` commands
+  (`--json` for tooling) and never edits; an OS update or a flagged review is
+  legitimate re-coverage, so the curator decides. On the back catalog it surfaced
+  RADIOSA / EXTEND / PEACE-2 duplicates (since cleaned) and caught a
+  Titlecase-capital-grab bug that had collided two distinct NRG trials.
+- **Acronym duplicate nudge + reply-to-drop.** The enrich-time nudge
+  (`notifyPriorCoverage`) now also fires on an acronym match
+  (`src/lib/acronym-coverage.ts`), so the heads-up lands even when neither the
+  tweet preview nor the paper carries an NCT. Both cards publish by default (no
+  silent auto-suppress); the DM names the earlier card and the curator can reply
+  `drop <date>/<slug>` in Telegram to suppress it — `src/lib/dedup-command.ts`
+  writes a durable suppress override and queues a rebuild. The drop takes effect
+  on the next rebuild (enrich and build run in the same nightly pass, so a reply
+  changes the next build, not the one that sent the nudge).
+
 ## [0.25.0] - 2026-07-03
 
 ### Added
