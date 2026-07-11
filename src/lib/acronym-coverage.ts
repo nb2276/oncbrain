@@ -14,13 +14,14 @@ import { studyDedupKey } from './study-dedup.ts';
 
 export type AcronymCoverageArtifact = {
   date: string; // YYYY-MM-DD
-  digest: { sites: Array<{ studies: Array<{ name: string }> }> };
+  digest: { sites: Array<{ studies: Array<{ name: string; slug?: string }> }> };
 };
 
-export type AcronymCoverageEntry = { date: string; name: string };
+// slug carried so a nudge can name a droppable target (reply "drop <date>/<slug>").
+export type AcronymCoverageEntry = { date: string; name: string; slug: string };
 export type AcronymCoverageIndex = Map<string, AcronymCoverageEntry[]>;
 
-export type PriorAcronymCoverage = { key: string; date: string; name: string };
+export type PriorAcronymCoverage = { key: string; date: string; name: string; slug: string };
 
 // dedupKey → coverage entries, newest first. Studies whose name yields no
 // discriminating key (bare society/group prefix, endpoint token) are skipped.
@@ -33,7 +34,7 @@ export function buildAcronymCoverageIndex(
       for (const study of site.studies) {
         const key = studyDedupKey(study.name);
         if (!key) continue;
-        const entry: AcronymCoverageEntry = { date: a.date, name: study.name };
+        const entry: AcronymCoverageEntry = { date: a.date, name: study.name, slug: study.slug ?? '' };
         const list = index.get(key);
         if (list) list.push(entry);
         else index.set(key, [entry]);
@@ -63,7 +64,7 @@ export function findPriorAcronymCoverage(
     const entries = index.get(key);
     if (!entries) continue;
     const prior = entries.find((e) => e.date < beforeDate);
-    if (prior) out.push({ key, date: prior.date, name: prior.name });
+    if (prior) out.push({ key, date: prior.date, name: prior.name, slug: prior.slug });
   }
   return out.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 }

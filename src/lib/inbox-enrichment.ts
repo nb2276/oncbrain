@@ -1099,16 +1099,29 @@ async function notifyPriorCoverage(
       item.bookmark_date,
     ).filter((p) => !nctNames.has(p.name));
 
-    if (nctPrior.length === 0 && acronymPrior.length === 0) return;
-
-    const lines = [
-      ...nctPrior.map((p) => `• ${p.nct} — covered ${p.date} (${p.name})`),
-      ...acronymPrior.map((p) => `• ${p.name} — covered ${p.date} (possible duplicate)`),
+    // One combined list of prior cards. Both this submission and the earlier
+    // card publish by DEFAULT (v0.26 chosen behavior: notify + reply to drop,
+    // never a silent auto-suppress). Each line offers a one-reply drop of the
+    // earlier card, keyed by its published date/slug.
+    const priors = [
+      ...nctPrior.map((p) => ({ date: p.date, name: p.name, slug: p.slug, tag: p.nct as string | null })),
+      ...acronymPrior.map((p) => ({ date: p.date, name: p.name, slug: p.slug, tag: null as string | null })),
     ];
-    const count = nctPrior.length + acronymPrior.length;
+    if (priors.length === 0) return;
+
+    const lines = priors.map((p) => {
+      const head = `• ${p.name} — covered ${p.date}${p.tag ? ` (${p.tag})` : ''}`;
+      // A slug is required to form a drop token; older artifacts without one
+      // just get the informational line.
+      return p.slug
+        ? `${head}\n   reply "drop ${p.date}/${p.slug}" to suppress that earlier card`
+        : head;
+    });
+    const count = priors.length;
     await replyToCurator(
       item,
-      `Heads up — previously covered ${count > 1 ? 'trials' : 'trial'}:\n${lines.join('\n')}`,
+      `Heads up — the source you just sent matches ${count > 1 ? 'trials' : 'a trial'} already covered. ` +
+        `Both will publish unless you drop one:\n${lines.join('\n')}`,
     );
   } catch {
     // a courtesy nudge must never fail enrichment

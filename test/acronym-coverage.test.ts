@@ -6,7 +6,12 @@ import {
 } from '../src/lib/acronym-coverage.ts';
 
 function cov(date: string, names: string[]): AcronymCoverageArtifact {
-  return { date, digest: { sites: [{ studies: names.map((name) => ({ name })) }] } };
+  return {
+    date,
+    digest: {
+      sites: [{ studies: names.map((name) => ({ name, slug: name.toLowerCase().split(/[\s(]/)[0] })) }],
+    },
+  };
 }
 
 describe('buildAcronymCoverageIndex', () => {
@@ -32,9 +37,11 @@ describe('findPriorAcronymCoverage', () => {
     cov('2026-05-31', ['ENZARAD (ANZUP 1303)']),
   ]);
 
-  it('returns coverage strictly before the given date', () => {
+  it('returns coverage strictly before the given date, carrying date/name/slug', () => {
     const prior = findPriorAcronymCoverage(idx, ['RAPCHEM'], '2026-06-09');
-    expect(prior).toEqual([{ key: 'RAPCHEM', date: '2026-05-17', name: 'RAPCHEM (BOOG 2010-03)' }]);
+    expect(prior).toEqual([
+      { key: 'RAPCHEM', date: '2026-05-17', name: 'RAPCHEM (BOOG 2010-03)', slug: 'rapchem' },
+    ]);
   });
 
   it('excludes same-day coverage (no self-trigger on the publish day)', () => {

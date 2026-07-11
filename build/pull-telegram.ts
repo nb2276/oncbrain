@@ -38,6 +38,7 @@ import {
   computeNextTelegramOffset,
 } from '../src/lib/telegram-ingest.ts';
 import { extractPaperUrls, tradePressOutletNames } from '../src/lib/paper-url.ts';
+import { parseDedupCommand, executeDedupDrop } from '../src/lib/dedup-command.ts';
 
 const OFFSET_KEY = 'telegram_offset';
 
@@ -133,6 +134,7 @@ async function main() {
   let skippedDuplicate = 0;
   let skippedNoTarget = 0;
   let skippedUnauthorized = 0;
+  let dedupCommands = 0;
   // Update ids whose inbox write threw — used to hold the offset back so the
   // message re-fetches next run instead of being silently lost.
   const failedUpdateIds = new Set<number>();
@@ -153,6 +155,30 @@ async function main() {
     const text = msg.text ?? msg.caption ?? '';
     const entities = msg.entities ?? msg.caption_entities ?? [];
     const date = unixToLocalDate(msg.date);
+
+    // v0.26: a curator reply "drop <date>/<slug>" is a dedup command, not a
+    // source. Recognize it BEFORE source extraction so it never lands in the
+    // inbox queue, apply the suppress + queued rebuild, and confirm. Skipped
+    // under --since-zero (replaying history must not re-drop) and --dry-run.
+    const dropCmd = parseDedupCommand(text);
+    if (dropCmd) {
+      if (args.sinceZero) continue; // don't replay drops on a history reset
+      dedupCommands++;
+      if (args.dryRun) {
+        console.log(`  [dry-run] would drop: ${dropCmd.date}/${dropCmd.slug}`);
+      } else {
+        const result = executeDedupDrop(db, dropCmd);
+        console.log(`  dedup drop ${dropCmd.date}/${dropCmd.slug}: ${result.ok ? 'ok' : 'rejected'}`);
+        if (msg.chat?.id != null) {
+          try {
+            await sendMessage(token, msg.chat.id, result.message, { disableWebPagePreview: true });
+          } catch (err) {
+            console.warn(`  failed to send dedup-drop reply: ${(err as Error).message}`);
+          }
+        }
+      }
+      continue;
+    }
 
     // v0.5: tweet URLs + PubMed PMIDs + slide photos.
     // v0.8: also DOI/journal/PMC URLs (PR1) + PDF documents (PR2), both
@@ -421,7 +447,7 @@ async function main() {
   }
 
   console.log(
-    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} unauthorized=${skippedUnauthorized} next-offset=${nextOffset}`,
+    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} unauthorized=${skippedUnauthorized} dedup-commands=${dedupCommands} next-offset=${nextOffset}`,
   );
   console.log(`Next: \`npm run enrich:inbox\` to enrich pending items, then \`npm run build:day\`.`);
 }

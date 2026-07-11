@@ -81,6 +81,12 @@ npm run override -- --date=2026-05-20 --related-trials-set=<slug> --json='[...]'
 npm run override -- --date=2026-05-20 --related-trials-clear=<slug>                       # clear
 npm run studio                  # interactive TUI (suppress/edit studies, trials-to-watch, build, ingest) wraps the above via @clack/prompts
 
+# Cross-day duplicate detection (v0.26)
+npm run find:dups               # scan published digests for the same trial covered on >1 date (shared NCT + discriminating acronym key); prints suggested --suppress commands. READ-ONLY. --json for tooling
+# Also: the enrich-time nudge (notifyPriorCoverage) DMs the curator when a submission matches an earlier study
+# (by NCT or acronym) and both cards will publish; reply "drop <date>/<slug>" in Telegram to suppress the earlier
+# one (writes a suppress override + queues a rebuild). Never auto-suppresses; default keeps both.
+
 # Deeper analysis (optional config — see "LLM backend")
 DIGEST_STUDY_MODEL=opus npm run build:day -- --date=<date>               # Opus on Phase 2 only (works on claude-cli)
 DIGEST_THINKING=8000 LLM_BACKEND=api npm run build:day -- --date=<date>  # + Phase 2 extended thinking (api only)
