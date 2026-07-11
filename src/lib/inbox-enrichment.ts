@@ -63,6 +63,12 @@ import {
   findPriorCoverage,
   type NctCoverageIndex,
 } from './nct-coverage.ts';
+import {
+  buildAcronymCoverageIndex,
+  findPriorAcronymCoverage,
+  type AcronymCoverageIndex,
+} from './acronym-coverage.ts';
+import { extractTextAcronymKeys } from './study-dedup.ts';
 import { extractPdfText, extractPdfFigureOcr, MAX_FIGURE_OCR_CHARS, PdfToolError } from './pdf-text.ts';
 import { extractPdfFigureStructured, MAX_FIGURE_STRUCTURED_CHARS } from './figure-extract.ts';
 import { enrichPmcOaFigures, resolvePmcIdForDoi } from './pmc-oa.ts';
@@ -1069,21 +1075,40 @@ async function notifyPriorCoverage(
   item: InboxItem,
   rowId: number,
   index: NctCoverageIndex,
+  acronymIndex: AcronymCoverageIndex,
 ): Promise<void> {
-  if (index.size === 0) return;
+  if (index.size === 0 && acronymIndex.size === 0) return;
   try {
     const text = getEnrichedText(db, item.type, rowId);
     if (!text) return;
+
+    // Strong signal: shared NCT with an earlier digest.
     const ncts = extractCitations(text)
       .filter((c) => c.kind === 'nct')
       .map((c) => c.id);
-    if (ncts.length === 0) return;
-    const prior = findPriorCoverage(index, ncts, item.bookmark_date);
-    if (prior.length === 0) return;
-    const lines = prior.map((p) => `• ${p.nct} — covered ${p.date} (${p.name})`);
+    const nctPrior = ncts.length ? findPriorCoverage(index, ncts, item.bookmark_date) : [];
+
+    // Medium signal (v0.26): same trial acronym as an earlier digest — catches
+    // the tweet-preview→full-paper duplicate where neither side carries an NCT.
+    // Suppress an acronym hit whose trial already surfaced via NCT above, so the
+    // curator isn't told about the same trial twice.
+    const nctNames = new Set(nctPrior.map((p) => p.name));
+    const acronymPrior = findPriorAcronymCoverage(
+      acronymIndex,
+      extractTextAcronymKeys(text),
+      item.bookmark_date,
+    ).filter((p) => !nctNames.has(p.name));
+
+    if (nctPrior.length === 0 && acronymPrior.length === 0) return;
+
+    const lines = [
+      ...nctPrior.map((p) => `• ${p.nct} — covered ${p.date} (${p.name})`),
+      ...acronymPrior.map((p) => `• ${p.name} — covered ${p.date} (possible duplicate)`),
+    ];
+    const count = nctPrior.length + acronymPrior.length;
     await replyToCurator(
       item,
-      `Heads up — previously covered ${prior.length > 1 ? 'trials' : 'trial'}:\n${lines.join('\n')}`,
+      `Heads up — previously covered ${count > 1 ? 'trials' : 'trial'}:\n${lines.join('\n')}`,
     );
   } catch {
     // a courtesy nudge must never fail enrichment
@@ -1190,9 +1215,14 @@ export async function runEnrichmentLoop(
   // E6: index which NCTs prior digests already covered, so we can nudge the
   // curator when they bookmark a source for an already-covered trial. Built
   // once per run; best-effort (an empty/failed index just means no nudges).
+  // v0.26: also index by discriminating acronym, so the nudge fires for the
+  // tweet-preview→full-paper duplicate that shares no NCT.
   let coverageIndex: NctCoverageIndex = new Map();
+  let acronymCoverageIndex: AcronymCoverageIndex = new Map();
   try {
-    coverageIndex = buildNctCoverageIndex(listDigests());
+    const artifacts = listDigests();
+    coverageIndex = buildNctCoverageIndex(artifacts);
+    acronymCoverageIndex = buildAcronymCoverageIndex(artifacts);
   } catch {
     // no prior artifacts / unreadable — skip the nudge feature this run
   }
@@ -1204,7 +1234,7 @@ export async function runEnrichmentLoop(
         markInboxEnriched(db, item.id, result.enrichedRowId);
         enriched++;
         if (result.bookmarkCreated) bookmarksCreated++;
-        await notifyPriorCoverage(db, item, result.enrichedRowId, coverageIndex);
+        await notifyPriorCoverage(db, item, result.enrichedRowId, coverageIndex, acronymCoverageIndex);
         break;
       case 'failed':
         if (result.permanent) {
