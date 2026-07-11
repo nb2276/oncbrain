@@ -68,7 +68,7 @@ import {
   findPriorAcronymCoverage,
   type AcronymCoverageIndex,
 } from './acronym-coverage.ts';
-import { extractTextAcronymKeys } from './study-dedup.ts';
+import { extractTextAcronymKeys, studyDedupKey } from './study-dedup.ts';
 import { extractPdfText, extractPdfFigureOcr, MAX_FIGURE_OCR_CHARS, PdfToolError } from './pdf-text.ts';
 import { extractPdfFigureStructured, MAX_FIGURE_STRUCTURED_CHARS } from './figure-extract.ts';
 import { enrichPmcOaFigures, resolvePmcIdForDoi } from './pmc-oa.ts';
@@ -1041,6 +1041,21 @@ export function contentDepthNote(p: { abstract?: string | null; fulltext_excerpt
   return 'no abstract or full text';
 }
 
+// The SUBJECT text of an enriched row, for ACRONYM matching: a paper's title
+// (the trial it's ABOUT) + the curator's note, or a tweet/slide's short body.
+// Deliberately narrower than getEnrichedText so a comparator trial named deep in
+// a paper's discussion doesn't trigger a spurious duplicate nudge.
+function getSubjectText(db: Database.Database, type: InboxItem['type'], rowId: number): string {
+  if (type === 'paper') {
+    const r = db.prepare('SELECT title, curator_note FROM papers WHERE id = ?').get(rowId) as
+      | { title: string | null; curator_note: string | null }
+      | undefined;
+    return [r?.title, r?.curator_note].filter(Boolean).join(' ');
+  }
+  // Tweets and slides are already short and subject-focused.
+  return getEnrichedText(db, type, rowId);
+}
+
 // The searchable text of a freshly-enriched row, for NCT extraction.
 function getEnrichedText(
   db: Database.Database,
@@ -1067,9 +1082,11 @@ function getEnrichedText(
   return [r?.ocr_text, r?.curator_note].filter(Boolean).join(' ');
 }
 
-// E6: if the just-enriched source references an NCT a prior digest already
-// covered, send a one-off "previously covered" nudge. Best-effort and silent
-// when there's no match (no new noise for normal bookmarks).
+// E6 (+ v0.26 acronym): if the just-enriched source matches a trial a prior
+// digest already covered — by shared NCT or by discriminating acronym — send a
+// one-off "previously covered" nudge that offers a one-reply drop of the earlier
+// card. Best-effort and silent when there's no match (no new noise for normal
+// bookmarks). Both cards publish by default; the drop is opt-in.
 async function notifyPriorCoverage(
   db: Database.Database,
   item: InboxItem,
@@ -1079,53 +1096,65 @@ async function notifyPriorCoverage(
 ): Promise<void> {
   if (index.size === 0 && acronymIndex.size === 0) return;
   try {
-    const text = getEnrichedText(db, item.type, rowId);
-    if (!text) return;
-
-    // Strong signal: shared NCT with an earlier digest.
-    const ncts = extractCitations(text)
+    // NCT match: extract from the FULL enriched text — a paper registers its own
+    // NCT in the body, and comparator NCTs are rarely printed inline.
+    const fullText = getEnrichedText(db, item.type, rowId);
+    if (!fullText) return;
+    const ncts = extractCitations(fullText)
       .filter((c) => c.kind === 'nct')
       .map((c) => c.id);
     const nctPrior = ncts.length ? findPriorCoverage(index, ncts, item.bookmark_date) : [];
 
-    // Medium signal (v0.26): same trial acronym as an earlier digest — catches
-    // the tweet-preview→full-paper duplicate where neither side carries an NCT.
-    // Suppress an acronym hit whose trial already surfaced via NCT above, so the
-    // curator isn't told about the same trial twice.
-    const nctNames = new Set(nctPrior.map((p) => p.name));
+    // Acronym match: extract from the SUBJECT text only (a paper's title, a
+    // tweet's body), NOT the full excerpt. An oncology paper names many
+    // comparator trials by acronym in its intro/discussion; matching those would
+    // invite the curator to drop a legitimately distinct earlier card. The
+    // tweet-preview→full-paper case this targets still hits — the subject trial's
+    // acronym is in the title.
     const acronymPrior = findPriorAcronymCoverage(
       acronymIndex,
-      extractTextAcronymKeys(text),
+      extractTextAcronymKeys(getSubjectText(db, item.type, rowId)),
       item.bookmark_date,
-    ).filter((p) => !nctNames.has(p.name));
+    );
 
-    // One combined list of prior cards. Both this submission and the earlier
-    // card publish by DEFAULT (v0.26 chosen behavior: notify + reply to drop,
-    // never a silent auto-suppress). Each line offers a one-reply drop of the
-    // earlier card, keyed by its published date/slug.
-    const priors = [
-      ...nctPrior.map((p) => ({ date: p.date, name: p.name, slug: p.slug, tag: p.nct as string | null })),
-      ...acronymPrior.map((p) => ({ date: p.date, name: p.name, slug: p.slug, tag: null as string | null })),
-    ];
-    if (priors.length === 0) return;
-
-    const lines = priors.map((p) => {
-      const head = `• ${p.name} — covered ${p.date}${p.tag ? ` (${p.tag})` : ''}`;
-      // A slug is required to form a drop token; older artifacts without one
-      // just get the informational line.
-      return p.slug
-        ? `${head}\n   reply "drop ${p.date}/${p.slug}" to suppress that earlier card`
-        : head;
-    });
-    const count = priors.length;
+    const lines = buildPriorCoverageLines(nctPrior, acronymPrior);
+    if (lines.length === 0) return;
     await replyToCurator(
       item,
-      `Heads up — the source you just sent matches ${count > 1 ? 'trials' : 'a trial'} already covered. ` +
+      `Heads up — the source you just sent matches ${lines.length > 1 ? 'trials' : 'a trial'} already covered. ` +
         `Both will publish unless you drop one:\n${lines.join('\n')}`,
     );
   } catch {
     // a courtesy nudge must never fail enrichment
   }
+}
+
+// Build the curator-facing "previously covered" lines from prior-coverage hits.
+// Pure + exported for tests. Dedups an acronym hit whose trial already surfaced
+// via NCT — keyed on the discriminating acronym (studyDedupKey), NOT the display
+// name, so an earlier "ENZARAD (ANZUP 1303)" (NCT) and "ENZARAD" (acronym) card
+// collapse to one line instead of naming the same trial twice.
+export function buildPriorCoverageLines(
+  nctPrior: Array<{ nct: string; date: string; name: string; slug: string }>,
+  acronymPrior: Array<{ key: string; date: string; name: string; slug: string }>,
+): string[] {
+  const nctKeys = new Set(
+    nctPrior.map((p) => studyDedupKey(p.name)).filter((k): k is string => !!k),
+  );
+  const priors = [
+    ...nctPrior.map((p) => ({ date: p.date, name: p.name, slug: p.slug, tag: p.nct as string | null })),
+    ...acronymPrior
+      .filter((p) => !nctKeys.has(p.key))
+      .map((p) => ({ date: p.date, name: p.name, slug: p.slug, tag: null as string | null })),
+  ];
+  return priors.map((p) => {
+    const head = `• ${p.name} — covered ${p.date}${p.tag ? ` (${p.tag})` : ''}`;
+    // A slug is required to form a drop token; older artifacts without one just
+    // get the informational line.
+    return p.slug
+      ? `${head}\n   reply "drop ${p.date}/${p.slug}" to suppress that earlier card`
+      : head;
+  });
 }
 
 // Best-effort E2/E3 reply to the curator's Telegram chat. Never throws — a

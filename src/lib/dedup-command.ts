@@ -46,6 +46,13 @@ export function executeDedupDrop(
   const lookupDigest = deps.lookupDigest ?? getDigest;
   const overridesDir = deps.overridesDir ?? 'data/overrides';
   try {
+    // Defense in depth: parseDedupCommand already constrains the shape, but this
+    // is an exported function reachable by other callers, and cmd.date flows into
+    // a filesystem path (overridesPath). Re-assert the safe shape so a future
+    // caller can't slip a traversal segment past the parser.
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(cmd.date) || !/^[a-z0-9][a-z0-9-]*$/.test(cmd.slug)) {
+      return { ok: false, message: `Invalid drop target ${cmd.date}/${cmd.slug}.` };
+    }
     const artifact = lookupDigest(cmd.date);
     if (!artifact) {
       return { ok: false, message: `No digest found for ${cmd.date} — nothing to drop.` };
@@ -61,7 +68,10 @@ export function executeDedupDrop(
     }
 
     const ov = loadOverrides(cmd.date, overridesDir) ?? {};
-    const suppress = new Set(ov.suppress ?? []);
+    // A hand-edited override file could have a non-array `suppress` (a bare
+    // string would explode into per-character entries via new Set(...)); guard
+    // it so a malformed file can't be silently corrupted here.
+    const suppress = new Set(Array.isArray(ov.suppress) ? ov.suppress : []);
     const already = suppress.has(cmd.slug);
     suppress.add(cmd.slug);
     ov.suppress = [...suppress];

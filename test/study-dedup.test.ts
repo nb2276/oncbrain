@@ -157,4 +157,21 @@ describe('findCrossDateDuplicates', () => {
       ]),
     ).toHaveLength(0);
   });
+
+  it('does not flag same-acronym cards that carry different NCTs (different trials)', () => {
+    const dups = findCrossDateDuplicates([
+      art('2026-06-09', [{ slug: 'a', name: 'ARTO', nct: 'NCT00000001' }]),
+      art('2026-06-10', [{ slug: 'b', name: 'ARTO', nct: 'NCT00000002' }]),
+    ]);
+    expect(dups).toHaveLength(0); // registered identity overrides an acronym collision
+  });
+
+  it('still flags a same-acronym pair when only one side has an NCT', () => {
+    const dups = findCrossDateDuplicates([
+      art('2026-06-09', [{ slug: 'a', name: 'ARTO', nct: null }]),
+      art('2026-06-10', [{ slug: 'b', name: 'ARTO', nct: 'NCT00000002' }]),
+    ]);
+    expect(dups).toHaveLength(1);
+    expect(dups[0]!.reason).toBe('shared-acronym');
+  });
 });

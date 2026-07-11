@@ -177,6 +177,10 @@ export function findCrossDateDuplicates(artifacts: DedupArtifact[]): DuplicateCa
     const occurrences = [...list].sort(byDateAsc);
     // Skip if the NCT pass already surfaced this exact set of cards.
     if (occurrences.every((o) => emitted.has(occId(o)))) continue;
+    // Two cards carrying DIFFERENT non-null NCTs are definitively different
+    // trials that merely share an acronym (e.g. a cooperative-group family) —
+    // an acronym match can't override registered identity. Don't flag them.
+    if (new Set(occurrences.map((o) => o.nct).filter(Boolean)).size >= 2) continue;
     out.push({ matchKey: key, reason: 'shared-acronym', occurrences });
   }
 

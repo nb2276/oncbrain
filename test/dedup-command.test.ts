@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, rmSync, existsSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Database from 'better-sqlite3';
@@ -65,6 +65,26 @@ describe('executeDedupDrop', () => {
     const r = executeDedupDrop(db, { date: '2020-01-01', slug: 'radiosa' }, { lookupDigest, overridesDir: dir });
     expect(r.ok).toBe(false);
     expect(listRebuildQueue(db)).toHaveLength(0);
+  });
+
+  it('rejects a malformed date/slug even if a caller bypasses the parser (defense in depth)', () => {
+    const r = executeDedupDrop(
+      db,
+      { date: '../../etc', slug: 'radiosa' },
+      { lookupDigest, overridesDir: dir },
+    );
+    expect(r.ok).toBe(false);
+    expect(r.message).toContain('Invalid');
+    expect(listRebuildQueue(db)).toHaveLength(0);
+  });
+
+  it('tolerates a malformed pre-existing override file (non-array suppress)', () => {
+    writeFileSync(join(dir, '2026-05-17.json'), JSON.stringify({ suppress: 'radiosa' }));
+    const r = executeDedupDrop(db, { date: '2026-05-17', slug: 'radiosa' }, { lookupDigest, overridesDir: dir });
+    expect(r.ok).toBe(true);
+    const ov = JSON.parse(readFileSync(join(dir, '2026-05-17.json'), 'utf8'));
+    // The bare string was discarded, not exploded into per-character entries.
+    expect(ov.suppress).toEqual(['radiosa']);
   });
 
   it('is idempotent: a second drop re-queues but keeps one suppress entry', () => {
