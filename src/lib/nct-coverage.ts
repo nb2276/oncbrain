@@ -9,13 +9,14 @@
 
 export type CoverageArtifact = {
   date: string; // YYYY-MM-DD
-  digest: { sites: Array<{ studies: Array<{ nct: string | null; name: string }> }> };
+  digest: { sites: Array<{ studies: Array<{ nct: string | null; name: string; slug?: string }> }> };
 };
 
-export type CoverageEntry = { date: string; name: string };
+// slug carried so a nudge can name a droppable target (reply "drop <date>/<slug>").
+export type CoverageEntry = { date: string; name: string; slug: string };
 export type NctCoverageIndex = Map<string, CoverageEntry[]>;
 
-export type PriorCoverage = { nct: string; date: string; name: string };
+export type PriorCoverage = { nct: string; date: string; name: string; slug: string };
 
 // NCT → coverage entries, newest first. Keyed by uppercase NCT id. Pass
 // listDigests() (date-desc), so entries land newest-first naturally; we sort
@@ -28,7 +29,7 @@ export function buildNctCoverageIndex(artifacts: CoverageArtifact[]): NctCoverag
         if (!study.nct) continue;
         const key = study.nct.toUpperCase();
         const list = index.get(key);
-        const entry: CoverageEntry = { date: a.date, name: study.name };
+        const entry: CoverageEntry = { date: a.date, name: study.name, slug: study.slug ?? '' };
         if (list) list.push(entry);
         else index.set(key, [entry]);
       }
@@ -57,7 +58,7 @@ export function findPriorCoverage(
     const entries = index.get(nct);
     if (!entries) continue;
     const prior = entries.find((e) => e.date < beforeDate);
-    if (prior) out.push({ nct, date: prior.date, name: prior.name });
+    if (prior) out.push({ nct, date: prior.date, name: prior.name, slug: prior.slug });
   }
   return out.sort((a, b) => (a.nct < b.nct ? -1 : a.nct > b.nct ? 1 : 0));
 }

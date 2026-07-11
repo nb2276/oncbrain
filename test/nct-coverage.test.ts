@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { buildNctCoverageIndex, findPriorCoverage, type CoverageArtifact } from '../src/lib/nct-coverage.ts';
 
-function cov(date: string, studies: Array<{ nct: string | null; name: string }>): CoverageArtifact {
+function cov(
+  date: string,
+  studies: Array<{ nct: string | null; name: string; slug?: string }>,
+): CoverageArtifact {
   return { date, digest: { sites: [{ studies }] } };
 }
 
@@ -22,14 +25,18 @@ describe('buildNctCoverageIndex', () => {
 
 describe('findPriorCoverage', () => {
   const idx = buildNctCoverageIndex([
-    cov('2026-05-10', [{ nct: 'NCT01', name: 'PRESTIGE-PSMA' }]),
+    cov('2026-05-10', [{ nct: 'NCT01', name: 'PRESTIGE-PSMA', slug: 'prestige-psma' }]),
     cov('2026-05-12', [{ nct: 'NCT02', name: 'ARANOTE' }]),
   ]);
 
-  it('returns the newest strictly-prior coverage', () => {
+  it('returns the newest strictly-prior coverage, carrying the slug', () => {
     expect(findPriorCoverage(idx, ['NCT01'], '2026-05-18')).toEqual([
-      { nct: 'NCT01', date: '2026-05-10', name: 'PRESTIGE-PSMA' },
+      { nct: 'NCT01', date: '2026-05-10', name: 'PRESTIGE-PSMA', slug: 'prestige-psma' },
     ]);
+  });
+
+  it('defaults slug to empty string when the study has none', () => {
+    expect(findPriorCoverage(idx, ['NCT02'], '2026-05-18')[0]!.slug).toBe('');
   });
 
   it('excludes same-day coverage (strictly before only)', () => {

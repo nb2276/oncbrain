@@ -28,7 +28,9 @@ export type AssociationGroup = {
 
 // Acronyms that are NOT trial names — common shorthand that would over-merge
 // if treated as identifiers. Expand as false positives appear in real data.
-const ACRONYM_BLACKLIST = new Set([
+// Exported so the cross-day dedup layer (study-dedup.ts) shares ONE blacklist —
+// a token that's "not a trial" here must not become a dedup key there either.
+export const ACRONYM_BLACKLIST = new Set([
   // Endpoints
   'OS', 'PFS', 'DFS', 'MFS', 'BFS', 'BFFS', 'BPFS', 'CFFS', 'CPFS', 'EFS',
   'ORR', 'CR', 'PR', 'SD', 'DOR', 'DCR', 'DCB', 'TTR', 'TTP',
@@ -52,7 +54,7 @@ const ACRONYM_BLACKLIST = new Set([
 // Trial-acronym pattern: 3-12 chars, all caps with optional digits/hyphens.
 // Conservative — only exact uppercase tokens. False-positive rate is the
 // dominant concern (codex P0 #2: over-merge destroys trust).
-const ACRONYM_RE = /\b[A-Z][A-Z0-9]{2,}(?:-[A-Z0-9]+)*\b/g;
+export const ACRONYM_RE = /\b[A-Z][A-Z0-9]{2,}(?:-[A-Z0-9]+)*\b/g;
 const NCT_RE = /\bNCT\d{8}\b/g;
 
 // Staging / grade / version shorthand that carries a digit — so the "must have a
@@ -60,7 +62,7 @@ const NCT_RE = /\bNCT\d{8}\b/g;
 // name: FIGO3, PHASE3, GRADE3, WHO2, ECOG1, COVID19. Pattern-based so we don't
 // enumerate every numeric suffix. Two such tokens shared across unrelated items
 // would otherwise produce a spurious medium-strength merge hint.
-const ACRONYM_PATTERN_BLACKLIST =
+export const ACRONYM_PATTERN_BLACKLIST =
   /^(?:(?:FIGO|PHASE|GRADE|WHO|ECOG|RECIST|ASA|NYHA|BCLC|ISUP|AJCC|TNM|KPS)\d+|COVID-?19)$/;
 
 export function buildAssociationGraph(items: DigestInputItem[]): AssociationGroup[] {
