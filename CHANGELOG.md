@@ -2,7 +2,7 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [0.26.0] - 2026-07-11
 
 ### Added
 
