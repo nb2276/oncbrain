@@ -31,7 +31,7 @@ import {
   formatTrialSubline,
   hasTrialSubline,
 } from '../lib/related-trials-render.ts';
-import type { SiblingPreview } from '../lib/tag-index.ts';
+import type { SiblingPreview, TrialAppearance } from '../lib/tag-index.ts';
 
 type Bookmark = DigestArtifact['bookmarks'][number];
 type StudyAuthor = { name: string; kind: 'tweet' | 'paper' };
@@ -65,6 +65,12 @@ interface Props {
   // .slice(0, 3) on render in case a caller passes more. Absent / empty →
   // no section.
   siblings?: SiblingPreview[];
+  // v0.28: same-trial cross-day history. Caller looks up via buildTrialHistory()
+  // keyed on studyKeyString({date, resolvedSlug}) and passes the per-card list.
+  // Rendered as a thin "Also covered · <date> · <date>" wayfinding line in the
+  // card head (identity, not the "Studies like this" similarity footer). Absent
+  // / empty → no line.
+  trialHistory?: TrialAppearance[];
   // v0.11 PR-1a: space-separated `namespace:slug` token string for the
   // future filter rail (PR-2). Caller derives via studyDataTags() so the
   // disease-site + conference context lives where it's known. Absent →
@@ -82,8 +88,21 @@ const {
   shareUrl,
   tagChips = [],
   siblings = [],
+  trialHistory = [],
   dataTags,
 } = Astro.props as Props;
+
+// Short, timezone-safe label from a YYYY-MM-DD string. Parsing as a Date would
+// shift a day under UTC; a manual split avoids that. "2026-05-17" → "May 17".
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function shortDate(iso: string, withYear = false): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return iso;
+  const label = `${MONTHS_SHORT[Number(m[2]) - 1] ?? '?'} ${Number(m[3])}`;
+  return withYear ? `${label} '${m[1]!.slice(2)}` : label;
+}
+const visibleHistory = trialHistory.slice(0, 4);
+const hasHistory = visibleHistory.length > 0;
 
 // Defensive cap on siblings: computeSiblings already caps at 3, but a future
 // caller passing a longer list shouldn't render an unbounded footer.
@@ -326,6 +345,24 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
         <Fragment>
           {i > 0 && <span class="tag-sep" aria-hidden="true">·</span>}
           <a class="tag-chip" href={`/tags/${c.slug}/`}>{c.label}</a>
+        </Fragment>
+      ))}
+    </p>
+  )}
+  {/* ── v0.28 cross-day trial history: thin "Also covered" wayfinding line.
+      IDENTITY (same trial on other dates), not the "Studies like this"
+      similarity footer. Each date links to that day's card. Absent → no line. ── */}
+  {hasHistory && (
+    <p class="study-history" aria-label="This trial covered on other dates">
+      <span class="study-history__label">Also covered</span>
+      {visibleHistory.map((h) => (
+        <Fragment>
+          <span class="tag-sep" aria-hidden="true">·</span>
+          <a
+            class="study-history__link"
+            href={`/${h.date}/#${h.resolvedSlug}`}
+            aria-label={`${h.name} — also covered ${shortDate(h.date, true)}`}
+          >{shortDate(h.date, h.crossYear)}</a>
         </Fragment>
       ))}
     </p>
@@ -1621,6 +1658,39 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   .tag-sep {
     color: var(--fg-muted);
     user-select: none;
+  }
+
+  /* ── v0.28 cross-day trial history: thin "Also covered" line. Same muted
+       meta treatment as the tag row; the label is a touch dimmer so the dates
+       read as the actionable part. Wraps rather than overflows. ── */
+  .study-history {
+    margin: 0.4rem 0 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--fg-muted);
+    line-height: 1.4;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.5rem;
+    align-items: baseline;
+  }
+  .study-history__label {
+    color: var(--fg-muted);
+    opacity: 0.75;
+  }
+  .study-history__link {
+    color: var(--fg-muted);
+    text-decoration: none;
+    padding: 0.15rem 0;
+  }
+  .study-history__link:hover {
+    color: var(--accent);
+  }
+  .study-history__link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 
   /* ── v0.10 "Studies like this" sibling footer. Lives inside the depth

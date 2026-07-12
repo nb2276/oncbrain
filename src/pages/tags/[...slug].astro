@@ -31,6 +31,7 @@ import {
 import {
   buildReverseIndex,
   buildSiblingPreviews,
+  buildTrialHistory,
   computeIntersections,
   intersectTagOccurrences,
   listDigestsStrict,
@@ -139,6 +140,7 @@ const railItems = occurrences.map((occ) => ({
 // v0.10: sibling map computed ONCE over the full corpus for this page's
 // renders. Each StudyCard reads its per-card sibling list from the map.
 const siblingPreviews = buildSiblingPreviews(listDigestsStrict());
+const trialHistory = buildTrialHistory(listDigestsStrict());
 
 // v0.11 PR-2: filter options scoped to occurrences on this tag landing.
 // The URL's path-derived tag(s) are passed as both initialFilters AND
@@ -219,6 +221,7 @@ const pageDescription =
           shareUrl={`/study/${anchorFor(occ)}/`}
           tagChips={studyTagChips(occ.study, occ.conference)}
           siblings={siblingPreviews.get(siblingKey) ?? []}
+          trialHistory={trialHistory.get(siblingKey) ?? []}
           dataTags={studyDataTags(occ.study, occ.diseaseSite, occ.conference?.slug ?? null)}
         />
       );
