@@ -2,6 +2,26 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.27.0] - 2026-07-11
+
+### Added
+
+- **Cross-day entity resolution via curator-declared dossier aliases.** A study's
+  per-date slug drifts (`prestige-psma` → `prestige-psma-2` on a same-name
+  collision; `PRESTIGE` vs `prestige-psma` across days), so an exact-slug lookup
+  silently lost the curator's prior-context dossier (`data/studies/<slug>.md`, read
+  at Phase 2). A dossier now opts into the slugs it covers via YAML frontmatter
+  (`aliases: [prestige-psma, prestige-psma-2, prestige]`); `loadStudyContext`
+  resolves exact slug first, then an alias index. The index is built once per
+  build (memoized on the studies-dir signature), never a directory scan per study.
+  Returned bodies have their frontmatter stripped so the LLM never sees the
+  `aliases:` line. Deliberately NOT auto-stemming a trailing `-\d+` suffix — that
+  cross-links distinct trials whose number is identity (`rtog-0539` ↔ `rtog-0848`);
+  resolution stays authoritative and curator-owned. `parseDossierAliases` /
+  `stripFrontmatter` are pure + tested (flow and block YAML forms, the rtog
+  non-collision, traversal-unsafe aliases dropped, back-compat with
+  frontmatter-free dossiers).
+
 ## [0.26.0] - 2026-07-11
 
 ### Added
