@@ -16,10 +16,12 @@ import { getDiseaseSite } from '../../lib/disease-sites.ts';
 import { studyDataTags } from '../../lib/study-data-tags.ts';
 import {
   buildSiblingPreviews,
+  buildTrialHistory,
   listDigestsStrict,
   studyKeyString,
   studyTagChips,
   type SiblingPreview,
+  type TrialAppearance,
 } from '../../lib/tag-index.ts';
 
 export async function getStaticPaths() {
@@ -27,6 +29,7 @@ export async function getStaticPaths() {
   // frontmatter, which would be O(pages × corpus)); each study's slice is
   // passed through props.
   const siblingPreviews = buildSiblingPreviews(listDigestsStrict());
+  const trialHistory = buildTrialHistory(listDigestsStrict());
   return listStudyPages().map((entry) => {
     const siblingKey = studyKeyString({ date: entry.date, resolvedSlug: entry.resolvedSlug });
     return {
@@ -34,6 +37,7 @@ export async function getStaticPaths() {
       props: {
         entry,
         siblings: siblingPreviews.get(siblingKey) ?? [],
+        trialHistory: trialHistory.get(siblingKey) ?? [],
         tagChips: studyTagChips(entry.study, entry.conference),
         dataTags: studyDataTags(entry.study, entry.disease_site, entry.conference?.slug ?? null),
       },
@@ -44,11 +48,12 @@ export async function getStaticPaths() {
 interface Props {
   entry: StudyPageEntry;
   siblings: SiblingPreview[];
+  trialHistory: TrialAppearance[];
   tagChips: Array<{ slug: string; label: string }>;
   dataTags: string;
 }
 
-const { entry, siblings, tagChips, dataTags } = Astro.props as Props;
+const { entry, siblings, trialHistory, tagChips, dataTags } = Astro.props as Props;
 const meta = getDiseaseSite(entry.disease_site);
 const description =
   stripStudyNamePrefix(entry.study.tldr ?? '', entry.study.name) ||
@@ -80,6 +85,7 @@ const description =
     shareUrl={`/study/${entry.param}/`}
     tagChips={tagChips}
     siblings={siblings}
+    trialHistory={trialHistory}
     dataTags={dataTags}
   />
 </Base>

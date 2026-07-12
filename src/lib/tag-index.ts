@@ -38,6 +38,7 @@ import {
   type SlugCollisionResult,
 } from './tags.ts';
 import { VERDICT_META } from './verdict.ts';
+import { studyDedupKey } from './study-dedup.ts';
 
 const DIGEST_ROOT = resolve(process.cwd(), 'data/digests');
 
@@ -853,6 +854,113 @@ function computeSiblingPreviewsUncached(
       });
     }
     if (previews.length > 0) out.set(key, previews);
+  }
+  return out;
+}
+
+// ---------------- Cross-day trial history (v0.28: entity resolution, visible) ----------------
+//
+// "Studies like this" (siblings, above) is SIMILARITY — same disease site +
+// verdict + modality. This is IDENTITY — the SAME trial covered on other dates,
+// so a reader sees a trial's longitudinal thread. Resolution mirrors the v0.26
+// duplicate detector: link occurrences that share an NCT, or a discriminating
+// studyDedupKey with no conflicting NCT (two DIFFERENT non-null NCTs are
+// different trials that merely share an acronym — never linked). Cross-DATE
+// only; a same-day repeat is Phase-1 clustering's job, not history.
+
+export type TrialAppearance = {
+  date: string;
+  resolvedSlug: string;
+  name: string;
+  verdictEmoji: string | null;
+};
+
+let _trialHistoryCache: Map<string, TrialAppearance[]> | null = null;
+
+/** Test-only: drop the cache so the next buildTrialHistory() rebuilds. */
+export function resetTrialHistoryCache(): void {
+  _trialHistoryCache = null;
+}
+
+// Per study, the SAME trial's other-date appearances (newest first, capped).
+// Keyed by studyKeyString({date, resolvedSlug}); studies with no cross-day match
+// are omitted (the card renders no "Also covered" line). Cached at module scope
+// like buildSiblingPreviews — the corpus is immutable mid-build, so the
+// O(N)-indexed scan runs once, not once per emitted page.
+export function buildTrialHistory(
+  digests: readonly DigestArtifact[],
+): Map<string, TrialAppearance[]> {
+  if (_trialHistoryCache !== null) return _trialHistoryCache;
+  _trialHistoryCache = computeTrialHistoryUncached(digests);
+  return _trialHistoryCache;
+}
+
+type TrialOcc = {
+  date: string;
+  resolvedSlug: string;
+  name: string;
+  nct: string | null;
+  verdictEmoji: string | null;
+};
+
+function computeTrialHistoryUncached(
+  digests: readonly DigestArtifact[],
+): Map<string, TrialAppearance[]> {
+  const occs: TrialOcc[] = [];
+  for (const digest of digests) {
+    for (const { study, resolvedSlug } of walkStudiesPerDate(digest)) {
+      const vm = study.verdict?.soc_implication ? VERDICT_META[study.verdict.soc_implication] : null;
+      occs.push({
+        date: digest.date,
+        resolvedSlug,
+        name: study.name,
+        nct: study.nct ?? null,
+        verdictEmoji: vm?.emoji ?? null,
+      });
+    }
+  }
+
+  const byNct = new Map<string, TrialOcc[]>();
+  const byKey = new Map<string, TrialOcc[]>();
+  for (const o of occs) {
+    if (o.nct) {
+      const k = o.nct.toUpperCase();
+      (byNct.get(k) ?? byNct.set(k, []).get(k)!).push(o);
+    }
+    const key = studyDedupKey(o.name);
+    if (key) (byKey.get(key) ?? byKey.set(key, []).get(key)!).push(o);
+  }
+
+  const out = new Map<string, TrialAppearance[]>();
+  for (const o of occs) {
+    const byDate = new Map<string, TrialOcc>(); // one appearance per other date
+    if (o.nct) {
+      for (const t of byNct.get(o.nct.toUpperCase()) ?? []) {
+        if (t.date !== o.date) byDate.set(t.date, t);
+      }
+    }
+    const key = studyDedupKey(o.name);
+    if (key) {
+      for (const t of byKey.get(key) ?? []) {
+        if (t.date === o.date) continue;
+        // Different registered NCTs ⇒ different trials sharing an acronym.
+        if (o.nct && t.nct && o.nct.toUpperCase() !== t.nct.toUpperCase()) continue;
+        if (!byDate.has(t.date)) byDate.set(t.date, t); // an NCT match already placed wins
+      }
+    }
+    if (byDate.size === 0) continue;
+    const appearances = [...byDate.values()]
+      .sort((a, b) =>
+        a.date < b.date ? 1 : a.date > b.date ? -1 : a.resolvedSlug < b.resolvedSlug ? -1 : 1,
+      )
+      .slice(0, 6)
+      .map((t) => ({
+        date: t.date,
+        resolvedSlug: t.resolvedSlug,
+        name: t.name,
+        verdictEmoji: t.verdictEmoji,
+      }));
+    out.set(studyKeyString({ date: o.date, resolvedSlug: o.resolvedSlug }), appearances);
   }
   return out;
 }

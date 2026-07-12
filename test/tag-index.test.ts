@@ -13,6 +13,8 @@ import {
   collectMeetingSlugs,
   assertSlugUniqueness,
   studyKeyString,
+  buildTrialHistory,
+  resetTrialHistoryCache,
 } from '../src/lib/tag-index.ts';
 import { VERDICT_META } from '../src/lib/verdict.ts';
 
@@ -520,5 +522,76 @@ describe('assertSlugUniqueness', () => {
   it('throws with a useful malformed-slug message', () => {
     const digests = [makeDigest('2026-05-27', 'ASCO 2026', [])];
     expect(() => assertSlugUniqueness(digests, VERDICT_SLUGS)).toThrowError(/malformed/i);
+  });
+});
+
+// ---------------- buildTrialHistory (cross-day identity) ----------------
+
+describe('buildTrialHistory', () => {
+  const hist = (digests: DigestArtifact[]) => {
+    resetTrialHistoryCache(); // module-cached — start fresh each test
+    return buildTrialHistory(digests);
+  };
+  const key = (date: string, slug: string) => studyKeyString({ date, resolvedSlug: slug });
+
+  it('links the same trial across dates by shared NCT', () => {
+    const map = hist([
+      makeDigest('2026-06-12', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT03449719' })] }]),
+      makeDigest('2026-07-07', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT03449719' })] }]),
+    ]);
+    expect(map.get(key('2026-07-07', 'arto'))?.map((a) => a.date)).toEqual(['2026-06-12']);
+    expect(map.get(key('2026-06-12', 'arto'))?.map((a) => a.date)).toEqual(['2026-07-07']);
+  });
+
+  it('links by discriminating acronym key when neither side has an NCT', () => {
+    const map = hist([
+      makeDigest('2026-07-08', null, [{ disease_site: 'prostate', studies: [makeStudy('HYDRA (MARCAP)') ] }]),
+      makeDigest('2026-07-09', null, [{ disease_site: 'prostate', studies: [makeStudy('HYDRA') ] }]),
+    ]);
+    expect(map.get(key('2026-07-09', 'hydra'))?.map((a) => a.date)).toEqual(['2026-07-08']);
+  });
+
+  it('does NOT link same-acronym cards carrying different NCTs', () => {
+    const map = hist([
+      makeDigest('2026-06-09', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT00000001' })] }]),
+      makeDigest('2026-06-10', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT00000002' })] }]),
+    ]);
+    expect(map.has(key('2026-06-09', 'arto'))).toBe(false);
+    expect(map.has(key('2026-06-10', 'arto'))).toBe(false);
+  });
+
+  it('is cross-DATE only — a same-day repeat is not history', () => {
+    const map = hist([
+      makeDigest('2026-07-09', null, [
+        { disease_site: 'prostate', studies: [makeStudy('HYDRA'), makeStudy('HYDRA')] },
+      ]),
+    ]);
+    // two same-day HYDRA cards (hydra, hydra-2) — neither lists the other
+    expect(map.size).toBe(0);
+  });
+
+  it('orders appearances newest-first and omits studies with no match', () => {
+    const map = hist([
+      makeDigest('2026-05-01', null, [{ disease_site: 'prostate', studies: [makeStudy('PRESTIGE', { nct: 'NCT01' })] }]),
+      makeDigest('2026-05-10', null, [{ disease_site: 'prostate', studies: [makeStudy('PRESTIGE', { nct: 'NCT01' })] }]),
+      makeDigest('2026-05-20', null, [{ disease_site: 'prostate', studies: [makeStudy('PRESTIGE', { nct: 'NCT01' })] }]),
+      makeDigest('2026-05-25', null, [{ disease_site: 'prostate', studies: [makeStudy('SOLO', { nct: 'NCT99' })] }]),
+    ]);
+    // the middle appearance sees both a newer and an older sibling, newest first
+    expect(map.get(key('2026-05-10', 'prestige'))?.map((a) => a.date)).toEqual(['2026-05-20', '2026-05-01']);
+    expect(map.has(key('2026-05-25', 'solo'))).toBe(false); // no other appearance
+  });
+
+  it('recomputes after resetTrialHistoryCache (module-cache invalidation)', () => {
+    const a = hist([
+      makeDigest('2026-05-01', null, [{ disease_site: 'x', studies: [makeStudy('AAA', { nct: 'NCT01' })] }]),
+      makeDigest('2026-05-02', null, [{ disease_site: 'x', studies: [makeStudy('AAA', { nct: 'NCT01' })] }]),
+    ]);
+    expect(a.size).toBe(2);
+    // Without a reset, buildTrialHistory returns the SAME cached map for a new corpus.
+    const cached = buildTrialHistory([]);
+    expect(cached.size).toBe(2); // stale on purpose — proves the cache holds
+    resetTrialHistoryCache();
+    expect(buildTrialHistory([]).size).toBe(0); // fresh corpus after reset
   });
 });
