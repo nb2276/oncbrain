@@ -44,7 +44,17 @@ export function loadStudyContext(slug: string, root: string = STUDIES_ROOT): str
   const direct = readDossierBody(slug, root);
   if (direct !== null) return direct;
   const owner = aliasIndex(root).get(slug);
-  if (owner && owner !== slug) return readDossierBody(owner, root);
+  if (owner && owner !== slug) {
+    const body = readDossierBody(owner, root);
+    if (body !== null) {
+      // Surface every alias resolution in the build log. An over-broad curator
+      // alias (e.g. `aliases: [prestige]`) could otherwise silently feed one
+      // trial's prior-context to an unrelated study later assigned that slug —
+      // an invisible wrong-merge in a clinical pipeline. The log makes it visible.
+      console.warn(`[study-context] "${slug}" resolved via alias → dossier "${owner}"`);
+      return body;
+    }
+  }
   return null;
 }
 
@@ -104,8 +114,10 @@ export function parseDossierAliases(content: string): string[] {
   const start = lines.findIndex((l) => /^aliases:[ \t]*$/.test(l));
   if (start >= 0) {
     for (let i = start + 1; i < lines.length; i++) {
-      const bm = lines[i]!.match(/^[ \t]*-[ \t]*(.+?)[ \t]*$/);
-      if (!bm) break; // first non-list line ends the block
+      const line = lines[i]!;
+      if (/^[ \t]*$/.test(line)) continue; // a blank line inside the list is tolerated, not a terminator
+      const bm = line.match(/^[ \t]*-[ \t]*(.+?)[ \t]*$/);
+      if (!bm) break; // first non-blank, non-list line ends the block
       pushAlias(out, bm[1]!);
     }
   }
@@ -113,7 +125,13 @@ export function parseDossierAliases(content: string): string[] {
 }
 
 function pushAlias(out: string[], raw: string): void {
-  const alias = raw.trim().replace(/^['"]|['"]$/g, '').trim();
+  // Strip a trailing `# comment` (a slug can't contain '#', so a spaced '#' is a
+  // YAML comment) and surrounding quotes before validating.
+  const alias = raw
+    .trim()
+    .replace(/\s+#.*$/, '')
+    .replace(/^['"]|['"]$/g, '')
+    .trim();
   if (alias && isSafeSlug(alias) && !out.includes(alias)) out.push(alias);
 }
 

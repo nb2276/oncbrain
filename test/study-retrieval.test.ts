@@ -43,6 +43,16 @@ describe('parseDossierAliases', () => {
     const c = '---\naliases:\n  - a\n  - b\ntitle: X\n  - c\n---\nbody';
     expect(parseDossierAliases(c)).toEqual(['a', 'b']); // c is after title, not part of the list
   });
+
+  it('tolerates a blank line inside the block and strips an inline comment', () => {
+    const c = '---\naliases:\n  - a\n\n  - b # the main slug\n---\nbody';
+    expect(parseDossierAliases(c)).toEqual(['a', 'b']); // blank line != end; "# ..." dropped
+  });
+
+  it('parses CRLF frontmatter in both flow and block forms', () => {
+    expect(parseDossierAliases('---\r\naliases: [a, b]\r\n---\r\nx')).toEqual(['a', 'b']);
+    expect(parseDossierAliases('---\r\naliases:\r\n  - a\r\n  - b\r\n---\r\nx')).toEqual(['a', 'b']);
+  });
 });
 
 describe('stripFrontmatter', () => {
@@ -121,6 +131,22 @@ describe('loadStudyContext', () => {
     write('aaa', '---\naliases: [shared]\n---\nfrom aaa');
     write('bbb', '---\naliases: [shared]\n---\nfrom bbb');
     expect(loadStudyContext('shared', root)).toBe('from aaa');
+  });
+
+  it('ignores a dossier listing its own filename slug as an alias', () => {
+    write('self-ref', '---\naliases: [self-ref, other]\n---\nSelf note.');
+    expect(loadStudyContext('self-ref', root)).toBe('Self note.'); // exact-match path
+    expect(loadStudyContext('other', root)).toBe('Self note.'); // real alias still works
+  });
+
+  it('rebuilds the memoized alias index when a dossier changes on the same root', () => {
+    // No resetAliasIndexCache between reads — this exercises signature-based
+    // invalidation, the memo's core promise. The rewrite changes body LENGTH so
+    // the (mtime,size) signature differs even under coarse mtime granularity.
+    write('a', '---\naliases: [x]\n---\nBody one, deliberately longer.');
+    expect(loadStudyContext('x', root)).toBe('Body one, deliberately longer.');
+    write('a', '---\naliases: []\n---\nShort.');
+    expect(loadStudyContext('x', root)).toBeNull(); // x is no longer an alias → index rebuilt
   });
 });
 
