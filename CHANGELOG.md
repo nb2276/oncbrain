@@ -2,6 +2,24 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.28.0] - 2026-07-11
+
+### Added
+
+- **Cross-day trial history on the study card (visible entity resolution).** Each
+  study card now shows a thin "Also covered · Jun 12 · Jul 7" line linking to the
+  SAME trial's coverage on other dates, so a reader sees a trial's longitudinal
+  thread across the digest. `buildTrialHistory` (`tag-index.ts`) resolves identity
+  by shared NCT (authoritative, cross-site) or a discriminating `studyDedupKey`
+  gated to the same disease site, with a group-level guard that never links an
+  acronym whose group holds ≥2 distinct registered NCTs (mirrors the v0.26
+  duplicate detector, so a null-NCT card can't bridge two different trials).
+  Cross-DATE only; cached once per build. Rendered as thin wayfinding in the card
+  head (identity, distinct from the "Studies like this" similarity footer), with
+  year-aware dates (`"Jan 9 '25"` across a year boundary), a same-year-restrained
+  cap of 4, and per-link aria-labels. Threaded through all four StudyCard
+  surfaces (date / site / tag / standalone study pages).
+
 ## [0.27.0] - 2026-07-11
 
 ### Added
