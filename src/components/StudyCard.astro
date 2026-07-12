@@ -95,12 +95,13 @@ const {
 // Short, timezone-safe label from a YYYY-MM-DD string. Parsing as a Date would
 // shift a day under UTC; a manual split avoids that. "2026-05-17" → "May 17".
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-function shortDate(iso: string): string {
+function shortDate(iso: string, withYear = false): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   if (!m) return iso;
-  return `${MONTHS_SHORT[Number(m[2]) - 1] ?? '?'} ${Number(m[3])}`;
+  const label = `${MONTHS_SHORT[Number(m[2]) - 1] ?? '?'} ${Number(m[3])}`;
+  return withYear ? `${label} '${m[1]!.slice(2)}` : label;
 }
-const visibleHistory = trialHistory.slice(0, 6);
+const visibleHistory = trialHistory.slice(0, 4);
 const hasHistory = visibleHistory.length > 0;
 
 // Defensive cap on siblings: computeSiblings already caps at 3, but a future
@@ -357,7 +358,11 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       {visibleHistory.map((h) => (
         <Fragment>
           <span class="tag-sep" aria-hidden="true">·</span>
-          <a class="study-history__link" href={`/${h.date}/#${h.resolvedSlug}`} title={h.name}>{shortDate(h.date)}</a>
+          <a
+            class="study-history__link"
+            href={`/${h.date}/#${h.resolvedSlug}`}
+            aria-label={`${h.name} — also covered ${shortDate(h.date, true)}`}
+          >{shortDate(h.date, h.crossYear)}</a>
         </Fragment>
       ))}
     </p>

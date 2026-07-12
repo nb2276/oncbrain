@@ -873,7 +873,16 @@ export type TrialAppearance = {
   resolvedSlug: string;
   name: string;
   verdictEmoji: string | null;
+  // True when this appearance's year differs from the host card's year, so the
+  // renderer can stamp the year (else a year-less "Jan 9 · Dec 18" misleads
+  // across an annual-meeting boundary).
+  crossYear: boolean;
 };
+
+// Rest-state cap. Kept BELOW the folded "Studies like this" cap (3) in spirit:
+// an always-visible line should stay restrained. 4 gives one extra for the
+// higher-value identity signal while still fitting ~one line.
+const MAX_TRIAL_HISTORY = 4;
 
 let _trialHistoryCache: Map<string, TrialAppearance[]> | null = null;
 
@@ -900,21 +909,25 @@ type TrialOcc = {
   resolvedSlug: string;
   name: string;
   nct: string | null;
+  diseaseSite: string;
   verdictEmoji: string | null;
 };
+
+const nctUpper = (nct: string | null): string | null => (nct ? nct.trim().toUpperCase() : null);
 
 function computeTrialHistoryUncached(
   digests: readonly DigestArtifact[],
 ): Map<string, TrialAppearance[]> {
   const occs: TrialOcc[] = [];
   for (const digest of digests) {
-    for (const { study, resolvedSlug } of walkStudiesPerDate(digest)) {
+    for (const { study, resolvedSlug, diseaseSite } of walkStudiesPerDate(digest)) {
       const vm = study.verdict?.soc_implication ? VERDICT_META[study.verdict.soc_implication] : null;
       occs.push({
         date: digest.date,
         resolvedSlug,
         name: study.name,
         nct: study.nct ?? null,
+        diseaseSite,
         verdictEmoji: vm?.emoji ?? null,
       });
     }
@@ -923,42 +936,59 @@ function computeTrialHistoryUncached(
   const byNct = new Map<string, TrialOcc[]>();
   const byKey = new Map<string, TrialOcc[]>();
   for (const o of occs) {
-    if (o.nct) {
-      const k = o.nct.toUpperCase();
-      (byNct.get(k) ?? byNct.set(k, []).get(k)!).push(o);
-    }
+    const n = nctUpper(o.nct);
+    if (n) (byNct.get(n) ?? byNct.set(n, []).get(n)!).push(o);
     const key = studyDedupKey(o.name);
     if (key) (byKey.get(key) ?? byKey.set(key, []).get(key)!).push(o);
   }
 
+  // Group-level guard, mirroring findCrossDateDuplicates (study-dedup.ts): an
+  // acronym key whose group holds ≥2 DISTINCT registered NCTs spans ≥2 different
+  // trials, so drop the WHOLE acronym group — never acronym-link any member. A
+  // pairwise `o.nct !== t.nct` check is NOT enough: a null-NCT card would bridge
+  // two provably-different NCTs (adversarial + testing review). Kept in lockstep
+  // with the detector so the two identity resolvers can't drift.
+  const ambiguousKeys = new Set<string>();
+  for (const [key, group] of byKey) {
+    const distinct = new Set(group.map((g) => nctUpper(g.nct)).filter(Boolean));
+    if (distinct.size >= 2) ambiguousKeys.add(key);
+  }
+
+  const yearOf = (d: string): string => d.slice(0, 4);
+
   const out = new Map<string, TrialAppearance[]>();
   for (const o of occs) {
+    const oNct = nctUpper(o.nct);
     const byDate = new Map<string, TrialOcc>(); // one appearance per other date
-    if (o.nct) {
-      for (const t of byNct.get(o.nct.toUpperCase()) ?? []) {
+    // NCT path: authoritative, links across disease sites (a registered trial is
+    // the same trial wherever it's tagged).
+    if (oNct) {
+      for (const t of byNct.get(oNct) ?? []) {
         if (t.date !== o.date) byDate.set(t.date, t);
       }
     }
+    // Acronym path: only for unambiguous keys, and gated to the SAME disease site
+    // (oncology reuses acronyms across sites — PROSPER in prostate vs melanoma —
+    // so a bare-name match across sites is a different trial).
     const key = studyDedupKey(o.name);
-    if (key) {
+    if (key && !ambiguousKeys.has(key)) {
       for (const t of byKey.get(key) ?? []) {
         if (t.date === o.date) continue;
-        // Different registered NCTs ⇒ different trials sharing an acronym.
-        if (o.nct && t.nct && o.nct.toUpperCase() !== t.nct.toUpperCase()) continue;
+        if (t.diseaseSite !== o.diseaseSite) continue;
         if (!byDate.has(t.date)) byDate.set(t.date, t); // an NCT match already placed wins
       }
     }
     if (byDate.size === 0) continue;
+    const hostYear = yearOf(o.date);
     const appearances = [...byDate.values()]
-      .sort((a, b) =>
-        a.date < b.date ? 1 : a.date > b.date ? -1 : a.resolvedSlug < b.resolvedSlug ? -1 : 1,
-      )
-      .slice(0, 6)
+      .sort((a, b) => (a.date < b.date ? 1 : -1)) // newest first; dates are distinct (keyed by date)
+      .slice(0, MAX_TRIAL_HISTORY)
       .map((t) => ({
         date: t.date,
         resolvedSlug: t.resolvedSlug,
         name: t.name,
         verdictEmoji: t.verdictEmoji,
+        crossYear: yearOf(t.date) !== hostYear,
       }));
     out.set(studyKeyString({ date: o.date, resolvedSlug: o.resolvedSlug }), appearances);
   }
