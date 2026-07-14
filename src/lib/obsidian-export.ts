@@ -27,6 +27,7 @@ export type DigestArtifactForExport = {
           | string
           | { text: string; subdetails: string[] }
           | { text: string; table: { columns: string[]; rows: string[][] } }
+          | { text: string } // v0.26: plain { text, source_tier? } bullet — no subdetails
         >;
         // v0.10: figure gallery. Older artifacts carry the single key_figure_*
         // pair below; the render loop normalizes both shapes.
@@ -300,8 +301,11 @@ function renderBody(artifact: DigestArtifactForExport): string {
             lines.push('');
           } else {
             lines.push(`- ${wikilinkify(d.text)}`);
-            for (const sub of d.subdetails) {
-              lines.push(`  - ${wikilinkify(sub)}`);
+            // v0.26: a plain { text, source_tier? } bullet carries no subdetails.
+            if ('subdetails' in d) {
+              for (const sub of d.subdetails) {
+                lines.push(`  - ${wikilinkify(sub)}`);
+              }
             }
           }
         }
