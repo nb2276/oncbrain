@@ -2,6 +2,70 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.28.0] - 2026-07-11
+
+### Added
+
+- **Cross-day trial history on the study card (visible entity resolution).** Each
+  study card now shows a thin "Also covered · Jun 12 · Jul 7" line linking to the
+  SAME trial's coverage on other dates, so a reader sees a trial's longitudinal
+  thread across the digest. `buildTrialHistory` (`tag-index.ts`) resolves identity
+  by shared NCT (authoritative, cross-site) or a discriminating `studyDedupKey`
+  gated to the same disease site, with a group-level guard that never links an
+  acronym whose group holds ≥2 distinct registered NCTs (mirrors the v0.26
+  duplicate detector, so a null-NCT card can't bridge two different trials).
+  Cross-DATE only; cached once per build. Rendered as thin wayfinding in the card
+  head (identity, distinct from the "Studies like this" similarity footer), with
+  year-aware dates (`"Jan 9 '25"` across a year boundary), a same-year-restrained
+  cap of 4, and per-link aria-labels. Threaded through all four StudyCard
+  surfaces (date / site / tag / standalone study pages).
+
+## [0.27.0] - 2026-07-11
+
+### Added
+
+- **Cross-day entity resolution via curator-declared dossier aliases.** A study's
+  per-date slug drifts (`prestige-psma` → `prestige-psma-2` on a same-name
+  collision; `PRESTIGE` vs `prestige-psma` across days), so an exact-slug lookup
+  silently lost the curator's prior-context dossier (`data/studies/<slug>.md`, read
+  at Phase 2). A dossier now opts into the slugs it covers via YAML frontmatter
+  (`aliases: [prestige-psma, prestige-psma-2, prestige]`); `loadStudyContext`
+  resolves exact slug first, then an alias index. The index is built once per
+  build (memoized on the studies-dir signature), never a directory scan per study.
+  Returned bodies have their frontmatter stripped so the LLM never sees the
+  `aliases:` line. Deliberately NOT auto-stemming a trailing `-\d+` suffix — that
+  cross-links distinct trials whose number is identity (`rtog-0539` ↔ `rtog-0848`);
+  resolution stays authoritative and curator-owned. `parseDossierAliases` /
+  `stripFrontmatter` are pure + tested (flow and block YAML forms, the rtog
+  non-collision, traversal-unsafe aliases dropped, back-compat with
+  frontmatter-free dossiers).
+
+## [0.26.0] - 2026-07-11
+
+### Added
+
+- **Cross-day duplicate detection (`npm run find:dups`).** The same trial could
+  get two study cards on two dates — a conference-tweet preview (no NCT) then a
+  full-paper card weeks later — because the NCT-only cross-day nudge couldn't
+  link them. `src/lib/study-dedup.ts` derives a discriminating acronym key from a
+  curated study name (cooperative-group and society guarded: bare EORTC/NRG/ARS
+  yield no key, `EORTC 22922` ≠ `EORTC 22033`, `PEACE-2` ≠ `PEACE-V`) and
+  `findCrossDateDuplicates` groups published cards by shared NCT and by key
+  across dates. The CLI is read-only: it prints suggested `--suppress` commands
+  (`--json` for tooling) and never edits; an OS update or a flagged review is
+  legitimate re-coverage, so the curator decides. On the back catalog it surfaced
+  RADIOSA / EXTEND / PEACE-2 duplicates (since cleaned) and caught a
+  Titlecase-capital-grab bug that had collided two distinct NRG trials.
+- **Acronym duplicate nudge + reply-to-drop.** The enrich-time nudge
+  (`notifyPriorCoverage`) now also fires on an acronym match
+  (`src/lib/acronym-coverage.ts`), so the heads-up lands even when neither the
+  tweet preview nor the paper carries an NCT. Both cards publish by default (no
+  silent auto-suppress); the DM names the earlier card and the curator can reply
+  `drop <date>/<slug>` in Telegram to suppress it — `src/lib/dedup-command.ts`
+  writes a durable suppress override and queues a rebuild. The drop takes effect
+  on the next rebuild (enrich and build run in the same nightly pass, so a reply
+  changes the next build, not the one that sent the nudge).
+
 ## [0.25.0] - 2026-07-03
 
 ### Added

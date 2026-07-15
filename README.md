@@ -97,6 +97,12 @@ npm run build:day -- --dry-run                 # no LLM call, see what would hap
 # Or curate interactively — suppress/edit studies, build, ingest — in one TUI:
 npm run studio
 
+# Catch the same trial covered on more than one date (tweet preview then a
+# full-paper card weeks later). Read-only; prints suggested --suppress commands:
+npm run find:dups
+# The bot also DMs you when a new submission matches an earlier study; both cards
+# publish by default and you reply "drop <date>/<slug>" in Telegram to suppress one.
+
 # 3. Static build + publish:
 npm run build                                  # Astro static build (preview locally with: npm run preview)
 git add data/digests data/obsidian             # explicit paths — papers/ is gitignored, never staged
@@ -184,7 +190,7 @@ npm run test:watch # watch mode
 npx astro check    # type check (0 errors expected)
 ```
 
-1100 tests across DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, Obsidian export, RSS + JSON API output, NCT coverage dedup, citation extraction, the v0.10 tag system, and the v0.13 trials-to-watch + trade-press ingestion.
+1600 tests across DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, and the v0.13 trials-to-watch + trade-press ingestion.
 
 ## Eval
 

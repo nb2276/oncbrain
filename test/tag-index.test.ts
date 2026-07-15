@@ -13,6 +13,8 @@ import {
   collectMeetingSlugs,
   assertSlugUniqueness,
   studyKeyString,
+  buildTrialHistory,
+  resetTrialHistoryCache,
 } from '../src/lib/tag-index.ts';
 import { VERDICT_META } from '../src/lib/verdict.ts';
 
@@ -520,5 +522,146 @@ describe('assertSlugUniqueness', () => {
   it('throws with a useful malformed-slug message', () => {
     const digests = [makeDigest('2026-05-27', 'ASCO 2026', [])];
     expect(() => assertSlugUniqueness(digests, VERDICT_SLUGS)).toThrowError(/malformed/i);
+  });
+});
+
+// ---------------- buildTrialHistory (cross-day identity) ----------------
+
+describe('buildTrialHistory', () => {
+  const hist = (digests: DigestArtifact[]) => {
+    resetTrialHistoryCache(); // module-cached — start fresh each test
+    return buildTrialHistory(digests);
+  };
+  const key = (date: string, slug: string) => studyKeyString({ date, resolvedSlug: slug });
+
+  it('links the same trial across dates by shared NCT', () => {
+    const map = hist([
+      makeDigest('2026-06-12', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT03449719' })] }]),
+      makeDigest('2026-07-07', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT03449719' })] }]),
+    ]);
+    expect(map.get(key('2026-07-07', 'arto'))?.map((a) => a.date)).toEqual(['2026-06-12']);
+    expect(map.get(key('2026-06-12', 'arto'))?.map((a) => a.date)).toEqual(['2026-07-07']);
+  });
+
+  it('links by discriminating acronym key when neither side has an NCT', () => {
+    const map = hist([
+      makeDigest('2026-07-08', null, [{ disease_site: 'prostate', studies: [makeStudy('HYDRA (MARCAP)') ] }]),
+      makeDigest('2026-07-09', null, [{ disease_site: 'prostate', studies: [makeStudy('HYDRA') ] }]),
+    ]);
+    expect(map.get(key('2026-07-09', 'hydra'))?.map((a) => a.date)).toEqual(['2026-07-08']);
+  });
+
+  it('does NOT link same-acronym cards carrying different NCTs (group-level guard)', () => {
+    const map = hist([
+      makeDigest('2026-06-09', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT00000001' })] }]),
+      makeDigest('2026-06-10', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT00000002' })] }]),
+    ]);
+    expect(map.has(key('2026-06-09', 'arto'))).toBe(false);
+    expect(map.has(key('2026-06-10', 'arto'))).toBe(false);
+  });
+
+  it('links a mixed NCT / no-NCT pair (the tweet-preview → full-paper case), both directions', () => {
+    const map = hist([
+      makeDigest('2026-07-08', null, [{ disease_site: 'prostate', studies: [makeStudy('HYDRA')] }]), // preview, no NCT
+      makeDigest('2026-07-09', null, [{ disease_site: 'prostate', studies: [makeStudy('HYDRA', { nct: 'NCT05' })] }]), // paper, NCT
+    ]);
+    expect(map.get(key('2026-07-08', 'hydra'))?.map((a) => a.date)).toEqual(['2026-07-09']);
+    expect(map.get(key('2026-07-09', 'hydra'))?.map((a) => a.date)).toEqual(['2026-07-08']);
+  });
+
+  it('a null-NCT card does NOT bridge two different NCTs sharing an acronym', () => {
+    // A(null) must not link to BOTH B(NCT01) and C(NCT02): the group has ≥2
+    // distinct NCTs, so the whole acronym group is dropped (no false cross-link).
+    const map = hist([
+      makeDigest('2026-01-01', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO')] }]),
+      makeDigest('2026-01-02', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT01' })] }]),
+      makeDigest('2026-01-03', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT02' })] }]),
+    ]);
+    expect(map.size).toBe(0);
+  });
+
+  it('does NOT acronym-link the same name across different disease sites', () => {
+    // PROSPER is reused across tumor types; a bare-name match across sites is a
+    // different trial. (NCT matches would still cross sites — none here.)
+    const map = hist([
+      makeDigest('2026-02-01', null, [{ disease_site: 'prostate', studies: [makeStudy('PROSPER')] }]),
+      makeDigest('2026-02-02', null, [{ disease_site: 'skin', studies: [makeStudy('PROSPER')] }]),
+    ]);
+    expect(map.size).toBe(0);
+  });
+
+  it("carries the TARGET appearance's verdict emoji, not the host's", () => {
+    const [v0, v1] = Object.keys(VERDICT_META) as Array<keyof typeof VERDICT_META>;
+    const map = hist([
+      makeDigest('2026-03-01', null, [{ disease_site: 'prostate', studies: [makeStudy('HYDRA', { verdict: { soc_implication: v0, rationale: 'r', audience: 'a' } as DigestStudy['verdict'] })] }]),
+      makeDigest('2026-03-02', null, [{ disease_site: 'prostate', studies: [makeStudy('HYDRA', { verdict: { soc_implication: v1, rationale: 'r', audience: 'a' } as DigestStudy['verdict'] })] }]),
+    ]);
+    // 03-01's single appearance is 03-02, so it must carry v1's emoji.
+    expect(map.get(key('2026-03-01', 'hydra'))?.[0]?.verdictEmoji).toBe(VERDICT_META[v1!].emoji);
+  });
+
+  it('flags crossYear when an appearance is in a different calendar year', () => {
+    const map = hist([
+      makeDigest('2025-12-18', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT01' })] }]),
+      makeDigest('2026-01-09', null, [{ disease_site: 'prostate', studies: [makeStudy('ARTO', { nct: 'NCT01' })] }]),
+    ]);
+    expect(map.get(key('2026-01-09', 'arto'))?.[0]?.crossYear).toBe(true);
+  });
+
+  it('caps at the 4 newest appearances', () => {
+    const dates = ['2026-04-01', '2026-04-02', '2026-04-03', '2026-04-04', '2026-04-05', '2026-04-06'];
+    const map = hist(
+      dates.map((d) => makeDigest(d, null, [{ disease_site: 'prostate', studies: [makeStudy('BIGTRIAL', { nct: 'NCT01' })] }])),
+    );
+    // host = the oldest (04-01); its 5 others capped to the 4 newest.
+    expect(map.get(key('2026-04-01', 'bigtrial'))?.map((a) => a.date)).toEqual([
+      '2026-04-06',
+      '2026-04-05',
+      '2026-04-04',
+      '2026-04-03',
+    ]);
+  });
+
+  it('omits a study with no NCT and no discriminating acronym key', () => {
+    const map = hist([
+      makeDigest('2026-05-01', null, [{ disease_site: 'prostate', studies: [makeStudy('10-yr SBRT outcomes')] }]),
+      makeDigest('2026-05-02', null, [{ disease_site: 'prostate', studies: [makeStudy('10-yr SBRT outcomes')] }]),
+    ]);
+    expect(map.size).toBe(0); // "10-yr …" leads with a digit → no dedup key
+  });
+
+  it('is cross-DATE only — a same-day repeat is not history', () => {
+    const map = hist([
+      makeDigest('2026-07-09', null, [
+        { disease_site: 'prostate', studies: [makeStudy('HYDRA'), makeStudy('HYDRA')] },
+      ]),
+    ]);
+    // two same-day HYDRA cards (hydra, hydra-2) — neither lists the other
+    expect(map.size).toBe(0);
+  });
+
+  it('orders appearances newest-first and omits studies with no match', () => {
+    const map = hist([
+      makeDigest('2026-05-01', null, [{ disease_site: 'prostate', studies: [makeStudy('PRESTIGE', { nct: 'NCT01' })] }]),
+      makeDigest('2026-05-10', null, [{ disease_site: 'prostate', studies: [makeStudy('PRESTIGE', { nct: 'NCT01' })] }]),
+      makeDigest('2026-05-20', null, [{ disease_site: 'prostate', studies: [makeStudy('PRESTIGE', { nct: 'NCT01' })] }]),
+      makeDigest('2026-05-25', null, [{ disease_site: 'prostate', studies: [makeStudy('SOLO', { nct: 'NCT99' })] }]),
+    ]);
+    // the middle appearance sees both a newer and an older sibling, newest first
+    expect(map.get(key('2026-05-10', 'prestige'))?.map((a) => a.date)).toEqual(['2026-05-20', '2026-05-01']);
+    expect(map.has(key('2026-05-25', 'solo'))).toBe(false); // no other appearance
+  });
+
+  it('recomputes after resetTrialHistoryCache (module-cache invalidation)', () => {
+    const a = hist([
+      makeDigest('2026-05-01', null, [{ disease_site: 'x', studies: [makeStudy('AAA', { nct: 'NCT01' })] }]),
+      makeDigest('2026-05-02', null, [{ disease_site: 'x', studies: [makeStudy('AAA', { nct: 'NCT01' })] }]),
+    ]);
+    expect(a.size).toBe(2);
+    // Without a reset, buildTrialHistory returns the SAME cached map for a new corpus.
+    const cached = buildTrialHistory([]);
+    expect(cached.size).toBe(2); // stale on purpose — proves the cache holds
+    resetTrialHistoryCache();
+    expect(buildTrialHistory([]).size).toBe(0); // fresh corpus after reset
   });
 });

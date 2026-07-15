@@ -19,6 +19,7 @@ import { studyDataTags } from '../lib/study-data-tags.ts';
 import { buildFilterRailOptions } from '../lib/tag-foundations.ts';
 import {
   buildSiblingPreviews,
+  buildTrialHistory,
   listDigestsStrict,
   studyKeyString,
   studyTagChips,
@@ -43,6 +44,7 @@ const { date, conference, digest, bookmarks, generated_at } = artifact;
 // the O(N²) per-card-render scan that would otherwise blow build time
 // as the corpus grows.
 const siblingPreviews = buildSiblingPreviews(listDigestsStrict());
+const trialHistory = buildTrialHistory(listDigestsStrict());
 
 const bookmarksById = new Map(bookmarks.map((b) => [b.id, b]));
 const papersById = new Map((artifact.papers ?? []).map((p) => [p.id, p]));
@@ -195,6 +197,7 @@ for (const study of allStudiesOnDate) {
               shareUrl={`/study/${date}-${resolvedSlug}/`}
               tagChips={studyTagChips(study, conference)}
               siblings={siblingPreviews.get(siblingKey) ?? []}
+              trialHistory={trialHistory.get(siblingKey) ?? []}
               dataTags={studyDataTags(study, site.disease_site, conference?.slug ?? null)}
             />
           );

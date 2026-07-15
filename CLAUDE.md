@@ -81,6 +81,12 @@ npm run override -- --date=2026-05-20 --related-trials-set=<slug> --json='[...]'
 npm run override -- --date=2026-05-20 --related-trials-clear=<slug>                       # clear
 npm run studio                  # interactive TUI (suppress/edit studies, trials-to-watch, build, ingest) wraps the above via @clack/prompts
 
+# Cross-day duplicate detection (v0.26)
+npm run find:dups               # scan published digests for the same trial covered on >1 date (shared NCT + discriminating acronym key); prints suggested --suppress commands. READ-ONLY. --json for tooling
+# Also: the enrich-time nudge (notifyPriorCoverage) DMs the curator when a submission matches an earlier study
+# (by NCT or acronym) and both cards will publish; reply "drop <date>/<slug>" in Telegram to suppress the earlier
+# one (writes a suppress override + queues a rebuild). Never auto-suppresses; default keeps both.
+
 # Deeper analysis (optional config — see "LLM backend")
 DIGEST_STUDY_MODEL=opus npm run build:day -- --date=<date>               # Opus on Phase 2 only (works on claude-cli)
 DIGEST_THINKING=8000 LLM_BACKEND=api npm run build:day -- --date=<date>  # + Phase 2 extended thinking (api only)
@@ -199,8 +205,11 @@ src/
     pdf-storage.ts         v0.8 PR2: file PDFs to the gitignored Obsidian vault (papers/<site>/<slug>.pdf)
     slide-photo-storage.ts Telegram getFile download + magic-byte sniff + disk save
     vision-ocr.ts          Apple Vision OCR (macOS-only); image fetch + caption validator
-    nct-coverage.ts        v0.8 PR3: cross-day NCT coverage index + prior-coverage lookup
-    source-association.ts  NCT + trial-acronym weighted graph; soft Phase 1 clustering hints
+    nct-coverage.ts        v0.8 PR3: cross-day NCT coverage index + prior-coverage lookup (carries slug for the v0.26 drop nudge)
+    acronym-coverage.ts    v0.26: cross-day coverage index keyed by discriminating acronym (parallels nct-coverage) — powers the acronym duplicate nudge when neither source has an NCT
+    study-dedup.ts         v0.26: studyDedupKey (cooperative-group/society-guarded acronym key from a study name) + findCrossDateDuplicates (same trial on >1 date, by NCT + key) + extractTextAcronymKeys. Backs npm run find:dups
+    dedup-command.ts       v0.26: parseDedupCommand + executeDedupDrop — the curator "drop <date>/<slug>" Telegram reply → durable suppress override + queued rebuild (never auto-suppresses)
+    source-association.ts  NCT + trial-acronym weighted graph; soft Phase 1 clustering hints (exports the acronym blacklist/pattern reused by study-dedup)
     extract.ts             NCT / PMID / DOI regex + auto-link
     slug.ts / slug-resolve.ts  deriveSlug + per-date slug disambiguation (anchors, search, API)
     llm-client.ts          AnthropicLlmClient + ClaudeCliLlmClient + multimodal blocks
@@ -243,8 +252,9 @@ prompts/
 build/
   digest-builder.ts        CLI: pull pending sources → build sites/studies → write JSON + Obsidian
   manage-overrides.ts      CLI (npm run override): edit data/overrides/<date>.json (suppress/edit studies)
+  find-duplicates.ts       CLI (npm run find:dups): scan published digests for cross-day duplicate study cards (v0.26); read-only, prints suggested --suppress commands (--json for tooling)
   studio.ts                CLI (npm run studio): interactive @clack/prompts TUI over overrides + build:day + pull/enrich
-  pull-telegram.ts         CLI: poll Telegram bot, write inbox_items
+  pull-telegram.ts         CLI: poll Telegram bot, write inbox_items (v0.26: also intercepts a "drop <date>/<slug>" reply → dedup suppress)
   enrich-inbox.ts          CLI: drain pending inbox_items into typed source tables (sweeps orphaned OCR temp dirs)
   figure-extract.ts        CLI (npm run figure-extract): grounded figure extraction on one image or PDF page (Vision+Qwen→Opus); manual runs / spikes
   notify-curator.ts        CLI: Telegram "build done" summary to the curator
