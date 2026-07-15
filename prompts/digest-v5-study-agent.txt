@@ -135,6 +135,34 @@ Hard rules for `significance`:
   specific "so what," ABSTAIN: set `significance` to null. A forced angle is
   worse than none.
 
+═══ MONDAY CLINIC (the one decision sentence a peer forwards) ═══
+
+Emit a `monday_clinic` string: ONE grounded sentence naming the patient in front
+of the reader tomorrow whom this study moves, and, where it sharpens the read,
+the patient it does NOT. This is the sentence a subspecialist screenshots to a
+colleague. Frame it as EVIDENCE CONTEXT, never a directive: name the population,
+biomarker, stage, or line of therapy the result applies to and the decision it
+informs. It is a decision aid, not medical advice.
+
+Shape: "In [specific population / biomarker / line], this [supports / questions /
+does not change] [the decision]; it does not extend to [the population it leaves
+untouched]." One sentence, tight, no preamble.
+
+Hard rules for `monday_clinic`:
+- DISTINCT FROM significance. `significance` names what is ADDITIVE to the
+  literature (the subgroup, the parameter, the figure signal). `monday_clinic`
+  names WHICH PATIENT it moves. If the honest clinic sentence would just restate
+  `significance`, ABSTAIN: set `monday_clinic` to null. Never pad the card with
+  two prose lines that say the same thing.
+- GROUNDED. Same no-fabrication bar as significance and the bullets. Never invent
+  an eligibility criterion, a subgroup, or a population the source did not state.
+- NOT CLINICAL ADVICE. Evidence-context framing only (population / biomarker /
+  line / decision). No imperative ("start", "add", "give"), no dose, no
+  "recommended". It must read as a peer summarizing evidence, not prescribing.
+- ABSTAIN when there is no single clinic-actionable read: a negative trial that
+  changes nothing, a guideline / review with no one-patient decision, or a signal
+  too immature to move a patient. A forced clinic sentence is worse than none.
+
 ═══ OUTPUT SHAPE ═══
 
 ```json
@@ -235,6 +263,7 @@ Rules:
 - `figures`: 0-4 items, ordered most-informative first. Each `url` must be EXACTLY one of the image URLs in the manifest below — don't invent URLs, don't repeat the same URL twice. Abstain (empty array `[]`) rather than promote weak images.
 - `verdict` is REQUIRED. Pick `soc_implication` from the taxonomy in the VOICE block above (6 enums). When uncertain, default conservatively (prefer `unclear` over guessing; prefer `early-signal` or `confirmatory` over `practice-changing`). `rationale` ≤30 words and explains the VERDICT CHOICE (not the trial result). `audience` ≤80 chars, one-line eligibility gate, or null when applicability is too broad to compress.
 - `significance` is the perspective-framed "why it matters" prose (see the SIGNIFICANCE section above). 2 to 3 sentences, aim ≤55 words (ceiling 70), written for the SPECIALTY PERSPECTIVE reader. Lead with the SUBTLE additive detail the bullets drop (subgroup/figure/table signal, technique parameter, local-regional endpoint) and name the decision it moves; do NOT restate the verdict's maturity caveat or open with a preamble sentence. Grounded (no fabricated numbers, no em dashes, no banned vocab). Set to **null** when there is nothing additive beyond the bullets or no specialty-specific "so what". A forced angle is worse than none.
+- `monday_clinic` is the one-sentence clinic-decision line (see the MONDAY CLINIC section above): which patient this moves and, where it sharpens the read, which it does NOT. Evidence-context framing only, never a directive or dose (not medical advice). Grounded (no fabricated numbers/populations, no em dashes, no banned vocab). Set to **null** when it would just restate `significance` or when there is no single clinic-actionable read. A forced clinic sentence is worse than none.
 - `modality`, `intent`, `methodology`: cross-cutting tag fields, OPTIONAL — emit `null` when the source doesn't make the classification unambiguous. Pick exactly ONE value per field from the enums below; never invent a new value. These drive cross-corpus navigation pages (`/tags/<slug>/`), so a conservative null is much better than a guess that puts the study on a wrong landing page.
   - `modality`: the primary treatment modality being evaluated. Enum:
     - `radiation` — RT is a primary intervention or comparator (definitive, salvage, palliative, SBRT, brachytherapy, proton, hypofractionation studies, dose-escalation).

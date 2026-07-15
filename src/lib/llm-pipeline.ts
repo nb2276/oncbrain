@@ -235,10 +235,19 @@ export type DigestTable = {
   columns: string[]; // header labels; first column is row label by convention
   rows: string[][]; // each row matches columns.length cells
 };
+// v0.26 (Thread 1): a bullet's figure-locked number was read from a figure
+// (KM curve / forest plot / image-rendered table), NOT the abstract. Computed
+// DETERMINISTICALLY after Phase 2 (figure-OCR membership, union across the
+// study's source papers, minus the abstract) — never LLM-asserted — and rendered
+// as a scholarly citation mark. Named for what it PROVES (read from a figure),
+// not "verified": membership shows a number is present in the figure, not that
+// it's used in the right role. The tier can ride any detail form.
+export type SourceTier = 'figure';
 export type DigestDetail =
   | string
-  | { text: string; subdetails: string[] }
-  | { text: string; table: DigestTable };
+  | { text: string; subdetails: string[]; source_tier?: SourceTier }
+  | { text: string; table: DigestTable; source_tier?: SourceTier }
+  | { text: string; source_tier?: SourceTier };
 
 // v0.10: one promoted figure. caption is numeric-only OCR text (string) or a
 // comparison matrix (table), or null when the model abstains on a caption.
@@ -292,6 +301,17 @@ export type DigestStudy = {
   // definition, so the two MUST stay in lockstep.
   significance?: string | null;
   significance_perspective?: string | null;
+  // v0.26 (E3): the "Monday clinic" decision line — ONE grounded sentence naming
+  // which patient in tomorrow's clinic this study moves, and which it does NOT.
+  // The peer-forward trigger (the sentence a subspecialist screenshots) and the
+  // decision content E1 pulls into the share body. Distinct from significance
+  // (which names what's ADDITIVE to the literature); abstains (null) when it
+  // would just repeat significance or when there's no clinic-actionable read.
+  // No-fabrication outranks the framing. Mirrored in digest-data.ts:DigestStudy.
+  monday_clinic?: string | null;
+  // v0.27: curator's own note — the human editor's voice, set via the override
+  // CLI, never LLM-emitted. Mirrored in digest-data.ts:DigestStudy.
+  curator_note?: string | null;
   // v0.14.5 (E5): set true when any source is a preprint (medRxiv / bioRxiv /
   // Research Square, by DOI prefix or host). Drives the "not peer-reviewed"
   // badge and a deterministic verdict cap at build (see lib/preprint.ts). Older
@@ -467,7 +487,26 @@ export function detailAllText(d: DigestDetail): string[] {
   if (isTableDetail(d)) {
     return [d.text, ...d.table.columns, ...d.table.rows.flat()];
   }
-  return [d.text, ...d.subdetails];
+  if (isSubdetailDetail(d)) return [d.text, ...d.subdetails];
+  return [d.text]; // v0.26: plain { text, source_tier? }
+}
+
+// v0.26 (Thread 1): the figure-sourced tier for a detail, or null. A plain
+// string detail can never carry one.
+export function sourceTierOf(d: DigestDetail): SourceTier | null {
+  if (typeof d === 'string') return null;
+  return (d as { source_tier?: SourceTier }).source_tier ?? null;
+}
+
+// Attach (or clear, when tier is null) a source_tier to a detail, returning a new
+// detail. A plain string detail is promoted to a { text, source_tier } object so
+// the marker can ride it; clearing a tier off a plain object leaves { text }.
+export function withSourceTier(d: DigestDetail, tier: SourceTier | null): DigestDetail {
+  if (typeof d === 'string') return tier ? { text: d, source_tier: tier } : d;
+  const next = { ...d } as { text: string; source_tier?: SourceTier };
+  if (tier) next.source_tier = tier;
+  else delete next.source_tier;
+  return next as DigestDetail;
 }
 
 export type DigestSite = {
@@ -1405,6 +1444,10 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     // label (significance_perspective) is stamped later, at build assembly,
     // where opts.perspectiveName is known — the parser only sees the raw text.
     significance: parseSignificance(root.significance),
+    // v0.26 (E3): the Monday-clinic decision line. Same prose sanitizer as
+    // significance (trim / min+max chars / null on empty); the agent keeps it to
+    // one short sentence and abstains when it would just repeat significance.
+    monday_clinic: parseSignificance(root.monday_clinic),
     open_questions: parseOpenQuestions(root.open_questions),
     consort: parseConsort(root.consort),
     modality,

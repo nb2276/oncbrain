@@ -12,10 +12,14 @@ import type { ContentType } from './content-type.ts';
 //   - {text, subdetails[]} for 1D nested rows (v0.4.1)
 //   - {text, table:{columns, rows}} for 2D matrix comparisons (v0.4.2)
 export type DigestTable = { columns: string[]; rows: string[][] };
+// v0.26 (Thread 1): a bullet's figure-locked number was read from a figure, not
+// the abstract (see llm-pipeline SourceTier). Rendered as a citation mark.
+export type SourceTier = 'figure';
 export type DigestDetail =
   | string
-  | { text: string; subdetails: string[] }
-  | { text: string; table: DigestTable };
+  | { text: string; subdetails: string[]; source_tier?: SourceTier }
+  | { text: string; table: DigestTable; source_tier?: SourceTier }
+  | { text: string; source_tier?: SourceTier };
 
 // v0.10: a single promoted figure (image URL + numeric caption or comparison
 // table). Studies carry an ordered array of these; see studyFigures().
@@ -72,6 +76,18 @@ export type DigestStudy = {
   // perspective was set (significance then renders under the generic heading)
   // or when there is no significance.
   significance_perspective?: string | null;
+  // v0.26 (E3): the "Monday clinic" decision line — one grounded sentence naming
+  // which patient this study moves and which it does not. Peer-forward trigger +
+  // E1 share-body content. Distinct from significance; abstains when it would
+  // repeat it. Mirrored in llm-pipeline.ts:DigestStudy — keep in lockstep.
+  monday_clinic?: string | null;
+  // v0.27: curator's own note on the study — the human editor's voice, distinct
+  // from the AI analysis. NOT LLM-generated: set durably via the override CLI
+  // (`--edit=<slug> --curator-note="…"`) and rendered as its own callout on the
+  // card. Absent/null when the curator hasn't annotated the study. (Separate
+  // from the per-SOURCE curator_note captured from a Telegram caption, which
+  // renders as a 📝 line under that source.) Mirrored in llm-pipeline.ts.
+  curator_note?: string | null;
   // v0.14.5 (E5): true when any source is a preprint. Drives the "not
   // peer-reviewed" badge; the verdict was already capped at build. Absent on
   // older artifacts and on non-preprint studies.

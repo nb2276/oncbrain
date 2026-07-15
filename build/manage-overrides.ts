@@ -9,6 +9,8 @@
 //   npm run override -- --date=2026-05-20 --suppress=<slug>
 //   npm run override -- --date=2026-05-20 --unsuppress=<slug>
 //   npm run override -- --date=2026-05-20 --edit=<slug> --tldr="..." [--name="..."] [--nct=NCT...]
+//   npm run override -- --date=2026-05-20 --edit=<slug> --curator-note="Your take on this study."
+//   npm run override -- --date=2026-05-20 --edit=<slug> --curator-note=    # empty clears the note
 //   npm run override -- --date=2026-05-20 --edit=<slug> --modality=radiation [--intent=palliative] [--methodology=phase-3-rct]
 //   npm run override -- --date=2026-05-20 --edit=<slug> --modality=    # empty value clears the LLM emission
 //   npm run override -- --date=2026-05-20 --top-line="..." [--digest-tldr="..."]
@@ -88,7 +90,7 @@ function main(): void {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     console.error(
       'Usage: npm run override -- --date=YYYY-MM-DD ' +
-        '[--list | --suppress=slug | --unsuppress=slug | --edit=slug (--tldr=.. --name=.. --nct=..) | --top-line=.. --digest-tldr=.. | --clear]',
+        '[--list | --suppress=slug | --unsuppress=slug | --edit=slug (--tldr=.. --name=.. --nct=.. --curator-note=..) | --top-line=.. --digest-tldr=.. | --clear]',
     );
     process.exit(1);
   }
@@ -138,6 +140,11 @@ function main(): void {
     if (typeof args.tldr === 'string') edit.tldr = args.tldr;
     if (typeof args.name === 'string') edit.name = args.name;
     if (typeof args.nct === 'string') edit.nct = args.nct;
+    // v0.27: curator's own study-level note (human editor's voice, rendered as
+    // its own callout). Empty value clears it (mapped to null).
+    if (typeof args['curator-note'] === 'string') {
+      edit.curator_note = args['curator-note'].trim() === '' ? null : args['curator-note'];
+    }
     // v0.10: tag field overrides. parseTagFlag (shared with the unit tests
     // and with applyOverrides' sidecar-validation layer) handles case
     // normalization, bareword detection, whitespace-only typo guard, and

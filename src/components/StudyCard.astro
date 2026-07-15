@@ -149,6 +149,44 @@ const significanceLabel =
     ? study.significance_perspective.trim()
     : null;
 
+// v0.26 (E3): the Monday-clinic decision line. Design decision Y: significance
+// holds the resting long-form slot and the clinic line folds into the depth; but
+// when there is NO significance, PROMOTE the clinic line into the resting slot so
+// the card keeps one long-form surface. The clinic line folds (below) only when
+// significance already occupies the resting slot, so it never renders twice.
+const mondayClinicText =
+  typeof study.monday_clinic === 'string' && study.monday_clinic.trim()
+    ? study.monday_clinic.trim()
+    : null;
+const restingProse: { text: string; label: string; sublabel: string | null } | null = significanceText
+  ? { text: significanceText, label: 'Why it matters', sublabel: significanceLabel }
+  : mondayClinicText
+    ? { text: mondayClinicText, label: 'Monday clinic', sublabel: null }
+    : null;
+const foldedClinic = significanceText ? mondayClinicText : null;
+
+// v0.27: the curator's own note on this study — the human editor's voice, set
+// durably via the override CLI (never LLM-generated). Rendered as its own
+// margin-note callout, visually distinct from the blue AI "why it matters"
+// block. Absent/null when the curator hasn't annotated the study.
+const curatorNoteText =
+  typeof study.curator_note === 'string' && study.curator_note.trim()
+    ? study.curator_note.trim()
+    : null;
+
+// v0.26 (E1): the text-ready share body — the decision content a colleague sees
+// when the card is forwarded, not a bare title+URL. Name-led headline (the TL;DR,
+// verbatim) + verdict + the Monday-clinic line when present. The deep link rides
+// the Web Share `url` field (data-share-url), so it isn't duplicated here.
+const shareHeadline = (study.tldr ?? '').trim();
+const shareText = [
+  shareHeadline && shareHeadline.toLowerCase().startsWith(study.name.toLowerCase())
+    ? shareHeadline
+    : [study.name, shareHeadline].filter(Boolean).join(': '),
+  verdictMeta ? `${verdictMeta.emoji} ${verdictMeta.label}` : null,
+  mondayClinicText,
+].filter((l): l is string => Boolean(l && l.trim())).join('\n');
+
 // IMRD-style section bucketing for the depth fold. The leading emoji on each
 // bullet already encodes the section (VOICE.md): 🔍/💊 are Methods, 📊/📐 are
 // Results, ⚠️ is Critique. Bullets without a recognized emoji prefix fall to
@@ -313,14 +351,20 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       <p class="verdict-rationale">{study.verdict.rationale}</p>
     </aside>
   )}
-  {significanceText && (
+  {restingProse && (
     <section class="significance-block" aria-label="Why this study matters">
       <div class="significance-label">
-        Why it matters{significanceLabel && (
-          <Fragment><span class="significance-sep" aria-hidden="true"> · </span>{significanceLabel}</Fragment>
+        {restingProse.label}{restingProse.sublabel && (
+          <Fragment><span class="significance-sep" aria-hidden="true"> · </span>{restingProse.sublabel}</Fragment>
         )}
       </div>
-      <p class="significance-text" set:html={linkifyCitations(significanceText)} />
+      <p class="significance-text" set:html={linkifyCitations(restingProse.text)} />
+    </section>
+  )}
+  {curatorNoteText && (
+    <section class="curator-note-block" aria-label="Curator's note">
+      <div class="curator-note-label">📝 Curator's note</div>
+      <p class="curator-note-text" set:html={linkifyCitations(curatorNoteText)} />
     </section>
   )}
   {comparatorBullets.length > 0 && (
@@ -378,6 +422,7 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
         class="study-share"
         data-share-url={shareUrl}
         data-share-title={study.name}
+        data-share-text={shareText}
         aria-label={`Share ${study.name}`}
         title="Share"
       ><svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
@@ -466,6 +511,12 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
           </Fragment>
         )}
       </summary>
+      {foldedClinic && (
+        <section class="depth-section clinic-section" aria-label="Monday clinic decision">
+          <div class="section-label">Monday clinic</div>
+          <p class="clinic-text" set:html={linkifyCitations(foldedClinic)} />
+        </section>
+      )}
       {depthSections.map((sec) => (
         <section class="depth-section">
           <div class="section-label">{sec.label}</div>
@@ -475,10 +526,15 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
                 if (typeof d === 'string') {
                   return <li set:html={linkifyCitations(d)} />;
                 }
+                // v0.26 (Thread 1): a figure-sourced bullet earns a citation
+                // mark. Named for what value-membership PROVES ("read from a
+                // figure"), never "verified". Non-emoji per DESIGN.md's reserved
+                // vocabulary, like the text-neutral NEW pill.
+                const isFig = 'source_tier' in d && d.source_tier === 'figure';
                 if ('table' in d) {
                   return (
                     <li>
-                      <span set:html={linkifyCitations(d.text)} />
+                      <span set:html={linkifyCitations(d.text)} />{isFig && <sup class="src-fig" title="Read from a figure, not the abstract">†</sup>}
                       <div class="study-table-wrap">
                         <table class="study-table">
                           <thead>
@@ -498,18 +554,24 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
                     </li>
                   );
                 }
-                // Defensive: a detail object may carry neither subdetails nor a
-                // table (e.g. a v0.26 { text, source_tier } bullet). Guard the
-                // subdetails access so an unexpected shape renders as plain text
-                // instead of crashing the whole static build (deploy hotfix).
+                if ('subdetails' in d) {
+                  return (
+                    <li>
+                      <span set:html={linkifyCitations(d.text)} />{isFig && <sup class="src-fig" title="Read from a figure, not the abstract">†</sup>}
+                      {d.subdetails.length > 0 && (
+                        <ul class="study-subdetails">
+                          {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                }
+                // v0.26: plain { text, source_tier? } — the explicit subdetails
+                // guard above already makes this crash-safe (supersedes main's
+                // defensive-hotfix variant), while keeping the figure-sourced †.
                 return (
                   <li>
-                    <span set:html={linkifyCitations(d.text)} />
-                    {'subdetails' in d && d.subdetails.length > 0 && (
-                      <ul class="study-subdetails">
-                        {d.subdetails.map((s) => (<li set:html={linkifyCitations(s)} />))}
-                      </ul>
-                    )}
+                    <span set:html={linkifyCitations(d.text)} />{isFig && <sup class="src-fig" title="Read from a figure, not the abstract">†</sup>}
                   </li>
                 );
               })}
@@ -756,6 +818,15 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   /* Figures open full-screen on click (lightbox wired in Base.astro). */
   .study-zoom { cursor: zoom-in; }
 
+  /* v0.26 (Thread 1): figure-sourced citation mark. Muted, non-emoji, scholarly
+     — the tooltip carries the meaning ("read from a figure, not the abstract"). */
+  .src-fig {
+    color: var(--fg-muted);
+    font-size: 0.72em;
+    margin-left: 0.1em;
+    cursor: help;
+  }
+
   .more-figures { margin-top: 0.85rem; }
   .more-figures > summary {
     cursor: pointer;
@@ -986,6 +1057,41 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     margin: 0;
     font-size: 0.97rem;
     line-height: 1.55;
+    color: var(--fg);
+  }
+  /* v0.27: curator's own note — a warm, quiet margin-note, distinct from the
+     blue AI "why it matters" callout above. Italic body signals human voice. */
+  .curator-note-block {
+    margin: 0.65rem 0 0.7rem;
+    padding: 0.55rem 0.85rem 0.6rem;
+    background: var(--citation-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--fg-muted);
+    border-radius: 4px;
+  }
+  .curator-note-label {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 0.3rem;
+  }
+  .curator-note-text {
+    margin: 0;
+    font-size: 0.97rem;
+    line-height: 1.55;
+    color: var(--fg);
+    font-style: italic;
+  }
+
+  /* v0.26 (E3): the folded Monday-clinic decision line — serif prose like the
+     significance callout, sitting under its section label in the depth fold. */
+  .clinic-text {
+    margin: 0.3rem 0 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
     color: var(--fg);
   }
 

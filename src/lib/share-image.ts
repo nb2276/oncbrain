@@ -54,6 +54,11 @@ export interface ShareCard {
   tagColor?: string;
   // Curator handle for the bottom-right attribution.
   handle?: string;
+  // v0.26 (E2): true when the study has ≥1 figure-sourced number (Thread 1). The
+  // trust signal on the surface that travels. Absence is NOT a negative signal
+  // (a card with no figure numbers simply has nothing to vouch for) — the mark
+  // is additive-positive only, matching the DESIGN.md "cards earn their pixels".
+  figuresSourced?: boolean;
 }
 
 function truncate(s: string, max: number): string {
@@ -128,6 +133,7 @@ export function studyCard(opts: {
   conference?: string | null;
   verdict?: StudyVerdict | null;
   handle: string;
+  figuresSourced?: boolean;
 }): ShareCard {
   const conf = opts.conference ? ` · ${opts.conference}` : '';
   const name = opts.name.trim();
@@ -141,6 +147,7 @@ export function studyCard(opts: {
     tagLabel: meta ? meta.label.toUpperCase() : undefined,
     tagColor: color,
     handle: opts.handle,
+    figuresSourced: opts.figuresSourced,
   };
 }
 
@@ -177,7 +184,15 @@ export async function renderShareImage(card: ShareCard): Promise<Buffer> {
       card.tagLabel
         ? div({ fontSize: 24, fontWeight: 700, letterSpacing: '0.08em', color: card.tagColor || MUTED }, card.tagLabel)
         : div({}, ''),
-      div({ fontSize: 22, color: MUTED }, attribution),
+      // Right column: the figure-sourced mark (v0.26 E2) stacked above the
+      // attribution. Non-emoji '†' matches the card's inline citation mark;
+      // rendered only when true (absence is not a negative signal).
+      div({ flexDirection: 'column', alignItems: 'flex-end' }, [
+        card.figuresSourced
+          ? div({ fontSize: 20, color: MUTED, marginBottom: 6 }, '† figures sourced')
+          : div({}, ''),
+        div({ fontSize: 22, color: MUTED }, attribution),
+      ]),
     ]),
   );
 

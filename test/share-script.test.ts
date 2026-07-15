@@ -27,7 +27,7 @@ interface StubButton {
   click: () => Promise<{ stopPropagation: ReturnType<typeof vi.fn>; preventDefault: ReturnType<typeof vi.fn> }>;
 }
 
-function makeButton(overrides: Partial<{ shareUrl: string; shareTitle: string; innerHTML: string }> = {}): StubButton {
+function makeButton(overrides: Partial<{ shareUrl: string; shareTitle: string; shareText: string; innerHTML: string }> = {}): StubButton {
   const listeners = new Map<string, EventListener>();
   const classes = new Set<string>();
   return {
@@ -36,6 +36,7 @@ function makeButton(overrides: Partial<{ shareUrl: string; shareTitle: string; i
     dataset: {
       shareUrl: overrides.shareUrl ?? '/sites/prostate/#2026-05-17-prestige-psma',
       shareTitle: overrides.shareTitle ?? 'PRESTIGE-PSMA',
+      ...(overrides.shareText !== undefined ? { shareText: overrides.shareText } : {}),
     },
     style: { display: 'none' },
     classList: {
@@ -176,6 +177,26 @@ describe('setupShareButton — feature detect + reveal', () => {
 });
 
 describe('setupShareButton — Web Share click path', () => {
+  it('E1: forwards the composed decision text via Web Share, and copies body+link on clipboard fallback', async () => {
+    const shareText = 'PRESTIGE-PSMA: mPFS 8.7 vs 5.4\n🔄 Confirmatory\nIn high-volume HSPC this supports adding X';
+    // Web Share path: nav.share receives the composed `text` (the decision card).
+    const b1 = attachListenerAPI(makeButton({ shareText }));
+    const { deps, shareFn } = makeDeps({ hasShare: true });
+    setupShareButton(asButton(b1), {}, deps);
+    await b1.click();
+    expect(shareFn).toHaveBeenCalledWith(expect.objectContaining({ text: shareText }));
+
+    // Clipboard fallback (no Web Share): writeText gets the body PLUS the absolute
+    // deep link, so an unfurl-less paste still points back to the study.
+    const b2 = attachListenerAPI(makeButton({ shareText }));
+    const { deps: deps2, writeTextFn } = makeDeps({ hasShare: false, hasClipboard: true });
+    setupShareButton(asButton(b2), {}, deps2);
+    await b2.click();
+    const copied = String(writeTextFn!.mock.calls[0]![0]);
+    expect(copied).toContain(shareText);
+    expect(copied).toContain('https://oncbrain.test');
+  });
+
   it('share resolves: no icon change', async () => {
     const b = attachListenerAPI(makeButton());
     const { deps, shareFn } = makeDeps({ hasShare: true });

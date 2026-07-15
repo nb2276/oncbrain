@@ -2,6 +2,44 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.29.0] - 2026-07-14
+
+The "forward loop" release: make each study card carry more of its own provenance
+and decision context, and give the human curator a first-class voice on the card.
+
+### Added
+
+- **Figure-sourced citation mark on study bullets.** A bullet whose figure-locked
+  number was read from a figure (KM curve, forest plot, image-rendered table)
+  rather than the abstract now carries a superscript † ("Read from a figure, not
+  the abstract"). Driven by a new `source_tier` field on the detail shape
+  (`src/lib/source-tier.ts`); the Phase 2 study agent tags figure-grounded
+  bullets. The detail union gains a plain `{ text, source_tier? }` variant.
+- **Monday-clinic decision line + text-ready share payload.** Each card gets a
+  grounded one-sentence clinic decision line (which patient it moves, which it
+  does not), promoted to the resting long-form slot when there is no
+  perspective-framed significance. The share button now copies a decision-first
+  text payload (name-led headline + verdict + clinic line) instead of a bare
+  title + URL.
+- **OG figure-sourced trust mark + "do this for your field" footer.** The OG
+  share image marks figure-sourced numbers and invites cross-field reuse.
+- **Curator's-note callout on study cards.** A study-level curator note — the
+  human editor's voice, distinct from the AI analysis and from the per-source
+  caption notes. Set durably via the override CLI
+  (`npm run override -- --date=<d> --edit=<slug> --curator-note="…"`, empty value
+  clears) and rendered as its own warm, italic margin-note callout below the "why
+  it matters" block. Not LLM-generated; survives rebuilds via the overrides
+  sidecar.
+
+### Fixed
+
+- **Obsidian export no longer crashes on `{ text, source_tier }` bullets.** The
+  detail loop assumed every non-string, non-table bullet carried a `subdetails[]`
+  array, so a plain source-tier bullet threw `d.subdetails is not iterable` in
+  `renderBody` — failing `build:day` and blocking the cron's publish for any day
+  with figure-sourced bullets. Guarded with `'subdetails' in d`
+  (`src/lib/obsidian-export.ts`), mirroring StudyCard.
+
 ## [0.28.0] - 2026-07-11
 
 ### Added

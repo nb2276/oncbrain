@@ -65,6 +65,14 @@ describe('share-image card builders', () => {
     expect(c.tagColor).toBe('#1a5e3a');
   });
 
+  it('studyCard: threads the v0.26 figuresSourced flag (E2 OG trust mark)', () => {
+    const base = { name: 'TRIAL-9', tldr: 'ORR 42%', date: '2026-01-01', handle: '@x' } as const;
+    expect(studyCard({ ...base, figuresSourced: true }).figuresSourced).toBe(true);
+    // Absent by default — a card with no figure numbers has nothing to vouch for
+    // (absence is not a negative signal).
+    expect(studyCard(base).figuresSourced).toBeUndefined();
+  });
+
   it('studyCard: no-conf eyebrow, no verdict → no tag (review path)', () => {
     const c = studyCard({
       name: 'A narrative review of PARP inhibitors',

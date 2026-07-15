@@ -15,6 +15,11 @@ export const getStaticPaths: GetStaticPaths = () =>
 
 export const GET: APIRoute = async ({ props }) => {
   const e = (props as { entry: StudyPageEntry }).entry;
+  // v0.26 (E2): does any bullet carry a figure-sourced number (Thread 1)? Drives
+  // the OG-card trust mark on the surface that unfurls in a text thread.
+  const figuresSourced = (e.study.details ?? []).some(
+    (d) => typeof d === 'object' && d != null && 'source_tier' in d && d.source_tier === 'figure',
+  );
   const png = await renderShareImage(
     studyCard({
       name: e.study.name,
@@ -23,6 +28,7 @@ export const GET: APIRoute = async ({ props }) => {
       conference: e.conference?.name ?? null,
       verdict: e.study.verdict ?? null,
       handle: HANDLE,
+      figuresSourced,
     }),
   );
   return new Response(new Uint8Array(png), {

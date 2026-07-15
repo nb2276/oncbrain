@@ -30,7 +30,10 @@ interface ShareNav {
   // page's OG card as a rich preview). We deliberately do NOT attach image files
   // — many share targets keep the file and drop the URL, leaving the recipient
   // with an image and no link back to the digest.
-  share?: (data: { title?: string; url?: string }) => Promise<void>;
+  // v0.26 (E1): `text` carries the composed decision body (headline + verdict +
+  // Monday-clinic line). The URL still travels for link-unfurl; text makes the
+  // forward a decision card rather than a bare title.
+  share?: (data: { title?: string; text?: string; url?: string }) => Promise<void>;
   clipboard?: { writeText?: (s: string) => Promise<void> };
 }
 
@@ -103,6 +106,12 @@ export function setupShareButton(
     if (!relativeUrl) return;
     const absoluteUrl = origin ? new URL(relativeUrl, origin).href : relativeUrl;
     const title = button.dataset.shareTitle ?? '';
+    // v0.26 (E1): the text-ready decision body (name-led headline + verdict +
+    // Monday-clinic line). Rides the Web Share `text` field so the forward is a
+    // decision card, not a bare title+URL; the clipboard fallback copies the
+    // body PLUS the deep link so an unfurl-less paste still points back.
+    const text = button.dataset.shareText ?? '';
+    const clipboardContent = text ? `${text}\n${absoluteUrl}` : absoluteUrl;
 
     // Cancel any in-flight flip/recovery timer so the next click is a clean
     // fresh action — visible state matches what we just did, not a leftover.
@@ -113,15 +122,15 @@ export function setupShareButton(
     // The existing URL-share / clipboard path. The image path falls back here.
     function shareUrlOrClipboard(): void {
       if (hasShare) {
-        nav.share!({ title, url: absoluteUrl })
+        nav.share!({ title, text: text || undefined, url: absoluteUrl })
           .then(() => { /* shared OK — system handled */ })
           .catch((err: unknown) => {
             const name = (err && typeof err === 'object' && 'name' in err) ? String((err as { name: unknown }).name) : '';
             if (name === 'AbortError') return; // user dismissed sheet — silent
-            if (hasClipboard) tryClipboard(button, refs, absoluteUrl, nav, setTimeoutFn, clearTimeoutFn);
+            if (hasClipboard) tryClipboard(button, refs, clipboardContent, nav, setTimeoutFn, clearTimeoutFn);
           });
       } else if (hasClipboard) {
-        tryClipboard(button, refs, absoluteUrl, nav, setTimeoutFn, clearTimeoutFn);
+        tryClipboard(button, refs, clipboardContent, nav, setTimeoutFn, clearTimeoutFn);
       }
     }
 
