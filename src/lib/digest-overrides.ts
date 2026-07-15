@@ -34,6 +34,9 @@ const EDITABLE_STUDY_KEYS = [
   'details',
   'verdict',
   'open_questions',
+  // v0.27: curator's own study-level note (human editor's voice). Pass-through
+  // string; empty value clears it (mapped to null by the CLI).
+  'curator_note',
   'figures',
   // v0.4 single-figure fields retained so old override sidecars still apply.
   'key_figure_caption',

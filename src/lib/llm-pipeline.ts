@@ -309,6 +309,9 @@ export type DigestStudy = {
   // would just repeat significance or when there's no clinic-actionable read.
   // No-fabrication outranks the framing. Mirrored in digest-data.ts:DigestStudy.
   monday_clinic?: string | null;
+  // v0.27: curator's own note — the human editor's voice, set via the override
+  // CLI, never LLM-emitted. Mirrored in digest-data.ts:DigestStudy.
+  curator_note?: string | null;
   // v0.14.5 (E5): set true when any source is a preprint (medRxiv / bioRxiv /
   // Research Square, by DOI prefix or host). Drives the "not peer-reviewed"
   // badge and a deterministic verdict cap at build (see lib/preprint.ts). Older

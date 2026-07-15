@@ -116,6 +116,23 @@ describe('applyOverrides', () => {
     expect(summary.edited).toEqual(['study-a']);
   });
 
+  it('applies a curator-note edit (human study-level note)', () => {
+    const { digest, summary } = applyOverrides(sampleDigest(), {
+      edits: { 'study-a': { curator_note: 'Underpowered — watch the OS subgroup.' } },
+    });
+    const a = digest.sites[0]!.studies[0]!;
+    expect(a.curator_note).toBe('Underpowered — watch the OS subgroup.');
+    expect(a.tldr).toBe('Study A tldr'); // other fields untouched
+    expect(summary.edited).toEqual(['study-a']);
+  });
+
+  it('clears a curator note when the edit sets it to null', () => {
+    const cleared = applyOverrides(sampleDigest(), {
+      edits: { 'study-a': { curator_note: null } },
+    }).digest.sites[0]!.studies[0]!;
+    expect(cleared.curator_note).toBeNull();
+  });
+
   it('ignores non-editable keys (slug cannot be overridden)', () => {
     const ov = { edits: { 'study-a': { slug: 'hacked' } } } as unknown as DigestOverrides;
     const { digest } = applyOverrides(sampleDigest(), ov);

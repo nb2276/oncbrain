@@ -81,6 +81,13 @@ export type DigestStudy = {
   // E1 share-body content. Distinct from significance; abstains when it would
   // repeat it. Mirrored in llm-pipeline.ts:DigestStudy — keep in lockstep.
   monday_clinic?: string | null;
+  // v0.27: curator's own note on the study — the human editor's voice, distinct
+  // from the AI analysis. NOT LLM-generated: set durably via the override CLI
+  // (`--edit=<slug> --curator-note="…"`) and rendered as its own callout on the
+  // card. Absent/null when the curator hasn't annotated the study. (Separate
+  // from the per-SOURCE curator_note captured from a Telegram caption, which
+  // renders as a 📝 line under that source.) Mirrored in llm-pipeline.ts.
+  curator_note?: string | null;
   // v0.14.5 (E5): true when any source is a preprint. Drives the "not
   // peer-reviewed" badge; the verdict was already capped at build. Absent on
   // older artifacts and on non-preprint studies.

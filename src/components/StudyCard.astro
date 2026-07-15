@@ -146,6 +146,15 @@ const restingProse: { text: string; label: string; sublabel: string | null } | n
     : null;
 const foldedClinic = significanceText ? mondayClinicText : null;
 
+// v0.27: the curator's own note on this study — the human editor's voice, set
+// durably via the override CLI (never LLM-generated). Rendered as its own
+// margin-note callout, visually distinct from the blue AI "why it matters"
+// block. Absent/null when the curator hasn't annotated the study.
+const curatorNoteText =
+  typeof study.curator_note === 'string' && study.curator_note.trim()
+    ? study.curator_note.trim()
+    : null;
+
 // v0.26 (E1): the text-ready share body — the decision content a colleague sees
 // when the card is forwarded, not a bare title+URL. Name-led headline (the TL;DR,
 // verbatim) + verdict + the Monday-clinic line when present. The deep link rides
@@ -331,6 +340,12 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
         )}
       </div>
       <p class="significance-text" set:html={linkifyCitations(restingProse.text)} />
+    </section>
+  )}
+  {curatorNoteText && (
+    <section class="curator-note-block" aria-label="Curator's note">
+      <div class="curator-note-label">📝 Curator's note</div>
+      <p class="curator-note-text" set:html={linkifyCitations(curatorNoteText)} />
     </section>
   )}
   {comparatorBullets.length > 0 && (
@@ -1004,6 +1019,32 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     font-size: 0.97rem;
     line-height: 1.55;
     color: var(--fg);
+  }
+  /* v0.27: curator's own note — a warm, quiet margin-note, distinct from the
+     blue AI "why it matters" callout above. Italic body signals human voice. */
+  .curator-note-block {
+    margin: 0.65rem 0 0.7rem;
+    padding: 0.55rem 0.85rem 0.6rem;
+    background: var(--citation-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--fg-muted);
+    border-radius: 4px;
+  }
+  .curator-note-label {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 0.3rem;
+  }
+  .curator-note-text {
+    margin: 0;
+    font-size: 0.97rem;
+    line-height: 1.55;
+    color: var(--fg);
+    font-style: italic;
   }
 
   /* v0.26 (E3): the folded Monday-clinic decision line — serif prose like the
