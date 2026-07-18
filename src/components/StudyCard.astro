@@ -391,7 +391,13 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     <div class="study-endpoint">
       <div class="endpoint-head">
         <span class="endpoint-name">{study.primary_endpoint.name}</span>
-        <span class:list={['endpoint-class', `ec-${study.primary_endpoint.klass}`]}>{endpointClassLabel(study.primary_endpoint.klass)}</span>
+        {/* The class chip flags a CAVEAT — a surrogate/proxy, local control, or a
+            safety endpoint. Overall survival is the definitive endpoint and the
+            name already says it, so no chip (a bare "hard" beside "Overall
+            survival" read as cryptic). */}
+        {study.primary_endpoint.klass !== 'overall-survival' && (
+          <span class:list={['endpoint-class', `ec-${study.primary_endpoint.klass}`]}>{endpointClassLabel(study.primary_endpoint.klass)}</span>
+        )}
       </div>
       <p class="endpoint-stat" set:html={emphasizeStats(linkifyCitations(study.primary_endpoint.stat_value))} />
       {study.primary_endpoint.stat_detail && (
