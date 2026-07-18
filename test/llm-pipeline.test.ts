@@ -654,9 +654,9 @@ describe('validateStudyTables', () => {
       }],
     };
     const out = validateStudyTables(study, tweets);
-    expect(typeof out.details[0]).toBe('string');
-    expect(out.details[0] as string).toContain('comparison values omitted');
-    expect(out.details[0] as string).toContain('0.99');
+    // table dropped to its bullet prose (no debug text, no em-dash on the card)
+    expect(out.details[0]).toBe('HRs');
+    expect(out.details[0] as string).not.toContain('0.99'); // the unverified value is gone
   });
 
   it('passes through non-table details unchanged', () => {
@@ -684,8 +684,7 @@ describe('validateStudyTables', () => {
       }],
     };
     const out = validateStudyTables(study, tweets);
-    expect(typeof out.details[0]).toBe('string');
-    expect(out.details[0] as string).toContain('comparison values omitted');
+    expect(out.details[0]).toBe('HRs'); // fabricated-interval table dropped to its prose
   });
 
   // The flip side: a real CI the model writes with a dash, where source spaced
@@ -730,8 +729,7 @@ describe('validateStudyTables', () => {
       details: [{ text: 'HR', table: { columns: ['EP', 'Arm'], rows: [['OS', 'HR 0.50 (0.50-0.97)']] } }],
     };
     const out = validateStudyTables(study, localTweets);
-    expect(typeof out.details[0]).toBe('string');
-    expect(out.details[0] as string).toContain('comparison values omitted');
+    expect(out.details[0]).toBe('HR'); // cross-source fabricated CI dropped to prose
   });
 
   // codex P2: a bracketed CI "[lo, hi]" is validated as a unit, like "(lo, hi)".
@@ -765,8 +763,7 @@ describe('validateStudyTables', () => {
       details: [{ text: 'dose', table: { columns: ['EP', 'Arm'], rows: [['RT', '2 to 70 fractions']] } }],
     };
     const out = validateStudyTables(study, localTweets);
-    expect(typeof out.details[0]).toBe('string');
-    expect(out.details[0] as string).toContain('comparison values omitted');
+    expect(out.details[0]).toBe('dose'); // fabricated range dropped to prose
   });
 
   it('falls back to cluster name if model omits name', () => {

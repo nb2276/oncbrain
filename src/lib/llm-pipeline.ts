@@ -1448,7 +1448,12 @@ export function validateStudyTables(
       const bad = firstUnverifiedCellValue(cell, sourceTokens, sourcePairs);
       if (bad !== null) {
         dropped++;
-        return `${d.text} — comparison values omitted (cell value "${bad}" not verified in source)`;
+        // Grounding failed on a table cell: silently drop the table, keep the
+        // bullet's prose. The old fallback published a debug string ("...cell
+        // value X not verified in source") — with a VOICE-banned em-dash —
+        // straight onto the card, and on a false redaction it contradicted the
+        // card's own tldr. Omit over hallucinate (VOICE), no reader-facing note.
+        return d.text;
       }
     }
     return d;
