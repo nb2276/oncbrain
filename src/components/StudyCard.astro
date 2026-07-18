@@ -1630,9 +1630,12 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   .depth-section-body > :first-child { margin-top: 0; }
   .depth-section-body .study-details { padding-left: 1rem; }
   .depth-section .consort { margin-top: 0.6rem; }
-  @media (max-width: 400px) {
+  /* On phones the narrow left label column squeezes the body into a thin strip,
+     so stack it: the section title sits ABOVE its text, full width. Was 400px
+     (only tiny phones); 600px covers all phones so the body gets the full width. */
+  @media (max-width: 600px) {
     .depth-section { grid-template-columns: 1fr; row-gap: 0.15rem; }
-    .depth-section > .section-label { padding-top: 0; margin-bottom: 0.25rem; }
+    .depth-section > .section-label { padding-top: 0; margin-bottom: 0.2rem; }
   }
 
   .study-details {

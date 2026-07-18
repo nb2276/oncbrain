@@ -129,4 +129,31 @@ const navEmpty = navSites.filter((s) => s.count === 0);
   .nav-empty-toggle summary:hover { color: var(--fg); border-color: var(--accent); }
   .nav-empty-toggle[open] summary { color: var(--fg); }
   .nav-row-empty { margin-top: 0.5rem; }
+
+  /* On phones the wrapping pill grid stacks into 5-7 ragged rows and eats the
+     screen. Collapse it to ONE swipeable strip: a single aligned row of compact
+     chips, scrollbar hidden. The rightmost chip sits partially cut off at the
+     edge, which signals there's more to scroll. */
+  @media (max-width: 600px) {
+    .site-nav { margin-bottom: 1rem; }
+    .nav-row {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .nav-row::-webkit-scrollbar { display: none; }
+    .nav-row > li {
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+    }
+    .nav-chip {
+      min-height: 40px;
+      padding: 0.32rem 0.7rem;
+      font-size: 0.8rem;
+    }
+    .nav-emoji { font-size: 1rem; }
+    .nav-count { font-size: 0.72rem; }
+  }
 </style>
