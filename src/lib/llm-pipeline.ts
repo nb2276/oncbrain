@@ -1801,7 +1801,13 @@ export function parseConsort(raw: unknown): ConsortDiagram | null {
     const label = typeof ao.label === 'string' ? ao.label.trim() : '';
     const allocated = posInt(ao.allocated);
     if (!label || allocated === null) continue;
-    arms.push({ label, allocated, analyzed: posInt(ao.analyzed) });
+    // A participant flow can't analyze more than it allocated. An "analyzed >
+    // allocated" arm (e.g. obs "analyzed 90 > allocated 76") is numerically
+    // impossible and reads as broken/fabricated data on the card — drop just the
+    // bad count, keep the (design-consistent) allocated figure.
+    let analyzed = posInt(ao.analyzed);
+    if (analyzed !== null && analyzed > allocated) analyzed = null;
+    arms.push({ label, allocated, analyzed });
   }
   if (arms.length < 2) return null;
 

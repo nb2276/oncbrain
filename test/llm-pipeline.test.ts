@@ -955,6 +955,19 @@ describe('parseConsort', () => {
     expect(r?.arms.map((a) => a.label)).toEqual(['A', 'D']);
   });
 
+  it('nulls an impossible analyzed > allocated count, keeps the allocated figure', () => {
+    // regression: bart obs arm shipped "analyzed 90 > allocated 76" — impossible.
+    const r = parseConsort({
+      randomized: 153,
+      arms: [
+        { label: 'RT', allocated: 77, analyzed: 63 },
+        { label: 'Observation', allocated: 76, analyzed: 90 },
+      ],
+    });
+    expect(r?.arms[0]).toEqual({ label: 'RT', allocated: 77, analyzed: 63 });
+    expect(r?.arms[1]).toEqual({ label: 'Observation', allocated: 76, analyzed: null });
+  });
+
   it('returns null for non-objects', () => {
     expect(parseConsort(null)).toBeNull();
     expect(parseConsort('x')).toBeNull();
