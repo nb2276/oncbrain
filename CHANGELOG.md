@@ -2,6 +2,43 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.30.0] - 2026-07-17
+
+The "endpoint-forward card" release: the study card leads with the primary
+endpoint TYPE beside the number (whether the benefit is survival, a surrogate, or
+local control is as decision-relevant as the effect size), carries a fuller folded
+spec sheet, and ships a dark theme.
+
+### Added
+- **Endpoint-forward glance.** New `primary_endpoint` field `{name, klass, stat_value, stat_detail}`
+  from Phase 2. The card head shows the endpoint name plus a class chip (hard
+  survival / surrogate / local control / safety, each a distinct legible fill)
+  next to the big headline number, with a muted CI/p sub-line. Falls back to the
+  TL;DR hero when a study has no stated primary.
+- **Structured fold.** New `analysis_sections` field `[{label, body}]` renders the
+  fold as a left-labeled spec sheet (Design, Population, Endpoints, Results, vs
+  leading data, Applies to, Limitations) with bold key terms, results tables, and
+  ✓/✕ "represents / does not represent" markers. Falls back to the IMRD buckets
+  when absent, so old digests render unchanged.
+- **Dark theme.** Default dark with a light toggle (persisted, pre-paint, no flash).
+- **Resume cache** (`build:day`). Content-addressed, TTL-scoped per-phase cache so
+  a session-limited multi-study rebuild finishes across windows. Keyed on inputs,
+  model, prompt fingerprint, image URLs, conference stamp, and prior context.
+- **Verbose pipeline logging.** Per-phase markers, which study/paper each Phase 2
+  agent is on, and every Apple Vision OCR / local Qwen / Opus figure-reconcile call.
+
+### Changed
+- The card resting layer leads with endpoint plus verdict; the Monday-clinic block
+  moved below the evidence sections.
+
+### Safety
+- `validatePrimaryEndpoint` grounds every published endpoint number against source,
+  reusing the detail-table gate: token membership plus CI/range adjacency, with the
+  whole field withheld to null if any number is unverified. A fabricated effect size
+  cannot reach the card head.
+- The publish-boundary test now walks the full artifact recursively, so a local-only
+  figure/fulltext field can never leak through a newly published field.
+
 ## [0.29.0] - 2026-07-14
 
 The "forward loop" release: make each study card carry more of its own provenance

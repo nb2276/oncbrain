@@ -480,14 +480,24 @@ async function enrichPdfPaper(
   // (it makes Opus reconcile calls per page) so a machine without it just keeps
   // figure_ocr_md. Runs while tmpPdf still exists (before the finally unlink).
   let figureStructured = '';
+  const pdfLabel = note ? `"${note.slice(0, 60)}"` : `item #${item.id}`;
   try {
     writeFileSync(tmpPdf, buffer);
     extracted = await extractPdfText(tmpPdf);
+    if (!process.env.VITEST) {
+      console.log(`  [enrich] PDF ${pdfLabel}: text via ${extracted.via}`);
+    }
     if (extracted.via === 'text') {
+      if (!process.env.VITEST) {
+        console.log(`  [enrich] PDF ${pdfLabel}: figure OCR (Apple Vision on figure pages)`);
+      }
       figureOcr = await extractPdfFigureOcr(tmpPdf);
       // Only worth the Qwen+Opus pass when the paper actually has figure pages
       // (figureOcr non-empty) AND the local vision stack is up.
       if (figureOcr && (await isQwenAvailable())) {
+        if (!process.env.VITEST) {
+          console.log(`  [enrich] PDF ${pdfLabel}: grounded figure structuring (Vision + Qwen → Opus reconcile)`);
+        }
         figureStructured = await extractPdfFigureStructured(tmpPdf);
       }
     }

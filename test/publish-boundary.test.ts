@@ -82,6 +82,44 @@ describe('digest artifact publish boundary (v0.15)', () => {
     });
     expect(withPapers.length).toBeGreaterThan(0);
   });
+
+  // v0.30 — the paper-level check above only walks artifact.papers. But
+  // sanitizeArtifactForApi spreads the whole artifact (api-output.ts) and per-study
+  // API carries the whole study object, so a forbidden field added to a STUDY (or
+  // any nested object) would auto-publish and slip past the papers-only loop. This
+  // walks the ENTIRE artifact so a local-only field can't leak from anywhere —
+  // papers, studies, figures, sources, or a future nested shape.
+  function deepKeys(obj: unknown, acc: Set<string> = new Set()): Set<string> {
+    if (Array.isArray(obj)) {
+      for (const v of obj) deepKeys(v, acc);
+    } else if (obj && typeof obj === 'object') {
+      for (const k of Object.keys(obj as Record<string, unknown>)) {
+        acc.add(k);
+        deepKeys((obj as Record<string, unknown>)[k], acc);
+      }
+    }
+    return acc;
+  }
+
+  it('no forbidden key appears ANYWHERE in a committed artifact (studies + nested, not just papers)', () => {
+    for (const f of digestFiles()) {
+      const artifact = JSON.parse(readFileSync(f, 'utf-8'));
+      const keys = deepKeys(artifact);
+      for (const key of FORBIDDEN_KEYS) {
+        expect(keys.has(key), `${f}: artifact leaks ${key} somewhere in the tree`).toBe(false);
+      }
+    }
+  });
+
+  it('walks study objects specifically (guard is exercised on the study surface)', () => {
+    // Make sure the deep walk actually reaches studies, so the assertion above
+    // isn't vacuously green on a corpus that never nested a study.
+    const withStudies = digestFiles().filter((f) => {
+      const a = JSON.parse(readFileSync(f, 'utf-8'));
+      return (a.digest?.sites ?? []).some((s: { studies?: unknown[] }) => (s.studies ?? []).length > 0);
+    });
+    expect(withStudies.length).toBeGreaterThan(0);
+  });
 });
 
 // v0.10 surface — extends the boundary to the new tag pages. A future

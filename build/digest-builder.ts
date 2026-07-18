@@ -666,6 +666,11 @@ export async function buildOneDate(
       // v0.13: thread the shared cache + injectable seams.
       relatedTrialsRunCache: deps?.relatedTrialsRunCache,
       relatedTrialsDeps: deps?.relatedTrialsDeps,
+      // v0.30: resume cache — skip already-built studies on a re-run so a big
+      // multi-study date that hit the claude-cli session limit finishes across
+      // windows. OFF for --backfill (a refresh path that must rebuild fresh) and
+      // when RESUME_CACHE=off (rebuild:queued sets that).
+      resumeCache: process.env.RESUME_CACHE !== 'off' && !args.backfill,
     });
 
   // v0.26 (Thread 1): mark figure-sourced bullets deterministically, before
