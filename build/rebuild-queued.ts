@@ -145,8 +145,13 @@ function main(): void {
 
       console.log(`\n▶ rebuild ${q.bookmark_date} (${q.reason ?? 'no reason recorded'})`);
       // Reuse the build:day CLI so overrides + perspective + model env all apply.
+      // RESUME_CACHE=off: this queue exists to REFRESH a past date (richer re-send,
+      // late slide, fresh ClinicalTrials.gov status), so it must NOT reuse a prior
+      // build's cached studies. The resume cache is for finishing a session-limited
+      // build, not for the refresh path.
       const res = spawnSync('npm', ['run', 'build:day', '--', `--date=${q.bookmark_date}`], {
         stdio: 'inherit',
+        env: { ...process.env, RESUME_CACHE: 'off' },
       });
       if (res.status === 0) {
         // Compare-and-delete: if enrichment re-queued this date mid-build, the

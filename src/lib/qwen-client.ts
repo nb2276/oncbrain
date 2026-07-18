@@ -105,6 +105,9 @@ export async function runQwenVision(imagePath: string, opts: RunQwenOptions = {}
 
   const host = (opts.host ?? process.env.OLLAMA_HOST ?? DEFAULT_OLLAMA_HOST).replace(/\/$/, '');
   const model = opts.model ?? process.env.QWEN_MODEL ?? DEFAULT_QWEN_MODEL;
+  if (!process.env.VITEST) {
+    console.log(`  [figure:qwen] ${model} (via ${host}) on ${imagePath}`);
+  }
   const prompt = opts.prompt ?? QWEN_FIGURE_PROMPT;
   const numCtx = opts.numCtx ?? QWEN_NUM_CTX;
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;

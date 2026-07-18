@@ -130,6 +130,55 @@ function toSlideUrl(filePath: string): string {
     ? '/slides/' + filePath.slice('data/slide-photos/'.length)
     : filePath;
 }
+// v0.30: emphasize the numbers that carry the result. Runs AFTER linkifyCitations,
+// so it operates only on text between tags (never inside an <a href>) and does NOT
+// re-escape (the text is already escaped). The first effect-size token (HR/OR/RR or
+// a "% vs %") is the one driving the headline → .stat-key; other stats → .stat.
+// The p-value pattern also matches the escaped `p&lt;`/`p&gt;` forms.
+function emphasizeStats(html: string): string {
+  if (!html) return html;
+  let keyed = false;
+  const TOK = /\b(?:a?HR|OR|RR|IRR)\s*[=:]?\s*\d+\.\d+(?:\s*\((?:95%\s*CI[:\s]*)?[\d.]+\s*[–-]\s*[\d.]+\))?|\b\d{1,3}(?:\.\d)?%(?:\s*vs\.?\s*\d{1,3}(?:\.\d)?%)?|\bp\s*(?:[=<>]|&lt;|&gt;)\s*0?\.\d+|\b\d+(?:\.\d)?\s*(?:mo|months|yr|years|wks|weeks)\b/gi;
+  return html.replace(/<[^>]+>|[^<]+/g, (seg) => {
+    if (seg.charAt(0) === '<') return seg;
+    return seg.replace(TOK, (tok) => {
+      const isEffect = /^(?:a?HR|OR|RR|IRR)/i.test(tok) || tok.indexOf('%') !== -1;
+      const cls = isEffect && !keyed ? ((keyed = true), 'stat stat-key') : 'stat';
+      return `<span class="${cls}">${tok}</span>`;
+    });
+  });
+}
+// v0.30: convert a small, safe subset of inline markdown (**bold**) AFTER
+// linkifyCitations (so text is already escaped and <a> citations are whole HTML
+// islands we skip) and BEFORE emphasizeStats. Restores the mockup's bolded key
+// terms in the structured fold without breaking citations or double-escaping.
+function applySafeBold(html: string): string {
+  return html
+    .split(/(<a\b[^>]*>[\s\S]*?<\/a>|<[^>]+>)/gi)
+    .map((seg) => (!seg || seg.charAt(0) === '<' ? seg : seg.replace(/\*\*([^*\n][\s\S]*?[^*\n]|\S)\*\*/g, '<b>$1</b>')))
+    .join('');
+}
+// The full inline pipeline for structured-fold prose: link citations → bold key
+// terms → emphasize stat numbers.
+function renderBrief(text: string): string {
+  return emphasizeStats(applySafeBold(linkifyCitations(text)));
+}
+// v0.30: split an "Applies to" body ("Represents X. Does not represent Y.") into
+// the ✓ represents / ✕ excludes pair (mockup). Null when it doesn't match → prose.
+function splitApplies(body: string): { yes: string; no: string } | null {
+  const m = body.match(/^(.*?)(\bdoes\s+not\b[\s\S]*)$/i);
+  if (!m) return null;
+  const yes = m[1].replace(/^\s*represents\s*/i, '').replace(/[.;,\s]+$/, '').trim();
+  const no = m[2].trim();
+  return yes && no ? { yes, no } : null;
+}
+// v0.30: short label for the endpoint-class chip in the endpoint-forward head.
+function endpointClassLabel(k: string): string {
+  if (k === 'overall-survival') return 'hard';
+  if (k === 'local-control') return 'local control';
+  if (k === 'safety') return 'safety';
+  return 'surrogate';
+}
 
 const comparatorBullets = study.details.filter(isComparatorBullet);
 const otherBullets = study.details.filter((d) => !isComparatorBullet(d));
@@ -214,6 +263,23 @@ if (resultsBullets.length > 0) depthSections.push({ label: 'Results', bullets: r
 if (critiqueBullets.length > 0) depthSections.push({ label: 'Critique', bullets: critiqueBullets, consort: false });
 if (notesBullets.length > 0) depthSections.push({ label: 'Notes', bullets: notesBullets, consort: false });
 
+// v0.30: structured fold sections (Design / Population / Regimen / …). When the
+// Phase-2 agent emits these, the fold renders them as the mockup's labeled prose
+// "spec sheet" INSTEAD of the emoji-IMRD buckets; absent → the buckets.
+const analysisSections = Array.isArray(study.analysis_sections)
+  ? study.analysis_sections.filter(
+      (s): s is { label: string; body: string } =>
+        Boolean(s && typeof s.label === 'string' && s.label.trim() && typeof s.body === 'string' && s.body.trim()),
+    )
+  : [];
+const hasAnalysisSections = analysisSections.length > 0;
+// Detail tables (arm-vs-arm data) survive even when analysis_sections replaces the
+// prose fold — the prose can't carry a grounded 2D table, so render them alongside.
+const tableDetails = study.details.filter(
+  (d): d is { text: string; table: { columns: string[]; rows: string[][] } } =>
+    typeof d === 'object' && d !== null && 'table' in d,
+);
+
 // v0.10: figure gallery (KM curve, forest plot, results/AE table…). Normalizes
 // the v0.4 single-figure shape; re-applies the host allowlist at render time as
 // defense-in-depth (build already validated). First figure is the visual anchor;
@@ -231,6 +297,7 @@ const hasAudience = Boolean(study.verdict?.audience);
 // Folded "depth" layer: everything past the triage essentials. Figures live in
 // their own column; audience is now in the head; CONSORT folds into Methods.
 const hasDepth =
+  hasAnalysisSections ||
   otherBullets.length > 0 ||
   hasOpenQuestions ||
   authors.length > 0 ||
@@ -295,13 +362,23 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
 
 <div class:list={['study', hasFigures && 'has-figures', study.verdict?.soc_implication && `verdict-${study.verdict.soc_implication}`]} id={anchorId} data-tags={dataTags || undefined}>
   <div class="study-head">
-  {/* ── Triage layer: always visible ── */}
-  <h4 class="study-name">
-    {study.name}
-    {study.nct && (
-      <a class="citation study-nct" href={`https://clinicaltrials.gov/study/${study.nct}`} target="_blank" rel="noopener">{study.nct}</a>
+  {/* ── Triage layer: always visible. v0.30: name + a compact verdict CHIP on
+      one row (the mockup glance top); the verdict rationale moves into the fold
+      so the head reads clean instead of a stacked pill + paragraph. ── */}
+  <div class="glance">
+  <div class="glance-top">
+    <h4 class="study-name">
+      {study.name}
+      {study.nct && (
+        <a class="citation study-nct" href={`https://clinicaltrials.gov/study/${study.nct}`} target="_blank" rel="noopener">{study.nct}</a>
+      )}
+    </h4>
+    {verdictMeta && study.verdict && (
+      <span class:list={['verdict-chip', `verdict-${study.verdict.soc_implication}`]}>
+        <span class="verdict-emoji" aria-hidden="true">{verdictMeta.emoji}</span>{verdictMeta.label}
+      </span>
     )}
-  </h4>
+  </div>
   {study.is_preprint && (
     <p class="preprint-badge" role="note" title="Preprint server (medRxiv / bioRxiv / Research Square). Findings are not yet peer-reviewed; the verdict is capped at early-signal.">
       <span class="preprint-badge-tag">PREPRINT</span><span class="preprint-badge-text">not peer-reviewed</span>
@@ -310,7 +387,20 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   {hasAudience && (
     <p class="study-audience study-audience-head"><span class="audience-label">For</span>{study.verdict!.audience}</p>
   )}
-  <p class="study-tldr"><span class="tldr-label">TL;DR</span><span set:html={linkifyCitations(stripStudyNamePrefix(study.tldr, study.name))} /></p>
+  {study.primary_endpoint && study.primary_endpoint.name && study.primary_endpoint.stat_value && (
+    <div class="study-endpoint">
+      <div class="endpoint-head">
+        <span class="endpoint-name">{study.primary_endpoint.name}</span>
+        <span class:list={['endpoint-class', `ec-${study.primary_endpoint.klass}`]}>{endpointClassLabel(study.primary_endpoint.klass)}</span>
+      </div>
+      <p class="endpoint-stat" set:html={emphasizeStats(linkifyCitations(study.primary_endpoint.stat_value))} />
+      {study.primary_endpoint.stat_detail && (
+        <p class="endpoint-sub" set:html={linkifyCitations(study.primary_endpoint.stat_detail)} />
+      )}
+    </div>
+  )}
+  <p class:list={['study-tldr', study.primary_endpoint?.stat_value && 'study-tldr--plain']}><span class="tldr-label">TL;DR</span><span set:html={emphasizeStats(linkifyCitations(stripStudyNamePrefix(study.tldr, study.name)))} /></p>
+  </div>{/* /.glance */}
   {provenanceOutlet && (
     <p class="study-provenance">
       <span class="provenance-icon" aria-hidden="true">{REVIEW_GLYPH}</span>
@@ -342,15 +432,6 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       </p>
     </section>
   )}
-  {study.verdict?.rationale && verdictMeta && (
-    <aside class:list={['verdict-block', `verdict-${study.verdict.soc_implication}`]}>
-      <div class="verdict-pill">
-        <span class="verdict-emoji" aria-hidden="true">{verdictMeta.emoji}</span>
-        <span class="verdict-label">{verdictMeta.label}</span>
-      </div>
-      <p class="verdict-rationale">{study.verdict.rationale}</p>
-    </aside>
-  )}
   {restingProse && (
     <section class="significance-block" aria-label="Why this study matters">
       <div class="significance-label">
@@ -367,7 +448,7 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       <p class="curator-note-text" set:html={linkifyCitations(curatorNoteText)} />
     </section>
   )}
-  {comparatorBullets.length > 0 && (
+  {comparatorBullets.length > 0 && !hasAnalysisSections && (
     <section class="comparator-block">
       <div class="comparator-label">vs leading data</div>
       <ul class="comparator-list">
@@ -383,16 +464,6 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       links to /tags/<slug>/. No border, no fill, no uppercase. Wraps to
       multiple lines on narrow viewports rather than overflowing. Subtraction
       first per DESIGN.md "cards earn their existence." ── */}
-  {hasTagChips && (
-    <p class="study-tags" aria-label="Cross-cutting tags">
-      {tagChips.map((c, i) => (
-        <Fragment>
-          {i > 0 && <span class="tag-sep" aria-hidden="true">·</span>}
-          <a class="tag-chip" href={`/tags/${c.slug}/`}>{c.label}</a>
-        </Fragment>
-      ))}
-    </p>
-  )}
   {/* ── v0.28 cross-day trial history: thin "Also covered" wayfinding line.
       IDENTITY (same trial on other dates), not the "Studies like this"
       similarity footer. Each date links to that day's card. Absent → no line. ── */}
@@ -511,15 +582,52 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
           </Fragment>
         )}
       </summary>
-      {foldedClinic && (
-        <section class="depth-section clinic-section" aria-label="Monday clinic decision">
-          <div class="section-label">Monday clinic</div>
-          <p class="clinic-text" set:html={linkifyCitations(foldedClinic)} />
+      {hasAnalysisSections && analysisSections.map((sec) => {
+        const isResults = /result/i.test(sec.label);
+        const applies = /^applies/i.test(sec.label) ? splitApplies(sec.body) : null;
+        return (
+          <section class="depth-section">
+            <div class="section-label">{sec.label}</div>
+            <div class="depth-section-body">
+              {applies ? (
+                <Fragment>
+                  <div class="rep yes"><span class="mark" aria-hidden="true">✓</span><span set:html={renderBrief(applies.yes)} /></div>
+                  <div class="rep no"><span class="mark" aria-hidden="true">✕</span><span set:html={renderBrief(applies.no)} /></div>
+                </Fragment>
+              ) : (
+                <p class="depth-prose" set:html={renderBrief(sec.body)} />
+              )}
+              {isResults && tableDetails.map((d) => (
+                <div class="study-table-wrap">
+                  <table class="study-table">
+                    <thead><tr>{d.table.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}</tr></thead>
+                    <tbody>{d.table.rows.map((row) => (<tr>{row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}</tr>))}</tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+      {hasAnalysisSections && tableDetails.length > 0 && !analysisSections.some((s) => /result/i.test(s.label)) && (
+        <section class="depth-section">
+          <div class="section-label">Results</div>
+          <div class="depth-section-body">
+            {tableDetails.map((d) => (
+              <div class="study-table-wrap">
+                <table class="study-table">
+                  <thead><tr>{d.table.columns.map((c) => (<th set:html={linkifyCitations(c)} />))}</tr></thead>
+                  <tbody>{d.table.rows.map((row) => (<tr>{row.map((cell) => (<td set:html={linkifyCitations(cell)} />))}</tr>))}</tbody>
+                </table>
+              </div>
+            ))}
+          </div>
         </section>
       )}
-      {depthSections.map((sec) => (
+      {!hasAnalysisSections && depthSections.map((sec) => (
         <section class="depth-section">
           <div class="section-label">{sec.label}</div>
+          <div class="depth-section-body">
           {sec.bullets.length > 0 && (
             <ul class="study-details">
               {sec.bullets.map((d) => {
@@ -605,8 +713,25 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
               </div>
             </details>
           )}
+          </div>
         </section>
       ))}
+      {study.verdict?.rationale && (
+        <section class="depth-section">
+          <div class="section-label">Rationale</div>
+          <div class="depth-section-body"><p class="depth-prose">{study.verdict.rationale}</p></div>
+        </section>
+      )}
+      {/* v0.30: the Monday-clinic bottom line renders AFTER the evidence
+          (Methods → Results → Critique), so the conclusion follows the data
+          instead of preceding it. It led the fold pre-v0.30, which read as a
+          conclusion before its own results. Content unchanged; order only. */}
+      {foldedClinic && (
+        <section class="depth-section clinic-section" aria-label="Monday clinic decision">
+          <div class="section-label">Monday clinic</div>
+          <p class="clinic-text" set:html={linkifyCitations(foldedClinic)} />
+        </section>
+      )}
       {hasOpenQuestions && (
         <div class="open-questions study-open-questions">
           <div class="section-label">Open questions</div>
@@ -792,6 +917,18 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       </div>
     </details>
   )}
+  {hasTagChips && (
+    <div class="meta">
+      <p class="study-tags" aria-label="Cross-cutting tags">
+        {tagChips.map((c, i) => (
+          <Fragment>
+            {i > 0 && <span class="tag-sep" aria-hidden="true">·</span>}
+            <a class="tag-chip" href={`/tags/${c.slug}/`}>{c.label}</a>
+          </Fragment>
+        ))}
+      </p>
+    </div>
+  )}
   </div>{/* /.study-rest */}
 </div>
 
@@ -799,7 +936,9 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   .study {
     margin: 2.25rem 0;
     padding: 1rem 1.15rem;
-    background: var(--bg-card);
+    /* v0.30: subtle verdict wash tints each card by its SOC implication (no
+       verdict → plain card bg). Pairs with the verdict left border below. */
+    background: color-mix(in srgb, var(--verdict-color, transparent) 4%, var(--bg-card));
     border: 1px solid var(--border);
     border-left: 3px solid var(--border);
     border-radius: 4px;
@@ -1222,17 +1361,214 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   /* TL;DR is the headline result — make it the lead callout so it isn't lost
      between the title and the verdict/comparator boxes. The one tinted block in
      the head; verdict + comparator are quieter bordered callouts below it. */
+  /* v0.30: the TL;DR is the card's hero. It carries a verdict-tinted wash + a
+     verdict-color left rule so the headline number (verdict-colored .stat-key)
+     reads as the endpoint-forward result box, echoing the redesign mockups. */
   .study-tldr {
     margin: 0 0 0.7rem;
-    padding: 0.6rem 0.85rem;
-    font-size: 1.08rem;
+    padding: 0.7rem 0.95rem;
+    font-size: 1.16rem;
     line-height: 1.5;
     color: var(--fg);
-    background: var(--accent-bg);
+    background: color-mix(in srgb, var(--verdict-color, var(--accent)) 9%, var(--bg-card));
     border: 1px solid var(--border);
-    border-left: 3px solid var(--border);
+    border-left: 3px solid var(--verdict-color, var(--accent));
     border-radius: 4px;
   }
+  /* v0.30: emphasize result-carrying numbers in the headline. The driving effect
+     size gets bold + a verdict-hued underline (valence hint via the underline, so
+     the text stays neutral and a negative HR never reads as a colored "win");
+     secondary stats get bold + tabular figures. */
+  .study-tldr .stat { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .study-tldr .stat-key {
+    font-weight: 700;
+    color: var(--verdict-color, var(--fg));
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+    text-decoration-color: var(--verdict-color, var(--fg-muted));
+  }
+  /* v0.30: endpoint-forward head — leads the card when a structured primary
+     endpoint is present. Verdict-washed hero box: endpoint name + class chip,
+     then the verbatim stat with its number emphasized. TL;DR then drops to plain. */
+  .study-endpoint {
+    margin: 0 0 0.5rem;
+    padding: 0.65rem 0.95rem 0.7rem;
+    background: color-mix(in srgb, var(--verdict-color, var(--accent)) 10%, var(--bg-card));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--verdict-color, var(--accent));
+    border-radius: 4px;
+  }
+  .endpoint-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.2rem;
+  }
+  .endpoint-name { font-weight: 700; font-size: 0.98rem; }
+  .endpoint-class {
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 3px;
+    /* Legible neutral fallback for any unrecognized class (the four known
+       classes each override below). Was --fg-muted with no fill, which read as
+       near-invisible for local-control/surrogate/safety in a screenshot. */
+    color: var(--fg);
+    background: color-mix(in srgb, var(--fg) 8%, var(--bg-card));
+    border: 1px solid var(--border);
+  }
+  .endpoint-stat {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.015em;
+    font-variant-numeric: tabular-nums;
+  }
+  .endpoint-stat .stat { font-weight: 700; }
+  .endpoint-stat .stat-key { color: var(--verdict-color, var(--fg)); text-decoration: none; }
+  /* v0.30: muted CI / p / absolute sub-line under the big endpoint value (mockup .ep-sub). */
+  .endpoint-sub {
+    margin: 3px 0 0;
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+  }
+  /* TL;DR sheds its hero box when the endpoint block already leads the card. */
+  .study-tldr--plain {
+    background: transparent;
+    border: none;
+    padding: 0 0 0 0.1rem;
+    font-size: 1rem;
+  }
+  /* v0.30: glance-top — trial name (left) + a compact verdict chip (right),
+     replacing the old stacked verdict pill + rationale paragraph. */
+  .glance-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding-right: 2.9rem; /* reserve the absolutely-positioned share button's corner */
+  }
+  .glance-top .study-name { padding-right: 0; flex: 1 1 auto; min-width: 0; }
+  /* v0.30: FILLED verdict chip (mockup parity). --verdict-color inverts per
+     theme (dark hue in light mode, bright hue in dark), so the text color flips
+     too: white on the dark-mode fills would fail, so dark mode uses near-bg text. */
+  .verdict-chip {
+    flex: 0 0 auto;
+    align-self: start;
+    margin-top: 0.12rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--verdict-chip-fg, #fff);
+    background: var(--verdict-color, var(--fg-muted));
+    border: none;
+    border-radius: 4px;
+    padding: 4px 9px;
+    white-space: nowrap;
+  }
+  :global(:root:not([data-theme='light'])) .verdict-chip { --verdict-chip-fg: var(--bg); }
+  .verdict-chip .verdict-emoji { font-size: 0.9rem; line-height: 1; }
+  .depth-prose { margin: 0; font-size: 0.92rem; line-height: 1.5; }
+  /* v0.30: unified GLANCE wash box (mockup parity) — holds name+chip, the
+     endpoint, and the take/TL;DR, capped by a verdict hairline. The endpoint and
+     TL;DR shed their own boxes inside it; "why it matters" reads plain below. */
+  .glance {
+    padding: 0.75rem 0.9rem 0.8rem;
+    margin-bottom: 0.85rem;
+    background: color-mix(in srgb, var(--verdict-color, var(--accent)) 8%, var(--bg-card));
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--verdict-color, var(--border));
+    border-radius: 5px;
+  }
+  .glance .study-audience { margin: 0.15rem 0 0.4rem; }
+  .glance .study-endpoint {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0.15rem 0 0.45rem;
+  }
+  .glance .study-tldr {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: 1rem;
+  }
+  /* de-box "why it matters" — plain read band, no border / blue left-bar. */
+  .significance-block {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0.1rem 0 0.75rem;
+  }
+  /* Endpoint class chip — one legible, distinct fill per class so the endpoint
+     TYPE reads as co-equal with the headline number (a survival benefit vs a
+     surrogate vs local control is as important as the effect size). Importance
+     hierarchy: hard survival (solid dark) > local control (solid accent) >
+     surrogate (soft accent tint) > safety (neutral). All derived from theme
+     tokens so they invert cleanly between dark + light mode. */
+  .endpoint-class.ec-overall-survival {
+    color: var(--bg-card);
+    background: var(--fg);
+    border-color: transparent;
+  }
+  .endpoint-class.ec-local-control {
+    color: var(--bg-card);
+    background: var(--accent);
+    border-color: transparent;
+  }
+  .endpoint-class.ec-surrogate {
+    color: var(--accent);
+    background: var(--accent-bg);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .endpoint-class.ec-safety {
+    color: var(--fg-muted);
+    background: color-mix(in srgb, var(--fg) 6%, var(--bg-card));
+    border-color: var(--border);
+  }
+  /* NCT as a plain accent line under the name (mockup), not a bordered pill. */
+  .glance .study-nct {
+    display: block;
+    margin: 2px 0 0;
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 0.66rem;
+    color: var(--accent);
+  }
+  /* fold labels tighter, matching the mockup's .fa-lab type scale. */
+  .depth-section > .section-label,
+  .study-open-questions > .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+  }
+  /* v0.30: meta footer — tags row at the card bottom (mockup .meta), not mid-card. */
+  .meta {
+    border-top: 1px solid var(--border);
+    margin-top: 0.9rem;
+    padding-top: 0.7rem;
+  }
+  .meta .study-tags { margin: 0; }
+  /* v0.30: ✓ represents / ✕ excludes markers in the "Applies to" fold section. */
+  .depth-section-body .rep { display: flex; gap: 0.4rem; margin: 0.12rem 0; line-height: 1.45; }
+  .depth-section-body .rep .mark { font-weight: 700; flex-shrink: 0; }
+  .depth-section-body .rep.yes .mark { color: #1a7a48; }
+  .depth-section-body .rep.no .mark { color: #8a4a12; }
+  :global(:root:not([data-theme='light'])) .depth-section-body .rep.yes .mark { color: #4fb07a; }
+  :global(:root:not([data-theme='light'])) .depth-section-body .rep.no .mark { color: #d9785a; }
   /* Inline TL;DR label — matches the FOR / vs leading data rhythm so the
      headline paragraph is identifiable at a glance. */
   .tldr-label {
@@ -1266,9 +1602,16 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
      → Notes). The label reuses .section-label (small caps, muted); a thin top
      rule separates sections so the dropdown reads as a structured paper rather
      than a flat list. CONSORT, when present, is nested inside Methods. */
+  /* v0.30: left-labeled "spec sheet" grid — the section label sits in a narrow
+     left column, content on the right (the v3-stampede-full mockup treatment).
+     Collapses to label-above-content on very narrow phones. */
   .depth-section {
-    margin-top: 0.85rem;
-    padding-top: 0.65rem;
+    display: grid;
+    grid-template-columns: clamp(84px, 26%, 116px) 1fr;
+    column-gap: 0.9rem;
+    align-items: start;
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
     border-top: 1px solid var(--border);
   }
   .depth-section:first-of-type {
@@ -1276,7 +1619,15 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     padding-top: 0;
     border-top: none;
   }
+  .depth-section > .section-label { margin: 0; padding-top: 0.1rem; }
+  .depth-section-body { min-width: 0; }
+  .depth-section-body > :first-child { margin-top: 0; }
+  .depth-section-body .study-details { padding-left: 1rem; }
   .depth-section .consort { margin-top: 0.6rem; }
+  @media (max-width: 400px) {
+    .depth-section { grid-template-columns: 1fr; row-gap: 0.15rem; }
+    .depth-section > .section-label { padding-top: 0; margin-bottom: 0.25rem; }
+  }
 
   .study-details {
     margin: 0;
@@ -1311,9 +1662,6 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     margin: 0.4rem 0 0.6rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--bg-card);
   }
   .study-table {
     border-collapse: collapse;
@@ -1322,20 +1670,27 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     font-family: var(--font-sans);
     line-height: 1.4;
   }
+  /* v0.30: mockup table.res — borderless, right-aligned numeric with a small-caps
+     header underline and row hairlines (no outer box / vertical rules). */
   .study-table th,
   .study-table td {
-    padding: 0.45rem 0.7rem;
-    text-align: left;
+    padding: 4px 8px;
+    text-align: right;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
+  .study-table th:first-child,
+  .study-table td:first-child { text-align: left; white-space: normal; font-weight: 600; }
   .study-table tbody tr:last-child td { border-bottom: none; }
   .study-table th {
-    font-weight: 600;
-    font-size: 0.82rem;
-    letter-spacing: 0.02em;
+    font-weight: 700;
+    font-size: 0.56rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     color: var(--fg-muted);
-    background: var(--bg-card);
+    background: transparent;
+    border-bottom: 1.5px solid var(--border);
   }
   @media (max-width: 600px) {
     .study-table th:first-child,
@@ -1524,13 +1879,23 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   .open-questions ul { margin: 0; padding-left: 1.2rem; line-height: 1.55; }
   .open-questions li { margin: 0.25rem 0; }
   .study-open-questions {
-    margin-top: 1rem;
+    margin-top: 0.6rem;
     padding: 0.6rem 0 0;
     background: transparent;
     border-top: 1px solid var(--border);
     border-radius: 0;
+    /* v0.30: same left-labeled grid as the other depth sections. */
+    display: grid;
+    grid-template-columns: clamp(84px, 26%, 116px) 1fr;
+    column-gap: 0.9rem;
+    align-items: start;
   }
-  .study-open-questions .section-label { color: var(--fg-muted); }
+  .study-open-questions > .section-label { color: var(--fg-muted); margin: 0; padding-top: 0.1rem; }
+  .study-open-questions > ul { margin-top: 0; }
+  @media (max-width: 400px) {
+    .study-open-questions { grid-template-columns: 1fr; row-gap: 0.15rem; }
+    .study-open-questions > .section-label { padding-top: 0; margin-bottom: 0.25rem; }
+  }
 
   /* ── v0.13: trials-to-watch nest under each open question ─────────────
      Design review (gap 2) caught that a nested <ul> would inherit
@@ -1655,12 +2020,12 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   }
 
   /* Verdict colors in dark mode: lighter values, legible on the dark card. */
-  @media (prefers-color-scheme: dark) {
-    .study.verdict-practice-changing { --verdict-color: #5fcc8a; }
-    .study.verdict-challenges-soc { --verdict-color: #d99a4a; }
-    .study.verdict-early-signal { --verdict-color: #6fbfd6; }
-    .study.verdict-methodologically-limited { --verdict-color: #d9785a; }
-  }
+  /* v0.30: brighter verdict hues in dark. Default theme IS dark, so :root (no
+     data-theme=light) gets these; light mode keeps the base darker hues. */
+  :global(:root:not([data-theme='light'])) .study.verdict-practice-changing { --verdict-color: #5fcc8a; }
+  :global(:root:not([data-theme='light'])) .study.verdict-challenges-soc { --verdict-color: #d99a4a; }
+  :global(:root:not([data-theme='light'])) .study.verdict-early-signal { --verdict-color: #6fbfd6; }
+  :global(:root:not([data-theme='light'])) .study.verdict-methodologically-limited { --verdict-color: #d9785a; }
 
   /* Share affordance anchored to the top-right of .study-head. On wide
      figures-present cards (grid: head | figs at >=1200px) the head is the

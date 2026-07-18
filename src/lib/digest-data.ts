@@ -81,6 +81,20 @@ export type DigestStudy = {
   // E1 share-body content. Distinct from significance; abstains when it would
   // repeat it. Mirrored in llm-pipeline.ts:DigestStudy — keep in lockstep.
   monday_clinic?: string | null;
+  // v0.30: structured primary endpoint — the card head leads with the endpoint
+  // TYPE (survival vs surrogate vs local) + the verbatim stat. `stat_text` is
+  // grounded (validated numbers or the field is null). Absent → TL;DR head.
+  // Mirrored in llm-pipeline.ts:DigestStudy — keep the shape in lockstep.
+  primary_endpoint?: {
+    name: string;
+    klass: 'overall-survival' | 'surrogate' | 'local-control' | 'safety';
+    stat_value: string;
+    stat_detail?: string | null;
+  } | null;
+  // v0.30: structured fold sections (Design / Population / Regimen / … ). When
+  // present the fold renders these labeled rows; absent → the emoji-IMRD buckets.
+  // Mirrored in llm-pipeline.ts — keep the shape in lockstep.
+  analysis_sections?: { label: string; body: string }[] | null;
   // v0.27: curator's own note on the study — the human editor's voice, distinct
   // from the AI analysis. NOT LLM-generated: set durably via the override CLI
   // (`--edit=<slug> --curator-note="…"`) and rendered as its own callout on the

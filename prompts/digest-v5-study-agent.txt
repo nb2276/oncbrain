@@ -163,6 +163,61 @@ Hard rules for `monday_clinic`:
   changes nothing, a guideline / review with no one-patient decision, or a signal
   too immature to move a patient. A forced clinic sentence is worse than none.
 
+═══ PRIMARY ENDPOINT (structured, for the card head) ═══
+
+Emit a `primary_endpoint` object when — and ONLY when — the source STATES a primary
+endpoint (i.e. a registered randomized trial). It lets the card lead with the
+endpoint TYPE beside the number, because knowing the benefit is on overall survival
+vs a surrogate (PFS/MFS/DFS) vs local control matters as much as the HR itself.
+
+Fields:
+- `name`: the endpoint, e.g. "Overall survival", "Metastasis-free survival".
+- `klass`: one of `overall-survival` | `surrogate` | `local-control` | `safety`.
+  OS → `overall-survival`; PFS/MFS/DFS/RFS/bPFS/bFFS → `surrogate`;
+  LC/LRR/LRF/local recurrence → `local-control`; an AE/toxicity primary → `safety`.
+- `stat_value`: the HEADLINE effect ONLY, verbatim — e.g. "HR 0.62", "82% vs 69%",
+  "6.7 vs 13.4 mo". ≤60 chars. This is set big on the card.
+- `stat_detail`: the supporting CI / p-value / absolute, verbatim — e.g.
+  "95% CI 0.48-0.79, p<0.001" or "ns, P=.34". Carries significance. ≤90 chars, or null.
+
+Hard rules for `primary_endpoint`:
+- GROUNDED. Every number in `stat_text` is verbatim from source; a stated
+  effect-size number not present in the source drops the whole field at build.
+  Never invent a number, an endpoint, or a p-value.
+- ABSTAIN → null for reviews, single-arm / observational studies, meta-analyses
+  with no single stated primary, or abstract-only sources with no primary endpoint.
+  A guessed primary is worse than none.
+- Report HONESTLY: if the primary was NOT met, `stat_text` says so (e.g.
+  "HR 1.55, ns" / "did not meet OS"). Never cherry-pick a positive secondary.
+
+═══ ANALYSIS SECTIONS (structured fold, for the card body) ═══
+
+Emit an `analysis_sections` array: the study's depth as LABELED prose sections, in
+reading order, so the card fold reads like a structured brief. Each item is
+`{label, body}`. Pick ONLY the labels the source supports, from:
+Design · Population & inclusion · Regimen · Radiotherapy · Endpoints · Results ·
+Safety · vs leading data · Applies to · Limitations · Discussion.
+
+Rules:
+- `body` is 1-3 tight sentences of prose (NOT a leading-emoji bullet). Put the
+  numbers inline. Same no-fabrication bar as the bullets: every number verbatim.
+- Use **markdown bold** for the decision-carrying terms + numbers: primary/secondary
+  labels ("**Primary:**"), the eligibility gate, the key effect sizes, the
+  verdict-moving phrase (e.g. "**no extra benefit**"). Bold sparingly, not whole lines.
+- Split what the emoji bullets lump together: trial DESIGN (phase/N/sites/follow-up)
+  vs POPULATION & inclusion (eligibility, baseline) vs REGIMEN (drug/dose/schedule)
+  vs RADIOTHERAPY (dose/fractionation/target) are DISTINCT sections when the source
+  gives them.
+- "Applies to" MUST be exactly two sentences: "Represents [population]. Does not
+  represent [excluded / boundary population]." (the card renders these as ✓ / ✕.)
+- "Results" holds the effect sizes. If the results are a 2D arm-vs-arm comparison,
+  emit them as a `{text, table}` DETAIL (endpoint col 1, intervention arm col 2,
+  control col 3, effect size last) and do NOT restate those numbers in the Results
+  section body — use the body only for a one-line note, or omit the Results section.
+  "Safety" = the AE profile; "Discussion" = the longer interpretive read.
+- Omit `analysis_sections` (or emit []) for a review / thin abstract with no
+  structured depth — the card then falls back to the terse bullets.
+
 ═══ OUTPUT SHAPE ═══
 
 ```json
@@ -222,6 +277,20 @@ Hard rules for `monday_clinic`:
     "audience": "Inoperable primary RCC, T1b-dominant, median age 77"
   },
   "significance": "Local control, not the OS-negative headline, is the RT read: the node-positive subgroup reached 91% in-field control at 3y (Fig 3). Dose was 60Gy/20fx to involved nodes, transferable to standard practice, so this moves the elective-nodal-coverage decision.",
+  "primary_endpoint": {
+    "name": "Overall survival",
+    "klass": "overall-survival",
+    "stat_value": "HR 0.62",
+    "stat_detail": "95% CI 0.48-0.79, p<0.001"
+  },
+  "analysis_sections": [
+    {"label": "Design", "body": "Phase 3 open-label RCT, 1:1, N=831, 76 sites; stratified by prior taxane. Median follow-up 21 mo."},
+    {"label": "Population", "body": "2L mCRPC after 1 ARSI; ECOG 0-1; median age 71. Excludes visceral-only disease."},
+    {"label": "Endpoints", "body": "Primary: overall survival. Secondary: rPFS, PSA response, QoL."},
+    {"label": "Results", "body": "OS 14.2 vs 9.8 mo, HR 0.62 (0.48-0.79), p<0.001. rPFS HR 0.55. No new safety signals."},
+    {"label": "Applies to", "body": "Represents taxane-exposed 2L mCRPC. Does not extend to 1L or visceral-only disease."},
+    {"label": "Limitations", "body": "Open-label; QoL secondary unblinded. Comparator predates modern sequencing."}
+  ],
   "modality": "radiation",
   "intent": "curative",
   "methodology": "phase-2-trial",

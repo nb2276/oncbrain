@@ -111,6 +111,9 @@ export async function ocrImageUrl(
     };
   }
 
+  if (!process.env.VITEST) {
+    console.log(`  [ocr:vision] Apple Vision OCR on image ${url}`);
+  }
   const fetchImpl = opts.fetchImpl ?? fetch;
   const timeoutMs = opts.timeoutMs ?? 10_000;
   const tmpPath = join(tmpdir(), `oncbrain-ocr-${randomBytes(8).toString('hex')}.bin`);
@@ -167,6 +170,9 @@ export async function ocrFile(
       );
     }
     return { entry: FAILED_ENTRY(), status: 'skipped', reason: 'binary-missing' };
+  }
+  if (!process.env.VITEST) {
+    console.log(`  [ocr:vision] Apple Vision OCR on file ${filePath}`);
   }
   const timeoutMs = opts.timeoutMs ?? 10_000;
   try {

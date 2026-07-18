@@ -52,6 +52,7 @@ import {
   DEFAULT_CONTENT_TYPE,
 } from './content-type.ts';
 import { loadStudyContext, isSafeSlug } from './study-retrieval.ts';
+import { buildCacheKey, readBuildCache, writeBuildCache } from './build-cache.ts';
 import { isOcrAvailable, isSafeImageUrl } from './vision-ocr.ts';
 import { buildAssociationGraph, renderGroupsForPrompt } from './source-association.ts';
 import { isPreprintSource, clampPreprintVerdict } from './preprint.ts';
@@ -371,7 +372,37 @@ export type DigestStudy = {
   // both files MUST keep these shapes in lockstep.
   related_trials?: RelatedTrial[] | null;
   related_trials_provenance?: RelatedTrialsProvenance | null;
+  // v0.30: structured primary endpoint so the card head can lead with the
+  // endpoint TYPE (survival vs surrogate vs local) beside the number — knowing
+  // the benefit is OS vs PFS vs local control matters as much as the HR itself.
+  // `stat_text` is VERBATIM from source (its printed p/CI carry significance);
+  // its effect-size number(s) are validated against source and the whole field
+  // drops to null if unverified (same grounding posture as detail tables).
+  // Emitted only when the source states a primary endpoint (RCTs); null for
+  // reviews / single-arm / observational / abstract-only. Mirrored in
+  // src/lib/digest-data.ts — keep the shape in lockstep.
+  primary_endpoint?: PrimaryEndpoint | null;
+  // v0.30: structured fold sections (Design / Population & inclusion / Regimen /
+  // Radiotherapy / Endpoints / Results / Safety / Applies to / Limitations /
+  // Discussion). When present, the fold renders these labeled "spec sheet" rows
+  // (mockup parity) instead of the emoji-IMRD buckets; absent → the emoji buckets.
+  // Prose-level grounding (same as the detail bullets). Mirrored in digest-data.ts.
+  analysis_sections?: AnalysisSection[] | null;
 };
+
+// v0.30: endpoint class drives the head chip. OS is the hard endpoint; MFS/PFS/
+// DFS/RFS/bPFS are surrogates; LC/LRR/LRF are local control; AE/toxicity is safety.
+export type EndpointClass = 'overall-survival' | 'surrogate' | 'local-control' | 'safety';
+// v0.30: split the stat into a headline value (big) + a muted detail/CI line so the
+// head reads "HR 0.53" big with "6-yr 82% vs 69% · p<0.001" beneath (mockup parity).
+// Both verbatim; their numbers are validated against source together.
+export type PrimaryEndpoint = {
+  name: string;
+  klass: EndpointClass;
+  stat_value: string;
+  stat_detail?: string | null;
+};
+export type AnalysisSection = { label: string; body: string };
 
 // v0.13: CT.gov status subset we surface. See plan D8.
 export type RelatedTrialStatus =
@@ -567,6 +598,12 @@ export type BuildOptions = {
   studyAgentConcurrency?: number;
   maxImagesPerStudy?: number; // cap to control Phase 2 token cost; default 6
 
+  // v0.30: resume cache. When true, each phase's result is cached to disk keyed
+  // by its inputs (content + model + prompt fingerprint), so a re-run after a
+  // session-limited failure skips work already done — big dates finish across
+  // windows. Off by default (tests + API backend unaffected). Set by build:day.
+  resumeCache?: boolean;
+
   // v0.13: related-trials orchestrator wiring. Optional; nothing about it
   // is required for a basic build. When provided:
   //   - relatedTrialsRunCache: in-memory cache for ct.gov fetches. When
@@ -745,8 +782,26 @@ export async function buildDigest(
   const client = opts.client ?? createLlmClient();
   const maxRetries = opts.maxRetries ?? 1;
 
-  // Phase 1
-  const clusters = await runGroupingPhase(client, tweets, opts, maxRetries, associationGroups);
+  // Phase 1 (cacheable — clustering depends only on tweet content + grouping model)
+  const groupKey = opts.resumeCache
+    ? buildCacheKey('group', {
+        tweets: tweets.map((t) => ({ id: t.id, text: t.text, ocr: t.image_ocr_texts ?? [] })),
+        model: opts.groupingModel ?? opts.model ?? '',
+        assoc: associationGroups,
+      })
+    : '';
+  let clusters = groupKey ? readBuildCache<StudyCluster[]>(groupKey) : null;
+  if (clusters) {
+    console.log(`  [cache] Phase 1 grouping: hit (${clusters.length} clusters)`);
+  } else {
+    console.log(
+      `  [phase 1] grouping ${tweets.length} source(s) → clusters ` +
+        `(model: ${opts.groupingModel ?? opts.model ?? 'default'})`,
+    );
+    clusters = await runGroupingPhase(client, tweets, opts, maxRetries, associationGroups);
+    console.log(`  [phase 1] done → ${clusters.length} cluster(s)`);
+    if (groupKey && clusters.length > 0) writeBuildCache(groupKey, clusters);
+  }
   if (clusters.length === 0) {
     throw new DigestParseError('Phase 1 produced no clusters. Cannot continue.');
   }
@@ -780,6 +835,47 @@ export async function buildDigest(
       return;
     }
     const capped = capStudyImages(allClusterTweets, maxImagesPerStudy);
+    // v0.30 resume cache: skip the study-agent + rerank LLM calls if this exact
+    // cluster (content + model + prompt) was already built in a prior run.
+    const studyKey = opts.resumeCache
+      ? buildCacheKey('study', {
+          cluster,
+          // Include image URLs (sent to Claude vision on the api backend) + the OCR
+          // + the image cap, so a changed image set / cap can't serve a stale study.
+          tweets: capped.map((t) => ({
+            id: t.id,
+            text: t.text,
+            ocr: t.image_ocr_texts ?? [],
+            imgs: t.image_urls ?? [],
+          })),
+          model: opts.studyModel ?? opts.model ?? '',
+          perspective: opts.perspectiveName ?? '',
+          thinking: opts.studyThinkingBudget ?? 0,
+          maxImages: maxImagesPerStudy,
+          ocr: ocrAvailable,
+        })
+      : '';
+    if (studyKey) {
+      const cached = readBuildCache<{ cluster: StudyCluster; study: DigestStudy }>(studyKey);
+      if (cached) {
+        successful.push(cached);
+        if (cached.study.related_trials_provenance && cached.study.related_trials_provenance.rerank_outcome !== 'skipped') {
+          relatedEligible += 1;
+          if (cached.study.related_trials && cached.study.related_trials.length > 0) relatedPopulated += 1;
+        }
+        console.log(`  [cache] Phase 2 ${cluster.slug}: hit`);
+        return;
+      }
+    }
+    // v0.30 verbose: name the study, its sources, and the model as each Phase 2
+    // agent starts — so a long multi-study build shows which paper is in flight
+    // (and which stalled if the session limit hits mid-run).
+    const imgCount = capped.reduce((n, t) => n + (t.image_urls?.length ?? 0), 0);
+    console.log(
+      `  [phase 2] ${cluster.slug} — "${cluster.name}" ` +
+        `(${capped.length} source(s)${imgCount ? `, ${imgCount} image(s)` : ''}, ` +
+        `model: ${opts.studyModel ?? opts.model ?? 'default'})`,
+    );
     try {
       const { study, raw } = await runStudyAgent(client, cluster, capped, opts, maxRetries, ocrAvailable);
       // v0.13: re-parse the raw Phase 2 response so the orchestrator can
@@ -834,7 +930,7 @@ export async function buildDigest(
         const it = itemById.get(id);
         return it?.source_type === 'paper' && isPreprintSource({ doi: it.doi, journal: it.journal });
       });
-      successful.push({
+      const entry = {
         cluster,
         study: {
           ...study,
@@ -850,7 +946,14 @@ export async function buildDigest(
           related_trials: enriched.related_trials,
           related_trials_provenance: enriched.related_trials_provenance,
         },
-      });
+      };
+      successful.push(entry);
+      console.log(
+        `  [phase 2] ${cluster.slug} — done` +
+          (entry.study.primary_endpoint?.klass ? ` (endpoint: ${entry.study.primary_endpoint.klass})` : '') +
+          (entry.study.verdict?.soc_implication ? ` (verdict: ${entry.study.verdict.soc_implication})` : ''),
+      );
+      if (studyKey) writeBuildCache(studyKey, entry);
     } catch (err) {
       const reason = (err as Error).message;
       dropped.push({ slug: cluster.slug, name: cluster.name, reason });
@@ -878,8 +981,40 @@ export async function buildDigest(
     throw new DigestParseError('All Phase 2 study agents failed. Cannot continue to synthesis.');
   }
 
-  // Phase 3
-  const synthesis = await runSynthesisPhase(client, successful, opts, maxRetries);
+  // Phase 3 (cacheable — synthesis is a pure function of the successful studies +
+  // the synthesis model). This is the phase that most often dies on the session
+  // limit AFTER every study succeeded, so caching studies + this lets a retry do
+  // ONLY the synthesis and finally write the digest.
+  const synthKey = opts.resumeCache
+    ? buildCacheKey('synth', {
+        // Key on the SAME projection the synthesis prompt serializes (name, site,
+        // tldr, details, nct, slug, figure captions) so a change to any of those
+        // re-runs Phase 3; + model + perspective (Phase 3 injects {{PERSPECTIVE}}).
+        studies: successful.map((s) => ({
+          name: s.study.name,
+          site: s.cluster.disease_site,
+          tldr: s.study.tldr,
+          slug: s.study.slug,
+          nct: s.study.nct,
+          details: s.study.details,
+          figs: (s.study.figures ?? []).map((f) => f.caption),
+        })),
+        model: opts.synthesisModel ?? opts.model ?? '',
+        perspective: opts.perspectiveName ?? '',
+      })
+    : '';
+  let synthesis = synthKey ? readBuildCache<Awaited<ReturnType<typeof runSynthesisPhase>>>(synthKey) : null;
+  if (synthesis) {
+    console.log('  [cache] Phase 3 synthesis: hit');
+  } else {
+    console.log(
+      `  [phase 3] synthesis over ${successful.length} study(ies) ` +
+        `(model: ${opts.synthesisModel ?? opts.model ?? 'default'})`,
+    );
+    synthesis = await runSynthesisPhase(client, successful, opts, maxRetries);
+    console.log('  [phase 3] done');
+    if (synthKey) writeBuildCache(synthKey, synthesis);
+  }
 
   // Assemble final shape.
   const sitesMap = new Map<string, DigestSite>();
@@ -1196,7 +1331,9 @@ async function runStudyAgent(
   // v0.4.4 backstop: if the LLM emitted both a table caption AND a detail
   // table covering the same columns, drop the detail-table. Prompt-level
   // rule asks for non-duplication; this is the safety net.
-  const finalStudy = dedupTablesAgainstCaption(detailsValidated, cluster.slug);
+  const dedupedStudy = dedupTablesAgainstCaption(detailsValidated, cluster.slug);
+  // v0.30: validate the structured primary endpoint's effect-size numbers.
+  const finalStudy = validatePrimaryEndpoint(dedupedStudy, tweets, cluster.slug);
   return { study: finalStudy, raw };
 }
 
@@ -1308,6 +1445,40 @@ export function validateStudyTables(
   return { ...study, details: newDetails };
 }
 
+// v0.30: validate the primary endpoint's EFFECT-SIZE numbers against source (the
+// HR/OR/RR value and any "% vs %" / "N vs N mo"). CI bounds, the "95" in "95% CI",
+// and p-thresholds are NOT required to appear (they'd over-abstain). If a stated
+// effect number isn't in the source tokens, drop the WHOLE field to null (the head
+// falls back to the TL;DR hero — the same conservative posture as tables).
+export function validatePrimaryEndpoint(
+  study: DigestStudy,
+  tweets: DigestInputTweet[],
+  slug?: string,
+): DigestStudy {
+  const ep = study.primary_endpoint;
+  if (!ep) return study;
+  const fragments = collectStudySourceFragments(tweets);
+  const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
+  const sourceTokens = new Set(
+    (fragments.join(' ').match(tokenRe) ?? []).map(normalizeNumericToken),
+  );
+  const effectNums: string[] = [];
+  const push = (...xs: (string | undefined)[]) => {
+    for (const x of xs) if (x) effectNums.push(x);
+  };
+  const stat = `${ep.stat_value} ${ep.stat_detail ?? ''}`;
+  for (const m of stat.matchAll(/(?:a?HR|OR|RR|IRR)\s*[=:]?\s*(\d+\.\d+)/gi)) push(m[1]);
+  for (const m of stat.matchAll(/(\d{1,3}(?:\.\d)?)\s*%\s*vs\.?\s*(\d{1,3}(?:\.\d)?)\s*%/gi)) push(m[1], m[2]);
+  for (const m of stat.matchAll(/(\d+(?:\.\d)?)\s*vs\.?\s*(\d+(?:\.\d)?)\s*(?:mo|months|yr|years|wks|weeks)/gi)) push(m[1], m[2]);
+  for (const n of effectNums) {
+    if (!sourceTokens.has(normalizeNumericToken(n))) {
+      if (slug) console.warn(`  [phase2:${slug}] primary_endpoint dropped: "${n}" not verified in source`);
+      return { ...study, primary_endpoint: null };
+    }
+  }
+  return study;
+}
+
 // Each source's text + each image's OCR as a SEPARATE fragment. Adjacency is
 // computed within a fragment so a number from tweet A and a number from paper B
 // never form a spurious "pair" across the boundary.
@@ -1318,6 +1489,38 @@ function collectStudySourceFragments(tweets: DigestInputTweet[]): string[] {
     for (const ocr of t.image_ocr_texts ?? []) parts.push(ocr);
   }
   return parts;
+}
+
+const ENDPOINT_CLASSES = new Set<string>(['overall-survival', 'surrogate', 'local-control', 'safety']);
+// v0.30: shape-guard the structured primary endpoint. Numbers are validated
+// against source later, in validatePrimaryEndpoint (needs the tweets). Abstains
+// (null) on any missing/invalid field or oversize input.
+function parsePrimaryEndpoint(raw: unknown): PrimaryEndpoint | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  const name = typeof o.name === 'string' ? o.name.trim() : '';
+  const klass = typeof o.klass === 'string' ? o.klass.trim() : '';
+  const stat_value = typeof o.stat_value === 'string' ? o.stat_value.trim() : '';
+  const stat_detail = typeof o.stat_detail === 'string' && o.stat_detail.trim() ? o.stat_detail.trim() : null;
+  if (!name || !stat_value || !ENDPOINT_CLASSES.has(klass)) return null;
+  if (name.length > 90 || stat_value.length > 60 || (stat_detail !== null && stat_detail.length > 90)) return null;
+  return { name, klass: klass as EndpointClass, stat_value, stat_detail };
+}
+// v0.30: parse the structured fold sections. Shape-guarded; prose-grounded (same
+// level as detail bullets). Empty/invalid → null (fold falls back to IMRD buckets).
+function parseAnalysisSections(raw: unknown): AnalysisSection[] | null {
+  if (!Array.isArray(raw)) return null;
+  const out: AnalysisSection[] = [];
+  for (const s of raw) {
+    if (!s || typeof s !== 'object') continue;
+    const o = s as Record<string, unknown>;
+    const label = typeof o.label === 'string' ? o.label.trim() : '';
+    const body = typeof o.body === 'string' ? o.body.trim() : '';
+    if (!label || !body || label.length > 40) continue;
+    out.push({ label, body });
+    if (out.length >= 12) break;
+  }
+  return out.length > 0 ? out : null;
 }
 
 export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): DigestStudy {
@@ -1448,6 +1651,10 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     // significance (trim / min+max chars / null on empty); the agent keeps it to
     // one short sentence and abstains when it would just repeat significance.
     monday_clinic: parseSignificance(root.monday_clinic),
+    // v0.30: structured primary endpoint (shape-guarded here, numbers validated
+    // in validatePrimaryEndpoint). Absent === no stated primary → TL;DR head.
+    primary_endpoint: parsePrimaryEndpoint(root.primary_endpoint),
+    analysis_sections: parseAnalysisSections(root.analysis_sections),
     open_questions: parseOpenQuestions(root.open_questions),
     consort: parseConsort(root.consort),
     modality,

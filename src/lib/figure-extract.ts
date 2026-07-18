@@ -266,9 +266,13 @@ export async function extractFigure(
     const prompt = template
       .replace('{{VISION_OCR}}', () => visionOcr)
       .replace('{{QWEN_STRUCTURED}}', () => qwen || '(Qwen read unavailable)');
+    const reconcileModel = opts.model ?? resolveReconcileModel();
+    if (!process.env.VITEST) {
+      console.log(`  [figure:reconcile] ${reconcileModel} merging Vision + Qwen for ${imagePath}`);
+    }
     reconciled = (
       await client.complete([{ role: 'user', content: prompt }], {
-        model: opts.model ?? resolveReconcileModel(),
+        model: reconcileModel,
         maxTokens: RECONCILE_MAX_TOKENS,
         temperature: 0,
       })
@@ -294,6 +298,13 @@ export async function extractFigure(
   // told this is the preferred figure source, so a fabricated factual line would
   // be published. Withholding is the only safe response in a no-fabrication path.
   const audit = auditReconciledOutput(reconciled, visionOcr);
+  if (!process.env.VITEST) {
+    console.log(
+      audit.ungrounded.length > 0
+        ? `  [figure:reconcile] grounding gate WITHHELD merge (${audit.ungrounded.length} ungrounded number(s)) → raw OCR fallback`
+        : `  [figure:reconcile] grounded merge accepted`,
+    );
+  }
   if (audit.ungrounded.length > 0) {
     notes.push(
       `grounding gate REJECTED the merge — ${audit.ungrounded.length} number(s) absent from the OCR: ${audit.ungrounded.join(', ')}; withholding the reconciled output, falling back to raw OCR`,
