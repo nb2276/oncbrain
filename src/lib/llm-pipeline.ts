@@ -1836,15 +1836,15 @@ export function parseVerdict(raw: unknown): StudyVerdict | undefined {
     rationaleWords.length > 40
       ? rationaleWords.slice(0, 40).join(' ') + '…'
       : rationaleRaw;
-  // VOICE.md mandates audience ≤ 80 chars. Truncate at 80 cleanly (no
-  // ellipsis: at 80 chars there isn't room for the marker and any
-  // information it would replace). Codex review flagged the previous
-  // 120-char slop as allowing the LLM to drift; keep the cap honest.
+  // VOICE.md mandates audience ≤ 80 chars. When the LLM over-runs, truncate at a
+  // WORD boundary (drop the trailing partial word, mark with an ellipsis): a raw
+  // 80-char slice cut mid-word ("...2012-2016 coho"), which breaks the card's
+  // always-visible eligibility gate. Word-boundary keeps the gate readable.
   const audienceRaw = typeof obj.audience === 'string' ? obj.audience.trim() : '';
   const audience: string | null = audienceRaw.length === 0
     ? null
     : audienceRaw.length > 80
-      ? audienceRaw.slice(0, 80).trimEnd()
+      ? audienceRaw.slice(0, 80).replace(/\s+\S*$/, '').trimEnd() + '…'
       : audienceRaw;
   return { soc_implication: soc, rationale, audience };
 }

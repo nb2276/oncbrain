@@ -91,15 +91,20 @@ describe('parseVerdict', () => {
     expect(v?.audience).toBeNull();
   });
 
-  it('truncates audience > 80 chars (no ellipsis at 80)', () => {
-    const longAudience = 'a'.repeat(150);
+  it('truncates audience > 80 chars at a WORD boundary with an ellipsis', () => {
+    // was a raw slice(0,80) that cut mid-word ("...2012-2016 coho"); now cuts at
+    // the last whole word so the always-visible eligibility gate stays readable.
+    const longAudience =
+      'Localized intermediate-risk prostate cancer after radical prostatectomy with rising PSA and adverse pathology';
     const v = parseVerdict({
       soc_implication: 'confirmatory',
       rationale: 'r',
       audience: longAudience,
     });
-    expect(v?.audience?.length).toBeLessThanOrEqual(80);
-    expect(v?.audience?.endsWith('…')).toBe(false);
+    expect(v?.audience?.length).toBeLessThanOrEqual(81); // ≤80 at a word boundary + ellipsis
+    expect(v?.audience?.endsWith('…')).toBe(true);
+    // pre-ellipsis text is a whole-word prefix of the original (no mid-word fragment)
+    expect(longAudience).toContain(v!.audience!.replace(/…$/, '').trimEnd());
   });
 
   it('keeps audience ≤ 80 chars intact', () => {

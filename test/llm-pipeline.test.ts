@@ -1670,6 +1670,25 @@ describe('parseVerdict', () => {
   it('returns undefined without a rationale', () => {
     expect(parseVerdict({ soc_implication: 'practice-changing' })).toBeUndefined();
   });
+
+  it('truncates an over-long audience at a WORD boundary, not mid-word', () => {
+    // regression: a raw slice(0,80) cut "...2012-2016 cohort)" to "...2012-2016 coho"
+    const long =
+      'Early breast cancer, breast-conserving surgery + whole-breast RT (2012-2016 cohort of registry patients)';
+    const v = parseVerdict({ soc_implication: 'confirmatory', rationale: 'r', audience: long });
+    expect(v?.audience).toBeTruthy();
+    expect(v!.audience!.length).toBeLessThanOrEqual(81); // 80 word-boundary + ellipsis
+    expect(v!.audience!.endsWith('…')).toBe(true);
+    // the mid-word "coho" fragment must be gone
+    expect(v!.audience).not.toContain('coho');
+    // whatever remains before the ellipsis is a whole word from the original
+    expect(long).toContain(v!.audience!.replace(/…$/, '').trimEnd());
+  });
+
+  it('leaves an audience within 80 chars untouched', () => {
+    const fits = 'High-risk localised prostate, planned long-term ADT';
+    expect(parseVerdict({ soc_implication: 'confirmatory', rationale: 'r', audience: fits })?.audience).toBe(fits);
+  });
 });
 
 describe('extractJsonSpan (prose-wrapped LLM JSON)', () => {
