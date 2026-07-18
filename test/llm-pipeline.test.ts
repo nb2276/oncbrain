@@ -3,6 +3,7 @@ import {
   buildDigest,
   parseGroupingResponse,
   parseStudyAgentResponse,
+  validatePrimaryEndpoint,
   parseSynthesisResponse,
   parseConsort,
   validateKeyFigure,
@@ -1746,5 +1747,142 @@ describe('completeAndParse retry image handling', () => {
     expect(value).toEqual({ ok: true });
     expect(calls).toHaveLength(2);
     expect(hasImage(calls[1])).toBe(false);
+  });
+});
+
+// v0.30 endpoint-forward card: the structured primary_endpoint + analysis_sections
+// shape-guards, and the no-fabrication effect-size validator. These gate what the
+// endpoint-forward glance publishes, so they're the load-bearing surface of the feature.
+describe('parsePrimaryEndpoint (v0.30, via parseStudyAgentResponse)', () => {
+  const cluster = {
+    slug: 'x',
+    name: 'X',
+    disease_site: 'prostate',
+    tweet_ids: [1],
+    content_type: 'study_report' as const,
+  };
+  const ep = (primary_endpoint: unknown) =>
+    parseStudyAgentResponse(
+      JSON.stringify({ name: 'X', tldr: 'y', details: [], primary_endpoint }),
+      cluster,
+    ).primary_endpoint;
+
+  it('parses a valid endpoint (all fields)', () => {
+    expect(
+      ep({ name: 'Overall survival', klass: 'overall-survival', stat_value: 'HR 0.62', stat_detail: '95% CI 0.5-0.8' }),
+    ).toEqual({ name: 'Overall survival', klass: 'overall-survival', stat_value: 'HR 0.62', stat_detail: '95% CI 0.5-0.8' });
+  });
+
+  it('stat_detail is optional → null when absent', () => {
+    expect(ep({ name: 'PFS', klass: 'surrogate', stat_value: 'HR 0.48' })).toEqual({
+      name: 'PFS',
+      klass: 'surrogate',
+      stat_value: 'HR 0.48',
+      stat_detail: null,
+    });
+  });
+
+  it('rejects an unknown endpoint class → null', () => {
+    expect(ep({ name: 'X', klass: 'made-up-class', stat_value: 'HR 0.5' })).toBeNull();
+  });
+
+  it('rejects a missing name or stat_value → null', () => {
+    expect(ep({ klass: 'surrogate', stat_value: 'HR 0.5' })).toBeNull();
+    expect(ep({ name: 'PFS', klass: 'surrogate' })).toBeNull();
+  });
+
+  it('rejects oversize fields → null', () => {
+    expect(ep({ name: 'x'.repeat(91), klass: 'surrogate', stat_value: 'HR 0.5' })).toBeNull();
+    expect(ep({ name: 'PFS', klass: 'surrogate', stat_value: 'x'.repeat(61) })).toBeNull();
+  });
+
+  it('absent primary_endpoint → null', () => {
+    expect(
+      parseStudyAgentResponse(JSON.stringify({ name: 'X', tldr: 'y', details: [] }), cluster).primary_endpoint,
+    ).toBeNull();
+  });
+});
+
+describe('parseAnalysisSections (v0.30, via parseStudyAgentResponse)', () => {
+  const cluster = {
+    slug: 'x',
+    name: 'X',
+    disease_site: 'prostate',
+    tweet_ids: [1],
+    content_type: 'study_report' as const,
+  };
+  const secs = (analysis_sections: unknown) =>
+    parseStudyAgentResponse(
+      JSON.stringify({ name: 'X', tldr: 'y', details: [], analysis_sections }),
+      cluster,
+    ).analysis_sections;
+
+  it('parses a valid sections array', () => {
+    expect(secs([
+      { label: 'Design', body: 'Phase 3 RCT, 1:1' },
+      { label: 'Results', body: 'HR 0.5' },
+    ])).toEqual([
+      { label: 'Design', body: 'Phase 3 RCT, 1:1' },
+      { label: 'Results', body: 'HR 0.5' },
+    ]);
+  });
+
+  it('a non-array → null (fold falls back to IMRD buckets)', () => {
+    expect(secs('nope')).toBeNull();
+    expect(secs({ label: 'Design', body: 'x' })).toBeNull();
+  });
+
+  it('skips empty/invalid entries and a too-long label', () => {
+    expect(secs([
+      { label: '', body: 'x' },
+      { label: 'ok', body: '' },
+      null,
+      'str',
+      { label: 'y'.repeat(41), body: 'x' },
+      { label: 'Design', body: 'kept' },
+    ])).toEqual([{ label: 'Design', body: 'kept' }]);
+  });
+
+  it('caps at 12 sections', () => {
+    const many = Array.from({ length: 20 }, (_, i) => ({ label: `L${i}`, body: `b${i}` }));
+    expect(secs(many)).toHaveLength(12);
+  });
+
+  it('all-invalid → null', () => {
+    expect(secs([{ label: '', body: '' }])).toBeNull();
+  });
+});
+
+describe('validatePrimaryEndpoint (v0.30 no-fabrication gate)', () => {
+  const tw = (text: string): DigestInputTweet => ({ id: 1, author: '@x', text, note: null });
+  const study = (primary_endpoint: DigestStudy['primary_endpoint']): DigestStudy =>
+    ({ name: 'X', tldr: 'y', details: [], nct: null, tweet_ids: [1], primary_endpoint }) as unknown as DigestStudy;
+
+  it('passes the study through untouched when there is no endpoint', () => {
+    const s = study(null);
+    expect(validatePrimaryEndpoint(s, [tw('any text')])).toBe(s);
+  });
+
+  it('keeps an HR that appears in a source', () => {
+    const s = study({ name: 'OS', klass: 'overall-survival', stat_value: 'HR 0.62', stat_detail: null });
+    expect(validatePrimaryEndpoint(s, [tw('OS benefit, HR 0.62 in ITT')]).primary_endpoint).not.toBeNull();
+  });
+
+  it('drops an HR that is in NO source (the fabrication guard)', () => {
+    const s = study({ name: 'OS', klass: 'overall-survival', stat_value: 'HR 0.62', stat_detail: null });
+    expect(validatePrimaryEndpoint(s, [tw('OS benefit reported, no number given')]).primary_endpoint).toBeNull();
+  });
+
+  it('validates a "% vs %" pair — keeps if both sides are in source, drops if one is missing', () => {
+    const s = study({ name: 'IBTR', klass: 'local-control', stat_value: '3.7% vs 3.5%', stat_detail: null });
+    expect(validatePrimaryEndpoint(s, [tw('10y IBTR 3.7% vs 3.5%')]).primary_endpoint).not.toBeNull();
+    expect(validatePrimaryEndpoint(s, [tw('10y IBTR 3.7% (one arm only)')]).primary_endpoint).toBeNull();
+  });
+
+  it('validates a "N vs N mo" median pair against source', () => {
+    const s = study({ name: 'PFS', klass: 'surrogate', stat_value: 'HR 0.48', stat_detail: '35.8 vs 20.4 mo' });
+    expect(validatePrimaryEndpoint(s, [tw('median PFS 35.8 vs 20.4 mo, HR 0.48')]).primary_endpoint).not.toBeNull();
+    // the 20.4 median is nowhere in source → the whole endpoint is withheld
+    expect(validatePrimaryEndpoint(s, [tw('median PFS 35.8 mo, HR 0.48')]).primary_endpoint).toBeNull();
   });
 });
