@@ -181,13 +181,13 @@ Fields:
   "95% CI 0.48-0.79, p<0.001" or "ns, P=.34". Carries significance. ≤90 chars, or null.
 
 Hard rules for `primary_endpoint`:
-- GROUNDED. Every number in `stat_text` is verbatim from source; a stated
-  effect-size number not present in the source drops the whole field at build.
-  Never invent a number, an endpoint, or a p-value.
+- GROUNDED. Every number in `stat_value` and `stat_detail` is verbatim from
+  source; a stated effect-size number not present in the source drops the whole
+  field at build. Never invent a number, an endpoint, or a p-value.
 - ABSTAIN → null for reviews, single-arm / observational studies, meta-analyses
   with no single stated primary, or abstract-only sources with no primary endpoint.
   A guessed primary is worse than none.
-- Report HONESTLY: if the primary was NOT met, `stat_text` says so (e.g.
+- Report HONESTLY: if the primary was NOT met, `stat_detail` says so (e.g.
   "HR 1.55, ns" / "did not meet OS"). Never cherry-pick a positive secondary.
 
 ═══ ANALYSIS SECTIONS (structured fold, for the card body) ═══

@@ -1885,4 +1885,36 @@ describe('validatePrimaryEndpoint (v0.30 no-fabrication gate)', () => {
     // the 20.4 median is nowhere in source → the whole endpoint is withheld
     expect(validatePrimaryEndpoint(s, [tw('median PFS 35.8 mo, HR 0.48')]).primary_endpoint).toBeNull();
   });
+
+  // v0.30 hardening: a LONE number (safety rate, single median) is now grounded too
+  // — the pre-hardening validator only caught HR / "% vs %" / "N vs N mo" shapes.
+  it('grounds a lone rate (single %) — keeps if in source, drops if not', () => {
+    const s = study({ name: 'Grade ≥3 AE', klass: 'safety', stat_value: '34%', stat_detail: null });
+    expect(validatePrimaryEndpoint(s, [tw('Grade ≥3 toxicity 34% in the experimental arm')]).primary_endpoint).not.toBeNull();
+    expect(validatePrimaryEndpoint(s, [tw('Grade ≥3 toxicity higher, exact rate not stated')]).primary_endpoint).toBeNull();
+  });
+
+  it('grounds a lone median (single duration)', () => {
+    const s = study({ name: 'mOS', klass: 'overall-survival', stat_value: '24.1 mo', stat_detail: null });
+    expect(validatePrimaryEndpoint(s, [tw('median OS 24.1 mo in the ITT population')]).primary_endpoint).not.toBeNull();
+    expect(validatePrimaryEndpoint(s, [tw('median OS not reached')]).primary_endpoint).toBeNull();
+  });
+
+  // v0.30 hardening: a CI whose bounds don't sit adjacent in a source fragment is a
+  // fabricated pair glued from two unrelated source numbers → withhold the field.
+  it('drops a CI whose bounds are NOT adjacent in source (fabricated-CI guard)', () => {
+    const s = study({ name: 'OS', klass: 'overall-survival', stat_value: 'HR 0.62', stat_detail: '95% CI 0.48-0.79' });
+    // 0.48 and 0.79 both appear but a number sits between them → not an adjacent pair
+    expect(
+      validatePrimaryEndpoint(s, [tw('HR 0.62; forest plot marks 0.48 then 1.00 then 0.79')]).primary_endpoint,
+    ).toBeNull();
+    // printed as a real adjacent CI → kept
+    expect(validatePrimaryEndpoint(s, [tw('HR 0.62 (95% CI 0.48-0.79)')]).primary_endpoint).not.toBeNull();
+  });
+
+  it('does not require the "95% CI" confidence-level label itself to appear in source', () => {
+    const s = study({ name: 'OS', klass: 'overall-survival', stat_value: 'HR 0.62', stat_detail: '95% CI 0.48-0.79' });
+    // source shows the adjacent bounds but omits the "95%" label — must still keep
+    expect(validatePrimaryEndpoint(s, [tw('HR 0.62 (0.48-0.79)')]).primary_endpoint).not.toBeNull();
+  });
 });

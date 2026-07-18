@@ -375,9 +375,9 @@ export type DigestStudy = {
   // v0.30: structured primary endpoint so the card head can lead with the
   // endpoint TYPE (survival vs surrogate vs local) beside the number — knowing
   // the benefit is OS vs PFS vs local control matters as much as the HR itself.
-  // `stat_text` is VERBATIM from source (its printed p/CI carry significance);
-  // its effect-size number(s) are validated against source and the whole field
-  // drops to null if unverified (same grounding posture as detail tables).
+  // `stat_value`/`stat_detail` are VERBATIM from source (their printed p/CI carry
+  // significance); the effect-size number(s) are validated against source and the
+  // whole field drops to null if unverified (same grounding posture as detail tables).
   // Emitted only when the source states a primary endpoint (RCTs); null for
   // reviews / single-arm / observational / abstract-only. Mirrored in
   // src/lib/digest-data.ts — keep the shape in lockstep.
@@ -599,9 +599,11 @@ export type BuildOptions = {
   maxImagesPerStudy?: number; // cap to control Phase 2 token cost; default 6
 
   // v0.30: resume cache. When true, each phase's result is cached to disk keyed
-  // by its inputs (content + model + prompt fingerprint), so a re-run after a
-  // session-limited failure skips work already done — big dates finish across
-  // windows. Off by default (tests + API backend unaffected). Set by build:day.
+  // by its inputs (content + model + prompt fingerprint + image URLs + conference
+  // stamp + prior context), so a re-run after a session-limited failure skips work
+  // already done — big dates finish across windows. Off by default when unset, so
+  // tests are unaffected; build:day enables it on BOTH backends (image inputs are
+  // keyed, so the api vision path is covered too).
   resumeCache?: boolean;
 
   // v0.13: related-trials orchestrator wiring. Optional; nothing about it
@@ -785,9 +787,19 @@ export async function buildDigest(
   // Phase 1 (cacheable — clustering depends only on tweet content + grouping model)
   const groupKey = opts.resumeCache
     ? buildCacheKey('group', {
-        tweets: tweets.map((t) => ({ id: t.id, text: t.text, ocr: t.image_ocr_texts ?? [] })),
+        // image URLs are keyed too: the grouping phase pushes image blocks on the
+        // api backend, so a changed image set must not serve a stale cluster.
+        tweets: tweets.map((t) => ({
+          id: t.id,
+          text: t.text,
+          ocr: t.image_ocr_texts ?? [],
+          imgs: t.image_urls ?? [],
+        })),
         model: opts.groupingModel ?? opts.model ?? '',
         assoc: associationGroups,
+        // the grouping prompt injects the conference stamp ({{CONFERENCE_NAME}} /
+        // {{CONFERENCE_DAY}}), so a same-day re-stamp must invalidate the clusters.
+        conf: `${opts.conferenceName ?? ''}|${opts.conferenceDay ?? ''}`,
       })
     : '';
   let clusters = groupKey ? readBuildCache<StudyCluster[]>(groupKey) : null;
@@ -853,6 +865,9 @@ export async function buildDigest(
           thinking: opts.studyThinkingBudget ?? 0,
           maxImages: maxImagesPerStudy,
           ocr: ocrAvailable,
+          // the Phase 2 prompt injects prior-context curator notes ({{PRIOR_CONTEXT_BLOCK}}),
+          // so a dossier edit within the TTL must invalidate the cached study.
+          priorContext: loadStudyContext(cluster.slug) ?? '',
         })
       : '';
     if (studyKey) {
@@ -1445,11 +1460,18 @@ export function validateStudyTables(
   return { ...study, details: newDetails };
 }
 
-// v0.30: validate the primary endpoint's EFFECT-SIZE numbers against source (the
-// HR/OR/RR value and any "% vs %" / "N vs N mo"). CI bounds, the "95" in "95% CI",
-// and p-thresholds are NOT required to appear (they'd over-abstain). If a stated
-// effect number isn't in the source tokens, drop the WHOLE field to null (the head
-// falls back to the TL;DR hero — the same conservative posture as tables).
+// v0.30: ground EVERY number the primary endpoint publishes against source,
+// reusing the SAME gate the detail tables use (firstUnverifiedCellValue) so the
+// head is as trustworthy as the tables:
+//   - every numeric token must appear in source (membership) — this catches a
+//     lone rate ("34%") or lone median ("24.1 mo"), not just HR / "% vs %" pairs;
+//   - any CI/range group ("0.48-0.79", "(2.2, 4.0)") must match two numbers that
+//     sit ADJACENT within a SINGLE source fragment, so a fabricated CI glued from
+//     two unrelated source numbers can't ride through;
+//   - a cross-arm "X vs Y" stays token-only (arm values are legitimately sourced
+//     separately — the same deliberate posture as the tables).
+// Any unverified number withholds the WHOLE field to null (drop-over-hallucinate;
+// the headline number still survives on the TL;DR hero).
 export function validatePrimaryEndpoint(
   study: DigestStudy,
   tweets: DigestInputTweet[],
@@ -1457,24 +1479,27 @@ export function validatePrimaryEndpoint(
 ): DigestStudy {
   const ep = study.primary_endpoint;
   if (!ep) return study;
+  // Adjacency pairs must be per-fragment (joining first would mint a spurious pair
+  // across a source boundary), token membership is order-free — same as the tables.
   const fragments = collectStudySourceFragments(tweets);
   const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
   const sourceTokens = new Set(
     (fragments.join(' ').match(tokenRe) ?? []).map(normalizeNumericToken),
   );
-  const effectNums: string[] = [];
-  const push = (...xs: (string | undefined)[]) => {
-    for (const x of xs) if (x) effectNums.push(x);
-  };
-  const stat = `${ep.stat_value} ${ep.stat_detail ?? ''}`;
-  for (const m of stat.matchAll(/(?:a?HR|OR|RR|IRR)\s*[=:]?\s*(\d+\.\d+)/gi)) push(m[1]);
-  for (const m of stat.matchAll(/(\d{1,3}(?:\.\d)?)\s*%\s*vs\.?\s*(\d{1,3}(?:\.\d)?)\s*%/gi)) push(m[1], m[2]);
-  for (const m of stat.matchAll(/(\d+(?:\.\d)?)\s*vs\.?\s*(\d+(?:\.\d)?)\s*(?:mo|months|yr|years|wks|weeks)/gi)) push(m[1], m[2]);
-  for (const n of effectNums) {
-    if (!sourceTokens.has(normalizeNumericToken(n))) {
-      if (slug) console.warn(`  [phase2:${slug}] primary_endpoint dropped: "${n}" not verified in source`);
-      return { ...study, primary_endpoint: null };
-    }
+  const sourcePairs = new Set<string>();
+  for (const frag of fragments) {
+    for (const key of sourceAdjacentNumberPairs(frag)) sourcePairs.add(key);
+  }
+  // Strip the "95% CI" (or 90 / 97.5%) confidence-LEVEL label before grounding:
+  // the model prints it by convention even when the source showed only the bounds,
+  // so requiring "95" in source would false-drop a legitimate CI. The bounds
+  // themselves still get the adjacency check. Table cells don't carry the "% CI"
+  // label, so this strip is endpoint-specific.
+  const stat = `${ep.stat_value} ${ep.stat_detail ?? ''}`.replace(/\b\d{2}(?:\.\d)?\s*%\s*CI\b/gi, 'CI');
+  const bad = firstUnverifiedCellValue(stat, sourceTokens, sourcePairs);
+  if (bad !== null) {
+    if (slug) console.warn(`  [phase2:${slug}] primary_endpoint dropped: "${bad}" not verified in source`);
+    return { ...study, primary_endpoint: null };
   }
   return study;
 }
