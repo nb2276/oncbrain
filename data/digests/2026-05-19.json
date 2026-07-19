@@ -1,57 +1,464 @@
 {
   "date": "2026-05-19",
   "conference": null,
-  "generated_at": 1782603510436,
+  "generated_at": 1784478990724,
   "digest": {
-    "top_line": "Single-fraction SABR (n=1687): 2yr local control 90-93% with G3+ AEs 2.9%, one-and-done lung SABR holds across primary NSCLC and pulmonary oligomets.",
-    "tldr": "RT-central day across three sites, with the largest signal in thoracic: pooled single-fraction SABR (n=1687) makes one-fraction lung treatment look durable and low-toxicity. Bladder TMT (CLR 63.7%, n=369) backs preservation; prostate staging shifts toward PSMA-PET to spare ePLND morbidity that compounds with pelvic RT.",
+    "top_line": "Single-fraction lung SABR (pooled n=1687): 2-yr LC 90-93%, G3+ AEs 2-3% · one-and-done SABR holds up across primary NSCLC + pulmonary oligomets.",
+    "tldr": "Three large observational RT series, all pointing toward de-escalation: single-fraction lung SABR (n=1687) matches multi-fraction LC, TMT preserves bladder in MIBC (CLR 63.7%, n=369), and PSMA-PET (NPV ~96%) may spare ePLND. Thoracic carries the day; none randomised.",
     "sites": [
       {
-        "disease_site": "prostate",
-        "intro": "Nodal staging strategy, not a new trial: PSMA-PET vs ePLND read through an RT-morbidity lens.",
+        "disease_site": "bladder",
+        "intro": "Retrospective multicenter TMT bladder-preservation cohort; no randomised TMT-vs-cystectomy comparator, RT dose/fractionation unreported.",
         "studies": [
           {
-            "name": "ePLND vs PSMA PET staging in prostate cancer (AUA 2026)",
-            "tldr": "PSMA PET/CT (NPV ~96%) may safely omit ePLND for nodal staging; ePLND's therapeutic benefit unproven and its morbidity compounds with pelvic RT.",
+            "name": "Multicenter TMT Bladder Preservation Analysis (n=369)",
+            "tldr": "CLR 63.7% in 369 MIBC pts on definitive TMT; 5-FU-based CRT and better image guidance predicted higher complete local response.",
             "details": [
-              "📊 RCTs have not shown consistent BCR improvement from ePLND; provides staging, therapeutic benefit unproven",
-              "📊 PSMA PET/CT NPV ~96% for nodal disease; a negative scan may safely avoid unnecessary PLND",
+              "📊 1° endpoint: complete local response (CLR) 63.7% with definitive TMT (TURBT + concurrent chemoRT)",
               {
-                "text": "🔍 Proposed risk-tiered PLND decision",
+                "text": "📊 Disease progression 28.8%, by pattern",
                 "subdetails": [
-                  "Intermediate-risk: omit PLND if PSMA PET LNI-negative; missed LN small, would be missed in ePLND too",
-                  "GG3: nomograms add value",
-                  "High-risk: individualized; flag that adjuvant/salvage pelvic RT may increase side effects"
+                  "Local: 10.1%",
+                  "Systemic: 10.7%",
+                  "Combined: 8.7%"
                 ]
               },
-              "⚠️ PLND morbidity beyond lymphedema: 6-10x increased DVT/PE risk (Tyritzis, 3544 pts RP vs RARP)",
-              "🔗 RT-relevant: PSMA-PET staging can route to post-op pelvic nodal RT, sparing ePLND and its additive morbidity, especially with no prior eLND (Roberts, PCAN 2024)",
-              "🔍 If PLND is performed, it should be extended (ePLND), per the AUA 2026 message",
-              "⚠️ Perspective/review synthesis, not new RCT data; level 1 evidence for ePLND oncological benefit absent"
+              "📊 Salvage cystectomy 9.7%",
+              "📊 Multivariable predictors of CLR",
+              "🔍 Multicenter retrospective cohort, Spain 2010-2022; N=369, median age 76, 85.1% male; cT2-T4aN0M0",
+              "🔍 RT dose/fractionation and modality mix not reported in source",
+              "⚠️ Retrospective; CLR predictors exploratory, no randomised TMT-vs-cystectomy comparator",
+              "⚠️ Weekly-portal-imaging signal likely confounded by treatment era/center technique, not a clean IGRT effect",
+              "🔗 Authors claim survival comparable to international TMT series (e.g. RTOG pooled, BC2001); no comparative numbers in source"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              33
+            ],
+            "slug": "mibc-tmt-bladder-preservation",
+            "verdict": {
+              "soc_implication": "confirmatory",
+              "rationale": "Retrospective real-world European cohort; no randomised TMT-vs-cystectomy comparator. Reinforces guideline-recognized bladder preservation; predictor findings exploratory.",
+              "audience": "Muscle-invasive bladder, cT2-T4aN0M0, median age 76"
+            },
+            "significance": "The two modifiable levers here are RT delivery and chemo backbone, both in the radonc's hands: 5-FU-based CRT predicted higher CLR (OR 4.9) and weekly portal imaging lower CLR (OR 0.35, p<0.001), favoring daily volumetric IGRT. Technique, not just patient selection, moved local control.",
+            "monday_clinic": "In cT2-T4aN0M0 MIBC pts already committed to bladder-preserving TMT, this favors daily volumetric IGRT and 5-FU-based chemoRT for local control; it does not inform the upstream TMT-versus-radical-cystectomy choice or node-positive/metastatic disease.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Multicenter **retrospective** cohort, Spain 2010-2022, **N=369** treated with definitive TMT (maximal TURBT + concurrent chemoRT). Multivariable logistic regression for predictors of complete local response."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**cT2-T4aN0M0** muscle-invasive bladder. Median age **76**, **85.1% male**. Node-positive and metastatic disease excluded by staging."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**Image-guidance quality** tracked with local control: weekly portal imaging predicted **lower CLR (OR 0.35, p<0.001)**, favoring daily volumetric IGRT; **VMAT** showed a non-significant favorable trend. RT dose/fractionation not reported in source."
+              },
+              {
+                "label": "Regimen",
+                "body": "Concurrent chemoradiotherapy. **5-FU-based CRT** predicted **higher CLR (OR 4.9, 95% CI 1.1-22.1, p=0.038)**."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary:** complete local response (CLR). Secondary: OS, CSS, recurrence patterns, salvage cystectomy."
+              },
+              {
+                "label": "Results",
+                "body": "CLR **63.7%**. Disease progression **28.8%** (local 10.1%, systemic 10.7%, combined 8.7%). Salvage cystectomy **9.7%**."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents cT2-T4aN0M0 MIBC selected for definitive bladder-preserving TMT at European centers. Does not represent node-positive or metastatic disease, or pts triaged to upfront radical cystectomy."
+              },
+              {
+                "label": "Limitations",
+                "body": "Retrospective, non-randomised; CLR predictors **exploratory** and confounded by treatment era. No head-to-head vs radical cystectomy; RT technique detail and CLR-survival effect sizes absent from source."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc",
+              "medonc",
+              "surgonc"
+            ],
+            "open_questions": [
+              "Optimal concurrent chemoradiotherapy regimen for bladder preservation",
+              "Whether daily volumetric IGRT improves local control vs weekly imaging",
+              "Randomised TMT vs radical cystectomy comparison"
+            ],
+            "consort": null,
+            "modality": "combined",
+            "intent": "curative",
+            "methodology": "retrospective",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05975307",
+                "brief_title": "Treating Muscle-invasive Bladder Cancer With A Non-surgical Method Consisting of Anti-PD-1 Therapy and Chemoradiation",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 71,
+                "primary_completion_date": "2025-12",
+                "brief_summary": "The goal of this Phase 2 trial is to evaluate a non-surgical bladder-preserving treatment mode which consists of neoadjuvant chemotherapy plus anti-programmed cell death protein 1 (anti-PD-1) therapy followed by radiotherapy plus concurrent anti-PD-1 therapy. The main questions it aims to answer are: (i) whether the anti-PD-1 antibody, toripalimab, is effective in treating muscle-invasive bladder cancer (MIBC), when combined with chemoradiation; (ii) whether toripalimab is safe in combination…",
+                "conditions": [
+                  "Muscle-Invasive Bladder Carcinoma",
+                  "Programmed Cell Death Protein 1 Inhibitor",
+                  "Radiotherapy"
+                ],
+                "interventions": [
+                  {
+                    "name": "Toripalimab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Gemcitabine",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Cisplatin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Carboplatin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Intensity-modulated radiation therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically diagnosed bladder malignant tumor via biopsy\n* Urothelial carcinoma as the primary histological component\n* Pretreatment clinical TNM stage as T2-4aN0M0 or T1-4aN1-2M0 (UICC TNM staging classification, version 8)\n* Age between 18 and 75 years old\n* Karnofsky…",
+                "answers_question": "Optimal concurrent chemoradiotherapy regimen for bladder preservation",
+                "relevance_phrase": "adds toripalimab to concurrent chemoRT"
+              },
+              {
+                "nct": "NCT07566156",
+                "brief_title": "Enfortumab Vedotin in Combination With Pembrolizumab vs. Concurrent Chemoradiotherapy (cCRT) in People With Muscle Invasive Bladder Cancer (EV-309)",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 390,
+                "primary_completion_date": "2030-03",
+                "brief_summary": "This study is being done to see how well two drugs (enfortumab vedotin and pembrolizumab) work together as a bladder preservation approach to treat patients with muscle invasive bladder cancer. The study will compare these drugs to concurrent chemoradiotherapy that is usually used to treat this cancer (standard of care). The study will enroll patients with muscle-invasive bladder cancer (MIBC) who have cancer that has not spread outside the bladder.",
+                "conditions": [
+                  "Urothelial Cancer",
+                  "Urinary Bladder Neoplasms"
+                ],
+                "interventions": [
+                  {
+                    "name": "Enfortumab vedotin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Conventional Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Hypofractionated Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Cisplatin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Fluorouracil",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Mitomycin C",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Gemcitabine",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Pembrolizumab",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Has histologically confirmed initial diagnosis of muscle-invasive bladder cancer (MIBC) with predominant urothelial histology staged cT2-T4aN0M0\n* Tissue comprising muscle-invasive urothelial cancer must be submitted for clinical staging at baseline\n* Eligible for and agree…",
+                "answers_question": "Optimal concurrent chemoradiotherapy regimen for bladder preservation",
+                "relevance_phrase": "phase 3 EV+pembro vs concurrent chemoRT"
+              },
+              {
+                "nct": "NCT02447549",
+                "brief_title": "Study of Tumour Focused Radiotherapy for Bladder Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 345,
+                "primary_completion_date": "2021-12",
+                "brief_summary": "Bladder cancer is the seventh most common cancer in the UK, with 10,399 new cases diagnosed in 2011. In a quarter of these cases the cancer has infiltrated the muscular wall of the bladder (muscle invasive) and is life threatening. This type of bladder cancer is usually treated either with surgical removal of the bladder, or daily radiotherapy treatment (high strength xrays which kill cells), given every day for 4 or 7 weeks. RAIDER will investigate methods which have the potential to improve…",
+                "conditions": [
+                  "Bladder Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "WBRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "SART",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "DART",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Written informed consent\n* Age ≥16 years\n* Histologically or cytologically confirmed transitional cell carcinoma (TCC) of the bladder\n* Unifocal bladder TCC staged T2-T4a N0 M0\\*\n* Fit to receive a radical course of radiotherapy\n* WHO performance status 0-2\n* Willing and able…",
+                "answers_question": "Whether daily volumetric IGRT improves local control vs weekly imaging",
+                "relevance_phrase": "adaptive tumour-focused vs whole-bladder RT"
+              },
+              {
+                "nct": "NCT07043543",
+                "brief_title": "Evaluation of the Clinical Utility of Online Adaptive Radiotherapy in Bladder Cancer (BLADAPT-GETUG V11)",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 120,
+                "primary_completion_date": "2029-01",
+                "brief_summary": "Trimodal therapy (TMT) consisting of transurethral resection of bladder tumors followed by radiotherapy and chemotherapy is a therapeutic alternative in patients with Muscle-Infiltrating Bladder Cancer who are inoperable or refuse surgery. One of the main challenges of TMT is the planning and delivery of radiation therapy. Indeed, the bladder is a mobile hollow organ subject to repletion, with variations in size and shape during and between radiotherapy sessions. Standard radiotherapy…",
+                "conditions": [
+                  "Bladder Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Adaptive radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "standard radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically proven muscle-infiltrating bladder cancer (de novo MIBC or after a history of non-muscle-invasive bladder cancer) or patients with initial high-grade T1 tumor showing Ta or T1 recurrence, or those with high-grade T1 after a course of intravesical biological…",
+                "answers_question": "Whether daily volumetric IGRT improves local control vs weekly imaging",
+                "relevance_phrase": "randomised online-adaptive vs standard RT in TMT"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "chemoradiotherapy bladder preservation",
+                "adaptive radiotherapy bladder",
+                "trimodality bladder cystectomy"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 39,
+              "fetched_at": "2026-07-19T16:34:09.904Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "tweet",
+                "id": 33
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "thoracic",
+        "intro": "Largest pooled single-fraction lung SABR series to date, though retrospective with no head-to-head vs multi-fraction and Gy dose unstated.",
+        "studies": [
+          {
+            "name": "Single-fraction SABR for primary NSCLC and lung oligomets (pooled, n=1687)",
+            "tldr": "2-yr local control 90-93% and G3+ AEs 2-3% across 1687 pts (1200 primary NSCLC, 487 oligomets) treated with single-fraction SABR.",
+            "details": [
+              "🔍 Pooled retrospective analysis, 3 institutions (Peter Mac, Cleveland Clinic, Roswell Park); N=1687 (1200 primary NSCLC, 487 pulmonary oligomets)",
+              "🔍 Single-fraction SABR; Gy dose/fractionation not reported in source",
+              "📊 Isolated local/locoregional failure very uncommon (authors' summary)",
+              "📊 Median PFS 30 mo (primary NSCLC) vs 11 mo (pulmonary oligomets)",
+              "⚠️ Retrospective pooled cohort, no randomised or matched comparator vs multi-fraction SABR",
+              "⚠️ AE data from 2 of 3 sites only (n=789, no Roswell Park); toxicity denominator ≠ full cohort",
+              "⚠️ Single-fraction Gy dose unstated in source, so the specific SF-SABR regimen behind these outcomes is unknown",
+              "🔗 Consistent with SAFRON II (TROG 13.01) and RTOG 0915 backing single-fraction lung SABR (both randomised)"
             ],
             "figures": [
               {
-                "url": "https://pbs.twimg.com/media/HIhwFsnWkAAjOfG.jpg",
-                "caption": "Ga-PSMA PET/CT primary staging, 1253 men: 47.7% of LN metastases outside the ePLND template."
+                "url": "https://pbs.twimg.com/media/HInTCxmXEAIPI69.jpg",
+                "caption": "LC 90-93% at 2y; G3+ AEs 2-3%; N=1687 (1200 NSCLC, 487 oligomets)"
               },
               {
-                "url": "https://pbs.twimg.com/media/HIhwFsDXsAAqefc.jpg",
+                "url": "https://pbs.twimg.com/media/HInTCxxXIAAKCPI.jpg",
                 "caption": {
                   "columns": [
+                    "Endpoint",
+                    "Primary NSCLC",
+                    "Oligomets"
+                  ],
+                  "rows": [
+                    [
+                      "1-yr OS",
+                      "84% (82-86)",
+                      "90% (86-92)"
+                    ],
+                    [
+                      "2-yr OS",
+                      "67% (64-69)",
+                      "75% (71-79)"
+                    ],
+                    [
+                      "Median OS",
+                      "40 mo (36-43)",
+                      "51 mo (42-58)"
+                    ]
+                  ]
+                }
+              },
+              {
+                "url": "https://pbs.twimg.com/media/HInTCxuWMAAiAjG.jpg",
+                "caption": "AEs (NSCLC subset, n=789): any 215 (27%), G2+ 124 (15.7%), G3+ 23 (2.9%). Pneumonitis 52 (7%)"
+              }
+            ],
+            "nct": null,
+            "tweet_ids": [
+              31
+            ],
+            "slug": "sf-sabr-nsclc-oligomets-pooled",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Pooled retrospective single-arm cohort, no randomised or matched comparator vs multi-fraction SABR; single-fraction Gy dose unstated. Consistent with SAFRON II / RTOG 0915.",
+              "audience": "Primary NSCLC or pulmonary oligometastases, SABR candidates"
+            },
+            "significance": "The transfer gate is the fraction size the source omits: outcomes are labeled single-fraction but no Gy dose is given, so you cannot map this 2y LC of 90-93% onto a specific regimen before offering one visit instead of a multi-fraction course. Toxicity (G3+ 2-3%) comes from 2 of 3 sites only. Moves the single- vs multi-fraction choice for lung SABR.",
+            "monday_clinic": "In pts with primary NSCLC or a pulmonary oligometastasis being considered for SABR, this supports single-fraction delivery as a lower-visit option with high local control; it does not establish it over a multi-fraction schedule, which this cohort did not compare against.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Pooled **retrospective** analysis of 3 institutions (Peter MacCallum, Cleveland Clinic, Roswell Park). **N=1687** (1200 primary NSCLC, 487 pulmonary oligometastases). No randomisation, no comparator arm; survival curves out to 60 months."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Primary NSCLC (n=1200) and pulmonary oligometastases (n=487) treated with single-fraction SABR. Stage, tumour location, and specific eligibility criteria **not reported in source**."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**Single-fraction SABR** across all pts. The **Gy dose is not reported in source** (single fraction only), so the specific regimen behind these outcomes is unknown, gating whether the result transfers to a given practice."
+              },
+              {
+                "label": "Endpoints",
+                "body": "No prespecified primary endpoint stated. Reported: local control, overall survival, PFS, and adverse events."
+              },
+              {
+                "label": "Results",
+                "body": "**2y local control 90-93%**; isolated local/locoregional failure very uncommon. Median PFS **30 mo** (NSCLC) vs **11 mo** (oligomets). OS by cohort shown in the figure."
+              },
+              {
+                "label": "Safety",
+                "body": "**G3+ AEs 2-3%** (23/789, 2.9% in the assessed NSCLC subset); G2+ 124/789 (15.7%), any AE 215/789 (27%). AE data from **2 of 3 sites only** (no Roswell Park)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Consistent with **SAFRON II** (TROG 13.01) and **RTOG 0915** supporting single-fraction lung SABR, but those were randomised; this pooled cohort carries **no comparator**."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents pts with primary NSCLC or a pulmonary oligometastasis treated with single-fraction SABR at three academic centres. Does not represent pts evaluated against a multi-fraction SABR comparator, which this cohort did not include."
+              },
+              {
+                "label": "Limitations",
+                "body": "**Retrospective**, no randomised/matched comparator. Single-fraction **Gy dose unstated**. AE denominator excludes one of three sites (n=789 of 1687)."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "open_questions": [
+              "Single-fraction vs multi-fraction SABR in a randomised comparison",
+              "Optimal single-fraction dose across primary NSCLC and pulmonary oligometastases"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "retrospective",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05138900",
+                "brief_title": "A Pilot Study of Single Fraction Stereotactic Body Radiation Therapy (SBRT) in Central Non-Small Cell Lung Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 30,
+                "primary_completion_date": "2028-03",
+                "brief_summary": "The purpose of this study is to determine if a single treatment of targeted radiation (called SBRT or Stereotactic Body Radiation Therapy) can be as safe and effective as multiple doses of radiation in patients with central non-small cell lung cancer",
+                "conditions": [
+                  "Non Small Cell Lung Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "SBRT",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Have an ECOG Performance Status of ≤ 2. Refer to Appendix A.\n* Have histologically proven diagnosis of non-small cell lung cancer (NSCLC).\n* Stage cT1-3N0M0 with tumor size \\< 6 cm.\n* Prior systemic therapy allowed but no systemic therapy 4-6 weeks prior to stereotactic body…",
+                "answers_question": "Single-fraction vs multi-fraction SABR in a randomised comparison",
+                "relevance_phrase": "single-fx vs multi-fx SBRT in central NSCLC"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "single fraction SABR lung",
+                "single fraction SBRT oligometastases"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 33,
+              "fetched_at": "2026-07-19T16:35:02.195Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "tweet",
+                "id": 31
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "prostate",
+        "intro": "AUA staging round-up positioning a negative PSMA-PET as the gate to omit ePLND, with post-op pelvic nodal RT as the lower-lymphedema alternative.",
+        "studies": [
+          {
+            "name": "AUA 2026: ePLND / PSMA PET staging round-up",
+            "tldr": "PSMA PET NPV ~96% may safely omit ePLND in intermediate-risk pts; 47.7% of nodal mets fall outside the ePLND template.",
+            "details": [
+              "📊 PSMA PET/CT NPV ~96% for nodal disease; a negative scan may spare PLND",
+              "🩻 Intermediate-risk: omit PLND if PSMA PET negative; missed nodes small, likely missed by ePLND too",
+              "🔍 Yaxley BJUI 2019 (n=1253): 47.7% of nodal mets fell OUTSIDE the ePLND template",
+              {
+                "text": "📊 Lymphedema by nodal treatment (systematic review, Clinckaert 2022)",
+                "table": {
+                  "columns": [
                     "Setting",
-                    "Lower-limb lymphedema",
-                    "Genital lymphedema"
+                    "Lower-limb LE",
+                    "Genital LE"
                   ],
                   "rows": [
                     [
                       "RP + PLND",
                       "0-14%",
-                      "—"
+                      "nr"
                     ],
                     [
                       "Pelvic LN RT",
                       "0-9%",
-                      "—"
+                      "nr"
                     ],
                     [
                       "PLND + salvage pelvic RT",
@@ -60,17 +467,59 @@
                     ]
                   ]
                 }
+              },
+              "⚠️ Tyritzis J Urol 2015 (3544 RP, 547 PLND): 6-10x higher DVT/PE risk with lymphadenectomy",
+              "🩻 High-risk: decision individualized; ePLND plus adjuvant/salvage pelvic RT may increase side effects",
+              "🔗 PSMA-PET staging can prompt post-op pelvic nodal RT instead of ePLND, limiting lymphedema",
+              "⚠️ Roberts PCAN 2024 SWOT: no level 1 evidence for oncologic benefit of ePLND; earlier ARSI use lowers pN relevance"
+            ],
+            "figures": [
+              {
+                "url": "https://pbs.twimg.com/media/HIhwFsnWkAAjOfG.jpg",
+                "caption": "n=1253 primary Ga-PSMA PET/CT staging; 47.7% of nodal metastases outside the ePLND template."
+              },
+              {
+                "url": "https://pbs.twimg.com/media/HIhwFsDXsAAqefc.jpg",
+                "caption": null
               }
             ],
             "nct": null,
             "tweet_ids": [
               32
             ],
-            "slug": "prostate-eplnd-psma-pet-aua2026",
-            "significance": "The RT read is compounded morbidity: lymphedema runs 19-29% after PLND plus salvage pelvic RT (2-22% also genital) vs 0-9% for nodal RT alone. With PSMA PET NPV ~96%, omitting ePLND when pelvic nodal RT is anticipated spares that additive toxicity without losing staging confidence.",
+            "slug": "aua26-eplnd-roundup",
+            "significance": "47.7% of positive nodes fall outside the ePLND template (Yaxley, n=1253), so a negative PSMA PET (NPV ~96%) can route pts to nodal RT rather than dissection. Lymphedema is 0-9% with pelvic LN RT alone vs 19-29% when PLND precedes salvage RT, arguing for one nodal treatment rather than stacking both.",
+            "monday_clinic": "In intermediate-risk pts with a negative PSMA PET, this supports omitting ePLND and, where nodal treatment is needed, favoring PSMA-guided pelvic RT over dissection-plus-salvage-RT; high-risk staging stays individualized.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Conference round-up synthesizing primary-staging literature: **Yaxley BJUI 2019** (n=1253 Ga-PSMA PET/CT), the **Clinckaert 2022** lymphedema systematic review, **Tyritzis J Urol 2015** (3544 RP), and the **Roberts PCAN 2024** SWOT perspective on ePLND."
+              },
+              {
+                "label": "Results",
+                "body": "**PSMA PET NPV ~96%** for nodal disease; **47.7%** of nodal metastases lie outside the ePLND template. Supports omitting PLND in intermediate-risk pts with a negative scan; GG3 leans on nomograms."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "A negative PSMA PET can route pts to post-op pelvic nodal RT instead of ePLND, limiting lymphedema. The **47.7%** out-of-template nodal rate argues for extended nodal coverage when elective pelvic RT is chosen."
+              },
+              {
+                "label": "Safety",
+                "body": "Beyond lymphedema, lymphadenectomy raises DVT/PE risk **6-10x** (Tyritzis). Morbidity peaks when ePLND is stacked with salvage pelvic RT, the main argument against routine dissection."
+              },
+              {
+                "label": "Discussion",
+                "body": "**No level 1 evidence** for an oncologic benefit of ePLND. Earlier ARSI use makes pN status less decision-relevant. High-risk staging remains individualized, weighing added morbidity of ePLND-plus-salvage-RT."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc",
+              "surgonc"
+            ],
             "open_questions": [
-              "Oncological benefit of ePLND beyond staging",
-              "PSMA PET reliability for nodal staging in high-risk disease"
+              "Does ePLND add oncologic benefit over PSMA-PET staging?",
+              "Optimal PSMA-PET nomogram cut-off for omitting PLND"
             ],
             "consort": null,
             "modality": null,
@@ -80,117 +529,78 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT06776172",
-                "brief_title": "Extended vs. No Pelvic Lymph Node Dissection During Radical Prostatectomy. DISSECTION 2.0.",
+                "nct": "NCT07115992",
+                "brief_title": "Efficacy and Safety of Radical Prostatectomy (RP) With or Without Salvage Radiotherapy Versus RP With Extended Pelvic Lymph Node Dissection for Localized Intermediate- and High-risk Prostate Cancer With a Briganti Nomogram≥7%",
                 "overall_status": "RECRUITING",
                 "phase": [
                   "NA"
                 ],
-                "enrollment_count": 400,
-                "primary_completion_date": "2027-02",
-                "brief_summary": "The aim of the DISSECTION 2.0 study is to determine whether extended pelvic lymph node dissection (ePLND) provides a therapeutic benefit for high-risk prostate cancer patients by improving cancer staging and potentially removing micrometastatic disease, ultimately improving their outcomes.",
+                "enrollment_count": 270,
+                "primary_completion_date": "2028-02",
+                "brief_summary": "The goal of this clinical trial is to evaluate efficacy and safety of radical prostatectomy (RP) with or without salvage radiotherapy versus RP with extended pelvic lymph node dissection (ePLND) in males who have localized intermediate/high-risk prostate cancer with a Briganti nomogram no less than 7%. The main questions this study aim to answer are:\n\n1. Is RP with or without salvage radiotherapy non-inferior to RP with ePLND in efficacy for patients with localized intermediate/high-risk…",
                 "conditions": [
-                  "Prostate Cancer Surgery",
-                  "Prostate Cancers"
-                ],
-                "interventions": [
-                  {
-                    "name": "Extended Pelvic Lymph Node Dissection",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years and life expectancy \\>15 years\n* Any biopsy-proven WHO/ISUP grade groups III-V PCa\n* High-risk prostate cancer defined as:\n\n  * Any biopsy-proven WHO/ISUP grade group III-V PCa or\n  * ISUP grade group II and PSA \\> 20 ng/ml\n* PSMA-PET: negative staging for…",
-                "answers_question": "Oncological benefit of ePLND beyond staging",
-                "relevance_phrase": "RCT: extended vs no PLND tests therapeutic benefit"
-              },
-              {
-                "nct": "NCT05000827",
-                "brief_title": "Dutch National Randomized Study: PSMA-PET/CT As a Triage Tool for Pelvic Lymph Node Dissection in Prostatectomy Patients",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 706,
-                "primary_completion_date": "2025-07",
-                "brief_summary": "To determine if the use of Prostate-Specific Membrane Antigen Positron Emission Computer Tomography (PSMA PET/CT) as a selection tool for performing extended lymph node dissection (ePLND) for prostate cancer (PCa) in the primary staging setting results in fewer ePLND procedures and therefore lower overall healthcare costs, lower patient burden in terms of intervention-related complications and morbidity, with comparable disease prognosis, compared to the current European Guideline-recommended…",
-                "conditions": [
-                  "Prostate Cancer Metastatic",
                   "Prostate Cancer",
-                  "Lymph Node Metastases"
+                  "Prostate Adenoma"
                 ],
                 "interventions": [
                   {
-                    "name": "PSMA-PET/CT",
-                    "type": "DEVICE"
+                    "name": "RARP±SRT",
+                    "type": "PROCEDURE"
                   },
                   {
-                    "name": "Nomogram",
-                    "type": "OTHER"
+                    "name": "RARP+ePLND",
+                    "type": "PROCEDURE"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Biopsy proven adenocarcinoma of the prostate\n* Indication for ePLND combined with robot assisted radical prostatectomy (RARP) (MSKCC nomogram \\>5%, if not applicable when only MRI targeted biopsies are positive, the Briganti nomogram will be used)\n* Suitable for…",
-                "answers_question": "PSMA PET reliability for nodal staging in high-risk disease",
-                "relevance_phrase": "RCT: PSMA PET triages ePLND, comparable prognosis"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Provided signed and dated informed consent form.\n* Be male aged 18-80 years at consent.\n* Commit to protocol compliance and complete all study procedures.\n* Medically fit to tolerate interventions, including PSMA PET imaging, RARP, pelvic radiotherapy.\n* Diagnosis of…",
+                "answers_question": "Does ePLND add oncologic benefit over PSMA-PET staging?",
+                "relevance_phrase": "noninferiority: RP±SRT vs RP+ePLND, Briganti≥7%"
               },
               {
-                "nct": "NCT06389786",
-                "brief_title": "Accuracy of 18F-rhPSMA-7.3 PET/ MRI for Prediction of Lymph Node Metastasis in Localized High-Risk Prostate Cancer",
+                "nct": "NCT04269512",
+                "brief_title": "Role of Lymphnode Dissection in Men With Prostate Cancer Treated With Radical Prostatectomy",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 3650,
+                "primary_completion_date": "2029-12",
+                "brief_summary": "Currently, lymph node dissection is standard of care during prostatectomy of intermediate risk tumors at the Martini Clinic. It allows the assessment of possible but unlikely lymph nodes metastases. In case of lymph node metastasis, depending on the number of affected lymph nodes, an adjuvant radiation with or without additional hormone therapy may be discussed in order to stop or delay further progression of the disease.\n\nSince the procedure carries additional risks, it is controversial. The…",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "lymph node dissection",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* localized intermediate risk prostate cancer (intermediate risk (PSA\\> 10 ng / ml - 20 ng / ml or Gleason score 7 or cT category 2b)\n* scheduled for open radical prostatectomie or DaVinci prostatectomie\n\nExclusion Criteria:\n\n* American Society of Anesthesiology…",
+                "answers_question": "Does ePLND add oncologic benefit over PSMA-PET staging?",
+                "relevance_phrase": "weighs PLND oncologic value at RP, interm-risk"
+              },
+              {
+                "nct": "NCT03327675",
+                "brief_title": "High Precision Imaging of Prostate Specific Membrane Antigen for Personalized Treatment in Prostate Cancer",
                 "overall_status": "RECRUITING",
                 "phase": [
                   "NA"
                 ],
-                "enrollment_count": 50,
-                "primary_completion_date": "2027-05",
-                "brief_summary": "This clinical trial evaluates the use of an imaging scan (18F-rhPSMA-7.3 positron emission tomography \\[PET\\]/magnetic resonance imaging \\[MRI\\]) for identifying patients who are at risk of having their disease spread to the lymph nodes in those undergoing radical prostatectomy for prostate cancer that has not spread to other parts of the body (localized). Prostate specific membrane antigen (PSMA) PET/computed tomography (CT) has emerged as an option to stage newly diagnosed high risk prostate…",
+                "enrollment_count": 188,
+                "primary_completion_date": "2025-12",
+                "brief_summary": "This is an Investigator Initiated, non-commercial, single center, non-randomized, single arm, open label pilot study on 194 patients. The patients are affected by prostate cancer but in two different clinical settings. The first group is characterized by patients who are going to be operated of radical prostatectomy and they will undergo the study imaging preoperatively. The second group experiences biochemical relapse after primary treatment.",
                 "conditions": [
-                  "Localized Prostate Carcinoma",
-                  "Oligometastatic Prostate Carcinoma",
-                  "Stage I Prostate Cancer AJCC v8",
-                  "Stage II Prostate Cancer AJCC v8",
-                  "Stage III Prostate Cancer AJCC v8",
-                  "Stage IVA Prostate Cancer AJCC v8"
+                  "Prostate Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "Bilateral Pelvic Lymph Node Dissection",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Biospecimen Collection",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Bone Scan",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Computed Tomography",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Electronic Health Record Review",
+                    "name": "68Ga-PSMA (HBED-CC) PET",
                     "type": "OTHER"
-                  },
-                  {
-                    "name": "Flotufolastat F-18 Gallium",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Laparoscopic Radical Prostatectomy with Robotics",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Magnetic Resonance Imaging",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Positron Emission Tomography",
-                    "type": "PROCEDURE"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Male subjects ≥ 30 and ≤ 85 years old\n* Primary diagnosis of prostate cancer selected for surgical intervention (radical prostatectomy with extended lymph node dissection)\n* Primary diagnosis of untreated American Urological Association (AUA) guidelines high-risk localized…",
-                "answers_question": "PSMA PET reliability for nodal staging in high-risk disease",
-                "relevance_phrase": "PSMA PET/MRI accuracy vs PLND for LN mets, high-risk"
+                "eligibility_brief": "Inclusion criteria\n\nWork-unit 1\n\n* age \\< 75 years of age, with histologically proven invasive adenocarcinoma of the prostate\n* a risk of equal or more than 5% of lymph node metastasis (intermediate to high risk disease), according to the Briganti nomogram (1)\n* scheduled to undergo radical…",
+                "answers_question": "Optimal PSMA-PET nomogram cut-off for omitting PLND",
+                "relevance_phrase": "68Ga-PSMA vs path, Briganti≥5% pre-RP cohort"
               },
               {
                 "nct": "NCT06398613",
@@ -212,311 +622,24 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Biopsy proven diagnosed adenocarcinoma of the prostate\n* Indication for ePLND combined with RALP:\n* High-risk group (EAU) and including MRI findings indicating extra prostatic extension (Likert scale ≥4)\n* -ISUP GG 3 with ≥1 of the following unfavourable risk factors\n\n  *…",
-                "answers_question": "PSMA PET reliability for nodal staging in high-risk disease",
-                "relevance_phrase": "tests if PSMA PET can replace ePLND for staging"
+                "answers_question": "Optimal PSMA-PET nomogram cut-off for omitting PLND",
+                "relevance_phrase": "PSMA PET/CT to safely replace ePLND at RALP"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "pelvic lymphadenectomy prostatectomy",
+                "pelvic lymphadenectomy prostate",
                 "PSMA PET prostate staging"
               ],
               "queries_failed": [],
-              "candidates_returned": 35,
-              "fetched_at": "2026-06-27T23:35:07.616Z",
+              "candidates_returned": 38,
+              "fetched_at": "2026-07-19T16:34:26.865Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {
                 "type": "tweet",
                 "id": 32
-              }
-            ]
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "bladder",
-        "intro": "Trimodality bladder preservation in a large retrospective MIBC cohort.",
-        "studies": [
-          {
-            "name": "Bladder-preserving TMT for MIBC (ESTRO 2026)",
-            "tldr": "CLR 63.7% with trimodality therapy in MIBC; complete local response linked to lower local recurrence and better survival in a 369-pt Spanish cohort.",
-            "details": [
-              "🔍 Multicenter retrospective cohort, Spain 2010-2022; N=369 cT2-T4a N0M0 MIBC, median age 76, 85.1% male",
-              "🔍 TMT = maximal TURBT + concurrent chemoRT; 1° EP complete local response (CLR), predictors by multivariable logistic regression",
-              "📊 CLR 63.7%",
-              {
-                "text": "📊 Disease progression 28.8%, by pattern",
-                "subdetails": [
-                  "Local 10.1%",
-                  "Systemic 10.7%",
-                  "Combined 8.7%"
-                ]
-              },
-              "📊 Salvage cystectomy 9.7%",
-              "📐 Predictors of CLR (multivariable logistic regression)",
-              "🔍 VMAT trended toward favorable outcomes (not statistically significant)",
-              "🔗 No randomised comparator vs radical cystectomy; authors frame survival as comparable to international TMT series",
-              {
-                "text": "⚠️ Key caveats",
-                "subdetails": [
-                  "Retrospective: TMT-selected pts likely fitter / lower-burden than RC candidates (selection bias)",
-                  "CLR is a surrogate; OS/CSS listed as secondary but no effect size in source"
-                ]
-              }
-            ],
-            "figures": [],
-            "nct": null,
-            "tweet_ids": [
-              33
-            ],
-            "slug": "bladder-tmt-preservation-estro26",
-            "verdict": {
-              "soc_implication": "confirmatory",
-              "rationale": "Retrospective real-world cohort backing TMT as a bladder-preservation alternative to cystectomy; no randomised comparator vs RC, and CLR is a surrogate primary endpoint.",
-              "audience": "Non-metastatic MIBC (cT2-T4a N0M0), median age 76"
-            },
-            "significance": "Image guidance and chemo regimen, not just patient selection, move local control: weekly portal imaging (older 2D IGRT) cut CLR odds (OR 0.35, p<0.001) while 5-FU-based CRT raised them (OR 4.9, p=0.038), VMAT trending favorable. For an RT reader, this argues for conformal daily-IGRT delivery and a 5-FU backbone when offering bladder-preserving TMT.",
-            "open_questions": [
-              "Randomised TMT vs radical cystectomy in MIBC",
-              "Does daily IGRT improve local control vs weekly portal imaging",
-              "Optimal concurrent chemo regimen for bladder TMT"
-            ],
-            "consort": null,
-            "modality": "combined",
-            "intent": "curative",
-            "methodology": "retrospective",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT07008833",
-                "brief_title": "Radical CystEctomy or RaDio-chEMotherapy as Preferred Treatment for invasivE blaDder Cancer",
-                "overall_status": "NOT_YET_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 336,
-                "primary_completion_date": "2031-12",
-                "brief_summary": "Your text is mostly clear and well-structured. Here's a slightly polished version for improved clarity and flow:\n\nThis is a randomized, non-inferiority study comparing radiochemotherapy to radical cystectomy in patients with muscle-invasive bladder cancer. The primary outcome is the evaluation of the non-inferiority of metastasis-free survival between the two treatments.\n\nThe study population includes individuals of both sexes, aged 18 years and older, diagnosed with pure or predominant…",
-                "conditions": [
-                  "Muscle Invasive Bladder Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Radiochemotherapy",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Radical cystectomy",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients ≥ 18 years of age.\n2. Pure or predominant urothelial carcinoma (including other histologic subtypes, with the exception of small cell carcinoma, as a minority component).\n3. Performance status of 0 to 1, according to the Eastern Cooperative Oncology Group (ECOG)…",
-                "answers_question": "Randomised TMT vs radical cystectomy in MIBC",
-                "relevance_phrase": "randomised chemoRT vs cystectomy, MFS non-inferiority"
-              },
-              {
-                "nct": "NCT05833867",
-                "brief_title": "Adaptive RADiation Therapy With Concurrent Sacituzumab Govitecan (SG) for Muscle Invasive Bladder Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE1"
-                ],
-                "enrollment_count": 20,
-                "primary_completion_date": "2026-06",
-                "brief_summary": "The purpose of this study is to examine the safety and tolerability of treatment with concurrent Sacituzumab Govitecan (SG) and adaptive radiation therapy. The main objective is to establish the safety, tolerability, and feasibility of bladder preservation therapy treatment with concurrent SG and adaptive image-guided radiation therapy for participants with localized MIBC. Participants will receive the study drug, SG, through an IV once weekly on days 1 and 8 of each 21-day treatment cycle. The…",
-                "conditions": [
-                  "Localized Muscle Invasive Bladder Urothelial Carcinoma",
-                  "Muscle-Invasive Bladder Carcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "Sacituzumab govitecan",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Adaptive Radiotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Participants must have histologically or cytologically confirmed muscle-invasive bladder cancer (MIBC) (T2-T4aN0M0). Participants with mixed urothelial carcinoma will be eligible for the trial, except for small cell or neuroendocrine component\n* Participants must have…",
-                "answers_question": "Optimal concurrent chemo regimen for bladder TMT",
-                "relevance_phrase": "concurrent sacituzumab govitecan + adaptive RT"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "bladder preservation cystectomy",
-                "image-guided radiotherapy bladder",
-                "chemoradiotherapy muscle-invasive bladder"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 54,
-              "fetched_at": "2026-06-27T23:34:37.193Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "tweet",
-                "id": 33
-              }
-            ]
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "thoracic",
-        "intro": "Single-fraction lung SABR pooled across three institutions.",
-        "studies": [
-          {
-            "name": "Single-fraction SABR: pooled analysis (n=1687)",
-            "tldr": "2yr local control 90-93% with G3+ AEs 2.9%, across 1687 pts (1200 primary NSCLC, 487 oligomets) on single-fraction SABR.",
-            "details": [
-              "🔍 Pooled retrospective analysis, 3 institutions (Peter Mac, Cleveland Clinic, Roswell Park); 1200 primary NSCLC + 487 pulmonary oligomets",
-              "🔍 Single-fraction SABR (one fraction); total dose (Gy) not reported in source",
-              "📊 Isolated local/locoregional failure very uncommon across both cohorts",
-              {
-                "text": "📊 Most common AEs, primary NSCLC (n=789)",
-                "subdetails": [
-                  "Chest wall pain 114 (14%), most common",
-                  "Pneumonitis 52 (7%)",
-                  "Fatigue 29 (4%)",
-                  "Rib fracture 4 (1%)"
-                ]
-              },
-              "🔗 Supports single-fraction approach; cf. RTOG 0915 (34Gy x1 for peripheral stage I NSCLC)",
-              "⚠️ No randomised comparator; dose/fractionation heterogeneity across 3 sites not detailed in source",
-              "⚠️ AE data missing for Roswell Park (n=789 of 1687); toxicity may be undercounted"
-            ],
-            "figures": [
-              {
-                "url": "https://pbs.twimg.com/media/HInTCxmXEAIPI69.jpg",
-                "caption": "Local control 90-93% at 2yr; median PFS 30mo (NSCLC), 11mo (oligomets)."
-              },
-              {
-                "url": "https://pbs.twimg.com/media/HInTCxxXIAAKCPI.jpg",
-                "caption": {
-                  "columns": [
-                    "Cohort",
-                    "1yr OS",
-                    "2yr OS",
-                    "Median OS"
-                  ],
-                  "rows": [
-                    [
-                      "Primary NSCLC",
-                      "84% (82-86)",
-                      "67% (64-69)",
-                      "40mo (36-43)"
-                    ],
-                    [
-                      "Oligomets",
-                      "90% (86-92)",
-                      "75% (71-79)",
-                      "51mo (42-58)"
-                    ]
-                  ]
-                }
-              },
-              {
-                "url": "https://pbs.twimg.com/media/HInTCxuWMAAiAjG.jpg",
-                "caption": "Primary NSCLC AEs (n=789): G2+ 15.7%, G3+ 2.9%, any AE 27%."
-              }
-            ],
-            "nct": null,
-            "tweet_ids": [
-              31
-            ],
-            "slug": "sf-sabr-nsclc-oligomets-pooled",
-            "verdict": {
-              "soc_implication": "confirmatory",
-              "rationale": "Pooled retrospective multi-site cohort, no randomised comparator; backs single-fraction SABR, an emerging-recognized option (cf. RTOG 0915). Mature follow-up but descriptive, not comparative.",
-              "audience": "Primary NSCLC (n=1200) or pulmonary oligometastases (n=487)"
-            },
-            "significance": "The RT read is toxicity, not the survival curves: chest wall pain (14%) dominates and G3+ sits at just 2.9% (n=789), so single-fraction earns its 'one-stop' pitch. But the prescription dose (Gy) isn't in the source, which gates whether this transfers to your practice.",
-            "open_questions": [
-              "Single-fraction vs multifraction SABR for pulmonary oligometastases",
-              "Optimal single-fraction dose and patient selection for primary NSCLC",
-              "Durability beyond 2 years and late toxicity"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": "retrospective",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT06462963",
-                "brief_title": "OligoCare TwiCs (Trials Within Cohorts) Trial Comparing Acute Toxicity in Single-fraction vs Multiple-fraction SBRT for Metastasis-directed Treatment (SPRINT)",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 302,
-                "primary_completion_date": "2029-02",
-                "brief_summary": "The goal of this clinical trial is to evaluate single-fraction metastases-directed SBRT in the broader radiation oncology community and to compare its safety and efficacy profile with the current Standard of Care (SoC) of multiple-fraction SBRT in patients with oligometastatic disease of primary breast, prostate, NSCLC and colorectal cancer having all lesions that will be treated with radical radiotherapy amenable to single-fraction SBRT.\n\nThe main question/hypothesis this clinical trial aims…",
-                "conditions": [
-                  "Breast Cancer",
-                  "Prostate Cancer",
-                  "NSCLC",
-                  "Colorectal Cancer",
-                  "Oligometastatic Disease"
-                ],
-                "interventions": [
-                  {
-                    "name": "single-fraction SBRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "multiple-fraction SBRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patient is part of the RP1822-OligoCare. As in OligoCare, ALL active cancer lesions (loco-regional primary and all oligometastases) were or will be treated with radical intent (surgery or radiotherapy).\n* All lesions that will be treated with radical radiotherapy have to be…",
-                "answers_question": "Single-fraction vs multifraction SABR for pulmonary oligometastases",
-                "relevance_phrase": "single-fx vs multi-fx SBRT for oligomets incl NSCLC"
-              },
-              {
-                "nct": "NCT05138900",
-                "brief_title": "A Pilot Study of Single Fraction Stereotactic Body Radiation Therapy (SBRT) in Central Non-Small Cell Lung Cancer",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 30,
-                "primary_completion_date": "2028-03",
-                "brief_summary": "The purpose of this study is to determine if a single treatment of targeted radiation (called SBRT or Stereotactic Body Radiation Therapy) can be as safe and effective as multiple doses of radiation in patients with central non-small cell lung cancer",
-                "conditions": [
-                  "Non Small Cell Lung Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "SBRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Have an ECOG Performance Status of ≤ 2. Refer to Appendix A.\n* Have histologically proven diagnosis of non-small cell lung cancer (NSCLC).\n* Stage cT1-3N0M0 with tumor size \\< 6 cm.\n* Prior systemic therapy allowed but no systemic therapy 4-6 weeks prior to stereotactic body…",
-                "answers_question": "Optimal single-fraction dose and patient selection for primary NSCLC",
-                "relevance_phrase": "single-fx SBRT vs multi-fx in central NSCLC"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "single fraction SBRT oligometastases",
-                "single fraction SBRT NSCLC"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 33,
-              "fetched_at": "2026-06-27T23:36:58.710Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "tweet",
-                "id": 31
               }
             ]
           }
