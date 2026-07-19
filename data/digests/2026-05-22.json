@@ -1,60 +1,101 @@
 {
   "date": "2026-05-22",
   "conference": null,
-  "generated_at": 1782587745549,
+  "generated_at": 1784477745590,
   "digest": {
-    "top_line": "DBCG IMN2: 15y OS 65.0 vs 60.8% with internal mammary nodal RT (HR 0.85, p=0.0016), no cardiac penalty in the modern systemic era.",
-    "tldr": "Nodal RT volume carried the day across two sites: DBCG IMN2 sustains an internal-mammary OS gain (HR 0.85) into the taxane/AI/trastuzumab era with no cardiac excess, while PEACE V–STORM is the first RCT favouring whole-pelvis ENRT over focal MDT in nodal oligorecurrence (4yr MFS 76 vs 63%, p=0.063). Lymphoma adds an EORTC per-entity low-dose algorithm.",
+    "top_line": "DBCG IMN2: 15yr OS 65.0% vs 60.8% with IMNI (HR 0.85, p=0.0016); internal mammary nodal RT benefit holds under modern systemic therapy.",
+    "tldr": "Regional nodal RT carried the day. Breast IMN2 (nationwide cohort, N=4541) keeps internal-mammary irradiation's OS edge alive under modern systemic Rx, while prostate PEACE V-STORM is the first randomised ENRT-vs-MDT read (4-yr MFS 76% vs 63%, p=0·063, phase 2). Skin adds EORTC low-dose RT dosing for indolent cutaneous lymphomas.",
     "sites": [
       {
-        "disease_site": "lymphoma",
-        "intro": null,
+        "disease_site": "skin",
+        "intro": "EORTC consensus on RT dose per cutaneous lymphoma entity, though no RCT fixes a standard.",
         "studies": [
           {
             "name": "EORTC Cutaneous Lymphoma RT Recommendations",
-            "tldr": "≥92% 1yr local control with low-dose RT (8-12 Gy) in MF; EORTC consensus algorithm standardizes per-entity dosing absent RCTs.",
+            "tldr": "Low-dose RT (8-12 Gy) recommended for indolent cutaneous lymphomas; MF 1-yr local control ≥92%, but no RCT defines a standard dose per entity.",
             "details": [
-              "📊 Low-dose RT in MF: 1yr local control ≥92%",
               {
-                "text": "📊 Recommended RT dose by cutaneous lymphoma entity",
+                "text": "🔍 RT dose recommendations by cutaneous lymphoma entity",
                 "table": {
                   "columns": [
-                    "Entity",
-                    "RT dose / fractionation"
+                    "Entity / setting",
+                    "RT dose"
                   ],
                   "rows": [
                     [
-                      "MF, localized plaques/tumours",
-                      "8-12 Gy in 2-3 fx"
+                      "MF plaque/tumour (local)",
+                      "8-12 Gy / 2-3 fx"
                     ],
                     [
-                      "MF, >10% BSA (TSEBT)",
-                      "8-12 Gy palliative; up to 24 Gy pre-autologous SCT"
+                      "Low-dose TSEBT (palliative)",
+                      "8-12 Gy"
+                    ],
+                    [
+                      "TSEBT pre-autoSCT",
+                      "up to 24 Gy"
                     ],
                     [
                       "Cutaneous DLBCL, leg type",
-                      "16-45 Gy (4 Gy/wk up to 40 Gy)"
+                      "16-45 Gy (4 Gy/wk to ≤40 Gy)"
                     ]
                   ]
-                }
+                },
+                "source_tier": "figure"
               },
-              "⚠️ 4 Gy (1-2 fx) gave inferior local control vs 8-12 Gy in MF",
-              "🔗 Folliculotropic MF: RT more effective than other modalities (Dutch registry, n=203, retrospective)",
-              "💊 Sézary syndrome: TSEBT controversial, rarely durable; systemic effect lowers circulating Sézary cells",
-              "🔍 Expert consensus / literature review; no completed RCTs defining standard dose per entity",
-              "🔍 EORTC algorithm (Figs 2A/2B) standardizes per-entity dose recommendations across centres"
+              {
+                "text": "📊 MF low-dose RT: 1-yr local control ≥92%",
+                "source_tier": "figure"
+              },
+              {
+                "text": "⚠️ 4 Gy (1-2 fx) gave inferior local control vs 8-12 Gy",
+                "source_tier": "figure"
+              },
+              {
+                "text": "🔗 Folliculotropic MF: RT more effective than other modalities (Dutch registry, 203 cases, retrospective)",
+                "source_tier": "figure"
+              },
+              "🔍 Sézary syndrome: TSEBT controversial, rarely achieves long-term remission",
+              "💊 TSEBT in SS also lowers circulating Sézary cell counts (systemic effect)",
+              {
+                "text": "💊 12 Gy TSEBT + mechlorethamine gel maintenance reported with encouraging results",
+                "source_tier": "figure"
+              },
+              "⚠️ No completed RCTs defining standard dose per entity; prospective trial urgently needed"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
               1000000013
             ],
-            "slug": "eortc-cutaneous-lymphoma-rt-recommendations",
-            "significance": "The actionable read is dose: 8-12 Gy in 2-3 fx clears ≥92% 1yr local control in MF, while 4 Gy underperforms, so ultra-low-dose trades control for fewer visits. The EORTC algorithm sets a per-entity dose floor where no RCT exists, reserving 24 Gy for bulky lesions or pre-transplant remission.",
+            "slug": "eortc-cutaneous-lymphoma-rt",
+            "significance": "The actionable read is the dose floor: 4 Gy (1-2 fx) underperformed vs 8-12 Gy, so 8-12 Gy stays the low-dose local standard for MF, 24 Gy reserved for large/refractory lesions or pre-autoSCT remission. Low-dose TSEBT trades durability for repeatability and lower toxicity, moving the de-escalation decision in indolent CTCL.",
+            "monday_clinic": "In indolent cutaneous lymphoma (MF plaque/tumour, pcALCL, cutaneous B-cell), this supports low-dose RT (8-12 Gy) as effective skin-directed treatment; it does not set a dose for aggressive CTCL variants, where low-dose RT has a limited role.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "EORTC cutaneous lymphoma tumour group **expert-opinion / consensus** recommendations, synthesizing retrospective case series and limited prospective registries. Proposes a **treatment algorithm** to standardize radiation dose across EORTC centres."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Modalities span **electrons, photons, kilovoltage X-ray, brachytherapy**. Low-dose regimens favored for low toxicity and **repeatability** on relapse; higher-dose TSEBT reserved for remission induction before autologous SCT."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents indolent primary cutaneous lymphomas (MF, pcALCL, CD4+ small/medium T-cell LPD, cutaneous B-cell). Does not represent aggressive CTCL variants (SPTCL, gamma/delta, CD8+ epidermotropic, NK/T-cell), where low-dose RT has a limited role."
+              },
+              {
+                "label": "Limitations",
+                "body": "**No completed RCTs** define the standard dose per entity; recommendations rest on retrospective series and expert consensus. Authors call a prospective trial **urgently needed**."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc"
+            ],
             "open_questions": [
-              "Standard radiation dose per cutaneous lymphoma entity (no completed RCT)",
-              "Factors predicting outcome after different radiation doses",
-              "Optimal low-dose RT combined with immunomodulatory/systemic agents"
+              "Optimal radiation dose per cutaneous lymphoma entity",
+              "Durability of low-dose TSEBT vs higher-dose regimens",
+              "TSEBT combined with immunotherapy in Sézary syndrome"
             ],
             "consort": null,
             "modality": "radiation",
@@ -76,37 +117,8 @@
                 ],
                 "interventions": [],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Age greater than or equal to 18 years\n* Histological diagnosis of indolent B-cell lymphoma (follicular, marginal, NOS)\n* Primary cutaneous location\n* Early stage (I-II)\n* First diagnosis or recurrence\n* Low-dose radiotherapy treatment (4 Gy/2 sessions)\n\nExclusion Criteria:\n\n*…",
-                "answers_question": "Standard radiation dose per cutaneous lymphoma entity (no completed RCT)",
-                "relevance_phrase": "4 Gy low-dose RT in cutaneous B-cell entity"
-              },
-              {
-                "nct": "NCT02702310",
-                "brief_title": "Low-Dose Total Skin Electron Therapy in Treating Patients With Refractory or Relapsed Stage IB-IIIA Mycosis Fungoides",
-                "overall_status": "RECRUITING",
-                "phase": null,
-                "enrollment_count": 60,
-                "primary_completion_date": "2026-09",
-                "brief_summary": "This clinical trial studies low- dose total skin electron therapy in treating patients with stage IB-IIIA mycosis fungoides that has not responded to previous treatment (refractory) or has returned after a period of improvement (relapsed). Radiation therapy uses high energy electrons to kill tumor cells and shrink tumors. Rotisserie technique is a method in which the patient receives total skin electron therapy while standing on a rotating platform. Giving low dose total skin electron therapy…",
-                "conditions": [
-                  "Recurrent Mycosis Fungoides",
-                  "Refractory Mycosis Fungoides",
-                  "Stage I Mycosis Fungoides",
-                  "Stage II Mycosis Fungoides",
-                  "Stage III Mycosis Fungoides"
-                ],
-                "interventions": [
-                  {
-                    "name": "Quality-of-Life Assessment",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Objective Grading of Skin Findings",
-                    "type": "OTHER"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Biopsy confirmed mycosis fungoides stage IB-IIIA\n* Skin manifestations of mycosis fungoides that are refractory to or have relapsed on at least one prior therapy, which may include topical steroids\n* Life expectancy \\> 6 months\n\nExclusion Criteria:\n\n* Serious medical…",
-                "answers_question": "Standard radiation dose per cutaneous lymphoma entity (no completed RCT)",
-                "relevance_phrase": "low-dose total skin electron therapy in MF"
+                "answers_question": "Optimal radiation dose per cutaneous lymphoma entity",
+                "relevance_phrase": "4 Gy low-dose RT in cutaneous B-cell lymphoma"
               },
               {
                 "nct": "NCT03398161",
@@ -137,68 +149,80 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Patients with pathologically confirmed MF with cutaneous involvement.\n\n  * Patients must have clinically measurable disease of at least 1 lesion on physical (skin) exam.\n  * If a patient has a prior pathological diagnosis of MF and is clinically diagnosed with a new lesion,…",
-                "answers_question": "Standard radiation dose per cutaneous lymphoma entity (no completed RCT)",
-                "relevance_phrase": "phase 2 ultra-low-dose RT in MF"
+                "answers_question": "Optimal radiation dose per cutaneous lymphoma entity",
+                "relevance_phrase": "phase 2 ultra-low-dose RT vs higher-dose in MF"
               },
               {
-                "nct": "NCT05357794",
-                "brief_title": "Effectiveness of Concurrent Ultra-Low-Dose Total-Skin Electron Beam Therapy and Brentuximab Vedotin Given Quarterly Over 12 Months for Patients With Mycosis Fungoides",
+                "nct": "NCT05205902",
+                "brief_title": "TOtal Skin Electron Beam Therapy (Low-dose) for Tumor Clone Eradication in Early-stage Mycosis Fungoides",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 78,
+                "primary_completion_date": "2027-02",
+                "brief_summary": "Primary cutaneous T-cell lymphomas are a group of peripheral T-cell lymphomas that primarily involve the skin. Mycosis fungoides (MF) is the most frequent subtype. Most patients with early-stage MF (i.e., patches and plaques of the skin without extracutaneous involvement) have a good prognosis but a subset of patients progress to incurable advanced-stage disease with an overall survival (OS) less than 5 years and an impaired quality of life.\n\nWe have recently identified the tumor clone…",
+                "conditions": [
+                  "Mycosis Fungoides",
+                  "Cutaneous T Cell Lymphoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Low-dose total-skin electron-beam therapy",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Phototherapy",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years\n* Histopathologically confirmed diagnosis of International Society for Cutaneous Lymphomas (ISCL) / European Organisation for Research and Treatment of Cancer (EORTC) mycosis fungoides stage IB or IIA\n\nExclusion Criteria:\n\n* Poor performance status: WHO…",
+                "answers_question": "Durability of low-dose TSEBT vs higher-dose regimens",
+                "relevance_phrase": "phase 3 low-dose TSEBT, clone-eradication EP"
+              },
+              {
+                "nct": "NCT04256018",
+                "brief_title": "Mogamulizumab + Low-Dose Total Skin Electron Beam Tx in Mycosis Fungoides & Sézary Syndrome",
                 "overall_status": "RECRUITING",
                 "phase": [
                   "PHASE2"
                 ],
                 "enrollment_count": 30,
-                "primary_completion_date": "2027-01",
-                "brief_summary": "To learn if a form of radiation therapy (called ultra-low-dose - total skin electron beam therapy \\[ULD-TSEBT\\]) in combination with brentuximab vedotin can help to control mycosis fungoides",
+                "primary_completion_date": "2026-12",
+                "brief_summary": "The purpose of this study is to determine the efficacy of the combination of LD-TSEBT and mogamulizumab in patients with MF and SS. And to evaluate the secondary measures of clinical benefit of the combination therapy and to evaluate the safety and tolerability of the combination in patients with MF and SS.",
                 "conditions": [
+                  "Sezary Syndrome",
                   "Mycosis Fungoides"
                 ],
                 "interventions": [
                   {
-                    "name": "Brentuximab vedotin",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Biopsy-confirmed mycosis fungoides in stage I-IV (APPENDICES 3 AND 4); the presence of Sezary cells in the blood is acceptable at original diagnosis or at enrollment into the protocol, as long as the patient has current mycosis fungoides in the skin and the sesary cells in…",
-                "answers_question": "Optimal low-dose RT combined with immunomodulatory/systemic agents",
-                "relevance_phrase": "ULD-TSEBT + brentuximab vedotin"
-              },
-              {
-                "nct": "NCT05838599",
-                "brief_title": "Combining Topical Imiquimod With Local Radiotherapy for Treatment of Mycosis Fungoides",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "EARLY_PHASE1"
-                ],
-                "enrollment_count": 25,
-                "primary_completion_date": "2027-06",
-                "brief_summary": "Mycosis fungoides (MF) is the most common subtype of cutaneous T cell lymphoma (MF) and presents as cutaneous patches, plaques, and tumors. Radiation therapy (RT) is a frequently pursued management option for CTCL, especially in patients with more advanced skin disease. Imiquimod stimulates a Th1 lymphocyte response with increased IL-2 and IFN-α, but also induces IFN-α, TNF-α, IL-1α, IL-6, and IL-8, thereby bridging both innate and adaptive immunity. Dosing of both radiotherapy (RT) and…",
-                "conditions": [
-                  "Mycosis Fungoides"
-                ],
-                "interventions": [
-                  {
-                    "name": "Imiquimod",
+                    "name": "Mogamulizumab",
                     "type": "DRUG"
                   },
                   {
-                    "name": "Radiation Therapy",
+                    "name": "LD TSEBT",
                     "type": "RADIATION"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patients must have confirmed stage IA-IIB mycosis fungoides.\n* Patients must be 18-90 years of age.\n* Patients must have failed at least one standard therapy for MF.\n* Patients must have active, but stable disease for \\>6 months.\n* Patients must have 4 or more discrete MF…",
-                "answers_question": "Optimal low-dose RT combined with immunomodulatory/systemic agents",
-                "relevance_phrase": "concurrent imiquimod + RT, both doses studied"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Stages IB-IV MF or SS\n\n  1. Stages IB-IV MF or SS\n  2. At least 1 prior standard-of-care therapy\n  3. Prior LD-TSEBT (\\> 3 months prior) and prior mogamulizumab is allowed, as long as progressive disease (PD) did not occur while on therapy, and did not discontinue due to…",
+                "answers_question": "TSEBT combined with immunotherapy in Sézary syndrome",
+                "relevance_phrase": "LD-TSEBT + mogamulizumab in MF/SS"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "cutaneous lymphoma radiation dose",
-                "mycosis fungoides radiation immunotherapy"
+                "cutaneous lymphoma radiotherapy dose",
+                "total skin electron beam",
+                "total skin electron immunotherapy"
               ],
-              "queries_failed": [],
-              "candidates_returned": 9,
-              "fetched_at": "2026-06-27T19:12:54.404Z",
+              "queries_failed": [
+                {
+                  "term": "total skin electron immunotherapy",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 16,
+              "fetched_at": "2026-07-19T16:08:36.884Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -213,14 +237,15 @@
       },
       {
         "disease_site": "breast",
-        "intro": null,
+        "intro": "DBCG IMN2 revives the internal-mammary nodal RT question for the modern-therapy era.",
         "studies": [
           {
             "name": "DBCG IMN2",
-            "tldr": "15y OS 65.0% vs 60.8% with IMNI, adjusted HR 0.85 (0.76-0.94) p=0.0016, in node-positive breast, modern-systemic era.",
+            "tldr": "15yr OS 65.0% vs 60.8% with IMNI, adjusted HR 0.85 (0.76-0.94); benefit persists under modern systemic therapy and 3D RT.",
             "details": [
+              "🔍 Prospective nationwide population-based cohort, N=4541, 6 RT centres; right-sided tumours → IMNI, left-sided → no IMNI. Median f/u 13.7yr.",
               {
-                "text": "📊 IMNI vs no IMNI across endpoints (adjusted HRs)",
+                "text": "📊 IMNI vs no IMNI, adjusted HRs (Cox)",
                 "table": {
                   "columns": [
                     "Endpoint",
@@ -246,14 +271,39 @@
                   ]
                 }
               },
-              "🔍 Nationwide population-based prospective cohort, N=4541, treated 2007-14; right-sided → IMNI, left-sided → no IMNI (laterality allocation to limit cardiac confounding)",
-              "🔍 Median f/u 13.7y; systemic backbone was taxane chemo, aromatase inhibitors, trastuzumab (modern era), with 3D-based RT",
-              "📊 Benefit held in 1-3 positive node subgroup; no subgroup identified for IMNI omission; authors advocate guideline IMNI for 1-3 nodes",
-              "📊 15y ischemic/valvular heart death 0.2% (0.0-0.5) right-sided/IMNI vs 0.7% (0.4-1.2) left-sided/no IMNI — no excess cardiac death with modern 3D IMNI",
-              "🔗 vs DBCG IMN1 (n=3089, treated 2003-07): absolute OS gain 4.7% at 14.8y; IMN2 sustains a similar 65.0 vs 60.8% spread in the modern era",
-              "🔗 vs EBCTCG regional-node-RT meta-analysis: 3% absolute 15y survival gain; IMN2 consistent. Contrasts the negative Korean KROG 06-08 IMNI study",
-              "⚠️ Not randomised: laterality-based allocation, residual confounding possible; cancer outcomes reported balanced right vs left, but this is a cohort, not an RCT",
-              "⚠️ Cardiac comparison confounded: left-sided chest-wall RT carries cardiac dose regardless of IMNI, so the 0.2 vs 0.7% gap is not purely IMNI-attributable"
+              "📊 15yr OS 65.0% (IMNI) vs 60.8% (no IMNI); absolute gain 4.2%",
+              "📊 IMNI benefit maintained in 1-3 positive-node pts; no subgroup identified for IMNI omission",
+              "💊 Modern systemic backbone (taxanes, trastuzumab, aromatase inhibitors), the era thought to erase residual IMNI gain",
+              "📊 15yr cardiac death (ischemic/valvular) 0.2% right/IMNI vs 0.7% left; no excess cardiac mortality from IMNI",
+              {
+                "text": "🔗 IMN2 vs prior IMNI/regional-node evidence",
+                "table": {
+                  "columns": [
+                    "Study",
+                    "Design",
+                    "Signal"
+                  ],
+                  "rows": [
+                    [
+                      "DBCG IMN1 (2003-07)",
+                      "prospective cohort, n=3089",
+                      "+4.7% abs OS, f/u 14.8yr"
+                    ],
+                    [
+                      "EBCTCG meta-analysis",
+                      "n=12,167",
+                      "+3% abs 15yr survival, regional node RT"
+                    ],
+                    [
+                      "Korean KROG 06-08",
+                      "3D-RT, modern systemic",
+                      "negative for IMNI"
+                    ]
+                  ]
+                }
+              },
+              "⚠️ Non-randomized: IMNI assigned by tumour laterality, not randomization; residual confounding possible",
+              "⚠️ Excludes neoadjuvant-treated pts; result doesn't transfer to the growing NAC population"
             ],
             "figures": [],
             "nct": "NCT06549920",
@@ -263,14 +313,62 @@
             "slug": "dbcg-imn2",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Non-randomised laterality-allocated cohort (right=IMNI, left=none), no RCT comparator; consistent with DBCG IMN1 and EBCTCG, extends benefit to modern-systemic era and 1-3 nodes.",
-              "audience": "Node-positive breast cancer, incl 1-3 positive nodes, modern systemic therapy"
+              "rationale": "Large prospective laterality-allocated cohort, not randomized; confirms IMN1 + EBCTCG that IMNI benefit persists with modern systemic therapy. Non-random design caps it below practice-changing.",
+              "audience": "Node-positive breast cancer, incl. 1-3 positive nodes; no neoadjuvant therapy"
             },
-            "significance": "Moves the IMN-coverage decision in 1-3 node disease, where guidelines split: benefit held in the lowest-burden subgroup, no omission group identified. Cardiac safety is the additive read: 15y ischemic/valvular death 0.2% with IMNI (right) vs 0.7% without, so modern 3D IMNI carried no excess cardiac death.",
+            "significance": "The 1-3 positive-node subgroup is the RT read: IMNI benefit held at the lowest nodal burden, no subgroup found for omission, moving elective IMN coverage where guidelines diverge. Reassuring on toxicity too: 15yr ischemic/valvular cardiac death 0.2% (right/IMNI) vs 0.7% (left) under 3D planning.",
+            "monday_clinic": "In node-positive breast cancer treated with upfront surgery then modern systemic therapy, especially 1-3 positive nodes, this supports including internal mammary nodes in the RT target; it does not extend to neoadjuvant-treated pts, who were excluded.",
+            "primary_endpoint": {
+              "name": "Overall survival",
+              "klass": "overall-survival",
+              "stat_value": "HR 0.85",
+              "stat_detail": "95% CI 0.76-0.94, p=0.0016; 15yr OS 65.0% vs 60.8%"
+            },
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**Prospective nationwide population-based cohort**, N=4541, 6 RT centres, treated 2007-14. IMNI assigned by tumour laterality: **right-sided → IMNI, left-sided → no IMNI**. Median follow-up **13.7 yr**."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Node-positive breast cancer, including the **1-3 positive-node** low-burden group. Excluded prior malignancy, bilateral cancer, **neoadjuvant systemic therapy**, pre-RT recurrence, non-standard RT."
+              },
+              {
+                "label": "Regimen",
+                "body": "Modern systemic backbone: **taxane chemotherapy, trastuzumab, aromatase inhibitors**, the era hypothesized to shrink absolute IMNI gain."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**3D-based RT**. IMNI delivered to right-sided tumours only; laterality allocation balances cardiac dose. Dose/fractionation not reported in source."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary: overall survival.** Secondary: breast cancer mortality, distant metastasis."
+              },
+              {
+                "label": "Results",
+                "body": "IMNI improved all three endpoints (see table). Absolute **15yr OS gain 4.2%** (65.0% vs 60.8%)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Confirms **DBCG IMN1** (+4.7% abs OS at 14.8 yr) and the **EBCTCG** meta-analysis (+3% abs 15yr survival, regional node RT); contradicts the negative Korean **KROG 06-08** in the modern-therapy era."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents node-positive breast cancer, including 1-3 positive nodes, treated with upfront surgery and modern systemic therapy. Does not represent neoadjuvant-treated patients, who were excluded."
+              },
+              {
+                "label": "Limitations",
+                "body": "Non-randomized: IMNI assigned by tumour laterality rather than randomization, so residual confounding is possible despite balanced baseline characteristics."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc"
+            ],
             "open_questions": [
-              "Confirmatory RCT for IMNI benefit in 1-3 positive nodes",
-              "Optimal IMNI technique (proton vs photon) to limit cardiac and lung dose",
-              "IMNI benefit by molecular subtype with current systemic therapy"
+              "Randomized confirmation of IMNI benefit in 1-3 node patients",
+              "IMNI value in neoadjuvant-treated patients (excluded here)",
+              "IMNI cardiac safety with modern breath-hold or proton planning"
             ],
             "consort": null,
             "modality": "radiation",
@@ -302,36 +400,64 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Eastern Cooperative Oncology Group Performance Status Scale 0-2\n* Histologically confirmed invasive breast cancer\n* Underwent total mastectomy/breast-conserving surgery and axillary dissection(10 or more axillary lymph nodes detected) and negative margins\n* Patients who had…",
-                "answers_question": "Confirmatory RCT for IMNI benefit in 1-3 positive nodes",
-                "relevance_phrase": "phase 3 IMNI vs no-IMNI, primary endpoint DFS"
+                "answers_question": "Randomized confirmation of IMNI benefit in 1-3 node patients",
+                "relevance_phrase": "phase 3 randomizing IMNI vs none, DFS endpoint"
               },
               {
-                "nct": "NCT05440149",
-                "brief_title": "The Postoperative Radiotherapy in N1 Breast Cancer Patients",
+                "nct": "NCT06559696",
+                "brief_title": "Internal Mammary Lymph Nodes Irradiation in High-risk Breast Cancer After Neoadjuvant Chemotherapy",
                 "overall_status": "RECRUITING",
                 "phase": [
                   "PHASE3"
                 ],
-                "enrollment_count": 1106,
-                "primary_completion_date": "2026-12",
-                "brief_summary": "This study is a multicenter, randomized, phase 3 clinical trial in patients with breast cancer, randomizing radiotherapy group (postmastectomy radiation therapy (PMRT)/whole breast irradiation plus regional radiotherapy (WBI+regional RT) versus and no PMRT/WBI alone group. This is a non-inferiority study aiming that there is no significant difference in the 7-year disease-free survival rate between the two groups.",
+                "enrollment_count": 722,
+                "primary_completion_date": "2032-07",
+                "brief_summary": "The aim of this study is to explore the impact of internal mammary nodal irradiation on disease-free survival in high-risk breast cancer patients (ypN+or supra/subclavicular lymph node positive) after neoadjuvant chemotherapy.",
                 "conditions": [
-                  "Radiotherapy",
                   "Breast Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "No PMRT for mastectomy / No regional RT for BCS",
+                    "name": "internal mammary nodal irradiation",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "PMRT for mastectomy / WBI + Regional RT for BCS",
+                    "name": "No internal mammary node irradiation",
                     "type": "RADIATION"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patients aged 19 years or older.\n* A female patient who underwent breast-conserving surgery or mastectomy for invasive breast cancer.\n* Patient with stage pN1 after surgery on histopathologic examination.\n\n  * However, if mastectomy was performed, 5 or more nodes should be…",
-                "answers_question": "Confirmatory RCT for IMNI benefit in 1-3 positive nodes",
-                "relevance_phrase": "phase 3 regional RT vs no RT in pN1"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed invasive breast cancer\n* Underwent neoadjuvant chemotherapy\n* Eastern Cooperative Oncology Group Performance Status Scale 0-2\n* ypN+ after neoadjuvant chemotherapy or supraclavicular/subclavicular lymph node metastasis before system therapy\n* No…",
+                "answers_question": "IMNI value in neoadjuvant-treated patients (excluded here)",
+                "relevance_phrase": "phase 3 IMNI vs none in post-NACT ypN+ pts"
+              },
+              {
+                "nct": "NCT07498855",
+                "brief_title": "Robustness Evaluation of Deep Inspiration Breath-Hold (DIBH) Plans in Internal Mammary Irradiation",
+                "overall_status": "RECRUITING",
+                "phase": null,
+                "enrollment_count": 25,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "This study is an investigator-initiated, single-arm, single-center, prospective, observational study. The hypothesis is that during the implementation of deep inspiration breath-hold (DIBH) radiotherapy plans in postoperative breast cancer patients receiving internal mammary irradiation, the actual target dose coverage and organ-at-risk (OARs) dose parameters remain within clinically acceptable ranges.",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "DIBH with 3mm Gating Window",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "DIBH with 2 mm Gating Window",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "DIBH with 1.5 mm Gating Window",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Provide a signed and dated informed consent form (ICF) before the initiation of any trial-specific procedures.\n2. Female patients aged ≥ 18 years.\n3. Histologically confirmed invasive breast cancer.\n4. Have received breast-conserving surgery or mastectomy with axillary…",
+                "answers_question": "IMNI cardiac safety with modern breath-hold or proton planning",
+                "relevance_phrase": "DIBH plan OAR dose in IMN irradiation"
               },
               {
                 "nct": "NCT07537712",
@@ -355,51 +481,19 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Female patients aged ≥18 years.\n2. Pathological diagnosis of invasive breast cancer or ductal carcinoma in situ.\n3. Undergone breast-conserving surgery or total mastectomy, with or without stage I breast reconstruction.\n4. For invasive carcinoma, sentinel lymph node biopsy,…",
-                "answers_question": "Optimal IMNI technique (proton vs photon) to limit cardiac and lung dose",
-                "relevance_phrase": "IMPT vs photon IMRT, heart/lung toxicity endpoint"
-              },
-              {
-                "nct": "NCT06826885",
-                "brief_title": "Safety and Efficacy of IMPT or IMRT for Breast Cancer",
-                "overall_status": "RECRUITING",
-                "phase": null,
-                "enrollment_count": 500,
-                "primary_completion_date": "2029-11",
-                "brief_summary": "The purpose of this trial is to compare the toxicities and efficacy of intensity-modulated proton therapy (IMPT) and intensity-modulated radiation therapy (IMRT) for breast cancer patients indicated for radiotherapy including preoperative radiotherapy, postoperative radiotherapy, or definitive radiotherapy. IMPT or IMRT will be administered to the whole breast, chest wall, and/or regional lymph nodes. A boost dose will be delivered in patients with high-risk area, at the discretion of the…",
-                "conditions": [
-                  "Breast Cancer",
-                  "Proton Therapy",
-                  "Intensity Modulated Radiation Therapy",
-                  "Efficacy and Safety",
-                  "Radiotherapy, Adjuvant"
-                ],
-                "interventions": [
-                  {
-                    "name": "Postoperative radiotherapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Preoperative Radiotherapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Definitive Radiotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria\n\n* Aged ≥18 years old\n* Karnofsky Performance Status (KPS) score ≥70\n* Histologically confirmed breast cancer with indications for preoperative radiotherapy, postoperative radiotherapy, or definitive radiotherapy as determined by the treating physician.\n* ER (estrogen-receptor),…",
-                "answers_question": "Optimal IMNI technique (proton vs photon) to limit cardiac and lung dose",
-                "relevance_phrase": "IMPT vs IMRT toxicity, incl regional nodes"
+                "answers_question": "IMNI cardiac safety with modern breath-hold or proton planning",
+                "relevance_phrase": "IMPT vs IMRT toxicity, heart among key OARs"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "internal mammary node irradiation breast",
-                "proton internal mammary irradiation"
+                "internal mammary irradiation",
+                "nodal irradiation neoadjuvant breast",
+                "proton breast nodal irradiation"
               ],
               "queries_failed": [],
-              "candidates_returned": 24,
-              "fetched_at": "2026-06-27T19:12:53.797Z",
+              "candidates_returned": 45,
+              "fetched_at": "2026-07-19T16:10:02.050Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -414,39 +508,59 @@
       },
       {
         "disease_site": "prostate",
-        "intro": null,
+        "intro": "PEACE V-STORM pits elective nodal RT against metastasis-directed therapy for pelvic nodal oligorecurrence.",
         "studies": [
           {
-            "name": "PEACE V–STORM",
-            "tldr": "4yr MFS 76% vs 63% favouring whole-pelvis ENRT over MDT, HR 0·62 (80% CI 0·44–0·86), p=0·063, in nodal oligorecurrence.",
+            "name": "PEACE V-STORM",
+            "tldr": "4-yr MFS 76% vs 63% favoring ENRT over MDT for pelvic nodal oligorecurrence, HR 0·62 (80% CI 0·44-0·86, p=0·063).",
             "details": [
               {
-                "text": "📊 1° EP metastasis-free survival, ENRT vs MDT",
+                "text": "📊 1° EP metastasis-free survival by arm (mITT, 4-yr)",
                 "table": {
                   "columns": [
                     "Endpoint",
-                    "MDT",
-                    "ENRT",
-                    "HR (ENRT vs MDT)"
+                    "ENRT (80% CI)",
+                    "MDT (80% CI)",
+                    "HR (80% CI)"
                   ],
                   "rows": [
                     [
                       "4-yr MFS",
-                      "63% (80% CI 56–69)",
-                      "76% (80% CI 69–81)",
-                      "0·62 (80% CI 0·44–0·86), p=0·063"
+                      "76% (69-81)",
+                      "63% (56-69)",
+                      "0·62 (0·44-0·86), p=0·063"
                     ]
                   ]
                 }
               },
-              "🔍 Phase 2, open-label, randomised 1:1, N=196 (MDT 99 / ENRT 97), 190 evaluable; 21 sites, 6 countries",
-              "🔍 Population: PET-detected pelvic nodal oligorecurrence (≤5 nodes) post radical local Rx, WHO PS 0–1",
-              "🔍 ENRT arm: 45 Gy/25 fx to pelvis + SIB 65 Gy to PET-positive nodes (or salvage LND), + 6mo ADT",
-              "🔍 MDT arm: SBRT 30 Gy/3 fx every other day (or salvage LND), + 6mo ADT",
-              "📊 Most common grade 3 AEs, MDT vs ENRT",
-              "⚠️ p=0·063 by conventional two-sided test; positive only under the trial's phase-2 80% CI design. Authors await phase 3",
-              "⚠️ Both arms permitted salvage LND as the local option, folding surgery into the RT comparison and blurring a clean ENRT-vs-MDT contrast",
-              "🔗 First RCT in this setting; STOMP/ORIOLE tested MDT vs surveillance, not wider ENRT vs focal MDT"
+              "🔍 Phase 2 open-label RCT, 196 randomised (MDT 99, ENRT 97) across 21 hospitals, 6 countries",
+              "🔍 Population: PET-detected pelvic nodal oligorecurrence (≤5 nodes), post radical local Rx, WHO PS 0-1",
+              "🔍 ENRT: 45 Gy/25fx whole pelvis + SIB 65 Gy to PET-positive nodes (or salvage LND), 6mo ADT",
+              "🔍 MDT: SBRT 30 Gy/3fx every other day (or salvage LND), 6mo ADT",
+              {
+                "text": "⚠️ Grade 3 AEs by arm (numerically higher with ENRT)",
+                "table": {
+                  "columns": [
+                    "Grade 3 AE",
+                    "ENRT",
+                    "MDT"
+                  ],
+                  "rows": [
+                    [
+                      "Urinary incontinence",
+                      "10%",
+                      "6%"
+                    ],
+                    [
+                      "Diarrhoea",
+                      "2%",
+                      "1%"
+                    ]
+                  ]
+                }
+              },
+              "🔗 First randomised ENRT-vs-MDT head-to-head; prior oligomet RCTs (STOMP, ORIOLE) tested MDT vs observation, not elective nodal RT",
+              "⚠️ 1° EP p=0·063 on an 80% CI phase 2 screening design; authors frame ENRT as potential SOC awaiting phase 3"
             ],
             "figures": [],
             "nct": "NCT03569241",
@@ -456,29 +570,73 @@
             "slug": "peace-v-storm",
             "verdict": {
               "soc_implication": "challenges-soc",
-              "rationale": "First RCT contesting MDT-only for PET-nodal oligorecurrence; randomised MFS primary endpoint favours whole-pelvis ENRT. Phase 2 with 80% CI design, p=0·063, awaits phase 3.",
-              "audience": "Pelvic nodal oligorecurrent prostate ca (≤5 nodes), post radical Rx"
+              "rationale": "First randomised ENRT-vs-MDT comparison; ENRT's MFS edge diverges from MDT-favouring practice. Phase 2 screening design, p=0·063, awaits phase 3.",
+              "audience": "Pelvic nodal oligorecurrent prostate (≤5 nodes), post radical local Rx, PS 0-1"
             },
-            "significance": "Target volume is the decision: whole-pelvis ENRT beat focal MDT on 4-yr MFS (76% vs 63%, HR 0·62), arguing microscopic nodal disease extends beyond the PET-visible node. The cost was modest, G3 urinary incontinence 10% vs 6%. Reason to elect pelvic nodal coverage over node-only SBRT, pending phase 3.",
+            "significance": "The RT read: whole-pelvis ENRT (45 Gy/25fx + SIB 65 Gy) beat node-only MDT on 4-yr MFS (76% vs 63%, HR 0·62), consistent with occult pelvic nodal disease driving the failures MDT leaves untreated. Moves the elective-nodal-coverage decision in ≤5-node pelvic recurrence.",
+            "monday_clinic": "In men with PET-detected pelvic nodal-only oligorecurrence (≤5 nodes) after radical local treatment, this favors whole-pelvis ENRT over node-only MDT; it does not extend to extrapelvic M1, bone, or visceral oligometastatic recurrence.",
+            "primary_endpoint": {
+              "name": "Metastasis-free survival",
+              "klass": "surrogate",
+              "stat_value": "76% vs 63% at 4y",
+              "stat_detail": "HR 0·62 (80% CI 0·44-0·86), p=0·063"
+            },
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Phase 2, open-label, randomised (1:1) **screening** trial, 21 hospitals in 6 countries. **196 randomised** (MDT 99, ENRT 97), 190 evaluable, modified ITT. Median follow-up **50 mo** (IQR 42-58)."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Men with **PET-detected pelvic nodal oligorecurrence** (≤5 nodes) after radical local prostate treatment; WHO PS 0-1, histologically confirmed adenocarcinoma. All male."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**ENRT:** 45 Gy/25fx whole pelvis + **SIB 65 Gy** to PET-positive nodes (or salvage LND). **MDT:** SBRT **30 Gy/3fx** every other day (or salvage LND). Both + **6 mo ADT**. Stratified by tracer (choline vs PSMA) and MDT type."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary:** metastasis-free survival (any M1 on PET or death), modified ITT. Reported with **80% CIs**, a phase 2 screening threshold, not the conventional 95%."
+              },
+              {
+                "label": "Safety",
+                "body": "Grade 3 events low in both arms and numerically higher with ENRT (urinary incontinence, diarrhoea). **No treatment-related deaths.**"
+              },
+              {
+                "label": "vs leading data",
+                "body": "First randomised **ENRT-vs-MDT** comparison for nodal oligorecurrence. Prior oligomet RCTs (**STOMP**, **ORIOLE**) tested MDT vs observation, not elective nodal RT, so this adds the missing head-to-head."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents PET-detected pelvic nodal-only oligorecurrent prostate cancer (≤5 nodes) after radical local treatment. Does not represent extrapelvic M1, bone, or visceral oligometastatic recurrence."
+              },
+              {
+                "label": "Limitations",
+                "body": "**Open-label**; primary endpoint **p=0·063** did not clear conventional significance and rests on a phase 2 screening design. Authors position ENRT as a **potential** standard awaiting phase 3."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc"
+            ],
             "open_questions": [
-              "Phase 3 confirmation of ENRT MFS benefit over MDT",
-              "OS and long-term QoL of whole-pelvis ENRT vs MDT",
-              "Does PSMA-PET selection change the ENRT vs MDT result"
+              "Phase 3 confirmation of ENRT superiority over MDT",
+              "Whether the MFS benefit translates to overall survival",
+              "Long-term GU and GI toxicity of whole-pelvis ENRT with SIB"
             ],
             "consort": {
               "enrolled": 198,
-              "excluded": 2,
+              "excluded": null,
               "randomized": 196,
               "arms": [
-                {
-                  "label": "MDT",
-                  "allocated": 99,
-                  "analyzed": 97
-                },
                 {
                   "label": "ENRT",
                   "allocated": 97,
                   "analyzed": 93
+                },
+                {
+                  "label": "MDT",
+                  "allocated": 99,
+                  "analyzed": 97
                 }
               ]
             },
@@ -486,16 +644,44 @@
             "intent": "curative",
             "methodology": "phase-2-trial",
             "significance_perspective": "Radiation oncology",
-            "related_trials": null,
+            "related_trials": [
+              {
+                "nct": "NCT06831032",
+                "brief_title": "Elective Adaptive Radiation With SBRT for Improved DurabilitY of Response",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 26,
+                "primary_completion_date": "2029-07",
+                "brief_summary": "This prospective, single-arm feasibility study will include patients with prostate cancer that have controlled local disease diagnosed with oligorecurrent para-aortic nodal disease and/or common iliac nodal disease detected by PSMA PET or conventional CT/MRI imaging, and these patients will undergo CT-guided online adaptive SBRT to the tumor and elective SBRT to adjacent at-risk nodal regions.",
+                "conditions": [
+                  "Prostate Adenocarcinoma",
+                  "Iliac Nodal Disease",
+                  "Para-aortic Lymph Node Metastasis",
+                  "Para-aortic Nodal Disease",
+                  "Oligorecurrence"
+                ],
+                "interventions": [
+                  {
+                    "name": "Adaptive radiotherapy using SBRT",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically confirmed prostate adenocarcinoma.\n2. Oligorecurrent para-aortic +/- common iliac nodal disease planned for SBRT.\n3. ≤10 involved para-aortic (defined as between L1/L2 interface and L4/L5 interface) +/- common iliac LN on PSMA PET imaging.\n4. ECOG performance…",
+                "answers_question": "Phase 3 confirmation of ENRT superiority over MDT",
+                "relevance_phrase": "elective nodal SBRT added to MDT for nodal oligorecurrence"
+              }
+            ],
             "related_trials_provenance": {
               "queries_fired": [
-                "nodal radiotherapy prostate oligorecurrence",
-                "metastasis-directed therapy prostate nodal recurrence"
+                "elective nodal radiotherapy prostate",
+                "metastasis directed therapy prostate"
               ],
               "queries_failed": [],
-              "candidates_returned": 9,
-              "fetched_at": "2026-06-27T19:13:44.033Z",
-              "rerank_outcome": "abstained"
+              "candidates_returned": 30,
+              "fetched_at": "2026-07-19T16:12:36.397Z",
+              "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {
