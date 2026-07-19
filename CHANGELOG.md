@@ -2,6 +2,26 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.31.0] - 2026-07-18
+
+Reader-selectable specialty relevance. A reader can mark which subspecialties
+matter to them and have low-relevance studies recede, saved across visits.
+
+### Added
+- **`relevant_specialties`** field (radonc / medonc / surgonc), emitted by Phase 2
+  from a study's actual clinical implications (not its modality tag), judged
+  neutrally across subspecialties. Shape-guarded, alias-tolerant parser; every
+  oncology study gets at least one. Optional, so older artifacts render unchanged.
+- **"Relevant to my specialty" bar** (SpecialtyBar). Picking one or more
+  subspecialties dims studies relevant to none of them (kept in flow, recessed),
+  shows an "N relevant" count, and persists the pick to localStorage (auto-applied
+  each visit). OR-logic; independent of the tag filter rail (re-applies on its
+  changes); self-hides on pages with no tagged studies or fewer than two.
+
+### Notes
+- The bar stays invisible until a date carries the field; the corpus gains it as
+  the rebuild loop reprocesses dates.
+
 ## [0.30.0] - 2026-07-17
 
 The "endpoint-forward card" release: the study card leads with the primary
