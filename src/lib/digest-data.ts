@@ -95,6 +95,9 @@ export type DigestStudy = {
   // present the fold renders these labeled rows; absent → the emoji-IMRD buckets.
   // Mirrored in llm-pipeline.ts — keep the shape in lockstep.
   analysis_sections?: { label: string; body: string }[] | null;
+  // v0.31: subspecialties this study informs (radonc/medonc/surgonc). Drives the
+  // reader's saved "for my specialty" filter. Mirrored in llm-pipeline.ts.
+  relevant_specialties?: ('radonc' | 'medonc' | 'surgonc')[] | null;
   // v0.27: curator's own note on the study — the human editor's voice, distinct
   // from the AI analysis. NOT LLM-generated: set durably via the override CLI
   // (`--edit=<slug> --curator-note="…"`) and rendered as its own callout on the

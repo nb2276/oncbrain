@@ -218,6 +218,21 @@ Rules:
 - Omit `analysis_sections` (or emit []) for a review / thin abstract with no
   structured depth — the card then falls back to the terse bullets.
 
+═══ RELEVANT SPECIALTIES (who this study informs) ═══
+Emit `relevant_specialties`: which oncology subspecialties this study MEANINGFULLY informs
+a treatment decision for. This is clinical RELEVANCE, NOT the modality tag.
+- Values (any subset of these three): "radonc" (radiation oncology), "medonc" (medical
+  oncology), "surgonc" (surgical oncology).
+- Judge by the decision the study moves. A radiation dose / fractionation / target-volume
+  trial → ["radonc"]. A systemic-regimen or biomarker-selection trial → ["medonc"]. An
+  extent-of-resection / margin / nodal-dissection trial → ["surgonc"]. A study at an
+  interface belongs to MULTIPLE: neoadjuvant systemic that changes resectability →
+  ["medonc","surgonc"]; chemoradiation or an RT-vs-surgery comparison → the two it
+  actually informs; a trimodality trial → all three.
+- Include a specialty ONLY when a practitioner of it would change or reaffirm a real
+  decision from this study, not merely because it is adjacent. When unsure, prefer FEWER
+  (a false "surgonc" buries the signal). Emit [] only when genuinely none apply (rare).
+
 ═══ OUTPUT SHAPE ═══
 
 ```json
@@ -291,6 +306,7 @@ Rules:
     {"label": "Applies to", "body": "Represents taxane-exposed 2L mCRPC. Does not extend to 1L or visceral-only disease."},
     {"label": "Limitations", "body": "Open-label; QoL secondary unblinded. Comparator predates modern sequencing."}
   ],
+  "relevant_specialties": ["radonc", "medonc"],
   "modality": "radiation",
   "intent": "curative",
   "methodology": "phase-2-trial",

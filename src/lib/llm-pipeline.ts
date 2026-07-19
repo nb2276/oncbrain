@@ -388,6 +388,14 @@ export type DigestStudy = {
   // (mockup parity) instead of the emoji-IMRD buckets; absent → the emoji buckets.
   // Prose-level grounding (same as the detail bullets). Mirrored in digest-data.ts.
   analysis_sections?: AnalysisSection[] | null;
+  // v0.31: which subspecialties this study meaningfully informs a decision for —
+  // radiation / medical / surgical oncology. Judged by Phase 2 from the study's
+  // actual clinical implications, NOT its modality tag (an RT-vs-surgery trial or
+  // a neoadjuvant-systemic study is relevant to a surgeon even though its modality
+  // is radiation/systemic). Drives the reader's saved "for my specialty" filter.
+  // Absent/null on older artifacts → the card is treated as relevant to all.
+  // Mirrored in src/lib/digest-data.ts — keep the shape in lockstep.
+  relevant_specialties?: SpecialtyTag[] | null;
 };
 
 // v0.30: endpoint class drives the head chip. OS is the hard endpoint; MFS/PFS/
@@ -403,6 +411,13 @@ export type PrimaryEndpoint = {
   stat_detail?: string | null;
 };
 export type AnalysisSection = { label: string; body: string };
+
+// v0.31: subspecialty a study informs a decision for. Parallels the DIGEST_PERSPECTIVE
+// lens names (radonc/medonc) + surgonc. The reader's saved "for my specialty" filter
+// brightens studies relevant to their pick(s).
+export const SPECIALTY_TAGS = ['radonc', 'medonc', 'surgonc'] as const;
+export type SpecialtyTag = (typeof SPECIALTY_TAGS)[number];
+const SPECIALTY_SET = new Set<string>(SPECIALTY_TAGS);
 
 // v0.13: CT.gov status subset we surface. See plan D8.
 export type RelatedTrialStatus =
@@ -1552,6 +1567,27 @@ function parseAnalysisSections(raw: unknown): AnalysisSection[] | null {
   }
   return out.length > 0 ? out : null;
 }
+// v0.31: shape-guard the relevant-specialties array. Accepts only the known slugs
+// (radonc/medonc/surgonc), de-dupes, preserves canonical order, null when empty or
+// not an array. Also tolerates a few natural-language aliases the model may emit.
+const SPECIALTY_ALIASES: Record<string, SpecialtyTag> = {
+  radonc: 'radonc', radiation: 'radonc', 'radiation-oncology': 'radonc', 'radiation oncology': 'radonc',
+  medonc: 'medonc', medical: 'medonc', 'medical-oncology': 'medonc', 'medical oncology': 'medonc',
+  surgonc: 'surgonc', surgery: 'surgonc', surgical: 'surgonc', 'surgical-oncology': 'surgonc', 'surgical oncology': 'surgonc',
+};
+function parseRelevantSpecialties(raw: unknown): SpecialtyTag[] | null {
+  if (!Array.isArray(raw)) return null;
+  const seen = new Set<SpecialtyTag>();
+  for (const v of raw) {
+    if (typeof v !== 'string') continue;
+    const key = v.trim().toLowerCase();
+    const tag = SPECIALTY_SET.has(key) ? (key as SpecialtyTag) : SPECIALTY_ALIASES[key];
+    if (tag) seen.add(tag);
+  }
+  if (seen.size === 0) return null;
+  // canonical order so the artifact + data-attr are stable
+  return SPECIALTY_TAGS.filter((t) => seen.has(t));
+}
 
 export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): DigestStudy {
   const cleaned = stripFences(raw);
@@ -1685,6 +1721,7 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     // in validatePrimaryEndpoint). Absent === no stated primary → TL;DR head.
     primary_endpoint: parsePrimaryEndpoint(root.primary_endpoint),
     analysis_sections: parseAnalysisSections(root.analysis_sections),
+    relevant_specialties: parseRelevantSpecialties(root.relevant_specialties),
     open_questions: parseOpenQuestions(root.open_questions),
     consort: parseConsort(root.consort),
     modality,
