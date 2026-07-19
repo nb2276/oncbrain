@@ -130,30 +130,27 @@ const navEmpty = navSites.filter((s) => s.count === 0);
   .nav-empty-toggle[open] summary { color: var(--fg); }
   .nav-row-empty { margin-top: 0.5rem; }
 
-  /* On phones the wrapping pill grid stacks into 5-7 ragged rows and eats the
-     screen. Collapse it to ONE swipeable strip: a single aligned row of compact
-     chips, scrollbar hidden. The rightmost chip sits partially cut off at the
-     edge, which signals there's more to scroll. */
+  /* On phones the free-wrapping pills stack into ragged rows. Lay them out as a
+     tidy grid instead: equal-width cells that auto-fill to 2 columns on a narrow
+     phone (more on wider), even gaps, each chip filling its cell with the count
+     right-aligned so the numbers line up down each column. Organized, no scroll. */
   @media (max-width: 600px) {
     .site-nav { margin-bottom: 1rem; }
     .nav-row {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      scroll-snap-type: x proximity;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.5rem;
     }
-    .nav-row::-webkit-scrollbar { display: none; }
-    .nav-row > li {
-      flex: 0 0 auto;
-      scroll-snap-align: start;
-    }
+    .nav-row > li { display: flex; }
     .nav-chip {
-      min-height: 40px;
-      padding: 0.32rem 0.7rem;
-      font-size: 0.8rem;
+      flex: 1;
+      min-height: 44px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.82rem;
     }
-    .nav-emoji { font-size: 1rem; }
-    .nav-count { font-size: 0.72rem; }
+    .nav-emoji { font-size: 1.05rem; }
+    .nav-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* push the count to the chip's right edge so counts align down each column */
+    .nav-count { margin-left: auto; font-size: 0.74rem; }
   }
 </style>
