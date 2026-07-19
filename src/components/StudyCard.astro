@@ -360,7 +360,7 @@ const normTrial = (t: string) => t.trim().replace(/\s+/g, ' ').toUpperCase();
 const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
 ---
 
-<div class:list={['study', hasFigures && 'has-figures', study.verdict?.soc_implication && `verdict-${study.verdict.soc_implication}`]} id={anchorId} data-tags={dataTags || undefined}>
+<div class:list={['study', hasFigures && 'has-figures', study.verdict?.soc_implication && `verdict-${study.verdict.soc_implication}`]} id={anchorId} data-tags={dataTags || undefined} data-specialties={study.relevant_specialties && study.relevant_specialties.length > 0 ? study.relevant_specialties.join(' ') : undefined}>
   <div class="study-head">
   {/* ── Triage layer: always visible. v0.30: name + a compact verdict CHIP on
       one row (the mockup glance top); the verdict rationale moves into the fold

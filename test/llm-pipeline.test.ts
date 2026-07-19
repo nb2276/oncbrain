@@ -1882,6 +1882,46 @@ describe('parseAnalysisSections (v0.30, via parseStudyAgentResponse)', () => {
   });
 });
 
+describe('parseRelevantSpecialties (v0.31, via parseStudyAgentResponse)', () => {
+  const cluster = {
+    slug: 'x',
+    name: 'X',
+    disease_site: 'prostate',
+    tweet_ids: [1],
+    content_type: 'study_report' as const,
+  };
+  const spec = (relevant_specialties: unknown) =>
+    parseStudyAgentResponse(
+      JSON.stringify({ name: 'X', tldr: 'y', details: [], relevant_specialties }),
+      cluster,
+    ).relevant_specialties;
+
+  it('parses a valid subset in canonical order', () => {
+    expect(spec(['medonc', 'radonc'])).toEqual(['radonc', 'medonc']); // canonical order, not input order
+    expect(spec(['radonc', 'medonc', 'surgonc'])).toEqual(['radonc', 'medonc', 'surgonc']);
+  });
+
+  it('de-dupes and drops unknown values', () => {
+    expect(spec(['radonc', 'radonc', 'gyn-onc', 42, null])).toEqual(['radonc']);
+  });
+
+  it('maps natural-language aliases to slugs', () => {
+    expect(spec(['radiation oncology', 'Medical', 'surgical-oncology'])).toEqual(['radonc', 'medonc', 'surgonc']);
+  });
+
+  it('a non-array or empty → null', () => {
+    expect(spec('radonc')).toBeNull();
+    expect(spec([])).toBeNull();
+    expect(spec(['nonsense'])).toBeNull();
+  });
+
+  it('absent → null', () => {
+    expect(
+      parseStudyAgentResponse(JSON.stringify({ name: 'X', tldr: 'y', details: [] }), cluster).relevant_specialties,
+    ).toBeNull();
+  });
+});
+
 describe('validatePrimaryEndpoint (v0.30 no-fabrication gate)', () => {
   const tw = (text: string): DigestInputTweet => ({ id: 1, author: '@x', text, note: null });
   const study = (primary_endpoint: DigestStudy['primary_endpoint']): DigestStudy =>

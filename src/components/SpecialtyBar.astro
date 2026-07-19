@@ -1,0 +1,204 @@
+---
+// v0.31: the reader's saved "for my specialty" preference. Pure client-side +
+// localStorage — independent of the tag filter rail. When one or more specialties
+// are picked, studies NOT relevant to any of them are DIMMED (kept in place, just
+// de-emphasized) so the studies that matter to the reader stand out; the pick
+// persists across visits. Studies without a `data-specialties` attribute (older
+// artifacts not yet rebuilt with the field) are treated as relevant-to-all and
+// never dimmed. The bar hides itself on pages that have no tagged studies.
+---
+
+<div class="specialty-bar" data-specialty-bar hidden>
+  <span class="specialty-bar-label">Relevant to my specialty</span>
+  <div class="specialty-bar-opts" role="group" aria-label="Emphasize studies relevant to your specialty">
+    <label class="specialty-chip">
+      <input type="checkbox" data-specialty="radonc" />
+      <span>🎯 Radiation</span>
+    </label>
+    <label class="specialty-chip">
+      <input type="checkbox" data-specialty="medonc" />
+      <span>💊 Medical</span>
+    </label>
+    <label class="specialty-chip">
+      <input type="checkbox" data-specialty="surgonc" />
+      <span>🔪 Surgical</span>
+    </label>
+  </div>
+  <span class="specialty-bar-count" data-specialty-count hidden aria-live="polite"></span>
+  <button type="button" class="specialty-bar-clear" data-specialty-clear hidden>Clear</button>
+</div>
+
+<style>
+  .specialty-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+    margin: 0 0 1.25rem;
+    padding: 0.5rem 0.15rem;
+    font-family: var(--font-sans);
+    border-bottom: 1px solid var(--border);
+  }
+  /* An author `display` beats the UA [hidden]{display:none} rule, so the SSR
+     `hidden` attribute (self-hide when no tagged studies) needs this explicit
+     guard — else an inert bar renders on every page until the corpus is rebuilt. */
+  .specialty-bar[hidden] { display: none; }
+  .specialty-bar-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .specialty-bar-opts { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .specialty-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 34px;
+    padding: 0.22rem 0.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    color: var(--fg);
+    cursor: pointer;
+    user-select: none;
+  }
+  .specialty-chip:hover { border-color: var(--accent); }
+  .specialty-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+  /* Filled state when checked. Needs :has() (all current browsers since 2023); on
+     an engine without it the dim still works, the chip just shows no fill (the
+     native checkbox is visually hidden, so there's no pure-CSS parent-select fallback). */
+  .specialty-chip:has(input:checked) {
+    background: var(--accent);
+    border-color: transparent;
+    color: var(--bg-card);
+    font-weight: 600;
+  }
+  .specialty-chip:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .specialty-bar-count {
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 600;
+    margin-left: auto;
+  }
+  .specialty-bar-clear {
+    background: transparent;
+    border: none;
+    padding: 0.2rem 0.3rem;
+    font: inherit;
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .specialty-bar-clear:hover { color: var(--accent); text-decoration: underline; }
+
+  /* Dim studies not relevant to the reader's picked specialties. Kept in flow so
+     the digest stays browseable; just visually recessed so relevant cards lead. */
+  :global(.study[data-specialty-dim]) {
+    opacity: 0.42;
+    transition: opacity 140ms ease;
+  }
+  :global(.study[data-specialty-dim]:hover),
+  :global(.study[data-specialty-dim]:focus-within) {
+    opacity: 1;
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var KEY = 'oncbrain:specialties';
+    var KNOWN = { radonc: 1, medonc: 1, surgonc: 1 };
+    function init() {
+      var bar = document.querySelector('[data-specialty-bar]');
+      if (!bar) return;
+      var cards = Array.prototype.slice.call(document.querySelectorAll('.study'));
+      // Only surface the bar where at least one study carries specialty data (else
+      // it's inert on an un-rebuilt corpus) AND there are 2+ studies to prioritize
+      // among (dimming the sole card on the standalone /study/ page is pointless).
+      var tagged = document.querySelectorAll('.study[data-specialties]');
+      if (tagged.length === 0 || cards.length < 2) return;
+      bar.removeAttribute('hidden');
+
+      var boxes = Array.prototype.slice.call(bar.querySelectorAll('[data-specialty]'));
+      var countEl = bar.querySelector('[data-specialty-count]');
+      var clearBtn = bar.querySelector('[data-specialty-clear]');
+
+      function read() {
+        // Validate stored tokens against the known slugs — a stale/renamed/tampered
+        // value would otherwise make `active` true with no chip checked, dimming
+        // every card with no visible explanation.
+        try {
+          var v = JSON.parse(localStorage.getItem(KEY) || '[]');
+          var out = new Set();
+          if (Array.isArray(v)) for (var i = 0; i < v.length; i++) if (KNOWN[v[i]]) out.add(v[i]);
+          return out;
+        } catch (e) { return new Set(); }
+      }
+      function save(set) {
+        // Array.from (NOT slice.call) — a Set isn't array-like, so slice.call
+        // would silently persist [] and the preference would never survive a reload.
+        try { localStorage.setItem(KEY, JSON.stringify(Array.from(set))); } catch (e) {}
+      }
+      function apply(set) {
+        var active = set.size > 0;
+        var relevant = 0;
+        for (var i = 0; i < cards.length; i++) {
+          var card = cards[i];
+          var raw = card.getAttribute('data-specialties');
+          var spec = raw ? raw.split(/\s+/).filter(Boolean) : [];
+          // relevant if no active pick, OR the card has no specialty data (unknown),
+          // OR it shares at least one specialty with the reader's pick (OR-logic).
+          var isRel = !active || spec.length === 0 || spec.some(function (s) { return set.has(s); });
+          if (isRel) {
+            card.removeAttribute('data-specialty-dim');
+            // Count only VISIBLE relevant cards — a card the tag filter rail hid
+            // (`hidden` attr) must not inflate "N relevant" past what's on screen.
+            if (active && spec.length > 0 && !card.hasAttribute('hidden')) relevant++;
+          } else {
+            card.setAttribute('data-specialty-dim', '');
+          }
+        }
+        if (countEl) {
+          if (active) { countEl.textContent = relevant + ' relevant'; countEl.removeAttribute('hidden'); }
+          else countEl.setAttribute('hidden', '');
+        }
+        if (clearBtn) {
+          if (active) clearBtn.removeAttribute('hidden'); else clearBtn.setAttribute('hidden', '');
+        }
+      }
+
+      var set = read();
+      for (var b = 0; b < boxes.length; b++) {
+        boxes[b].checked = set.has(boxes[b].getAttribute('data-specialty'));
+      }
+      apply(set);
+
+      function onChange() {
+        var s = new Set();
+        for (var i = 0; i < boxes.length; i++) {
+          if (boxes[i].checked) s.add(boxes[i].getAttribute('data-specialty'));
+        }
+        save(s);
+        apply(s);
+      }
+      for (var j = 0; j < boxes.length; j++) boxes[j].addEventListener('change', onChange);
+      if (clearBtn) clearBtn.addEventListener('click', function () {
+        for (var k = 0; k < boxes.length; k++) boxes[k].checked = false;
+        var s = new Set();
+        save(s);
+        apply(s);
+      });
+      // The tag filter rail hides/shows cards independently; re-apply on its change
+      // event so the dim state + "N relevant" count track what's actually visible.
+      document.addEventListener('oncbrain:filterchange', function () {
+        var s = new Set();
+        for (var i = 0; i < boxes.length; i++) if (boxes[i].checked) s.add(boxes[i].getAttribute('data-specialty'));
+        apply(s);
+      });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  })();
+</script>
