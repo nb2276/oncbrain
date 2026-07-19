@@ -10,7 +10,7 @@
 
 <div class="specialty-bar" data-specialty-bar hidden>
   <span class="specialty-bar-label">Relevant to my specialty</span>
-  <div class="specialty-bar-opts" role="group" aria-label="Filter studies by relevance to your specialty">
+  <div class="specialty-bar-opts" role="group" aria-label="Emphasize studies relevant to your specialty">
     <label class="specialty-chip">
       <input type="checkbox" data-specialty="radonc" />
       <span>🎯 Radiation</span>
@@ -39,6 +39,10 @@
     font-family: var(--font-sans);
     border-bottom: 1px solid var(--border);
   }
+  /* An author `display` beats the UA [hidden]{display:none} rule, so the SSR
+     `hidden` attribute (self-hide when no tagged studies) needs this explicit
+     guard — else an inert bar renders on every page until the corpus is rebuilt. */
+  .specialty-bar[hidden] { display: none; }
   .specialty-bar-label {
     font-size: 0.7rem;
     font-weight: 700;
@@ -63,7 +67,9 @@
   }
   .specialty-chip:hover { border-color: var(--accent); }
   .specialty-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
-  /* filled state when checked (progressive: :has() supported in all evergreen). */
+  /* Filled state when checked. Needs :has() (all current browsers since 2023); on
+     an engine without it the dim still works, the chip just shows no fill (the
+     native checkbox is visually hidden, so there's no pure-CSS parent-select fallback). */
   .specialty-chip:has(input:checked) {
     background: var(--accent);
     border-color: transparent;
@@ -103,14 +109,16 @@
 <script is:inline>
   (function () {
     var KEY = 'oncbrain:specialties';
+    var KNOWN = { radonc: 1, medonc: 1, surgonc: 1 };
     function init() {
       var bar = document.querySelector('[data-specialty-bar]');
       if (!bar) return;
-      // Only surface the bar where at least one study carries specialty data —
-      // otherwise (older un-rebuilt corpus) it would be inert.
-      var tagged = document.querySelectorAll('.study[data-specialties]');
-      if (tagged.length === 0) return;
       var cards = Array.prototype.slice.call(document.querySelectorAll('.study'));
+      // Only surface the bar where at least one study carries specialty data (else
+      // it's inert on an un-rebuilt corpus) AND there are 2+ studies to prioritize
+      // among (dimming the sole card on the standalone /study/ page is pointless).
+      var tagged = document.querySelectorAll('.study[data-specialties]');
+      if (tagged.length === 0 || cards.length < 2) return;
       bar.removeAttribute('hidden');
 
       var boxes = Array.prototype.slice.call(bar.querySelectorAll('[data-specialty]'));
@@ -118,9 +126,14 @@
       var clearBtn = bar.querySelector('[data-specialty-clear]');
 
       function read() {
+        // Validate stored tokens against the known slugs — a stale/renamed/tampered
+        // value would otherwise make `active` true with no chip checked, dimming
+        // every card with no visible explanation.
         try {
           var v = JSON.parse(localStorage.getItem(KEY) || '[]');
-          return new Set(Array.isArray(v) ? v : []);
+          var out = new Set();
+          if (Array.isArray(v)) for (var i = 0; i < v.length; i++) if (KNOWN[v[i]]) out.add(v[i]);
+          return out;
         } catch (e) { return new Set(); }
       }
       function save(set) {
@@ -140,7 +153,9 @@
           var isRel = !active || spec.length === 0 || spec.some(function (s) { return set.has(s); });
           if (isRel) {
             card.removeAttribute('data-specialty-dim');
-            if (active && spec.length > 0) relevant++;
+            // Count only VISIBLE relevant cards — a card the tag filter rail hid
+            // (`hidden` attr) must not inflate "N relevant" past what's on screen.
+            if (active && spec.length > 0 && !card.hasAttribute('hidden')) relevant++;
           } else {
             card.setAttribute('data-specialty-dim', '');
           }
@@ -173,6 +188,13 @@
         for (var k = 0; k < boxes.length; k++) boxes[k].checked = false;
         var s = new Set();
         save(s);
+        apply(s);
+      });
+      // The tag filter rail hides/shows cards independently; re-apply on its change
+      // event so the dim state + "N relevant" count track what's actually visible.
+      document.addEventListener('oncbrain:filterchange', function () {
+        var s = new Set();
+        for (var i = 0; i < boxes.length; i++) if (boxes[i].checked) s.add(boxes[i].getAttribute('data-specialty'));
         apply(s);
       });
     }
