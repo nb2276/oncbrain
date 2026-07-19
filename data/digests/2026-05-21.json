@@ -1,56 +1,77 @@
 {
   "date": "2026-05-21",
   "conference": null,
-  "generated_at": 1782602795722,
+  "generated_at": 1784478222777,
   "digest": {
-    "top_line": "Adjuvant pelvic IMRT phase III: 2yr LRFS 87.1% vs 76.0% (HR 0.43), first modern RCT signal for post-cystectomy RT in urothelial MIBC.",
-    "tldr": "Regional nodal RT cuts both ways this cycle. A phase III adds adjuvant pelvic IMRT after cystectomy (2yr LRFS HR 0.43), while two breast datasets temper nodal RT: no IDFS signal from RNI in favorable N1 (SWOG S1007), and EORTC 22922's BC-mortality gain erased at 20yr by excess cardiac/lung deaths (OS HR 1.00).",
+    "top_line": "EORTC 22922 at 20yr: IM-MS-RT cut BC mortality (HR 0.82) but excess cardiopulmonary deaths (HR 1.26) erase it, netting flat OS (HR 1.00, p=.967).",
+    "tldr": "Regional nodal RT got right-sized from both ends: breast RNI enthusiasm cooled (EORTC 22922 20yr OS flat as cardiopulmonary deaths offset the mortality gain; SWOG S1007 no IDFS benefit in RS≤25 N1), while a first modern IG-IMRT RCT revived adjuvant RT after cystectomy (LRFS HR 0.43). Breast and bladder carried the day.",
     "sites": [
       {
         "disease_site": "breast",
-        "intro": "Two long-horizon nodal RT datasets, both arguing against reflexive regional irradiation: null IDFS from RNI in favorable N1, and a 20yr OS wash once late cardiopulmonary deaths land.",
+        "intro": "Two regional-nodal-RT readouts, both tempering enthusiasm: no IDFS gain in RS≤25 N1 (SWOG S1007) and a 20yr OS wash as cardiopulmonary deaths offset the mortality benefit (EORTC 22922).",
         "studies": [
           {
-            "name": "SWOG S1007 RNI Analysis",
-            "tldr": "5yr LRR <1% regardless of RNI in favorable N1 HR+ breast; IDFS not associated with RNI (premeno HR 1.03, postmeno HR 0.85).",
+            "name": "SWOG S1007",
+            "tldr": "5y LRR 0.55% without RNI vs 0.85% with; IDFS unchanged by RNI (HR 1.03 premenopausal, 0.85 postmenopausal) in RS ≤25 N1 breast.",
             "details": [
               {
-                "text": "📊 5yr cumulative LRR by locoregional treatment received",
-                "subdetails": [
-                  "BCS + RT with RNI: 0.85%",
-                  "BCS + RT without RNI: 0.55%",
-                  "Mastectomy + PMRT: 0.11%",
-                  "Mastectomy without RT: 1.7%"
-                ]
+                "text": "📊 5y cumulative LRR by locoregional therapy",
+                "table": {
+                  "columns": [
+                    "Locoregional therapy",
+                    "5y cumulative LRR"
+                  ],
+                  "rows": [
+                    [
+                      "BCS + RT + RNI",
+                      "0.85%"
+                    ],
+                    [
+                      "BCS + RT, no RNI",
+                      "0.55%"
+                    ],
+                    [
+                      "Mastectomy + PMRT",
+                      "0.11%"
+                    ],
+                    [
+                      "Mastectomy, no RT",
+                      "1.7%"
+                    ]
+                  ]
+                }
               },
               {
-                "text": "📊 IDFS not associated with RNI receipt, by menopausal status",
+                "text": "📊 IDFS by RNI receipt (RNI vs no RNI)",
                 "table": {
                   "columns": [
                     "Menopausal status",
-                    "HR (95% CI)",
+                    "IDFS HR",
+                    "95% CI",
                     "p"
                   ],
                   "rows": [
                     [
                       "Premenopausal",
-                      "1.03 (0.74-1.43)",
+                      "1.03",
+                      "0.74-1.43",
                       "0.87"
                     ],
                     [
                       "Postmenopausal",
-                      "0.85 (0.68-1.07)",
+                      "0.85",
+                      "0.68-1.07",
                       "0.16"
                     ]
                   ]
                 }
               },
-              "🔍 Secondary analysis of SWOG S1007 (RxPONDER): HR+/ERBB2-, 1-3 nodes, Oncotype RS ≤25, randomized endocrine ± chemo",
-              "🔍 RNI practice split: of 3852 irradiated pts with target data, 2274 (59.0%) got RNI (≥supraclavicular)",
-              "🔍 4871 pts with RT forms; 3947 (81.0%) received RT; median f/u 6.1yr, survival landmarked at 1yr",
-              "⚠️ RNI was non-randomized within the trial; higher-risk pts likely selected for RNI, confounding the null IDFS association",
-              "⚠️ LRR events very few (all strata <2%), so underpowered to detect a small RNI benefit; absence of association ≠ no benefit",
-              "⚠️ Technique thin: RNI defined only as ≥supraclavicular; dose, fractionation, target volume not reported in source"
+              "🔍 Secondary analysis of SWOG S1007 (RxPONDER); RNI prospectively recorded but NOT randomized",
+              "🔍 HR+/HER2−, RS ≤25, 1-3 nodes; 4871 with RT forms, 81% got RT, 59% of those RNI (≥supraclav)",
+              "📊 Low LRR held within the endocrine-only (no-chemo) group too",
+              "⚠️ RNI vs no-RNI is non-randomized: confounding by indication (higher-risk pts likely selected for RNI)",
+              "🔗 vs MA.20 / EORTC 22922: RNI benefit was concentrated in higher-risk node-positive disease",
+              "🔗 TAILOR RT (MA.39) is randomizing RNI in exactly this RS-low N1 population"
             ],
             "figures": [],
             "nct": null,
@@ -60,20 +81,106 @@
             "slug": "swog-s1007-rni",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Secondary analysis; RNI non-randomized within S1007, so the null IDFS association is confounded by selection. Few LRR events (<1%) limit power.",
-              "audience": "HR+/ERBB2- breast, 1-3 positive nodes, Oncotype RS ≤25"
+              "rationale": "RNI vs no-RNI comparison is non-randomized within RxPONDER; confounding by indication limits the null IDFS and low-LRR read. Randomized RNI trial (TAILOR RT) pending.",
+              "audience": "HR+/HER2− breast, 1-3 nodes, Oncotype RS ≤25"
             },
-            "significance": "The decision it moves: does chemo-omitted (endocrine-only) favorable N1 still mandate RNI? Not by these data, 5yr LRR held <1% across every surgery/RT stratum and IDFS tracked menopausal status (premeno HR 1.03, postmeno HR 0.85), not RNI receipt. Technique detail is thin though: RNI defined only as ≥supraclavicular, dose/target volume not in source, so transfer to your fields is uncertain.",
+            "significance": "The RT read: RNI omission after breast conservation carries low locoregional risk, 5y LRR 0.55% without RNI vs 0.85% with, in RS ≤25 N1 disease. Chemo omission alone is not an RNI indication, so this supports withholding RNI in biologically favorable N1, pending randomized confirmation.",
+            "monday_clinic": "In HR+/HER2− breast with 1-3 positive nodes and Oncotype RS ≤25, this supports omitting regional nodal irradiation given low LRR; it does not extend to higher recurrence-score or >3 node disease.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Secondary analysis of **SWOG S1007 (RxPONDER)**, a phase 3 RCT of chemo omission by 21-gene recurrence score. **RNI receipt was prospectively recorded, not randomized.** Median follow-up 6.1y; survival landmarked at 1y."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**HR+/HER2−, Oncotype RS ≤25, 1-3 positive nodes.** 4871 had RT forms; **81% received RT**, and **59%** of those with target data received RNI (targeting ≥ supraclavicular region)."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "RNI defined as targeting at least the supraclavicular region. The **59/41 split** in RNI use reflects genuine practice equipoise in favorable N1 disease."
+              },
+              {
+                "label": "Results",
+                "body": "LRR was **low across every locoregional approach**; only mastectomy without RT reached 1.7%. IDFS did not differ by RNI in either menopausal group (see tables)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Consistent with **MA.20 / EORTC 22922**, where RNI's benefit was concentrated in higher-risk node-positive disease. **TAILOR RT (MA.39)** is randomizing RNI in exactly this RS-low N1 population."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents HR+/HER2−, RS ≤25, 1-3 node breast cancer on modern systemic therapy. Does not represent higher recurrence-score, >3 node, or HER2+/triple-negative disease."
+              },
+              {
+                "label": "Limitations",
+                "body": "RNI comparison is **non-randomized**: confounding by indication (higher-risk pts selected for RNI) can mask a true RNI effect. Landmarking at 1y and diverse-setting RT reporting add noise."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc",
+              "medonc"
+            ],
             "open_questions": [
-              "Whether any favorable N1 subset still benefits from RNI",
-              "Randomized confirmation of RNI omission in RS-low N1 disease"
+              "Randomized confirmation of RNI omission in favorable-risk N1 disease",
+              "Durability of low LRR beyond 6 years without RNI"
             ],
             "consort": null,
             "modality": "radiation",
             "intent": "curative",
-            "methodology": "phase-3-rct",
+            "methodology": "retrospective",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
+              {
+                "nct": "NCT04517266",
+                "brief_title": "Evaluating Omitting of Internal Mammary Irradiation Among Early Stage Intermediate Risk (N1) Breast Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 214,
+                "primary_completion_date": "2025-10",
+                "brief_summary": "The effect of internal mammary irradiation (IMI) added to whole-breast or thoracic-wall irradiation plus supraclavicular (SVC) irradiation after surgery on survival among women with early-stage intermediate risk (N1) breast cancer remains debated. The present study aimed to identified patient could be omitted from internal mammary lymph node irradiation by using a clinical-genomic model.",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "omit of IMI group",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "IMI group",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* • Histologically confirmed invasive breast cancer\n\n  * Underwent radical surgery with either mastectomy or breast conserving surgery and axillary lymph node dissection (ALND)\n  * The number of positive lymph node should be 1-3 (N1).\n  * Clinical high risk breast cancer (≥2…",
+                "answers_question": "Randomized confirmation of RNI omission in favorable-risk N1 disease",
+                "relevance_phrase": "genomic model omits IMN irradiation in N1"
+              },
+              {
+                "nct": "NCT05634889",
+                "brief_title": "The T-REX Trial: Tailored Regional External Beam Radiotherapy in Clinically Node-negative Breast Cancer Patients With 1-2 Sentinel Node Macrometastases.",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 1350,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "T-REX is a randomized multicenter, non-inferiority trial.\n\nAim: To evaluate whether regional radiotherapy may safely be omitted in clinically node negative breast cancer patients with one or two sentinel node macrometastases and an estrogen receptor positive, HER2-negative tumor. Leading to an improved quality of life and reduced side effects, without worsening recurrence free survival at five years.\n\nIntervention: Patients will be randomized to locoregional radiotherapy towards the…",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "De-escalation",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Primary unifocal or multifocal invasive breast cancer T1-T2.\n2. Clinically N0.\n3. Macrometastasis (\\>2mm) in 1-2 lymph nodes at sentinel node biopsy.\n4. Oral and written consent.\n5. Age ≥ 18 years.\n6. All resection margins are tumor free (no tumor on ink).\n7. Primary tumor…",
+                "answers_question": "Randomized confirmation of RNI omission in favorable-risk N1 disease",
+                "relevance_phrase": "RCT omitting regional RT, 1-2 macromets, ER+/HER2-"
+              },
               {
                 "nct": "NCT04069884",
                 "brief_title": "RecurIndex Guided Avoidance of Regional Nodal Irradiation for Node Positive Breast Cancer",
@@ -103,77 +210,17 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years old, ≤ 70 years old.\n* Eastern Cooperative Oncology Group (ECOG) ≤ 2.\n* Postoperative pathology is clearly diagnosed as invasive breast cancer.\n* Meet the clinical definition of low risk: ①Axillary lymph node micrometastasis (N1mic) or ②N1 patients who meet the…",
-                "answers_question": "Whether any favorable N1 subset still benefits from RNI",
-                "relevance_phrase": "RecurIndex genomic-guided RNI in low-risk N1"
-              },
-              {
-                "nct": "NCT01872975",
-                "brief_title": "Standard or Comprehensive Radiation Therapy in Treating Patients With Early-Stage Breast Cancer Previously Treated With Chemotherapy and Surgery",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 1636,
-                "primary_completion_date": "2023-09",
-                "brief_summary": "This randomized phase III trial studies standard or comprehensive radiation therapy in treating patients with early-stage breast cancer who have undergone surgery. Radiation therapy uses high-energy x rays to kill tumor cells. It is not yet known whether comprehensive radiation therapy is more effective than standard radiation therapy in treating patients with breast cancer",
-                "conditions": [
-                  "Stage IB Breast Cancer",
-                  "Stage II Breast Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "regional nodal XRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "chestwall XRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "WBI",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* The patient must have signed and dated an Institutional Review Board (IRB)-approved consent form that conforms to federal and institutional guidelines\n* The patient must have an Eastern Cooperative Oncology Group (ECOG) performance status of 0 or 1\n* Patient must have…",
-                "answers_question": "Randomized confirmation of RNI omission in RS-low N1 disease",
-                "relevance_phrase": "phase 3 randomized comprehensive vs standard nodal RT"
-              },
-              {
-                "nct": "NCT07385365",
-                "brief_title": "A Study of Postoperative Regional Nodal Radiotherapy in Intermediate-risk Breast Cancer",
-                "overall_status": "NOT_YET_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 3142,
-                "primary_completion_date": "2032-12",
-                "brief_summary": "The research hypothesis is that the tumor-free survival rate of intermediate-risk breast cancer patients exempted from RNI is not inferior to that of those receiving RNI. Patients with intermediate-risk breast cancer have a relatively low local-regional recurrence rate whether they undergo RNI or not.Patients were randomly assigned to the RNI group and the non-RNI group.After radiotherapy,the patients are followed the efficacy and toxicities of radiotherapy are evaluated.",
-                "conditions": [
-                  "Breast Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Regional nodal Radiotherapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Non-Regional nodal Radiotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Female patients aged 18 or above\n* Undergo breast-conserving surgery or total mastectomy and axillary lymph node dissection or sentinel lymph node biopsy\n* The surgical margin was negative\n* Tumor stage:Patients who receive direct surgery : pT1-2N1M0, with at least one lymph…",
-                "answers_question": "Randomized confirmation of RNI omission in RS-low N1 disease",
-                "relevance_phrase": "phase 3 RNI vs no-RNI exemption in pT1-2N1"
+                "answers_question": "Randomized confirmation of RNI omission in favorable-risk N1 disease",
+                "relevance_phrase": "RecurIndex-guided RNI avoidance in N1 low-risk"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "regional nodal irradiation breast",
-                "nodal irradiation recurrence score"
+                "regional nodal irradiation breast"
               ],
               "queries_failed": [],
-              "candidates_returned": 38,
-              "fetched_at": "2026-06-27T23:22:58.212Z",
+              "candidates_returned": 20,
+              "fetched_at": "2026-07-19T16:18:34.730Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -185,60 +232,58 @@
           },
           {
             "name": "EORTC 22922/10925",
-            "tldr": "20yr: no OS benefit from IM-MS-RT (HR 1.00, p=.967); breast cancer mortality cut (HR 0.82, p=.006) offset by excess non-BC deaths (HR 1.26, p=.002).",
+            "tldr": "20yr OS 61.0% vs 61.8%, HR 1.00 (p=.967): IM-MS-RT cut breast cancer mortality (HR 0.82) but raised non-BC deaths (HR 1.26).",
             "details": [
-              "🔍 Phase 3 RCT, N=4004 (1996-2004), stage I-III, central/medial tumor or node-positive, post-ALND, median age 54",
-              "🔍 Intervention: internal mammary + medial supraclavicular nodal RT added to standard breast/chest-wall RT; 1° EP overall survival",
+              "📊 IM-MS-RT's breast cancer mortality benefit is fully offset by excess non-breast-cancer deaths (cardiac/lung), netting flat 20yr OS",
               {
                 "text": "📊 20-year outcomes, IM-MS-RT vs control",
                 "table": {
                   "columns": [
                     "Endpoint (20yr)",
-                    "Control",
                     "IM-MS-RT",
-                    "HR (p)"
+                    "Control",
+                    "HR (95% CI), p"
                   ],
                   "rows": [
                     [
                       "Overall survival",
-                      "61.8%",
                       "61.0%",
-                      "1.00 (p=.967)"
+                      "61.8%",
+                      "1.00 (0.90-1.10), p=.967"
                     ],
                     [
                       "Disease-free survival",
-                      "49.0%",
                       "48.2%",
-                      "0.97 (p=.515)"
+                      "49.0%",
+                      "0.97 (0.89-1.06), p=.515"
                     ],
                     [
-                      "Distant mets-free survival",
-                      "59.8%",
+                      "Distant metastasis-free",
                       "58.9%",
-                      "0.97 (p=.578)"
+                      "59.8%",
+                      "0.97 (0.88-1.08), p=.578"
                     ],
                     [
                       "Breast cancer mortality",
-                      "22.4%",
                       "18.6%",
-                      "0.82 (p=.006)"
+                      "22.4%",
+                      "0.82 (0.72-0.95), p=.006"
                     ],
                     [
                       "Non-BC/unknown deaths",
-                      "15.8%",
                       "20.4%",
-                      "1.26 (p=.002)"
+                      "15.8%",
+                      "1.26, p=.002"
                     ]
                   ]
-                }
+                },
+                "source_tier": "figure"
               },
-              "⚠️ OS null because RT-related non-BC deaths (cardiac/lung) rose after 15yr, cancelling the breast cancer mortality gain",
-              "📊 Any breast recurrence reduced with IM-MS-RT: HR 0.88 (95% CI 0.78-0.99), p=.0369 — local control held despite null OS",
               {
-                "text": "📊 RT-attributable late morbidity, IM-MS-RT vs no IM-MS-RT",
+                "text": "⚠️ Late cardiopulmonary morbidity, IM-MS-RT vs no IM-MS-RT",
                 "table": {
                   "columns": [
-                    "Late effect",
+                    "Late morbidity",
                     "IM-MS-RT",
                     "No IM-MS-RT"
                   ],
@@ -271,23 +316,82 @@
                   ]
                 }
               },
-              "🔗 vs prior EORTC 22922 reports (NEJM 2015, 10yr): earlier DMFS / BC-mortality benefit and OS trend now flat at 20yr"
+              "🔍 Phase 3 RCT, N=4004 randomized 1996-2004, median f/u 22.2yr, median age 54",
+              "🔍 Eligible: stage I-III breast, central/medial primary (any nodal status) or any-quadrant primary with axillary node+",
+              {
+                "text": "📐 Any breast recurrence reduced: HR 0.88 (0.78-0.99), p=.0369 (secondary EP, from figure)",
+                "source_tier": "figure"
+              },
+              {
+                "text": "🔗 vs 10-yr EORTC 22922 (Poortmans, NEJM 2015) + MA.20: RNI improves control more than OS; 20yr adds that cardiopulmonary deaths erase the mortality gain",
+                "source_tier": "figure"
+              },
+              "⚠️ 1996-2004 planning era: IM-RT at least doubled heart dose per cited series (pre-DIBH/IMRT); modern heart-sparing may shrink the non-BC-death penalty"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
               1000000015
             ],
-            "slug": "eortc-22922-im-ms-rt-20yr",
+            "slug": "eortc-22922-10925",
             "verdict": {
               "soc_implication": "challenges-soc",
-              "rationale": "Randomised phase 3, mature 22yr f/u, prespecified OS endpoint; design valid for the divergence. Earlier OS signal now null as late RT mortality offsets the cancer benefit.",
-              "audience": "Stage I-III breast, central/medial tumor or node-positive, post-ALND"
+              "rationale": "Large randomized phase 3, OS-primary, 22yr f/u: internally valid to contest the IM-MS-RT survival rationale, which the mortality-toxicity tradeoff nullifies. Divergence is the headline.",
+              "audience": "Stage I-III breast, medial/central primary or axillary node-positive"
             },
-            "significance": "The RT read is competing mortality: IM-MS-RT cut breast cancer death (HR 0.82) but raised non-BC deaths after 15yr (HR 1.26, mostly cardiac/lung), netting zero OS. Trial RT was 1996-2004 era; modern cardiac-sparing technique may preserve the benefit without the late penalty, so the decision turns on heart/lung dose, not whether to cover the nodes.",
+            "significance": "The RT read is competing mortality: IM-MS-RT's breast cancer mortality benefit (HR 0.82) is fully offset by excess cardiac and lung deaths (HR 1.26) at 20yr. With 1996-2004 planning the survival case nets to zero, so contemporary heart-sparing (DIBH/IMRT) is the variable that decides whether IM-MS nodal coverage still pays off.",
+            "monday_clinic": "In a woman with a medial/central or node-positive stage I-III breast tumor, this tempers the survival rationale for adding the internal-mammary + medial-supraclavicular field specifically; it does not change breast/chest-wall or axillary RT indications.",
+            "primary_endpoint": {
+              "name": "Overall survival",
+              "klass": "overall-survival",
+              "stat_value": "HR 1.00",
+              "stat_detail": "95% CI 0.90-1.10, p=.967; 20yr OS 61.0% vs 61.8% (ns)"
+            },
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**Phase 3** multicenter RCT with central RT quality assurance; **4004** women randomized 1996-2004 to added IM-MS nodal RT vs none. Prespecified for final analysis at 20yr on a delayed-benefit hypothesis; median follow-up **22.2yr**."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Stage I-III breast adenocarcinoma, age ≤75. Eligible if **central/medial primary** (any nodal status) OR any-quadrant primary with **axillary node involvement**. Surgery was mastectomy or BCS plus ALND; median age 54."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Intervention added **internal-mammary + medial-supraclavicular (levels 3-4) nodal irradiation** on top of standard breast/chest-wall RT. 1996-2004 planning era (2D/3D, pre-DIBH/IMRT); dose and fractionation not specified in source text."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary: overall survival.** Secondary: disease-free survival, distant metastasis-free survival, breast cancer mortality, any breast recurrence."
+              },
+              {
+                "label": "Results",
+                "body": "Primary OS was **flatly null**; the significant efficacy signals (lower breast cancer mortality, fewer breast recurrences) were **offset in OS terms** by excess non-breast-cancer deaths. Per-endpoint numbers in the table."
+              },
+              {
+                "label": "Safety",
+                "body": "Excess late **lung fibrosis, cardiac fibrosis, and cardiac disease** with IM-MS-RT is the mechanism behind the competing non-breast-cancer mortality; severe grade 3-4 cardiac and lung events stayed rare in both arms (table)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Aligns with the 10-yr EORTC 22922 report (Poortmans, NEJM 2015) and MA.20 in showing regional nodal RT improves disease control more than OS. The **new 20yr signal**: late cardiopulmonary deaths neutralize the breast cancer mortality gain."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents stage I-III breast cancer with medial/central primaries or axillary node involvement treated with 1996-2004 RT technique. Does not represent pts treated with contemporary heart-sparing delivery (DIBH, IMRT, protons), where cardiac dose is materially lower."
+              },
+              {
+                "label": "Limitations",
+                "body": "1996-2004 planning predates modern cardiac-sparing, so the non-breast-cancer-death penalty likely **overstates** contemporary risk. Systemic therapy followed era standards (tamoxifen era), not current regimens. OS as primary is a high bar a single nodal-RT field rarely clears."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc"
+            ],
             "open_questions": [
-              "Does modern cardiac-sparing RT preserve the BC-mortality benefit without the late penalty?",
-              "Which pts gain enough BC-mortality benefit to justify IMN cardiac/lung dose?"
+              "Does modern heart-sparing RT (DIBH/IMRT) preserve the mortality benefit without the cardiac penalty?",
+              "Which subgroups still net an OS gain from IM-MS-RT coverage?",
+              "Optimal patient selection for internal-mammary chain coverage in the contemporary era"
             ],
             "consort": null,
             "modality": "radiation",
@@ -296,121 +400,157 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT07299812",
-                "brief_title": "BRAVE-HEART: Breast Cancer Radiotherapy Using Active Breathing Coordinator to aVoid Exposure of HEART",
+                "nct": "NCT07498855",
+                "brief_title": "Robustness Evaluation of Deep Inspiration Breath-Hold (DIBH) Plans in Internal Mammary Irradiation",
                 "overall_status": "RECRUITING",
                 "phase": null,
-                "enrollment_count": 400,
-                "primary_completion_date": "2026-04",
-                "brief_summary": "The BRAVE-HEART trial is an ambispective, observational, non-randomized study conducted at Fondazione IRCCS (Istituto di Ricovero e Cura a Carattere Scientifico) Policlinico San Matteo (Pavia, Italy). It aims to document and quantify the cardiac dose reduction achievable with breast radiotherapy performed in Deep Inspiration Breath Hold (DIBH) using the Active Breathing Coordinator (ABC) system. Dosimetric parameters from DIBH treatments are evaluated, with free-breathing treatment plans and…",
-                "conditions": [
-                  "Breast Cancer",
-                  "Radiotherapy"
-                ],
-                "interventions": [
-                  {
-                    "name": "Breast Radiotherapy with or without Deep Inspiration Breath Hold (DIBH)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Diagnosis of stage I-III breast carcinoma with an indication for radiotherapy\n* Invasive carcinoma or ductal carcinoma in situ (DCIS)\n* Radiotherapy delivered using three-dimensional conformal radiotherapy (3D-CRT) or intensity-modulated/volumetric modulated arc therapy…",
-                "answers_question": "Does modern cardiac-sparing RT preserve the BC-mortality benefit without the late penalty?",
-                "relevance_phrase": "DIBH breast RT, quantifies cardiac dose reduction"
-              },
-              {
-                "nct": "NCT01758445",
-                "brief_title": "Proton Radiation for Stage II/III Breast Cancer",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 220,
-                "primary_completion_date": "2027-01",
-                "brief_summary": "The purpose of this study is to look at the rates of acute and long term adverse events of postoperative proton radiotherapy for complex loco-regional irradiation in women with loco-regionally advanced breast cancer. This study specifically includes longitudinal follow up to assess the incidence of cardiac mortality and second malignant neoplasms at 10 and 15 years following proton therapy(PT).",
-                "conditions": [
-                  "Breast Cancer",
-                  "Breast Neoplasm",
-                  "Breast Tumor",
-                  "Cancer of the Breast"
-                ],
-                "interventions": [
-                  {
-                    "name": "Proton Radiotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Must sign study-specific, IRB approved informed consent form prior to study entry. Note consent by legally authorized representative is not allowed for this trial.\n2. Must be \\> = 18 years of age.\n3. Must have a life expectancy of at least 10 years based on age and…",
-                "answers_question": "Does modern cardiac-sparing RT preserve the BC-mortality benefit without the late penalty?",
-                "relevance_phrase": "proton loco-regional RT, 15y cardiac mortality EP"
-              },
-              {
-                "nct": "NCT04069884",
-                "brief_title": "RecurIndex Guided Avoidance of Regional Nodal Irradiation for Node Positive Breast Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 540,
-                "primary_completion_date": "2029-08",
-                "brief_summary": "The purpose of this study is to validate whether clinically low-risk, and RecurIndex high-risk N1 patients receiving regional lymph node radiotherapy can further improve clinical outcomes.",
-                "conditions": [
-                  "Breast Cancer",
-                  "Radiation"
-                ],
-                "interventions": [
-                  {
-                    "name": "regional nodal irradiation",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "WBI",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "chestwall XRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years old, ≤ 70 years old.\n* Eastern Cooperative Oncology Group (ECOG) ≤ 2.\n* Postoperative pathology is clearly diagnosed as invasive breast cancer.\n* Meet the clinical definition of low risk: ①Axillary lymph node micrometastasis (N1mic) or ②N1 patients who meet the…",
-                "answers_question": "Which pts gain enough BC-mortality benefit to justify IMN cardiac/lung dose?",
-                "relevance_phrase": "RecurIndex genomic signature selects N1 pts for RNI"
-              },
-              {
-                "nct": "NCT07385365",
-                "brief_title": "A Study of Postoperative Regional Nodal Radiotherapy in Intermediate-risk Breast Cancer",
-                "overall_status": "NOT_YET_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 3142,
-                "primary_completion_date": "2032-12",
-                "brief_summary": "The research hypothesis is that the tumor-free survival rate of intermediate-risk breast cancer patients exempted from RNI is not inferior to that of those receiving RNI. Patients with intermediate-risk breast cancer have a relatively low local-regional recurrence rate whether they undergo RNI or not.Patients were randomly assigned to the RNI group and the non-RNI group.After radiotherapy,the patients are followed the efficacy and toxicities of radiotherapy are evaluated.",
+                "enrollment_count": 25,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "This study is an investigator-initiated, single-arm, single-center, prospective, observational study. The hypothesis is that during the implementation of deep inspiration breath-hold (DIBH) radiotherapy plans in postoperative breast cancer patients receiving internal mammary irradiation, the actual target dose coverage and organ-at-risk (OARs) dose parameters remain within clinically acceptable ranges.",
                 "conditions": [
                   "Breast Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "Regional nodal Radiotherapy",
+                    "name": "DIBH with 3mm Gating Window",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "Non-Regional nodal Radiotherapy",
+                    "name": "DIBH with 2 mm Gating Window",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "DIBH with 1.5 mm Gating Window",
                     "type": "RADIATION"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Female patients aged 18 or above\n* Undergo breast-conserving surgery or total mastectomy and axillary lymph node dissection or sentinel lymph node biopsy\n* The surgical margin was negative\n* Tumor stage:Patients who receive direct surgery : pT1-2N1M0, with at least one lymph…",
-                "answers_question": "Which pts gain enough BC-mortality benefit to justify IMN cardiac/lung dose?",
-                "relevance_phrase": "phase 3 RNI vs none in intermediate-risk pts"
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Provide a signed and dated informed consent form (ICF) before the initiation of any trial-specific procedures.\n2. Female patients aged ≥ 18 years.\n3. Histologically confirmed invasive breast cancer.\n4. Have received breast-conserving surgery or mastectomy with axillary…",
+                "answers_question": "Does modern heart-sparing RT (DIBH/IMRT) preserve the mortality benefit without the cardiac penalty?",
+                "relevance_phrase": "DIBH heart sparing while covering IMN"
+              },
+              {
+                "nct": "NCT06826885",
+                "brief_title": "Safety and Efficacy of IMPT or IMRT for Breast Cancer",
+                "overall_status": "RECRUITING",
+                "phase": null,
+                "enrollment_count": 500,
+                "primary_completion_date": "2029-11",
+                "brief_summary": "The purpose of this trial is to compare the toxicities and efficacy of intensity-modulated proton therapy (IMPT) and intensity-modulated radiation therapy (IMRT) for breast cancer patients indicated for radiotherapy including preoperative radiotherapy, postoperative radiotherapy, or definitive radiotherapy. IMPT or IMRT will be administered to the whole breast, chest wall, and/or regional lymph nodes. A boost dose will be delivered in patients with high-risk area, at the discretion of the…",
+                "conditions": [
+                  "Breast Cancer",
+                  "Proton Therapy",
+                  "Intensity Modulated Radiation Therapy",
+                  "Efficacy and Safety",
+                  "Radiotherapy, Adjuvant"
+                ],
+                "interventions": [
+                  {
+                    "name": "Postoperative radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Preoperative Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Definitive Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria\n\n* Aged ≥18 years old\n* Karnofsky Performance Status (KPS) score ≥70\n* Histologically confirmed breast cancer with indications for preoperative radiotherapy, postoperative radiotherapy, or definitive radiotherapy as determined by the treating physician.\n* ER (estrogen-receptor),…",
+                "answers_question": "Does modern heart-sparing RT (DIBH/IMRT) preserve the mortality benefit without the cardiac penalty?",
+                "relevance_phrase": "IMPT vs IMRT toxicity for nodal breast RT"
+              },
+              {
+                "nct": "NCT04320979",
+                "brief_title": "Postmastecomy Internal Mammary Nodal Irradiation for High-risk Breast Cancer Patients",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 2400,
+                "primary_completion_date": "2025-11",
+                "brief_summary": "The purpose of this study is to evaluate the impact of internal mammary nodal irradiation on disease-free survival in high-risk breast cancer patients treated with mastectomy or breast-conserving surgery.",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "internal mammary nodal irradiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "no internal mammary nodal irradiation",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Eastern Cooperative Oncology Group Performance Status Scale 0-2\n* Histologically confirmed invasive breast cancer\n* Underwent total mastectomy/breast-conserving surgery and axillary dissection(10 or more axillary lymph nodes detected) and negative margins\n* Patients who had…",
+                "answers_question": "Which subgroups still net an OS gain from IM-MS-RT coverage?",
+                "relevance_phrase": "IMN vs no-IMN on DFS in high-risk pts"
+              },
+              {
+                "nct": "NCT04517266",
+                "brief_title": "Evaluating Omitting of Internal Mammary Irradiation Among Early Stage Intermediate Risk (N1) Breast Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 214,
+                "primary_completion_date": "2025-10",
+                "brief_summary": "The effect of internal mammary irradiation (IMI) added to whole-breast or thoracic-wall irradiation plus supraclavicular (SVC) irradiation after surgery on survival among women with early-stage intermediate risk (N1) breast cancer remains debated. The present study aimed to identified patient could be omitted from internal mammary lymph node irradiation by using a clinical-genomic model.",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "omit of IMI group",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "IMI group",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* • Histologically confirmed invasive breast cancer\n\n  * Underwent radical surgery with either mastectomy or breast conserving surgery and axillary lymph node dissection (ALND)\n  * The number of positive lymph node should be 1-3 (N1).\n  * Clinical high risk breast cancer (≥2…",
+                "answers_question": "Optimal patient selection for internal-mammary chain coverage in the contemporary era",
+                "relevance_phrase": "clinical-genomic model to omit IMI in N1"
+              },
+              {
+                "nct": "NCT05896865",
+                "brief_title": "Radiotherapy Dose Adaptation Based on Tumor Biology in Patients With cN2b-N3 Breast Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 120,
+                "primary_completion_date": "2028-03",
+                "brief_summary": "The purpose of the study is to evaluate treatment outcomes of breast cancer with internal mammary or supraclavicular lymph node metastasis according to total radiation dose of postoperative radiation therapy differentiated by tumor response to neoadjuvant chemotherapy.\n\nThe main questions it aims to answer are:\n\n* 5-year disease-free survival\n* 5-year overall survival\n* 5-year locoregional recurrence\n* Adverse events after radiation therapy\n* Quality of life\n\nParticipants will be assessed by…",
+                "conditions": [
+                  "Breast Cancer Stage III"
+                ],
+                "interventions": [
+                  {
+                    "name": "Whole breast / chest wall & regional lymph node irradiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Internal mammary or supraclavicular lymph node boost",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Female with age 19 or older\n* Metastasis to internal mammary and/or supraclavicular lymph nodes, assessed by radiological exams and/or biopsy\n* Underwent neoadjuvant chemotherapy\n* Pathologic confirmation of invasive breast cancer treated with breast conserving surgery or…",
+                "answers_question": "Optimal patient selection for internal-mammary chain coverage in the contemporary era",
+                "relevance_phrase": "dose adaptation for IM/SCV nodal mets"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "cardiac sparing breast radiation",
-                "regional nodal irradiation breast"
+                "regional nodal irradiation breast",
+                "internal mammary node radiation"
               ],
               "queries_failed": [],
-              "candidates_returned": 25,
-              "fetched_at": "2026-06-27T23:24:37.956Z",
+              "candidates_returned": 33,
+              "fetched_at": "2026-07-19T16:21:36.176Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -425,18 +565,14 @@
       },
       {
         "disease_site": "bladder",
-        "intro": "First modern phase III testing adjuvant pelvic IG-IMRT after radical cystectomy in high-risk urothelial MIBC.",
+        "intro": "First modern IG-IMRT RCT revives adjuvant RT after cystectomy on locoregional control, though DFS/BCSS/OS stay non-significant.",
         "studies": [
           {
-            "name": "Bladder Adjuvant Radiotherapy Phase III",
-            "tldr": "2yr LRFS 87.1% vs 76.0%, HR 0.43 (0.20-0.96) p=.04 favoring adjuvant pelvic IMRT in high-risk MIBC post-cystectomy.",
+            "name": "Bladder Adjuvant Radiotherapy Trial",
+            "tldr": "2y LRFS 87.1% vs 76.0%, HR 0.43 (0.20-0.96) P=.04 favoring adjuvant pelvic IMRT after cystectomy; DFS/BCSS/OS all NS.",
             "details": [
-              "🔍 Phase III multicenter RCT, N=153 (RT=77, Obs=76); stratified by nodal status + chemo timing",
-              "🔍 RT: stoma-sparing IG-IMRT 50.4Gy/28fx to cystectomy bed + pelvic nodes",
-              "🔍 Eligibility: high-risk post-RC (any of T3-4, N1-3, margin+, ≤10 nodes dissected); 62% pT3-4, 41% pN+",
-              "💊 >90% had perioperative chemo (71% neoadjuvant, 20% adjuvant); none received immunotherapy",
               {
-                "text": "📊 Outcomes by arm (RT vs Obs), median f/u 47mo",
+                "text": "📊 Outcomes by endpoint, adjuvant RT vs observation",
                 "table": {
                   "columns": [
                     "Endpoint",
@@ -446,10 +582,10 @@
                   ],
                   "rows": [
                     [
-                      "LRFS (2yr)",
+                      "2y LRFS (1°)",
                       "87.1%",
                       "76.0%",
-                      "0.43 (0.20-0.96), p=.04"
+                      "0.43 (0.20-0.96), P=.04"
                     ],
                     [
                       "DFS",
@@ -472,27 +608,83 @@
                   ]
                 }
               },
-              "🔍 RT contribution is clean: both arms had RC + perioperative chemo, so RT vs observation isolates the radiation effect",
-              "📊 No additional severe toxicity with RT; late GU/GI grades not detailed in source",
-              "⚠️ Underpowered for survival: every secondary (DFS, BCSS, OS) favored RT but all CIs cross 1",
-              "🔗 vs Zaghloul (Egypt NCI RCT): prior adjuvant-RT benefit was in an SCC/bilharzial-enriched cohort; this trial extends the signal to urothelial with modern IMRT"
+              "🔍 Phase III multicenter RCT, N=153 (RT=77 vs Obs=76); 1° EP 2y LRFS, median f/u 47mo",
+              "🔍 High-risk post-cystectomy MIBC (any of pT3-4, N1-3, margin+, ≤10 nodes dissected); enrolled 62% pT3-4, 41% pN+",
+              "🔍 Stoma-sparing IG-IMRT 50.4Gy/28fx to cystectomy bed + pelvic nodes",
+              "💊 >90% received perioperative chemo (71% neoadjuvant, 20% adjuvant)",
+              "⚠️ 1° EP is a locoregional-control surrogate; DFS, BCSS, OS all favored RT but none significant",
+              "⚠️ Small (N=153); LRFS P=.04 with wide CI (0.20-0.96), underpowered for survival endpoints",
+              "⚠️ No immunotherapy in either arm; predates adjuvant nivolumab (CheckMate-274) as SOC, so RT+IO untested",
+              "🔗 Reopens the adjuvant-RT-after-cystectomy question (prior Egyptian NCI RCTs signalled local control); first modern IG-IMRT randomized test"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
               1000000010
             ],
-            "slug": "bladder-adjuvant-rt-phase3",
+            "slug": "mibc-adjuvant-rt",
             "verdict": {
-              "soc_implication": "confirmatory",
-              "rationale": "Randomized phase III, prespecified primary LRFS endpoint hit; supports the guideline-listed but not-universal adjuvant-RT option post-cystectomy. OS/DFS gains not significant, N=153.",
-              "audience": "High-risk MIBC post-cystectomy (T3-4, N+, margin+, or ≤10 nodes)"
+              "soc_implication": "challenges-soc",
+              "rationale": "Randomised phase III hit prespecified primary LRFS endpoint favoring adjuvant RT (non-standard); but N=153 and DFS/BCSS/OS all NS. Field reopened, not settled.",
+              "audience": "High-risk MIBC post-cystectomy (pT3-4, N+, or margin+), chemo-treated"
             },
-            "significance": "Actionable RT detail is technique: stoma-sparing IG-IMRT 50.4Gy/28fx to bed + pelvic nodes delivered the locoregional gain with no added severe toxicity, so it transfers cleanly. The gradient matters: DFS, BCSS, and OS all favored RT yet none reached significance (N=153), moving the offer-adjuvant-RT decision short of a proven survival benefit.",
+            "significance": "Locoregional control is the RT read: 2y LRFS 87.1% vs 76.0% (HR 0.43) with stoma-sparing IG-IMRT 50.4Gy/28fx to the cystectomy bed plus pelvic nodes, no added severe toxicity. DFS, BCSS, and OS all trended toward RT but none significant at N=153, reopening adjuvant pelvic RT for high-risk MIBC without settling survival benefit.",
+            "monday_clinic": "In high-risk post-cystectomy MIBC (pT3-4, N+, or margin+) after perioperative chemo, this supports adjuvant pelvic IMRT as a locoregional-control option but not a proven survival gain; it does not extend to organ-confined, node-negative low-risk disease.",
+            "primary_endpoint": {
+              "name": "2-year locoregional recurrence-free survival",
+              "klass": "local-control",
+              "stat_value": "HR 0.43",
+              "stat_detail": "2y LRFS 87.1% vs 76.0%; 95% CI 0.20-0.96, P=.04"
+            },
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**Phase 3** multicenter RCT, 1:1, **N=153** (RT=77 vs Obs=76); stratified by nodal involvement and chemotherapy timing (neoadjuvant/adjuvant/none). Median follow-up **47 mo**."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "High-risk nonmetastatic urothelial MIBC after radical cystectomy: **any of pT3-4, N1-3, margin-positive, or ≤10 nodes dissected**. Enrolled 62% pT3-4, 41% pN+."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**Stoma-sparing IG-IMRT, 50.4Gy in 28 fractions** to the cystectomy bed and pelvic nodes."
+              },
+              {
+                "label": "Regimen",
+                "body": "Over **90% received perioperative chemotherapy** (71% neoadjuvant, 20% adjuvant). **None received immunotherapy**."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary:** 2-year locoregional recurrence-free survival. Secondary: disease-free survival, bladder-cancer-specific survival, overall survival."
+              },
+              {
+                "label": "Results",
+                "body": "Primary **LRFS met** (HR 0.43, P=.04); DFS, BCSS, and OS all favored RT but **none reached significance** (see table)."
+              },
+              {
+                "label": "Safety",
+                "body": "**No additional severe toxicity** reported with adjuvant pelvic IMRT versus observation."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Reopens the adjuvant-RT-after-cystectomy question that prior **Egyptian NCI trials** raised for local control; first randomized test in the modern IG-IMRT era."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents high-risk post-cystectomy MIBC (pT3-4, N+, or margin-positive) treated with perioperative chemotherapy. Does not represent organ-confined, node-negative low-risk disease, nor immunotherapy-treated patients."
+              },
+              {
+                "label": "Limitations",
+                "body": "**Small (N=153)**; primary endpoint is a locoregional-control **surrogate**, and survival endpoints were underpowered and nonsignificant. No immunotherapy-era comparator."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc"
+            ],
             "open_questions": [
-              "Does locoregional benefit translate to a survival gain in a larger trial",
-              "Role of adjuvant RT after adjuvant immunotherapy (none enrolled received IO)",
-              "Which high-risk subgroup (pN+, margin+, pT3-4) benefits most"
+              "Does the locoregional control benefit translate to overall survival in a larger trial?",
+              "How does adjuvant RT integrate with adjuvant immunotherapy (nivolumab)?",
+              "Which high-risk subgroup (pN+ vs margin+) benefits most from adjuvant RT?"
             ],
             "consort": {
               "enrolled": null,
@@ -536,8 +728,31 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\nTo be eligible, the patients must fulfil all of the following inclusion criteria:\n\n1. Patients with histologically-confirmed muscle-invasive bladder cancer, either with pure urothelial carcinomas, or dominant urothelial carcinomas (\\>50%) combined with other histological…",
-                "answers_question": "Does locoregional benefit translate to a survival gain in a larger trial",
-                "relevance_phrase": "randomized adjuvant pelvic RT, LRC + survival"
+                "answers_question": "Does the locoregional control benefit translate to overall survival in a larger trial?",
+                "relevance_phrase": "randomized adjuvant post-cystectomy RT, survival EP"
+              },
+              {
+                "nct": "NCT03171025",
+                "brief_title": "Adjuvant Nivolumab Following Chemo-Radiation in Localized Muscle-Invasive Bladder Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 200,
+                "primary_completion_date": "2025-02",
+                "brief_summary": "This is a phase 2, single arm, open label trial to evaluate the rate of failure free survival at 2 years after start of chemoradiation with adjuvant nivolumab in adult subjects who undergo chemoradiation for localized bladder cancer.",
+                "conditions": [
+                  "Bladder Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Nivolumab",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients with muscularis propria invasion clinical stages 2 to 4 (T2-4b, N0 or N+, M0 or T1 with N+), who are not candidates for radical cystectomy.\n\n  * Patients may have undergone partial cystectomy for removal of bladder tumor prior to chemoradiation. Patients who have M1…",
+                "answers_question": "How does adjuvant RT integrate with adjuvant immunotherapy (nivolumab)?",
+                "relevance_phrase": "adjuvant nivolumab after chemoRT, 2y FFS EP"
               },
               {
                 "nct": "NCT06586255",
@@ -560,41 +775,18 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Pure or mixed variant urothelial carcinoma\n\n  o Allowable mixed variant subtypes include:\n  * squamous differentiation\n  * glandular differentiation\n  * nested pattern\n  * microcystic\n  * micropapillary\n  * lymphoepthelioma-like\n  * plasmacytoid and lymphoma-like\n  *…",
-                "answers_question": "Role of adjuvant RT after adjuvant immunotherapy (none enrolled received IO)",
-                "relevance_phrase": "adjuvant concurrent IO + RT, urothelial bladder"
-              },
-              {
-                "nct": "NCT02397434",
-                "brief_title": "Adjuvant Radiotherapy After Cystectomy for Muscle Invasive Bladder Cancer",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 76,
-                "primary_completion_date": "2018-10",
-                "brief_summary": "A radical cystectomy + extended pelvic lymph node dissection is considered to be the treatment of choice for patients with muscle invasive bladder cancer (MIBC). Despite this aggressive treatment the outcome is poor and ultimately, 30% of the patients with ≥pT3 tumors develop a pelvic recurrence. One- and 2-years survival for patients developing a local recurrence after cystectomy is only 8% and 3% respectively, with a median survival of \\<4 months. For patients with lymph node recurrence…",
-                "conditions": [
-                  "Toxicity"
-                ],
-                "interventions": [
-                  {
-                    "name": "Adjuvant EBRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria: muscle invasive bladder cancer with:\n\n* ≥ pathological tumor stage (p)T3 stage + presence of lymphovascular invasion on pathological examination\n* pT4\n* \\<10 lymph nodes removed\n* positive lymph nodes\n* positive surgical margins\n\nExclusion Criteria:\n\n\\-",
-                "answers_question": "Which high-risk subgroup (pN+, margin+, pT3-4) benefits most",
-                "relevance_phrase": "adjuvant EBRT, enrolls pT3+/margin+/node+"
+                "answers_question": "How does adjuvant RT integrate with adjuvant immunotherapy (nivolumab)?",
+                "relevance_phrase": "adjuvant concurrent IO + RT for bladder cancer"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "bladder adjuvant radiotherapy cystectomy",
-                "bladder radiotherapy immunotherapy"
+                "adjuvant radiotherapy bladder cystectomy",
+                "nivolumab bladder radiotherapy"
               ],
               "queries_failed": [],
-              "candidates_returned": 28,
-              "fetched_at": "2026-06-27T23:23:51.967Z",
+              "candidates_returned": 19,
+              "fetched_at": "2026-07-19T16:18:56.026Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
