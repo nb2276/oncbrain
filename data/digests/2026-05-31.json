@@ -1,27 +1,26 @@
 {
   "date": "2026-05-31",
   "conference": null,
-  "generated_at": 1782564860399,
+  "generated_at": 1784458627573,
   "digest": {
-    "top_line": "CAN-2409 + definitive 78Gy RT: DFS HR 0.7 (p=0.0155), 2yr biopsy pCR 80 vs 64%; a local-control gain without dose escalation or ADT, OS/PCSM still immature.",
-    "tldr": "Prostate carried the RT news, and the recurring lesson is that intensifying on top of definitive RT mostly fails hard endpoints: ENZARAD (enza add-on) and COMPPARE (proton vs IMRT) both null, while CAN-2409 bought local control but not yet OS. Outside RT, RASolute 302 hit mOS 13.2 vs 6.6mo (HR 0.40) in 2L pancreatic.",
+    "top_line": "RASolute 302: mOS 13.2 vs 6.7mo (HR 0.40), daraxonrasib roughly doubles OS in previously-treated metastatic pancreatic ca.",
+    "tldr": "GI posted the day's biggest number (RASolute 302 roughly doubling 2L pancreatic OS), but the RT slate is the reader's story: in prostate, adding enza (ENZARAD) or protons (COMPPARE) to the RT+ADT backbone failed while intraprostatic CAN-2409 improved DFS (HR 0.70); thoracic OCEANUS found sequential iRT beat concurrent (HR 0.68, real-world).",
     "sites": [
       {
         "disease_site": "prostate",
-        "intro": "Four prostate reads probing intensification on definitive RT: enzalutamide and protons added nothing on hard endpoints, an oncolytic virus moved only local control, and PROTEUS stays an unreadable preview.",
+        "intro": "RT-intensification theme dominates: adding enza (ENZARAD) or protons (COMPPARE) to the RT+ADT backbone failed, while intraprostatic CAN-2409 hit its DFS endpoint.",
         "studies": [
           {
             "name": "COMPPARE",
-            "tldr": "No proton advantage over IMRT: bowel urgency 5.7 vs 6%, GI G2+ tox 5.2 vs 5.6%, 3yr biochemical control 98.0 vs 97.9%, all NS.",
+            "tldr": "Proton vs IMRT: no difference in bowel urgency (6% vs 5.7%), ≥G2 GI tox, or 3-yr biochemical control in localized prostate.",
             "details": [
-              "🔍 Prospective comparative-effectiveness cohort (non-randomized), PCORI-funded; 51 centers, 2524 accrued Jul 2018–Oct 2022",
-              "🔍 Cohorts: 1500 proton vs 1000 photon; all de novo localized prostate excl very-high-risk and metastatic",
-              "⚠️ Realized GI/bowel toxicity ~5-6% in both arms, far below the 15-29% hypothesized for IMRT",
-              "⚠️ Low realized event rates leave the comparison likely underpowered to detect a true proton benefit",
-              "📊 Rectal spacer cut 2yr GI G2+ toxicity more than modality choice (p=0.009); proton vs IMRT negligible within spacer strata",
-              "🔗 vs PARTIQoL (randomized proton vs IMRT, localized prostate): concordant null for patient-reported bowel/GI endpoints",
-              "⚠️ Early results; late GI/GU toxicity (the main proton rationale) and long-term control not yet mature",
-              "⚠️ Non-randomized cohorts: baseline differences between proton and IMRT pts may confound the read"
+              "🔍 Prospective comparative effectiveness (COMPPARE, PCORI-funded); non-randomized proton vs photon cohorts, 51 centers, 2524 accrued 2018-2022",
+              "🔍 De novo localized prostate, excl very-high-risk + metastatic; proton n=1500, photon n=1000",
+              "📊 No powered endpoint favored protons; observed rates near-identical, all p≥0.28",
+              "🔍 Observed GI tox far below design assumptions (hypothesized IMRT 29%, actual 5.6%), reflecting modern technique + spacers",
+              "⚠️ Non-randomized cohorts: selection bias and residual confounding limit the proton-vs-IMRT comparison",
+              "⚠️ Early results, short f/u; late GU/GI toxicity (protons' theoretical edge) and long-term control unassessed",
+              "🔗 Directionally consistent with PARTIQoL (randomized proton vs IMRT, localized prostate): no bowel-QoL advantage for protons"
             ],
             "figures": [
               {
@@ -31,7 +30,7 @@
                     "Endpoint",
                     "IMRT",
                     "Proton",
-                    "p"
+                    "P"
                   ],
                   "rows": [
                     [
@@ -47,13 +46,13 @@
                       "0.43"
                     ],
                     [
-                      "GI tox (CTCAE ≥G2)",
+                      "GI tox ≥G2 (CTCAE)",
                       "5.6%",
                       "5.2%",
                       "0.60"
                     ],
                     [
-                      "3yr freedom from progression",
+                      "3-yr FFDP (PSA)",
                       "97.9%",
                       "98.0%",
                       "0.90"
@@ -66,7 +65,7 @@
                 "caption": {
                   "columns": [
                     "Group",
-                    "2yr GI G2+ toxicity (95% CI)"
+                    "2-yr G2+ GI toxicity (95% CI)"
                   ],
                   "rows": [
                     [
@@ -95,14 +94,57 @@
             ],
             "slug": "comppare",
             "verdict": {
-              "soc_implication": "confirmatory",
-              "rationale": "Large multi-site prospective comparative cohort (non-randomized); 3yr null concords with randomized PARTIQoL that protons don't reduce GI toxicity vs IMRT. Late-toxicity follow-up still immature.",
+              "soc_implication": "early-signal",
+              "rationale": "Prospective but non-randomized cohorts (selection bias); early results, short f/u leave late toxicity and long-term control open. Null aligns with randomized PARTIQoL non-superiority.",
               "audience": "De novo localized prostate cancer, excl very-high-risk and metastatic"
             },
-            "significance": "Not proton vs photon but the rectal spacer is the toxicity lever: it cut 2yr GI G2+ toxicity (4.4% IMRT, 4.7% proton with spacer vs 7.2% and 8.7% without, p=0.009), dwarfing modality. Both arms fell far below hypothesized rates, so paying the proton premium for less GI toxicity isn't supported.",
+            "significance": "The RT read is that rectal spacer use, not proton vs photon, moved GI toxicity: 2-yr G2+ fell to ~4.4-4.7% with a spacer vs 7.2-8.7% without (p=0.009), similar across modalities. Protons showed no toxicity or 3-yr biochemical-control edge, arguing against the proton premium for localized disease.",
+            "monday_clinic": "In localized prostate cancer (de novo, excluding very-high-risk and metastatic), these early data question routine proton use over IMRT for GI toxicity or 3-yr control; they do not yet speak to late toxicity or long-term outcomes.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Prospective comparative effectiveness study (**COMPPARE**, PCORI-funded), **non-randomized** proton vs photon cohorts across 51 centers. 2524 accrued July 2018-October 2022. Early results, short follow-up."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "De novo **localized prostate cancer**, excluding very-high-risk and metastatic. Proton cohort n=1500, photon (IMRT) cohort n=1000."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Proton therapy vs IMRT; rectal spacer use captured as a covariate (FDA-approved 2015). **Dose/fractionation and target volume not reported in source.**"
+              },
+              {
+                "label": "Endpoints",
+                "body": "Co-primary patient-reported bowel urgency and frequency (EPIC) and ≥G2 GI toxicity (CTCAE v5), each powered 90%. Exploratory: 3-yr freedom from PSA progression."
+              },
+              {
+                "label": "Results",
+                "body": "**No significant proton advantage** on any endpoint (all p ≥ 0.28). Observed toxicity fell far below design assumptions (hypothesized IMRT GI tox 29%, actual 5.6%)."
+              },
+              {
+                "label": "Safety",
+                "body": "Rectal spacer reduced 2-yr cumulative G2+ GI toxicity in **both arms** (p=0.009); the spacer effect exceeded any proton-vs-IMRT difference."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Directionally consistent with **PARTIQoL** (randomized proton vs IMRT, localized prostate), which found no bowel-QoL advantage for protons."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents de novo localized prostate cancer treated with definitive protons or IMRT. Does not represent very-high-risk or metastatic disease."
+              },
+              {
+                "label": "Limitations",
+                "body": "Non-randomized cohorts (**selection bias**, residual confounding); short follow-up leaves late GU/GI toxicity and long-term control unanswered; dose/fractionation not reported."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc"
+            ],
             "open_questions": [
-              "Late GI/GU toxicity beyond 3 years for proton vs IMRT",
-              "Long-term biochemical and disease control with longer follow-up"
+              "Late GU/GI toxicity beyond 3 years",
+              "Long-term biochemical and metastasis-free control with protons vs IMRT"
             ],
             "consort": null,
             "modality": "radiation",
@@ -110,6 +152,33 @@
             "methodology": "real-world-evidence",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
+              {
+                "nct": "NCT01617161",
+                "brief_title": "Proton Therapy vs. IMRT for Low or Intermediate Risk Prostate Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 454,
+                "primary_completion_date": "2025-12",
+                "brief_summary": "We are studying whether men being treated for prostate cancer have the same amount of side effects from either one of two different external radiation treatments: IMRT or PBT. With IMRT, a number of x-ray beams are used to shape the radiation to the prostate. PBT is another type of external radiation treatment for prostate cancer that is used in a few centers in the United States. Protons are tiny particles with positive charge that can be controlled to travel a certain distance and stop. PBT…",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Proton Beam Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Intensity Modulated Radiation Therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Diagnosed with histologically confirmed adenocarcinoma of the prostate based on core-biopsy within 1 year of study entry from TRUS\n* Clinical stages T1c to T2c\n* PSA \\<20, within 6 months of study entry\n* Participants who are currently receiving Dutasteride (or have received…",
+                "answers_question": "Late GU/GI toxicity beyond 3 years",
+                "relevance_phrase": "proton vs IMRT, side-effect head-to-head"
+              },
               {
                 "nct": "NCT03561220",
                 "brief_title": "A Prospective Comparative Study of Outcomes With Proton and Photon Radiation in Prostate Cancer",
@@ -142,8 +211,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Diagnosis of adenocarcinoma of the prostate.\n* 30-85 years of age at the time of consent with a life expectancy estimation (LEE) of ≥ 8 years.\n* Localized prostate cancer, as confirmed by staging with PSA, biopsy, Gleason score, DRE with or without mpMRI, and clinical…",
-                "answers_question": "Late GI/GU toxicity beyond 3 years for proton vs IMRT",
-                "relevance_phrase": "proton vs IMRT toxicity cohort, n=3000"
+                "answers_question": "Late GU/GI toxicity beyond 3 years",
+                "relevance_phrase": "3000-pt proton vs IMRT QOL + toxicity cohort"
               },
               {
                 "nct": "NCT05350475",
@@ -170,8 +239,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Histologically verified localized/locally advanced prostate cancer T1-3bN0-1M0 (TNM 8th edition). A clinical T4 is allowed if it is because of invasion into the bladder neck.\n* Adenocarcinoma (mixed histology allowed as long as the adenocarcinoma component comprise more than…",
-                "answers_question": "Late GI/GU toxicity beyond 3 years for proton vs IMRT",
-                "relevance_phrase": "proton vs photon late GI toxicity, high-risk"
+                "answers_question": "Late GU/GI toxicity beyond 3 years",
+                "relevance_phrase": "proton vs photon, primary late GI toxicity"
               },
               {
                 "nct": "NCT03561220",
@@ -205,8 +274,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Diagnosis of adenocarcinoma of the prostate.\n* 30-85 years of age at the time of consent with a life expectancy estimation (LEE) of ≥ 8 years.\n* Localized prostate cancer, as confirmed by staging with PSA, biopsy, Gleason score, DRE with or without mpMRI, and clinical…",
-                "answers_question": "Long-term biochemical and disease control with longer follow-up",
-                "relevance_phrase": "proton vs IMRT disease-control cohort, n=3000"
+                "answers_question": "Long-term biochemical and metastasis-free control with protons vs IMRT",
+                "relevance_phrase": "proton vs IMRT cohorts, disease-control endpoint"
               },
               {
                 "nct": "NCT01352429",
@@ -230,18 +299,18 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria\n\n* Histologically confirmed prostate adenocarcinoma within 365 days of registration.\n* Clinical stages T1a-T2c N0 M0 (AJCC Criteria 6th Ed). For any suspicious pelvic lymph node \\> 1.5cm (as exhibited on pelvic imaging), biopsy of the lymph node is suggested.\n* Histological…",
-                "answers_question": "Long-term biochemical and disease control with longer follow-up",
-                "relevance_phrase": "proton vs IMRT, cancer-control endpoint"
+                "answers_question": "Long-term biochemical and metastasis-free control with protons vs IMRT",
+                "relevance_phrase": "proton vs IMRT hypofx, improve cancer control"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "proton IMRT prostate toxicity",
-                "proton prostate biochemical control"
+                "proton prostate toxicity",
+                "proton IMRT prostate outcomes"
               ],
               "queries_failed": [],
-              "candidates_returned": 18,
-              "fetched_at": "2026-06-27T12:47:08.369Z",
+              "candidates_returned": 23,
+              "fetched_at": "2026-07-19T10:48:24.977Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -252,175 +321,15 @@
             ]
           },
           {
-            "name": "CAN-2409",
-            "tldr": "DFS HR 0.7 (0.52-0.94, p=0.0155), median NR vs 86.1mo, adding intra-prostatic oncolytic virus to definitive 78Gy RT; OS/PCSM immature.",
-            "details": [
-              "🔍 Intra-prostatic oncolytic-viral therapy (CAN-2409) added to definitive EBRT 78Gy, vs RT + placebo, randomized",
-              "⚠️ DFS driven mainly by 2yr post-RT biopsy pCR, a surrogate endpoint",
-              "⚠️ OS and PCSM still flat, so clinical benefit unproven",
-              "⚠️ Per discussant: control RT 78Gy lacked modern dose intensification (brachy boost, SIB) or ADT, blunting relevance to current SOC",
-              "🔗 Local-control gain reached without dose escalation or ADT, a different lever than brachy boost or hormones",
-              "📊 ≥Gr 3 toxicity <1% with CAN-2409 added, no major added RT toxicity"
-            ],
-            "figures": [
-              {
-                "url": "https://pbs.twimg.com/media/Gshzd0nWAAAgwmm.jpg",
-                "caption": {
-                  "columns": [
-                    "Endpoint",
-                    "CAN-2409",
-                    "Placebo",
-                    "HR / p"
-                  ],
-                  "rows": [
-                    [
-                      "DFS, median",
-                      "NR",
-                      "86.1 mo",
-                      "HR 0.7 (0.52-0.94), p=0.0155"
-                    ],
-                    [
-                      "2yr biopsy pCR",
-                      "80.4%",
-                      "63.6%",
-                      ""
-                    ],
-                    [
-                      "2yr +biopsy (local)",
-                      "19.6%",
-                      "36.4%",
-                      "p=0.0015"
-                    ],
-                    [
-                      "OS",
-                      "NS",
-                      "NS",
-                      ""
-                    ],
-                    [
-                      "PCSM events",
-                      "1",
-                      "1",
-                      ""
-                    ]
-                  ]
-                }
-              },
-              {
-                "url": "https://pbs.twimg.com/media/Gshz8TuWgAENQ46.jpg",
-                "caption": {
-                  "columns": [
-                    "Method (trial)",
-                    "Endpoint",
-                    "Control",
-                    "Intensified"
-                  ],
-                  "rows": [
-                    [
-                      "+ADT (RTOG 9408)",
-                      "2yr +biopsy",
-                      "40%",
-                      "20%"
-                    ],
-                    [
-                      "Brachy boost (ASCENDE-RT)",
-                      "10y local failure",
-                      "7.1%",
-                      "1.5%"
-                    ],
-                    [
-                      "Dose SIB (FLAME)",
-                      "crude local failure",
-                      "7.7%",
-                      "2.7%"
-                    ],
-                    [
-                      "CAN-2409",
-                      "2yr +biopsy",
-                      "36.4%",
-                      "19.6%"
-                    ]
-                  ]
-                }
-              }
-            ],
-            "nct": null,
-            "tweet_ids": [
-              63
-            ],
-            "slug": "can-2409-prostate",
-            "verdict": {
-              "soc_implication": "methodologically-limited",
-              "rationale": "DFS driven by surrogate 2yr biopsy pCR with flat OS/PCSM; control RT lacks modern dose escalation or ADT, so the divergence isn't yet reliable.",
-              "audience": "Localized prostate cancer, definitive EBRT (78Gy)"
-            },
-            "significance": "The RT-relevant read is local control: 2yr positive-biopsy fell to 19.6% vs 36.4% (p=0.0015) without dose escalation or added ADT, a new local-intensification lever. But the control RT (78Gy, no boost or ADT) predates modern intensification, leaving its place vs brachy boost or ADT unsettled.",
-            "open_questions": [
-              "Does the DFS benefit translate to OS/PCSM with longer follow-up?",
-              "Does benefit hold against modern dose-escalated RT and ADT?"
-            ],
-            "consort": null,
-            "modality": "combined",
-            "intent": "curative",
-            "methodology": "phase-3-rct",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT01436968",
-                "brief_title": "Phase 3 Study of ProstAtak® Immunotherapy With Standard Radiation Therapy for Localized Prostate Cancer",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 711,
-                "primary_completion_date": "2024-08",
-                "brief_summary": "The purpose of this study is to evaluate the effectiveness of ProstAtak® immunotherapy in combination with radiation therapy for patients with intermediate-high risk localized prostate cancer. ProstAtak kills tumor cells and stimulates a cancer vaccine effect. Killing tumor cells in an immune stimulatory environment induces the body's immune system to detect and destroy cancer cells. ProstAtak has shown synergy with radiation without added toxicity and lower than expected recurrence rates in…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Aglatimagene besadenovec + valacyclovir",
-                    "type": "BIOLOGICAL"
-                  },
-                  {
-                    "name": "Placebo + valacyclovir",
-                    "type": "BIOLOGICAL"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria include:\n\n* Localized prostate cancer meeting the NCCN criteria of Intermediate Risk or patients having only one NCCN high-risk feature\n\n  * NCCN Intermediate Risk is defined as having at least one of the following: PSA 10-20 ng/ml, Gleason score =7, T2b-T2c\n  * High Risk with a…",
-                "answers_question": "Does the DFS benefit translate to OS/PCSM with longer follow-up?",
-                "relevance_phrase": "phase 3 same virus+RT, n=711, intermediate-high risk"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "CAN-2409 prostate"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 3,
-              "fetched_at": "2026-06-27T12:49:26.608Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "tweet",
-                "id": 63
-              }
-            ]
-          },
-          {
             "name": "PROTEUS",
-            "tldr": "Preview only; most distant mets found by PSMA PET (53.0% apalutamide vs 60.7% ADT), so MFS events were PET- not conventionally-driven.",
+            "tldr": "Most distant mets PSMA PET-detected (53.0% APA vs 60.7% control); preview NEJM data, MFS benefit's clinical meaning contested.",
             "details": [
-              "📊 Preview release; primary MFS effect size (HR, medians) not reported in source tweets.",
-              "📊 Distant mets identified by PSMA PET: 53.0% apalutamide vs 60.7% ADT.",
-              "⚠️ Majority of MFS events were PET-detected, not conventional imaging, per the NEJM report.",
-              "⚠️ More-sensitive PSMA PET ascertainment shifts MFS event counts vs conventional-imaging-era trials.",
-              "🔍 Arms per source: apalutamide + ADT vs ADT alone; endpoints reference EFS, BCR, MFS.",
-              "🔍 Phase, N, and study population/setting not stated in source tweets.",
-              "⚠️ @seanmmcbride 50 vs 60 BCR/100 figures are a hypothetical thought experiment, not reported results.",
-              "⚠️ Curator flags as controversial pre-presentation: framed as either homerun or large negative."
+              "📊 Preview read: results just posted (NEJM online), full ASCO26 presentation pending; framed as highly controversial.",
+              "📊 Most distant mets identified by PSMA PET, not conventional imaging: 53.0% apalutamide vs 60.7% control.",
+              "⚠️ MFS read confounded: majority of MFS events were PET-detected, raising lead-time / detection-bias concern.",
+              "🔍 Design: apalutamide + ADT vs ADT alone (two randomized arms); endpoints include MFS/EFS and BCR.",
+              "⚠️ Companion thought experiment (explicitly hypothetical, not PROTEUS data): rescaled 50 vs 60 BCR/100 suggests PET-detection differences could drive much of the metastasis delta.",
+              "⚠️ 'Homerun vs largest negative' per curator; primary effect size not reported in source, await full data."
             ],
             "figures": [],
             "nct": null,
@@ -431,19 +340,42 @@
             ],
             "slug": "proteus",
             "verdict": {
-              "soc_implication": "unclear",
-              "rationale": "Preview only; primary MFS magnitude not in source. Lone disclosed detail (most mets PSMA-PET-detected, 53.0% vs 60.7%) raises endpoint-ascertainment concern but can't classify the result.",
+              "soc_implication": "methodologically-limited",
+              "rationale": "Preview NEJM data; primary effect size not in source. Most MFS events PSMA PET-detected (53.0% vs 60.7%), raising lead-time/detection bias that undermines the MFS read.",
               "audience": null
             },
             "significance": null,
+            "monday_clinic": null,
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Randomized, **apalutamide + ADT vs ADT alone**. Results just posted (NEJM online); full ASCO26 presentation pending, so this is a preview read."
+              },
+              {
+                "label": "Results",
+                "body": "**Most distant metastases were PSMA PET-detected**: 53.0% in the apalutamide group vs 60.7% in the control group. Primary MFS effect size not reported in source."
+              },
+              {
+                "label": "Limitations",
+                "body": "MFS events were predominantly PET-detected, raising **lead-time / detection-bias** concerns about the endpoint. The 50-vs-60 BCR/100 figures circulating are an **illustrative hypothetical**, not PROTEUS primary data."
+              },
+              {
+                "label": "Discussion",
+                "body": "Curator frames it as **'homerun vs largest negative'** pending full data. A companion thought experiment argues PSMA PET vs conventional detection differences could account for much of the apparent metastasis delta."
+              }
+            ],
+            "relevant_specialties": [
+              "medonc"
+            ],
             "open_questions": [
-              "Does the MFS benefit hold when limited to conventional-imaging mets?",
-              "Will PSMA-PET-defined MFS translate to an OS benefit?"
+              "Does the MFS benefit hold on OS or conventional-imaging endpoints?",
+              "How much of the MFS delta reflects PSMA PET lead-time bias?"
             ],
             "consort": null,
             "modality": "systemic",
             "intent": "curative",
-            "methodology": null,
+            "methodology": "phase-3-rct",
             "related_trials": [
               {
                 "nct": "NCT02531516",
@@ -485,7 +417,7 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Age \\>= 18 years\n* Indicated and planned to receive primary radiation therapy for prostate cancer\n* Histologically confirmed adenocarcinoma of an intact prostate, and 1 of the following at diagnosis: 1) Gleason score \\>=8 and \\>=cT2c, 2) Gleason score 7, PSA \\>=20 nanogram…",
-                "answers_question": "Does the MFS benefit hold when limited to conventional-imaging mets?",
+                "answers_question": "Does the MFS benefit hold on OS or conventional-imaging endpoints?",
                 "relevance_phrase": "apalutamide MFS by conventional imaging (BICR)"
               }
             ],
@@ -495,7 +427,7 @@
               ],
               "queries_failed": [],
               "candidates_returned": 13,
-              "fetched_at": "2026-06-27T12:50:12.984Z",
+              "fetched_at": "2026-07-19T10:51:45.520Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -512,229 +444,215 @@
                 "id": 61
               }
             ]
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "lower-gi",
-        "intro": "Upfront RT folded into 1L systemic + PD1 for unresectable MSS met rectal ca, but the single-arm design leaves RT's contribution unmeasurable.",
-        "studies": [
+          },
           {
-            "name": "MIRACLE-2",
-            "tldr": "ORR 68%, mOS 23.2mo, 18% reached NED with upfront RT then systemic + PD1 in 1L unresectable MSS met rectal ca.",
+            "name": "CAN-2409",
+            "tldr": "DFS HR 0.70 (0.52-0.94, p=0.016) adding intraprostatic CAN-2409 to EBRT in intermediate/high-risk localised prostate; OS and PCSM immature.",
             "details": [
+              "🔍 Phase 3 double-blind placebo-controlled RCT, 2:1 randomisation, N=745, 51 US/Puerto Rico centres",
+              "🔍 Primary EP disease-free survival (ITT); accrued 2012-2021, median follow-up 50.3mo",
+              "🔍 RT: EBRT 78Gy/2Gy or hypofx (60Gy/3Gy, 70Gy/2.5Gy); ADT optional",
+              "💊 3 intraprostatic aglatimagene injections (5×10^11 viral particles) + valacyclovir vs placebo + valacyclovir",
+              "⚠️ DFS is a composite (recurrence or death); OS and PCSM immature, 1 PCSM event per arm",
+              "⚠️ ADT optional, no brachy/SIB boost mandated; added value over modern dose intensification unresolved",
+              "⚠️ Accrual 2012-2021 predates PSMA staging; 'high-risk' cohort likely differs from PSMA-staged pts today",
               {
-                "text": "📊 Efficacy outcomes (single-arm, N=50)",
+                "text": "📊 Grade 3+ safety comparable; no treatment-related deaths",
                 "table": {
                   "columns": [
-                    "Endpoint",
-                    "Value",
-                    "95% CI"
+                    "Event (G3+)",
+                    "Aglatimagene",
+                    "Placebo"
                   ],
                   "rows": [
                     [
-                      "ETS rate (1°)",
-                      "76.0%",
-                      "62.4-86.8%"
+                      "Any TEAE",
+                      "8% (40/479)",
+                      "7% (17/232)"
                     ],
                     [
-                      "ORR",
-                      "68.0%",
-                      "53.6-80.0%"
+                      "Acute kidney injury",
+                      "2% (9/479)",
+                      "2% (4/232)"
                     ],
                     [
-                      "DCR",
-                      "88.0%",
-                      "76.0-95.2%"
+                      "Serious AEs",
+                      "6% (28/479)",
+                      "7% (17/232)"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "figures": [
+              {
+                "url": "https://pbs.twimg.com/media/Gshzd0nWAAAgwmm.jpg",
+                "caption": {
+                  "columns": [
+                    "Endpoint",
+                    "CAN-2409",
+                    "Placebo",
+                    "HR / p"
+                  ],
+                  "rows": [
+                    [
+                      "DFS median",
+                      "NR",
+                      "86.1 mo",
+                      "HR 0.7 (0.52-0.94), p=0.0155"
                     ],
                     [
-                      "Median PFS",
-                      "9.3 mo",
-                      "7.1-11.5"
+                      "2yr biopsy pCR",
+                      "80.4%",
+                      "63.6%",
+                      "n/a"
                     ],
                     [
-                      "Median OS",
-                      "23.2 mo",
-                      "15.1-31.3"
-                    ],
-                    [
-                      "Median DOR",
-                      "8.0 mo",
-                      "5.2-10.8"
+                      "2yr local recurrence",
+                      "19.6%",
+                      "36.4%",
+                      "p=0.0015"
                     ]
                   ]
                 }
               },
-              "📊 18% (9/50) reached NED; 1-yr OS 93.3%, 1-yr PFS 33.4%, 1-yr DOR 20%",
-              "🔍 Prospective single-arm phase I, N=50, 1L MSS unresectable met rectal ca, primary ≤10cm from anal verge",
-              "🔍 RT given upfront: HFRT to primary, HFRT or SBRT to mets. Dose/fractionation not reported in source",
-              "💊 Then FOLFOX-bev-tislelizumab (RAS/BRAF-mut) or FOLFIRI-cetux-tislelizumab (WT); RAS/BRAF mut in 56.0%",
               {
-                "text": "⚠️ Grade 3/4 TRAEs, heme-dominant",
-                "subdetails": [
-                  "Lymphopenia 36.7%",
-                  "Neutropenia 26.5%",
-                  "Leukopenia 20.4%"
-                ]
-              },
-              "⚠️ RT-associated lymphopenia a plausible driver of the 36.7% G3/4 lymphopenia",
-              "⚠️ RT contribution unmeasurable: no RT-omission arm, effect confounded with systemic + PD1",
-              "⚠️ 1° EP is ETS (≥20% shrinkage at 8wk), an early surrogate not OS/PFS; mFU only 19.9mo (16.4-23.4)",
-              "⚠️ Durability thin: 1-yr DOR 20%, mDOR 8.0mo despite high 1-yr OS",
-              "🔗 MSS ~95% of mCRC and intrinsically IO-resistant; single-agent PD1 inactive in MSS"
-            ],
-            "figures": [
-              {
-                "url": "https://pbs.twimg.com/media/HJpxlR1X0AMyvn4.jpg",
-                "caption": null
+                "url": "https://pbs.twimg.com/media/Gshz8TuWgAENQ46.jpg",
+                "caption": {
+                  "columns": [
+                    "Trial",
+                    "Intensifier",
+                    "Local endpoint: control → intensified"
+                  ],
+                  "rows": [
+                    [
+                      "RTOG 9408",
+                      "+4mo ADT",
+                      "2yr biopsy+ 40% → 20%"
+                    ],
+                    [
+                      "ASCENDE-RT",
+                      "LDR brachy boost",
+                      "10y local failure 7.1% → 1.5%"
+                    ],
+                    [
+                      "FLAME",
+                      "SIB 95Gy",
+                      "Crude local failure 7.7% → 2.7%"
+                    ],
+                    [
+                      "CAN-2409",
+                      "+CAN-2409",
+                      "2yr biopsy+ 36.4% → 19.6%"
+                    ]
+                  ]
+                }
               }
             ],
-            "nct": null,
+            "nct": "NCT01436968",
             "tweet_ids": [
-              64
+              63,
+              1000000052
             ],
-            "slug": "miracle-2",
+            "slug": "can-2409",
             "verdict": {
-              "soc_implication": "early-signal",
-              "rationale": "Single-arm phase I, N=50, no randomised RT-omission comparator; primary endpoint is early tumor shrinkage surrogate (ETS), short follow-up. RT effect inseparable from systemic + PD1.",
-              "audience": "1L MSS unresectable metastatic rectal ca, synchronous liver/lung mets"
+              "soc_implication": "confirmatory",
+              "rationale": "Positive phase 3 primary (DFS) but on a surrogate/composite; OS and PCSM immature (1 event/arm). Additive benefit over modern dose-intensification plus ADT unproven.",
+              "audience": "Intermediate or high-risk localised prostate cancer, EBRT candidates"
             },
-            "significance": "The RT read is upfront priming: HFRT to primary plus HFRT/SBRT to mets precedes systemic + PD1, and 18% (9/50) of unresectable pts reached NED, an unusual signal in immune-cold MSS. RT dose/fractionation isn't in source and no omission arm isolates its effect, so adding RT to a systemic backbone stays hypothesis-only.",
-            "open_questions": [
-              "Does RT add benefit over systemic + PD1 alone (no control arm)?",
-              "Biomarkers selecting MSS responders to trimodal therapy",
-              "Durability beyond short follow-up (1-yr DOR only 20%)"
-            ],
-            "consort": null,
-            "modality": "combined",
-            "intent": null,
-            "methodology": "phase-1",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
+            "significance": "The RT read is local control: 2yr biopsy positivity fell 36.4% to 19.6% (p=0.0015), comparable to adding ADT (RTOG 9408) but on standard 78Gy without a brachy or SIB boost. Whether it adds over modern dose-intensification plus ADT is the open integration question, since ADT was optional and no boost was used.",
+            "monday_clinic": "In intermediate or high-risk localised prostate cancer planned for definitive EBRT, this informs whether an added intraprostatic biologic could improve local control; it does not extend to post-prostatectomy, salvage, or metastatic settings.",
+            "primary_endpoint": null,
+            "analysis_sections": [
               {
-                "nct": "NCT07644286",
-                "brief_title": "A Phase II Study of Pirfenidone Plus PD-1 Inhibitor With or Without Hypofractionated Radiotherapy for Refractory pMMR/MSS Colorectal Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 48,
-                "primary_completion_date": "2027-01",
-                "brief_summary": "This study aims to evaluate the safety, tolerability, and efficacy of pirfenidone and PD-1 monoclonal antibody combined with or without hypofractionated radiotherapy in the treatment of advanced refractory pMMR/MSS colorectal cancer patients.",
-                "conditions": [
-                  "Colorectal Cancer (CRC)"
-                ],
-                "interventions": [
-                  {
-                    "name": "Pirfenidone in combination with a PD-1 inhibitor",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "hypofractionated radiotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Written informed consent must be provided, and the patient must be able to comply with the visit schedule and procedures outlined in the protocol.\n2. Age ≥ 18 years and ≤ 75 years, regardless of gender.\n3. Histologically or cytologically confirmed, unresectable locally…",
-                "answers_question": "Does RT add benefit over systemic + PD1 alone (no control arm)?",
-                "relevance_phrase": "PD-1 backbone ± hypofractionated RT in MSS CRC"
+                "label": "Design",
+                "body": "**Phase 3**, double-blind, placebo-controlled RCT, **2:1** randomisation, **N=745** across 51 US and Puerto Rico centres. Median follow-up **50.3 mo**."
               },
               {
-                "nct": "NCT06958419",
-                "brief_title": "Node-Sparing Short-Course Radiotherapy Plus Chemotherapy, Bevacizumab and PD-1 Inhibitor in Metastatic pMMR/MSS Colorectal Cancer (MODIFI-CRC)",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2",
-                  "PHASE3"
-                ],
-                "enrollment_count": 286,
-                "primary_completion_date": "2030-12",
-                "brief_summary": "The current standard first-line treatment for metastatic colorectal cancer is chemotherapy combined with targeted therapy, yet the prognosis remains poor. Although combining immunotherapy, anti-angiogenic agents, and chemotherapy has shown some efficacy in MSS/pMMR metastatic patients, progression-free survival (PFS) remains suboptimal. Radiotherapy-particularly high-dose radiotherapy-can enhance tumor antigen release and potentially improve the response of MSS/pMMR colorectal cancer to PD-1…",
-                "conditions": [
-                  "Immune Checkpoint Therapy",
-                  "Radiotherapy",
-                  "Metastatic Colorectal Cancer (CRC)"
-                ],
-                "interventions": [
-                  {
-                    "name": "Node-Sparing Radiotherapy plus first-line therapy",
-                    "type": "COMBINATION_PRODUCT"
-                  },
-                  {
-                    "name": "First-line treatment",
-                    "type": "COMBINATION_PRODUCT"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Voluntarily signs a written informed consent form.\n\n  * Aged between 18 and 75 years at the time of enrollment.\n  * Eastern Cooperative Oncology Group (ECOG) performance status of 0 or 1.\n  * Expected survival of more than 3 months.\n  * Histologically or cytologically…",
-                "answers_question": "Does RT add benefit over systemic + PD1 alone (no control arm)?",
-                "relevance_phrase": "randomizes RT + 1L vs 1L alone in met MSS CRC"
+                "label": "Population & inclusion",
+                "body": "**Intermediate or high-risk localised** prostate cancer, ECOG 0-2, planned for EBRT. Stratified by risk category and ADT use. 79% White, 16% Black."
               },
               {
-                "nct": "NCT06849362",
-                "brief_title": "Multicenter Retrospective Study on Optimizing Combination Immunotherapy Strategies in MSS/MSI-L/pMMR Advanced Colorectal Cancer",
-                "overall_status": "ENROLLING_BY_INVITATION",
-                "phase": null,
-                "enrollment_count": 200,
-                "primary_completion_date": "2024-02",
-                "brief_summary": "This multicenter retrospective study aims to evaluate and optimize combination immunotherapy strategies for patients with microsatellite stable (MSS), microsatellite instability-low (MSI-L), or mismatch repair-proficient (pMMR) advanced colorectal cancer (CRC). The study will analyze clinical outcomes, treatment responses, and prognostic factors in patients who received various immunotherapy regimens. Data from multiple institutions will be collected to identify potential predictive biomarkers…",
-                "conditions": [
-                  "Metastatic Colorectal Cancer (CRC)",
-                  "MSS Metastatic Colorectal Cancer",
-                  "Immunotherapy"
-                ],
-                "interventions": [
-                  {
-                    "name": "Bevacizumab",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:1) study subjects were mCRC patients with explicitly stated MSS/MSI-L/pMMR status; 2) at least one cohort included immunotherapy treatment; 3); primary outcomes of this study were defined as Disease Control Rate (DCR) and Progression-Free Survival (PFS); secondary outcomes…",
-                "answers_question": "Biomarkers selecting MSS responders to trimodal therapy",
-                "relevance_phrase": "mines predictive biomarkers in MSS CRC IO"
+                "label": "Radiotherapy",
+                "body": "EBRT **78 Gy/2 Gy**, or hypofractionated **60 Gy/3 Gy** or **70 Gy/2.5 Gy**. ADT optional. **No dose-escalation or brachytherapy boost** mandated."
               },
               {
-                "nct": "NCT06680739",
-                "brief_title": "Single cEll pRofiling PErsistaNce To ImmuNothErapy",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 60,
-                "primary_completion_date": "2032-07",
-                "brief_summary": "The SERPENTINE trial (ESR 21-21165) is a phase II clinical study aiming to evaluate the efficacy of durvalumab and tremelimumab, alone or in combination, in patients with colorectal or endometrial cancer. The trial targets patients with microsatellite instability-high (MSI-H) tumors and those with microsatellite stable (MSS) tumors.\n\nColorectal and endometrial cancers present significant challenges due to their heterogeneity and variable responses to treatment. Immunotherapy, particularly…",
-                "conditions": [
-                  "Colorectal Cancer",
-                  "Endometrial Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Durvalumab",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Tremelimumab",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Capable of giving signed informed consent which includes compliance with the requirements and restrictions listed in the informed consent form (ICF) and in this protocol. Written informed consent and any locally required authorization (e.g., Health Insurance Portability and…",
-                "answers_question": "Biomarkers selecting MSS responders to trimodal therapy",
-                "relevance_phrase": "single-cell profiling of IO response in MSS CRC"
+                "label": "Regimen",
+                "body": "Three intraprostatic aglatimagene injections (**5×10^11 viral particles**) plus valacyclovir prodrug, versus placebo plus valacyclovir."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary:** disease-free survival (recurrence or death, ITT). Secondary/exploratory: OS, PCSM, 2-year post-RT biopsy pathologic response."
+              },
+              {
+                "label": "Results",
+                "body": "**Primary met:** DFS favoured aglatimagene; **OS and PCSM immature**, not significantly different. Arm-by-endpoint values in the results figure."
+              },
+              {
+                "label": "Safety",
+                "body": "Grade 3+ TEAEs **8% vs 7%**; most common acute kidney injury (2% both arms). Serious AEs 6% vs 7%. **No treatment-related deaths**."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Discussant benchmarked the biopsy-positivity gain against **ADT (RTOG 9408)**, **brachytherapy boost (ASCENDE-RT)**, and **SIB (FLAME)** as established local-control intensifiers."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents intermediate or high-risk localised prostate cancer treated with definitive EBRT. Does not represent post-prostatectomy, salvage, or metastatic disease."
+              },
+              {
+                "label": "Limitations",
+                "body": "DFS is a **composite surrogate**; OS and PCSM immature. **ADT optional, no boost mandated**, confounding added value over modern intensification. Accrual (2012-2021) predates PSMA staging."
               }
             ],
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "open_questions": [
+              "Does the local-control gain add over modern dose-escalation and ADT?",
+              "Do DFS and pCR gains translate to overall or cancer-specific survival?",
+              "Optimal ADT and RT-intensification pairing with intraprostatic CAN-2409"
+            ],
+            "consort": {
+              "enrolled": null,
+              "excluded": null,
+              "randomized": 745,
+              "arms": [
+                {
+                  "label": "Aglatimagene + valacyclovir",
+                  "allocated": 496,
+                  "analyzed": null
+                },
+                {
+                  "label": "Placebo + valacyclovir",
+                  "allocated": 249,
+                  "analyzed": null
+                }
+              ]
+            },
+            "modality": "combined",
+            "intent": "curative",
+            "methodology": "phase-3-rct",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "radiotherapy MSS metastatic colorectal",
-                "biomarker microsatellite stable colorectal immunotherapy"
+                "aglatimagene prostate",
+                "CAN-2409 prostate radiation"
               ],
               "queries_failed": [],
-              "candidates_returned": 35,
-              "fetched_at": "2026-06-27T12:45:44.956Z",
-              "rerank_outcome": "picked_N"
+              "candidates_returned": 2,
+              "fetched_at": "2026-07-19T10:54:36.569Z",
+              "rerank_outcome": "abstained"
             },
             "source_ids": [
               {
                 "type": "tweet",
-                "id": 64
+                "id": 63
+              },
+              {
+                "type": "paper",
+                "id": 52
               }
             ]
           }
@@ -743,44 +661,55 @@
       },
       {
         "disease_site": "upper-gi",
-        "intro": "A systemic standout with no RT relevance: daraxonrasib nearly doubled OS in 2L RAS-G12 metastatic pancreatic.",
+        "intro": "First targeted 2L option to roughly double OS over chemo in metastatic pancreatic; no RT relevance.",
         "studies": [
           {
             "name": "RASolute 302",
-            "tldr": "mOS 13.2 vs 6.6mo, HR 0.40 (0.30-0.54), P<0.001 for daraxonrasib vs chemo in RAS G12 2L metastatic pancreatic cancer.",
+            "tldr": "mOS 13.2 vs 6.7mo, HR 0.40 (0.30-0.53), P<0.001 for daraxonrasib vs investigator's-choice chemo in previously treated metastatic pancreatic cancer.",
             "details": [
-              "🔍 Randomized 2L metastatic PDAC: daraxonrasib vs investigator's-choice chemotherapy",
-              "🔍 'Overall' population = RAS G12/G13/Q61-mutant or no RAS mutation detected; G12 the enriched cohort",
-              "📊 Deaths 32% daraxonrasib vs 55% chemo in the RAS G12 cohort",
-              "⚠️ Daraxonrasib mOS upper CI not reached (10.0-NR); OS data still maturing",
-              "⚠️ Investigator's-choice comparator pools heterogeneous 2L regimens; no uniform control arm",
-              "🔗 An OS benefit of this magnitude in 2L metastatic PDAC is highly unusual for a historically chemo-refractory setting"
+              "🔍 Phase 3 RCT: daraxonrasib (oral RAS(ON) multi-selective inhibitor) vs investigator's-choice chemo in previously treated metastatic pancreatic cancer",
+              "🔍 Two prespecified populations: RAS G12-mutant (n=228 vs 231) and overall (n=248 vs 252; includes G12/G13/Q61 + no RAS mutation identified)",
+              "📊 Death events 32% (daraxonrasib) vs 55-56% (chemo), both populations; medians reached",
+              "💊 Single oral targeted agent standing in for cytotoxic chemo at 2L; targets active GTP-bound RAS across G12 variants",
+              "🔗 Chemo control (6.6-6.7mo) matches the historic 2L metastatic PDAC benchmark; experimental arm 13.2mo roughly doubles it",
+              "⚠️ Data from a single ASCO LBA OS figure; full efficacy, safety, and PFS not yet published (abstract 'soon')",
+              "⚠️ Open-label (oral drug vs IV chemo); OS is a hard endpoint so bias is limited, but any PRO/PFS read needs blinded review",
+              "⚠️ Daraxonrasib median OS upper CI not reached (10.0-NR); tail durability still immature"
             ],
             "figures": [
               {
                 "url": "https://pbs.twimg.com/media/HJprw8yWkAQlNuV.jpg",
                 "caption": {
                   "columns": [
-                    "Population",
-                    "Daraxonrasib mOS (mo)",
-                    "Chemo mOS (mo)",
-                    "HR (95% CI)",
-                    "P"
+                    "Population · Arm",
+                    "Median OS",
+                    "HR (death)",
+                    "12-mo OS"
                   ],
                   "rows": [
                     [
-                      "RAS G12",
-                      "13.2 (10.0-NR)",
-                      "6.6 (5.4-8.2)",
+                      "G12 · Daraxonrasib",
+                      "13.2 mo (10.0-NR)",
                       "0.40 (0.30-0.54)",
-                      "<0.001"
+                      "53.3%"
                     ],
                     [
-                      "Overall",
-                      "13.2 (10.0-NR)",
-                      "6.7 (5.8-8.0)",
+                      "G12 · Chemo",
+                      "6.6 mo (5.4-8.2)",
+                      "—",
+                      "8.7%"
+                    ],
+                    [
+                      "Overall · Daraxonrasib",
+                      "13.2 mo (10.0-NR)",
                       "0.40 (0.30-0.53)",
-                      "<0.001"
+                      "53.2%"
+                    ],
+                    [
+                      "Overall · Chemo",
+                      "6.7 mo (5.8-8.0)",
+                      "—",
+                      "17.3%"
                     ]
                   ]
                 }
@@ -793,63 +722,60 @@
             "slug": "rasolute-302",
             "verdict": {
               "soc_implication": "practice-changing",
-              "rationale": "Randomized phase 3 with OS primary endpoint hit vs investigator's-choice chemo; HR 0.40 magnitude in dismal-prognosis 2L PDAC clears the bar despite still-maturing follow-up.",
-              "audience": "Previously treated metastatic pancreatic cancer (RAS G12-mutant cohort)"
+              "rationale": "Randomized phase 3, OS primary hit HR 0.40 in 2L metastatic PDAC where no targeted SOC exists; hard endpoint, unprecedented magnitude. Full LBA data pending.",
+              "audience": "Previously treated metastatic pancreatic cancer (RAS-mut or WT)"
             },
             "significance": null,
+            "monday_clinic": "In previously treated metastatic pancreatic cancer with a RAS mutation, daraxonrasib's OS benefit supports it as a systemic option over chemotherapy; the signal does not extend to treatment-naive or localized disease.",
+            "primary_endpoint": {
+              "name": "Overall survival",
+              "klass": "overall-survival",
+              "stat_value": "HR 0.40",
+              "stat_detail": "95% CI 0.30-0.53, P<0.001; mOS 13.2 vs 6.7 mo (overall pop)"
+            },
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**Phase 3 RCT**, daraxonrasib vs investigator's-choice chemotherapy in previously treated metastatic pancreatic cancer. Two prespecified populations: **RAS G12-mutant** and **overall** (G12/G13/Q61 or no RAS mutation identified)."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Previously treated metastatic pancreatic cancer. RAS G12 arm **n=228 vs 231**; overall **n=248 vs 252**. Overall population also includes tumors with no identified RAS mutation."
+              },
+              {
+                "label": "Regimen",
+                "body": "**Daraxonrasib**, an oral RAS(ON) multi-selective inhibitor targeting active GTP-bound RAS, vs investigator's choice cytotoxic chemotherapy."
+              },
+              {
+                "label": "Results",
+                "body": "**Primary OS met**: median **13.2 vs 6.7 mo**, **HR 0.40** (0.30-0.53), P<0.001 (overall); HR 0.40 (0.30-0.54) in RAS G12. 12-mo OS **53% vs 17%** (overall). Deaths 32% vs 55-56%."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents previously treated metastatic pancreatic cancer with RAS mutations (G12/G13/Q61) or no identified RAS mutation. Does not represent treatment-naive or localized/resectable pancreatic cancer."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Chemo control (6.6-6.7 mo) matches the historic 2L metastatic PDAC benchmark; no prior targeted agent has shown an OS signal of this magnitude in this setting."
+              },
+              {
+                "label": "Limitations",
+                "body": "Data limited to a single ASCO LBA OS figure; full safety and PFS not yet reported. **Open-label**; daraxonrasib median OS upper CI not reached (10.0-NR), so tail durability is immature."
+              }
+            ],
+            "relevant_specialties": [
+              "medonc"
+            ],
             "open_questions": [
-              "Benefit in non-G12 RAS and RAS-wildtype subgroups",
-              "Mature OS once daraxonrasib arm events accrue",
-              "First-line and chemo-combination potential"
+              "Sequencing and combination with 1L chemotherapy",
+              "Efficacy across RAS-WT vs RAS-mutant subsets",
+              "Full safety and toxicity profile"
             ],
             "consort": null,
             "modality": "systemic",
             "intent": "palliative",
             "methodology": "phase-3-rct",
             "related_trials": [
-              {
-                "nct": "NCT05585320",
-                "brief_title": "A Phase 1/2a Study of IMM-1-104 in Participants With Advanced or Metastatic Solid Tumors",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE1",
-                  "PHASE2"
-                ],
-                "enrollment_count": 209,
-                "primary_completion_date": "2026-06",
-                "brief_summary": "This is an open-label, dose-exploration and expansion study to determine the safety, tolerability, pharmacokinetics, pharmacodynamics, and preliminary anti-tumor activity of IMM-1-104 when administered as monotherapy or in combination with approved agents in participants with RAS-mutated or RAS/MAPK activated advanced or metastatic solid tumors. The dose exploration will identify the candidate recommended Phase 2 candidate optimal dose of IMM-1-104 to further explore the anti-tumor activity of…",
-                "conditions": [
-                  "Advanced Solid Tumor",
-                  "Pancreatic Adenocarcinoma",
-                  "Malignant Melanoma (Cutaneous)",
-                  "Non-small Cell Lung Cancer (NSCLC)"
-                ],
-                "interventions": [
-                  {
-                    "name": "IMM-1-104 Monotherapy (Treatment Group A)",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "IMM-1-104 + modified Gemcitabine/nab-Paclitaxel (Treatment Group B)",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "IMM-1-104 + modified FOLFIRINOX (Treatment Group C)",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "IMM-1-104 + dabrafenib (Treatment Group D)",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "IMM-1-104 + pembrolizumab (Treatment Group E)",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Must be ≥18 years of age\n* Must have histologically or cytologically confirmed diagnosis as follows:\n\n  1. Monotherapy Phase 1: A locally advanced unresectable or metastatic solid tumor malignancy that harbors a RAS (KRAS, NRAS, or HRAS) activating mutation.\n  2. Monotherapy…",
-                "answers_question": "Benefit in non-G12 RAS and RAS-wildtype subgroups",
-                "relevance_phrase": "RAS-mut or RAS/MAPK-activated, incl pancreas"
-              },
               {
                 "nct": "NCT07491445",
                 "brief_title": "Study of Daraxonrasib and Daraxonrasib + GnP as First-line Treatment in Patients With Metastatic Pancreatic Adenocarcinoma",
@@ -885,18 +811,18 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* At least 18 years old and has provided informed consent.\n* Eastern Cooperative Oncology Group (ECOG) performance status of 0 or 1.\n* Histologically or cytologically confirmed pancreatic adenocarcinoma.\n* Diagnosis of metastatic disease ≤ 6 weeks prior to informed consent.\n*…",
-                "answers_question": "First-line and chemo-combination potential",
-                "relevance_phrase": "phase 3 daraxonrasib ± gem/nab-pac, 1L PDAC"
+                "answers_question": "Sequencing and combination with 1L chemotherapy",
+                "relevance_phrase": "1L daraxonrasib + gem/nab-paclitaxel combination"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "daraxonrasib pancreatic",
-                "RAS inhibitor pancreatic"
+                "daraxonrasib pancreatic cancer",
+                "daraxonrasib RAS pancreatic"
               ],
               "queries_failed": [],
-              "candidates_returned": 24,
-              "fetched_at": "2026-06-27T12:51:23.588Z",
+              "candidates_returned": 6,
+              "fetched_at": "2026-07-19T10:53:42.095Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -910,79 +836,356 @@
         "open_questions": null
       },
       {
+        "disease_site": "lower-gi",
+        "intro": "RT delivered first as an immune primer in MSS metastatic rectal; provocative conversion signal but single-arm, responses not yet durable.",
+        "studies": [
+          {
+            "name": "MIRACLE-2",
+            "tldr": "68% ORR, mOS 23.2mo, 18% NED with RT-primed chemo + tislelizumab in MSS unresectable met rectal ca.",
+            "details": [
+              "🔍 Prospective single-arm phase I, N=50, Fudan Shanghai; RT delivered FIRST as an immune primer",
+              "⚠️ RT dose/fractionation and target volumes not reported in source (HFRT to primary, HFRT/SBRT to mets)",
+              "💊 Post-RT, biomarker-gated: FOLFOX-bev-tislelizumab (RAS/BRAF-mut) or FOLFIRI-cetuximab-tisle (WT); tisle 200mg Q2W",
+              {
+                "text": "🔍 Population (N=50)",
+                "subdetails": [
+                  "76% male, median age 57 (range 30-73)",
+                  "Mets: 52% liver, 8% lung, 40% both",
+                  "RAS/BRAF-mut in 56% of primaries",
+                  "Median 8 treatment courses (range 3-12)"
+                ]
+              },
+              "📊 18% (9/50) reached NED via conversion resection/ablation or watch-and-wait",
+              {
+                "text": "📊 Time-to-event endpoints",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "Median",
+                    "95% CI",
+                    "1-yr rate"
+                  ],
+                  "rows": [
+                    [
+                      "OS",
+                      "23.2 mo",
+                      "15.1-31.3",
+                      "93.3%"
+                    ],
+                    [
+                      "PFS",
+                      "9.3 mo",
+                      "7.1-11.5",
+                      "33.4%"
+                    ],
+                    [
+                      "DOR (n=34)",
+                      "8.0 mo",
+                      "5.2-10.8",
+                      "20%"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "⚠️ Heme toxicity dominant (RT + FOLFOX/FOLFIRI + PD1); no grade 5 TRAEs",
+                "subdetails": [
+                  "Lymphopenia: 95.9% all-grade, 36.7% G3/4",
+                  "Leukopenia: 69.4% all-grade, 20.4% G3/4",
+                  "Anemia: 91.8% all-grade",
+                  "Neutropenia: 26.5% G3/4"
+                ]
+              },
+              "⚠️ Primary EP is ETS (≥20% shrinkage at 8wk), a surrogate; single-arm can't isolate RT's contribution",
+              "⚠️ High ORR (68%) but short DOR and low 1-yr DOR rate → responses not yet durable"
+            ],
+            "figures": [
+              {
+                "url": "https://pbs.twimg.com/media/HJpxlR1X0AMyvn4.jpg",
+                "caption": {
+                  "columns": [
+                    "Metric",
+                    "n (%)",
+                    "95% CI"
+                  ],
+                  "rows": [
+                    [
+                      "CR",
+                      "1 (2.0%)",
+                      ""
+                    ],
+                    [
+                      "PR",
+                      "33 (66.0%)",
+                      ""
+                    ],
+                    [
+                      "SD",
+                      "10 (20.0%)",
+                      ""
+                    ],
+                    [
+                      "PD",
+                      "6 (12.0%)",
+                      ""
+                    ],
+                    [
+                      "ORR",
+                      "34 (68.0%)",
+                      "53.6-80.0%"
+                    ],
+                    [
+                      "DCR",
+                      "44 (88.0%)",
+                      "76.0-95.2%"
+                    ],
+                    [
+                      "ETS",
+                      "38 (76.0%)",
+                      "62.4-86.8%"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "nct": null,
+            "tweet_ids": [
+              64
+            ],
+            "slug": "miracle-2",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Single-arm phase I, N=50; surrogate primary (ETS at 8wk); no comparator to isolate RT's contribution to the immune-priming effect.",
+              "audience": "1L unresectable MSS rectal cancer, synchronous liver/lung mets"
+            },
+            "significance": "The RT-relevant read is technique: HFRT to the primary plus HFRT/SBRT to mets, delivered first to prime immunity, but no dose or fractionation in source, so it doesn't transfer to practice yet. 18% (9/50) converted to NED via resection or watch-and-wait. Near-universal lymphopenia (95.9% all-grade, 36.7% G3/4) undercuts a strategy premised on RT-driven T-cell activation.",
+            "monday_clinic": null,
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Prospective single-arm phase I, N=50, Fudan University Shanghai Cancer Center. Data cutoff Dec 31 2025; median follow-up 19.9 mo (95% CI 16.4-23.4)."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "MSS rectal cancer, primary ≤10cm from anal verge, synchronous unresectable mets. 76% male, median age 57; 52% liver, 8% lung, 40% both; RAS/BRAF-mut 56%."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**RT delivered first** as an immune primer: HFRT to the primary, HFRT or SBRT to metastases. **Dose, fractionation, and target volumes not reported in source.**"
+              },
+              {
+                "label": "Regimen",
+                "body": "Post-RT, biomarker-gated: **FOLFOX-bevacizumab-tislelizumab** (RAS/BRAF-mut) or **FOLFIRI-cetuximab-tislelizumab** (WT); tislelizumab 200mg Q2W. Resection/metastasectomy if converted, watch-and-wait if primary cCR."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary: ETS rate** (≥20% target shrinkage at 8wk). Secondary: DCR, DOR, OS, PFS, safety."
+              },
+              {
+                "label": "Results",
+                "body": "ETS **76.0%**, ORR **68.0%**, DCR 88.0%; **18% (9/50) reached NED**. Median OS 23.2mo, PFS 9.3mo, DOR 8.0mo (endpoints in table)."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents treatment-naive MSS rectal cancer with synchronous unresectable liver/lung metastases. Does not represent MSI-H tumors, resectable disease, or non-rectal colorectal primaries."
+              },
+              {
+                "label": "Limitations",
+                "body": "Single-arm phase I, N=50, no comparator to isolate RT's contribution. Surrogate primary (ETS at 8wk), short median DOR (8mo), and near-universal lymphopenia (95.9%)."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc",
+              "medonc",
+              "surgonc"
+            ],
+            "open_questions": [
+              "RT's added benefit over chemo plus PD1 alone in MSS mCRC",
+              "Optimal RT dose and fractionation for immune priming in MSS mCRC",
+              "Predictive biomarker for MSS response to trimodal therapy"
+            ],
+            "consort": null,
+            "modality": "combined",
+            "intent": "curative",
+            "methodology": "phase-1",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05963490",
+                "brief_title": "Regorafenib Alone or in Combination With Hypofractionated/Low-dose Radiotherapy Plus Toripalimab for Metastatic Colorectal Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 108,
+                "primary_completion_date": "2025-04",
+                "brief_summary": "The study compares the efficacy and safety of regorafenib alone or in combination with hypofractionated radiotherapy and low-dose radiotherapy (LDRT) plus toripalimab in patients with microsatellite stable metastatic colorectal cancer (MSS mCRC). Patients are randomly assigned (1:1) into the control arm and the experimental arm. Control arm: a total of 54 patients will receive regorafenib monotherapy. Experimental arm: a total of 54 patients will first receive 1 cycle of regorafenib and…",
+                "conditions": [
+                  "Microsatellite Stable Metastatic Colorectal Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Regorafenib",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Toripalimab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Regorafenib",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Age ≥18 years old\n2. An Eastern Cooperative Oncology Group (ECOG) performance status ≤1\n3. Life expectancy of at least 3 months\n4. Histopathological confirmed MSS/pMMR adenocarcinoma of the colon or rectum\n5. At least one evaluable metastatic lesion for radiotherapy…",
+                "answers_question": "Optimal RT dose and fractionation for immune priming in MSS mCRC",
+                "relevance_phrase": "randomized hypofrac+LDRT + toripalimab, MSS mCRC"
+              },
+              {
+                "nct": "NCT06525428",
+                "brief_title": "Standard Systemic Therapy Combined With High/Low-dose Radiotherapy Plus Toripalimab for Metastatic Colorectal Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 96,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "TORCH-M is a prospective, single-arm, two-cohort, investigator-initiated phase II trial to investigate the efficacy and safety of standard systemic therapy in combination with high/low-dose radiotherapy plus toripalimab in paitents with microsatellite stable metastatic colorectal cancer (MSS mCRC). Eligible patients will be assigned to two cohorts according to previous treatment: a first-line cohort A and a second-line cohort B. Patients in both arms will first receive one cycle of standard…",
+                "conditions": [
+                  "Microsatellite Stable Metastatic Colorectal Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "standard systemic therapy combined with high/low-dose radiotherapy plus toripalimab",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\nAge between18 and 75 years old.\n\nAn Eastern Cooperative Oncology Group (ECOG) performance status ≤1.\n\nHistopathological confirmed MSS/pMMR adenocarcinoma of the colon or rectum.\n\nAt least one evaluable metastatic lesion for radiotherapy and evaluation according to RECIST…",
+                "answers_question": "Optimal RT dose and fractionation for immune priming in MSS mCRC",
+                "relevance_phrase": "high + low-dose RT + toripalimab in MSS mCRC"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "radiotherapy immunotherapy rectal",
+                "stereotactic colorectal metastases",
+                "microsatellite colorectal immunotherapy"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 56,
+              "fetched_at": "2026-07-19T10:50:16.980Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "tweet",
+                "id": 64
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
         "disease_site": "thoracic",
-        "intro": null,
+        "intro": "Real-world only: sequencing RT before ICI beat concurrent iRT for OS, but hypothesis-generating with no RT technique reported.",
         "studies": [
           {
             "name": "OCEANUS",
-            "tldr": "Sequential iRT mOS 20.3 vs 16.0mo, HR 0.68 (P=.045) vs concurrent in newly-dx advanced NSCLC; real-world Hong Kong cohort.",
+            "tldr": "Sequential iRT beat concurrent for real-world OS in newly-dx advanced NSCLC: median 20.3 vs 16.0 mo, HR 0.68 (0.47-0.99), P=.045.",
             "details": [
-              "🔍 Real-world Hong Kong CDARS (>90% population coverage); NSCLC dx 2010-2021, propensity overlap-weighted, IPTW sensitivity",
-              "🔍 335 of 3522 ICI-treated pts received RT: 155 newly-dx advanced, 180 refractory; 73.7% male, median age 64",
               {
-                "text": "📊 Newly-dx advanced NSCLC: sequential vs concurrent iRT (real-world OS)",
+                "text": "📊 Real-world OS by iRT comparison (propensity-weighted, landmark)",
                 "table": {
                   "columns": [
-                    "Endpoint",
-                    "Sequential iRT",
-                    "Concurrent iRT",
-                    "Adjusted HR / P"
+                    "Setting / comparison",
+                    "Experimental OS",
+                    "Control OS",
+                    "HR / P value"
                   ],
                   "rows": [
                     [
-                      "Median OS (95% CI)",
-                      "20.3 mo (13.3-NR)",
-                      "16.0 mo (8.3-30.0)",
-                      "0.68 (0.47-0.99), P=.045"
+                      "Newly-dx advanced, sequential vs concurrent iRT",
+                      "20.3 mo (95% CI 13.3-NR)",
+                      "16.0 mo (95% CI 8.3-30.0)",
+                      "HR 0.68 (0.47-0.99), P=.045"
+                    ],
+                    [
+                      "Refractory, RT + ICI maintenance vs RT alone",
+                      "11.2 mo (95% CI 7.9-20.6)",
+                      "6.7 mo (95% CI 4.4-17.4)",
+                      "P=.20 (ns)"
                     ]
                   ]
                 }
               },
-              {
-                "text": "📊 Refractory NSCLC: RT with vs without ICI maintenance (real-world OS)",
-                "table": {
-                  "columns": [
-                    "Endpoint",
-                    "RT + ICI maintenance",
-                    "RT without maintenance",
-                    "P"
-                  ],
-                  "rows": [
-                    [
-                      "Median OS (95% CI)",
-                      "11.2 mo (7.9-20.6)",
-                      "6.7 mo (4.4-17.4)",
-                      "P=.20"
-                    ]
-                  ]
-                }
-              },
-              "📊 Chemotherapy associated with longer OS in newly-dx advanced; not significant in refractory",
-              "📐 Proportional hazards violated (Schoenfeld); treatment effects also summarized by RMST",
-              "⚠️ Sequencing not randomized: confounding by indication likely (concurrent may mark more urgent/bulky disease)",
-              "⚠️ RT dose, fractionation, technique, and target volume not reported in source, limits transfer to practice",
-              "⚠️ Refractory analysis required ≥90-day survival (landmark); small per-arm N, wide CIs; authors call it hypothesis-generating"
+              "🔍 Territory-wide real-world cohort (Hong Kong CDARS, >90% population coverage); NSCLC dx 2010-2021 who received iRT",
+              "🔍 335 of 3522 ICI-treated pts got RT: 155 newly-dx advanced, 180 refractory. Median age 64 (34-90), 73.7% male",
+              "🔍 Overlap-weighting propensity score primary; IPTW sensitivity gave similar estimates",
+              "💊 Chemotherapy associated with longer OS in newly-dx; not significant in refractory",
+              "⚠️ Observational: sequential vs concurrent not randomized, confounding by indication plausible despite weighting",
+              "⚠️ No RT dose, fractionation, modality, or target volume reported in source; authors call findings hypothesis-generating",
+              "🔗 Direction (RT before ICI favored) aligns with PACIFIC paradigm, though PACIFIC was curative-intent stage III chemoRT, not advanced disease"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
               1000000053
             ],
-            "slug": "oceanus-irt-sequencing",
+            "slug": "oceanus",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective propensity-weighted real-world cohort; sequencing not randomized, confounding by indication, small per-arm N. Authors themselves call the findings hypothesis-generating.",
-              "audience": "Advanced/refractory NSCLC receiving RT plus checkpoint inhibitor"
+              "rationale": "Observational real-world cohort; sequential-vs-concurrent not randomized, confounding by indication despite propensity weighting. Small subgroups (155 newly-dx). Authors label it hypothesis-generating.",
+              "audience": "Advanced/refractory NSCLC on immunoradiotherapy, median age 64, 74% male"
             },
-            "significance": "Timing is the read: sequential iRT showed longer OS than concurrent (mOS 20.3 vs 16.0mo, HR 0.68) in newly-dx advanced NSCLC. RT dose, fractionation, and target volume go unreported, so it can't say which regimen earned the gap. Moves the concurrent-vs-sequential timing question only, in stage IV.",
-            "monday_clinic": "In newly-diagnosed stage IV NSCLC starting a checkpoint inhibitor who will also receive RT, this real-world signal favors sequential over concurrent timing; it does not extend to refractory disease, where the maintenance OS gain was not significant.",
+            "significance": "Sequential iRT (ICI and RT not overlapping) beat concurrent for real-world OS in newly-dx advanced NSCLC, HR 0.68 (0.47-0.99), P=.045, favoring temporal separation of RT from ICI. RT dose, fractionation, and target volume aren't in the source, so the signal can't yet transfer to a specific plan. The refractory RT+ICI-maintenance read was NS (P=.20).",
+            "monday_clinic": "In newly-diagnosed advanced NSCLC starting immunoradiotherapy, this real-world signal supports separating RT from ICI in time rather than delivering them concurrently; it does not extend to refractory disease, where the RT-plus-ICI-maintenance benefit was not significant.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Territory-wide **real-world cohort** (OCEANUS, Hong Kong CDARS, >90% population coverage); NSCLC diagnosed 2010-2021 who received iRT. **Overlap-weighting** propensity score primary, IPTW sensitivity; landmark-based OS with weighted Kaplan-Meier and Cox (restricted mean survival time where PH violated)."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "335 of 3522 ICI-treated pts received RT: **155 newly-dx advanced**, **180 refractory**. Median age **64** (34-90), **73.7% male**. Refractory analysis required survival ≥90 days (landmark)."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "RT dose, fractionation, modality, and target volume **not reported in source**. The variable studied is **timing of RT relative to ICI** (sequential vs concurrent), not technique."
+              },
+              {
+                "label": "Results",
+                "body": "Both comparisons favored the sequential / ICI-maintenance arm (magnitudes in table). **Chemotherapy** was associated with longer OS in newly-dx pts only; **not significant** in refractory disease."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Randomized data on iRT sequencing in advanced NSCLC are limited (stated by authors). RT-before-ICI direction is consistent with the **PACIFIC** consolidation paradigm, but PACIFIC treated curative-intent unresectable stage III with concurrent chemoRT, a different population."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents advanced or refractory NSCLC receiving immunoradiotherapy, predominantly male, median age 64. Does not represent curative-intent stage III chemoRT, oligometastatic, or ICI-treated patients who did not receive RT."
+              },
+              {
+                "label": "Limitations",
+                "body": "Observational: sequential vs concurrent not randomized, residual confounding by indication despite weighting. Small subgroups (155 newly-dx). Refractory comparison **non-significant** (P=.20)."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc",
+              "medonc"
+            ],
             "open_questions": [
-              "Sequential vs concurrent iRT sequencing in advanced NSCLC needs randomized confirmation",
-              "Value of adding chemotherapy to iRT in refractory NSCLC",
-              "Optimal RT dose, fractionation, and target volume for iRT"
+              "Optimal RT-ICI sequencing (sequential vs concurrent) in advanced NSCLC",
+              "Value of ICI maintenance after RT in refractory NSCLC"
             ],
             "consort": null,
-            "modality": "radiation",
+            "modality": "combined",
             "intent": "palliative",
             "methodology": "real-world-evidence",
             "significance_perspective": "Radiation oncology",
@@ -1017,118 +1220,18 @@
                   }
                 ],
                 "eligibility_brief": "INCLUSION CRITERIA:\n\n1. Patient must have signed a written informed consent form prior to any study specific procedures\n2. Histologically or cytologically confirmed advanced (stage IIIB/IIIC/IV), squamous or non-squamous NSCLC\n3. NSCLC patients eligible for treatment with pembrolizumab and…",
-                "answers_question": "Sequential vs concurrent iRT sequencing in advanced NSCLC needs randomized confirmation",
-                "relevance_phrase": "phase 3 RCT: concurrent RT + PD-1 in advanced NSCLC"
-              },
-              {
-                "nct": "NCT06020430",
-                "brief_title": "Omitting CTV for Locally Advanced NSCLC Responded to Immunotherapy and Chemotherapy",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 134,
-                "primary_completion_date": "2026-02",
-                "brief_summary": "Radical radiotherapy is critical for locally advanced non small cell lung cancer(NSCLC ). Our previous sturdy indicated that patients who received induction immunotherapy and subsequent radiotherapy suffered higher proportion of pneumonitis.Grade 2 or more pneumonitis patients have worse prognosis. It is urged to optimize the radiotherapy dose and target volume for patients treated with immunotherapy and radiotherapy. According to retrospective and prospective studies, omitting CTV radiation is…",
-                "conditions": [
-                  "Non Small Cell Lung Cancer",
-                  "Locally Advanced",
-                  "Radiotherapy",
-                  "Immunotherapy"
-                ],
-                "interventions": [
-                  {
-                    "name": "CTV omitted or delineated",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically or cytologically confirmed non-small cell lung cancer;\n2. stage IIIA or IIIB or IIIC according to the 8th edition of the TNM cancer staging system of the American Joint Committee on Cancer (AJCC) and Union for International Cancer Control（UICC);\n3. inoperable…",
-                "answers_question": "Optimal RT dose, fractionation, and target volume for iRT",
-                "relevance_phrase": "omit-CTV target volume in IO-treated NSCLC"
-              },
-              {
-                "nct": "NCT06953843",
-                "brief_title": "Study on the Optimal Combination Pattern of the Combined Treatment of Radiotherapy and Immunotherapy for the Abscopal Effect in Non-Small Cell Lung Cancer (NSCLC) With Multiple Metastases",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 366,
-                "primary_completion_date": "2027-06",
-                "brief_summary": "This study aims to conduct a prospective, multicenter, umbrella clinical study to compare the abscopal effects of different radiotherapy fractionation patterns combined with Benmelstobart, and to explore an efficient and low-toxic treatment strategy for non-small cell lung cancer (NSCLC) with multiple metastases. The main objective is to explore and compare the control rates of abscopal lesions in NSCLC patients with multiple metastases when different radiotherapy fractionation patterns are…",
-                "conditions": [
-                  "NSCLC Stage IV Without EGFR/ALK Mutation"
-                ],
-                "interventions": [
-                  {
-                    "name": "Benmelstobart combined with chemotherapy",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Benmelstobart combined with chemotherapy",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Benmelstobart combined with chemotherapy",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Benmelstobart combined with chemotherapy",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Benmelstobart combined with chemotherapy",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Benmelstobart combined with Bevacizumab and chemotherapy",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patient must meet all of the following inclusion criteria to be enrolled in this study:\n\n  1. Non-small cell lung cancer confirmed by pathological histology.\n  2. More than 3 metastatic lesions.\n  3. No brain metastases or stable lesions.\n  4. Negative for driver genes…",
-                "answers_question": "Optimal RT dose, fractionation, and target volume for iRT",
-                "relevance_phrase": "compares RT fractionation patterns + IO, stage IV"
-              },
-              {
-                "nct": "NCT06484491",
-                "brief_title": "IMPT Dose Escalation for NSCLC (HyDose)",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 87,
-                "primary_completion_date": "2027-10",
-                "brief_summary": "The goal of this clinical pilot trial is to learn if dose to the tumor in the lung can be safely increased using proton therapy in stage III non-small-cell lung cancer patients receiving combined chemotherapy and radiotherapy. The main questions it aims to answer are:\n\n* Is the risk of severe radiotherapy toxicities (requiring hospital admission) within acceptable margins ?\n* What is a rough estimate of the effect of the treatment under study?\n\nCompared to standard care in our clinic, all…",
-                "conditions": [
-                  "Carcinoma, Non-Small-Cell Lung"
-                ],
-                "interventions": [
-                  {
-                    "name": "Dose-escalated intensity-modulated proton therapy (IMPT-74)",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Cisplatin or carboplatin + pemetrexed for induction chemotherapy, cisplatin + docetaxel for concurrent chemotherapy",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Immunotherapy: adjuvant durvalumab",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥18 years\n* WHO performance score 0-2\n* Histologically proven stage III NSCLC\n* Planned for CCRT and adjuvant immunotherapy (intention to treat)\n* Primary tumour volume outside of mediastinal PRV (i.e., mediastinal envelope + 5 mm) ≥60% of total primary tumour volume…",
-                "answers_question": "Optimal RT dose, fractionation, and target volume for iRT",
-                "relevance_phrase": "proton RT dose escalation with adjuvant durvalumab"
+                "answers_question": "Optimal RT-ICI sequencing (sequential vs concurrent) in advanced NSCLC",
+                "relevance_phrase": "phase 3 concurrent RT+PD-1 in stage IIIB/IV NSCLC"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "radiotherapy immunotherapy NSCLC",
-                "chemotherapy radiotherapy NSCLC"
+                "radiotherapy immunotherapy advanced NSCLC",
+                "checkpoint inhibitor maintenance radiation NSCLC"
               ],
               "queries_failed": [],
-              "candidates_returned": 30,
-              "fetched_at": "2026-07-15T00:36:31.203Z",
+              "candidates_returned": 21,
+              "fetched_at": "2026-07-19T10:55:06.241Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -1143,8 +1246,8 @@
       }
     ],
     "meta": {
-      "clusters_total": 6,
-      "studies_analyzed": 5,
+      "clusters_total": 7,
+      "studies_analyzed": 6,
       "dropped": [
         {
           "slug": "enzarad",
@@ -1332,6 +1435,45 @@
       "pdf_path": null,
       "source_url": null,
       "note": "https://jamanetwork.com/journals/jamaoncology/fullarticle/2847148?guestAccessKey=6284363c-f1dd-46da-aa0e-8528e5ecca06&utm_source=twitter&utm_medium=social_jamaonc&utm_term=20674463146&utm_campaign=article_alert&linkId=952727864",
+      "resolved_from_review": false
+    },
+    {
+      "id": 52,
+      "pmid": null,
+      "doi": "10.1016/s1470-2045(26)00071-9",
+      "pmc_id": null,
+      "title": "Aglatimagene besadenovec (CAN-2409) with radiotherapy for patients with localised prostate cancer: a phase 3, multicentre, randomised, double-blind, placebo-controlled trial",
+      "authors": [
+        "DeWeese, Theodore L",
+        "Manzanera, Andrea",
+        "Sylvester, John",
+        "Wheeler, Thomas",
+        "Schroeder, Thomas",
+        "Gejerman, Glen",
+        "Chesnut, Gregory",
+        "Facelle, Thomas M",
+        "Garzotto, Mark G",
+        "Pieczonka, Christopher",
+        "Gandhi, Nilay M",
+        "Sukin, Steven",
+        "Liss, Michael A",
+        "Tutrone, Ronald",
+        "Mehlhaff, Bryan",
+        "Savage, Stephen J",
+        "Goody, Megan",
+        "Vogt, Jenessa",
+        "Rao, Shangbang",
+        "Polanco, Maria Lucia Silva",
+        "Barone, Francesca",
+        "Nichols, W Garrett",
+        "Tak, Paul P"
+      ],
+      "journal": "The Lancet Oncology",
+      "pub_date": "2026-06",
+      "abstract": "Background About 30% of men with localised prostate cancer undergoing radiotherapy with curative intent have disease recurrence associated with progression-related symptoms and substantial toxicity of salvage therapies. Previous studies with aglatimagene besadenovec (CAN-2409, hereafter referred to as aglatimagene) showed synergy with radiation and immune-mediated cytotoxicity in patients with prostate cancer. We aimed to assess whether addition of aglatimagene plus prodrug (valacyclovir) to standard-of-care external beam radiation therapy (EBRT) could improve disease-free survival in this population. Methods We conducted a phase 3, randomised, double-blind, placebo-controlled trial at 51 medical centres (26 community and 25 institutional or military) across the USA and Puerto Rico in patients with intermediate or high-risk prostate cancer. Patients aged at least 18 years who were planning to undergo EBRT and with an Eastern Cooperative Oncology Group score of 0-2 were eligible. Patients were randomly assigned (2:1) via central block-randomisation to receive either three courses of intraprostatic aglatimagene (5 × 10 11 viral particles) plus valacyclovir or placebo plus valacyclovir, with randomisation stratified by risk category and androgen deprivation therapy (ADT) use. Patients received standard-of-care EBRT (78 Gy in 2 Gy fractions) or hypofractionated EBRT (60 Gy in 3 Gy fractions or 70 Gy in 2·5 Gy fractions) with optional ADT. The primary endpoint was disease-free survival, defined as time-from-randomisation to prostate cancer recurrence or death in the intent-to-treat population (all randomly assigned patients). Safety was assessed in all individuals who received at least one injection. The trial is registered at ClinicalTrials.gov, NCT01436968, and long-term follow-up is ongoing. Findings Between Feb 21, 2012, and Sept 9, 2021, 745 men (591 [79%] White, 121 [16%] Black) were randomly assigned to receive aglatimagene plus valacyclovir (n=496) or placebo plus valacyclovir (n=249). After a median follow-up of 50·3 months (IQR 35·2-63·3), median disease-free survival was not reached (95% CI 121·78 to not reached) in the aglatimagene plus valacyclovir group versus 86·1 (IQR 29·7-143·0) months in the placebo plus valacyclovir group (hazard ratio 0·70, 95% CI 0·52-0·94; p=0·016). Treatment-emergent adverse events (TEAEs) of grade 3 or worse occurred in 40 (8%) of 479 patients in the aglatimagene group and 17 (7%)of 232 patients in the placebo group. The most common TEAE of grade 3 or worse was acute kidney injury in both the aglatimagene group (nine [2%] of 479 patients) and the placebo group (four [2%] of 232 patients). Serious adverse events occurred in 28 (6%) of 479 patients in the aglatimagene group and 17 (7%) of 232 in the placebo group. Treatment-related serious adverse events occurred in eight (2%) patients in the aglatimagene group (four acute kidney injury, two pyrexia, and one each influenza-like symptoms and urinary retention) and five (2%) in the placebo group (four acute kidney injury, and one each increased creatinine levels and skin rash; one patient reported two serious adverse events). No treatment-related deaths were reported. Interpretation Aglatimagene plus valacyclovir was associated with longer disease-free survival than placebo plus valacyclovir when added to standard of radiotherapy for the treatment of localised prostate cancer, offering a meaningful benefit without increasing clinically significant toxicity. Funding Candel Therapeutics and US National Institutes of Health.",
+      "pdf_path": null,
+      "source_url": "https://doi.org/10.1016/S1470-2045(26)00071-9",
+      "note": "https://www.thelancet.com/journals/lanonc/article/PIIS1470-2045(26)00071-9/fulltext",
       "resolved_from_review": false
     }
   ]
