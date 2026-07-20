@@ -49,7 +49,7 @@ const canonicalUrl = canonicalHref(Astro.url, Astro.site?.toString());
 
 // v0.14 T4: absolute og:image URL (social cards require an absolute URL).
 const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
-const ogDescription = description || 'Curated, AI-summarized oncology meeting research, by disease site.';
+const ogDescription = description || 'Curated, AI-summarized oncology meeting research and published studies, by disease site.';
 
 // v0.11 PR-1a: namespace map + built-intersections allowlist for the
 // future filter rail (PR-2) and canonical-redirect logic (PR-5). Inlined

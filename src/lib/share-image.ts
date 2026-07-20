@@ -80,7 +80,7 @@ export function headlineSize(s: string): number {
 
 export function defaultCard(handle: string): ShareCard {
   return {
-    headline: 'Curated, AI-summarized oncology meeting research, by disease site.',
+    headline: 'Curated, AI-summarized oncology meeting research and published studies, by disease site.',
     handle,
   };
 }

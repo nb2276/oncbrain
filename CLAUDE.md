@@ -4,7 +4,7 @@ Project-level context for AI agents (Claude Code and others) working on this cod
 
 ## What this is
 
-**oncbrain** is a curated AI-summarized digest of oncology meeting research. A single oncologist sends sources from major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets): conference tweets, paper links (DOI/PubMed/journal pages), trade-press articles (ASCO Post, OncLive, UroToday, …), full-text PDFs, and slide photos. An AI pipeline analyzes them with comparative literature context and a standard-of-care verdict, and the output ships as a static site (plus an RSS feed + JSON API) at **https://oncbrain.oncologytoolkit.com**.
+**oncbrain** is a curated AI-summarized digest of oncology meeting research and published studies. A single oncologist sends sources from major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets) and from the published literature: conference tweets, paper links (DOI/PubMed/journal pages), trade-press articles (ASCO Post, OncLive, UroToday, …), full-text PDFs, and slide photos. An AI pipeline analyzes them with comparative literature context and a standard-of-care verdict, and the output ships as a static site (plus an RSS feed + JSON API) at **https://oncbrain.oncologytoolkit.com**.
 
 The site is organized by disease site (`/sites/breast/`, `/sites/prostate/`, etc.) and by date (`/2026-05-17/`). Each study gets a per-study TL;DR with effect sizes verbatim, then bullets that include comparisons to recent / historic literature and methodological critique when warranted.
 
