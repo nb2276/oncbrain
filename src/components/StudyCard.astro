@@ -212,7 +212,29 @@ const restingProse: { text: string; label: string; sublabel: string | null } | n
   : mondayClinicText
     ? { text: mondayClinicText, label: 'Monday clinic', sublabel: null }
     : null;
-const foldedClinic = significanceText ? mondayClinicText : null;
+// v0.31: the verdict Rationale, the Monday-clinic decision, and a Limitations
+// section can echo each other. When the Monday-clinic line substantially restates
+// the verdict rationale it adds nothing beside it in the fold, so drop it (the
+// rationale stays as the verdict's basis). Conservative word-overlap gate so a
+// genuinely distinct decision line is never hidden.
+function sigWordSet(s: string): Set<string> {
+  return new Set(
+    s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((w) => w.length > 3),
+  );
+}
+function contentOverlap(a: string, b: string): number {
+  const sa = sigWordSet(a);
+  const sb = sigWordSet(b);
+  if (sa.size === 0 || sb.size === 0) return 0;
+  let inter = 0;
+  for (const w of sa) if (sb.has(w)) inter++;
+  return inter / Math.min(sa.size, sb.size);
+}
+const rationaleText = typeof study.verdict?.rationale === 'string' ? study.verdict.rationale : '';
+const foldedClinic =
+  significanceText && mondayClinicText && contentOverlap(mondayClinicText, rationaleText) < 0.6
+    ? mondayClinicText
+    : null;
 
 // v0.27: the curator's own note on this study — the human editor's voice, set
 // durably via the override CLI (never LLM-generated). Rendered as its own
@@ -367,17 +389,17 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       so the head reads clean instead of a stacked pill + paragraph. ── */}
   <div class="glance">
   <div class="glance-top">
+    {verdictMeta && study.verdict && (
+      <span class:list={['verdict-chip', `verdict-${study.verdict.soc_implication}`]}>
+        <span class="verdict-emoji" aria-hidden="true">{verdictMeta.emoji}</span>{verdictMeta.label}
+      </span>
+    )}
     <h4 class="study-name">
       {study.name}
       {study.nct && (
         <a class="citation study-nct" href={`https://clinicaltrials.gov/study/${study.nct}`} target="_blank" rel="noopener">{study.nct}</a>
       )}
     </h4>
-    {verdictMeta && study.verdict && (
-      <span class:list={['verdict-chip', `verdict-${study.verdict.soc_implication}`]}>
-        <span class="verdict-emoji" aria-hidden="true">{verdictMeta.emoji}</span>{verdictMeta.label}
-      </span>
-    )}
   </div>
   {study.is_preprint && (
     <p class="preprint-badge" role="note" title="Preprint server (medRxiv / bioRxiv / Research Square). Findings are not yet peer-reviewed; the verdict is capped at early-signal.">
@@ -1455,14 +1477,17 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   }
   /* v0.30: glance-top — trial name (left) + a compact verdict chip (right),
      replacing the old stacked verdict pill + rationale paragraph. */
+  /* v0.31: verdict chip is a KICKER on its own line above the title. Beside-the-
+     title (the old space-between row) overlapped a long title that wrapped — the
+     chip sat over the first line. Stacking is robust for any title length. */
   .glance-top {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.6rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
     padding-right: 2.9rem; /* reserve the absolutely-positioned share button's corner */
   }
-  .glance-top .study-name { padding-right: 0; flex: 1 1 auto; min-width: 0; }
+  .glance-top .study-name { padding-right: 0; }
   /* v0.30: FILLED verdict chip (mockup parity). --verdict-color inverts per
      theme (dark hue in light mode, bright hue in dark), so the text color flips
      too: white on the dark-mode fills would fail, so dark mode uses near-bg text. */
@@ -1893,18 +1918,12 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     background: transparent;
     border-top: 1px solid var(--border);
     border-radius: 0;
-    /* v0.30: same left-labeled grid as the other depth sections. */
-    display: grid;
-    grid-template-columns: clamp(84px, 26%, 116px) 1fr;
-    column-gap: 0.9rem;
-    align-items: start;
+    /* v0.31: open questions carry rich nested "trials to watch" cards, which the
+       narrow left-label column squeezed. Stack the label ABOVE the content, full
+       width, at every viewport (unlike the terse-prose depth sections). */
   }
-  .study-open-questions > .section-label { color: var(--fg-muted); margin: 0; padding-top: 0.1rem; }
+  .study-open-questions > .section-label { color: var(--fg-muted); margin: 0 0 0.35rem; padding-top: 0; }
   .study-open-questions > ul { margin-top: 0; }
-  @media (max-width: 400px) {
-    .study-open-questions { grid-template-columns: 1fr; row-gap: 0.15rem; }
-    .study-open-questions > .section-label { padding-top: 0; margin-bottom: 0.25rem; }
-  }
 
   /* ── v0.13: trials-to-watch nest under each open question ─────────────
      Design review (gap 2) caught that a nested <ul> would inherit
