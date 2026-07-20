@@ -86,7 +86,25 @@ const SERIES: Series[] = [
     acronym: 'ASTRO',
     hashtags: [/#ASTRO(20\d\d|\d{2})\b/i],
     hosts: ['meetings.astro.org'],
-    prose: [/\bASTRO\s+Annual\s+Meeting\b/i],
+    // Real abstract/slide text brands the meeting "ASTRO 2025:" far more often
+    // than "ASTRO Annual Meeting", so match the acronym+year form too. The
+    // required whitespace + trailing year keeps "AUA/ASTRO guidelines" (year, if
+    // any, sits BEFORE the acronym) from mis-tagging.
+    prose: [/\bASTRO\s+Annual\s+Meeting\b/i, /\bASTRO\s+20[1-3]\d\b/i],
+  },
+  {
+    key: 'estro',
+    name: 'ESTRO Congress',
+    acronym: 'ESTRO',
+    hashtags: [/#ESTRO(20\d\d|\d{2})\b/i],
+    // estro.org also hosts society guidelines + working-group pages, so a host
+    // match would over-tag; the year-bearing hashtag/prose is unambiguous.
+    hosts: [],
+    // Brand is "ESTRO <year>" (ESTRO 2026 Stockholm), rarely "ESTRO Congress" in
+    // source text. The acronym+year form catches it; the required whitespace +
+    // year keeps GEC-ESTRO / ESMO-ESTRO / "(ESTRO) guidelines" (no adjacent
+    // year) from mis-tagging as the congress.
+    prose: [/\bESTRO\s+Congress\b/i, /\bESTRO\s+20[1-3]\d\b/i],
   },
   {
     key: 'aacr',

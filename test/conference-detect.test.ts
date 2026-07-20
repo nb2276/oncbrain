@@ -120,6 +120,46 @@ describe('detectConference — prose', () => {
   it('does not tag generic society mentions without a meeting phrase', () => {
     expect(detectConference('Per ASCO and ESMO recommendations in 2026')).toBeNull();
   });
+
+  // Regression: real ingested sources brand radonc meetings as "<ACRONYM> <year>"
+  // (abstract titles, slide footers), not "<ACRONYM> Annual Meeting". Prose used
+  // to require the formal phrase, so these all landed at conference_slug=null.
+  it('detects the "ASTRO 2025" abstract brand (not just "ASTRO Annual Meeting")', () => {
+    expect(detectConference('ASTRO 2025: Co-Primary Results from NRG-GU005')?.slug).toBe('astro-2025');
+    expect(detectConference('Hanlon et al abstract ASTRO 2024)')?.slug).toBe('astro-2024');
+  });
+
+  it('does not mis-tag "AUA/ASTRO guidelines" as the ASTRO meeting', () => {
+    // year sits BEFORE the acronym and no year trails it → not the meeting.
+    expect(detectConference('The 2022 AUA/ASTRO guidelines recommend 18-36 months')).toBeNull();
+  });
+});
+
+describe('detectConference — ESTRO (v0.31 regression)', () => {
+  it('detects the #ESTRO26 hashtag → estro-2026', () => {
+    const hit = detectConference('OLIGOMA trial results just dropped at #ESTRO26 and they are massive');
+    expect(hit?.slug).toBe('estro-2026');
+    expect(hit?.year).toBe(2026);
+    expect(hit?.hashtag).toBe('#ESTRO26');
+  });
+
+  it('detects the "ESTRO 2026" prose brand, including across a newline', () => {
+    expect(detectConference('interim analysis at ESTRO 2026')?.slug).toBe('estro-2026');
+    expect(detectConference('Prostate Cancer\nESTRO\n2026\nSTOCKHOLM')?.slug).toBe('estro-2026');
+  });
+
+  it('does not mis-tag GEC-ESTRO / ESMO-ESTRO / "(ESTRO) guidelines" (no adjacent year)', () => {
+    expect(detectConference('(GEC-ESTRO) Breast Cancer Working Group')).toBeNull();
+    expect(detectConference('ESMO-ESTRO advises caution in 2026')).toBeNull();
+    expect(detectConference('Society for Radiotherapy and Oncology (ESTRO) clinical guidelines')).toBeNull();
+  });
+
+  it('keeps ESTRO and ASTRO distinct (no cross-match)', () => {
+    expect(detectConference('#ESTRO26')?.slug).toBe('estro-2026');
+    expect(detectConference('#ASTRO26')?.slug).toBe('astro-2026');
+    expect(detectConference('ESTRO 2026')?.slug).toBe('estro-2026');
+    expect(detectConference('ASTRO 2026')?.slug).toBe('astro-2026');
+  });
 });
 
 describe('detectConference — precedence + misc', () => {
