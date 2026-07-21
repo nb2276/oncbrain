@@ -76,6 +76,10 @@ export type DigestStudy = {
   // perspective was set (significance then renders under the generic heading)
   // or when there is no significance.
   significance_perspective?: string | null;
+  // v0.32: per-specialty "why it matters" variants (mirrors llm-pipeline). The card
+  // shows `significance` by default and the SpecialtyBar swaps to the reader's
+  // picked specialty's entry when present.
+  significance_by_specialty?: Partial<Record<'radonc' | 'medonc' | 'surgonc', string>> | null;
   // v0.26 (E3): the "Monday clinic" decision line — one grounded sentence naming
   // which patient this study moves and which it does not. Peer-forward trigger +
   // E1 share-body content. Distinct from significance; abstains when it would

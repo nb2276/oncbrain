@@ -470,6 +470,29 @@ describe('parseStudyAgentResponse', () => {
     expect(parseStudyAgentResponse(raw, cluster).significance_perspective).toBeUndefined();
   });
 
+  it('parses significance_by_specialty variants, dropping unknown keys + thin entries (v0.32)', () => {
+    const radonc = 'a'.repeat(60);
+    const medonc = 'b'.repeat(60);
+    const raw = JSON.stringify({
+      name: 'X',
+      tldr: 'y',
+      details: [],
+      significance_by_specialty: { radonc, medonc, bogus: 'c'.repeat(60), surgonc: 'too short' },
+    });
+    expect(parseStudyAgentResponse(raw, cluster).significance_by_specialty).toEqual({ radonc, medonc });
+  });
+
+  it('leaves significance_by_specialty null when absent, empty, non-object, or all thin (v0.32)', () => {
+    const none = JSON.stringify({ name: 'X', tldr: 'y', details: [] });
+    expect(parseStudyAgentResponse(none, cluster).significance_by_specialty).toBeNull();
+    const empty = JSON.stringify({ name: 'X', tldr: 'y', details: [], significance_by_specialty: {} });
+    expect(parseStudyAgentResponse(empty, cluster).significance_by_specialty).toBeNull();
+    const arr = JSON.stringify({ name: 'X', tldr: 'y', details: [], significance_by_specialty: ['radonc'] });
+    expect(parseStudyAgentResponse(arr, cluster).significance_by_specialty).toBeNull();
+    const thin = JSON.stringify({ name: 'X', tldr: 'y', details: [], significance_by_specialty: { radonc: 'x' } });
+    expect(parseStudyAgentResponse(thin, cluster).significance_by_specialty).toBeNull();
+  });
+
   it('preserves structured {text, subdetails} bullets (v0.4.1 hotfix)', () => {
     const raw = JSON.stringify({
       name: 'POP-RT vs PEACE-2',

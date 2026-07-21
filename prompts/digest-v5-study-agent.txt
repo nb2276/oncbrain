@@ -247,6 +247,30 @@ a treatment decision for. This is clinical RELEVANCE, NOT the modality tag.
   one is set) frames the significance PROSE, not this field — do not over-weight your
   own specialty when deciding who a study is relevant to.
 
+═══ SIGNIFICANCE BY SPECIALTY (per-reader "why it matters") ═══
+Emit `significance_by_specialty`: an object with a key for EACH specialty in
+`relevant_specialties`, each value a 2-3 sentence "why it matters" written from THAT
+subspecialty's decision lens — what THIS study changes for a radiation ("radonc"),
+medical ("medonc"), or surgical ("surgonc") oncologist SPECIFICALLY. This powers a
+reader-facing toggle: when a med onc selects their field on the site, the card swaps
+its "why it matters" prose to your "medonc" entry.
+
+Rules for `significance_by_specialty`:
+- ONE key per relevant specialty, using the same slugs ("radonc" / "medonc" /
+  "surgonc"). Do NOT invent keys or include a specialty absent from relevant_specialties.
+- Each entry is that specialty's OWN read: lead with the additive detail and the
+  decision it moves FOR THAT reader. A radonc entry foregrounds dose / target volume /
+  local-regional control; a medonc entry the regimen / biomarker / sequencing; a surgonc
+  entry resectability / margin / extent of resection. Two entries for the same study must
+  differ in what they emphasize, not merely reword one text.
+- GROUNDED. Same no-fabrication bar as `significance`: every number verbatim from source,
+  no invented subgroup or population. A magnitude a lens wants but the source lacks is
+  omitted, not guessed.
+- For a single-specialty study this is just one key echoing `significance` — fine, emit it
+  so the toggle still resolves. Omit a key (or set the whole field to null) only when that
+  specialty gets nothing additive beyond the shared bullets.
+- 2 to 3 sentences each, ≤55 words, no em dashes, no banned vocab.
+
 ═══ OUTPUT SHAPE ═══
 
 ```json
@@ -321,6 +345,10 @@ a treatment decision for. This is clinical RELEVANCE, NOT the modality tag.
     {"label": "Limitations", "body": "Open-label; QoL secondary unblinded. Comparator predates modern sequencing."}
   ],
   "relevant_specialties": ["radonc", "medonc"],
+  "significance_by_specialty": {
+    "radonc": "Local control is the RT read: the node-positive subgroup reached 91% in-field control at 3y (Fig 3) with 60Gy/20fx to involved nodes, transferable to standard practice, moving the elective-nodal-coverage decision.",
+    "medonc": "The systemic backbone was fixed (6mo ADT both arms), so the OS-negative headline reflects the RT question, not the regimen; for a med onc this reaffirms current sequencing rather than changing drug choice."
+  },
   "modality": "radiation",
   "intent": "curative",
   "methodology": "phase-2-trial",
@@ -362,6 +390,7 @@ Rules:
 - `figures`: 0-4 items, ordered most-informative first. Each `url` must be EXACTLY one of the image URLs in the manifest below — don't invent URLs, don't repeat the same URL twice. Abstain (empty array `[]`) rather than promote weak images.
 - `verdict` is REQUIRED. Pick `soc_implication` from the taxonomy in the VOICE block above (6 enums). When uncertain, default conservatively (prefer `unclear` over guessing; prefer `early-signal` or `confirmatory` over `practice-changing`). `rationale` ≤30 words and explains the VERDICT CHOICE (not the trial result). `audience` ≤80 chars, one-line eligibility gate, or null when applicability is too broad to compress.
 - `significance` is the perspective-framed "why it matters" prose (see the SIGNIFICANCE section above). 2 to 3 sentences, aim ≤55 words (ceiling 70), written for the SPECIALTY PERSPECTIVE reader. Lead with the SUBTLE additive detail the bullets drop (subgroup/figure/table signal, technique parameter, local-regional endpoint) and name the decision it moves; do NOT restate the verdict's maturity caveat or open with a preamble sentence. Grounded (no fabricated numbers, no em dashes, no banned vocab). Set to **null** when there is nothing additive beyond the bullets or no specialty-specific "so what". A forced angle is worse than none.
+- `significance_by_specialty` is the per-specialty "why it matters" map (see that section above): one key per specialty in `relevant_specialties`, each 2 to 3 grounded sentences from that reader's decision lens, so the site can swap the prose to the reader's chosen field. Same no-fabrication bar as `significance`; entries must differ in emphasis, not just wording; null when nothing specialty-specific is additive.
 - `monday_clinic` is the one-sentence clinic-decision line (see the MONDAY CLINIC section above): which patient this moves and, where it sharpens the read, which it does NOT. Evidence-context framing only, never a directive or dose (not medical advice). Grounded (no fabricated numbers/populations, no em dashes, no banned vocab). Set to **null** when it would just restate `significance` or when there is no single clinic-actionable read. A forced clinic sentence is worse than none.
 - `modality`, `intent`, `methodology`: cross-cutting tag fields, OPTIONAL — emit `null` when the source doesn't make the classification unambiguous. Pick exactly ONE value per field from the enums below; never invent a new value. These drive cross-corpus navigation pages (`/tags/<slug>/`), so a conservative null is much better than a guess that puts the study on a wrong landing page.
   - `modality`: the primary treatment modality being evaluated. Enum:

@@ -302,6 +302,13 @@ export type DigestStudy = {
   // definition, so the two MUST stay in lockstep.
   significance?: string | null;
   significance_perspective?: string | null;
+  // v0.32: per-specialty "why it matters" variants, keyed by SpecialtyTag. Phase 2
+  // writes one entry per relevant specialty, each a 2-4 sentence significance from
+  // THAT subspecialty's decision lens. Powers the reader's specialty toggle: the
+  // card shows `significance` by default and swaps to significance_by_specialty[pick]
+  // when the reader selects their field. Null for a single-specialty study or when
+  // nothing specialty-specific is additive. Mirrored in digest-data.ts.
+  significance_by_specialty?: Partial<Record<SpecialtyTag, string>> | null;
   // v0.26 (E3): the "Monday clinic" decision line — ONE grounded sentence naming
   // which patient in tomorrow's clinic this study moves, and which it does NOT.
   // The peer-forward trigger (the sentence a subspecialist screenshots) and the
@@ -1575,6 +1582,19 @@ const SPECIALTY_ALIASES: Record<string, SpecialtyTag> = {
   medonc: 'medonc', medical: 'medonc', 'medical-oncology': 'medonc', 'medical oncology': 'medonc',
   surgonc: 'surgonc', surgery: 'surgonc', surgical: 'surgonc', 'surgical-oncology': 'surgonc', 'surgical oncology': 'surgonc',
 };
+// v0.32: per-specialty significance variants. Each value runs through the same
+// prose sanitizer as `significance` (trim / min+max chars); only the known
+// specialty keys survive. Null when the object yields no valid entry.
+function parseSignificanceBySpecialty(raw: unknown): Partial<Record<SpecialtyTag, string>> | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const o = raw as Record<string, unknown>;
+  const out: Partial<Record<SpecialtyTag, string>> = {};
+  for (const tag of SPECIALTY_TAGS) {
+    const v = parseSignificance(o[tag]);
+    if (v) out[tag] = v;
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
 function parseRelevantSpecialties(raw: unknown): SpecialtyTag[] | null {
   if (!Array.isArray(raw)) return null;
   const seen = new Set<SpecialtyTag>();
@@ -1722,6 +1742,7 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     primary_endpoint: parsePrimaryEndpoint(root.primary_endpoint),
     analysis_sections: parseAnalysisSections(root.analysis_sections),
     relevant_specialties: parseRelevantSpecialties(root.relevant_specialties),
+    significance_by_specialty: parseSignificanceBySpecialty(root.significance_by_specialty),
     open_questions: parseOpenQuestions(root.open_questions),
     consort: parseConsort(root.consort),
     modality,

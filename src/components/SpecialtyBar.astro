@@ -133,6 +133,9 @@
   (function () {
     var KEY = 'oncbrain:specialties';
     var KNOWN = { radonc: 1, medonc: 1, surgonc: 1 };
+    // v0.32: when several specialties are picked, the card's "why it matters" shows
+    // the first one (this fixed order) that the card actually has a variant for.
+    var SIG_PRIORITY = ['radonc', 'medonc', 'surgonc'];
     function init() {
       var bar = document.querySelector('[data-specialty-bar]');
       if (!bar) return;
@@ -164,6 +167,35 @@
         // would silently persist [] and the preference would never survive a reload.
         try { localStorage.setItem(KEY, JSON.stringify(Array.from(set))); } catch (e) {}
       }
+      // v0.32: show the "why it matters" written for the reader's picked specialty
+      // when this card carries such a variant; else the default block. Scoped to
+      // blocks whose closest .study is THIS card, so a nested sibling card's
+      // variants are never toggled by the parent's pass.
+      function swapSignificance(card, set, active) {
+        var all = card.querySelectorAll('[data-sig-for]');
+        if (!all.length) return;
+        var variants = [];
+        for (var i = 0; i < all.length; i++) if (all[i].closest('.study') === card) variants.push(all[i]);
+        if (!variants.length) return;
+        var pick = null;
+        if (active) {
+          for (var p = 0; p < SIG_PRIORITY.length && !pick; p++) {
+            if (!set.has(SIG_PRIORITY[p])) continue;
+            for (var v = 0; v < variants.length; v++) {
+              if (variants[v].getAttribute('data-sig-for') === SIG_PRIORITY[p]) { pick = SIG_PRIORITY[p]; break; }
+            }
+          }
+        }
+        for (var v2 = 0; v2 < variants.length; v2++) {
+          if (pick && variants[v2].getAttribute('data-sig-for') === pick) variants[v2].removeAttribute('hidden');
+          else variants[v2].setAttribute('hidden', '');
+        }
+        var defs = card.querySelectorAll('[data-sig-default]');
+        for (var d = 0; d < defs.length; d++) {
+          if (defs[d].closest('.study') !== card) continue;
+          if (pick) defs[d].setAttribute('hidden', ''); else defs[d].removeAttribute('hidden');
+        }
+      }
       function apply(set) {
         var active = set.size > 0;
         var relevant = 0;
@@ -182,6 +214,7 @@
           } else {
             card.setAttribute('data-specialty-dim', '');
           }
+          swapSignificance(card, set, active);
         }
         if (countEl) {
           if (active) { countEl.textContent = relevant + ' relevant'; countEl.removeAttribute('hidden'); }

@@ -212,6 +212,22 @@ const restingProse: { text: string; label: string; sublabel: string | null } | n
   : mondayClinicText
     ? { text: mondayClinicText, label: 'Monday clinic', sublabel: null }
     : null;
+// v0.32: per-specialty "why it matters" variants. The default significance-block
+// (restingProse) stays the primary/fallback; when the reader picks their specialty
+// in the header bar, the client hides the default and reveals the matching variant.
+// Only render variants when a real significance holds the resting slot (not the
+// promoted Monday-clinic line) and the map carries specialty-keyed entries.
+const SPECIALTY_LABELS: Record<string, string> = {
+  radonc: 'Radiation oncology',
+  medonc: 'Medical oncology',
+  surgonc: 'Surgical oncology',
+};
+const significanceVariants: Array<{ specialty: string; label: string; text: string }> =
+  significanceText && study.significance_by_specialty
+    ? Object.entries(study.significance_by_specialty)
+        .filter(([spec, text]) => SPECIALTY_LABELS[spec] && typeof text === 'string' && !!text.trim())
+        .map(([spec, text]) => ({ specialty: spec, label: SPECIALTY_LABELS[spec]!, text: (text as string).trim() }))
+    : [];
 // v0.31: the verdict Rationale, the Monday-clinic decision, and a Limitations
 // section can echo each other. When the Monday-clinic line substantially restates
 // the verdict rationale it adds nothing beside it in the fold, so drop it (the
@@ -461,7 +477,11 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     </section>
   )}
   {restingProse && (
-    <section class="significance-block" aria-label="Why this study matters">
+    <section
+      class="significance-block"
+      aria-label="Why this study matters"
+      data-sig-default={significanceVariants.length > 0 ? '' : undefined}
+    >
       <div class="significance-label">
         {restingProse.label}{restingProse.sublabel && (
           <Fragment><span class="significance-sep" aria-hidden="true"> · </span>{restingProse.sublabel}</Fragment>
@@ -470,6 +490,22 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       <p class="significance-text" set:html={linkifyCitations(restingProse.text)} />
     </section>
   )}
+  {/* v0.32: hidden per-specialty variants; the SpecialtyBar reveals the one the
+      reader picks and hides the default. Server-rendered so each keeps citation
+      links + styling for free. */}
+  {significanceVariants.map((v) => (
+    <section
+      class="significance-block significance-variant"
+      aria-label={`Why this study matters for ${v.label.toLowerCase()}`}
+      data-sig-for={v.specialty}
+      hidden
+    >
+      <div class="significance-label">
+        Why it matters<span class="significance-sep" aria-hidden="true"> · </span>{v.label}
+      </div>
+      <p class="significance-text" set:html={linkifyCitations(v.text)} />
+    </section>
+  ))}
   {curatorNoteText && (
     <section class="curator-note-block" aria-label="Curator's note">
       <div class="curator-note-label">📝 Curator's note</div>
@@ -1210,6 +1246,10 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     border-left: 3px solid var(--accent);
     border-radius: 4px;
   }
+  /* v0.32: the per-specialty variant blocks ship SSR-hidden; the SpecialtyBar
+     reveals the picked one. Explicit guard so a scoped display rule can't leak an
+     inert variant onto the card. */
+  .significance-block[hidden] { display: none; }
   .significance-label {
     font-family: var(--font-sans);
     font-size: 0.68rem;
