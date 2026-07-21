@@ -1,5 +1,8 @@
 ---
-// v0.31: the reader's saved "for my specialty" preference. Pure client-side +
+// v0.31: the reader's saved "for my specialty" preference. v0.32: promoted from a
+// muted divider to a distinct, labeled panel (action label + helper subtitle + card
+// container) so readers actually discover they can pick their specialty.
+// Pure client-side +
 // localStorage — independent of the tag filter rail. When one or more specialties
 // are picked, studies NOT relevant to any of them are DIMMED (kept in place, just
 // de-emphasized) so the studies that matter to the reader stand out; the pick
@@ -9,7 +12,10 @@
 ---
 
 <div class="specialty-bar" data-specialty-bar hidden>
-  <span class="specialty-bar-label">Relevant to my specialty</span>
+  <div class="specialty-bar-head">
+    <span class="specialty-bar-label">Focus on your specialty</span>
+    <span class="specialty-bar-sub">Highlight the studies that matter to you. Saved for next time.</span>
+  </div>
   <div class="specialty-bar-opts" role="group" aria-label="Emphasize studies relevant to your specialty">
     <label class="specialty-chip">
       <input type="checkbox" data-specialty="radonc" />
@@ -29,38 +35,55 @@
 </div>
 
 <style>
+  /* v0.32: promoted from a muted divider to a distinct, inviting panel — the
+     reader has to notice it's a control they can use (the curator didn't). A
+     card container + an action label + a one-line "what this does / it's saved"
+     helper carry the affordance. */
   .specialty-bar {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.4rem 0.6rem;
-    margin: 0 0 1.25rem;
-    padding: 0.5rem 0.15rem;
+    gap: 0.5rem 0.9rem;
+    margin: 0 0 1.5rem;
+    padding: 0.7rem 0.9rem;
     font-family: var(--font-sans);
-    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
   }
   /* An author `display` beats the UA [hidden]{display:none} rule, so the SSR
      `hidden` attribute (self-hide when no tagged studies) needs this explicit
      guard — else an inert bar renders on every page until the corpus is rebuilt. */
   .specialty-bar[hidden] { display: none; }
-  .specialty-bar-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--fg-muted);
+  .specialty-bar-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    margin-right: 0.3rem;
   }
-  .specialty-bar-opts { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .specialty-bar-label {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--fg);
+    line-height: 1.2;
+  }
+  .specialty-bar-sub {
+    font-size: 0.74rem;
+    color: var(--fg-muted);
+    line-height: 1.3;
+  }
+  .specialty-bar-opts { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
   .specialty-chip {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    min-height: 34px;
-    padding: 0.22rem 0.6rem;
-    background: var(--bg-card);
+    min-height: 36px;
+    padding: 0.28rem 0.7rem;
+    background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 999px;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     color: var(--fg);
     cursor: pointer;
     user-select: none;
