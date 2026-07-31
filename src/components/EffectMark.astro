@@ -1,0 +1,119 @@
+---
+// v0.33 slice 1: the effect-size mark. A forest dot on a log axis, drawn
+// directly under the primary endpoint number it visualizes.
+//
+// DESIGN CONSTRAINTS (from the design review — see DESIGN.md → Effect-size mark):
+//   NEUTRAL COLOR. --fg for the estimate, --fg-muted for the axis furniture.
+//   Never verdict color: StudyCard keeps valence in the headline number's
+//   UNDERLINE specifically so a negative HR never reads as a colored win, and a
+//   verdict-green dot on the harm side of the null would contradict that.
+//   Direction is carried by POSITION relative to the null line, which also
+//   survives colorblindness, greyscale and print.
+//
+//   OPACITY IS NOT AVAILABLE. The SpecialtyBar dims off-specialty cards with
+//   opacity, so encoding imprecision as faintness would collide: a dimmed card
+//   with a wide interval would be faint for two unrelated reasons. Imprecision
+//   is drawn as WIDTH, which is also the honest encoding — the interval to
+//   scale IS the uncertainty.
+//
+//   NO "FAVORS X / FAVORS Y" SPINE. It needs arm names the artifact does not
+//   reliably carry, and a guessed arm label is a clinical error, not a flourish.
+//
+// All coordinates come from markGeometry() in effect-size.ts — this file paints,
+// it does not compute, so a future satori renderer can share the math exactly.
+//
+// aria-hidden: the estimate and its interval are already in the card's text
+// immediately above. A screen reader should not announce the same numbers twice.
+import { markGeometry, describeEffect, type EffectDatum, type AxisDomain } from '../lib/effect-size.ts';
+
+interface Props {
+  datum: EffectDatum;
+  domain: AxisDomain;
+}
+const { datum, domain } = Astro.props;
+
+// Intrinsic size, never scaled UP: text inside a scaled viewBox scales with it,
+// and the design review set an 11px floor on tick labels. Capping the rendered
+// width at the viewBox width keeps 11px meaning 11px.
+const W = 280;
+const H = 44;
+const PAD = 10; // keeps a clipped arrowhead and the edge tick labels inside the box
+const PLOT = W - PAD * 2;
+
+const AXIS_Y = 26;
+const BAR_Y = 17;
+const TICK_Y = 39;
+
+const g = markGeometry(datum, domain, PLOT);
+const px = (n: number) => PAD + n;
+const label = describeEffect(datum);
+---
+
+<svg
+  class="emark"
+  viewBox={`0 0 ${W} ${H}`}
+  width={W}
+  height={H}
+  role="img"
+  aria-hidden="true"
+  focusable="false"
+>
+  <title>{label}</title>
+
+  {/* Axis hairline */}
+  <line class="emark-axis" x1={PAD} y1={AXIS_Y} x2={W - PAD} y2={AXIS_Y} />
+
+  {/* Null at 1.0. Dashed so it reads as a reference, not as data. */}
+  <line class="emark-null" x1={px(g.nullX)} y1={BAR_Y - 8} x2={px(g.nullX)} y2={AXIS_Y + 3} />
+
+  {/* Confidence interval, drawn to scale. Absent when the source reported none. */}
+  {g.loX !== null && g.hiX !== null && (
+    <line class="emark-ci" x1={px(g.loX)} y1={BAR_Y} x2={px(g.hiX)} y2={BAR_Y} />
+  )}
+
+  {/* Clip indicators: the interval ran past the axis. An arrowhead says
+      "continues", so a truncated interval never reads as ending here. */}
+  {g.clippedLo && (
+    <path class="emark-clip" d={`M ${px(g.loX ?? 0) + 7} ${BAR_Y - 5} L ${px(g.loX ?? 0)} ${BAR_Y} L ${px(g.loX ?? 0) + 7} ${BAR_Y + 5}`} />
+  )}
+  {g.clippedHi && (
+    <path class="emark-clip" d={`M ${px(g.hiX ?? PLOT) - 7} ${BAR_Y - 5} L ${px(g.hiX ?? PLOT)} ${BAR_Y} L ${px(g.hiX ?? PLOT) - 7} ${BAR_Y + 5}`} />
+  )}
+
+  {/* Point estimate */}
+  <circle class="emark-point" cx={px(g.pointX)} cy={BAR_Y} r="4" />
+
+  {/* Three ticks: the scale is what makes the dot's position mean anything.
+      Edge labels anchor inward so they can't overflow the box. */}
+  {g.ticks.map((t, i) => (
+    <text
+      class="emark-tick"
+      x={px(t.x)}
+      y={TICK_Y}
+      text-anchor={i === 0 ? 'start' : i === g.ticks.length - 1 ? 'end' : 'middle'}
+    >{t.label}</text>
+  ))}
+</svg>
+
+<style>
+  .emark {
+    display: block;
+    width: 100%;
+    max-width: 280px; /* never scale UP, or the 11px tick floor stops holding */
+    height: auto;
+    margin: 0.5rem 0 0;
+    overflow: visible;
+  }
+  /* Axis furniture recedes; the estimate is the only thing at full strength. */
+  .emark-axis { stroke: var(--fg-muted); stroke-width: 1; opacity: 0.45; }
+  .emark-null { stroke: var(--fg-muted); stroke-width: 1; stroke-dasharray: 2 2; opacity: 0.8; }
+  .emark-ci { stroke: var(--fg); stroke-width: 2; stroke-linecap: round; opacity: 0.55; }
+  .emark-clip { stroke: var(--fg); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55; }
+  .emark-point { fill: var(--fg); }
+  .emark-tick {
+    font-family: var(--font-sans);
+    font-size: 11px; /* floor set by the design review; do not shrink, drop instead */
+    fill: var(--fg-muted);
+    font-variant-numeric: tabular-nums;
+  }
+</style>
