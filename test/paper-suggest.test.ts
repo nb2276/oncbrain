@@ -134,3 +134,31 @@ describe('formatSuggestionReply', () => {
     expect(reply).not.toContain('—'); // VOICE: no em dashes
   });
 });
+
+describe('formatSuggestionReply — naming the failed page', () => {
+  const FAILED = 'https://www.sciencedirect.com/science/article/pii/S0360301624001230';
+  const SUGGESTION = {
+    title: 'A trial of something',
+    journal: 'Int J Radiat Oncol Biol Phys',
+    year: '2024',
+    url: 'https://pubmed.ncbi.nlm.nih.gov/38123456/',
+    source: 'pubmed' as const,
+    identifier: '38123456',
+    score: 1,
+  };
+
+  it('distinguishes the rejected page from the suggested replacement', () => {
+    // This reply carries TWO links. Without naming the first, the curator has to
+    // guess which was rejected and which to forward back.
+    const reply = formatSuggestionReply('fetch refused: HTTP 403', SUGGESTION, FAILED);
+    expect(reply).toContain(FAILED);
+    expect(reply).toContain(SUGGESTION.url);
+    expect(reply.indexOf(FAILED)).toBeLessThan(reply.indexOf(SUGGESTION.url));
+    expect(reply).not.toContain('—');
+  });
+
+  it('falls back to the parenthetical form with no label', () => {
+    const reply = formatSuggestionReply('fetch refused: HTTP 403', SUGGESTION);
+    expect(reply).toContain("Couldn't ingest that page directly (fetch refused: HTTP 403).");
+  });
+});

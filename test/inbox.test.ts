@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import Database from 'better-sqlite3';
 import {
@@ -364,5 +366,107 @@ describe('setBookmarkConferenceIfEmpty', () => {
     // A second attempt with a different slug must NOT overwrite.
     expect(setBookmarkConferenceIfEmpty(db, id, 'esmo-2025')).toBe(false);
     expect(listBookmarks(db)[0]!.conference_slug).toBe('asco-2026');
+  });
+});
+
+describe('paperFailureReply — naming the failed link', () => {
+  const URL = 'https://www.sciencedirect.com/science/article/pii/S0360301624001230';
+
+  it('names the link that was not ingested', () => {
+    const msg = paperFailureReply('url', 'fetch refused: HTTP 403', URL);
+    expect(msg).toContain(URL);
+    expect(msg).toContain('Reason: fetch refused: HTTP 403');
+  });
+
+  it('leads with the link, before the reason', () => {
+    // Forwarding a batch produces a batch of replies; "which one?" must be
+    // answerable without scrolling past the explanation.
+    const msg = paperFailureReply('url', 'fetch refused: HTTP 403', URL);
+    expect(msg.indexOf(URL)).toBeLessThan(msg.indexOf('Reason:'));
+  });
+
+  it('names a DOI/PMID target too, without the send-a-DOI hint', () => {
+    const msg = paperFailureReply('doi', 'crossref parse: no title', '10.1016/j.ijrobp.2024.01.001');
+    expect(msg).toContain('10.1016/j.ijrobp.2024.01.001');
+    expect(msg).not.toMatch(/send the DOI/i);
+  });
+
+  it('names a PDF by filename rather than a link', () => {
+    expect(paperFailureReply('url', 'no text layer', 'supremo-nejm.pdf')).toContain('supremo-nejm.pdf');
+  });
+
+  it('falls back to the old single-line form when there is no label', () => {
+    expect(paperFailureReply('doi', 'network: timeout')).toBe(
+      "Couldn't ingest that paper: network: timeout",
+    );
+    expect(paperFailureReply('doi', 'network: timeout', '   ')).toBe(
+      "Couldn't ingest that paper: network: timeout",
+    );
+    expect(paperFailureReply('doi', 'network: timeout', null)).toBe(
+      "Couldn't ingest that paper: network: timeout",
+    );
+  });
+
+  it('keeps the reply free of em dashes (VOICE)', () => {
+    expect(paperFailureReply('url', 'fetch refused: HTTP 403', URL)).not.toContain('—');
+  });
+});
+
+describe('PDF failure replies name the file', () => {
+  // Same defect as the paper reply: forwarding several PDFs at once produced
+  // interchangeable failure messages. describeSource returns the filename.
+  const src = readFileSync(resolve(process.cwd(), 'src/lib/inbox-enrichment.ts'), 'utf-8');
+  // Comment lines quote the very strings under test, so strip them before
+  // grepping or the assertions match their own documentation.
+  const code = src
+    .split('\n')
+    .filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l))
+    .join('\n');
+
+  const pdfItem = (fileName: unknown): InboxItem =>
+    ({
+      id: 1,
+      type: 'paper',
+      raw_target: 'file-id-123',
+      raw_message_text: null,
+      attachments_json: JSON.stringify({ kind: 'pdf', file_name: fileName }),
+      bookmark_date: '2026-07-31',
+      telegram_chat_id: 42,
+      status: 'pending',
+    }) as unknown as InboxItem;
+
+  it('every PDF failure reply interpolates describeSource(item)', () => {
+    const pdfReplies = code
+      .split('\n')
+      .filter((l) => /Couldn't (fetch|read|file) that PDF|isn't a PDF:/.test(l));
+    expect(pdfReplies.length).toBeGreaterThanOrEqual(4);
+    for (const line of pdfReplies) {
+      expect(line).toContain('describeSource(item)');
+    }
+  });
+
+  it('puts the file before the reason in each of them', () => {
+    const templates = [...code.matchAll(/`(?:Couldn't [^`]*?that PDF|That file isn't a PDF)[^`]*`/g)];
+    expect(templates.length).toBeGreaterThanOrEqual(4);
+    for (const m of templates) {
+      const tpl = m[0];
+      expect(tpl.indexOf('describeSource(item)')).toBeLessThan(tpl.indexOf('Reason:'));
+    }
+  });
+
+  // Behavioral, not structural: a filename that is truthy but cleans to empty
+  // would render a reply that names nothing.
+  it('never yields an empty label for a PDF, however malformed the filename', () => {
+    expect(describeSource(pdfItem('   '))).toBe('the PDF you sent');
+    expect(describeSource(pdfItem('\u0000\u0001'))).toBe('the PDF you sent');
+    expect(describeSource(pdfItem(''))).toBe('the PDF you sent');
+    expect(describeSource(pdfItem(null))).toBe('the PDF you sent');
+    expect(describeSource(pdfItem('supremo-nejm.pdf'))).toBe('supremo-nejm.pdf');
+  });
+
+  it('replies to the curator with link previews disabled', () => {
+    // The reply text now carries the curator-pasted URL that just failed;
+    // previews would make Telegram re-fetch it and attach a broken card.
+    expect(code).toMatch(/sendMessage\([\s\S]{0,140}disableWebPagePreview:\s*true/);
   });
 });

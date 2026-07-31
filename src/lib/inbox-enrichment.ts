@@ -453,7 +453,10 @@ async function enrichPdfPaper(
     if (err instanceof TelegramFileError) {
       const retryable = err.kind === 'network';
       if (!retryable) {
-        await replyToCurator(item, `Couldn't fetch that PDF: ${friendlyDownloadReason(err.kind)}`);
+        await replyToCurator(
+          item,
+          `Couldn't fetch that PDF: ${describeSource(item)}\n\nReason: ${friendlyDownloadReason(err.kind)}`,
+        );
       }
       return { status: 'failed', reason: `pdf download ${err.kind}: ${err.message}`, permanent: !retryable };
     }
@@ -462,7 +465,10 @@ async function enrichPdfPaper(
 
   // 2. Verify the bytes really are a PDF.
   if (!isPdfBuffer(buffer)) {
-    await replyToCurator(item, "That file isn't a PDF (failed the magic-byte check).");
+    await replyToCurator(
+      item,
+      `That file isn't a PDF: ${describeSource(item)}\n\nReason: failed the magic-byte check.`,
+    );
     return { status: 'failed', reason: 'not a PDF (magic-byte check failed)', permanent: true };
   }
   const contentHash = createHash('sha256').update(buffer).digest('hex');
@@ -513,7 +519,10 @@ async function enrichPdfPaper(
       }
       const retryable = err.kind === 'extract-failed'; // transient poppler hiccup only
       if (!retryable) {
-        await replyToCurator(item, `Couldn't read that PDF (${err.kind}).${filedNote}`);
+        await replyToCurator(
+          item,
+          `Couldn't read that PDF: ${describeSource(item)}\n\nReason: ${err.kind}.${filedNote}`,
+        );
       }
       return { status: 'failed', reason: `pdf ${err.kind}: ${err.message}`, permanent: !retryable };
     }
@@ -586,7 +595,10 @@ async function enrichPdfPaper(
   try {
     filedRelPath = filePdfToVault({ buffer, site: meta.disease_site, slug }).relPath;
   } catch (err) {
-    await replyToCurator(item, `Couldn't file the PDF to the vault: ${(err as Error).message}`);
+    await replyToCurator(
+      item,
+      `Couldn't file that PDF to the vault: ${describeSource(item)}\n\nReason: ${(err as Error).message}`,
+    );
     return { status: 'failed', reason: `pdf filing failed: ${(err as Error).message}` };
   }
 
@@ -962,8 +974,21 @@ function classifyResolveError(err: unknown): { retryable: boolean; message: stri
 // DOI or the PubMed link / PMID, which resolve via the Crossref / PubMed APIs
 // without ever fetching the publisher page. Only journal-URL targets get the
 // hint; a DOI/PMID that failed would not benefit from "send a DOI".
-export function paperFailureReply(targetKind: string, message: string): string {
-  const base = `Couldn't ingest that paper: ${message}`;
+// `sourceLabel` (from describeSource) names WHICH item failed. Forwarding a
+// batch produces a batch of replies, and "Couldn't ingest that paper" alone
+// leaves the curator guessing which link it refers to — the threaded
+// reply_to_message_id helps on desktop but collapses on mobile, and one message
+// can carry several links. Leading with the link makes the reply answer "which
+// one?" before "why?". Optional so the canned text still stands alone.
+export function paperFailureReply(
+  targetKind: string,
+  message: string,
+  sourceLabel?: string | null,
+): string {
+  const label = sourceLabel?.trim();
+  const base = label
+    ? `Couldn't ingest that paper:\n${label}\n\nReason: ${message}`
+    : `Couldn't ingest that paper: ${message}`;
   if (targetKind === 'url') {
     return (
       `${base}\n\n` +
@@ -1003,7 +1028,12 @@ export function describeSource(item: InboxItem): string {
     } catch {
       // malformed attachment metadata → the generic label below
     }
-    return fileName ? cleanSourceLabel(fileName) : 'the PDF you sent';
+    // Clean BEFORE deciding the fallback: a filename that is entirely control
+    // chars or whitespace is truthy but cleans to '', and the PDF failure
+    // replies interpolate this directly — an empty label would render as
+    // "Couldn't fetch that PDF: \n\nReason: …", naming nothing.
+    const cleaned = fileName ? cleanSourceLabel(fileName) : '';
+    return cleaned || 'the PDF you sent';
   }
   return cleanSourceLabel(item.raw_target ?? '');
 }
@@ -1022,7 +1052,10 @@ async function buildPaperFailureReply(
   item: InboxItem,
   err: unknown,
 ): Promise<string> {
-  if (targetKind !== 'url') return paperFailureReply(targetKind, message);
+  // Name the failed source in every branch below, so a batch of replies is
+  // attributable without relying on Telegram's threading.
+  const sourceLabel = describeSource(item);
+  if (targetKind !== 'url') return paperFailureReply(targetKind, message, sourceLabel);
   try {
     const pageTitle = err instanceof MetaNotFoundError ? err.pageTitle ?? null : null;
     const suggestion = await suggestAccessibleSource({
@@ -1033,12 +1066,12 @@ async function buildPaperFailureReply(
       console.log(
         `  [enrich] suggested accessible source for item #${item.id}: ${suggestion.source} ${suggestion.identifier} (score ${suggestion.score.toFixed(2)})`,
       );
-      return formatSuggestionReply(message, suggestion);
+      return formatSuggestionReply(message, suggestion, sourceLabel);
     }
   } catch {
     // best-effort: any lookup failure falls back to the canned reply
   }
-  return paperFailureReply(targetKind, message);
+  return paperFailureReply(targetKind, message, sourceLabel);
 }
 
 // How much analyzable text we actually captured for a paper, so the curator
@@ -1169,11 +1202,18 @@ export function buildPriorCoverageLines(
 
 // Best-effort E2/E3 reply to the curator's Telegram chat. Never throws — a
 // failed reply must not fail the enrichment.
+// Previews are OFF on every curator reply. These replies now echo the source
+// that failed, which means the text carries a curator-pasted URL — leaving
+// previews on would make Telegram re-fetch the very page that just refused us
+// (often paywalled, sometimes carrying a one-time token in the query string),
+// and attach a broken card to a failure message. The suggestion reply also
+// links an accessible copy, and a preview of that is noise on a message whose
+// job is "forward this back to me". Nothing here benefits from a preview.
 async function replyToCurator(item: InboxItem, text: string): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token || item.telegram_chat_id == null) return;
   try {
-    await sendMessage(token, item.telegram_chat_id, text);
+    await sendMessage(token, item.telegram_chat_id, text, { disableWebPagePreview: true });
   } catch {
     // swallow — the digest still gets the paper; the reply is a courtesy
   }

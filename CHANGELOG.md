@@ -2,6 +2,22 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.32.1] - 2026-07-31
+
+### Fixed
+- **Ingest failure replies now say which source failed.** "Couldn't ingest that
+  paper: fetch refused" didn't name the paper, so forwarding a batch produced a
+  batch of interchangeable failures. Every failure reply now leads with the link
+  (or the PDF's filename) and puts the reason underneath. The
+  found-an-accessible-copy reply needed it most: it carries a second link, so
+  without naming the first you couldn't tell which was rejected and which to
+  forward back.
+- **Bot replies no longer generate link previews.** Now that a reply can contain
+  the URL that just failed, a preview would make Telegram re-fetch the page that
+  refused us and staple a broken card to the message.
+- **A PDF whose filename is blank or unprintable** no longer produces a reply
+  that names nothing.
+
 ## [0.32.0] - 2026-07-31
 
 Your specialty pick now changes what the analysis *says*, not just which cards
