@@ -177,6 +177,13 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
         else
           echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
           FAILED=1
+          # Nothing reached DigitalOcean, so nothing is announceable. CHANGED_DATES
+          # was captured BEFORE the push (it has to be — the commit clears the
+          # index), so without this the run would go on to DM the curator and post
+          # to the channel about dates still sitting on this laptop, linking pages
+          # that do not exist. Same rule as the deploy-readiness gate: never
+          # announce what is not published.
+          CHANGED_DATES=""
         fi
       fi
     else
@@ -235,6 +242,10 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
           else
             echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
             FAILED=1
+            # Same guard as the on-main path: nothing deployed, so nothing is
+            # announceable. Without this the run announces dates that never left
+            # the laptop.
+            CHANGED_DATES=""
           fi
         fi
         git worktree remove --force "$PUBLISH_WT" 2>/dev/null \
@@ -243,6 +254,7 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
         echo "  ✗ could not create a main worktree — content NOT published"
         rmdir "$PUBLISH_WT" 2>/dev/null
         FAILED=1
+        CHANGED_DATES=""
       fi
     fi
   elif [ "$DIGEST_FAILED" = 1 ]; then
