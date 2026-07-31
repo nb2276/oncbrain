@@ -228,3 +228,53 @@ describe('OG share image publish boundary (v0.14 T4)', () => {
     }
   });
 });
+
+// v0.33: the effect-size mark's input surface.
+//
+// The mark draws numbers onto a public page. Its ONLY legitimate inputs are
+// primary_endpoint (already validated grounded at build) and, from slice 2,
+// details[].table. It must never read the local-only figure fields — those are
+// OCR of copyrighted figures, and redrawing them into a published SVG would move
+// that content across the publish boundary while still passing the field-grep
+// guards above, because the pixels are derived rather than copied.
+//
+// Structurally safe today (those fields never enter the artifact at all), so
+// this pins the SHAPE: the module must not reference them, and the component
+// must receive a narrow typed datum rather than the whole study object.
+describe('effect-size mark input surface (v0.33)', () => {
+  const root = resolve(process.cwd());
+  const FORBIDDEN = ['figure_ocr_md', 'figure_structured_md', 'fulltext_excerpt_md'];
+
+  it('the parser never references a local-only field', () => {
+    const src = readFileSync(resolve(root, 'src/lib/effect-size.ts'), 'utf-8');
+    for (const field of FORBIDDEN) {
+      expect(src).not.toContain(field);
+    }
+  });
+
+  it('the renderer never references a local-only field', () => {
+    const src = readFileSync(resolve(root, 'src/components/EffectMark.astro'), 'utf-8');
+    for (const field of FORBIDDEN) {
+      expect(src).not.toContain(field);
+    }
+  });
+
+  it('the renderer takes a narrow datum, never the whole study object', () => {
+    // A component handed `study` could reach anything a future artifact carries.
+    // Its props must stay {datum, domain}.
+    const src = readFileSync(resolve(root, 'src/components/EffectMark.astro'), 'utf-8');
+    const props = src.match(/interface Props \{[\s\S]*?\}/);
+    expect(props).not.toBeNull();
+    expect(props![0]).toContain('datum');
+    expect(props![0]).toContain('domain');
+    expect(props![0]).not.toMatch(/\bstudy\b/);
+    expect(props![0]).not.toMatch(/DigestStudy/);
+  });
+
+  it('the parser reads only the primary endpoint, not arbitrary study fields', () => {
+    const src = readFileSync(resolve(root, 'src/lib/effect-size.ts'), 'utf-8');
+    // PrimaryEndpointLike is the whole input contract; nothing wider.
+    expect(src).toContain('PrimaryEndpointLike');
+    expect(src).not.toMatch(/import .*DigestStudy/);
+  });
+});
