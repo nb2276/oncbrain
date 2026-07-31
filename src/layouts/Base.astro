@@ -20,8 +20,15 @@ interface Props {
   // v0.14 T4: path to the page's social-preview (og:image) PNG. Defaults to the
   // branded /og/default.png; date + site pages pass their specific card.
   ogImage?: string;
+  // Build stamp: the digest artifact's `generated_at` for pages that render one
+  // (date pages). Emitted as a meta tag so the deploy-readiness gate can tell
+  // "a page for this date exists" from "THIS build is live" — a re-rendered date
+  // is otherwise indistinguishable from its previous deploy. See
+  // src/lib/deploy-ready.ts. Also a debugging handle: any live page names the
+  // build that produced it.
+  buildStamp?: string | number;
 }
-const { title, description, wide = false, ogImage = '/og/default.png' } = Astro.props;
+const { title, description, wide = false, ogImage = '/og/default.png', buildStamp } = Astro.props;
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'onc brain';
 const curatorName = import.meta.env.PUBLIC_CURATOR_NAME || '';
 const curatorHandle = import.meta.env.PUBLIC_CURATOR_HANDLE || '';
@@ -80,6 +87,7 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
     {/* v0.11 PR-1a: canonical strips ?tag= filter params so search engines
         index one URL per content page, not one per filter combination. */}
     <link rel="canonical" href={canonicalUrl} />
+    {buildStamp && <meta name="oncbrain:build" content={String(buildStamp)} />}
     {/* v0.14 T4: Open Graph + Twitter card so a shared link renders a branded
         preview image instead of a bare URL. og:image is a build-time PNG. */}
     <meta property="og:type" content="website" />
