@@ -18,6 +18,7 @@ import { resolve } from 'node:path';
 import { todayIso } from '../src/lib/db.ts';
 import { sendMessage } from '../src/lib/telegram-ingest.ts';
 import { formatChannelPost, type ChannelArtifact } from '../src/lib/channel-post.ts';
+import { waitForDeployedDate } from '../src/lib/deploy-ready.ts';
 
 type Args = { date: string; dryRun: boolean };
 
@@ -42,7 +43,11 @@ async function main(): Promise<void> {
     console.log(`notify:channel: no digest at ${digestPath}, skipping`);
     return;
   }
-  const artifact = JSON.parse(readFileSync(digestPath, 'utf8')) as ChannelArtifact;
+  // generated_at isn't part of ChannelArtifact (the post doesn't render it); it's
+  // read here only as the deploy-readiness build stamp.
+  const artifact = JSON.parse(readFileSync(digestPath, 'utf8')) as ChannelArtifact & {
+    generated_at?: number;
+  };
   const text = formatChannelPost(artifact, siteUrl);
 
   if (args.dryRun) {
@@ -59,6 +64,30 @@ async function main(): Promise<void> {
   }
   if (!channelId) {
     console.log('notify:channel: TELEGRAM_CHANNEL_ID not set, skipping (channel not configured yet)');
+    return;
+  }
+
+  // The preview IS the product on this surface, so the channel SKIPS on timeout
+  // rather than posting anyway. Posting before the page is live is the very act
+  // that makes Telegram cache the catchall home page's default card, and that
+  // cache is sticky — a wrong post is worse than a missing one here. The curator
+  // DM makes the opposite call deliberately. See src/lib/deploy-ready.ts.
+  const ready = await waitForDeployedDate(args.date, {
+    siteUrl,
+    expectBuildStamp: artifact.generated_at,
+  });
+  if (!ready.ready) {
+    console.log(
+      `notify:channel: page not confirmed live (${ready.reason}) — NOT posting ${args.date}. ` +
+        `Posting now would cache a wrong preview. Re-run once the deploy lands: ` +
+        `npm run notify:channel -- --date=${args.date}`,
+    );
+    // Exit NON-ZERO so the skip is loud. Everything else in this CLI is
+    // fail-soft (exit 0) so the cron never aborts, but a skipped post is a
+    // missed publication, not a handled error: the digest is live and nobody
+    // was told. daily-build.sh wraps this call with `|| echo "⚠ …"`, so a
+    // non-zero exit surfaces a warning line without stopping the run.
+    process.exitCode = 1;
     return;
   }
 
