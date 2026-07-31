@@ -252,6 +252,7 @@ describe('waitForDeployedDate', () => {
       timeoutMs: 30,
       intervalMs: 5,
       settleMs: 0,
+      now: (() => { let t = 0; return () => (t += 4); })(),
       probe: async () => NOT_YET,
       log: () => {},
     });
@@ -262,15 +263,25 @@ describe('waitForDeployedDate', () => {
 
   // The loop used to quit a full interval BEFORE the deadline, so a deploy
   // landing inside the last interval was missed.
+  //
+  // Drives a VIRTUAL clock via the injectable `now`, so the assertion doesn't
+  // depend on how fast this machine happens to run the loop. An earlier version
+  // used real wall-clock margins (40ms budget, 30ms interval) and flaked about
+  // 1 run in 9 under parallel load: probe overhead ate the remaining budget and
+  // the loop correctly gave up after two probes, which is right behaviour and a
+  // wrong test.
   it('still probes at the deadline instead of quitting an interval early', async () => {
     let calls = 0;
+    let clock = 0;
     const res = await waitForDeployedDate('2026-07-29', {
       siteUrl: 'https://example.test',
       timeoutMs: 40,
       intervalMs: 30,
       settleMs: 0,
+      now: () => clock,
       probe: async () => {
         calls += 1;
+        clock += 10; // each probe costs 10 virtual ms
         // Not ready on the first two probes; ready on the third, which only
         // happens if the loop sleeps the REMAINING budget rather than a full
         // interval and then gives up.
