@@ -28,9 +28,23 @@ See the [full emoji set + selection principles](#disease-site-emoji-set) below.
 
 ## Color
 
-- **Background:** `#f7f5f0` (warm off-white). Soft on a phone in a dim conference room. Also the PWA manifest `theme_color` + `background_color`, and the opaque background of the maskable app icons (shipped v0.9).
-- **Foreground:** dark on light, defaults to the user agent's text color cascading from `body`. No custom near-black — let the platform pick the contrast.
-- **Accents:** minimal. The disclaimer callout has a left border; everything else is plain prose.
+**Two themes, dark by default (v0.30).** A pre-paint inline script in `Base.astro` reads `localStorage` and stamps `data-theme` on `<html>` before first paint (no flash); with no saved choice it stays dark. Light is an explicit opt-in via the header's sun/moon toggle, persisted per reader. Every surface reads CSS custom properties defined once on `:root` (dark) and overridden on `:root[data-theme='light']` — **never hardcode a hex in a component**, or it will break in one theme.
+
+| Token | Dark (default) | Light |
+|---|---|---|
+| `--bg` | `#14130f` | `#f7f5f0` |
+| `--bg-card` | `#1d1c17` | `#fffdf8` |
+| `--fg` | `#ece8de` | `#1a1a1a` |
+| `--fg-muted` | `#9d978a` | `#555` |
+| `--border` | `#2f2d27` | `#e3ddd0` |
+| `--accent` | `#6fb0ff` | `#0a4b8a` |
+| `--accent-bg` | `#14253c` | `#e8f1fa` |
+| `--citation-bg` | `#23211c` | `#f1ede1` |
+
+- **Why dark by default?** The digest is read early morning and late evening on a phone. The palette is warm-neutral, not blue-black, so the serif still reads like paper rather than a terminal.
+- **The warm off-white `#f7f5f0` is still brand color**, not just the light theme's background. It stays fixed on every surface a reader's theme can't follow: the PWA manifest `theme_color` + `background_color`, the maskable app icons (v0.9), and the OG / share-image cards (v0.14 T4), which are always light.
+- **Verdict color** is the one accent that carries meaning. `VERDICT_COLOR` (`src/lib/verdict.ts`) is the light-surface palette, shared by the card and the share image. Dark mode lifts four of the six to brighter variants in `StudyCard.astro` (`:root:not([data-theme='light'])`) because the light-surface greens/oranges go muddy on `#1d1c17` — change one and change its pair.
+- **Accents otherwise minimal.** The disclaimer callout has a left border; the study card's left border is colored only for the three attention verdicts. Everything else is plain prose.
 
 ## App icon (PWA)
 
@@ -53,6 +67,14 @@ forms stay consistent.
 - **Cards earn their existence.** Don't add a card border, shadow, or chip unless it carries information. A study heading + paragraph is fine.
 - **Brevity beats completeness in output.** Depth shows in *which* bullets are included, not in adding more.
 - **One reading column.** The body is a single ~700px reading column, centered on desktop (`src/layouts/Base.astro`). No two-column *reading* of prose; desktop adds a navigation rail in the gutter, not a second column.
+
+### Global header
+
+Every page shares one header (`Base.astro`), three rows deep and no more:
+
+1. **Top row** — wordmark, the **live search box**, and the **theme toggle** on a single flex line (v0.32). Search used to sit on its own row below the sub-line; it now rides the title row so the first screenful starts with content instead of chrome. On narrow viewports the row wraps and search takes the full width; the toggle never wraps (`flex-shrink: 0`).
+2. **Sub-line** — About + curator attribution.
+3. **Specialty bar** — the reader's "Focus on your specialty" control (see *Study card → Specialty filter*), below the header rule so it reads as a reader setting, not navigation.
 
 ## Study card
 
@@ -112,7 +134,7 @@ Built for a returning reader, not a first-time browser:
   - A 🚀 **practice-changing flag** leads the row for practice-changing studies only. It is the one verdict that survives as a bare glyph in a dense row: the others (🔄 ↔️ ❔) read as UI controls without their pill label, and ⚠️ collides with the safety disease-site anchor (design review 2026-06-10). The card's verdict pill still carries the full verdict for every study.
   - A **NEW text pill** + a "N new overall" total mark studies added since the reader's last visit (client-side, localStorage seen-id set). The pill is text at `.section-label` typography in a NEUTRAL color, never an emoji or a verdict color, so it stays clear of the 3-axis emoji vocabulary.
 - **Verdict card border (v0.14):** the study card's left border is colored for the three ATTENTION verdicts only (🚀 practice-changing, ↔️ challenges-SOC, ⚠️ caveats-dominate). Confirmatory / early-signal / unclear keep the neutral border, so a long page reads as a heat-map where the few that demand action pop. `--verdict-color` is defined once on `.study.verdict-*` and shared by the pill text + the border.
-- **Live search:** a single box below the nav that filters studies as you type (substring over name / TL;DR / NCT / disease-site label). `/` focuses it, `Esc` clears.
+- **Live search:** lives in the global header's top row (v0.32), so it is one control on every page, not a home-page feature. Filters studies as you type (substring over name / TL;DR / NCT / disease-site label); `/` focuses it, `Esc` clears.
 
 ## Disease-site emoji set
 
