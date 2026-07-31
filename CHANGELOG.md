@@ -2,6 +2,35 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.33.0] - 2026-07-31
+
+Effect sizes you can see. A hazard ratio is precise as text but not comparable
+at a glance; now the magnitude has a shape.
+
+### Added
+- **Effect-size mark on study cards.** Where a study reports a hazard, odds or
+  risk ratio, the card draws it as a dot with its confidence interval on a log
+  scale, directly under the number. Position relative to the null line carries
+  the direction, and the interval is drawn to scale, so an imprecise result
+  looks imprecise rather than merely reading that way.
+- **A shared scale per day.** On a date page, every mark of the same endpoint
+  type and ratio type shares one ruler, so the biggest result of the day is
+  visibly the longest reach from the null instead of each dot sitting on its own
+  private scale. Tick labels are always shown, so it is clear when the ruler
+  changes between pages.
+
+### Notes
+- The mark appears on 31 of the 44 studies that report a headline statistic. It
+  abstains whenever there is no clean ratio to draw, which is most often because
+  the study reported percentages or median months instead. A card without a mark
+  is the normal case, not a defect, so nothing is shown in its place.
+- It abstains rather than guess: a confidence interval it cannot confidently
+  match to the right estimate is dropped, and an estimate that would fall off
+  the scale is not drawn at all.
+- Deliberately colorless. The card already uses color for the standard-of-care
+  verdict, and a green dot sitting on the harm side of the null would contradict
+  it.
+
 ## [0.32.1] - 2026-07-31
 
 ### Fixed

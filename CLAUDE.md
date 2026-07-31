@@ -39,7 +39,7 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 - **Admin server**: Hono 4 (localhost only, on port 3001)
 - **DB**: better-sqlite3 (synchronous), file at `./oncbrain.db`
 - **LLM**: Anthropic Claude Sonnet via `@anthropic-ai/sdk` OR via `claude -p` (subscription path). v0.8 PR2: also called at *enrichment* time (not just build) to extract metadata from PDF text.
-- **Tests**: Vitest (1755 tests across 88 files as of v0.32). `test/global-setup.ts` builds `dist/` once before collection when the artifacts are absent, so `npm test` is correct cold or warm.
+- **Tests**: Vitest (1815 tests across 89 files as of v0.33). `test/global-setup.ts` builds `dist/` once before collection when the artifacts are absent, so `npm test` is correct cold or warm.
 - **Theme**: dark by default with a light opt-in (v0.30). All colors come from CSS custom properties in `Base.astro` (`:root` dark, `:root[data-theme='light']` override) — a hardcoded hex in a component breaks one theme. See `DESIGN.md → Color`.
 - **PDF ingestion** (v0.8 PR2): poppler (`brew install poppler`) provides `pdftotext` (text layer) + `pdftoppm` (rasterize scanned pages for Apple Vision OCR) + `pdfimages` (v0.15: locate figure pages). No npm dep. A missing binary yields a clear Telegram reply, not a crash.
 - **Figure OCR** (v0.15, Path A): for a text-layer PDF, `pdfimages -list` finds the pages carrying a real figure (large raster image) and `pdftoppm`→Vision OCRs just those, capturing numbers printed *inside* figures (subgroup medians, forest-plot estimates, n-at-risk, image-rendered tables) that `pdftotext` can't see. Stored in `papers.figure_ocr_md` (local-only, never published — same IP boundary as `fulltext_excerpt_md`) and fed to the Phase 2 study agent as labeled lower-confidence source so it can *ground* a figure-locked magnitude instead of flagging it missing. Backfill the back catalog with `npx tsx build/backfill-figure-ocr.ts`.
@@ -94,7 +94,7 @@ DIGEST_THINKING=8000 LLM_BACKEND=api npm run build:day -- --date=<date>  # + Pha
 DIGEST_PERSPECTIVE=radonc npm run build:day -- --date=<date>            # specialty lens for Phase 2 (radonc | medonc | your own); see prompts/perspectives/
 
 # Tests + eval
-npm test                        # vitest run (1755 tests)
+npm test                        # vitest run (1815 tests)
 npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations / v0.13 query+trial axes)
 npm run quality-eval                                # multi-persona quality review of today's digest
 npm run quality-eval -- --date=2026-06-05           # specific day
@@ -226,6 +226,7 @@ src/
     digest-overrides.ts    durable per-date overrides: suppress/edit studies, applied at build time (applyOverrides + saveOverrides)
     verdict.ts             v0.9: SOC-implication verdict taxonomy (emoji + label), shared by StudyCard + TriageRail. v0.16: REVIEW_GLYPH (🗞️) + railEmojiForStudy (verdict emoji, else 🗞️ for a review, else neutral dot)
     content-type.ts        v0.16: study content_type (study_report | review) — first-class, orthogonal to methodology + verdict; parseContentType + stripReviewVerdicts (a review carries no verdict). Classified at Phase 1; NOT a /tags/ namespace
+    effect-size.ts         v0.33: the effect-size mark's numeric spine. Parses a ratio (HR/OR/RR/SHR) + its CI out of the already-validated primary_endpoint free text, computes the log-axis domain, and maps a datum to coordinates (markGeometry). Pure functions only — the component paints, it does not compute, so a future satori renderer shares the math exactly. Abstains rather than guess: no ratio, non-positive ratio, reversed interval, an interval that does not contain its estimate, or a CI it cannot unambiguously associate with the ratio (adjacent, or the only one in the text). Draws RATIOS ONLY; proportions and medians are a different mark and are out of scope
     disease-sites.ts       22-site enum (slug → label + emoji + rationale; see DESIGN.md)
   pages/
     index.astro            home: disease-site nav + hero TL;DR + latest ~12-study what's-new slice (RecentFeed)
@@ -249,6 +250,7 @@ src/
   components/StudyCard.astro  v0.9: the single dense study card (triage-first; v0.30 endpoint-forward — rests at verdict chip/name/For/primary endpoint/TL;DR/why-it-matters, folds depth); rendered by [date] + sites/[site] + tags/[...slug] + studies + (v0.21) study/[slug]
   components/TriageRail.astro v0.9: desktop-only (>=1200px, >=1640px on wide pages) sticky jump-list (verdict emoji + name) in the left gutter
   components/SearchBox.astro  live search input + results dropdown; lives in the global header top row (Base.astro), lazy-loads the index
+  components/EffectMark.astro v0.33: the forest-dot renderer — inline SVG, log axis, CI drawn to scale as WIDTH. NEUTRAL (never verdict color: the card keeps valence in the headline number's underline so a negative HR is never a colored win) and opacity-free (that channel belongs to SpecialtyBar dimming). Refuses to draw when the estimate would fall off the axis. See DESIGN.md → Effect-size mark
   components/SpecialtyBar.astro v0.31/v0.32: the reader's saved "focus on your specialty" panel in the header. Dims cards whose data-specialties miss the pick, and swaps the why-it-matters block to that specialty's variant. Pure client-side + localStorage; independent of the tag rail
   components/RecentFeed.astro v0.14 T3: the shared flat study feed template — home renders a latest-N slice, /studies the full corpus. Carries the 🚀 practice-changing flag + the NEW/seen-set pills (allIds is the full corpus, not just the rendered slice)
   components/SiteNav.astro    v0.14.3: disease-site chip row, the primary cross-corpus wayfinding; shared by home + /studies
@@ -338,7 +340,7 @@ When a user request matches a gstack skill, invoke via the Skill tool:
 ## Testing
 
 ```
-npm test                   # 1755 tests across 88 files, all should pass
+npm test                   # 1815 tests across 89 files, all should pass
 npm run test:watch         # vitest watch mode
 npx astro check            # type check (0 errors expected)
 ```
@@ -349,7 +351,7 @@ Tests live in `test/`. Each lib module has a corresponding test file. Naming con
 
 Single source of truth: `package.json` `"version"` field. CHANGELOG.md gets a new section per release.
 
-**Released:** v0.32.0 — per-specialty "why it matters" (`significance_by_specialty`): the specialty bar reframes the callout prose to the reader's field instead of only dimming cards, plus specialty-filter discoverability, search on the header's title row, and the deploy-readiness gate on Telegram notifications. Builds on v0.31 (reader-selectable specialty relevance) and v0.30 (the "endpoint-forward card" — `primary_endpoint` / `analysis_sections` — plus the dark-default theme).
+**Released:** v0.33.0 (effect-size marks: study cards draw the reported ratio and its confidence interval on a log axis, with a shared scale per date). Prior: v0.32.0 — per-specialty "why it matters" (`significance_by_specialty`): the specialty bar reframes the callout prose to the reader's field instead of only dimming cards, plus specialty-filter discoverability, search on the header's title row, and the deploy-readiness gate on Telegram notifications. Builds on v0.31 (reader-selectable specialty relevance) and v0.30 (the "endpoint-forward card" — `primary_endpoint` / `analysis_sections` — plus the dark-default theme).
 
 ## Planning artifacts
 
