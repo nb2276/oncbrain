@@ -10,6 +10,25 @@ Format: `- [scope] description (source)`
 - **Reader-prefs cookie / saved-default filters.** localStorage-backed; precedence URL > saved > none. Defer until v0.11 ships and reader behavior data exists (or until curator feedback validates the workflow). Implementation must use `requestIdleCallback` defer + post-paint application + "applying saved filter…" transition to avoid blocking critical render path on iOS Safari. (v0.11 autoplan design + eng — perf risk + design-thin / `docs/plans/v0.11-tag-filter-rail.md`)
 - **Tag-filter keyboard shortcuts.** Resolve the `f`-vs-global-search-focus collision first (try `\` or `/` instead). Spec the editable-control guard list explicitly including `<select>` and `[role="textbox"]`. Numerals 1-9 map to top visible filters with `<kbd>` hints inline. (v0.11 autoplan eng — Base.astro search-focus collision / `docs/plans/v0.11-tag-filter-rail.md`)
 
+## Notifications (from the v0.32 deploy-readiness work)
+
+- **A failed push strands a local publish commit that is then never announced.** **Priority: P2.**
+  `scripts/daily-build.sh` commits data, then pushes. If the push fails, v0.32 clears
+  `CHANGED_DATES` so the run can't announce undeployed dates (correct). But the local commit
+  stays ahead of `origin`, and a *later* run derives `CHANGED_DATES` from its own staged
+  changes — so the stranded date can eventually deploy on a subsequent push and never be
+  announced at all. Same shape in both publish paths (on-main and the temp-worktree branch
+  guard). **Where to start:** before deriving `CHANGED_DATES`, union in any dates from commits
+  already ahead of `origin/main` (`git log origin/main..main --name-only -- data/digests`).
+  **Found by:** codex adversarial review during `/ship` v0.32.
+- **Extract a shared notify-CLI helper.** **Priority: P3.** `build/notify-curator.ts` and
+  `build/notify-channel.ts` duplicate `parseArgs`, the `PUBLIC_SITE_URL` default, the
+  digest-existence check, the artifact load, the fail-soft `main().catch()`, and now the
+  deploy-gate call. Nothing is broken; the risk is that the next notification change gets made
+  in one file and missed in the other. Deliberately deferred during the v0.32 eng review to
+  avoid mixing a structural refactor into an unattended-cron bugfix. **Do it the next time you
+  touch notifications.**
+
 ## Now — highest priority
 
 - **Live end-to-end test of v0.8 ingestion.** PR1/2/3 pass unit + build tests but have never run against real Telegram traffic. DM the bot a journal URL + a PDF, run `pull:telegram → enrich:inbox → build:day`, confirm vault filing + E2/E3 replies + digest output. (this session)
