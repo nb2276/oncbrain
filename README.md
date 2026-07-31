@@ -2,7 +2,7 @@
 
 Curated, AI-summarized digest of oncology meeting research and published studies. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets), alongside newly published journal papers. One oncologist curates the sources; an AI pipeline summarizes each study with comparative-literature context and a standard-of-care verdict.
 
-**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.31.0
+**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.32.0
 
 ## Architecture
 
@@ -97,6 +97,11 @@ npm run build:day -- --dry-run                 # no LLM call, see what would hap
 # Or curate interactively — suppress/edit studies, build, ingest — in one TUI:
 npm run studio
 
+# Durable per-date overrides (survive a rebuild; committed under data/overrides/):
+npm run override -- --date=2026-05-20 --list
+npm run override -- --date=2026-05-20 --suppress=<slug>
+npm run override -- --date=2026-05-20 --edit=<slug> --tldr="..."
+
 # Catch the same trial covered on more than one date (tweet preview then a
 # full-paper card weeks later). Read-only; prints suggested --suppress commands:
 npm run find:dups
@@ -116,8 +121,10 @@ Organized by **disease site** (22-slug enum, see `DESIGN.md`), newest date first
 
 - **Top line** — one-sentence lede with the headline number.
 - **TL;DR** — 2-3 sentence cross-site synthesis (also the home-page hero).
-- **Per study card (triage-first):** rests at its triage layer — trial name, the eligible population ("For …"), a one-line **TL;DR** (effect sizes verbatim), a **standard-of-care verdict** pill (practice-changing / challenges-SOC / confirmatory / early-signal / caveats-dominate / unclear), and a 🔗 **"vs leading data"** comparator callout. Figures sit in their own column on wide screens (under the triage layer on narrow ones). The depth folds behind a tap and flows like a paper — **Methods** (design, regimen, CONSORT participant flow), **Results** (effect sizes + comparison tables), **Critique** (methodological caveats), then **Open questions** and source attribution. **Sources** (🐦 📄 🩻) are a separate collapsible.
+- **Per study card (triage-first, endpoint-forward):** rests at its triage layer — a **standard-of-care verdict** chip (practice-changing / challenges-SOC / confirmatory / early-signal / caveats-dominate / unclear), the trial name, the eligible population ("For …"), the **primary endpoint plus its effect size verbatim** with an endpoint-class chip (surrogate / local control / safety; dropped for overall survival, which needs no flag), a one-line **TL;DR**, and a **"Why it matters"** callout naming the decision the result moves. Figures sit in their own column on wide screens (under the triage layer on narrow ones). The depth folds behind a tap and reads as a labeled spec sheet — **Design · Population · Regimen · Radiotherapy · Endpoints · Results · Safety · vs leading data · Applies to · Limitations** — then the verdict rationale, the Monday-clinic line, and **Open questions**. **Sources** (🐦 📄 🩻) are a separate collapsible.
   - On mobile the depth stays folded for the 90-second scan; on desktop (≥1024px) it auto-expands, and a sticky **triage rail** (≥1200px) lists every study by verdict for quick jumping.
+  - **Focus on your specialty:** a header control lets a reader mark radiation / medical / surgical oncology. Studies relevant to none of the picks dim (they stay in view — a systemic trial can still move a radonc decision), and the "Why it matters" prose reframes to the picked specialty's decision lens. Saved in `localStorage`.
+  - **Dark by default**, light via the header toggle, persisted and applied before first paint.
 
 Disease-site emoji anchors live in `DESIGN.md`; the per-study bullet + verdict emoji vocabulary and voice rules live in `VOICE.md`.
 
@@ -131,13 +138,16 @@ npm run cron:install                                          # registers macOS 
 sudo pmset repeat wakeorpoweron MTWRFSU 00:55:00              # wake laptop 5 min before (sleep guard)
 ```
 
-Each run: `pull:telegram → enrich:inbox → build:day (yesterday + today) → astro build → git push`. Idempotent — empty days are no-ops. Logs append to `~/Library/Logs/oncbrain-cron.log`. Uninstall with `npm run cron:uninstall`; test manually with `npm run cron:test`; diagnose a missed run with `npm run cron:doctor`.
+Each run: `pull:telegram → enrich:inbox → build:day (yesterday + today) → rebuild:queued → astro build → git push → notify:curator + notify:channel` per changed date. `rebuild:queued` drains the rebuild queue: past dates the enrichment layer flagged after a richer re-send (a full-paper PDF landing on what was an abstract-only card, a late slide). Idempotent — empty days are no-ops. Logs append to `~/Library/Logs/oncbrain-cron.log`. Uninstall with `npm run cron:uninstall`; test manually with `npm run cron:test`; diagnose a missed run with `npm run cron:doctor`.
 
 ## URLs
 
-- `https://oncbrain.oncologytoolkit.com/` — recent studies, disease-site nav, live search
+- `https://oncbrain.oncologytoolkit.com/` — what's new: latest studies, disease-site nav, live search
+- `https://oncbrain.oncologytoolkit.com/studies/` — the full flat index of every study, with the tag filter rail
 - `https://oncbrain.oncologytoolkit.com/2026-05-18/` — one day's digest
+- `https://oncbrain.oncologytoolkit.com/study/2026-05-18-prestige-psma/` — one study on its own page (the share target)
 - `https://oncbrain.oncologytoolkit.com/sites/breast/` — all studies for one disease site
+- `https://oncbrain.oncologytoolkit.com/tags/` — browse by cross-cutting tag
 - `https://oncbrain.oncologytoolkit.com/conferences/asco2026/` — all days tagged with a conference
 - `https://oncbrain.oncologytoolkit.com/about/` — what it is, how it works, curator
 - `https://oncbrain.oncologytoolkit.com/api` — RSS feed + JSON API docs
@@ -180,7 +190,7 @@ Two paths via `LLM_BACKEND` env var:
 - `DIGEST_MODEL` — model for all phases (default sonnet).
 - `DIGEST_STUDY_MODEL` — Phase 2 only (the deep per-study step), e.g. `opus` on cli / `claude-opus-4-7` on api.
 - `DIGEST_THINKING=8000` — Phase 2 extended-thinking budget in tokens (**api backend only**).
-- `DIGEST_PERSPECTIVE` — specialty lens for Phase 2 + Phase 3 (`radonc` | `medonc` | your own `prompts/perspectives/<name>.md`). Unset = no bias. Foregrounds one subspecialty's decision needs without changing the schema.
+- `DIGEST_PERSPECTIVE` — specialty lens for Phase 2 only; Phases 1 and 3 stay specialty-neutral (`radonc` | `medonc` | your own `prompts/perspectives/<name>.md`). Unset = no bias. Foregrounds one subspecialty's decision needs without changing the schema.
 
 ## Tests
 
@@ -190,7 +200,9 @@ npm run test:watch # watch mode
 npx astro check    # type check (0 errors expected)
 ```
 
-1699 tests across DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, and v0.31 reader-selectable specialty relevance.
+1743 tests across 88 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, and reader-selectable specialty relevance plus its per-specialty "why it matters".
+
+A vitest `globalSetup` builds `dist/` once before collection when it's missing, so a cold checkout passes. After switching branches, run `rm -rf dist && npm run build` first — the dist-reading tests reuse an existing build, and a stale one fails like a code regression.
 
 ## Eval
 

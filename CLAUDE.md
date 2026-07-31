@@ -39,7 +39,8 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 - **Admin server**: Hono 4 (localhost only, on port 3001)
 - **DB**: better-sqlite3 (synchronous), file at `./oncbrain.db`
 - **LLM**: Anthropic Claude Sonnet via `@anthropic-ai/sdk` OR via `claude -p` (subscription path). v0.8 PR2: also called at *enrichment* time (not just build) to extract metadata from PDF text.
-- **Tests**: Vitest (469 tests as of v0.8)
+- **Tests**: Vitest (1743 tests across 88 files as of v0.32). `test/global-setup.ts` builds `dist/` once before collection when the artifacts are absent, so `npm test` is correct cold or warm.
+- **Theme**: dark by default with a light opt-in (v0.30). All colors come from CSS custom properties in `Base.astro` (`:root` dark, `:root[data-theme='light']` override) — a hardcoded hex in a component breaks one theme. See `DESIGN.md → Color`.
 - **PDF ingestion** (v0.8 PR2): poppler (`brew install poppler`) provides `pdftotext` (text layer) + `pdftoppm` (rasterize scanned pages for Apple Vision OCR) + `pdfimages` (v0.15: locate figure pages). No npm dep. A missing binary yields a clear Telegram reply, not a crash.
 - **Figure OCR** (v0.15, Path A): for a text-layer PDF, `pdfimages -list` finds the pages carrying a real figure (large raster image) and `pdftoppm`→Vision OCRs just those, capturing numbers printed *inside* figures (subgroup medians, forest-plot estimates, n-at-risk, image-rendered tables) that `pdftotext` can't see. Stored in `papers.figure_ocr_md` (local-only, never published — same IP boundary as `fulltext_excerpt_md`) and fed to the Phase 2 study agent as labeled lower-confidence source so it can *ground* a figure-locked magnitude instead of flagging it missing. Backfill the back catalog with `npx tsx build/backfill-figure-ocr.ts`.
 - **Grounded figure extraction** (v0.20, Vision + Qwen → Opus): a structured layer on top of the raw figure OCR. The figure page goes to *both* Apple Vision (high recall) and a local Qwen2.5-VL (`qwen2.5vl:7b` via an Ollama HTTP server — clean per-panel structure + honest "not legible"), and Opus reconciles the two into per-panel markdown (KM / cumulative-incidence / forest plots / image-rendered tables). A deterministic **grounding gate** then audits the *whole* merged output: if any number isn't in the figure's own Vision OCR token stream it **withholds the entire merge and falls back to raw OCR**, so a fabricated magnitude can't reach the digest. Grounding is role-aware for percentage/CI labels (a "95% CI" claim must match a printed "95%"). Stored in `papers.figure_structured_md` (local-only, same IP boundary as `figure_ocr_md`; guarded out of the published artifact + JSON API by `test/publish-boundary.test.ts`) and fed to the Phase 2 study agent as the *preferred* figure-number source over `figure_ocr_md`. Runs in PDF enrichment only when the paper has figure pages **and** a local Qwen/Ollama is reachable (`isQwenAvailable()`); a machine without Ollama just keeps `figure_ocr_md` and loses nothing. Kill switch `FIGURE_STRUCTURED=off`; reconcile model is Opus by default, override with `FIGURE_RECONCILE_MODEL`; `QWEN_MODEL` / `OLLAMA_HOST` configurable. Run one manually with `npm run figure-extract`.
@@ -93,7 +94,7 @@ DIGEST_THINKING=8000 LLM_BACKEND=api npm run build:day -- --date=<date>  # + Pha
 DIGEST_PERSPECTIVE=radonc npm run build:day -- --date=<date>            # specialty lens for Phase 2 (radonc | medonc | your own); see prompts/perspectives/
 
 # Tests + eval
-npm test                        # vitest run (1000+ tests)
+npm test                        # vitest run (1743 tests)
 npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations / v0.13 query+trial axes)
 npm run quality-eval                                # multi-persona quality review of today's digest
 npm run quality-eval -- --date=2026-06-05           # specific day
@@ -227,11 +228,15 @@ src/
     content-type.ts        v0.16: study content_type (study_report | review) — first-class, orthogonal to methodology + verdict; parseContentType + stripReviewVerdicts (a review carries no verdict). Classified at Phase 1; NOT a /tags/ namespace
     disease-sites.ts       22-site enum (slug → label + emoji + rationale; see DESIGN.md)
   pages/
-    index.astro            home: disease-site nav + hero TL;DR + recent-studies feed + live search
+    index.astro            home: disease-site nav + hero TL;DR + latest ~12-study what's-new slice (RecentFeed)
+    studies.astro          v0.14 T3: the full flat index of every study; where the tag filter rail lives ("Browse all N studies →" from home)
     about.astro            what it is / how it works / curator (linked from the header)
     [date].astro           daily digest, grouped by disease site; per-study verdict pills
     sites/index.astro      browse-by-site grid
     sites/[site].astro     all studies for one site across dates, newest first
+    tags/index.astro       v0.10: tag namespace browse
+    tags/[...slug].astro   v0.10: one tag (or built intersection) → matching studies
+    offline.astro          v0.6 PWA offline fallback page
     study/[slug].astro     v0.21: standalone per-study page at /study/<date>-<slug>/ — the share-button target; og:title is the study name (+ " — oncbrain") and og:image is the per-study card, so a shared link unfurls with the study, not the site card. Renders the same StudyCard the date/site pages use
     conferences/[slug]/    conference index (all days tagged with a conference)
     og/study/[slug].png.ts v0.21: per-study OG card at /og/study/<date>-<slug>.png (share-image.ts studyCard: study name + headline number + verdict pill); og:image for the standalone study page
@@ -241,10 +246,16 @@ src/
     api/v1/digests.json.ts        v0.8 PR3: index of published days + counts
     api/v1/digest/[date].json.ts  v0.8 PR3: one day's artifact (papers sanitized, no full text)
     api/v1/study/[slug].json.ts   v0.8 PR3: one study, cross-date resolved
-  components/StudyCard.astro  v0.9: the single dense study card (triage-first — rests at name/TL;DR/verdict/comparator, folds depth); rendered by [date] + sites/[site] + tags/[...slug] + (v0.21) study/[slug]
-  components/TriageRail.astro v0.9: desktop-only (>=1200px) sticky jump-list (verdict emoji + name) in the left gutter
-  components/SearchBox.astro  live search input + results dropdown; lives in the global header (Base.astro), lazy-loads the index
-  layouts/Base.astro       shell: Newsreader font, RSS <link>, widgets.js, header (title + search + About/curator on one line), desktop depth-auto-expand script (>=1024px), disclaimer + API/RSS footer
+  components/StudyCard.astro  v0.9: the single dense study card (triage-first; v0.30 endpoint-forward — rests at verdict chip/name/For/primary endpoint/TL;DR/why-it-matters, folds depth); rendered by [date] + sites/[site] + tags/[...slug] + studies + (v0.21) study/[slug]
+  components/TriageRail.astro v0.9: desktop-only (>=1200px, >=1640px on wide pages) sticky jump-list (verdict emoji + name) in the left gutter
+  components/SearchBox.astro  live search input + results dropdown; lives in the global header top row (Base.astro), lazy-loads the index
+  components/SpecialtyBar.astro v0.31/v0.32: the reader's saved "focus on your specialty" panel in the header. Dims cards whose data-specialties miss the pick, and swaps the why-it-matters block to that specialty's variant. Pure client-side + localStorage; independent of the tag rail
+  components/RecentFeed.astro v0.14 T3: the shared flat study feed template — home renders a latest-N slice, /studies the full corpus. Carries the 🚀 practice-changing flag + the NEW/seen-set pills (allIds is the full corpus, not just the rendered slice)
+  components/SiteNav.astro    v0.14.3: disease-site chip row, the primary cross-corpus wayfinding; shared by home + /studies
+  components/TagFilterRail.astro v0.11: desktop-only (>=1200px) tag checkbox tree; filters every [data-tags] card on the page, state in the URL
+  components/Sparkline.astro  v0.10: home tag-activity sparkline (hairline SVG, no axes). The documented exception to the no-decorative-SVG rule
+  components/A2hsHint.astro   v0.14.8: iOS add-to-home-screen hint; reveals only on iOS Safari, uninstalled, undismissed (logic in src/lib/pwa-a2hs.ts)
+  layouts/Base.astro       shell: Newsreader font, dark/light theme tokens + pre-paint theme script (v0.30), RSS <link>, widgets.js, header (wordmark + search + theme toggle on the top row, then sub-line, then SpecialtyBar), desktop depth-auto-expand script (>=1024px), disclaimer + API/RSS footer
 prompts/
   digest-v5-grouping.txt     CURRENT Phase 1: cluster sources into studies
   digest-v5-study-agent.txt  CURRENT Phase 2: per-study deep-analysis (parallel)
@@ -302,6 +313,12 @@ TODOS.md                   deferred work tracker (seeded from CHANGELOG "Not yet
 - **Local DB** (`oncbrain.db`) is gitignored. Phone-bookmarking is via Telegram bot, NOT remote DB — admin runs locally only.
 - **Cron** at 1am Pacific via launchd (early enough that its claude-cli usage clears the rolling 5-hour subscription window before the morning). If Mac is asleep, pmset wake at 00:55 is required.
 - **Channel distribution (v0.14.7 T5).** After the build + push, the cron runs `npm run notify:channel` per changed date, posting a reader-facing announcement (top-line + verdict-emoji study list + deep link, which Telegram previews with the T4 OG card) to a public Telegram channel. Config: `TELEGRAM_CHANNEL_ID` (`.env`) = the channel `@username` or numeric id, with `@oncbrain_bot` added as a channel ADMIN. Unset → the step self-skips (ships dormant). Distinct from `notify:curator` (the curator's private "build done" DM). `npm run notify:channel -- --dry-run` previews the post without sending.
+- **Deploy-readiness gate before Telegram notifications** (`src/lib/deploy-ready.ts`). `notify:curator` and `notify:channel` poll the date URL until it is genuinely live, then send. Three checks, all necessary:
+  1. The served HTML references `/og/<date>.png`. **A status check would be useless:** `.do/app.yaml` sets `catchall_document: index.html`, so an undeployed path returns **HTTP 200 with the home page** rather than a 404, and Telegram caches that wrong preview per URL.
+  2. The og:image the page names responds 200 **with an `image/*` content-type**. The catchall swallows missing assets too — a missing `/og/<date>.png` returns 200 `text/html`, so status alone passes on exactly the broken case.
+  3. The page's `<meta name="oncbrain:build">` matches the artifact's `generated_at`, read out of that tag and compared exactly (never a substring of the page). Without it a *re-rendered* date is indistinguishable from its previous deploy.
+  **The two surfaces deliberately differ on timeout.** `notify:curator` still sends (the "build ran" ping is worth more than its preview) but **suppresses the link preview**, so it can't poison the URL's cache for the channel post that follows it in `daily-build.sh`. `notify:channel` **skips entirely** and tells you the re-run command — there the preview IS the product, and posting is the act that poisons the cache.
+  Cap is **2 minutes** (DO deploys in ~40s). Kill switch `DEPLOY_WAIT=off`; cap override `DEPLOY_WAIT_TIMEOUT_MS`. `--dry-run` never waits. Also worth knowing: the catchall means **every** typo'd URL 200s as the home page, so broken links never surface as 404s anywhere on this site.
 - **Curator name** (`PUBLIC_CURATOR_NAME`, `PUBLIC_CURATOR_HANDLE`) is local-only — DO's build doesn't see `.env`. Set these as DO app env vars to attribute on the live site.
 - **Filed PDFs are local-only** (v0.8 PR2). Full-text PDFs forwarded to the bot are filed under `data/obsidian/papers/<site>/<slug>.pdf` (gitignored, no `public/` symlink, never in the Astro build) and embedded in the Obsidian daily note. The public site carries only the summary. This is a hard IP constraint — never publish the PDFs (a test in `test/publish-boundary.test.ts` guards it).
 
@@ -321,16 +338,18 @@ When a user request matches a gstack skill, invoke via the Skill tool:
 ## Testing
 
 ```
-npm test                   # 469 tests, all should pass
+npm test                   # 1743 tests across 88 files, all should pass
 npm run test:watch         # vitest watch mode
 npx astro check            # type check (0 errors expected)
 ```
 
-Tests live in `test/`. Each lib module has a corresponding test file. Naming convention: `test/<module>.test.ts`.
+Tests live in `test/`. Each lib module has a corresponding test file. Naming convention: `test/<module>.test.ts`. `test/global-setup.ts` builds `dist/` once before any file is collected (only when the artifacts are absent), so the dist-reading tests (`publish-boundary`, `pwa-build`, `pwa-routes`, `tag-filter-rail-drawer`) are correct on a cold checkout. **After switching branches, `rm -rf dist && npm run build` first** — those tests reuse an existing `dist/`, and a stale one from another branch fails as if it were a code regression.
 
 ## Versioning
 
-Single source of truth: `package.json` `"version"` field. CHANGELOG.md gets a new section per release. Currently v0.31.0 (reader-selectable specialty relevance: a reader marks which subspecialties matter and the day dims off-target cards, on top of the v0.30 "endpoint-forward card" — the study card leads with the primary endpoint + effect size via the new `primary_endpoint` / `analysis_sections` schema fields).
+Single source of truth: `package.json` `"version"` field. CHANGELOG.md gets a new section per release.
+
+**Released:** v0.32.0 — per-specialty "why it matters" (`significance_by_specialty`): the specialty bar reframes the callout prose to the reader's field instead of only dimming cards, plus specialty-filter discoverability, search on the header's title row, and the deploy-readiness gate on Telegram notifications. Builds on v0.31 (reader-selectable specialty relevance) and v0.30 (the "endpoint-forward card" — `primary_endpoint` / `analysis_sections` — plus the dark-default theme).
 
 ## Planning artifacts
 
