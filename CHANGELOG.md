@@ -2,6 +2,51 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.32.0] - 2026-07-31
+
+Your specialty pick now changes what the analysis *says*, not just which cards
+stand out. Plus the daily Telegram announcement finally shows the right card.
+
+### Added
+- **Per-specialty "why it matters."** Picking a subspecialty now rewrites each
+  study's "why it matters" prose to that reader's decision lens — radiation gets
+  dose, target and local control; medical gets regimen and biomarker; surgical
+  gets resectability and margin. The specialty bar used to only dim off-target
+  cards; now it reframes the ones that stay. Studies with nothing
+  specialty-specific to add keep their single default read.
+- **A build stamp on every date page.** Each digest page now names the build that
+  produced it, so you can tell at a glance whether what you're looking at is the
+  latest render.
+
+### Changed
+- **The specialty filter announces itself.** It shipped as a muted divider that
+  read as chrome and nobody noticed it was theirs to use. It's now a labeled
+  panel — "Focus on your specialty" — with a one-line explanation.
+- **Search moved onto the header's title row**, so the first screenful starts
+  with content instead of chrome.
+- **The verdict chip sits above the trial name** rather than beside it. A long
+  name used to wrap into it.
+
+### Fixed
+- **The daily Telegram announcement showed the generic site card instead of the
+  day's own.** Notifications were sent the instant the digest was pushed, but the
+  site takes about 40 seconds to deploy — so Telegram fetched a page that wasn't
+  live yet and cached the wrong preview, permanently, for that link. Compounding
+  it: the site returns "200 OK" with the home page for any address that doesn't
+  exist yet (including missing images), so nothing looked wrong. Announcements
+  now wait until the page, its preview card, and the matching build stamp are all
+  genuinely live. If the deploy is slow, the private build notice still arrives
+  but without a preview (so it can't poison the link), and the public post is
+  held back rather than published with a wrong card.
+- **A failed push no longer produces announcements.** If publishing failed, the
+  run could still announce dates that never left the laptop, linking pages that
+  don't exist.
+- **ESTRO meetings are recognized**, along with the "ASTRO 2025" style of
+  branding that real abstracts actually use, so those days get their conference
+  badge.
+- **Disease-site navigation is a grid on phones** instead of a side-scrolling
+  strip that hid half the sites.
+
 ## [0.31.0] - 2026-07-18
 
 Reader-selectable specialty relevance. A reader can mark which subspecialties
