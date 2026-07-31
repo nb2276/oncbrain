@@ -203,11 +203,23 @@ async function suggestFromCrossref(query: string, deps: SuggestDeps): Promise<Su
 // The curator-facing reply when we DID find a likely accessible copy. The link
 // is a clean PubMed/DOI URL that re-ingests through the reliable id path when
 // forwarded back. No em dashes (VOICE), commas/parentheses only.
-export function formatSuggestionReply(failureMessage: string, s: Suggestion): string {
+// `sourceLabel` names the page that failed. This reply already carries a SECOND
+// link (the suggested accessible copy), so without naming the original the
+// curator sees two URLs and has to work out which one was rejected and which one
+// to forward back.
+export function formatSuggestionReply(
+  failureMessage: string,
+  s: Suggestion,
+  sourceLabel?: string | null,
+): string {
   const cite = [s.journal, s.year].filter(Boolean).join(' ');
   const citeLine = cite ? `${s.title} (${cite})` : s.title;
+  const label = sourceLabel?.trim();
+  const head = label
+    ? `Couldn't ingest that page directly:\n${label}\n\nReason: ${failureMessage}`
+    : `Couldn't ingest that page directly (${failureMessage}).`;
   return (
-    `Couldn't ingest that page directly (${failureMessage}).\n\n` +
+    `${head}\n\n` +
     `Likely the same paper, from an accessible source:\n` +
     `${citeLine}\n` +
     `${s.url}\n\n` +
