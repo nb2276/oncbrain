@@ -10,6 +10,8 @@
 // (audience, figure, detail bullets/tables, open questions, attribution) folds
 // behind a native <details> expander. Sources stay in their own collapsible.
 import { linkifyCitations } from '../lib/extract.ts';
+import EffectMark from './EffectMark.astro';
+import { parseEffectSize, domainFor, type AxisDomain } from '../lib/effect-size.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
 import { VERDICT_META, REVIEW_GLYPH } from '../lib/verdict.ts';
 import { tradePressLabel } from '../lib/paper-url.ts';
@@ -42,6 +44,11 @@ interface Props {
   bookmarks?: Bookmark[];
   papers?: DigestArtifactPaper[];
   slides?: DigestArtifactSlide[];
+  // v0.33: shared log-axis domain for the effect-size mark. [date].astro passes
+  // one per endpoint class so a day's marks are comparable; every other surface
+  // leaves it undefined and gets the fixed domain, so the same study never
+  // changes size depending on which page you found it on.
+  effectDomain?: AxisDomain;
   // Optional anchor id on the card root (per-date page uses it for deep links).
   anchorId?: string;
   // Optional "Sourced from …" attribution line (per-date page only).
@@ -83,6 +90,7 @@ const {
   bookmarks = [],
   papers = [],
   slides = [],
+  effectDomain,
   anchorId,
   authors = [],
   shareUrl,
@@ -322,6 +330,11 @@ const tableDetails = study.details.filter(
 // the v0.4 single-figure shape; re-applies the host allowlist at render time as
 // defense-in-depth (build already validated). First figure is the visual anchor;
 // the rest fold behind a tap on mobile (auto-expanded on desktop via Base.astro).
+// v0.33: the effect-size mark. Abstains (null) whenever the endpoint has no
+// clean ratio — most studies report proportions or medians, and forcing those
+// onto a log ratio axis would be wrong. A card with no mark is the expected
+// state, not a defect, so nothing renders in its place.
+const effect = parseEffectSize(study.primary_endpoint);
 const figures = studyFigures(study).filter((f) => isSafeImageUrl(f.url));
 const hasFigures = figures.length > 0;
 const restFigures = figures.slice(1);
@@ -441,6 +454,7 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       {study.primary_endpoint.stat_detail && (
         <p class="endpoint-sub" set:html={linkifyCitations(study.primary_endpoint.stat_detail)} />
       )}
+      {effect && <EffectMark datum={effect} domain={effectDomain ?? domainFor(effect)} />}
     </div>
   )}
   <p class:list={['study-tldr', study.primary_endpoint?.stat_value && 'study-tldr--plain']}><span class="tldr-label">TL;DR</span><span set:html={emphasizeStats(linkifyCitations(stripStudyNamePrefix(study.tldr, study.name)))} /></p>

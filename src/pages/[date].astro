@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import StudyCard from '../components/StudyCard.astro';
+import { parseEffectSize, sharedDomain, type AxisDomain, type EffectDatum } from '../lib/effect-size.ts';
 import TriageRail from '../components/TriageRail.astro';
 import TagFilterRail from '../components/TagFilterRail.astro';
 import {
@@ -89,6 +90,41 @@ type SourceArrays = {
   slides: DigestArtifactSlide[];
 };
 const authorsByStudy = new Map<DigestStudy, StudyAuthor[]>();
+// v0.33: the day-level shared axis. Every effect-size mark on THIS page is
+// drawn on one scale, so the biggest result of the day is visibly the longest
+// reach from the null rather than each dot sitting on its own private ruler.
+//
+// Scoped two ways, deliberately:
+//   PER ENDPOINT CLASS. An overall-survival HR and a local-control HR are not
+//   freely comparable, so they never share a ruler. Studies whose class is
+//   unset fall into their own bucket rather than being pooled with a real one.
+//   DATE PAGES ONLY. Site, tag and per-study pages pass no domain and get the
+//   fixed one, because "these arrived on the same day" is a real relationship
+//   and "these share a disease site" is not a reason to rescale a mark. A
+//   reader comparing the two surfaces sees different tick labels, which is the
+//   honest signal that the ruler changed, not the number.
+const effectDomainByStudy = new Map<DigestStudy, AxisDomain>();
+{
+  const byKlass = new Map<string, Array<{ study: DigestStudy; datum: EffectDatum }>>();
+  for (const site of digest.sites) {
+    for (const study of site.studies) {
+      const datum = parseEffectSize(study.primary_endpoint);
+      if (!datum) continue;
+      // Key by endpoint class AND ratio kind. An odds ratio and a hazard ratio
+      // are not interchangeable quantities, so they never share a ruler even
+      // when they describe the same endpoint class.
+      const key = `${datum.klass ?? 'unknown'}::${datum.kind}`;
+      const bucket = byKlass.get(key);
+      if (bucket) bucket.push({ study, datum });
+      else byKlass.set(key, [{ study, datum }]);
+    }
+  }
+  for (const rows of byKlass.values()) {
+    const domain = sharedDomain(rows.map((r) => r.datum));
+    for (const r of rows) effectDomainByStudy.set(r.study, domain);
+  }
+}
+
 const sourcesByStudy = new Map<DigestStudy, SourceArrays>();
 for (const study of allStudiesOnDate) {
   // v0.5: typed refs preferred; tweet_ids is the back-compat fallback.
@@ -199,6 +235,7 @@ for (const study of allStudiesOnDate) {
               siblings={siblingPreviews.get(siblingKey) ?? []}
               trialHistory={trialHistory.get(siblingKey) ?? []}
               dataTags={studyDataTags(study, site.disease_site, conference?.slug ?? null)}
+              effectDomain={effectDomainByStudy.get(study)}
             />
           );
         })}

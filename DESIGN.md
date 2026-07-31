@@ -114,6 +114,34 @@ The depth dropdown's summary keeps the `N details` count so the affordance reads
   - **Wide variant `triage-rail--wide` (1180px body — study pages `[date].astro` and `sites/[site].astro`):** the wider body needs more page width before the gutter clears, so the rail only shows at **≥1640px**. On common 1280-1440px desktops the rail stays hidden on study pages, and the cards' own figure columns carry the page.
   - Hidden below the matching threshold.
 
+### Effect-size mark (v0.33)
+
+A **forest dot on a log axis**, drawn inline directly under the primary endpoint number it visualizes (`src/components/EffectMark.astro`). The second sanctioned information-bearing SVG alongside `Sparkline.astro` — it earns its pixels because a hazard ratio's *magnitude* doesn't register in text: "HR 0.53 (95% CI 0.38-0.74)" is precise but not comparable at a glance across eight studies.
+
+It is a **domain convention, not an invention** — this audience reads forest plots professionally, so it needs no onboarding affordance.
+
+- **Placement: inline, inside `.study-endpoint`.** NOT in the figure column. That column is sized for slide photographs (`clamp(320px, 40%, 470px)`), so a compact mark marooned there reads as broken, and on mobile that slot sits *above* the TL;DR and would push the 90-second scan down. Inline, the mark sits with its own number on every viewport, and a card with a real slide photo still gets the figure column for the photo.
+- **Neutral, never verdict color.** Point and interval are `var(--fg)`; axis, null line and ticks are `var(--fg-muted)`. The card already decided this: `StudyCard.astro` keeps valence in the headline number's *underline* so a negative HR never renders as a colored win. A verdict-green dot sitting on the harm side of the null would contradict the card's own rule. **Direction is carried by position** relative to the null, which also survives colorblindness, greyscale and print.
+- **Opacity is unavailable.** The SpecialtyBar dims off-specialty cards with opacity, so encoding imprecision as faintness would leave a reader unable to tell "not your field" from "weak evidence". **Imprecision is width** — the interval drawn to scale, which is the honest encoding anyway.
+- **Scaffolding: null line + three ticks. No "favors X / favors Y" spine.** The spine needs arm names the artifact doesn't reliably carry, and a guessed arm label is a clinical error, not a flourish. Tick labels have an **11px floor**; drop them before shrinking below it.
+- **The axis always contains the estimate.** A hard 0.25-4 window would clamp a real corpus value (`OR 5.34`) to the axis edge, where it reads as 4.0 — clamping an *interval* is honest because the arrowhead says "continues", but clamping the *estimate* is a lie. The domain is therefore derived from the data, and `markGeometry` reports `pointOffScale` so a renderer can refuse to draw rather than mislead.
+- **Shared axis on date pages only.** Every mark on one date shares a scale *within one endpoint class AND one ratio kind* — an odds ratio and a hazard ratio are not interchangeable quantities, so they never share a ruler. That makes the biggest result of the day visibly the longest reach from the null. Site, tag and per-study pages scale each mark to itself, because "these arrived on the same day" is a real relationship and "these share a disease site" is not a reason to rescale. The same study renders identically across every non-date surface. Visible tick labels make the difference self-explaining.
+- **The null line at 1.0 is a reference, not a verdict.** Several trials in the corpus are non-inferiority designs whose margin lives in prose the artifact doesn't model. The mark shows the estimate; the verdict chip and prose carry the conclusion.
+
+**States:**
+
+| State | What renders |
+|---|---|
+| Point + interval | Dot, interval to scale, null line, three ticks |
+| Point only, no interval | Dot alone, same size. No bar, so it can't read as precise |
+| Interval runs off the axis | Arrowhead at the clipped end: "continues", not "ends here" |
+| No clean ratio | **Nothing.** No placeholder, no reserved space, no footnote |
+| Point estimate off the axis | **Nothing.** Clamping the dot to the edge would misreport its value |
+
+**On inconsistent presence:** a date page where only some cards carry a mark is the expected state, not a defect. Most studies report proportions or medians rather than a ratio, and a missing mark says nothing about the study. Adding a placeholder would invent a signal.
+
+**Accessibility:** the mark is `aria-hidden` — the estimate and its interval are already in adjacent text, and a screen reader shouldn't announce them twice.
+
 ### Specialty filter (v0.31)
 
 A **"Focus on your specialty"** bar (`src/components/SpecialtyBar.astro`) in the global header lets the reader pick which subspecialties matter: three checkboxes — 🎯 **Radiation** · 💊 **Medical** · 🔪 **Surgical**. Selecting one or more **dims** every card that doesn't carry a selected specialty; OR-logic across selections; the choice persists in `localStorage`. Cards expose the signal via `data-specialties` (from the study's `relevant_specialties`, judged neutrally at build). The bar self-hides when a page has fewer than two tagged cards — nothing to filter.
