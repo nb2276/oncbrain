@@ -124,7 +124,8 @@ It is a **domain convention, not an invention** — this audience reads forest p
 - **Neutral, never verdict color.** Point and interval are `var(--fg)`; axis, null line and ticks are `var(--fg-muted)`. The card already decided this: `StudyCard.astro` keeps valence in the headline number's *underline* so a negative HR never renders as a colored win. A verdict-green dot sitting on the harm side of the null would contradict the card's own rule. **Direction is carried by position** relative to the null, which also survives colorblindness, greyscale and print.
 - **Opacity is unavailable.** The SpecialtyBar dims off-specialty cards with opacity, so encoding imprecision as faintness would leave a reader unable to tell "not your field" from "weak evidence". **Imprecision is width** — the interval drawn to scale, which is the honest encoding anyway.
 - **Scaffolding: null line + three ticks. No "favors X / favors Y" spine.** The spine needs arm names the artifact doesn't reliably carry, and a guessed arm label is a clinical error, not a flourish. Tick labels have an **11px floor**; drop them before shrinking below it.
-- **Shared axis on date pages only.** Every mark on one date shares a scale *within an endpoint class*, so the biggest result of the day is visibly the longest reach from the null. Site, tag and per-study pages use a fixed 0.25-4 domain, because "these arrived on the same day" is a real relationship and "these share a disease site" is not a reason to rescale. Visible tick labels make the difference self-explaining.
+- **The axis always contains the estimate.** A hard 0.25-4 window would clamp a real corpus value (`OR 5.34`) to the axis edge, where it reads as 4.0 — clamping an *interval* is honest because the arrowhead says "continues", but clamping the *estimate* is a lie. The domain is therefore derived from the data, and `markGeometry` reports `pointOffScale` so a renderer can refuse to draw rather than mislead.
+- **Shared axis on date pages only.** Every mark on one date shares a scale *within one endpoint class AND one ratio kind* — an odds ratio and a hazard ratio are not interchangeable quantities, so they never share a ruler. That makes the biggest result of the day visibly the longest reach from the null. Site, tag and per-study pages scale each mark to itself, because "these arrived on the same day" is a real relationship and "these share a disease site" is not a reason to rescale. The same study renders identically across every non-date surface. Visible tick labels make the difference self-explaining.
 - **The null line at 1.0 is a reference, not a verdict.** Several trials in the corpus are non-inferiority designs whose margin lives in prose the artifact doesn't model. The mark shows the estimate; the verdict chip and prose carry the conclusion.
 
 **States:**
@@ -135,7 +136,7 @@ It is a **domain convention, not an invention** — this audience reads forest p
 | Point only, no interval | Dot alone, same size. No bar, so it can't read as precise |
 | Interval runs off the axis | Arrowhead at the clipped end: "continues", not "ends here" |
 | No clean ratio | **Nothing.** No placeholder, no reserved space, no footnote |
-| Single study on the date | Fixed domain rather than a shared one |
+| Point estimate off the axis | **Nothing.** Clamping the dot to the edge would misreport its value |
 
 **On inconsistent presence:** a date page where only some cards carry a mark is the expected state, not a defect. Most studies report proportions or medians rather than a ratio, and a missing mark says nothing about the study. Adding a placeholder would invent a signal.
 

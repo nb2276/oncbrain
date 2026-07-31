@@ -110,7 +110,10 @@ const effectDomainByStudy = new Map<DigestStudy, AxisDomain>();
     for (const study of site.studies) {
       const datum = parseEffectSize(study.primary_endpoint);
       if (!datum) continue;
-      const key = datum.klass ?? 'unknown';
+      // Key by endpoint class AND ratio kind. An odds ratio and a hazard ratio
+      // are not interchangeable quantities, so they never share a ruler even
+      // when they describe the same endpoint class.
+      const key = `${datum.klass ?? 'unknown'}::${datum.kind}`;
       const bucket = byKlass.get(key);
       if (bucket) bucket.push({ study, datum });
       else byKlass.set(key, [{ study, datum }]);

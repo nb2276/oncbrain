@@ -5,6 +5,7 @@ import {
   parseEffectSize,
   markGeometry,
   sharedDomain,
+  domainFor,
   groupByKlass,
   describeEffect,
   FIXED_DOMAIN,
@@ -383,5 +384,72 @@ describe('the mark is wired into real date pages', () => {
       const src = readFileSync(resolve(process.cwd(), f), 'utf-8');
       expect(src).not.toContain('effectDomain');
     }
+  });
+});
+
+// Findings from the ship adversarial pass. All four were real; two would have
+// drawn a confidently wrong picture from clinical data.
+describe('adversarial regressions', () => {
+  // HIGH: a point estimate outside the domain used to be clamped to the axis
+  // edge, so a real corpus value (OR 5.34) rendered as if it were 4.0.
+  it('flags an off-scale POINT estimate rather than clamping it silently', () => {
+    const or: EffectDatum = { form: 'ratio', kind: 'OR', point: 5.34, lo: 2.05, hi: 13.88, ciLevel: 95, klass: null };
+    const g = markGeometry(or, FIXED_DOMAIN, 100);
+    expect(g.pointOffScale).toBe(true);
+  });
+
+  it('gives a single mark a domain that actually contains its estimate', () => {
+    const or: EffectDatum = { form: 'ratio', kind: 'OR', point: 5.34, lo: 2.05, hi: 13.88, ciLevel: 95, klass: null };
+    const dom = domainFor(or);
+    expect(or.point).toBeGreaterThan(dom.lo);
+    expect(or.point).toBeLessThan(dom.hi);
+    expect(markGeometry(or, dom, 100).pointOffScale).toBe(false);
+  });
+
+  it('gives the same study the same domain on every non-date surface', () => {
+    const d: EffectDatum = { form: 'ratio', kind: 'HR', point: 0.53, lo: 0.38, hi: 0.74, ciLevel: 95, klass: 'x' };
+    expect(domainFor(d)).toEqual(domainFor({ ...d }));
+  });
+
+  // HIGH: containment alone can't prove association. Here the RATE's CI happens
+  // to contain the HR, so pairing them would draw a confidently wrong interval.
+  it('refuses a CI it cannot unambiguously associate with the ratio', () => {
+    const d = parseEffectSize(
+      pe('HR 0.70', '12-mo PFS 0.70 (95% CI 0.60-0.80); HR 95% CI 0.50-0.95'),
+    );
+    // The estimate is still trustworthy; the interval is not, so it drops to
+    // point-only rather than drawing the wrong bar.
+    expect(d).toMatchObject({ point: 0.7, lo: null, hi: null });
+  });
+
+  it('still accepts an adjacent parenthetical CI when other CIs exist', () => {
+    const d = parseEffectSize(
+      pe('mDFS 52.7 vs 24.4 mo', 'HR 0.750 (95% CI 0.607-0.928); 3-yr rate 61% (95% CI 55-67)'),
+    );
+    expect(d).toMatchObject({ point: 0.75, lo: 0.607, hi: 0.928 });
+  });
+
+  // LOW: an exported function should not emit NaN because a caller passed junk.
+  it('never emits NaN or Infinity on a degenerate domain or width', () => {
+    const d: EffectDatum = { form: 'ratio', kind: 'HR', point: 0.5, lo: 0.4, hi: 0.8, ciLevel: 95, klass: null };
+    for (const dom of [{ lo: 0, hi: 4 }, { lo: 4, hi: 0.25 }, { lo: NaN, hi: 4 }, { lo: 1, hi: 1 }]) {
+      for (const w of [0, -5, NaN, 100]) {
+        const g = markGeometry(d, dom as never, w);
+        for (const v of [g.pointX, g.nullX, g.loX, g.hiX]) {
+          if (v == null) continue;
+          expect(Number.isFinite(v)).toBe(true);
+        }
+        for (const t of g.ticks) expect(Number.isFinite(t.x)).toBe(true);
+      }
+    }
+  });
+});
+
+describe('the date-page axis never pools incomparable quantities', () => {
+  it('keys the shared axis by endpoint class AND ratio kind', () => {
+    // An odds ratio and a hazard ratio are not interchangeable, so sharing a
+    // ruler because they describe the same endpoint class would be wrong.
+    const src = readFileSync(resolve(process.cwd(), 'src/pages/[date].astro'), 'utf-8');
+    expect(src).toMatch(/datum\.klass[^\n]*datum\.kind/);
   });
 });

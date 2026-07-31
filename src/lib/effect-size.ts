@@ -63,6 +63,35 @@ const RATIO_RE =
 const CI_RE =
   /(\d{2})\s*%\s*CI[\s:]*\(?\s*(\d+(?:\.\d+)?)\s*(?:-|to)\s*(\d+(?:\.\d+)?)\s*\)?/i;
 
+type CiHit = { a: number; b: number; level: number | null };
+
+function toCiHit(m: RegExpMatchArray | null): CiHit | null {
+  if (!m) return null;
+  const a = Number(m[2]);
+  const b = Number(m[3]);
+  const level = Number(m[1]);
+  if (!Number.isFinite(a) || !Number.isFinite(b) || a <= 0 || b <= 0) return null;
+  return { a, b, level: Number.isFinite(level) ? level : null };
+}
+
+// How far after a ratio a CI may start and still count as "attached to it".
+// "HR 0.750 (95% CI ...)" is ~2 chars; allow a little slack for "HR 0.75, 95% CI".
+const CI_ADJACENCY_CHARS = 12;
+
+function findAdjacentCi(text: string, fromIndex: number): CiHit | null {
+  const tail = text.slice(fromIndex, fromIndex + CI_ADJACENCY_CHARS + 40);
+  const m = CI_RE.exec(tail);
+  if (!m || (m.index ?? 0) > CI_ADJACENCY_CHARS) return null;
+  return toCiHit(m);
+}
+
+/** A CI, only when the text contains exactly one — otherwise association is a guess. */
+function findSoleCi(text: string): CiHit | null {
+  const all = [...text.matchAll(new RegExp(CI_RE.source, 'gi'))];
+  if (all.length !== 1) return null;
+  return toCiHit(all[0]!);
+}
+
 function ratioKind(raw: string, prefixed: boolean): RatioKind {
   const up = raw.toUpperCase();
   if (up === 'OR') return 'OR';
@@ -101,25 +130,40 @@ export function parseEffectSize(pe: PrimaryEndpointLike): EffectDatum | null {
   const prefixed = /sub-?|^s/i.test(m[0].trim()) && !/^(adjusted|a)\s*HR/i.test(m[0].trim());
   const kind = ratioKind(m[1]!, prefixed);
 
-  // The interval lives in the detail in every corpus case; check the value too
-  // for the parenthetical form. First match only, same reasoning as above.
-  const ci = CI_RE.exec(detail) ?? CI_RE.exec(value);
+  // Pick the interval. Containment alone is NOT enough to prove association: a
+  // detail like "HR 0.70; 12-mo PFS 0.70 (95% CI 0.60-0.80); HR 95% CI 0.50-0.95"
+  // has a rate CI that happens to contain the HR, and pairing them would draw a
+  // confidently wrong interval. So a CI is accepted only when the association is
+  // UNAMBIGUOUS: either it directly follows the ratio, or it is the only CI in
+  // the text. Anything else drops to a point-only mark — the estimate is still
+  // trustworthy, the interval is not.
+  const ratioInValue = inValue !== null;
+  const ratioText = ratioInValue ? value : detail;
+  const ratioEnd = m.index + m[0].length;
+
+  const ci =
+    // (a) adjacent: the CI opens within a short window after the ratio, which
+    //     covers the parenthetical form "HR 0.750 (95% CI 0.607-0.928)".
+    findAdjacentCi(ratioText, ratioEnd) ??
+    // (b) unambiguous: exactly one CI in the other field. Covers the corpus's
+    //     dominant shape, stat_value "HR 0.54" + stat_detail "95% CI 0.41-0.72",
+    //     including details where prose precedes the CI.
+    findSoleCi(ratioInValue ? detail : value) ??
+    // (c) unambiguous within the ratio's own field.
+    findSoleCi(ratioText);
+
   let lo: number | null = null;
   let hi: number | null = null;
   let ciLevel: number | null = null;
   if (ci) {
-    const a = Number(ci[2]);
-    const b = Number(ci[3]);
-    const level = Number(ci[1]);
-    if (Number.isFinite(a) && Number.isFinite(b) && a > 0 && b > 0) {
-      if (b < a) return null; // reversed bounds: corrupt, do not guess
-      // Containment is the load-bearing guard. It catches corrupt data AND a
-      // CI we mis-paired with the wrong ratio, which is the likelier failure.
-      if (point < a || point > b) return null;
-      lo = a;
-      hi = b;
-      ciLevel = Number.isFinite(level) ? level : null;
-    }
+    const { a, b, level } = ci;
+    if (b < a) return null; // reversed bounds: corrupt, do not guess
+    // Containment stays as a second guard: it still catches corrupt data and a
+    // CI that passed association but cannot belong to this estimate.
+    if (point < a || point > b) return null;
+    lo = a;
+    hi = b;
+    ciLevel = level;
   }
 
   return { form: 'ratio', kind, point, lo, hi, ciLevel, klass: pe.klass ?? null };
@@ -161,6 +205,17 @@ export function sharedDomain(data: EffectDatum[]): AxisDomain {
   return { lo: 1 / hi, hi };
 }
 
+/**
+ * The domain for a SINGLE mark, on every surface except a date page. Derived
+ * from the datum so the estimate is always on scale: a hard 0.25-4 window would
+ * clamp a real corpus value (OR 5.34) to the axis edge, where it reads as 4.0.
+ * Deterministic per datum, so the same study renders identically on the site,
+ * tag and per-study pages.
+ */
+export function domainFor(d: EffectDatum): AxisDomain {
+  return sharedDomain([d]);
+}
+
 /** Group by endpoint class so a shared axis never spans two of them. */
 export function groupByKlass(data: EffectDatum[]): Map<string, EffectDatum[]> {
   const out = new Map<string, EffectDatum[]>();
@@ -184,6 +239,13 @@ export type MarkGeometry = {
   /** True when the interval ran past the axis and was cut short. */
   clippedLo: boolean;
   clippedHi: boolean;
+  /**
+   * True when the POINT ESTIMATE itself falls outside the domain. Clamping an
+   * interval is honest (the arrowhead says "continues"); clamping the estimate
+   * is a lie — the dot would sit at the axis edge and read as that edge's value.
+   * Callers must not draw a mark when this is true.
+   */
+  pointOffScale: boolean;
   /** Tick positions + their labels, low to high. */
   ticks: Array<{ x: number; label: string }>;
 };
@@ -208,14 +270,23 @@ export function markGeometry(
   domain: AxisDomain,
   width: number,
 ): MarkGeometry {
-  const logLo = Math.log(domain.lo);
-  const logHi = Math.log(domain.hi);
+  // Defensive: an exported function should not emit NaN/Infinity because a
+  // future caller handed it a degenerate domain.
+  const safe =
+    Number.isFinite(domain.lo) && Number.isFinite(domain.hi) &&
+    domain.lo > 0 && domain.hi > domain.lo && Number.isFinite(width) && width > 0
+      ? domain
+      : FIXED_DOMAIN;
+  const plotWidth = Number.isFinite(width) && width > 0 ? width : 1;
+  const logLo = Math.log(safe.lo);
+  const logHi = Math.log(safe.hi);
   const span = logHi - logLo;
-  const x = (v: number) => ((Math.log(v) - logLo) / span) * width;
-  const clamp = (n: number) => Math.min(width, Math.max(0, n));
+  const x = (v: number) => ((Math.log(v) - logLo) / span) * plotWidth;
+  const clamp = (n: number) => Math.min(plotWidth, Math.max(0, n));
 
-  const clippedLo = datum.lo != null && datum.lo < domain.lo;
-  const clippedHi = datum.hi != null && datum.hi > domain.hi;
+  const clippedLo = datum.lo != null && datum.lo < safe.lo;
+  const clippedHi = datum.hi != null && datum.hi > safe.hi;
+  const pointOffScale = datum.point < safe.lo || datum.point > safe.hi;
 
   return {
     pointX: clamp(x(datum.point)),
@@ -224,10 +295,11 @@ export function markGeometry(
     nullX: clamp(x(1)),
     clippedLo,
     clippedHi,
+    pointOffScale,
     ticks: [
-      { x: clamp(x(domain.lo)), label: fmtTick(domain.lo) },
+      { x: clamp(x(safe.lo)), label: fmtTick(safe.lo) },
       { x: clamp(x(1)), label: '1.0' },
-      { x: clamp(x(domain.hi)), label: fmtTick(domain.hi) },
+      { x: clamp(x(safe.hi)), label: fmtTick(safe.hi) },
     ],
   };
 }
