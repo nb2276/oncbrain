@@ -2,6 +2,34 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.34.0] - 2026-07-31
+
+Effect-size marks now cover studies that report two numbers instead of a ratio.
+
+### Added
+- **Paired bars.** A study reporting "28% vs 21%" or "15.8 vs 12.3 months" now
+  gets two bars instead of nothing. They start at zero, so bar length is
+  proportional to the value, and percentages are drawn against a 100 ceiling so
+  two cards can be compared. Arm names are shown when the source states them.
+- **Marks now appear on 36 of the 44 studies** that report a headline statistic,
+  up from 31.
+
+### Notes
+- **Neither bar is marked better.** The endpoint type cannot tell us which
+  direction is good: the same category covers "local control 95% vs 88%" (higher
+  is better) and "local recurrence 5% vs 12%" (lower is better). The mark shows
+  the magnitudes and leaves the meaning to the reader, the same way the ratio
+  form carries no "favours" labels.
+- **Comparison tables are read only when they can be positively identified as a
+  two-arm result.** Of the 75 tables in the archive, exactly one has a column
+  called "Arm", while 23 compare something else entirely: different trials,
+  disease-stage cohorts, subgroups, anatomic sites. Drawing any of those as the
+  two arms of one trial would be wrong, so a table has to prove what it is
+  before a single number is read from it. Six qualify today.
+- It still abstains rather than guess: three or more arms, "not reached", a
+  stated difference rather than two values, or two values in different units all
+  produce no mark.
+
 ## [0.33.0] - 2026-07-31
 
 Effect sizes you can see. A hazard ratio is precise as text but not comparable
