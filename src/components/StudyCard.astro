@@ -11,12 +11,12 @@
 // behind a native <details> expander. Sources stay in their own collapsible.
 import { linkifyCitations } from '../lib/extract.ts';
 import EffectMark from './EffectMark.astro';
-import { effectForStudy, domainFor, axisBucket } from '../lib/effect-size.ts';
+import { effectForStudy } from '../lib/effect-size.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
 import { VERDICT_META, REVIEW_GLYPH } from '../lib/verdict.ts';
 import { tradePressLabel } from '../lib/paper-url.ts';
 import {
-  effectDomains,
+  domainForMark,
   studyFigures,
   stripStudyNamePrefix,
   type DigestStudy,
@@ -458,7 +458,7 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       )}
       {effect && (
         effect.form === 'ratio'
-          ? <EffectMark datum={effect} domain={effectDomains().get(axisBucket(effect)) ?? domainFor(effect)} />
+          ? <EffectMark datum={effect} domain={domainForMark(effect)} />
           : <EffectMark datum={effect} />
       )}
     </div>

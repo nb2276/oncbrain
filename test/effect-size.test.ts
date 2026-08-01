@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { domainForMark, listDigests } from '../src/lib/digest-data.ts';
 import {
   parseEffectSize,
   parsePairedValues,
@@ -9,12 +10,12 @@ import {
   pairedGeometry,
   effectForStudy,
   markGeometry,
+  barSpan,
   sharedDomain,
   corpusDomains,
   axisBucket,
   endpointFamily,
   domainFor,
-  groupByKlass,
   describeEffect,
   FIXED_DOMAIN,
   type EffectDatum,
@@ -196,8 +197,9 @@ describe('markGeometry', () => {
 });
 
 describe('sharedDomain', () => {
-  const mk = (point: number, klass = 'surrogate'): EffectDatum => ({
-    form: 'ratio', kind: 'HR', point, lo: null, hi: null, ciLevel: null, klass,
+  const mk = (point: number): RatioDatum => ({
+    form: 'ratio', kind: 'HR', point, lo: null, hi: null, ciLevel: null,
+    klass: 'surrogate', endpointName: null,
   });
 
   it('stays symmetric about the null', () => {
@@ -230,11 +232,47 @@ describe('sharedDomain', () => {
   it('falls back to the fixed domain with no data', () => {
     expect(sharedDomain([])).toEqual(FIXED_DOMAIN);
   });
+});
 
-  it('groups by endpoint class so one ruler never spans two of them', () => {
-    const g = groupByKlass([mk(0.5, 'overall-survival'), mk(2, 'local-control'), mk(0.6, 'overall-survival')]);
-    expect(g.get('overall-survival')).toHaveLength(2);
-    expect(g.get('local-control')).toHaveLength(1);
+describe('barSpan', () => {
+  const DOM = { lo: 1 / 3, hi: 3 };
+  const mk = (point: number, lo: number | null, hi: number | null): RatioDatum => ({
+    form: 'ratio', kind: 'HR', point, lo, hi, ciLevel: 95,
+    klass: 'surrogate', endpointName: 'Overall survival',
+  });
+
+  it('abstains when the source reported no interval', () => {
+    expect(barSpan(markGeometry(mk(0.6, null, null), DOM, 560), 16)).toBeNull();
+  });
+
+  it('insets a clipped end to make room for the continuation mark', () => {
+    const g = markGeometry(mk(1.4, 0.22, 11.7), DOM, 560);
+    const span = barSpan(g, 16)!;
+    expect(span.left).toBe(g.loX! + 16);
+    expect(span.right).toBe(g.hiX! - 16);
+  });
+
+  it('leaves an unclipped end exactly on its bound', () => {
+    const g = markGeometry(mk(0.6, 0.5, 0.8), DOM, 560);
+    const span = barSpan(g, 16)!;
+    expect(span.left).toBe(g.loX);
+    expect(span.right).toBe(g.hiX);
+  });
+
+  // The regression the affordable-inset rule exists for: a short bar inset by
+  // the full chevron width gets drawn to the RIGHT of its own upper bound, which
+  // shows a magnitude the data does not support.
+  it('never draws the bar outside the interval it represents', () => {
+    for (const [point, lo, hi] of [
+      [0.34, 0.1, 0.35], [0.35, 0.2, 0.36], [2.9, 2.85, 20], [1.0, 0.3, 3.2],
+      [0.4, 0.05, 0.42], [1.4, 0.22, 11.7], [0.6, 0.5, 0.8],
+    ] as const) {
+      const g = markGeometry(mk(point, lo, hi), DOM, 560);
+      const span = barSpan(g, 16)!;
+      expect(span.left).toBeGreaterThanOrEqual(g.loX!);
+      expect(span.right).toBeLessThanOrEqual(g.hiX!);
+      expect(span.left).toBeLessThanOrEqual(span.right);
+    }
   });
 });
 
@@ -427,10 +465,40 @@ describe('the mark is wired into real date pages', () => {
     }
   });
 
+  // The guarantee the shared helper exists to make: a ruler ALWAYS contains the
+  // estimate it is drawn against, so the mark actually draws. The corpus map is
+  // keyed by endpoint family, so a first-of-its-kind endpoint has no bucket at
+  // all; the OG route had dropped the per-datum fallback and would have rendered
+  // nothing for one. Asserted as a property over the whole real corpus plus a
+  // novel endpoint, so it cannot go stale as the corpus grows into new buckets.
+  it('always yields a ruler that contains the estimate', () => {
+    // Deliberately EXTREME: an estimate that already fits the default window
+    // would pass under any fallback at all, and prove nothing.
+    const novel: RatioDatum = {
+      form: 'ratio', kind: 'HR', point: 5.34, lo: 2.05, hi: 13.88, ciLevel: 95,
+      klass: 'surrogate', endpointName: 'Some entirely novel endpoint nobody has published',
+    };
+    const corpus: RatioDatum[] = [];
+    for (const artifact of listDigests()) {
+      for (const site of artifact.digest.sites) {
+        for (const study of site.studies) {
+          const d = parseEffectSize(study.primary_endpoint);
+          if (d) corpus.push(d);
+        }
+      }
+    }
+    expect(corpus.length).toBeGreaterThan(0); // the property must have subjects
+    for (const d of [...corpus, novel]) {
+      expect(markGeometry(d, domainForMark(d), 100).pointOffScale).toBe(false);
+    }
+  });
+
   it('resolves the ruler from the corpus, inside the card', () => {
     const card = readFileSync(resolve(process.cwd(), 'src/components/StudyCard.astro'), 'utf-8');
-    expect(card).toContain('effectDomains()');
-    expect(card).toContain('axisBucket(');
+    expect(card).toContain('domainForMark(');
+    // and does NOT resolve the ruler itself: that duplication is what let the
+    // OG route drift away from the card.
+    expect(card).not.toContain('effectDomains()');
   });
 });
 

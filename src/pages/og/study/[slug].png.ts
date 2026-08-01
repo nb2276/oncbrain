@@ -6,7 +6,8 @@
 // fell back to the generic site card; this gives each study its own card.
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { renderShareImage, studyCard } from '../../../lib/share-image.ts';
-import { listStudyPages, type StudyPageEntry } from '../../../lib/digest-data.ts';
+import { listStudyPages, domainForMark, type StudyPageEntry } from '../../../lib/digest-data.ts';
+import { effectForStudy } from '../../../lib/effect-size.ts';
 
 const HANDLE = import.meta.env.PUBLIC_CURATOR_HANDLE || '@nb2276';
 
@@ -20,17 +21,51 @@ export const GET: APIRoute = async ({ props }) => {
   const figuresSourced = (e.study.details ?? []).some(
     (d) => typeof d === 'object' && d != null && 'source_tier' in d && d.source_tier === 'figure',
   );
-  const png = await renderShareImage(
-    studyCard({
-      name: e.study.name,
-      tldr: e.study.tldr,
-      date: e.date,
-      conference: e.conference?.name ?? null,
-      verdict: e.study.verdict ?? null,
-      handle: HANDLE,
-      figuresSourced,
-    }),
+  // v0.36 slice 4: carry the effect-size mark onto the card a shared link
+  // unfurls, so the magnitude travels with the study name. Same resolver and
+  // same corpus ruler as the web card — a study's mark reads the same in a text
+  // thread as it does on the site.
+  const datum = effectForStudy(
+    e.study.primary_endpoint,
+    (e.study.details ?? [])
+      .filter((d): d is { text: string; table: { columns: string[]; rows: string[][] } } =>
+        typeof d === 'object' && d !== null && 'table' in d)
+      .map((d) => d.table),
   );
+  const effect = datum
+    ? {
+        datum,
+        // Shared with the web card, so the two renderers cannot disagree on the
+        // ruler. See domainForMark.
+        domain: datum.form === 'ratio' ? domainForMark(datum) : undefined,
+      }
+    : null;
+
+  const card = {
+    name: e.study.name,
+    tldr: e.study.tldr,
+    date: e.date,
+    conference: e.conference?.name ?? null,
+    verdict: e.study.verdict ?? null,
+    handle: HANDLE,
+    figuresSourced,
+  };
+
+  // Review Issue 2: a satori throw here kills `astro build`, which kills the 1am
+  // publish for the WHOLE day. One study's mark is never worth the day's digest,
+  // so a throw falls back to the markless card that shipped before v0.36 and
+  // names the study in the build log. A second throw is a genuinely broken card
+  // and propagates: silently serving nothing would be worse than a loud build.
+  let png: Buffer;
+  try {
+    png = await renderShareImage(studyCard({ ...card, effect }));
+  } catch (err) {
+    console.warn(
+      `[og/study] effect mark failed for ${e.date}/${e.study.slug ?? e.study.name}, ` +
+        `falling back to a markless card: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    png = await renderShareImage(studyCard(card));
+  }
   return new Response(new Uint8Array(png), {
     headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' },
   });

@@ -39,7 +39,7 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 - **Admin server**: Hono 4 (localhost only, on port 3001)
 - **DB**: better-sqlite3 (synchronous), file at `./oncbrain.db`
 - **LLM**: Anthropic Claude Sonnet via `@anthropic-ai/sdk` OR via `claude -p` (subscription path). v0.8 PR2: also called at *enrichment* time (not just build) to extract metadata from PDF text.
-- **Tests**: Vitest (1890 tests across 89 files as of v0.35). `test/global-setup.ts` builds `dist/` once before collection when the artifacts are absent, so `npm test` is correct cold or warm.
+- **Tests**: Vitest (1908 tests across 90 files as of v0.36). `test/global-setup.ts` builds `dist/` once before collection when the artifacts are absent, so `npm test` is correct cold or warm.
 - **Theme**: dark by default with a light opt-in (v0.30). All colors come from CSS custom properties in `Base.astro` (`:root` dark, `:root[data-theme='light']` override) — a hardcoded hex in a component breaks one theme. See `DESIGN.md → Color`.
 - **PDF ingestion** (v0.8 PR2): poppler (`brew install poppler`) provides `pdftotext` (text layer) + `pdftoppm` (rasterize scanned pages for Apple Vision OCR) + `pdfimages` (v0.15: locate figure pages). No npm dep. A missing binary yields a clear Telegram reply, not a crash.
 - **Figure OCR** (v0.15, Path A): for a text-layer PDF, `pdfimages -list` finds the pages carrying a real figure (large raster image) and `pdftoppm`→Vision OCRs just those, capturing numbers printed *inside* figures (subgroup medians, forest-plot estimates, n-at-risk, image-rendered tables) that `pdftotext` can't see. Stored in `papers.figure_ocr_md` (local-only, never published — same IP boundary as `fulltext_excerpt_md`) and fed to the Phase 2 study agent as labeled lower-confidence source so it can *ground* a figure-locked magnitude instead of flagging it missing. Backfill the back catalog with `npx tsx build/backfill-figure-ocr.ts`.
@@ -94,7 +94,7 @@ DIGEST_THINKING=8000 LLM_BACKEND=api npm run build:day -- --date=<date>  # + Pha
 DIGEST_PERSPECTIVE=radonc npm run build:day -- --date=<date>            # specialty lens for Phase 2 (radonc | medonc | your own); see prompts/perspectives/
 
 # Tests + eval
-npm test                        # vitest run (1890 tests)
+npm test                        # vitest run (1908 tests)
 npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations / v0.13 query+trial axes)
 npm run quality-eval                                # multi-persona quality review of today's digest
 npm run quality-eval -- --date=2026-06-05           # specific day
@@ -226,7 +226,7 @@ src/
     digest-overrides.ts    durable per-date overrides: suppress/edit studies, applied at build time (applyOverrides + saveOverrides)
     verdict.ts             v0.9: SOC-implication verdict taxonomy (emoji + label), shared by StudyCard + TriageRail. v0.16: REVIEW_GLYPH (🗞️) + railEmojiForStudy (verdict emoji, else 🗞️ for a review, else neutral dot)
     content-type.ts        v0.16: study content_type (study_report | review) — first-class, orthogonal to methodology + verdict; parseContentType + stripReviewVerdicts (a review carries no verdict). Classified at Phase 1; NOT a /tags/ namespace
-    effect-size.ts         v0.33: the effect-size mark's numeric spine. Parses a ratio (HR/OR/RR/SHR) + its CI out of the already-validated primary_endpoint free text, computes the log-axis domain, and maps a datum to coordinates (markGeometry). Pure functions only — the component paints, it does not compute, so a future satori renderer shares the math exactly. Abstains rather than guess: no ratio, non-positive ratio, reversed interval, an interval that does not contain its estimate, or a CI it cannot unambiguously associate with the ratio (adjacent, or the only one in the text). v0.34: also parses two-value endpoints into PAIRED BARS (linear, zero-anchored, no valence — klass cannot tell you which direction is good), and reads a detail table only through armColumns(), a POSITIVE gate requiring an Endpoint row axis, exactly two non-statistic value columns, no non-arm axis name, and real arm evidence. Of 75 corpus tables only 6 qualify: shape alone would have drawn trial-vs-trial and subgroup tables as randomised arms
+    effect-size.ts         v0.33: the effect-size mark's numeric spine. Parses a ratio (HR/OR/RR/SHR) + its CI out of the already-validated primary_endpoint free text, computes the log-axis domain, and maps a datum to coordinates (markGeometry). Pure functions only — the component paints, it does not compute, so a future satori renderer shares the math exactly. Abstains rather than guess: no ratio, non-positive ratio, reversed interval, an interval that does not contain its estimate, or a CI it cannot unambiguously associate with the ratio (adjacent, or the only one in the text). v0.34: also parses two-value endpoints into PAIRED BARS (linear, zero-anchored, no valence — klass cannot tell you which direction is good), and reads a detail table only through armColumns(), a POSITIVE gate requiring an Endpoint row axis, exactly two non-statistic value columns, no non-arm axis name, and real arm evidence. Of 75 corpus tables only 6 qualify: shape alone would have drawn trial-vs-trial and subgroup tables as randomised arms. v0.36: barSpan() — where the interval bar is drawn once a clipped end is given room for its continuation mark, insetting ONLY when the interval can afford it (a short bar inset by the full chevron width would be drawn to the right of its own upper bound)
     disease-sites.ts       22-site enum (slug → label + emoji + rationale; see DESIGN.md)
   pages/
     index.astro            home: disease-site nav + hero TL;DR + latest ~12-study what's-new slice (RecentFeed)
@@ -240,7 +240,7 @@ src/
     offline.astro          v0.6 PWA offline fallback page
     study/[slug].astro     v0.21: standalone per-study page at /study/<date>-<slug>/ — the share-button target; og:title is the study name (+ " — oncbrain") and og:image is the per-study card, so a shared link unfurls with the study, not the site card. Renders the same StudyCard the date/site pages use
     conferences/[slug]/    conference index (all days tagged with a conference)
-    og/study/[slug].png.ts v0.21: per-study OG card at /og/study/<date>-<slug>.png (share-image.ts studyCard: study name + headline number + verdict pill); og:image for the standalone study page
+    og/study/[slug].png.ts v0.21: per-study OG card at /og/study/<date>-<slug>.png (share-image.ts studyCard: study name + headline number + verdict pill); og:image for the standalone study page. v0.36: also carries the effect-size mark (ratio form only), resolved through digest-data domainForMark() so the share card and the web card share one ruler. Wrapped in a per-study try/catch: a satori throw falls back to the markless card and names the study in the build log, because astro build renders every card and one throw would fail the whole 1am publish
     search-index.json.ts   v0.6: build-time search index (one entry per study)
     feed.xml.ts            v0.8 PR3: RSS 2.0 feed (latest 30 studies)
     api/index.astro        v0.8 PR3: public RSS + JSON API docs page
@@ -340,7 +340,7 @@ When a user request matches a gstack skill, invoke via the Skill tool:
 ## Testing
 
 ```
-npm test                   # 1890 tests across 89 files, all should pass
+npm test                   # 1908 tests across 90 files, all should pass
 npm run test:watch         # vitest watch mode
 npx astro check            # type check (0 errors expected)
 ```
@@ -351,7 +351,7 @@ Tests live in `test/`. Each lib module has a corresponding test file. Naming con
 
 Single source of truth: `package.json` `"version"` field. CHANGELOG.md gets a new section per release.
 
-**Released:** v0.35.0 (effect-size marks slice 3: ONE corpus-wide ruler per endpoint FAMILY + ratio kind, so a study renders identically on every surface and site-page marks are mutually comparable). Prior: v0.34.0 (slice 2: paired bars for two-value endpoints, plus a POSITIVE gate that only reads a detail table when it can be identified as endpoint-by-arm). Prior: v0.33.0 (the ratio forest dot on a log axis, with a shared scale per date). Prior: v0.32.0 — per-specialty "why it matters" (`significance_by_specialty`): the specialty bar reframes the callout prose to the reader's field instead of only dimming cards, plus specialty-filter discoverability, search on the header's title row, and the deploy-readiness gate on Telegram notifications. Builds on v0.31 (reader-selectable specialty relevance) and v0.30 (the "endpoint-forward card" — `primary_endpoint` / `analysis_sections` — plus the dark-default theme).
+**Released:** v0.36.0 (effect-size marks slice 4: the mark travels onto the per-study share card, painted in satori from the same `markGeometry()` the web SVG uses, with a per-study try/catch so one study's mark can never fail the nightly publish). Prior: v0.35.0 (effect-size marks slice 3: ONE corpus-wide ruler per endpoint FAMILY + ratio kind, so a study renders identically on every surface and site-page marks are mutually comparable). Prior: v0.34.0 (slice 2: paired bars for two-value endpoints, plus a POSITIVE gate that only reads a detail table when it can be identified as endpoint-by-arm). Prior: v0.33.0 (the ratio forest dot on a log axis, with a shared scale per date). Prior: v0.32.0 — per-specialty "why it matters" (`significance_by_specialty`): the specialty bar reframes the callout prose to the reader's field instead of only dimming cards, plus specialty-filter discoverability, search on the header's title row, and the deploy-readiness gate on Telegram notifications. Builds on v0.31 (reader-selectable specialty relevance) and v0.30 (the "endpoint-forward card" — `primary_endpoint` / `analysis_sections` — plus the dark-default theme).
 
 ## Planning artifacts
 

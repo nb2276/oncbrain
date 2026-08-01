@@ -603,18 +603,6 @@ export function domainFor(d: RatioDatum): AxisDomain {
   return sharedDomain([d]);
 }
 
-/** Group by endpoint class so a shared axis never spans two of them. */
-export function groupByKlass(data: RatioDatum[]): Map<string, RatioDatum[]> {
-  const out = new Map<string, RatioDatum[]>();
-  for (const d of data) {
-    const key = d.klass ?? 'unknown';
-    const bucket = out.get(key);
-    if (bucket) bucket.push(d);
-    else out.set(key, [d]);
-  }
-  return out;
-}
-
 // ── geometry ────────────────────────────────────────────────────────────────
 
 export type MarkGeometry = {
@@ -688,6 +676,30 @@ export function markGeometry(
       { x: clamp(x(1)), label: '1.0' },
       { x: clamp(x(safe.hi)), label: fmtTick(safe.hi) },
     ],
+  };
+}
+
+/**
+ * Where the interval bar is actually drawn once continuation marks are given
+ * room at a clipped end. Lives here, not in a renderer: it is geometry, and the
+ * share-card renderer is required to paint only.
+ *
+ * The inset is affordable-only. A short bar (upper bound just inside the axis
+ * floor) inset by the full chevron width would be drawn to the RIGHT of its own
+ * upper bound, i.e. showing a magnitude the data does not support. Overlapping
+ * the chevron slightly is strictly better than moving the bar off its value.
+ *
+ * Returns null when the source reported no interval.
+ */
+export function barSpan(
+  g: MarkGeometry,
+  chevron: number,
+): { left: number; right: number } | null {
+  if (g.loX === null || g.hiX === null) return null;
+  const inset = g.hiX - g.loX > chevron * 2 ? chevron : 0;
+  return {
+    left: g.clippedLo ? g.loX + inset : g.loX,
+    right: g.clippedHi ? g.hiX - inset : g.hiX,
   };
 }
 
