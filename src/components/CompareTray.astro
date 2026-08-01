@@ -1,0 +1,279 @@
+---
+// v0.38 (E6): the reader's compare tray. Select two or more studies and read
+// their effect marks stacked on ONE axis instead of scattered down a long page.
+//
+// WHY THIS EARNS ITS PIXELS. Five of nine disease-site pages carry a comparable
+// cluster today (breast alone has four OS hazard ratios and three recurrence
+// HRs). Slice 3 already put every same-bucket study on one corpus ruler, so
+// those marks ARE mutually comparable — they are just never adjacent. This makes
+// them adjacent. It adds no new number and no new claim.
+//
+// IT CLONES, IT DOES NOT COMPUTE. The mark SVG already exists in the card. The
+// tray deep-clones that node, so there is no third renderer and no geometry in
+// client JS. A JS reimplementation of markGeometry would be exactly the drift
+// risk this feature set has guarded against since slice 1: two renderers for one
+// visual is already one too many, three is untenable.
+//
+// COMPARABILITY IS ENFORCED, NOT SUGGESTED. Selecting the first study LOCKS the
+// set to its `data-compare-key` (axis bucket + the exact rendered domain), and
+// every incompatible toggle is DISABLED. An overall-survival hazard ratio beside
+// a toxicity odds ratio on one axis is a clinical error, and the plan's own open
+// risk 3 names cross-trial comparability as the live hazard here. Disabling
+// teaches the rule; a post-hoc warning would not.
+//
+// The block is DISABLED-not-dimmed on purpose: card opacity belongs to the
+// SpecialtyBar, and reusing it here would make a card faint for two unrelated
+// reasons.
+//
+// STATE IS IN-MEMORY AND SAME-PAGE. Cloning needs the source nodes present, so a
+// selection cannot survive navigation. Persisting it would resurrect a set whose
+// cards do not exist on the new page. Nothing is written to storage.
+---
+
+<aside class="compare-tray" data-compare-tray hidden aria-live="polite">
+  <div class="ct-head">
+    <span class="ct-title">Comparing <span data-compare-count>0</span></span>
+    <span class="ct-endpoint" data-compare-endpoint></span>
+    <button type="button" class="ct-clear" data-compare-clear>clear</button>
+  </div>
+  <div class="ct-rows" data-compare-rows></div>
+  <p class="ct-note">
+    Same endpoint and ratio type, drawn on one shared scale. Effect sizes from
+    different trials are not freely comparable: populations, follow-up and
+    comparator arms differ.
+  </p>
+</aside>
+
+<style>
+  .compare-tray {
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+    margin: 2rem 0 0;
+    padding: 0.75rem 0.9rem 0.85rem;
+    background: var(--bg-raised, var(--bg));
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    box-shadow: 0 -2px 12px rgb(0 0 0 / 0.12);
+  }
+  .compare-tray[hidden] { display: none; }
+  .ct-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+  }
+  .ct-title { font-weight: 600; color: var(--fg); }
+  .ct-endpoint { color: var(--fg-muted); flex: 1; }
+  .ct-clear {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    color: var(--fg-muted);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .ct-rows { margin-top: 0.5rem; }
+  /* One row per study: name + verbatim stat above its cloned mark. The marks
+     share an x-axis because they share a domain, so vertical stacking is what
+     makes them readable against each other. */
+  /* These rows are built by the script at runtime, so they never receive
+     Astro's scope attribute and scoped selectors would not match them. The
+     :global() inner selectors are namespaced under .compare-tray, which IS
+     scoped, so nothing leaks to the rest of the page. */
+  .compare-tray :global(.ct-row) { padding: 0.35rem 0 0.1rem; border-top: 1px solid var(--rule); }
+  .compare-tray :global(.ct-row:first-child) { border-top: 0; }
+  .compare-tray :global(.ct-row-head) {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    font-family: var(--font-sans);
+    font-size: 0.76rem;
+    line-height: 1.3;
+  }
+  .compare-tray :global(.ct-row-name) { color: var(--fg); font-weight: 600; }
+  .compare-tray :global(.ct-row-stat) { color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+  .compare-tray :global(svg.emark) { margin-top: 0.15rem; }
+  .ct-note {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    line-height: 1.45;
+    color: var(--fg-muted);
+  }
+  @media (max-width: 600px) {
+    .compare-tray { margin-left: -0.5rem; margin-right: -0.5rem; border-radius: 0; }
+  }
+</style>
+
+<!-- is:inline matches SpecialtyBar / TagFilterRail: a small self-contained
+     IIFE, emitted verbatim rather than bundled. -->
+<script is:inline>
+  (function () {
+    var tray = document.querySelector('[data-compare-tray]');
+    if (!tray) return;
+    var rowsEl = tray.querySelector('[data-compare-rows]');
+    var countEl = tray.querySelector('[data-compare-count]');
+    var endpointEl = tray.querySelector('[data-compare-endpoint]');
+    var clearEl = tray.querySelector('[data-compare-clear]');
+    if (!rowsEl || !countEl || !endpointEl || !clearEl) return;
+
+    // Only cards that actually rendered a ratio mark carry a compare key.
+    var cards = Array.prototype.slice.call(
+      document.querySelectorAll('[data-compare-key]'),
+    );
+    if (cards.length < 2) return; // nothing to compare on this page
+
+    // A compare control is only useful where a COMPATIBLE pair exists. Two ratio
+    // cards with different keys (an os::HR and a local::HR, as on 2026-05-21)
+    // would each show a button, and selecting either would disable the other and
+    // never open the tray — a dead end that looks like a broken feature. Count
+    // per key and drop the singletons.
+    var perKey = {};
+    cards.forEach(function (c) {
+      var k = c.getAttribute('data-compare-key');
+      perKey[k] = (perKey[k] || 0) + 1;
+    });
+    cards = cards.filter(function (c) {
+      return perKey[c.getAttribute('data-compare-key')] >= 2;
+    });
+    if (cards.length < 2) return;
+
+    // Never REBOUND, only mutated: reassigning these inside a nested closure
+    // defeats TypeScript's inference for the whole block. '' means unlocked.
+    var selected = []; // card elements, in click order
+    var lockedKey = '';
+
+    function keyOf(card) { return card.getAttribute('data-compare-key'); }
+
+    // Human label for the locked set, derived from the key ("os::HR|0.33:3").
+    function endpointLabel(key) {
+      if (!key) return '';
+      var bucket = key.split('|')[0] || '';
+      var parts = bucket.split('::');
+      var family = (parts[0] || '').replace(/-/g, ' ');
+      var kind = parts[1] || '';
+      return family && kind ? family + ' · ' + kind : bucket;
+    }
+
+    function render() {
+      countEl.textContent = String(selected.length);
+      endpointEl.textContent = selected.length ? endpointLabel(lockedKey) : '';
+      rowsEl.textContent = '';
+      selected.forEach(function (card) {
+        var mark = card.querySelector('svg.emark');
+        if (!mark) return;
+        var row = document.createElement('div');
+        row.className = 'ct-row';
+        var head = document.createElement('div');
+        head.className = 'ct-row-head';
+        var name = document.createElement('span');
+        name.className = 'ct-row-name';
+        name.textContent = card.getAttribute('data-compare-name') || '';
+        var stat = document.createElement('span');
+        stat.className = 'ct-row-stat';
+        stat.textContent = card.getAttribute('data-compare-stat') || '';
+        head.appendChild(name);
+        head.appendChild(stat);
+        row.appendChild(head);
+        // Deep clone: identical geometry to the card, no recomputation. The
+        // clone is decorative here too — the name and stat above it are the text.
+        var clone = mark.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        row.appendChild(clone);
+        rowsEl.appendChild(row);
+      });
+      tray.hidden = selected.length < 2;
+      syncToggles();
+    }
+
+    // A study is selectable only while the set is unlocked, or when it shares the
+    // locked key. Blocked studies get a DISABLED button; the card is never dimmed
+    // (that channel is the SpecialtyBar's).
+    function syncToggles() {
+      cards.forEach(function (card) {
+        var btn = card.querySelector('[data-compare-toggle]');
+        if (!btn) return;
+        var isOn = selected.indexOf(card) !== -1;
+        btn.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+        var blocked = lockedKey !== '' && keyOf(card) !== lockedKey && !isOn;
+        // Every control repeats the word "compare", so the accessible name has
+        // to carry the study. A disabled button is skipped in tab order but IS
+        // read in browse mode, so the reason belongs in the name — `title`
+        // alone is not reliably announced.
+        var who = card.getAttribute('data-compare-name') || 'this study';
+        if (blocked) {
+          btn.setAttribute('disabled', '');
+          btn.setAttribute('aria-label', 'Cannot compare ' + who + ': a different endpoint or ratio type');
+          btn.title = 'Not comparable: a different endpoint or ratio type';
+        } else {
+          btn.removeAttribute('disabled');
+          btn.setAttribute('aria-label', (isOn ? 'Remove ' : 'Compare ') + who);
+          btn.removeAttribute('title');
+        }
+      });
+    }
+
+    cards.forEach(function (card) {
+      var btn = card.querySelector('[data-compare-toggle]');
+      if (!btn) return;
+      btn.hidden = false; // reveal only once the script is running
+      btn.addEventListener('click', function () {
+        var i = selected.indexOf(card);
+        if (i !== -1) {
+          selected.splice(i, 1);
+        } else {
+          // Defence in depth. `disabled` is the visible guard, but this is the
+          // clinical-safety invariant — one tray must never hold two different
+          // axes — so the state mutation refuses it too, not just the UI.
+          if (lockedKey !== '' && keyOf(card) !== lockedKey) return;
+          selected.push(card);
+        }
+        lockedKey = selected.length ? keyOf(selected[0]) || '' : '';
+        render();
+      });
+    });
+
+    clearEl.addEventListener('click', function () {
+      selected.length = 0; // mutate, do not rebind
+      lockedKey = '';
+      render();
+    });
+
+    // A card can leave the page under the reader's feet: the tag rail hides
+    // non-matching cards. A hidden card would stay in the comparison with its
+    // toggle unreachable, so the set could only be escaped via "clear". Drop it
+    // instead — the tray compares what is actually on screen.
+    //
+    // Deliberately keyed on HIDDEN, not dimmed: the SpecialtyBar dims
+    // off-specialty cards, and a dimmed card is still present and still a
+    // legitimate thing to compare.
+    function isVisible(el) {
+      return !!(el.offsetParent || el.getClientRects().length);
+    }
+    function pruneHidden() {
+      var before = selected.length;
+      for (var i = selected.length - 1; i >= 0; i--) {
+        if (!isVisible(selected[i])) selected.splice(i, 1);
+      }
+      if (selected.length !== before) {
+        lockedKey = selected.length ? keyOf(selected[0]) || '' : '';
+        render();
+      }
+    }
+    if (typeof MutationObserver === 'function') {
+      // Observes the cards only (no subtree), and render() never writes card
+      // attributes, so this cannot re-trigger itself.
+      var mo = new MutationObserver(pruneHidden);
+      cards.forEach(function (card) {
+        mo.observe(card, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
+      });
+    }
+
+    syncToggles();
+  })();
+</script>
