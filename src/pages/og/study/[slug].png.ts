@@ -41,18 +41,31 @@ export const GET: APIRoute = async ({ props }) => {
       }
     : null;
 
-  const png = await renderShareImage(
-    studyCard({
-      name: e.study.name,
-      tldr: e.study.tldr,
-      date: e.date,
-      conference: e.conference?.name ?? null,
-      verdict: e.study.verdict ?? null,
-      handle: HANDLE,
-      figuresSourced,
-      effect,
-    }),
-  );
+  const card = {
+    name: e.study.name,
+    tldr: e.study.tldr,
+    date: e.date,
+    conference: e.conference?.name ?? null,
+    verdict: e.study.verdict ?? null,
+    handle: HANDLE,
+    figuresSourced,
+  };
+
+  // Review Issue 2: a satori throw here kills `astro build`, which kills the 1am
+  // publish for the WHOLE day. One study's mark is never worth the day's digest,
+  // so a throw falls back to the markless card that shipped before v0.36 and
+  // names the study in the build log. A second throw is a genuinely broken card
+  // and propagates: silently serving nothing would be worse than a loud build.
+  let png: Buffer;
+  try {
+    png = await renderShareImage(studyCard({ ...card, effect }));
+  } catch (err) {
+    console.warn(
+      `[og/study] effect mark failed for ${e.date}/${e.study.slug ?? e.study.name}, ` +
+        `falling back to a markless card: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    png = await renderShareImage(studyCard(card));
+  }
   return new Response(new Uint8Array(png), {
     headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' },
   });
