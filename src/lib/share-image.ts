@@ -17,6 +17,7 @@ import { VERDICT_META, VERDICT_COLOR } from './verdict.ts';
 import { stripStudyNamePrefix, type StudyVerdict } from './digest-data.ts';
 import {
   markGeometry,
+  barSpan,
   type EffectDatum,
   type AxisDomain,
 } from './effect-size.ts';
@@ -218,8 +219,10 @@ function effectMark(datum: EffectDatum, domain?: AxisDomain): unknown {
     // low-side clip loX is 0, so a chevron placed left of it lands at a negative
     // x and falls off the canvas entirely (verified).
     const CHEV = 16;
-    const barLeft = g.clippedLo ? g.loX + CHEV : g.loX;
-    const barRight = g.clippedHi ? g.hiX - CHEV : g.hiX;
+    // barSpan lives in effect-size.ts: the affordable-inset rule is geometry,
+    // and this file paints only. See the note there for why the inset is
+    // conditional.
+    const { left: barLeft, right: barRight } = barSpan(g, CHEV)!;
     layer.push(
       div({ position: 'absolute', left: barLeft, top: axisY - 9, width: Math.max(2, barRight - barLeft), height: 6, background: FG, opacity: 0.55, borderRadius: 3 }, ''),
     );

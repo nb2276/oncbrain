@@ -11,6 +11,7 @@ import {
   renderShareSvg,
 } from '../src/lib/share-image.ts';
 import { Resvg } from '@resvg/resvg-js';
+import { markGeometry } from '../src/lib/effect-size.ts';
 
 // Read a PNG's IHDR width/height (big-endian uint32 at byte 16 and 20).
 function pngSize(buf: Buffer): { width: number; height: number; isPng: boolean } {
@@ -331,6 +332,58 @@ describe('share-image effect mark', () => {
   // own copy of the expression and had already dropped the fallback, so a datum
   // whose bucket is missing from the corpus map drew a mark on the site and
   // nothing on the share image. Both now call one function.
+  // A bare "HR 0.62" with no interval is ordinary in a conference tweet, which
+  // is a primary source type here. parseEffectSize returns lo/hi null for it, so
+  // this branch is live even though today's corpus happens to have no instance.
+  // The dot must still draw: the estimate is the point of the mark.
+  //
+  // This also carries the load for the whole "two renderers, one geometry"
+  // guarantee. The source-grep test below is weak on its own: a renderer could
+  // keep an unused markGeometry import and paint a WRONG linear position without
+  // ever calling Math.log, and the grep would still pass. Here the painted dot's
+  // measured centre is compared against markGeometry's computed pointX, so the
+  // paint is pinned to the math rather than to the import list.
+  it('paints the estimate at markGeometry pointX, with no interval to lean on', async () => {
+    const datum = { ...ratio, point: 0.62, lo: null, hi: null, ciLevel: null };
+    const domain = { lo: 1 / 3, hi: 3 };
+    const p = await probe(studyCard({
+      name: 'C', tldr: 'x', date: '2026-07-31', handle: '@h', effect: { datum, domain },
+    }));
+    expect(p.axis).not.toBeNull();
+    const { y, x0 } = p.axis!;
+
+    // Row through the dot's middle. With no CI there is no interval bar here,
+    // so the only wide run is the dot itself (the null reference is 2px).
+    const row = y - 6;
+    const runs: Array<{ start: number; end: number }> = [];
+    let start = -1;
+    for (let x = x0; x <= x0 + 560; x++) {
+      if (p.ink(x, row)) { if (start < 0) start = x; }
+      else if (start >= 0) { runs.push({ start, end: x - 1 }); start = -1; }
+    }
+    const dot = runs.find((r) => r.end - r.start >= 10);
+    expect(dot, 'no dot painted — the card showed an empty ruler').toBeDefined();
+
+    const expected = markGeometry(datum, domain, 560).pointX;
+    const measured = (dot!.start + dot!.end) / 2 - x0;
+    expect(Math.abs(measured - expected)).toBeLessThanOrEqual(2);
+  });
+
+  // domain is optional on ShareCard.effect. The OG route always supplies one for
+  // a ratio, so this is the guard for any other caller: abstain rather than
+  // invent a ruler, because a mark drawn against a guessed axis is a wrong
+  // magnitude, not a cosmetic bug.
+  it('abstains for a ratio with no domain rather than inventing a ruler', async () => {
+    const noDomain = await renderShareImage(studyCard({
+      name: 'C', tldr: 'x', date: '2026-07-31', handle: '@h',
+      effect: { datum: ratio },
+    }));
+    const bare = await renderShareImage(studyCard({
+      name: 'C', tldr: 'x', date: '2026-07-31', handle: '@h',
+    }));
+    expect(noDomain.length).toBe(bare.length);
+  });
+
   it('uses the same corpus ruler as the web card', () => {
     const route = readFileSync(resolve(process.cwd(), 'src/pages/og/study/[slug].png.ts'), 'utf-8');
     expect(route).toContain('domainForMark(');

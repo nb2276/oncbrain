@@ -679,6 +679,30 @@ export function markGeometry(
   };
 }
 
+/**
+ * Where the interval bar is actually drawn once continuation marks are given
+ * room at a clipped end. Lives here, not in a renderer: it is geometry, and the
+ * share-card renderer is required to paint only.
+ *
+ * The inset is affordable-only. A short bar (upper bound just inside the axis
+ * floor) inset by the full chevron width would be drawn to the RIGHT of its own
+ * upper bound, i.e. showing a magnitude the data does not support. Overlapping
+ * the chevron slightly is strictly better than moving the bar off its value.
+ *
+ * Returns null when the source reported no interval.
+ */
+export function barSpan(
+  g: MarkGeometry,
+  chevron: number,
+): { left: number; right: number } | null {
+  if (g.loX === null || g.hiX === null) return null;
+  const inset = g.hiX - g.loX > chevron * 2 ? chevron : 0;
+  return {
+    left: g.clippedLo ? g.loX + inset : g.loX,
+    right: g.clippedHi ? g.hiX - inset : g.hiX,
+  };
+}
+
 export type PairedGeometry = {
   /** Bar widths in [0, width]. Linear from zero — bar length IS the value. */
   aW: number;

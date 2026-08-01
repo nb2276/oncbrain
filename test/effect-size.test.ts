@@ -10,6 +10,7 @@ import {
   pairedGeometry,
   effectForStudy,
   markGeometry,
+  barSpan,
   sharedDomain,
   corpusDomains,
   axisBucket,
@@ -230,6 +231,48 @@ describe('sharedDomain', () => {
 
   it('falls back to the fixed domain with no data', () => {
     expect(sharedDomain([])).toEqual(FIXED_DOMAIN);
+  });
+});
+
+describe('barSpan', () => {
+  const DOM = { lo: 1 / 3, hi: 3 };
+  const mk = (point: number, lo: number | null, hi: number | null): RatioDatum => ({
+    form: 'ratio', kind: 'HR', point, lo, hi, ciLevel: 95,
+    klass: 'surrogate', endpointName: 'Overall survival',
+  });
+
+  it('abstains when the source reported no interval', () => {
+    expect(barSpan(markGeometry(mk(0.6, null, null), DOM, 560), 16)).toBeNull();
+  });
+
+  it('insets a clipped end to make room for the continuation mark', () => {
+    const g = markGeometry(mk(1.4, 0.22, 11.7), DOM, 560);
+    const span = barSpan(g, 16)!;
+    expect(span.left).toBe(g.loX! + 16);
+    expect(span.right).toBe(g.hiX! - 16);
+  });
+
+  it('leaves an unclipped end exactly on its bound', () => {
+    const g = markGeometry(mk(0.6, 0.5, 0.8), DOM, 560);
+    const span = barSpan(g, 16)!;
+    expect(span.left).toBe(g.loX);
+    expect(span.right).toBe(g.hiX);
+  });
+
+  // The regression the affordable-inset rule exists for: a short bar inset by
+  // the full chevron width gets drawn to the RIGHT of its own upper bound, which
+  // shows a magnitude the data does not support.
+  it('never draws the bar outside the interval it represents', () => {
+    for (const [point, lo, hi] of [
+      [0.34, 0.1, 0.35], [0.35, 0.2, 0.36], [2.9, 2.85, 20], [1.0, 0.3, 3.2],
+      [0.4, 0.05, 0.42], [1.4, 0.22, 11.7], [0.6, 0.5, 0.8],
+    ] as const) {
+      const g = markGeometry(mk(point, lo, hi), DOM, 560);
+      const span = barSpan(g, 16)!;
+      expect(span.left).toBeGreaterThanOrEqual(g.loX!);
+      expect(span.right).toBeLessThanOrEqual(g.hiX!);
+      expect(span.left).toBeLessThanOrEqual(span.right);
+    }
   });
 });
 
