@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import StudyCard from '../components/StudyCard.astro';
-import { parseEffectSize, sharedDomain, type AxisDomain, type EffectDatum } from '../lib/effect-size.ts';
+import { parseEffectSize, sharedDomain, type AxisDomain, type RatioDatum } from '../lib/effect-size.ts';
 import TriageRail from '../components/TriageRail.astro';
 import TagFilterRail from '../components/TagFilterRail.astro';
 import {
@@ -105,7 +105,9 @@ const authorsByStudy = new Map<DigestStudy, StudyAuthor[]>();
 //   honest signal that the ruler changed, not the number.
 const effectDomainByStudy = new Map<DigestStudy, AxisDomain>();
 {
-  const byKlass = new Map<string, Array<{ study: DigestStudy; datum: EffectDatum }>>();
+  // Only RATIOS share an axis. Paired bars scale to their own values, so they
+  // have no domain to share and are not collected here.
+  const byKlass = new Map<string, Array<{ study: DigestStudy; datum: RatioDatum }>>();
   for (const site of digest.sites) {
     for (const study of site.studies) {
       const datum = parseEffectSize(study.primary_endpoint);

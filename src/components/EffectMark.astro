@@ -24,13 +24,15 @@
 //
 // aria-hidden: the estimate and its interval are already in the card's text
 // immediately above. A screen reader should not announce the same numbers twice.
-import { markGeometry, describeEffect, type EffectDatum, type AxisDomain } from '../lib/effect-size.ts';
+import { markGeometry, pairedGeometry, describeEffect, type EffectDatum, type AxisDomain } from '../lib/effect-size.ts';
 
 interface Props {
   datum: EffectDatum;
-  domain: AxisDomain;
+  /** Only used by the ratio form; paired bars scale to their own values. */
+  domain?: AxisDomain;
 }
 const { datum, domain } = Astro.props;
+const isPaired = datum.form === 'paired';
 
 // Intrinsic size, never scaled UP: text inside a scaled viewBox scales with it,
 // and the design review set an 11px floor on tick labels. Capping the rendered
@@ -40,22 +42,27 @@ const H = 44;
 const PAD = 10; // keeps a clipped arrowhead and the edge tick labels inside the box
 const PLOT = W - PAD * 2;
 
+// Paired bars need vertical room for two rows plus optional arm labels.
+const PAIR_H = 44;
+
 const AXIS_Y = 26;
 const BAR_Y = 17;
 const TICK_Y = 39;
 
-const g = markGeometry(datum, domain, PLOT);
+const g = datum.form === 'ratio' && domain ? markGeometry(datum, domain, PLOT) : null;
+const bars = datum.form === 'paired' ? pairedGeometry(datum, PLOT - 46) : null;
 const px = (n: number) => PAD + n;
 const label = describeEffect(datum);
+const fmt = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
 
 // Clamping an INTERVAL is honest — the arrowhead says "continues". Clamping the
 // POINT ESTIMATE is a lie: the dot would sit at the axis edge and read as that
 // edge's value (a real corpus OR of 5.34 rendered as 4.0 on a fixed domain).
 // Callers pick a domain that contains the estimate, so this should never fire;
 // it is the guard that makes "should never" true.
-const drawable = !g.pointOffScale;
+const drawable = isPaired ? bars !== null : g !== null && !g.pointOffScale;
 ---
-{drawable && (
+{drawable && !isPaired && g && (
 
 <svg
   class="emark"
@@ -104,6 +111,36 @@ const drawable = !g.pointOffScale;
 </svg>
 )}
 
+{drawable && isPaired && bars && datum.form === 'paired' && (
+<svg
+  class="emark emark--paired"
+  viewBox={`0 0 ${W} ${PAIR_H}`}
+  width={W}
+  height={PAIR_H}
+  role="img"
+  aria-hidden="true"
+  focusable="false"
+>
+  <title>{label}</title>
+  {/* Two bars from a common zero baseline, so length is proportional to value.
+      Neither is marked better: see the no-valence note in effect-size.ts. */}
+  {[
+    { v: datum.a.value, w: bars.aW, lab: datum.a.label, y: 8 },
+    { v: datum.b.value, w: bars.bW, lab: datum.b.label, y: 26 },
+  ].map((r) => (
+    <>
+      <rect class="emark-bar" x={PAD} y={r.y} width={Math.max(1, r.w)} height="10" rx="2" />
+      <text class="emark-barval" x={PAD + Math.max(1, r.w) + 6} y={r.y + 9}>
+        {fmt(r.v)}{datum.unit ?? ''}
+      </text>
+      {r.lab && (
+        <text class="emark-barlab" x={PAD} y={r.y - 1}>{r.lab}</text>
+      )}
+    </>
+  ))}
+</svg>
+)}
+
 <style>
   .emark {
     display: block;
@@ -124,5 +161,19 @@ const drawable = !g.pointOffScale;
     font-size: 11px; /* floor set by the design review; do not shrink, drop instead */
     fill: var(--fg-muted);
     font-variant-numeric: tabular-nums;
+  }
+  /* Paired bars. Both bars are the SAME neutral fill: neither arm is marked
+     better, because the endpoint class cannot tell us which direction is good. */
+  .emark-bar { fill: var(--fg); opacity: 0.5; }
+  .emark-barval {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    fill: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+  .emark-barlab {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    fill: var(--fg-muted);
   }
 </style>
