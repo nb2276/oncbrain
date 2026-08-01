@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import StudyCard from '../../components/StudyCard.astro';
+import CompareTray from '../../components/CompareTray.astro';
 import TriageRail from '../../components/TriageRail.astro';
 import TagFilterRail from '../../components/TagFilterRail.astro';
 import { listSiteSummaries, type SiteSummary } from '../../lib/digest-data.ts';
@@ -127,6 +128,7 @@ const filterOptions = buildFilterRailOptions(
       </section>
     );
   })}
+  <CompareTray />
 </Base>
 
 <style>

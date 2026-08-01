@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import StudyCard from '../components/StudyCard.astro';
+import CompareTray from '../components/CompareTray.astro';
 import TriageRail from '../components/TriageRail.astro';
 import TagFilterRail from '../components/TagFilterRail.astro';
 import {
@@ -236,6 +237,7 @@ for (const study of allStudiesOnDate) {
       )}
     </section>
   )}
+  <CompareTray />
 </Base>
 
 <style>

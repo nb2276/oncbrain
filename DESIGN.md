@@ -167,6 +167,16 @@ It is a **domain convention, not an invention** — this audience reads forest p
 
 **It never fires on an unchanged number.** An identical re-reading is a duplicate card, not news, and drawing a second dot on top of the first would claim something happened. A *tightened interval at the same point estimate* does fire: a CI crossing back over 1.0 changes the conclusion. Endpoint bucket must match too, since an OS hazard ratio is not an update of a PFS one.
 
+**Compare tray (v0.38, E6).** On a page carrying two or more studies with the *same* endpoint bucket and ratio kind, each such card offers a small `compare` control. Selecting two or more opens a sticky tray that stacks their marks on one axis, with the trial name and the verbatim ratio above each.
+
+**It clones, it never computes.** The tray deep-clones the card's already-rendered `<svg class="emark">`. Slice 3 put every same-bucket study on one corpus ruler, so those marks are *already* mutually comparable and stacking them needs no new geometry. A JS reimplementation would make three renderers of one visual.
+
+**Comparability is enforced, not suggested.** Selecting the first study locks the set to its bucket + domain, and every incompatible control is **disabled**. An overall-survival hazard ratio beside a toxicity odds ratio on one axis is a clinical error. Note that a shared axis is *not* sufficient: on the breast page `os::HR`, `recurrence::HR` and `toxicity::HR` all render a 0.33–3 axis, and the bucket is what keeps them apart.
+
+**Disabled, never dimmed.** Card opacity belongs to the SpecialtyBar. Blocking happens on the control so a faint card never means two different things. A card *hidden* by the tag rail is dropped from the set (its control would be unreachable); a card merely dimmed by specialty is not.
+
+**No control where there is no pair.** A page with two ratio cards of different buckets shows no compare affordance at all, rather than a control that leads nowhere.
+
 **Accessibility:** the mark is `aria-hidden` — the estimate and its interval are already in adjacent text, and a screen reader shouldn't announce them twice.
 
 ### Specialty filter (v0.31)

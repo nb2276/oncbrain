@@ -11,7 +11,7 @@
 // behind a native <details> expander. Sources stay in their own collapsible.
 import { linkifyCitations } from '../lib/extract.ts';
 import EffectMark from './EffectMark.astro';
-import { effectForStudy } from '../lib/effect-size.ts';
+import { effectForStudy, axisBucket, describeEffect } from '../lib/effect-size.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
 import { VERDICT_META, REVIEW_GLYPH } from '../lib/verdict.ts';
 import { tradePressLabel } from '../lib/paper-url.ts';
@@ -337,6 +337,16 @@ const effect = effectForStudy(
   study.details.filter((d): d is { text: string; table: { columns: string[]; rows: string[][] } } =>
     typeof d === 'object' && d !== null && 'table' in d).map((d) => d.table),
 );
+// v0.38 (E6): metadata for the reader's compare tray. Only ratio marks are
+// comparable, and only against a study sharing BOTH the axis bucket and the
+// exact rendered ruler — slice 3 puts every same-bucket study on one corpus
+// domain, so equal domains is what actually guarantees the axes line up.
+const compareBucket = effect && effect.form === 'ratio' ? axisBucket(effect) : null;
+const compareDomain = effect && effect.form === 'ratio' ? domainForMark(effect) : null;
+const compareKey = compareBucket && compareDomain
+  ? `${compareBucket}|${compareDomain.lo}:${compareDomain.hi}`
+  : null;
+
 const figures = studyFigures(study).filter((f) => isSafeImageUrl(f.url));
 const hasFigures = figures.length > 0;
 const restFigures = figures.slice(1);
@@ -413,7 +423,7 @@ const normTrial = (t: string) => t.trim().replace(/\s+/g, ' ').toUpperCase();
 const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
 ---
 
-<div class:list={['study', hasFigures && 'has-figures', study.verdict?.soc_implication && `verdict-${study.verdict.soc_implication}`]} id={anchorId} data-tags={dataTags || undefined} data-specialties={study.relevant_specialties && study.relevant_specialties.length > 0 ? study.relevant_specialties.join(' ') : undefined}>
+<div class:list={['study', hasFigures && 'has-figures', study.verdict?.soc_implication && `verdict-${study.verdict.soc_implication}`]} id={anchorId} data-tags={dataTags || undefined} data-specialties={study.relevant_specialties && study.relevant_specialties.length > 0 ? study.relevant_specialties.join(' ') : undefined} data-compare-key={compareKey || undefined} data-compare-name={compareKey ? study.name : undefined} data-compare-stat={compareKey && effect ? describeEffect(effect) : undefined}>
   <div class="study-head">
   {/* ── Triage layer: always visible. v0.30: name + a compact verdict CHIP on
       one row (the mockup glance top); the verdict rationale moves into the fold
@@ -460,6 +470,14 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
         effect.form === 'ratio'
           ? <EffectMark datum={effect} domain={domainForMark(effect)} prior={study.prior_estimate ?? null} />
           : <EffectMark datum={effect} />
+      )}
+      {/* v0.38 (E6): the compare affordance. Renders ONLY on a ratio mark, so
+          most cards are untouched. Hidden until the tray's script enables it, so
+          a reader with JS off never sees a dead control. */}
+      {compareKey && (
+        <button type="button" class="compare-toggle" data-compare-toggle hidden aria-pressed="false">
+          compare
+        </button>
       )}
       {/* v0.37 (E5): the trial reported a DIFFERENT number last time. The text
           carries the meaning; the hollow dot above only shows the direction. An
@@ -1536,6 +1554,33 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   /* v0.37 (E5): the longitudinal note. Sits with the endpoint it revises, in
      the muted register of endpoint-sub — it is context on the number above, not
      a second headline. */
+  /* v0.38 (E6): compare toggle. Muted sans, same register as endpoint-prior —
+     it is a tool, not a second headline. DISABLED (not dimmed-card) is how an
+     incomparable study is blocked: card opacity belongs to SpecialtyBar, and
+     using it here would make a card faint for two unrelated reasons. */
+  .compare-toggle {
+    margin: 0.4rem 0 0;
+    padding: 0.15rem 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .compare-toggle[aria-pressed='true'] {
+    color: var(--bg);
+    background: var(--fg);
+    border-color: var(--fg);
+  }
+  .compare-toggle[disabled] {
+    cursor: not-allowed;
+    text-decoration: line-through;
+    border-style: dashed;
+  }
   .endpoint-prior {
     margin: 0.3rem 0 0;
     font-family: var(--font-sans);
