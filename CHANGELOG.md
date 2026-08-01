@@ -2,6 +2,22 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.39.1] - 2026-08-01
+
+### Fixed
+- The public channel announcement could be triggered just by loading its code.
+  The private curator message was protected against this in v0.39 and the
+  channel post was not, which is precisely the kind of gap that appears when two
+  near-identical pieces of code are edited one at a time. Both now share the
+  protection, so it cannot be fixed in one and forgotten in the other.
+
+### Changed
+- The two notification commands now share their common plumbing (argument
+  parsing, site address, loading the day's digest, and the rule that a
+  notification failure never aborts the nightly run). Their genuinely different
+  behaviour is untouched: the private message still sends even when the page
+  is not yet confirmed live, and the public post still holds back.
+
 ## [0.39.0] - 2026-08-01
 
 ### Fixed
