@@ -17,27 +17,18 @@
 //   - Telegram API error → log and skip
 
 import 'dotenv/config';
-import { readFileSync, existsSync, realpathSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { openDb, getCuratorChatId, todayIso } from '../src/lib/db.ts';
+import { openDb, getCuratorChatId } from '../src/lib/db.ts';
 import { sendMessage } from '../src/lib/telegram-ingest.ts';
 import { getDiseaseSite } from '../src/lib/disease-sites.ts';
 import { waitForDeployedDate } from '../src/lib/deploy-ready.ts';
+import {
+  parseNotifyArgs,
+  siteUrlFromEnv,
+  loadDigestArtifact,
+  runNotifyCli,
+} from '../src/lib/notify-cli.ts';
 
-type Args = { date: string; dryRun: boolean };
-
-function parseArgs(argv: string[]): Args {
-  let date = todayIso();
-  let dryRun = false;
-  for (const a of argv.slice(2)) {
-    const m = a.match(/^--([^=]+)(?:=(.*))?$/);
-    if (!m) continue;
-    if (m[1] === 'date' && m[2]) date = m[2];
-    if (m[1] === 'dry-run') dryRun = true;
-  }
-  return { date, dryRun };
-}
+const LABEL = 'notify:curator';
 
 type DigestArtifact = {
   date: string;
@@ -85,22 +76,17 @@ export function formatMessage(artifact: DigestArtifact, siteUrl: string): string
 }
 
 async function main(): Promise<void> {
-  const args = parseArgs(process.argv);
+  const args = parseNotifyArgs(process.argv);
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const siteUrl = process.env.PUBLIC_SITE_URL || 'https://oncbrain.oncologytoolkit.com';
+  const siteUrl = siteUrlFromEnv();
 
   if (!token) {
     console.log('notify:curator: TELEGRAM_BOT_TOKEN not set, skipping');
     return;
   }
 
-  const digestPath = resolve(`data/digests/${args.date}.json`);
-  if (!existsSync(digestPath)) {
-    console.log(`notify:curator: no digest at ${digestPath}, skipping`);
-    return;
-  }
-
-  const artifact = JSON.parse(readFileSync(digestPath, 'utf8')) as DigestArtifact;
+  const artifact = loadDigestArtifact<DigestArtifact>(args.date, LABEL);
+  if (!artifact) return;
   const text = formatMessage(artifact, siteUrl);
 
   if (args.dryRun) {
@@ -149,22 +135,6 @@ async function main(): Promise<void> {
   }
 }
 
-// Only run when invoked as a script. Without this guard, a unit test that
-// imports formatMessage() also runs main(), which on a machine with a real
-// TELEGRAM_BOT_TOKEN would poll for deploy-readiness and send a real DM.
-// Mirrors digest-builder.ts.
-function isInvokedAsScript(): boolean {
-  const arg = process.argv[1];
-  if (!arg) return false;
-  try {
-    return realpathSync(arg) === realpathSync(fileURLToPath(import.meta.url));
-  } catch {
-    return false;
-  }
-}
-
-if (isInvokedAsScript()) {
-  main().catch((err) => {
-    console.log(`notify:curator: unexpected error (${(err as Error).message}), continuing`);
-  });
-}
+// Script-only + fail-soft. See runNotifyCli: importing formatMessage() from a
+// test must not run main() and DM the curator.
+runNotifyCli(LABEL, import.meta.url, main);

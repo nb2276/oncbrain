@@ -23,16 +23,6 @@ Format: `- [scope] description (source)`
   forbade. Distinguishing "never announced" from "announced before, rebuilt since" needs a
   persisted announced-ledger, which is the real fix. **Found by:** codex review during
   /ship v0.39.
-- **Extract a shared notify-CLI helper.** **Priority: P3.** `build/notify-curator.ts` and
-  `build/notify-channel.ts` duplicate `parseArgs`, the `PUBLIC_SITE_URL` default, the
-  digest-existence check, the artifact load, the fail-soft `main().catch()`, and now the
-  deploy-gate call. Nothing is broken; the risk is that the next notification change gets made
-  in one file and missed in the other. Deliberately deferred during the v0.32 eng review to
-  avoid mixing a structural refactor into an unattended-cron bugfix. **Do it the next time you
-  touch notifications.**
-
-## Now — highest priority
-
 - **Live end-to-end test of v0.8 ingestion.** PR1/2/3 pass unit + build tests but have never run against real Telegram traffic. DM the bot a journal URL + a PDF, run `pull:telegram → enrich:inbox → build:day`, confirm vault filing + E2/E3 replies + digest output. (this session)
 
 ## v0.14 — verdict triage + what's-new (deferred from 2026-06-09 office-hours design + eng review)
