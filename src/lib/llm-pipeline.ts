@@ -389,6 +389,19 @@ export type DigestStudy = {
   // reviews / single-arm / observational / abstract-only. Mirrored in
   // src/lib/digest-data.ts — keep the shape in lockstep.
   primary_endpoint?: PrimaryEndpoint | null;
+  // v0.37 (E5): the same trial's PREVIOUS reading of this same endpoint, when it
+  // differs. Build-stamped by prior-estimate.ts, never LLM-generated, so no
+  // prompt can invent one. Null/absent is the overwhelmingly common case.
+  // Mirrored in llm-pipeline.ts — keep the shape in lockstep.
+  prior_estimate?: {
+    date: string;
+    slug: string;
+    stat_value: string;
+    stat_detail: string | null;
+    point: number;
+    lo: number | null;
+    hi: number | null;
+  } | null;
   // v0.30: structured fold sections (Design / Population & inclusion / Regimen /
   // Radiotherapy / Endpoints / Results / Safety / Applies to / Limitations /
   // Discussion). When present, the fold renders these labeled "spec sheet" rows
