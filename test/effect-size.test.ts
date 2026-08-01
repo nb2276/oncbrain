@@ -12,6 +12,7 @@ import {
   sharedDomain,
   corpusDomains,
   axisBucket,
+  endpointFamily,
   domainFor,
   groupByKlass,
   describeEffect,
@@ -138,7 +139,7 @@ describe('parseEffectSize — abstains', () => {
 });
 
 describe('markGeometry', () => {
-  const d: EffectDatum = { form: 'ratio', kind: 'HR', point: 0.5, lo: 0.4, hi: 0.8, ciLevel: 95, klass: null };
+  const d: EffectDatum = { form: 'ratio', kind: 'HR', point: 0.5, lo: 0.4, hi: 0.8, ciLevel: 95, klass: null, endpointName: null };
 
   it('places the null line at the midpoint of a symmetric domain', () => {
     const g = markGeometry(d, { lo: 0.25, hi: 4 }, 100);
@@ -216,9 +217,14 @@ describe('sharedDomain', () => {
     expect(dom.hi).toBeGreaterThanOrEqual(2);
   });
 
-  it('caps at 0.1x-10x so one outlier cannot flatten the page', () => {
-    const dom = sharedDomain([mk(0.5), mk(500)]);
-    expect(dom.hi).toBeLessThanOrEqual(10);
+  // The old hard 10x cap could produce a domain that did NOT contain a point it
+  // was built from; the renderer then silently drew nothing. Containment wins.
+  it('always contains every estimate, however extreme', () => {
+    for (const extreme of [12, 25, 140, 500]) {
+      const dom = sharedDomain([mk(0.5), mk(extreme)]);
+      expect(extreme).toBeLessThan(dom.hi);
+      expect(0.5).toBeGreaterThan(dom.lo);
+    }
   });
 
   it('falls back to the fixed domain with no data', () => {
@@ -235,13 +241,13 @@ describe('sharedDomain', () => {
 describe('describeEffect', () => {
   it('renders the estimate and its interval', () => {
     expect(
-      describeEffect({ form: 'ratio', kind: 'HR', point: 0.53, lo: 0.38, hi: 0.74, ciLevel: 95, klass: null }),
+      describeEffect({ form: 'ratio', kind: 'HR', point: 0.53, lo: 0.38, hi: 0.74, ciLevel: 95, klass: null, endpointName: null }),
     ).toBe('HR 0.53, 95% CI 0.38 to 0.74');
   });
 
   it('omits the interval when there is none', () => {
     expect(
-      describeEffect({ form: 'ratio', kind: 'OR', point: 2, lo: null, hi: null, ciLevel: null, klass: null }),
+      describeEffect({ form: 'ratio', kind: 'OR', point: 2, lo: null, hi: null, ciLevel: null, klass: null, endpointName: null }),
     ).toBe('OR 2');
   });
 });
@@ -434,13 +440,13 @@ describe('adversarial regressions', () => {
   // HIGH: a point estimate outside the domain used to be clamped to the axis
   // edge, so a real corpus value (OR 5.34) rendered as if it were 4.0.
   it('flags an off-scale POINT estimate rather than clamping it silently', () => {
-    const or: EffectDatum = { form: 'ratio', kind: 'OR', point: 5.34, lo: 2.05, hi: 13.88, ciLevel: 95, klass: null };
+    const or: EffectDatum = { form: 'ratio', kind: 'OR', point: 5.34, lo: 2.05, hi: 13.88, ciLevel: 95, klass: null, endpointName: null };
     const g = markGeometry(or, FIXED_DOMAIN, 100);
     expect(g.pointOffScale).toBe(true);
   });
 
   it('gives a single mark a domain that actually contains its estimate', () => {
-    const or: EffectDatum = { form: 'ratio', kind: 'OR', point: 5.34, lo: 2.05, hi: 13.88, ciLevel: 95, klass: null };
+    const or: EffectDatum = { form: 'ratio', kind: 'OR', point: 5.34, lo: 2.05, hi: 13.88, ciLevel: 95, klass: null, endpointName: null };
     const dom = domainFor(or);
     expect(or.point).toBeGreaterThan(dom.lo);
     expect(or.point).toBeLessThan(dom.hi);
@@ -448,7 +454,7 @@ describe('adversarial regressions', () => {
   });
 
   it('gives the same study the same domain on every non-date surface', () => {
-    const d: EffectDatum = { form: 'ratio', kind: 'HR', point: 0.53, lo: 0.38, hi: 0.74, ciLevel: 95, klass: 'x' };
+    const d: EffectDatum = { form: 'ratio', kind: 'HR', point: 0.53, lo: 0.38, hi: 0.74, ciLevel: 95, klass: 'x', endpointName: null };
     expect(domainFor(d)).toEqual(domainFor({ ...d }));
   });
 
@@ -472,7 +478,7 @@ describe('adversarial regressions', () => {
 
   // LOW: an exported function should not emit NaN because a caller passed junk.
   it('never emits NaN or Infinity on a degenerate domain or width', () => {
-    const d: EffectDatum = { form: 'ratio', kind: 'HR', point: 0.5, lo: 0.4, hi: 0.8, ciLevel: 95, klass: null };
+    const d: EffectDatum = { form: 'ratio', kind: 'HR', point: 0.5, lo: 0.4, hi: 0.8, ciLevel: 95, klass: null, endpointName: null };
     for (const dom of [{ lo: 0, hi: 4 }, { lo: 4, hi: 0.25 }, { lo: NaN, hi: 4 }, { lo: 1, hi: 1 }]) {
       for (const w of [0, -5, NaN, 100]) {
         const g = markGeometry(d, dom as never, w);
@@ -491,7 +497,7 @@ describe('the axis never pools incomparable quantities', () => {
     // An odds ratio and a hazard ratio are not interchangeable, so sharing a
     // ruler because they describe the same endpoint class would be wrong.
     const src = readFileSync(resolve(process.cwd(), 'src/lib/effect-size.ts'), 'utf-8');
-    expect(src).toMatch(/axisBucket[\s\S]{0,200}klass[\s\S]{0,60}kind/);
+    expect(src).toMatch(/axisBucket[\s\S]{0,300}endpointFamily[\s\S]{0,80}kind/);
   });
 });
 
@@ -746,7 +752,7 @@ describe('slice 2 adversarial regressions', () => {
 
 describe('snapped domains', () => {
   const mk = (point: number, klass = 'surrogate', kind: 'HR' | 'OR' = 'HR'): RatioDatum => ({
-    form: 'ratio', kind, point, lo: null, hi: null, ciLevel: null, klass,
+    form: 'ratio', kind, point, lo: null, hi: null, ciLevel: null, klass, endpointName: null,
   });
 
   it('snaps the bound to the ladder, giving readable ticks', () => {
@@ -786,20 +792,47 @@ describe('snapped domains', () => {
 });
 
 describe('corpusDomains', () => {
-  const mk = (point: number, klass: string, kind: 'HR' | 'OR' | 'SHR' = 'HR'): RatioDatum => ({
-    form: 'ratio', kind, point, lo: null, hi: null, ciLevel: null, klass,
+  const mk = (point: number, endpointName: string, kind: 'HR' | 'OR' | 'SHR' = 'HR'): RatioDatum => ({
+    form: 'ratio', kind, point, lo: null, hi: null, ciLevel: null, klass: 'surrogate', endpointName,
   });
 
-  it('keys a ruler by endpoint class AND ratio kind', () => {
-    const m = corpusDomains([mk(0.5, 'overall-survival'), mk(5.3, 'surrogate', 'OR'), mk(0.6, 'overall-survival')]);
-    expect(m.has('overall-survival::HR')).toBe(true);
-    expect(m.has('surrogate::OR')).toBe(true);
-    // An odds ratio must never widen the hazard-ratio ruler.
-    expect(m.get('overall-survival::HR')!.hi).toBeLessThan(m.get('surrogate::OR')!.hi);
+  it('keys a ruler by endpoint FAMILY and ratio kind', () => {
+    const m = corpusDomains([
+      mk(0.5, 'Overall survival'),
+      mk(5.3, 'Biochemical response', 'OR'),
+      mk(0.6, 'Overall survival'),
+    ]);
+    expect(m.has('os::HR')).toBe(true);
+    expect(m.has('biochemical::OR')).toBe(true);
+    // An odds ratio must never widen a hazard-ratio ruler.
+    expect(m.get('os::HR')!.hi).toBeLessThan(m.get('biochemical::OR')!.hi);
+  });
+
+  // The objection this bucketing exists to answer: "surrogate" pooled PFS, MFS
+  // and DFS, which share a unit but are not the same quantity.
+  it('does not pool MFS, DFS and PFS onto one ruler', () => {
+    const m = corpusDomains([
+      mk(0.5, 'Metastasis-free survival'),
+      mk(0.6, 'Disease-free survival'),
+      mk(0.7, 'Progression-free survival'),
+    ]);
+    expect([...m.keys()].sort()).toEqual(['dfs::HR', 'mfs::HR', 'pfs::HR']);
+  });
+
+  // But assessment variants of ONE endpoint do belong together, or the ruler
+  // degenerates to one per card and buys nothing.
+  it('keeps PFS assessment variants on one ruler', () => {
+    const m = corpusDomains([
+      mk(0.5, 'Progression-free survival'),
+      mk(0.6, 'Imaging-based progression-free survival'),
+      mk(0.7, 'Progression-free survival (BICR)'),
+      mk(0.8, 'Clinical progression-free survival'),
+    ]);
+    expect([...m.keys()]).toEqual(['pfs::HR']);
   });
 
   it('gives every mark in a bucket the same ruler', () => {
-    const rows = [mk(0.4, 'x'), mk(1.2, 'x'), mk(0.9, 'x')];
+    const rows = [mk(0.4, 'Overall survival'), mk(1.2, 'Overall survival'), mk(0.9, 'Overall survival')];
     const m = corpusDomains(rows);
     const domains = rows.map((r) => m.get(axisBucket(r)));
     expect(new Set(domains.map((d) => `${d!.lo}:${d!.hi}`)).size).toBe(1);
@@ -807,6 +840,36 @@ describe('corpusDomains', () => {
 
   it('returns an empty map for no data rather than throwing', () => {
     expect(corpusDomains([]).size).toBe(0);
+  });
+});
+
+describe('endpointFamily', () => {
+  it.each([
+    ['Overall survival', 'os'],
+    ['Metastasis-free survival', 'mfs'],
+    ['Disease-free survival (co-primary)', 'dfs'],
+    ['Progression-free survival (BICR)', 'pfs'],
+    ['Imaging-based progression-free survival', 'pfs'],
+    ['Intracranial PFS', 'pfs'],
+    ['Biochemical failure (Phoenix)', 'biochemical'],
+    ['Pathologic complete response', 'response'],
+    ['Arm lymphedema at 3 years', 'toxicity'],
+  ])('maps %s to %s', (name, family) => {
+    expect(endpointFamily(name)).toBe(family);
+  });
+
+  // Order matters: a locoregional recurrence endpoint is LOCAL control, and
+  // must not fall through to the generic recurrence family.
+  it('claims locoregional endpoints before the generic recurrence rule', () => {
+    expect(endpointFamily('2-year locoregional recurrence-free survival')).toBe('local');
+    expect(endpointFamily('Loco-regional recurrence-free survival')).toBe('local');
+    expect(endpointFamily('Ipsilateral breast tumour recurrence')).toBe('recurrence');
+  });
+
+  it('falls back rather than guessing', () => {
+    expect(endpointFamily('')).toBe('unknown');
+    expect(endpointFamily(null)).toBe('unknown');
+    expect(endpointFamily('Some entirely novel endpoint')).toBe('other');
   });
 });
 

@@ -448,6 +448,10 @@ let _listDigestsCache: { sig: string; value: DigestArtifact[] } | null = null;
 // change) call this to force a fresh read.
 export function resetListDigestsCache(): void {
   _listDigestsCache = null;
+  // The corpus rulers are derived from the same files, so they go stale with
+  // it. Without this an in-process rebuild after data/digests changes would
+  // draw new extremes against the previous build's bounds.
+  _effectDomains = null;
 }
 
 // Returns all digest artifacts, newest first. Flat directory layout:

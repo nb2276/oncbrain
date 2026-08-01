@@ -54,8 +54,10 @@ export type RatioDatum = {
   hi: number | null;
   /** 95, 90, 80 — the corpus carries all three. Null when unstated. */
   ciLevel: number | null;
-  /** The endpoint class, passed through for the day-axis same-class guard. */
+  /** The endpoint class, kept for reference; the axis buckets on family. */
   klass: string | null;
+  /** The endpoint's name, so a datum can name its own axis bucket. */
+  endpointName: string | null;
 };
 
 export type EffectDatum = RatioDatum | PairedDatum;
@@ -191,7 +193,7 @@ export function parseEffectSize(pe: PrimaryEndpointLike): RatioDatum | null {
     ciLevel = level;
   }
 
-  return { form: 'ratio', kind, point, lo, hi, ciLevel, klass: pe.klass ?? null };
+  return { form: 'ratio', kind, point, lo, hi, ciLevel, klass: pe.klass ?? null, endpointName: pe.name ?? null };
 }
 
 // ── paired values (slice 2) ─────────────────────────────────────────────────
@@ -476,11 +478,17 @@ const MIN_HALF_WIDTH = Math.log(2); // never tighter than 0.5x-2x
  *
  * It also gives readable ticks — "0.33 / 1.0 / 3" instead of "0.43 / 1.0 / 2.3".
  */
-const DOMAIN_STEPS = [1.5, 2, 3, 4, 5, 7, 10] as const;
+// Extends past 10 so a real but extreme effect still gets a ruler that CONTAINS
+// it. Capping at 10 meant a point of, say, 12 produced a domain excluding it,
+// which then failed the pointOffScale guard and silently drew nothing — safe,
+// but it contradicts the "the axis always contains the estimate" contract.
+const DOMAIN_STEPS = [1.5, 2, 3, 4, 5, 7, 10, 15, 20, 30, 50, 100] as const;
 
 function snapUp(hi: number): number {
   for (const step of DOMAIN_STEPS) if (hi <= step) return step;
-  return DOMAIN_STEPS[DOMAIN_STEPS.length - 1]!;
+  // Past the ladder, round up to the next power of ten so the bound stays a
+  // clean tick and still contains the estimate.
+  return Math.pow(10, Math.ceil(Math.log10(hi)));
 }
 
 /**
@@ -502,14 +510,59 @@ export function sharedDomain(data: RatioDatum[]): AxisDomain {
   // Snap UP to the ladder. Deriving lo as 1/hi keeps the domain exactly
   // symmetric about the null, and snapping keeps the bound exact (exp(log(10))
   // is 10.000000000000002, which would leak into a tick label).
-  const hi = snapUp(Math.min(Math.exp(half), 10));
+  const hi = snapUp(Math.exp(half));
   return { lo: 1 / hi, hi };
 }
 
-/** The bucket a mark shares a ruler with. Class AND kind: an odds ratio and a
- *  hazard ratio are not interchangeable quantities. */
-export function axisBucket(d: RatioDatum): string {
-  return `${d.klass ?? 'unknown'}::${d.kind}`;
+/**
+ * Endpoint FAMILY — the grouping a shared ruler is allowed to span.
+ *
+ * The endpoint class alone is too coarse: "surrogate" covers progression-free
+ * survival, clinical PFS, imaging PFS, PFS by blinded review, metastasis-free
+ * survival, disease-free survival and recurrence-free survival in this corpus
+ * alone. Those share a unit but are not the same quantity, and one ruler across
+ * them implies a comparison the endpoints do not support.
+ *
+ * Bucketing by the exact NAME is the opposite failure: 19 rulers for 31 marks,
+ * 16 holding a single card, which is per-mark scaling with extra steps.
+ *
+ * Families are the middle: PFS variants group together (they measure the same
+ * thing with different assessment methods), while PFS, MFS and DFS stay apart.
+ * Derived from the endpoint name the card already displays above the mark.
+ *
+ * Order matters — the first match wins, so the more specific patterns lead.
+ */
+const ENDPOINT_FAMILIES: Array<[RegExp, string]> = [
+  [/\bmetastasis-?free\b|\bMFS\b/i, 'mfs'],
+  [/\bdisease-?free\b|\bDFS\b/i, 'dfs'],
+  [/\bevent-?free\b|\bEFS\b/i, 'efs'],
+  // Local/regional recurrence and failure measure the same construct.
+  [/\b(locoregional|loco-regional|local)\b.*\b(recurrence|failure|progression|control)\b/i, 'local'],
+  [/\b(recurrence|relapse)\b/i, 'recurrence'],
+  [/\bbiochemical\b/i, 'biochemical'],
+  [/\bprogression-?free\b|\bPFS\b/i, 'pfs'],
+  [/\boverall survival\b|\bOS\b/i, 'os'],
+  [/\bcomplete response\b|\bpCR\b|\bresponse\b/i, 'response'],
+  [/\btoxicity\b|\bgrade\s*[≥>]?\s*\d|\blymphedema\b|\binduration\b|\bplaque\b/i, 'toxicity'],
+  [/\bquality of life\b|\bqol\b|\bwell-?being\b|\bcomposite score\b|\bbreast-?q\b/i, 'pro'],
+];
+
+export function endpointFamily(name: string | null | undefined): string {
+  const n = (name ?? '').trim();
+  if (!n) return 'unknown';
+  for (const [re, family] of ENDPOINT_FAMILIES) if (re.test(n)) return family;
+  return 'other';
+}
+
+/**
+ * The bucket a mark shares a ruler with: endpoint FAMILY and ratio KIND.
+ *
+ * Kind, because an odds ratio and a hazard ratio are not interchangeable.
+ * Family rather than class, because class pools quantities that are not
+ * comparable (see ENDPOINT_FAMILIES).
+ */
+export function axisBucket(d: RatioDatum, endpointName?: string | null): string {
+  return `${endpointFamily(endpointName ?? d.endpointName)}::${d.kind}`;
 }
 
 /**
