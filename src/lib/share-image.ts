@@ -15,6 +15,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { VERDICT_META, VERDICT_COLOR } from './verdict.ts';
 import { stripStudyNamePrefix, type StudyVerdict } from './digest-data.ts';
+import {
+  markGeometry,
+  type EffectDatum,
+  type AxisDomain,
+} from './effect-size.ts';
 
 const W = 1200;
 const H = 630;
@@ -59,6 +64,10 @@ export interface ShareCard {
   // (a card with no figure numbers simply has nothing to vouch for) — the mark
   // is additive-positive only, matching the DESIGN.md "cards earn their pixels".
   figuresSourced?: boolean;
+  // v0.36 slice 4: the effect-size mark, so a shared study link carries its
+  // magnitude and not just its name. The ratio form needs its corpus ruler;
+  // paired bars scale to themselves.
+  effect?: { datum: EffectDatum; domain?: AxisDomain } | null;
 }
 
 function truncate(s: string, max: number): string {
@@ -134,6 +143,7 @@ export function studyCard(opts: {
   verdict?: StudyVerdict | null;
   handle: string;
   figuresSourced?: boolean;
+  effect?: { datum: EffectDatum; domain?: AxisDomain } | null;
 }): ShareCard {
   const conf = opts.conference ? ` · ${opts.conference}` : '';
   const name = opts.name.trim();
@@ -148,6 +158,7 @@ export function studyCard(opts: {
     tagColor: color,
     handle: opts.handle,
     figuresSourced: opts.figuresSourced,
+    effect: opts.effect ?? null,
   };
 }
 
@@ -156,6 +167,68 @@ export function studyCard(opts: {
 // satori requires an explicit display on every div; text leaves are fine.
 function div(style: Record<string, unknown>, children: unknown): unknown {
   return { type: 'div', props: { style: { display: 'flex', ...style }, children } };
+}
+
+// The mark, composed as absolutely-positioned divs because satori renders a
+// subset of HTML rather than arbitrary SVG.
+//
+// The COORDINATES come from markGeometry() / pairedGeometry() — the exact
+// functions the web component uses. That is the whole point: two renderers for
+// one visual is a standing drift risk, so only the PAINT differs here, never
+// the math. If this file ever computes a position itself, that guarantee is
+// gone.
+//
+// Fixed light palette: OG cards are always light (a reader's theme cannot
+// follow an image), which is the one documented exception to theme-native.
+const MARK_W = 560;
+const MARK_H = 74;
+
+function effectMark(datum: EffectDatum, domain?: AxisDomain): unknown {
+  // RATIO ONLY on this surface. The web card draws paired bars too, but here the
+  // headline IS the TL;DR and already carries both values verbatim ("1.5% with
+  // PBI vs 9.8%"), so bars restate the text — and at the size this card is
+  // viewed in a text thread, a 1.5% bar is about seven pixels. The ratio form
+  // earns its space because a dot's position relative to the null is not
+  // something the sentence conveys. DESIGN.md: cards earn their existence.
+  if (datum.form === 'paired') return div({}, '');
+
+  if (!domain) return div({}, '');
+  const g = markGeometry(datum, domain, MARK_W);
+  // Never paint an estimate that is off the axis — it would sit at the edge and
+  // read as the edge's value. Same guard the web component applies.
+  if (g.pointOffScale) return div({}, '');
+
+  const axisY = 30;
+  const layer: unknown[] = [
+    // axis
+    div({ position: 'absolute', left: 0, top: axisY, width: MARK_W, height: 2, background: MUTED, opacity: 0.45 }, ''),
+    // null reference at 1.0
+    div({ position: 'absolute', left: g.nullX - 1, top: axisY - 16, width: 2, height: 26, background: MUTED, opacity: 0.8 }, ''),
+  ];
+  if (g.loX !== null && g.hiX !== null) {
+    layer.push(
+      div({ position: 'absolute', left: g.loX, top: axisY - 9, width: Math.max(2, g.hiX - g.loX), height: 6, background: FG, opacity: 0.55, borderRadius: 3 }, ''),
+    );
+  }
+  layer.push(
+    div({ position: 'absolute', left: g.pointX - 8, top: axisY - 14, width: 16, height: 16, background: FG, borderRadius: 8 }, ''),
+  );
+  for (const [i, t] of g.ticks.entries()) {
+    const w = 70;
+    const left = i === 0 ? 0 : i === g.ticks.length - 1 ? MARK_W - w : g.ticks[i]!.x - w / 2;
+    layer.push(
+      div({
+        position: 'absolute',
+        left,
+        top: axisY + 10,
+        width: w,
+        fontSize: 20,
+        color: MUTED,
+        justifyContent: i === 0 ? 'flex-start' : i === g.ticks.length - 1 ? 'flex-end' : 'center',
+      }, t.label),
+    );
+  }
+  return div({ position: 'relative', width: MARK_W, height: MARK_H, marginTop: 20 }, layer);
 }
 
 export async function renderShareImage(card: ShareCard): Promise<Buffer> {
@@ -169,14 +242,22 @@ export async function renderShareImage(card: ShareCard): Promise<Buffer> {
   if (card.eyebrow) {
     children.push(div({ fontSize: 24, color: MUTED, marginTop: 6 }, truncate(card.eyebrow, 72)));
   }
+  // Headline AND mark share one top-aligned block, so the mark sits directly
+  // under the headline it illustrates and the slack falls below both. Putting
+  // the mark after a flex:1 headline pushed it to the bottom edge, crowding the
+  // verdict label with a lake of dead space above it.
   children.push(
     div(
-      // Top-align (not center): the headline reads top-down from the eyebrow
-      // instead of floating as an island with dead space above AND below.
-      // wordBreak so a long UNBROKEN token (no spaces) wraps instead of running
-      // off the right edge of the canvas; overflow hidden as a backstop.
-      { flex: 1, alignItems: 'flex-start', fontSize: headlineSize(headline), fontWeight: 700, lineHeight: 1.2, color: FG, marginTop: 40, wordBreak: 'break-word', overflow: 'hidden' },
-      headline,
+      { flex: 1, flexDirection: 'column', alignItems: 'flex-start', marginTop: 40, overflow: 'hidden' },
+      [
+        div(
+          // wordBreak so a long UNBROKEN token (no spaces) wraps instead of
+          // running off the right edge; overflow hidden as a backstop.
+          { fontSize: headlineSize(headline), fontWeight: 700, lineHeight: 1.2, color: FG, wordBreak: 'break-word' },
+          headline,
+        ),
+        card.effect ? effectMark(card.effect.datum, card.effect.domain) : div({}, ''),
+      ],
     ),
   );
   children.push(

@@ -6,7 +6,8 @@
 // fell back to the generic site card; this gives each study its own card.
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { renderShareImage, studyCard } from '../../../lib/share-image.ts';
-import { listStudyPages, type StudyPageEntry } from '../../../lib/digest-data.ts';
+import { listStudyPages, effectDomains, type StudyPageEntry } from '../../../lib/digest-data.ts';
+import { effectForStudy, axisBucket } from '../../../lib/effect-size.ts';
 
 const HANDLE = import.meta.env.PUBLIC_CURATOR_HANDLE || '@nb2276';
 
@@ -20,6 +21,21 @@ export const GET: APIRoute = async ({ props }) => {
   const figuresSourced = (e.study.details ?? []).some(
     (d) => typeof d === 'object' && d != null && 'source_tier' in d && d.source_tier === 'figure',
   );
+  // v0.36 slice 4: carry the effect-size mark onto the card a shared link
+  // unfurls, so the magnitude travels with the study name. Same resolver and
+  // same corpus ruler as the web card — a study's mark reads the same in a text
+  // thread as it does on the site.
+  const datum = effectForStudy(
+    e.study.primary_endpoint,
+    (e.study.details ?? [])
+      .filter((d): d is { text: string; table: { columns: string[]; rows: string[][] } } =>
+        typeof d === 'object' && d !== null && 'table' in d)
+      .map((d) => d.table),
+  );
+  const effect = datum
+    ? { datum, domain: datum.form === 'ratio' ? effectDomains().get(axisBucket(datum)) : undefined }
+    : null;
+
   const png = await renderShareImage(
     studyCard({
       name: e.study.name,
@@ -29,6 +45,7 @@ export const GET: APIRoute = async ({ props }) => {
       verdict: e.study.verdict ?? null,
       handle: HANDLE,
       figuresSourced,
+      effect,
     }),
   );
   return new Response(new Uint8Array(png), {

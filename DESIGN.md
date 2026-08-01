@@ -153,6 +153,12 @@ It is a **domain convention, not an invention** — this audience reads forest p
 
 **On inconsistent presence:** a date page where only some cards carry a mark is the expected state, not a defect. Most studies report proportions or medians rather than a ratio, and a missing mark says nothing about the study. Adding a placeholder would invent a signal.
 
+**On the share card.** The per-study OG card (`/og/study/<date>-<slug>.png`, what a shared study link unfurls) carries the **ratio** mark, drawn in satori from the *same* `markGeometry()` the web SVG uses — two renderers for one visual is a drift risk, so only the paint differs, never the math. Fixed light palette, the documented exception to theme-native, because a reader's theme can't follow an image.
+
+**Paired bars are deliberately absent from the share card.** There the headline *is* the TL;DR and already carries both values verbatim ("1.5% with PBI vs 9.8%"), and at the size the card is viewed in a text thread a 1.5% bar is a few pixels. The ratio form earns its space because a dot's position relative to the null isn't something the sentence conveys.
+
+**The Telegram channel post does not carry a mark**, and can't: it links to `/<date>/`, which unfurls the *date* card — a day summary with no single study to draw. The plan's "OG card + Telegram" was one surface, not two.
+
 **Accessibility:** the mark is `aria-hidden` — the estimate and its interval are already in adjacent text, and a screen reader shouldn't announce them twice.
 
 ### Specialty filter (v0.31)

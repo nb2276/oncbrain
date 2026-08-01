@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   defaultCard,
   digestCard,
@@ -144,5 +146,85 @@ describe('renderShareImage', () => {
     expect(isPng).toBe(true);
     expect(width).toBe(1200);
     expect(height).toBe(630);
+  });
+});
+
+// v0.36 slice 4: the effect-size mark on the card a shared study link unfurls.
+describe('share-image effect mark', () => {
+  const ratio = {
+    form: 'ratio' as const, kind: 'HR' as const, point: 0.53,
+    lo: 0.38, hi: 0.74, ciLevel: 95, klass: 'surrogate', endpointName: 'Progression-free survival',
+  };
+  const paired = {
+    form: 'paired' as const,
+    a: { label: null, value: 1.5 }, b: { label: null, value: 9.8 },
+    unit: '%', klass: 'local-control', origin: 'endpoint' as const,
+  };
+
+  it('carries the mark through studyCard', () => {
+    const card = studyCard({
+      name: 'X', tldr: 'y', date: '2026-07-31', handle: '@h',
+      effect: { datum: ratio, domain: { lo: 1 / 3, hi: 3 } },
+    });
+    expect(card.effect?.datum).toBe(ratio);
+  });
+
+  it('renders a valid PNG with a mark', async () => {
+    const png = await renderShareImage(studyCard({
+      name: 'PRESTIGE', tldr: 'MFS improved', date: '2026-07-31', handle: '@h',
+      effect: { datum: ratio, domain: { lo: 1 / 3, hi: 3 } },
+    }));
+    expect(png.length).toBeGreaterThan(1000);
+    // PNG magic bytes — a real image, not an error page.
+    expect([...png.subarray(0, 4)]).toEqual([0x89, 0x50, 0x4e, 0x47]);
+  });
+
+  it('renders without a mark just as happily', async () => {
+    const png = await renderShareImage(studyCard({
+      name: 'PRESTIGE', tldr: 'no ratio here', date: '2026-07-31', handle: '@h',
+    }));
+    expect([...png.subarray(0, 4)]).toEqual([0x89, 0x50, 0x4e, 0x47]);
+  });
+
+  // The eng review's condition for accepting a SECOND renderer: both must use
+  // the same geometry function, so only the paint can differ, never the math.
+  // If this file ever computes a coordinate itself, that guarantee is gone.
+  it('takes its coordinates from markGeometry, and computes none itself', () => {
+    const src = readFileSync(resolve(process.cwd(), 'src/lib/share-image.ts'), 'utf-8');
+    expect(src).toContain('markGeometry');
+    // No local log-scale math: that would be a second implementation.
+    expect(src).not.toMatch(/Math\.log\(/);
+  });
+
+  it('draws nothing for the paired form on this surface', async () => {
+    // The headline IS the TL;DR and already carries both values verbatim, and a
+    // 1.5% bar is a few pixels at the size this card is viewed.
+    const withPaired = await renderShareImage(studyCard({
+      name: 'X', tldr: 'same text', date: '2026-07-31', handle: '@h',
+      effect: { datum: paired },
+    }));
+    const without = await renderShareImage(studyCard({
+      name: 'X', tldr: 'same text', date: '2026-07-31', handle: '@h',
+    }));
+    expect(withPaired.length).toBe(without.length);
+  });
+
+  it('draws nothing when the estimate would fall off the axis', async () => {
+    // Same guard as the web component: a clamped dot would read as the edge value.
+    const off = await renderShareImage(studyCard({
+      name: 'X', tldr: 'same text', date: '2026-07-31', handle: '@h',
+      effect: { datum: { ...ratio, point: 50, lo: null, hi: null }, domain: { lo: 1 / 3, hi: 3 } },
+    }));
+    const without = await renderShareImage(studyCard({
+      name: 'X', tldr: 'same text', date: '2026-07-31', handle: '@h',
+    }));
+    expect(off.length).toBe(without.length);
+  });
+
+  it('uses the same corpus ruler as the web card', () => {
+    const route = readFileSync(resolve(process.cwd(), 'src/pages/og/study/[slug].png.ts'), 'utf-8');
+    expect(route).toContain('effectDomains()');
+    expect(route).toContain('axisBucket(');
+    expect(route).toContain('effectForStudy(');
   });
 });
