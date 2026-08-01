@@ -2,6 +2,36 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.36.0] - 2026-07-31
+
+A shared study link now carries its effect size, not just its name.
+
+### Added
+- **The effect-size mark travels with a shared link.** The card that unfurls when
+  you send a study into a text thread or a chat now shows the same forest dot the
+  site does: the estimate's position against the no-difference line, with the
+  confidence interval drawn to scale. Someone who never opens the link still sees
+  how big the effect was and how certain it is.
+- A clipped interval says so. When the interval runs past the end of the scale,
+  the card marks that end as continuing, so a truncated interval is never read as
+  a precise one.
+
+### Changed
+- The share card and the site now resolve the axis through one shared function,
+  so the same study cannot be drawn against two different rulers.
+- Paired-value studies (two percentages, two medians) show no mark on the share
+  card by design: the headline already carries both numbers verbatim, and at the
+  size the card is viewed a small bar is a few pixels.
+
+### Fixed
+- One study can no longer take down the whole day. If the mark fails to render
+  for any single study, that card falls back to its previous markless form and
+  the build carries on, instead of failing the nightly publish for everything.
+
+### Notes
+- Telegram channel posts still carry no mark, and can't: they link to a whole
+  day, which has no single study to draw.
+
 ## [0.35.0] - 2026-07-31
 
 Effect-size marks are now comparable across the whole site, not just within a day.
