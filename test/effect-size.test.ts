@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   parseEffectSize,
@@ -10,12 +10,15 @@ import {
   effectForStudy,
   markGeometry,
   sharedDomain,
+  corpusDomains,
+  axisBucket,
   domainFor,
   groupByKlass,
   describeEffect,
   FIXED_DOMAIN,
   type EffectDatum,
   type PairedDatum,
+  type RatioDatum,
 } from '../src/lib/effect-size.ts';
 
 const pe = (stat_value: string, stat_detail = '', klass = 'surrogate') => ({
@@ -402,16 +405,26 @@ describe('the mark is wired into real date pages', () => {
     if (figuresOpen > -1) expect(idx).toBeLessThan(figuresOpen);
   });
 
-  it('shares one axis per date, and does not leak it to other surfaces', () => {
-    const datePage = readFileSync(resolve(process.cwd(), 'src/pages/[date].astro'), 'utf-8');
-    expect(datePage).toContain('sharedDomain');
-    expect(datePage).toContain('effectDomain=');
-    // Site / tag / study pages must NOT pass a domain, or the same study would
-    // change size depending on which page you found it on.
-    for (const f of ['src/pages/sites/[site].astro', 'src/pages/study/[slug].astro', 'src/pages/tags/[...slug].astro']) {
+  // Slice 3 replaced per-page axes with ONE corpus-wide ruler per class+kind.
+  // No page may pass a domain any more: if one did, that page's marks would
+  // stop matching the same study everywhere else.
+  it('lets no page pass its own axis domain', () => {
+    for (const f of [
+      'src/pages/[date].astro',
+      'src/pages/sites/[site].astro',
+      'src/pages/study/[slug].astro',
+      'src/pages/tags/[...slug].astro',
+      'src/pages/studies.astro',
+    ]) {
       const src = readFileSync(resolve(process.cwd(), f), 'utf-8');
       expect(src).not.toContain('effectDomain');
     }
+  });
+
+  it('resolves the ruler from the corpus, inside the card', () => {
+    const card = readFileSync(resolve(process.cwd(), 'src/components/StudyCard.astro'), 'utf-8');
+    expect(card).toContain('effectDomains()');
+    expect(card).toContain('axisBucket(');
   });
 });
 
@@ -473,12 +486,12 @@ describe('adversarial regressions', () => {
   });
 });
 
-describe('the date-page axis never pools incomparable quantities', () => {
-  it('keys the shared axis by endpoint class AND ratio kind', () => {
+describe('the axis never pools incomparable quantities', () => {
+  it('keys a ruler by endpoint class AND ratio kind', () => {
     // An odds ratio and a hazard ratio are not interchangeable, so sharing a
     // ruler because they describe the same endpoint class would be wrong.
-    const src = readFileSync(resolve(process.cwd(), 'src/pages/[date].astro'), 'utf-8');
-    expect(src).toMatch(/datum\.klass[^\n]*datum\.kind/);
+    const src = readFileSync(resolve(process.cwd(), 'src/lib/effect-size.ts'), 'utf-8');
+    expect(src).toMatch(/axisBucket[\s\S]{0,200}klass[\s\S]{0,60}kind/);
   });
 });
 
@@ -726,5 +739,124 @@ describe('slice 2 adversarial regressions', () => {
 
   it('still accepts a unit stated on only one side', () => {
     expect(parsePairedValues(pe('15.8 vs 12.3 mo'))).toMatchObject({ unit: 'mo' });
+  });
+});
+
+// ── slice 3: one corpus-wide ruler per class+kind ───────────────────────────
+
+describe('snapped domains', () => {
+  const mk = (point: number, klass = 'surrogate', kind: 'HR' | 'OR' = 'HR'): RatioDatum => ({
+    form: 'ratio', kind, point, lo: null, hi: null, ciLevel: null, klass,
+  });
+
+  it('snaps the bound to the ladder, giving readable ticks', () => {
+    // Unsnapped this produced bounds like 2.87 and 3.34, which read as noise.
+    for (const d of [sharedDomain([mk(1.38)]), sharedDomain([mk(1.55)]), sharedDomain([mk(5.34)])]) {
+      expect([1.5, 2, 3, 4, 5, 7, 10]).toContain(d.hi);
+    }
+  });
+
+  it('stays exactly symmetric about the null', () => {
+    const d = sharedDomain([mk(0.35), mk(1.38)]);
+    expect(d.lo).toBeCloseTo(1 / d.hi, 12);
+  });
+
+  // Stability is the whole point of snapping: without it every new study nudges
+  // the domain and silently redraws every older card in its bucket.
+  it('does not move when a new study lands inside the current rung', () => {
+    const before = sharedDomain([mk(0.5), mk(1.4)]);
+    const after = sharedDomain([mk(0.5), mk(1.4), mk(0.9), mk(1.2), mk(0.7)]);
+    expect(after).toEqual(before);
+  });
+
+  it('does move when a genuinely new extreme crosses a rung', () => {
+    const before = sharedDomain([mk(0.5)]);
+    const after = sharedDomain([mk(0.5), mk(6.2)]);
+    expect(after.hi).toBeGreaterThan(before.hi);
+  });
+
+  it('still contains every point estimate it was built from', () => {
+    const points = [0.35, 0.48, 1.38, 5.34];
+    const d = sharedDomain(points.map((p) => mk(p)));
+    for (const p of points) {
+      expect(p).toBeGreaterThan(d.lo);
+      expect(p).toBeLessThan(d.hi);
+    }
+  });
+});
+
+describe('corpusDomains', () => {
+  const mk = (point: number, klass: string, kind: 'HR' | 'OR' | 'SHR' = 'HR'): RatioDatum => ({
+    form: 'ratio', kind, point, lo: null, hi: null, ciLevel: null, klass,
+  });
+
+  it('keys a ruler by endpoint class AND ratio kind', () => {
+    const m = corpusDomains([mk(0.5, 'overall-survival'), mk(5.3, 'surrogate', 'OR'), mk(0.6, 'overall-survival')]);
+    expect(m.has('overall-survival::HR')).toBe(true);
+    expect(m.has('surrogate::OR')).toBe(true);
+    // An odds ratio must never widen the hazard-ratio ruler.
+    expect(m.get('overall-survival::HR')!.hi).toBeLessThan(m.get('surrogate::OR')!.hi);
+  });
+
+  it('gives every mark in a bucket the same ruler', () => {
+    const rows = [mk(0.4, 'x'), mk(1.2, 'x'), mk(0.9, 'x')];
+    const m = corpusDomains(rows);
+    const domains = rows.map((r) => m.get(axisBucket(r)));
+    expect(new Set(domains.map((d) => `${d!.lo}:${d!.hi}`)).size).toBe(1);
+  });
+
+  it('returns an empty map for no data rather than throwing', () => {
+    expect(corpusDomains([]).size).toBe(0);
+  });
+});
+
+// The property this slice exists to guarantee, asserted against the real build.
+describe('a study renders identically on every surface', () => {
+  function marksIn(file: string): Map<string, string> {
+    const doc = readFileSync(resolve(process.cwd(), file), 'utf-8');
+    const out = new Map<string, string>();
+    for (const m of doc.match(/<svg class="emark"[\s\S]*?<\/svg>/g) ?? []) {
+      const title = /<title>(.*?)<\/title>/.exec(m)?.[1];
+      const cx = /class="emark-point" cx="([\d.]+)"/.exec(m)?.[1];
+      const ticks = [...m.matchAll(/class="emark-tick"[^>]*>([^<]*)</g)].map((t) => t[1]).join('/');
+      if (title && cx) out.set(title, `${cx}|${ticks}`);
+    }
+    return out;
+  }
+
+  it('draws the same mark at the same position on a date page and a site page', () => {
+    const dates = readdirSync(resolve(process.cwd(), 'dist')).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
+    const sites = readdirSync(resolve(process.cwd(), 'dist/sites')).filter((d) =>
+      existsSync(resolve(process.cwd(), 'dist/sites', d, 'index.html')));
+    const siteMarks = new Map<string, string>();
+    for (const s of sites) for (const [k, v] of marksIn(`dist/sites/${s}/index.html`)) siteMarks.set(k, v);
+
+    let compared = 0;
+    for (const d of dates) {
+      const f = `dist/${d}/index.html`;
+      if (!existsSync(resolve(process.cwd(), f))) continue;
+      for (const [title, render] of marksIn(f)) {
+        const onSite = siteMarks.get(title);
+        if (!onSite) continue;
+        compared += 1;
+        // Same numbers, same ruler, same pixel — no "which page am I on?" drift.
+        expect(onSite).toBe(render);
+      }
+    }
+    expect(compared).toBeGreaterThan(0);
+  });
+
+  it('never pools two ratio kinds onto one ruler in the built output', () => {
+    const doc = readFileSync(resolve(process.cwd(), 'dist/sites/prostate/index.html'), 'utf-8');
+    const byRuler = new Map<string, Set<string>>();
+    for (const m of doc.match(/<svg class="emark"[\s\S]*?<\/svg>/g) ?? []) {
+      const title = /<title>(.*?)<\/title>/.exec(m)?.[1] ?? '';
+      const kind = /^(HR|OR|RR|SHR)\b/.exec(title)?.[1];
+      const ticks = [...m.matchAll(/class="emark-tick"[^>]*>([^<]*)</g)].map((t) => t[1]).join('/');
+      if (!kind || !ticks) continue;
+      byRuler.set(ticks, (byRuler.get(ticks) ?? new Set()).add(kind));
+    }
+    expect(byRuler.size).toBeGreaterThan(0);
+    for (const kinds of byRuler.values()) expect(kinds.size).toBe(1);
   });
 });

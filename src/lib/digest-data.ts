@@ -1,6 +1,12 @@
 // Read digest artifacts written by build/digest-builder.ts.
 // Astro pages use this at build time to enumerate paths and render content.
 
+import {
+  parseEffectSize,
+  corpusDomains,
+  type AxisDomain,
+  type RatioDatum,
+} from './effect-size.ts';
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { assignSlugsForDate } from './slug-resolve.ts';
@@ -250,6 +256,36 @@ export type StudyVerdict = {
 // `figures[]`; v0.4–v0.9 artifacts carry a single key_figure_url/caption pair.
 // Renderers and the Obsidian export read figures exclusively through this so
 // both shapes render identically.
+// v0.34 slice 3: ONE effect-size ruler per (endpoint class, ratio kind), shared
+// by every surface. Built once per build from every committed digest and
+// memoized, so a card renders identically wherever it appears and any two
+// comparable cards can be read against each other.
+//
+// Per-PAGE axes were the earlier model and mostly did nothing: only 3 date
+// buckets in the archive hold two comparable marks while 24 hold one, so the
+// day axis equalled a per-mark axis on 89% of dates. The clusters readers
+// actually compare sit on site pages.
+let _effectDomains: Map<string, AxisDomain> | null = null;
+export function effectDomains(): Map<string, AxisDomain> {
+  if (_effectDomains) return _effectDomains;
+  const data: RatioDatum[] = [];
+  for (const artifact of listDigests()) {
+    for (const site of artifact.digest.sites) {
+      for (const study of site.studies) {
+        const d = parseEffectSize(study.primary_endpoint);
+        if (d) data.push(d);
+      }
+    }
+  }
+  _effectDomains = corpusDomains(data);
+  return _effectDomains;
+}
+
+/** Test seam: drop the memo so a fixture corpus is picked up. */
+export function resetEffectDomains(): void {
+  _effectDomains = null;
+}
+
 export function studyFigures(study: DigestStudy): DigestFigure[] {
   if (study.figures && study.figures.length > 0) return study.figures;
   if (study.key_figure_url) {

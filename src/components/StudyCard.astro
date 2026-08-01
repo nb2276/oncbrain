@@ -11,11 +11,12 @@
 // behind a native <details> expander. Sources stay in their own collapsible.
 import { linkifyCitations } from '../lib/extract.ts';
 import EffectMark from './EffectMark.astro';
-import { effectForStudy, domainFor, type AxisDomain } from '../lib/effect-size.ts';
+import { effectForStudy, domainFor, axisBucket } from '../lib/effect-size.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
 import { VERDICT_META, REVIEW_GLYPH } from '../lib/verdict.ts';
 import { tradePressLabel } from '../lib/paper-url.ts';
 import {
+  effectDomains,
   studyFigures,
   stripStudyNamePrefix,
   type DigestStudy,
@@ -44,11 +45,6 @@ interface Props {
   bookmarks?: Bookmark[];
   papers?: DigestArtifactPaper[];
   slides?: DigestArtifactSlide[];
-  // v0.33: shared log-axis domain for the effect-size mark. [date].astro passes
-  // one per endpoint class so a day's marks are comparable; every other surface
-  // leaves it undefined and gets the fixed domain, so the same study never
-  // changes size depending on which page you found it on.
-  effectDomain?: AxisDomain;
   // Optional anchor id on the card root (per-date page uses it for deep links).
   anchorId?: string;
   // Optional "Sourced from …" attribution line (per-date page only).
@@ -90,7 +86,6 @@ const {
   bookmarks = [],
   papers = [],
   slides = [],
-  effectDomain,
   anchorId,
   authors = [],
   shareUrl,
@@ -463,7 +458,7 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       )}
       {effect && (
         effect.form === 'ratio'
-          ? <EffectMark datum={effect} domain={effectDomain ?? domainFor(effect)} />
+          ? <EffectMark datum={effect} domain={effectDomains().get(axisBucket(effect)) ?? domainFor(effect)} />
           : <EffectMark datum={effect} />
       )}
     </div>

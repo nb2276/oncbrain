@@ -469,6 +469,21 @@ export const FIXED_DOMAIN: AxisDomain = { lo: 0.25, hi: 4 };
 const MIN_HALF_WIDTH = Math.log(2); // never tighter than 0.5x-2x
 
 /**
+ * The upper bounds a ratio axis is allowed to take. Snapping to this ladder is
+ * what makes a corpus-wide axis STABLE: without it, every new study nudges the
+ * domain and silently redraws every older card in its bucket. With it, the axis
+ * only moves when a genuinely new extreme crosses a rung.
+ *
+ * It also gives readable ticks — "0.33 / 1.0 / 3" instead of "0.43 / 1.0 / 2.3".
+ */
+const DOMAIN_STEPS = [1.5, 2, 3, 4, 5, 7, 10] as const;
+
+function snapUp(hi: number): number {
+  for (const step of DOMAIN_STEPS) if (hi <= step) return step;
+  return DOMAIN_STEPS[DOMAIN_STEPS.length - 1]!;
+}
+
+/**
  * A shared domain for one date's marks. Symmetric about 1.0 and wide enough to
  * hold every point estimate, so two cards on the same page are comparable at a
  * glance. Intervals may still overflow — that is what the clip indicator is
@@ -484,11 +499,44 @@ export function sharedDomain(data: RatioDatum[]): AxisDomain {
   if (points.length === 0) return FIXED_DOMAIN;
   const maxLog = Math.max(...points.map((p) => Math.abs(Math.log(p))), MIN_HALF_WIDTH);
   const half = maxLog * 1.15; // 15% breathing room past the most extreme estimate
-  // Clamp the BOUND, not the log, so the cap is exact: exp(log(10)) is
-  // 10.000000000000002, which would leak a float artifact into a tick label.
-  // Deriving lo as 1/hi keeps the domain exactly symmetric about the null.
-  const hi = Math.min(Math.exp(half), 10);
+  // Snap UP to the ladder. Deriving lo as 1/hi keeps the domain exactly
+  // symmetric about the null, and snapping keeps the bound exact (exp(log(10))
+  // is 10.000000000000002, which would leak into a tick label).
+  const hi = snapUp(Math.min(Math.exp(half), 10));
   return { lo: 1 / hi, hi };
+}
+
+/** The bucket a mark shares a ruler with. Class AND kind: an odds ratio and a
+ *  hazard ratio are not interchangeable quantities. */
+export function axisBucket(d: RatioDatum): string {
+  return `${d.klass ?? 'unknown'}::${d.kind}`;
+}
+
+/**
+ * One ruler per (endpoint class, ratio kind), computed across the WHOLE corpus.
+ *
+ * Why corpus-wide rather than per page: counted over the archive, only 3 date
+ * buckets ever hold two comparable marks while 24 hold exactly one, so a
+ * per-date axis is identical to a per-mark axis on 89% of dates. The clusters
+ * that readers actually compare live on site pages (six prostate surrogate-HR
+ * trials on one page). A corpus-wide ruler makes those comparable, makes every
+ * card comparable to every other of its type, and removes the cross-surface
+ * inconsistency where one study rendered at different widths on different pages.
+ *
+ * Snapped bounds keep it stable: a new study only moves the ruler when it
+ * crosses a rung of the ladder.
+ */
+export function corpusDomains(data: RatioDatum[]): Map<string, AxisDomain> {
+  const byBucket = new Map<string, RatioDatum[]>();
+  for (const d of data) {
+    const key = axisBucket(d);
+    const bucket = byBucket.get(key);
+    if (bucket) bucket.push(d);
+    else byBucket.set(key, [d]);
+  }
+  const out = new Map<string, AxisDomain>();
+  for (const [key, rows] of byBucket) out.set(key, sharedDomain(rows));
+  return out;
 }
 
 /**
