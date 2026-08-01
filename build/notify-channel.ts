@@ -13,41 +13,29 @@
 //
 // Fail-soft (exit 0) so the cron pipeline never aborts on a notify failure.
 import 'dotenv/config';
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { todayIso } from '../src/lib/db.ts';
 import { sendMessage } from '../src/lib/telegram-ingest.ts';
 import { formatChannelPost, type ChannelArtifact } from '../src/lib/channel-post.ts';
 import { waitForDeployedDate } from '../src/lib/deploy-ready.ts';
+import {
+  parseNotifyArgs,
+  siteUrlFromEnv,
+  loadDigestArtifact,
+  runNotifyCli,
+} from '../src/lib/notify-cli.ts';
 
-type Args = { date: string; dryRun: boolean };
-
-function parseArgs(argv: string[]): Args {
-  let date = todayIso();
-  let dryRun = false;
-  for (const a of argv.slice(2)) {
-    const m = a.match(/^--([^=]+)(?:=(.*))?$/);
-    if (!m) continue;
-    if (m[1] === 'date' && m[2]) date = m[2];
-    if (m[1] === 'dry-run') dryRun = true;
-  }
-  return { date, dryRun };
-}
+const LABEL = 'notify:channel';
 
 async function main(): Promise<void> {
-  const args = parseArgs(process.argv);
-  const siteUrl = process.env.PUBLIC_SITE_URL || 'https://oncbrain.oncologytoolkit.com';
+  const args = parseNotifyArgs(process.argv);
+  const siteUrl = siteUrlFromEnv();
 
-  const digestPath = resolve(`data/digests/${args.date}.json`);
-  if (!existsSync(digestPath)) {
-    console.log(`notify:channel: no digest at ${digestPath}, skipping`);
-    return;
-  }
   // generated_at isn't part of ChannelArtifact (the post doesn't render it); it's
   // read here only as the deploy-readiness build stamp.
-  const artifact = JSON.parse(readFileSync(digestPath, 'utf8')) as ChannelArtifact & {
-    generated_at?: number;
-  };
+  const artifact = loadDigestArtifact<ChannelArtifact & { generated_at?: number }>(
+    args.date,
+    LABEL,
+  );
+  if (!artifact) return;
   const text = formatChannelPost(artifact, siteUrl);
 
   if (args.dryRun) {
@@ -101,6 +89,7 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  console.log(`notify:channel: unexpected error (${(err as Error).message}), continuing`);
-});
+// Script-only + fail-soft. The guard matters MORE here than on the curator DM:
+// importing this module used to run main(), which posts to the PUBLIC channel.
+// The non-zero exitCode set above for a skipped post survives this wrapper.
+runNotifyCli(LABEL, import.meta.url, main);
