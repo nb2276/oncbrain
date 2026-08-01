@@ -2,6 +2,29 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.38.0] - 2026-08-01
+
+Compare trials side by side instead of scrolling between them.
+
+### Added
+- **Compare selected studies.** Where a page carries two or more trials
+  reporting the same kind of endpoint, each offers a `compare` control. Pick
+  two or more and they stack on one axis at the bottom of the screen, trial
+  name and effect size above each, so the one with the biggest effect is
+  obvious at a glance. On the breast page that is four overall-survival hazard
+  ratios that were previously scattered down a long page.
+
+### Notes
+- Only like can be compared with like. Choosing the first trial locks the set
+  to its endpoint and ratio type, and anything that cannot honestly be read on
+  the same scale is switched off rather than quietly allowed. A shared axis is
+  not enough on its own: survival, recurrence and toxicity hazard ratios can
+  all be drawn on the same scale and still are not comparable.
+- The tray carries the standing caveat that effect sizes from different trials
+  are not freely comparable, since populations, follow-up and comparator arms
+  differ.
+- Pages where nothing has a comparable partner show no compare control at all.
+
 ## [0.37.0] - 2026-07-31
 
 When a trial comes back with a different number, the digest now says so instead of
