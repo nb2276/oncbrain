@@ -679,3 +679,52 @@ describe('paired bars carry no valence', () => {
     expect(src).not.toMatch(/--verdict-color/);
   });
 });
+
+// Slice 2 adversarial pass. All three were reproduced against the real code
+// before fixing; each would have drawn a confidently wrong clinical picture.
+describe('slice 2 adversarial regressions', () => {
+  // Bare substring matching in both directions: "OS" is inside "Dose", and the
+  // unanchored cell regex read "50 Gy" as 50 — so an overall-survival endpoint
+  // rendered a RADIOTHERAPY DOSE as its result.
+  it('does not match a short endpoint name inside an unrelated row label', () => {
+    const t = { columns: ['Endpoint', 'Arm A', 'Arm B', 'p'], rows: [['Dose', '50 Gy', '40 Gy', '0.4']] };
+    expect(parsePairedFromTable({ name: 'OS', klass: 'overall-survival' }, t)).toBeNull();
+  });
+
+  it('still matches a full endpoint name exactly', () => {
+    const t = { columns: ['Endpoint', 'Arm A', 'Arm B', 'p'], rows: [['OS', '60%', '55%', '0.4']] };
+    expect(parsePairedFromTable({ name: 'OS' }, t)).toMatchObject({ a: { value: 60 }, b: { value: 55 } });
+  });
+
+  it('reads only a whole-cell plain value, never a dose or a compound cell', () => {
+    for (const cell of ['50 Gy', '2/236', '61.0% (55-67)', 'HR 0.80', 'n/a']) {
+      const t = { columns: ['Endpoint', 'Arm A', 'Arm B', 'p'], rows: [['Overall survival', cell, '40%', 'x']] };
+      expect(parsePairedFromTable({ name: 'Overall survival' }, t)).toBeNull();
+    }
+  });
+
+  // Two trials both report an n, so "(n=...)" alone cannot identify a
+  // randomised comparison.
+  it('rejects trial-vs-trial even when both columns carry an n', () => {
+    expect(armColumns({ columns: ['Endpoint', 'POP-RT (n=500)', 'PEACE-2 (n=600)'], rows: [] })).toBeNull();
+  });
+
+  it('still accepts real arm names carrying an n', () => {
+    expect(armColumns({ columns: ['Endpoint', 'Sequential (n=1,118)', 'Concurrent (n=1,137)'], rows: [] })).not.toBeNull();
+  });
+
+  it('still accepts an acronym arm when the other column is a comparator', () => {
+    // IM-MS-RT is acronym-shaped, but "Control" identifies the comparison.
+    expect(armColumns({ columns: ['Endpoint (20yr)', 'IM-MS-RT', 'Control', 'HR (95% CI), p'], rows: [] })).not.toBeNull();
+  });
+
+  // Two different stated units are not two measurements of one endpoint.
+  it('abstains when the two values carry different units', () => {
+    expect(parsePairedValues(pe('28% vs 21 mo'))).toBeNull();
+    expect(parsePairedValues(pe('15.8 mo vs 12%'))).toBeNull();
+  });
+
+  it('still accepts a unit stated on only one side', () => {
+    expect(parsePairedValues(pe('15.8 vs 12.3 mo'))).toMatchObject({ unit: 'mo' });
+  });
+});

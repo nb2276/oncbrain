@@ -249,7 +249,12 @@ export function parsePairedValues(pe: PrimaryEndpointLike): PairedDatum | null {
   if (av < 0 || bv < 0) return null;
   if (av === 0 && bv === 0) return null; // two empty bars carry nothing
 
-  const unit = normUnit(m[2]) ?? normUnit(m[4]);
+  // Two DIFFERENT stated units means these are not two measurements of one
+  // endpoint ("28% vs 21 mo"), so they cannot be two bars on one scale.
+  const ua = normUnit(m[2]);
+  const ub = normUnit(m[4]);
+  if (ua && ub && ua !== ub) return null;
+  const unit = ua ?? ub;
   // Arm labels only when the source states them; never invented. A purely
   // numeric "label" means the parenthetical held the VALUES, not arm names
   // ("Δ4.8 pts (79.2 vs 74.3)"), so it is not a label.
@@ -288,12 +293,17 @@ export type DigestTableLike = { columns?: unknown; rows?: unknown } | null | und
 const NON_ARM_AXIS =
   /\b(trial|study|cohort|subgroup|group|setting|site|entity|modality|technique|regimen|status|stage|population|line|histolog|menopaus|feature|failure|grade|morbidity|therapy)\b/i;
 
-// Positive evidence that a column names a randomized arm.
-const ARM_POSITIVE = [
-  /\(\s*n\s*=/i,                                   // "Sequential (n=1,118)"
+// STRONG evidence that a column names a randomized arm: an explicit "Arm X" or
+// a comparator name. Either identifies a randomised comparison on its own.
+const STRONG_ARM = [
   /^\s*arm\s+[a-z0-9]/i,                           // "Arm A"
   /\b(control|placebo|observation|obs|soc|standard|no\s+\w+|usual care|sham)\b/i,
 ];
+
+// A bare study/trial acronym: "POP-RT", "PEACE-2", "STAMPEDE". Two of these
+// side by side is a trial comparison, not a randomised two-arm result, even
+// when both report an n.
+const TRIAL_ACRONYM = /^\s*[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*\s*(?:\(\s*n\s*=[^)]*\))?\s*$/;
 
 // A trailing statistics column ("p", "HR (95% CI), p") is not an arm.
 const STAT_COLUMN = /^\s*(p|p-?value|hr|or|rr|95%\s*ci|hr\s*\(95%\s*ci\)|.*\bci\b.*)\s*[,)]?\s*$/i;
@@ -353,8 +363,15 @@ export function armColumns(table: DigestTableLike): ArmTable | null {
   if (NON_ARM_AXIS.test(cols[0] ?? '')) return null;
 
   // 4. positive evidence required — absence of a red flag is not evidence.
-  const positive = candidates.some((c) => ARM_POSITIVE.some((re) => re.test(c.name)));
-  if (!positive) return null;
+  //
+  // An "(n=...)" alone is NOT enough: "Endpoint | POP-RT (n=500) | PEACE-2
+  // (n=600)" is trial-vs-trial, and both trials report an n. A control-like
+  // name or an explicit "Arm X" identifies a randomised comparison; a bare n
+  // only counts when at least one column is not a bare study acronym.
+  const strong = candidates.some((c) => STRONG_ARM.some((re) => re.test(c.name)));
+  const hasN = candidates.some((c) => /\(\s*n\s*=/i.test(c.name));
+  const bothAcronyms = candidates.every((c) => TRIAL_ACRONYM.test(c.name));
+  if (!strong && !(hasN && !bothAcronyms)) return null;
 
   return {
     armA: candidates[0]!.name,
@@ -364,7 +381,32 @@ export function armColumns(table: DigestTableLike): ArmTable | null {
   };
 }
 
-const CELL_NUM = /(\d+(?:\.\d+)?)\s*(%|mo|months?)?/i;
+// ANCHORED: the whole cell must be a plain endpoint value. Unanchored, this
+// read "50 Gy" as 50 and rendered a radiotherapy dose as a survival result.
+// A cell with any other content (a dose unit, a fraction, an interval) is not
+// an arm value for this endpoint.
+const CELL_NUM = /^\s*(\d+(?:\.\d+)?)\s*(%|mo|months?)?\s*$/i;
+
+/**
+ * Does a table row label name the study's primary endpoint?
+ *
+ * Bare substring matching in BOTH directions is unsafe for short endpoint
+ * names: "OS" is a substring of "Dose", so an overall-survival endpoint matched
+ * a dose row. Short names must match exactly; longer ones may match on word
+ * boundaries.
+ */
+function rowMatchesEndpoint(rowLabel: string, endpointName: string): boolean {
+  const norm = (x: string) => x.toLowerCase().replace(/\s+/g, ' ').trim();
+  const row = norm(rowLabel);
+  const want = norm(endpointName);
+  if (!row || !want) return false;
+  if (row === want) return true;
+  const [shorter, longer] = want.length <= row.length ? [want, row] : [row, want];
+  // Too short to risk a partial match ("OS", "PFS", "IBR").
+  if (shorter.length < 5) return false;
+  const esc = shorter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(^|\\W)${esc}(\\W|$)`).test(longer);
+}
 
 /**
  * A paired datum from a gated arm table, matching the study's primary endpoint
@@ -379,13 +421,12 @@ export function parsePairedFromTable(
   const arms = armColumns(table);
   if (!arms || !Array.isArray(table?.rows)) return null;
 
-  const wanted = pe.name.toLowerCase().trim();
+  const wanted = pe.name;
   for (const row of table.rows as unknown[]) {
     if (!Array.isArray(row)) continue;
-    const label = typeof row[0] === 'string' ? row[0].toLowerCase() : '';
+    const label = typeof row[0] === 'string' ? row[0] : '';
     if (!label) continue;
-    // Require a real name match, not a loose overlap.
-    if (!label.includes(wanted) && !wanted.includes(label)) continue;
+    if (!rowMatchesEndpoint(label, wanted)) continue;
 
     const rawA = row[arms.colA];
     const rawB = row[arms.colB];
