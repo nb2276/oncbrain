@@ -44,10 +44,12 @@ import {
   type DigestOutput,
   type RelatedTrialsRunCache,
   type EnrichRelatedTrialsDeps,
+  type DigestStudy,
 } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { markFigureSourcedDetails } from '../src/lib/source-tier.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
+import { buildPriorIndex, findPriorEstimate, studiesFromArtifacts } from '../src/lib/prior-estimate.ts';
 import { clampPreprintVerdict } from '../src/lib/preprint.ts';
 import { stripReviewVerdicts } from '../src/lib/content-type.ts';
 import { ingestApprovedResolutions, crossDateResolvedPapers } from '../src/lib/review-trial-ingest.ts';
@@ -141,7 +143,7 @@ import {
   isOcrEntryFresh,
   type OcrEntry,
 } from '../src/lib/vision-ocr.ts';
-import { writeFileSync, mkdirSync, existsSync, realpathSync } from 'node:fs';
+import { writeFileSync, mkdirSync, existsSync, realpathSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -717,10 +719,90 @@ export async function buildOneDate(
   // "Trials discussed" list can deep-link to the resolved card.
   linkResolvedTrials(db, date, digest, allPapers);
 
+  // v0.37 (E5): stamp each study with the same trial's PREVIOUS reading of the
+  // same endpoint, when it moved. Runs after overrides so a suppressed card can
+  // never become someone's cited prior, and reads only committed artifacts from
+  // strictly earlier dates. Build-stamped, never LLM-generated.
+  const priorHits = stampPriorEstimates(date, digest, args.outDir);
+  for (const h of priorHits) {
+    console.log(`  magnitude moved: ${h.slug} ${h.from} → ${h.to} (prior ${h.priorDate})`);
+  }
+  if (priorHits.length === 0) console.log('  magnitude moved: none');
+
   const artifact = buildArtifact(date, confMeta, bookmarks, allPapers, slidesForDate, digest, crossDateIds);
   const paths = writeArtifact(args, artifact);
   console.log(`  wrote ${paths.json}`);
   console.log(`  wrote ${paths.obsidian}`);
+}
+
+// v0.37 (E5): attach `prior_estimate` to every study whose trial the digest has
+// covered before with a DIFFERENT magnitude on the same endpoint. Returns the
+// hits so the build log (and the curator DM) can name them — the detector half
+// of E5 is exactly this list.
+//
+// Reads the committed artifacts off disk rather than listDigests(), because the
+// builder's output dir is configurable and tests inject a fixture dir. A
+// missing or malformed artifact is skipped, never fatal: a longitudinal note is
+// a nice-to-have and must not be able to fail a publish.
+export function stampPriorEstimates(
+  date: string,
+  digest: { sites: { disease_site?: string | null; studies: DigestStudy[] }[] },
+  outDir: string,
+): { slug: string; from: string; to: string; priorDate: string }[] {
+  const artifacts: Parameters<typeof studiesFromArtifacts>[0] = [];
+  let names: string[] = [];
+  try {
+    names = readdirSync(outDir).filter((f: string) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f));
+  } catch {
+    return [];
+  }
+  for (const f of names) {
+    const d = f.slice(0, 10);
+    if (d >= date) continue; // strictly earlier; also skips the date being rebuilt
+    try {
+      artifacts.push(JSON.parse(readFileSync(resolve(outDir, f), 'utf-8')));
+    } catch {
+      continue;
+    }
+  }
+  // Whole-pass guard. A longitudinal note is strictly additive; it must never be
+  // the reason a day fails to publish. Same rule the OG-card mark follows.
+  try {
+    const index = buildPriorIndex(studiesFromArtifacts(artifacts));
+    if (index.length === 0) return [];
+
+    const hits: { slug: string; from: string; to: string; priorDate: string }[] = [];
+    for (const site of digest.sites) {
+      for (const study of site.studies) {
+        if (!study.slug) continue;
+        const prior = findPriorEstimate(
+          {
+            date,
+            slug: study.slug,
+            name: study.name,
+            nct: study.nct ?? null,
+            // Required for acronym-only matching; without it a bare acronym can
+            // never match, which would silently disable half the detector.
+            disease_site: site.disease_site ?? null,
+            primary_endpoint: study.primary_endpoint,
+          },
+          index,
+        );
+        if (!prior) continue;
+        study.prior_estimate = prior;
+        hits.push({
+          slug: study.slug,
+          from: prior.stat_value,
+          to: study.primary_endpoint?.stat_value ?? '?',
+          priorDate: prior.date,
+        });
+      }
+    }
+    return hits;
+  } catch (err) {
+    console.warn(`  prior-estimate pass skipped: ${err instanceof Error ? err.message : String(err)}`);
+    return [];
+  }
 }
 
 function pickDatesToBuild(db: ReturnType<typeof openDb>, args: Args): string[] {

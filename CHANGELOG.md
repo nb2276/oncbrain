@@ -2,6 +2,33 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.37.0] - 2026-07-31
+
+When a trial comes back with a different number, the digest now says so instead of
+dropping one of the two cards.
+
+### Added
+- **Longitudinal magnitude.** A study whose trial the digest has covered before,
+  and which now reports a *different* effect size for the same endpoint, carries
+  an `updated from HR 0.92 (95% CI 0.71-1.19) · 2026-05-17` line linking back to
+  the earlier card, plus a hollow dot at the old estimate on the same axis. An
+  interim result that matures, or a confidence interval that tightens across the
+  no-difference line, is now visible instead of lost.
+- **The build tells you when a number moved.** The build log and the curator's
+  build-done message both name any trial whose magnitude changed since it was
+  last covered. Previously the duplicate-detection flow would suggest suppressing
+  the second card, and any change in the number went with it.
+
+### Notes
+- Nothing in the current archive triggers this: of four trials covered on more
+  than one date, only one carries a comparable estimate on both, and that one is
+  unchanged. The detection runs on every build, so the first genuine update will
+  surface on the day it happens.
+- Matching is deliberately strict, because attributing one trial's estimate to
+  another would be a clinical error. A disagreement on either the registration
+  number or the trial acronym vetoes a match even when the other agrees, and an
+  unchanged estimate never produces a note.
+
 ## [0.36.0] - 2026-07-31
 
 A shared study link now carries its effect size, not just its name.

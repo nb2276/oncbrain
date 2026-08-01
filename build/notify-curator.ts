@@ -17,8 +17,9 @@
 //   - Telegram API error → log and skip
 
 import 'dotenv/config';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { openDb, getCuratorChatId, todayIso } from '../src/lib/db.ts';
 import { sendMessage } from '../src/lib/telegram-ingest.ts';
 import { getDiseaseSite } from '../src/lib/disease-sites.ts';
@@ -47,12 +48,18 @@ type DigestArtifact = {
   digest: {
     sites: Array<{
       disease_site: string;
-      studies: Array<{ name: string }>;
+      studies: Array<{
+        name: string;
+        // v0.37 (E5): set by the build when this trial's magnitude moved since
+        // the digest last covered it.
+        primary_endpoint?: { stat_value?: string | null } | null;
+        prior_estimate?: { date: string; stat_value: string } | null;
+      }>;
     }>;
   };
 };
 
-function formatMessage(artifact: DigestArtifact, siteUrl: string): string {
+export function formatMessage(artifact: DigestArtifact, siteUrl: string): string {
   const sites = artifact.digest.sites.filter((s) => s.studies.length > 0);
   const totalStudies = sites.reduce((n, s) => n + s.studies.length, 0);
   const breakdown = sites
@@ -63,7 +70,18 @@ function formatMessage(artifact: DigestArtifact, siteUrl: string): string {
     .join(' · ');
   const url = `${siteUrl.replace(/\/$/, '')}/${artifact.date}/`;
   const header = `✓ ${artifact.date} built — ${totalStudies} ${totalStudies === 1 ? 'study' : 'studies'} across ${sites.length} ${sites.length === 1 ? 'site' : 'sites'}`;
-  return `${header}\n${breakdown}\n${url}`;
+
+  // v0.37 (E5), the detector half. A trial the digest already covered has come
+  // back reporting a DIFFERENT number. That is the one thing in a routine build
+  // worth reading the DM for, so it goes above the fold, before the site
+  // breakdown. Silent on the overwhelmingly common day where nothing moved.
+  const moved = sites
+    .flatMap((s) => s.studies)
+    .filter((st) => st.prior_estimate)
+    .map((st) => `↻ ${st.name}: ${st.prior_estimate!.stat_value} → ${st.primary_endpoint?.stat_value ?? '?'} (was ${st.prior_estimate!.date})`);
+  const movedBlock = moved.length ? `\n${moved.join('\n')}` : '';
+
+  return `${header}${movedBlock}\n${breakdown}\n${url}`;
 }
 
 async function main(): Promise<void> {
@@ -131,6 +149,22 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  console.log(`notify:curator: unexpected error (${(err as Error).message}), continuing`);
-});
+// Only run when invoked as a script. Without this guard, a unit test that
+// imports formatMessage() also runs main(), which on a machine with a real
+// TELEGRAM_BOT_TOKEN would poll for deploy-readiness and send a real DM.
+// Mirrors digest-builder.ts.
+function isInvokedAsScript(): boolean {
+  const arg = process.argv[1];
+  if (!arg) return false;
+  try {
+    return realpathSync(arg) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (isInvokedAsScript()) {
+  main().catch((err) => {
+    console.log(`notify:curator: unexpected error (${(err as Error).message}), continuing`);
+  });
+}
