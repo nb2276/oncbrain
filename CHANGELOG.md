@@ -2,6 +2,30 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.39.0] - 2026-08-01
+
+### Fixed
+- **A digest that failed to publish is no longer deployed in silence.** When the
+  nightly push failed, the day's work stayed on the laptop and was correctly not
+  announced. The next night's push carried it to the site, but that run only
+  knew about its own work, so the earlier day went live without ever being
+  announced. Each run now also accounts for anything an earlier run left
+  unpushed, and pushes it even on a night that produced nothing new.
+- The nightly run no longer announces a day when the commit itself failed. A
+  failed commit could leave the day staged but uncommitted while the push still
+  reported success, which was enough to send a message about a page that was
+  never published.
+- Pushes now name the branch explicitly, so the nightly run cannot push
+  somewhere other than the branch the site deploys from.
+
+### Notes
+- A day that was later withdrawn or reverted before it reached the site is not
+  announced: what gets announced is the net effect of the push, not every file
+  it touched along the way.
+- A multi-day outage still announces only the most recent day or two. Older days
+  deploy silently, because telling them apart from a routine rebuild of an old
+  day needs a record of what has already been announced. Tracked in TODOS.
+
 ## [0.38.0] - 2026-08-01
 
 Compare trials side by side instead of scrolling between them.
