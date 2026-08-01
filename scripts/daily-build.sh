@@ -27,6 +27,11 @@
 # pull:telegram, enrich:inbox, build:day, astro build, git push. Non-critical:
 # notify:curator.
 
+# Date derivation for the publish/announce step (testable; see
+# test/publish-dates.test.ts).
+# shellcheck source=scripts/lib/publish-dates.sh
+. "$(dirname "$0")/lib/publish-dates.sh"
+
 set -uo pipefail
 
 # Tracks whether any critical stage failed. Checked at the very end → exit code.
@@ -161,18 +166,46 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
       # Which digest dates actually changed this run? A late-evening tweet can land
       # on yesterday's date, so notifying only $TODAY would miss it. Derive the
       # changed dates from the staged digest files (capture before the commit).
-      CHANGED_DATES="$(git diff --cached --name-only -- data/digests 2>/dev/null \
-        | sed -nE 's|.*/([0-9]{4}-[0-9]{2}-[0-9]{2})\.json$|\1|p' | sort -u)"
+      STAGED_DATES="$(staged_digest_dates .)"
+
+      # Plus anything an EARLIER run committed but could not push. A failed push
+      # clears the announce list (correct — nothing deployed), but leaves the
+      # commit on local main. This run's push carries it, so this run has to
+      # announce it or it deploys silently and is never announced at all.
+      REMOTE_BASE="$(resolve_remote_base .)"
+      BACKLOG_DATES="$(unpushed_digest_dates . "$REMOTE_BASE")"
+      [ -n "$BACKLOG_DATES" ] && echo "  carrying $(echo "$BACKLOG_DATES" | wc -l | tr -d ' ') unpushed date(s) from an earlier run"
+      CHANGED_DATES="$(union_dates "$STAGED_DATES" "$BACKLOG_DATES")"
 
       if git diff --cached --quiet -- data; then
         echo "  (no new digest content — nothing to commit)"
+        # A backlog with nothing new to commit still needs pushing, or the
+        # stranded date sits there until some future run happens to have content.
+        if [ -n "$BACKLOG_DATES" ]; then
+          echo "  → pushing the unpushed backlog"
+          if git push origin main 2>&1; then
+            echo "  pushed → DigitalOcean will auto-deploy"
+          else
+            echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
+            FAILED=1
+            CHANGED_DATES=""
+          fi
+        fi
       else
         # Scope the commit to the data/ pathspec. Without it, a source file the
         # curator left staged the night before would ride along into the "auto"
         # commit and deploy to production. (The repo rule: stage explicit paths,
         # never let an unscoped commit sweep the whole index.)
-        git commit -m "auto: $TODAY 1am pull" -- data
-        if git push 2>&1; then
+        # The commit's exit status is load-bearing. A hook, a signing failure or a
+        # stale index lock leaves the digest staged but UNCOMMITTED, and the push
+        # below can still return 0 ("Everything up-to-date", or it carries only a
+        # pre-existing backlog) — so without this the run announces a date that
+        # never left the laptop.
+        if ! git commit -m "auto: $TODAY 1am pull" -- data; then
+          echo "  ✗ git commit FAILED — nothing published"
+          FAILED=1
+          CHANGED_DATES=""
+        elif git push origin main 2>&1; then
           echo "  pushed → DigitalOcean will auto-deploy"
         else
           echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
@@ -230,14 +263,35 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
             done
         git -C "$PUBLISH_WT" add data 2>/dev/null || true
 
-        CHANGED_DATES="$(git -C "$PUBLISH_WT" diff --cached --name-only -- data/digests 2>/dev/null \
-          | sed -nE 's|.*/([0-9]{4}-[0-9]{2}-[0-9]{2})\.json$|\1|p' | sort -u)"
+        STAGED_DATES="$(staged_digest_dates "$PUBLISH_WT")"
+        # Same backlog rule as the on-main path. The worktree checked out main and
+        # only fast-forwarded it, so any commit an earlier run stranded on main is
+        # still here and still unpushed.
+        WT_BASE="$(resolve_remote_base "$PUBLISH_WT")"
+        BACKLOG_DATES="$(unpushed_digest_dates "$PUBLISH_WT" "$WT_BASE")"
+        [ -n "$BACKLOG_DATES" ] && echo "  carrying $(echo "$BACKLOG_DATES" | wc -l | tr -d ' ') unpushed date(s) from an earlier run"
+        CHANGED_DATES="$(union_dates "$STAGED_DATES" "$BACKLOG_DATES")"
 
         if git -C "$PUBLISH_WT" diff --cached --quiet -- data; then
           echo "  (no new digest content vs main — nothing to commit)"
+          if [ -n "$BACKLOG_DATES" ]; then
+            echo "  → pushing the unpushed backlog"
+            if git -C "$PUBLISH_WT" push origin main 2>&1; then
+              echo "  pushed main → DigitalOcean will auto-deploy"
+            else
+              echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
+              FAILED=1
+              CHANGED_DATES=""
+            fi
+          fi
         else
-          git -C "$PUBLISH_WT" commit -m "auto: $TODAY 1am pull" -- data
-          if git -C "$PUBLISH_WT" push origin main 2>&1; then
+          # Same rule as the on-main path: an uncommitted-but-staged digest with a
+          # succeeding push would be announced without ever deploying.
+          if ! git -C "$PUBLISH_WT" commit -m "auto: $TODAY 1am pull" -- data; then
+            echo "  ✗ git commit FAILED — nothing published"
+            FAILED=1
+            CHANGED_DATES=""
+          elif git -C "$PUBLISH_WT" push origin main 2>&1; then
             echo "  pushed main → DigitalOcean will auto-deploy"
           else
             echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
