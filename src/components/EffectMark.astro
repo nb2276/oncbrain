@@ -30,8 +30,13 @@ interface Props {
   datum: EffectDatum;
   /** Only used by the ratio form; paired bars scale to their own values. */
   domain?: AxisDomain;
+  /** v0.37 (E5): the same trial's earlier reading of this endpoint, when it
+   *  moved. Drawn as a HOLLOW dot on the same axis so the reader sees the
+   *  direction of travel. Never a faded dot: opacity belongs to SpecialtyBar
+   *  dimming, and a second meaning on that channel would collide. */
+  prior?: { point: number; lo: number | null; hi: number | null } | null;
 }
-const { datum, domain } = Astro.props;
+const { datum, domain, prior } = Astro.props;
 const isPaired = datum.form === 'paired';
 
 // Intrinsic size, never scaled UP: text inside a scaled viewBox scales with it,
@@ -50,6 +55,13 @@ const BAR_Y = 17;
 const TICK_Y = 39;
 
 const g = datum.form === 'ratio' && domain ? markGeometry(datum, domain, PLOT) : null;
+// The prior rides the CURRENT study's axis: two dots only mean something if
+// they share a ruler. markGeometry flags it off-scale rather than clamping, and
+// an off-scale prior is simply not drawn — a clamped ghost would read as the
+// axis-edge value, the exact lie the current dot's guard exists to prevent.
+const pg = prior && datum.form === 'ratio' && domain
+  ? markGeometry({ ...datum, point: prior.point, lo: prior.lo, hi: prior.hi }, domain, PLOT)
+  : null;
 const bars = datum.form === 'paired' ? pairedGeometry(datum, PLOT - 46) : null;
 const px = (n: number) => PAD + n;
 const label = describeEffect(datum);
@@ -93,6 +105,12 @@ const drawable = isPaired ? bars !== null : g !== null && !g.pointOffScale;
   )}
   {g.clippedHi && (
     <path class="emark-clip" d={`M ${px(g.hiX ?? PLOT) - 7} ${BAR_Y - 5} L ${px(g.hiX ?? PLOT)} ${BAR_Y} L ${px(g.hiX ?? PLOT) - 7} ${BAR_Y + 5}`} />
+  )}
+
+  {/* v0.37 (E5): the earlier reading, hollow so the filled current dot reads as
+      "now" without either being colored. Skipped when off this axis. */}
+  {pg && !pg.pointOffScale && (
+    <circle class="emark-prior" cx={px(pg.pointX)} cy={BAR_Y} r="3.5" />
   )}
 
   {/* Point estimate */}
@@ -156,6 +174,8 @@ const drawable = isPaired ? bars !== null : g !== null && !g.pointOffScale;
   .emark-ci { stroke: var(--fg); stroke-width: 2; stroke-linecap: round; opacity: 0.55; }
   .emark-clip { stroke: var(--fg); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55; }
   .emark-point { fill: var(--fg); }
+  /* Hollow, same neutral ink. Distinguished by FILL, not by opacity or hue. */
+  .emark-prior { fill: none; stroke: var(--fg-muted); stroke-width: 1.5; }
   .emark-tick {
     font-family: var(--font-sans);
     font-size: 11px; /* floor set by the design review; do not shrink, drop instead */

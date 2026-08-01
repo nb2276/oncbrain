@@ -159,6 +159,14 @@ It is a **domain convention, not an invention** — this audience reads forest p
 
 **The Telegram channel post does not carry a mark**, and can't: it links to `/<date>/`, which unfurls the *date* card — a day summary with no single study to draw. The plan's "OG card + Telegram" was one surface, not two.
 
+**Longitudinal magnitude (v0.37, E5).** When the same trial reports a *different* number than the last time the digest covered it, the card says so: a muted `updated from HR 0.92 (95% CI 0.71-1.19) · 2026-05-17` line under the mark, linking back to the earlier card, plus a **hollow** dot at the earlier estimate on the same axis.
+
+**Hollow, not faded.** The prior dot is distinguished by FILL, never by opacity — that channel belongs to SpecialtyBar dimming, and a dimmed card carrying a faded prior would be faint for two unrelated reasons. Never by hue either: the mark stays neutral, so a worsening estimate is never colored as a loss.
+
+**The text carries the meaning; the dot only shows direction of travel.** Two dots alone would read as two treatment arms. The sentence names which is which, and the prior rides the *current* study's axis because two dots on different rulers compare nothing.
+
+**It never fires on an unchanged number.** An identical re-reading is a duplicate card, not news, and drawing a second dot on top of the first would claim something happened. A *tightened interval at the same point estimate* does fire: a CI crossing back over 1.0 changes the conclusion. Endpoint bucket must match too, since an OS hazard ratio is not an update of a PFS one.
+
 **Accessibility:** the mark is `aria-hidden` — the estimate and its interval are already in adjacent text, and a screen reader shouldn't announce them twice.
 
 ### Specialty filter (v0.31)

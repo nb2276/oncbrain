@@ -458,8 +458,20 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       )}
       {effect && (
         effect.form === 'ratio'
-          ? <EffectMark datum={effect} domain={domainForMark(effect)} />
+          ? <EffectMark datum={effect} domain={domainForMark(effect)} prior={study.prior_estimate ?? null} />
           : <EffectMark datum={effect} />
+      )}
+      {/* v0.37 (E5): the trial reported a DIFFERENT number last time. The text
+          carries the meaning; the hollow dot above only shows the direction. An
+          unchanged estimate never reaches here (prior-estimate.ts abstains), so
+          this line always marks a real move. */}
+      {study.prior_estimate && (
+        <p class="endpoint-prior">
+          updated from <strong>{study.prior_estimate.stat_value}</strong>
+          {study.prior_estimate.stat_detail && <span class="prior-detail"> ({study.prior_estimate.stat_detail})</span>}
+          {' · '}
+          <a href={`/study/${study.prior_estimate.date}-${study.prior_estimate.slug}/`}>{study.prior_estimate.date}</a>
+        </p>
       )}
     </div>
   )}
@@ -1521,6 +1533,18 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   .endpoint-stat .stat { font-weight: 700; }
   .endpoint-stat .stat-key { color: var(--verdict-color, var(--fg)); text-decoration: none; }
   /* v0.30: muted CI / p / absolute sub-line under the big endpoint value (mockup .ep-sub). */
+  /* v0.37 (E5): the longitudinal note. Sits with the endpoint it revises, in
+     the muted register of endpoint-sub — it is context on the number above, not
+     a second headline. */
+  .endpoint-prior {
+    margin: 0.3rem 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--fg-muted);
+    line-height: 1.4;
+  }
+  .endpoint-prior strong { font-weight: 600; color: var(--fg); }
+  .endpoint-prior a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
   .endpoint-sub {
     margin: 3px 0 0;
     font-size: 0.75rem;
