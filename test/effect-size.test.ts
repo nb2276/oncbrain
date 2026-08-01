@@ -3,6 +3,11 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   parseEffectSize,
+  parsePairedValues,
+  parsePairedFromTable,
+  armColumns,
+  pairedGeometry,
+  effectForStudy,
   markGeometry,
   sharedDomain,
   domainFor,
@@ -10,6 +15,7 @@ import {
   describeEffect,
   FIXED_DOMAIN,
   type EffectDatum,
+  type PairedDatum,
 } from '../src/lib/effect-size.ts';
 
 const pe = (stat_value: string, stat_detail = '', klass = 'surrogate') => ({
@@ -248,6 +254,7 @@ describe('corpus pass over every committed digest', () => {
   it('never throws, and never emits an undrawable datum', () => {
     let withEndpoint = 0;
     let drawn = 0;
+    let paired = 0;
     let abstained = 0;
     let clipped = 0;
 
@@ -257,12 +264,33 @@ describe('corpus pass over every committed digest', () => {
         for (const study of site.studies ?? []) {
           if (!study.primary_endpoint) continue;
           withEndpoint += 1;
-          const d = parseEffectSize(study.primary_endpoint);
+          const tables = (study.details ?? [])
+            .filter((x: unknown) => x && typeof x === 'object' && 'table' in (x as object))
+            .map((x: { table: unknown }) => x.table);
+          const d = effectForStudy(study.primary_endpoint, tables as never[]);
           if (!d) {
             abstained += 1;
             continue;
           }
           drawn += 1;
+
+          if (d.form === 'paired') {
+            paired += 1;
+            for (const v of [d.a.value, d.b.value]) {
+              expect(Number.isFinite(v)).toBe(true);
+              expect(v).toBeGreaterThanOrEqual(0);
+            }
+            const pg = pairedGeometry(d, 200);
+            for (const v of [pg.aW, pg.bW]) {
+              expect(Number.isFinite(v)).toBe(true);
+              expect(v).toBeGreaterThanOrEqual(0);
+              expect(v).toBeLessThanOrEqual(200);
+            }
+            // Labels are all-or-nothing: one named arm and one blank reads as if
+            // only one side were identified.
+            expect(d.a.label === null).toBe(d.b.label === null);
+            continue;
+          }
 
           // Anything that reaches the renderer must be drawable.
           expect(Number.isFinite(d.point)).toBe(true);
@@ -286,8 +314,8 @@ describe('corpus pass over every committed digest', () => {
     }
 
     console.log(
-      `  [effect-size] corpus: ${drawn} drawn, ${abstained} abstained ` +
-        `of ${withEndpoint} studies with a primary endpoint (${clipped} clipped)`,
+      `  [effect-size] corpus: ${drawn} drawn (${drawn - paired} ratio, ${paired} paired), ` +
+        `${abstained} abstained of ${withEndpoint} with a primary endpoint (${clipped} clipped)`,
     );
     expect(files.length).toBeGreaterThan(0);
   });
@@ -451,5 +479,203 @@ describe('the date-page axis never pools incomparable quantities', () => {
     // ruler because they describe the same endpoint class would be wrong.
     const src = readFileSync(resolve(process.cwd(), 'src/pages/[date].astro'), 'utf-8');
     expect(src).toMatch(/datum\.klass[^\n]*datum\.kind/);
+  });
+});
+
+// ── slice 2 ─────────────────────────────────────────────────────────────────
+
+describe('parsePairedValues — two-value comparisons', () => {
+  it.each([
+    ['28% vs 21%', 28, 21, '%'],
+    ['1.5% vs 9.8%', 1.5, 9.8, '%'],
+    ['61.0% vs 28.6%', 61, 28.6, '%'],
+    ['19% vs 61%', 19, 61, '%'],
+    ['15.8 vs 12.3 mo', 15.8, 12.3, 'mo'],
+  ])('reads %s', (v, a, b, unit) => {
+    expect(parsePairedValues(pe(v))).toMatchObject({
+      form: 'paired', a: { value: a }, b: { value: b }, unit, origin: 'endpoint',
+    });
+  });
+
+  it('uses arm names when the source states them', () => {
+    expect(parsePairedValues(pe('7% vs 7.4% (AHRT vs EHRT)'))).toMatchObject({
+      a: { label: 'AHRT', value: 7 }, b: { label: 'EHRT', value: 7.4 },
+    });
+  });
+
+  // A trailing "(A vs B)" is arm names, not a third arm. Counting every "vs"
+  // made this abstain on a perfectly good two-arm study.
+  it('does not mistake an arm parenthetical for a third arm', () => {
+    expect(parsePairedValues(pe('7% vs 7.4% (AHRT vs EHRT)'))).not.toBeNull();
+  });
+
+  // Asymmetric labels read as if only one arm were identified.
+  it('drops BOTH labels when only one side is a real name', () => {
+    const d = parsePairedValues(pe('8.0% vs 9.4% (40 vs 50Gy)'));
+    expect(d).toMatchObject({ a: { value: 8 }, b: { value: 9.4 } });
+    expect(d!.a.label).toBeNull();
+    expect(d!.b.label).toBeNull();
+  });
+
+  it.each([
+    ['three arms cannot be two bars', '3.5% vs 3.7% vs 5.5% at 10yr'],
+    ['not-reached has no position on a linear axis', 'NR vs 17 mo'],
+    ['prose', 'No between-arm difference'],
+    ['a single value', '100% at 36, 60, and 84 mo'],
+    ['a stated difference, not two values', '68.9 mm³ more plaque with leuprolide vs relugolix'],
+  ])('abstains: %s', (_l, v) => {
+    expect(parsePairedValues(pe(v))).toBeNull();
+  });
+
+  it('abstains when both values are zero (two empty bars carry nothing)', () => {
+    expect(parsePairedValues(pe('0% vs 0%'))).toBeNull();
+  });
+});
+
+describe('armColumns — the positive table gate', () => {
+  const t = (columns: string[]) => ({ columns, rows: [] });
+
+  // Every one of these is a REAL header from the corpus and a real two-arm table.
+  it.each([
+    [['Endpoint', 'Arm A', 'Arm B', 'p']],
+    [['Endpoint', 'Sequential (n=1,118)', 'Concurrent (n=1,137)']],
+    [['Endpoint (20yr)', 'IM-MS-RT', 'Control', 'HR (95% CI), p']],
+    [['Endpoint', 'RT', 'Obs', 'HR (95% CI)']],
+    [['Endpoint (2y)', 'Adjuvant RT', 'Observation', 'HR (95% CI), p']],
+  ])('accepts a genuine arm table: %j', (cols) => {
+    expect(armColumns(t(cols as string[]))).not.toBeNull();
+  });
+
+  // Every one of these is a REAL header from the corpus that a SHAPE parser
+  // would have drawn as two arms. Each would be a clinically wrong picture.
+  it.each([
+    ['two different TRIALS', ['Endpoint', 'POP-RT', 'PEACE-2']],
+    ['disease-stage cohorts', ['Cohort', 'BCLC-0', 'BCLC-A']],
+    ['anatomic sites', ['Setting', 'Lower-limb LE', 'Genital LE']],
+    ['subgroups', ['Menopausal status', 'IDFS HR', '95% CI', 'p']],
+    ['a study list', ['Study', 'Design', 'Signal']],
+    ['a regimen spec', ['Arm', 'Dose / fractionation', 'Boost / technique']],
+    ['a modality comparison', ['Modality + reconstruction', 'n', '2-yr CC rate']],
+    ['a subgroup slice of one endpoint', ['Endpoint (never/former smokers)', 'A (n=10)', 'B (n=10)']],
+  ])('rejects %s', (_label, cols) => {
+    expect(armColumns(t(cols as string[]))).toBeNull();
+  });
+
+  it('rejects when only statistics remain after dropping stat columns', () => {
+    expect(armColumns(t(['Endpoint', 'HR (95% CI)', 'p']))).toBeNull();
+  });
+
+  it('requires POSITIVE evidence, not merely the absence of a red flag', () => {
+    // Two unfamiliar acronyms could be arms or could be trials. Without an n=,
+    // an "Arm X" or a control-like name, we do not guess.
+    expect(armColumns(t(['Endpoint', 'FOO-1', 'BAR-2']))).toBeNull();
+  });
+
+  it('rejects malformed input rather than throwing', () => {
+    expect(armColumns(null)).toBeNull();
+    expect(armColumns(undefined)).toBeNull();
+    expect(armColumns({ columns: 'nope' } as never)).toBeNull();
+    expect(armColumns({ columns: ['Endpoint'] })).toBeNull();
+  });
+});
+
+describe('parsePairedFromTable', () => {
+  const table = {
+    columns: ['Endpoint', 'Sequential (n=1,118)', 'Concurrent (n=1,137)'],
+    rows: [['5-yr IBR', '2.1%', '1.9%'], ['5-yr OS', '90%', '91%']],
+  };
+
+  it('reads the row matching the study primary endpoint', () => {
+    const d = parsePairedFromTable({ name: '5-yr IBR', klass: 'local-control' }, table);
+    expect(d).toMatchObject({
+      form: 'paired', origin: 'table', unit: '%',
+      a: { label: 'Sequential (n=1,118)', value: 2.1 },
+      b: { label: 'Concurrent (n=1,137)', value: 1.9 },
+    });
+  });
+
+  it('returns null when no row matches the endpoint name', () => {
+    expect(parsePairedFromTable({ name: 'Distant recurrence' }, table)).toBeNull();
+  });
+
+  it('never reads a table the gate rejected', () => {
+    const trials = { columns: ['Endpoint', 'POP-RT', 'PEACE-2'], rows: [['bFFS', '50%', '60%']] };
+    expect(parsePairedFromTable({ name: 'bFFS' }, trials)).toBeNull();
+  });
+
+  it('skips a cell holding a ratio or an interval rather than a plain value', () => {
+    const withHr = {
+      columns: ['Endpoint', 'Arm A', 'Arm B', 'p'],
+      rows: [['OS', 'HR 0.80', '1.0']],
+    };
+    expect(parsePairedFromTable({ name: 'OS' }, withHr)).toBeNull();
+  });
+});
+
+describe('pairedGeometry', () => {
+  const mk = (a: number, b: number, unit: string | null = '%'): PairedDatum => ({
+    form: 'paired', a: { label: null, value: a }, b: { label: null, value: b },
+    unit, klass: null, origin: 'endpoint',
+  });
+
+  // Anchoring anywhere but zero exaggerates small differences — the classic
+  // misleading bar chart.
+  it('is anchored at zero, so bar length is proportional to value', () => {
+    const g = pairedGeometry(mk(50, 25), 200);
+    expect(g.aW / g.bW).toBeCloseTo(2, 5);
+  });
+
+  it('scales percentages against 100 so two cards are comparable', () => {
+    expect(pairedGeometry(mk(7, 7.4), 200).max).toBe(100);
+  });
+
+  it('scales a non-percentage unit to its own peak', () => {
+    expect(pairedGeometry(mk(15.8, 12.3, 'mo'), 200).max).toBeCloseTo(15.8 * 1.05, 5);
+  });
+
+  it('never emits a negative or over-wide bar', () => {
+    for (const w of [0, -10, NaN, 200]) {
+      const g = pairedGeometry(mk(120, 0), w);
+      for (const v of [g.aW, g.bW]) {
+        expect(Number.isFinite(v)).toBe(true);
+        expect(v).toBeGreaterThanOrEqual(0);
+      }
+    }
+  });
+});
+
+describe('effectForStudy precedence', () => {
+  it('prefers a ratio, which carries an interval and a null reference', () => {
+    const d = effectForStudy(pe('61.0% vs 61.8%', 'HR=1.00; 95% CI 0.90-1.10'));
+    expect(d?.form).toBe('ratio');
+  });
+
+  it('falls back to paired values when there is no ratio', () => {
+    expect(effectForStudy(pe('28% vs 21%'))?.form).toBe('paired');
+  });
+
+  it('only reaches a table when the endpoint itself yields nothing', () => {
+    const table = {
+      columns: ['Endpoint', 'Arm A', 'Arm B', 'p'],
+      rows: [['W14 good response', '65%', '88%', '0.004']],
+    };
+    const d = effectForStudy({ name: 'W14 good response', klass: 'surrogate', stat_value: 'No between-arm difference' }, [table]);
+    expect(d).toMatchObject({ form: 'paired', origin: 'table' });
+  });
+
+  it('returns null when nothing is drawable', () => {
+    expect(effectForStudy(pe('Not yet mature'), [])).toBeNull();
+  });
+});
+
+describe('paired bars carry no valence', () => {
+  it('uses one neutral fill for both bars', () => {
+    const src = readFileSync(resolve(process.cwd(), 'src/components/EffectMark.astro'), 'utf-8');
+    // klass cannot tell us direction: local-control covers both "local control
+    // 95% vs 88%" (higher better) and "local recurrence 5% vs 12%" (lower
+    // better). So neither bar is marked better.
+    expect(src).toMatch(/\.emark-bar\s*\{\s*fill:\s*var\(--fg\)/);
+    expect(src).not.toMatch(/emark-bar--(good|bad|better|worse|harm)/);
+    expect(src).not.toMatch(/--verdict-color/);
   });
 });
