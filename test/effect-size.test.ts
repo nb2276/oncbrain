@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { domainForMark, listDigests } from '../src/lib/digest-data.ts';
 import {
   parseEffectSize,
   parsePairedValues,
@@ -14,7 +15,6 @@ import {
   axisBucket,
   endpointFamily,
   domainFor,
-  groupByKlass,
   describeEffect,
   FIXED_DOMAIN,
   type EffectDatum,
@@ -196,8 +196,9 @@ describe('markGeometry', () => {
 });
 
 describe('sharedDomain', () => {
-  const mk = (point: number, klass = 'surrogate'): EffectDatum => ({
-    form: 'ratio', kind: 'HR', point, lo: null, hi: null, ciLevel: null, klass,
+  const mk = (point: number): RatioDatum => ({
+    form: 'ratio', kind: 'HR', point, lo: null, hi: null, ciLevel: null,
+    klass: 'surrogate', endpointName: null,
   });
 
   it('stays symmetric about the null', () => {
@@ -229,12 +230,6 @@ describe('sharedDomain', () => {
 
   it('falls back to the fixed domain with no data', () => {
     expect(sharedDomain([])).toEqual(FIXED_DOMAIN);
-  });
-
-  it('groups by endpoint class so one ruler never spans two of them', () => {
-    const g = groupByKlass([mk(0.5, 'overall-survival'), mk(2, 'local-control'), mk(0.6, 'overall-survival')]);
-    expect(g.get('overall-survival')).toHaveLength(2);
-    expect(g.get('local-control')).toHaveLength(1);
   });
 });
 
@@ -427,10 +422,40 @@ describe('the mark is wired into real date pages', () => {
     }
   });
 
+  // The guarantee the shared helper exists to make: a ruler ALWAYS contains the
+  // estimate it is drawn against, so the mark actually draws. The corpus map is
+  // keyed by endpoint family, so a first-of-its-kind endpoint has no bucket at
+  // all; the OG route had dropped the per-datum fallback and would have rendered
+  // nothing for one. Asserted as a property over the whole real corpus plus a
+  // novel endpoint, so it cannot go stale as the corpus grows into new buckets.
+  it('always yields a ruler that contains the estimate', () => {
+    // Deliberately EXTREME: an estimate that already fits the default window
+    // would pass under any fallback at all, and prove nothing.
+    const novel: RatioDatum = {
+      form: 'ratio', kind: 'HR', point: 5.34, lo: 2.05, hi: 13.88, ciLevel: 95,
+      klass: 'surrogate', endpointName: 'Some entirely novel endpoint nobody has published',
+    };
+    const corpus: RatioDatum[] = [];
+    for (const artifact of listDigests()) {
+      for (const site of artifact.digest.sites) {
+        for (const study of site.studies) {
+          const d = parseEffectSize(study.primary_endpoint);
+          if (d) corpus.push(d);
+        }
+      }
+    }
+    expect(corpus.length).toBeGreaterThan(0); // the property must have subjects
+    for (const d of [...corpus, novel]) {
+      expect(markGeometry(d, domainForMark(d), 100).pointOffScale).toBe(false);
+    }
+  });
+
   it('resolves the ruler from the corpus, inside the card', () => {
     const card = readFileSync(resolve(process.cwd(), 'src/components/StudyCard.astro'), 'utf-8');
-    expect(card).toContain('effectDomains()');
-    expect(card).toContain('axisBucket(');
+    expect(card).toContain('domainForMark(');
+    // and does NOT resolve the ruler itself: that duplication is what let the
+    // OG route drift away from the card.
+    expect(card).not.toContain('effectDomains()');
   });
 });
 

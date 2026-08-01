@@ -206,9 +206,31 @@ function effectMark(datum: EffectDatum, domain?: AxisDomain): unknown {
     div({ position: 'absolute', left: g.nullX - 1, top: axisY - 16, width: 2, height: 26, background: MUTED, opacity: 0.8 }, ''),
   ];
   if (g.loX !== null && g.hiX !== null) {
+    // A clipped interval MUST say "continues", or a truncated CI reads as
+    // bounded — the web SVG draws an arrowhead here, and an image that omitted
+    // it would carry a different clinical meaning from the same geometry.
+    //
+    // Drawn as a TEXT chevron: satori has no SVG paths, and the CSS zero-size
+    // border-triangle trick does not render in it (verified — it produced a
+    // small square instead).
+    //
+    // The chevron gets its OWN space rather than overlapping the bar end: at a
+    // low-side clip loX is 0, so a chevron placed left of it lands at a negative
+    // x and falls off the canvas entirely (verified).
+    const CHEV = 16;
+    const barLeft = g.clippedLo ? g.loX + CHEV : g.loX;
+    const barRight = g.clippedHi ? g.hiX - CHEV : g.hiX;
     layer.push(
-      div({ position: 'absolute', left: g.loX, top: axisY - 9, width: Math.max(2, g.hiX - g.loX), height: 6, background: FG, opacity: 0.55, borderRadius: 3 }, ''),
+      div({ position: 'absolute', left: barLeft, top: axisY - 9, width: Math.max(2, barRight - barLeft), height: 6, background: FG, opacity: 0.55, borderRadius: 3 }, ''),
     );
+    const chevron = (left: number, glyph: string) =>
+      div({
+        position: 'absolute', left, top: axisY - 22,
+        width: CHEV, height: 24, fontSize: 30, fontWeight: 700, color: FG, opacity: 0.7,
+        justifyContent: 'center', alignItems: 'center',
+      }, glyph);
+    if (g.clippedLo) layer.push(chevron(g.loX, '\u2039'));
+    if (g.clippedHi) layer.push(chevron(g.hiX - CHEV, '\u203A'));
   }
   layer.push(
     div({ position: 'absolute', left: g.pointX - 8, top: axisY - 14, width: 16, height: 16, background: FG, borderRadius: 8 }, ''),
@@ -231,7 +253,11 @@ function effectMark(datum: EffectDatum, domain?: AxisDomain): unknown {
   return div({ position: 'relative', width: MARK_W, height: MARK_H, marginTop: 20 }, layer);
 }
 
-export async function renderShareImage(card: ShareCard): Promise<Buffer> {
+// The laid-out card, one step before rasterization. Split out so a test can
+// inspect what actually got PAINTED rather than only that a PNG came back: the
+// mark sits inside an `overflow: hidden` block, so a tall headline could clip it
+// away without changing anything a byte-count assertion can see.
+export async function renderShareSvg(card: ShareCard): Promise<string> {
   const headline = truncate(card.headline, 170);
   const accent = card.tagColor || BORDER;
   const attribution = card.handle ? `${SITE}  ·  ${card.handle}` : SITE;
@@ -290,6 +316,10 @@ export async function renderShareImage(card: ShareCard): Promise<Buffer> {
     children,
   );
 
-  const svg = await satori(root as Parameters<typeof satori>[0], { width: W, height: H, fonts: fonts() });
+  return satori(root as Parameters<typeof satori>[0], { width: W, height: H, fonts: fonts() });
+}
+
+export async function renderShareImage(card: ShareCard): Promise<Buffer> {
+  const svg = await renderShareSvg(card);
   return Buffer.from(new Resvg(svg, { background: BG }).render().asPng());
 }

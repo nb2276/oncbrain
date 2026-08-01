@@ -603,18 +603,6 @@ export function domainFor(d: RatioDatum): AxisDomain {
   return sharedDomain([d]);
 }
 
-/** Group by endpoint class so a shared axis never spans two of them. */
-export function groupByKlass(data: RatioDatum[]): Map<string, RatioDatum[]> {
-  const out = new Map<string, RatioDatum[]>();
-  for (const d of data) {
-    const key = d.klass ?? 'unknown';
-    const bucket = out.get(key);
-    if (bucket) bucket.push(d);
-    else out.set(key, [d]);
-  }
-  return out;
-}
-
 // ── geometry ────────────────────────────────────────────────────────────────
 
 export type MarkGeometry = {

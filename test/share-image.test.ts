@@ -8,7 +8,9 @@ import {
   studyCard,
   headlineSize,
   renderShareImage,
+  renderShareSvg,
 } from '../src/lib/share-image.ts';
+import { Resvg } from '@resvg/resvg-js';
 
 // Read a PNG's IHDR width/height (big-endian uint32 at byte 16 and 20).
 function pngSize(buf: Buffer): { width: number; height: number; isPng: boolean } {
@@ -149,6 +151,51 @@ describe('renderShareImage', () => {
   });
 });
 
+// ── pixel probes ───────────────────────────────────────────────────────────
+// satori rasterizes text to paths and drops off-canvas elements silently, so
+// neither the SVG source nor a PNG byte count can tell you whether a piece of
+// the mark actually got PAINTED. These read the final RGBA and look.
+
+type Probe = {
+  ink(x: number, y: number): boolean;
+  /** Ink count inside a box, x0/y0 inclusive, x1/y1 exclusive. */
+  count(x0: number, x1: number, y0: number, y1: number): number;
+  /** The mark's axis rule: a 560px horizontal run nothing else on the card makes. */
+  axis: { y: number; x0: number } | null;
+};
+
+async function probe(card: Parameters<typeof renderShareSvg>[0]): Promise<Probe> {
+  const img = new Resvg(await renderShareSvg(card), { background: '#f7f5f0' }).render();
+  const { pixels } = img;
+  const W = img.width;
+  // Anything meaningfully darker than the warm off-white background.
+  const ink = (x: number, y: number) => {
+    const i = (y * W + x) * 4;
+    return pixels[i]! < 210 || pixels[i + 1]! < 205 || pixels[i + 2]! < 200;
+  };
+  const count = (x0: number, x1: number, y0: number, y1: number) => {
+    let n = 0;
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (ink(x, y)) n++;
+    return n;
+  };
+  // Scan bottom-up: a wide confidence interval also makes a long run, and it
+  // sits ABOVE the axis, so the lowest such row is the axis itself.
+  const MIN_RUN = 400;
+  let axis: Probe['axis'] = null;
+  for (let y = img.height - 1; y >= 0 && !axis; y--) {
+    let run = 0;
+    let start = 0;
+    for (let x = 0; x < W; x++) {
+      if (ink(x, y)) {
+        if (run === 0) start = x;
+        run++;
+        if (run >= MIN_RUN) { axis = { y, x0: start }; break; }
+      } else run = 0;
+    }
+  }
+  return { ink, count, axis };
+}
+
 // v0.36 slice 4: the effect-size mark on the card a shared study link unfurls.
 describe('share-image effect mark', () => {
   const ratio = {
@@ -221,10 +268,75 @@ describe('share-image effect mark', () => {
     expect(off.length).toBe(without.length);
   });
 
+  // The mark lives inside an `overflow: hidden` flex block that it SHARES with
+  // the headline, so a headline long enough to eat the block's height would clip
+  // the mark away silently. A byte-count assertion cannot see that (a clipped
+  // render is still a valid, differently-sized PNG), so this looks at pixels.
+  //
+  // The mark's axis is a 560px horizontal rule. Nothing else on the card draws a
+  // long horizontal run, which makes it a clean signature to search for.
+  it('still paints the mark under a MAX-length headline', async () => {
+    const withMark = studyCard({
+      // Longer than the 170-char truncate, at the smallest headline size.
+      name: 'MAXIMUS',
+      tldr: 'Median overall survival improved substantially in the experimental arm across every prespecified stratum evaluated, with a consistent direction of effect and no new safety signals reported anywhere in the trial population.',
+      date: '2026-07-31', handle: '@h',
+      effect: { datum: ratio, domain: { lo: 1 / 3, hi: 3 } },
+    });
+    expect((await probe(withMark)).axis).not.toBeNull();
+    // Negative control: without the mark there is no such rule, which is what
+    // makes the positive assertion mean "the mark", not "some pixels".
+    expect((await probe({ ...withMark, effect: undefined })).axis).toBeNull();
+  });
+
+  // A clipped interval MUST show that it continues, or a truncated CI reads as
+  // bounded, which is a different clinical claim from the same geometry.
+  //
+  // Regression: the first version placed the low-side chevron at loX - 20. At a
+  // low clip loX is 0, so it landed at a negative x and satori dropped it —
+  // leaving a bar that stopped dead at the axis edge and looked precise. The PNG
+  // was still valid and still a different size, so only pixels catch this.
+  it('marks BOTH ends of an interval that runs off the axis', async () => {
+    const clipped = studyCard({
+      name: 'C', tldr: 'x', date: '2026-07-31', handle: '@h',
+      effect: {
+        datum: { ...ratio, point: 1.4, lo: 0.22, hi: 11.7 },
+        domain: { lo: 1 / 3, hi: 3 },
+      },
+    });
+    // Same domain, interval comfortably inside it: no continuation to show.
+    const inside = studyCard({
+      name: 'C', tldr: 'x', date: '2026-07-31', handle: '@h',
+      effect: { datum: { ...ratio, point: 1.4, lo: 0.9, hi: 2.0 }, domain: { lo: 1 / 3, hi: 3 } },
+    });
+
+    const MARK_W = 560;
+    const END = 16; // the width each chevron is given at the axis end
+    for (const [card, expected] of [[clipped, true], [inside, false]] as const) {
+      const p = await probe(card);
+      expect(p.axis).not.toBeNull();
+      const { y, x0 } = p.axis!;
+      // A band strictly ABOVE the interval bar (whose top edge is axis - 9), at
+      // each far end. Overlapping the bar would make this vacuous: the buggy
+      // build drew a full-width bar right there and "passed".
+      const band = [y - 19, y - 10] as const;
+      const lo = p.count(x0, x0 + END, band[0], band[1]);
+      const hi = p.count(x0 + MARK_W - END, x0 + MARK_W, band[0], band[1]);
+      expect(lo > 0).toBe(expected);
+      expect(hi > 0).toBe(expected);
+    }
+  });
+
+  // Two renderers, one ruler. The OG route used to resolve the domain with its
+  // own copy of the expression and had already dropped the fallback, so a datum
+  // whose bucket is missing from the corpus map drew a mark on the site and
+  // nothing on the share image. Both now call one function.
   it('uses the same corpus ruler as the web card', () => {
     const route = readFileSync(resolve(process.cwd(), 'src/pages/og/study/[slug].png.ts'), 'utf-8');
-    expect(route).toContain('effectDomains()');
-    expect(route).toContain('axisBucket(');
+    expect(route).toContain('domainForMark(');
     expect(route).toContain('effectForStudy(');
+    // No local re-derivation: that is exactly how the two drifted apart.
+    expect(route).not.toContain('effectDomains()');
+    expect(route).not.toContain('axisBucket(');
   });
 });

@@ -6,8 +6,8 @@
 // fell back to the generic site card; this gives each study its own card.
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { renderShareImage, studyCard } from '../../../lib/share-image.ts';
-import { listStudyPages, effectDomains, type StudyPageEntry } from '../../../lib/digest-data.ts';
-import { effectForStudy, axisBucket } from '../../../lib/effect-size.ts';
+import { listStudyPages, domainForMark, type StudyPageEntry } from '../../../lib/digest-data.ts';
+import { effectForStudy } from '../../../lib/effect-size.ts';
 
 const HANDLE = import.meta.env.PUBLIC_CURATOR_HANDLE || '@nb2276';
 
@@ -33,7 +33,12 @@ export const GET: APIRoute = async ({ props }) => {
       .map((d) => d.table),
   );
   const effect = datum
-    ? { datum, domain: datum.form === 'ratio' ? effectDomains().get(axisBucket(datum)) : undefined }
+    ? {
+        datum,
+        // Shared with the web card, so the two renderers cannot disagree on the
+        // ruler. See domainForMark.
+        domain: datum.form === 'ratio' ? domainForMark(datum) : undefined,
+      }
     : null;
 
   const png = await renderShareImage(

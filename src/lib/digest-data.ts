@@ -4,6 +4,8 @@
 import {
   parseEffectSize,
   corpusDomains,
+  axisBucket,
+  domainFor,
   type AxisDomain,
   type RatioDatum,
 } from './effect-size.ts';
@@ -284,6 +286,17 @@ export function effectDomains(): Map<string, AxisDomain> {
 /** Test seam: drop the memo so a fixture corpus is picked up. */
 export function resetEffectDomains(): void {
   _effectDomains = null;
+}
+
+/**
+ * The ruler ONE mark is drawn against. Every surface that renders a mark must
+ * come through here: the web card and the OG card each resolved this themselves
+ * and drifted (the OG route dropped the fallback, so a datum whose bucket is
+ * missing from the corpus map drew a mark on the site and nothing on the share
+ * image). One function, one answer, no drift to test for.
+ */
+export function domainForMark(d: RatioDatum): AxisDomain {
+  return effectDomains().get(axisBucket(d)) ?? domainFor(d);
 }
 
 export function studyFigures(study: DigestStudy): DigestFigure[] {
