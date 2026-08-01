@@ -8,6 +8,7 @@
 // sessionStorage baseline keeps markers consistent with the home slice within a
 // session (see src/lib/whats-new.ts).
 import Base from '../layouts/Base.astro';
+import CompareTray from '../components/CompareTray.astro';
 import TagFilterRail from '../components/TagFilterRail.astro';
 import RecentFeed from '../components/RecentFeed.astro';
 import SiteNav from '../components/SiteNav.astro';
@@ -50,6 +51,7 @@ const filterOptions = buildFilterRailOptions(
   ) : (
     <p style="margin-top:2rem;color:var(--fg-muted)">No studies yet — check back soon.</p>
   )}
+  <CompareTray />
 </Base>
 
 <style>
