@@ -2,6 +2,32 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.35.0] - 2026-07-31
+
+Effect-size marks are now comparable across the whole site, not just within a day.
+
+### Changed
+- **One scale per endpoint type, used everywhere.** A study's mark is now drawn
+  identically wherever it appears, and two studies measuring the same kind of
+  endpoint can be read against each other on any page. Browsing a disease site,
+  the trial with the biggest effect is visibly the one reaching furthest from
+  the no-difference line.
+- The previous per-day scale mostly did nothing: across the archive only three
+  days ever carry two comparable marks, while twenty-four carry one, where a
+  shared scale is the same as no scale. The comparisons readers would actually
+  make sit on the disease-site pages.
+
+### Notes
+- **Scales are grouped by endpoint family, not by broad category.** Progression-
+  free survival, metastasis-free survival and disease-free survival each get
+  their own scale rather than sharing one, because they measure different
+  things even though they are reported the same way. Different assessment
+  methods for the same endpoint do share a scale.
+- A hazard ratio and an odds ratio never share a scale. When two cards are on
+  different scales, the tick labels show it.
+- Scale bounds snap to round values, so adding a study does not quietly redraw
+  every older card, and the labels read cleanly.
+
 ## [0.34.0] - 2026-07-31
 
 Effect-size marks now cover studies that report two numbers instead of a ratio.
