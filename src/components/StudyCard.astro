@@ -11,7 +11,7 @@
 // behind a native <details> expander. Sources stay in their own collapsible.
 import { linkifyCitations } from '../lib/extract.ts';
 import EffectMark from './EffectMark.astro';
-import { parseEffectSize, domainFor, type AxisDomain } from '../lib/effect-size.ts';
+import { effectForStudy, domainFor, type AxisDomain } from '../lib/effect-size.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
 import { VERDICT_META, REVIEW_GLYPH } from '../lib/verdict.ts';
 import { tradePressLabel } from '../lib/paper-url.ts';
@@ -334,7 +334,14 @@ const tableDetails = study.details.filter(
 // clean ratio — most studies report proportions or medians, and forcing those
 // onto a log ratio axis would be wrong. A card with no mark is the expected
 // state, not a defect, so nothing renders in its place.
-const effect = parseEffectSize(study.primary_endpoint);
+// Ratio first (it carries an interval and a null reference, so it says strictly
+// more), then a two-value comparison from the endpoint, then a POSITIVELY gated
+// arm table. Tables are only reached when the endpoint itself yields nothing.
+const effect = effectForStudy(
+  study.primary_endpoint,
+  study.details.filter((d): d is { text: string; table: { columns: string[]; rows: string[][] } } =>
+    typeof d === 'object' && d !== null && 'table' in d).map((d) => d.table),
+);
 const figures = studyFigures(study).filter((f) => isSafeImageUrl(f.url));
 const hasFigures = figures.length > 0;
 const restFigures = figures.slice(1);
@@ -454,7 +461,11 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       {study.primary_endpoint.stat_detail && (
         <p class="endpoint-sub" set:html={linkifyCitations(study.primary_endpoint.stat_detail)} />
       )}
-      {effect && <EffectMark datum={effect} domain={effectDomain ?? domainFor(effect)} />}
+      {effect && (
+        effect.form === 'ratio'
+          ? <EffectMark datum={effect} domain={effectDomain ?? domainFor(effect)} />
+          : <EffectMark datum={effect} />
+      )}
     </div>
   )}
   <p class:list={['study-tldr', study.primary_endpoint?.stat_value && 'study-tldr--plain']}><span class="tldr-label">TL;DR</span><span set:html={emphasizeStats(linkifyCitations(stripStudyNamePrefix(study.tldr, study.name)))} /></p>

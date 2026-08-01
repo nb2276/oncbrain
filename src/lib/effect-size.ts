@@ -21,7 +21,30 @@
 /** The label the source used. Kept for the mark's accessible description. */
 export type RatioKind = 'HR' | 'OR' | 'RR' | 'SHR';
 
-export type EffectDatum = {
+/**
+ * v0.33 slice 2. A two-value comparison drawn as paired bars on a LINEAR axis
+ * from zero — percentages, months, or points.
+ *
+ * NO VALENCE. Neither bar is marked better. The endpoint class cannot tell you
+ * the direction: `local-control` covers both "local control 95% vs 88%" (higher
+ * is better) and "local recurrence 5% vs 12%" (lower is better), and deriving it
+ * would mean guessing from the endpoint's NAME. That is the semantic guessing
+ * this codebase has been burned by, so the mark reports magnitude and leaves
+ * meaning to the reader — the same reasoning that cut the "favors X" spine from
+ * the ratio form.
+ */
+export type PairedDatum = {
+  form: 'paired';
+  a: { label: string | null; value: number };
+  b: { label: string | null; value: number };
+  /** Rendered after each value. Null when the source gave no unit. */
+  unit: string | null;
+  klass: string | null;
+  /** Where the numbers came from, for the corpus report and for debugging. */
+  origin: 'endpoint' | 'table';
+};
+
+export type RatioDatum = {
   form: 'ratio';
   kind: RatioKind;
   /** The point estimate. Always > 0 (a ratio <= 0 abstains). */
@@ -34,6 +57,8 @@ export type EffectDatum = {
   /** The endpoint class, passed through for the day-axis same-class guard. */
   klass: string | null;
 };
+
+export type EffectDatum = RatioDatum | PairedDatum;
 
 /** Minimal shape this module needs; mirrors DigestStudy['primary_endpoint']. */
 export type PrimaryEndpointLike = {
@@ -110,7 +135,7 @@ function ratioKind(raw: string, prefixed: boolean): RatioKind {
  *     a sign we associated the wrong CI with the ratio. Abstaining is the safe
  *     read: a mark drawn from a mis-paired interval is worse than no mark.
  */
-export function parseEffectSize(pe: PrimaryEndpointLike): EffectDatum | null {
+export function parseEffectSize(pe: PrimaryEndpointLike): RatioDatum | null {
   if (!pe) return null;
   const value = normalizeNumerics(pe.stat_value ?? '');
   const detail = normalizeNumerics(pe.stat_detail ?? '');
@@ -169,6 +194,267 @@ export function parseEffectSize(pe: PrimaryEndpointLike): EffectDatum | null {
   return { form: 'ratio', kind, point, lo, hi, ciLevel, klass: pe.klass ?? null };
 }
 
+// ── paired values (slice 2) ─────────────────────────────────────────────────
+
+// "28% vs 21%", "61.0% vs 28.6%", "15.8 vs 12.3 mo", "7% vs 7.4% (AHRT vs EHRT)",
+// "8.0% vs 9.4% (40 vs 50Gy)". Captures both numbers plus a trailing unit.
+const PAIR_RE =
+  /(\d+(?:\.\d+)?)\s*(%|mo|months?|pts?|Gy)?\s+vs\.?\s+(\d+(?:\.\d+)?)\s*(%|mo|months?|pts?|Gy)?/i;
+
+// A trailing "(A vs B)" names the arms: "7% vs 7.4% (AHRT vs EHRT)".
+const ARMS_RE = /\(([^()]{1,40}?)\s+vs\.?\s+([^()]{1,40}?)\)/i;
+
+// Any SECOND "vs" among the VALUES means three or more arms
+// ("3.5% vs 3.7% vs 5.5%"), and a two-bar mark cannot honestly represent three.
+// Count only outside parentheses: a trailing "(AHRT vs EHRT)" names the arms and
+// its "vs" is not a third value.
+function countValueVs(s: string): number {
+  return (s.replace(/\([^()]*\)/g, ' ').match(/\bvs\.?\b/gi) ?? []).length;
+}
+
+function normUnit(u: string | undefined): string | null {
+  if (!u) return null;
+  const l = u.toLowerCase();
+  if (l === '%') return '%';
+  if (l.startsWith('mo') || l.startsWith('month')) return 'mo';
+  if (l.startsWith('pt')) return 'pts';
+  if (l === 'gy') return 'Gy';
+  return null;
+}
+
+/**
+ * Parse a two-value comparison out of a primary endpoint, or abstain.
+ *
+ * Only runs when parseEffectSize found no ratio: a study reporting BOTH an HR
+ * and two rates is better served by the ratio, which carries its interval.
+ *
+ * Abstains on: three or more arms, "not reached" (no finite value to plot),
+ * prose with no pair, a stated difference rather than two values ("68.9 mm³
+ * more plaque"), and equal-and-zero pairs that would draw two empty bars.
+ */
+export function parsePairedValues(pe: PrimaryEndpointLike): PairedDatum | null {
+  if (!pe) return null;
+  const value = normalizeNumerics(pe.stat_value ?? '');
+  if (!value) return null;
+
+  // "NR vs 17 mo" — not-reached has no position on a linear axis.
+  if (/\b(NR|not reached)\b/i.test(value)) return null;
+  if (countValueVs(value) !== 1) return null;
+
+  const m = PAIR_RE.exec(value);
+  if (!m) return null;
+  const av = Number(m[1]);
+  const bv = Number(m[3]);
+  if (!Number.isFinite(av) || !Number.isFinite(bv)) return null;
+  if (av < 0 || bv < 0) return null;
+  if (av === 0 && bv === 0) return null; // two empty bars carry nothing
+
+  // Two DIFFERENT stated units means these are not two measurements of one
+  // endpoint ("28% vs 21 mo"), so they cannot be two bars on one scale.
+  const ua = normUnit(m[2]);
+  const ub = normUnit(m[4]);
+  if (ua && ub && ua !== ub) return null;
+  const unit = ua ?? ub;
+  // Arm labels only when the source states them; never invented. A purely
+  // numeric "label" means the parenthetical held the VALUES, not arm names
+  // ("Δ4.8 pts (79.2 vs 74.3)"), so it is not a label.
+  //
+  // ALL OR NOTHING. "8.0% vs 9.4% (40 vs 50Gy)" captures "40" and "50Gy": the
+  // first is numeric and gets dropped, which would leave one bar labelled
+  // "50Gy" and the other blank — an asymmetric label reads as if only one arm
+  // were identified. Either both sides are real names or neither is used.
+  const arms = ARMS_RE.exec(value);
+  const labelOf = (raw: string | undefined): string | null => {
+    const t = raw?.trim();
+    if (!t || /^[\d.,%\s]+$/.test(t)) return null;
+    return t;
+  };
+  const la = labelOf(arms?.[1]);
+  const lb = labelOf(arms?.[2]);
+  const bothLabelled = la !== null && lb !== null;
+  return {
+    form: 'paired',
+    a: { label: bothLabelled ? la : null, value: av },
+    b: { label: bothLabelled ? lb : null, value: bv },
+    unit,
+    klass: pe.klass ?? null,
+    origin: 'endpoint',
+  };
+}
+
+// ── table gate (slice 2) ────────────────────────────────────────────────────
+
+export type DigestTableLike = { columns?: unknown; rows?: unknown } | null | undefined;
+
+// Headers that name something OTHER than the trial's randomized arms. Drawing
+// any of these as two arms is a clinical misrepresentation, and they are the
+// MAJORITY shape in this corpus: of 75 tables, 23 name one of these and exactly
+// one says "Arm". Surveyed 2026-07-31.
+const NON_ARM_AXIS =
+  /\b(trial|study|cohort|subgroup|group|setting|site|entity|modality|technique|regimen|status|stage|population|line|histolog|menopaus|feature|failure|grade|morbidity|therapy)\b/i;
+
+// STRONG evidence that a column names a randomized arm: an explicit "Arm X" or
+// a comparator name. Either identifies a randomised comparison on its own.
+const STRONG_ARM = [
+  /^\s*arm\s+[a-z0-9]/i,                           // "Arm A"
+  /\b(control|placebo|observation|obs|soc|standard|no\s+\w+|usual care|sham)\b/i,
+];
+
+// A bare study/trial acronym: "POP-RT", "PEACE-2", "STAMPEDE". Two of these
+// side by side is a trial comparison, not a randomised two-arm result, even
+// when both report an n.
+const TRIAL_ACRONYM = /^\s*[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*\s*(?:\(\s*n\s*=[^)]*\))?\s*$/;
+
+// A trailing statistics column ("p", "HR (95% CI), p") is not an arm.
+const STAT_COLUMN = /^\s*(p|p-?value|hr|or|rr|95%\s*ci|hr\s*\(95%\s*ci\)|.*\bci\b.*)\s*[,)]?\s*$/i;
+
+export type ArmTable = { armA: string; armB: string; colA: number; colB: number };
+
+/**
+ * POSITIVE gate: return the two arm columns ONLY when the table can be
+ * identified as an endpoint-by-arm comparison. Returns null otherwise, which is
+ * the common case by design.
+ *
+ * Shape alone is not enough. A 3-column table is just as likely to be
+ * trial-vs-trial ("Endpoint | POP-RT | PEACE-2"), stage cohorts
+ * ("Cohort | BCLC-0 | BCLC-A") or subgroups ("Menopausal status | ..."), and
+ * each of those drawn as arms would be confidently wrong.
+ *
+ * Requires ALL of:
+ *   1. the row-label column is endpoint-like (rows are outcomes, columns arms)
+ *   2. exactly two non-statistic value columns remain
+ *   3. neither names a non-arm axis
+ *   4. at least one carries positive arm evidence (an n=, an "Arm X", or a
+ *      control-like name)
+ */
+export function armColumns(table: DigestTableLike): ArmTable | null {
+  if (!table || !Array.isArray(table.columns)) return null;
+  const cols = table.columns.filter((c): c is string => typeof c === 'string');
+  if (cols.length < 3) return null;
+
+  // 1. rows must be endpoints, so the columns can be arms.
+  const rowAxis = cols[0] ?? '';
+  if (!/^\s*endpoint\b/i.test(rowAxis)) return null;
+
+  // A parenthetical on the endpoint axis is fine when it is a TIME horizon
+  // ("Endpoint (20yr)", "Endpoint (2y)") and disqualifying when it names a
+  // POPULATION ("Endpoint (never/former smokers)"). The columns of a
+  // subgroup-restricted table really are the arms, but its numbers are that
+  // subgroup's, and drawing them beneath the card's headline endpoint would
+  // present a subgroup result as the primary one.
+  const qualifier = /\(([^)]*)\)/.exec(rowAxis)?.[1]?.trim();
+  if (qualifier && !/^\d+\s*-?\s*(y|yr|yrs|year|years|mo|month|months|wk|week|weeks|d|day|days)$/i.test(qualifier)) {
+    return null;
+  }
+
+  // 2. drop trailing statistic columns.
+  const candidates: Array<{ name: string; idx: number }> = [];
+  for (let i = 1; i < cols.length; i += 1) {
+    const name = cols[i]!;
+    if (STAT_COLUMN.test(name)) continue;
+    candidates.push({ name, idx: i });
+  }
+  if (candidates.length !== 2) return null;
+
+  // 3. neither may name a non-arm axis.
+  for (const c of candidates) if (NON_ARM_AXIS.test(c.name)) return null;
+  // The row-label header itself can disqualify: "Endpoint (never/former smokers)"
+  // is a subgroup slice, not the trial's arms.
+  if (NON_ARM_AXIS.test(cols[0] ?? '')) return null;
+
+  // 4. positive evidence required — absence of a red flag is not evidence.
+  //
+  // An "(n=...)" alone is NOT enough: "Endpoint | POP-RT (n=500) | PEACE-2
+  // (n=600)" is trial-vs-trial, and both trials report an n. A control-like
+  // name or an explicit "Arm X" identifies a randomised comparison; a bare n
+  // only counts when at least one column is not a bare study acronym.
+  const strong = candidates.some((c) => STRONG_ARM.some((re) => re.test(c.name)));
+  const hasN = candidates.some((c) => /\(\s*n\s*=/i.test(c.name));
+  const bothAcronyms = candidates.every((c) => TRIAL_ACRONYM.test(c.name));
+  if (!strong && !(hasN && !bothAcronyms)) return null;
+
+  return {
+    armA: candidates[0]!.name,
+    armB: candidates[1]!.name,
+    colA: candidates[0]!.idx,
+    colB: candidates[1]!.idx,
+  };
+}
+
+// ANCHORED: the whole cell must be a plain endpoint value. Unanchored, this
+// read "50 Gy" as 50 and rendered a radiotherapy dose as a survival result.
+// A cell with any other content (a dose unit, a fraction, an interval) is not
+// an arm value for this endpoint.
+const CELL_NUM = /^\s*(\d+(?:\.\d+)?)\s*(%|mo|months?)?\s*$/i;
+
+/**
+ * Does a table row label name the study's primary endpoint?
+ *
+ * Bare substring matching in BOTH directions is unsafe for short endpoint
+ * names: "OS" is a substring of "Dose", so an overall-survival endpoint matched
+ * a dose row. Short names must match exactly; longer ones may match on word
+ * boundaries.
+ */
+function rowMatchesEndpoint(rowLabel: string, endpointName: string): boolean {
+  const norm = (x: string) => x.toLowerCase().replace(/\s+/g, ' ').trim();
+  const row = norm(rowLabel);
+  const want = norm(endpointName);
+  if (!row || !want) return false;
+  if (row === want) return true;
+  const [shorter, longer] = want.length <= row.length ? [want, row] : [row, want];
+  // Too short to risk a partial match ("OS", "PFS", "IBR").
+  if (shorter.length < 5) return false;
+  const esc = shorter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(^|\\W)${esc}(\\W|$)`).test(longer);
+}
+
+/**
+ * A paired datum from a gated arm table, matching the study's primary endpoint
+ * row. Returns null unless the gate passes AND a row plainly matches the
+ * endpoint name AND both cells hold a plain number.
+ */
+export function parsePairedFromTable(
+  pe: PrimaryEndpointLike,
+  table: DigestTableLike,
+): PairedDatum | null {
+  if (!pe?.name) return null;
+  const arms = armColumns(table);
+  if (!arms || !Array.isArray(table?.rows)) return null;
+
+  const wanted = pe.name;
+  for (const row of table.rows as unknown[]) {
+    if (!Array.isArray(row)) continue;
+    const label = typeof row[0] === 'string' ? row[0] : '';
+    if (!label) continue;
+    if (!rowMatchesEndpoint(label, wanted)) continue;
+
+    const rawA = row[arms.colA];
+    const rawB = row[arms.colB];
+    if (typeof rawA !== 'string' || typeof rawB !== 'string') continue;
+    // A cell carrying a ratio or an interval is not a plain arm value.
+    if (RATIO_RE.test(rawA) || RATIO_RE.test(rawB)) continue;
+    if (CI_RE.test(rawA) || CI_RE.test(rawB)) continue;
+
+    const ma = CELL_NUM.exec(normalizeNumerics(rawA));
+    const mb = CELL_NUM.exec(normalizeNumerics(rawB));
+    if (!ma || !mb) continue;
+    const av = Number(ma[1]);
+    const bv = Number(mb[1]);
+    if (!Number.isFinite(av) || !Number.isFinite(bv) || av < 0 || bv < 0) continue;
+    if (av === 0 && bv === 0) continue;
+
+    return {
+      form: 'paired',
+      a: { label: arms.armA, value: av },
+      b: { label: arms.armB, value: bv },
+      unit: normUnit(ma[2]) ?? normUnit(mb[2]),
+      klass: pe.klass ?? null,
+      origin: 'table',
+    };
+  }
+  return null;
+}
+
 // ── axis ────────────────────────────────────────────────────────────────────
 
 export type AxisDomain = { lo: number; hi: number };
@@ -193,7 +479,7 @@ const MIN_HALF_WIDTH = Math.log(2); // never tighter than 0.5x-2x
  * with a local-control HR on one ruler implies a comparability the numbers do
  * not have.
  */
-export function sharedDomain(data: EffectDatum[]): AxisDomain {
+export function sharedDomain(data: RatioDatum[]): AxisDomain {
   const points = data.map((d) => d.point).filter((p) => Number.isFinite(p) && p > 0);
   if (points.length === 0) return FIXED_DOMAIN;
   const maxLog = Math.max(...points.map((p) => Math.abs(Math.log(p))), MIN_HALF_WIDTH);
@@ -212,13 +498,13 @@ export function sharedDomain(data: EffectDatum[]): AxisDomain {
  * Deterministic per datum, so the same study renders identically on the site,
  * tag and per-study pages.
  */
-export function domainFor(d: EffectDatum): AxisDomain {
+export function domainFor(d: RatioDatum): AxisDomain {
   return sharedDomain([d]);
 }
 
 /** Group by endpoint class so a shared axis never spans two of them. */
-export function groupByKlass(data: EffectDatum[]): Map<string, EffectDatum[]> {
-  const out = new Map<string, EffectDatum[]>();
+export function groupByKlass(data: RatioDatum[]): Map<string, RatioDatum[]> {
+  const out = new Map<string, RatioDatum[]>();
   for (const d of data) {
     const key = d.klass ?? 'unknown';
     const bucket = out.get(key);
@@ -266,7 +552,7 @@ function fmtTick(v: number): string {
  * distances from the null.
  */
 export function markGeometry(
-  datum: EffectDatum,
+  datum: RatioDatum,
   domain: AxisDomain,
   width: number,
 ): MarkGeometry {
@@ -304,6 +590,51 @@ export function markGeometry(
   };
 }
 
+export type PairedGeometry = {
+  /** Bar widths in [0, width]. Linear from zero — bar length IS the value. */
+  aW: number;
+  bW: number;
+  /** The axis maximum the bars are scaled against. */
+  max: number;
+};
+
+/**
+ * Paired bars use a LINEAR axis anchored at ZERO, not a log one. These are
+ * magnitudes (a rate, a duration), so bar length must be proportional to value:
+ * a bar twice as long has to mean twice as much. Starting anywhere but zero
+ * would exaggerate a small difference, which is the classic misleading chart.
+ */
+export function pairedGeometry(d: PairedDatum, width: number): PairedGeometry {
+  const plotWidth = Number.isFinite(width) && width > 0 ? width : 1;
+  const peak = Math.max(d.a.value, d.b.value);
+  // Percentages get a 100 ceiling so two rates are comparable card to card;
+  // everything else scales to its own peak with a little headroom.
+  const max = d.unit === '%' ? Math.max(100, peak) : peak * 1.05 || 1;
+  const w = (v: number) => Math.max(0, Math.min(plotWidth, (v / max) * plotWidth));
+  return { aW: w(d.a.value), bW: w(d.b.value), max };
+}
+
+/**
+ * The one entry point a caller needs: the best available mark for a study, or
+ * null. Ratio first — it carries an interval and a null reference, so it says
+ * strictly more than two bars. Paired values are the fallback, and a gated arm
+ * table is the last resort.
+ */
+export function effectForStudy(
+  pe: PrimaryEndpointLike,
+  tables: DigestTableLike[] = [],
+): EffectDatum | null {
+  const ratio = parseEffectSize(pe);
+  if (ratio) return ratio;
+  const paired = parsePairedValues(pe);
+  if (paired) return paired;
+  for (const t of tables) {
+    const fromTable = parsePairedFromTable(pe, t);
+    if (fromTable) return fromTable;
+  }
+  return null;
+}
+
 /**
  * Plain-language description, for a caption or a title attribute. The mark
  * itself is aria-hidden (the estimate and interval are already in the card's
@@ -311,6 +642,12 @@ export function markGeometry(
  * sighted-hover and for tests, not as an accessibility substitute.
  */
 export function describeEffect(d: EffectDatum): string {
+  if (d.form === 'paired') {
+    const u = d.unit ?? '';
+    const a = d.a.label ? `${d.a.label} ` : '';
+    const b = d.b.label ? `${d.b.label} ` : '';
+    return `${a}${d.a.value}${u} versus ${b}${d.b.value}${u}`;
+  }
   const ci =
     d.lo != null && d.hi != null
       ? `, ${d.ciLevel ?? 95}% CI ${d.lo} to ${d.hi}`

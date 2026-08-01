@@ -128,6 +128,14 @@ It is a **domain convention, not an invention** — this audience reads forest p
 - **Shared axis on date pages only.** Every mark on one date shares a scale *within one endpoint class AND one ratio kind* — an odds ratio and a hazard ratio are not interchangeable quantities, so they never share a ruler. That makes the biggest result of the day visibly the longest reach from the null. Site, tag and per-study pages scale each mark to itself, because "these arrived on the same day" is a real relationship and "these share a disease site" is not a reason to rescale. The same study renders identically across every non-date surface. Visible tick labels make the difference self-explaining.
 - **The null line at 1.0 is a reference, not a verdict.** Several trials in the corpus are non-inferiority designs whose margin lives in prose the artifact doesn't model. The mark shows the estimate; the verdict chip and prose carry the conclusion.
 
+**Two forms.** A **forest dot** when the study reports a ratio (HR / OR / RR / subdistribution HR), because a ratio has a null reference and an interval. **Paired bars** when it reports two values instead (`28% vs 21%`, `15.8 vs 12.3 mo`) — a linear axis anchored at **zero**, so bar length is proportional to value; percentages scale against 100 so two cards are comparable.
+
+**Paired bars carry no valence, deliberately.** Neither bar is marked better. The endpoint class cannot tell you the direction: `local-control` covers both "local control 95% vs 88%" (higher is better) and "local recurrence 5% vs 12%" (lower is better), and deriving it would mean guessing from the endpoint's name. Same reasoning that cut the favors spine. There is no "harm" form.
+
+**Arm labels are all-or-nothing.** `8.0% vs 9.4% (40 vs 50Gy)` yields one usable name and one number; labelling only one bar reads as if only that arm were identified, so both are dropped.
+
+**Table-sourced marks pass a POSITIVE gate.** A table is only read when it can be identified as endpoint-by-arm: the row axis must be `Endpoint` (with at most a time qualifier), exactly two non-statistic value columns must remain, neither may name a non-arm axis, and at least one must carry positive arm evidence (an `n=`, an `Arm X`, or a control-like name). Shape alone is not enough — of 75 tables in the corpus only **one** says "Arm", while 23 name a Trial, Cohort, Subgroup, Setting or Modality. Drawing `POP-RT vs PEACE-2` as two arms of one trial would be a clinical misrepresentation, and it is the majority shape.
+
 **States:**
 
 | State | What renders |
