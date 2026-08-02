@@ -2,6 +2,24 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.39.2] - 2026-08-01
+
+### Added
+- A check that copyrighted paper text never reaches the published site. The
+  existing guards confirm the site's *structure* carries no full-text fields;
+  this one reads the words, because the analysis step is given the full text as
+  background and could in principle quote a sentence of it into a summary. That
+  would leave the structure perfectly correct and publish the sentence anyway.
+  Ordinary bibliographic material is allowed through by name: titles, abstracts,
+  author lists (including society authors, which read like prose), and the
+  curator's own conference-slide photographs.
+
+### Notes
+- Audited the live corpus while adding it: 380 samples of local-only paper text
+  checked against every published page, and nothing published traces to anything
+  other than a title, an abstract, an author list, or a slide the curator
+  photographed. The boundary holds.
+
 ## [0.39.1] - 2026-08-01
 
 ### Fixed
