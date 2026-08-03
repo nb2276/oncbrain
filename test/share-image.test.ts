@@ -9,6 +9,7 @@ import {
   headlineSize,
   renderShareImage,
   renderShareSvg,
+  splitHeadline,
 } from '../src/lib/share-image.ts';
 import { Resvg } from '@resvg/resvg-js';
 import { markGeometry } from '../src/lib/effect-size.ts';
@@ -123,6 +124,98 @@ describe('share-image card builders', () => {
     ];
     const blob = JSON.stringify(cards);
     expect(blob).not.toMatch(/pbs\.twimg\.com|\/slides\/|\.(png|jpg|jpeg|webp)\b/i);
+  });
+});
+
+// v0.40: a card whose headline has nothing after it used to top-align, leaving
+// ~300px of dead canvas that read as truncation rather than composition. It now
+// centres. A card WITH an effect mark must stay top-aligned, because the mark
+// has to sit directly under the number it draws.
+describe('date card composition', () => {
+  /** First row carrying ink, ignoring the 12px accent border at x<60. */
+  async function firstInkRow(card: Parameters<typeof renderShareSvg>[0], fromY: number): Promise<number> {
+    const p = await probe(card);
+    for (let y = fromY; y < 630; y++) {
+      if (p.count(60, 1140, y, y + 1) > 0) return y;
+    }
+    return -1;
+  }
+
+  const LONG = 'DBCG IMN2: 15yr OS 65.0% vs 60.8% with IMNI (HR 0.85, p=0.0016); internal mammary nodal RT benefit holds under modern systemic therapy.';
+
+  it('centres a headline that has no mark under it', async () => {
+    const y = await firstInkRow(
+      digestCard({ date: '2026-05-22', topLine: LONG, studyCount: 3, siteCount: 2, handle: '@h' }),
+      140, // below the wordmark + eyebrow
+    );
+    expect(y).toBeGreaterThan(200); // pushed down into the optical centre
+  });
+
+  it('keeps a marked study card top-aligned so the mark stays under its number', async () => {
+    const y = await firstInkRow(
+      studyCard({
+        name: 'TRIAL', tldr: 'Median overall survival improved in the experimental arm.',
+        date: '2026-07-31', handle: '@h',
+        effect: { datum: { form: 'ratio', kind: 'HR', point: 0.53, lo: 0.38, hi: 0.74, ciLevel: 95, klass: 'surrogate', endpointName: 'Overall survival' }, domain: { lo: 1 / 3, hi: 3 } },
+      }),
+      140,
+    );
+    expect(y).toBeLessThan(200);
+  });
+});
+
+describe('splitHeadline', () => {
+  // v0.40. The date card led with one dense run-on sentence and left half the
+  // canvas empty. Splitting at the curator's OWN punctuation gives the card a
+  // reading order (finding, then qualifier) without rewriting a word.
+
+  it('splits at a semicolon and keeps both halves verbatim', () => {
+    const t = 'NRG/RTOG 0848: adjuvant chemoRT adds no OS overall post-resection (HR 0.96, p=0.38); node-negative subgroup gains 5-yr OS 48% vs 29%.';
+    const { lead, rest } = splitHeadline(t);
+    expect(lead).toBe('NRG/RTOG 0848: adjuvant chemoRT adds no OS overall post-resection (HR 0.96, p=0.38)');
+    expect(rest).toBe('node-negative subgroup gains 5-yr OS 48% vs 29%.');
+    expect(`${lead}; ${rest}`).toBe(t); // nothing invented, nothing dropped
+  });
+
+  // The comma inside "(HR 0.43, P=0.008)" is not a clause break. Splitting there
+  // would tear an effect size in half across two type sizes.
+  it('never splits inside parentheses', () => {
+    const t = 'SIB-CRT in LARC: 9yr OS 74.3% vs 48.9% (HR 0.43, P=0.008) with a 56Gy PGTV boost, despite identical pCR (15.2% vs 18.4%).';
+    const { lead, rest } = splitHeadline(t);
+    expect(lead).toContain('(HR 0.43, P=0.008)');
+    expect(rest).toBe('despite identical pCR (15.2% vs 18.4%).');
+  });
+
+  // Without a balance floor a leading topic phrase becomes the big type and the
+  // actual finding gets demoted to the small line.
+  it('refuses a split that would demote the finding to the small tier', () => {
+    const t = 'Single-fraction lung SABR (pooled n=1687): 2-yr LC 90-93%, G3+ AEs 2-3% and one-and-done SABR holds up across primary NSCLC and pulmonary oligomets.';
+    expect(splitHeadline(t).rest).toBeNull();
+  });
+
+  it('leaves a short headline alone', () => {
+    expect(splitHeadline('3 studies across 2 disease sites').rest).toBeNull();
+  });
+
+  it('does not strand a runt qualifier', () => {
+    expect(splitHeadline('A reasonably long clinical headline that runs past the minimum lead length; tiny.').rest).toBeNull();
+  });
+});
+
+describe('digestCard headline tiers', () => {
+  it('carries the qualifier as a subhead when the sentence splits', () => {
+    const c = digestCard({
+      date: '2026-05-22', studyCount: 3, siteCount: 2, handle: '@h',
+      topLine: 'DBCG IMN2: 15yr OS 65.0% vs 60.8% with IMNI (HR 0.85, p=0.0016); internal mammary nodal RT benefit holds under modern systemic therapy.',
+    });
+    expect(c.headline).toContain('DBCG IMN2');
+    expect(c.headline).not.toContain('holds under modern');
+    expect(c.subhead).toBe('internal mammary nodal RT benefit holds under modern systemic therapy.');
+  });
+
+  it('leaves subhead null when the sentence does not split', () => {
+    const c = digestCard({ date: '2026-01-01', studyCount: 1, siteCount: 1, handle: '@h', topLine: 'Short one.' });
+    expect(c.subhead).toBeNull();
   });
 });
 
