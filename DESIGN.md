@@ -157,7 +157,24 @@ It is a **domain convention, not an invention** — this audience reads forest p
 
 **Paired bars are deliberately absent from the share card.** There the headline *is* the TL;DR and already carries both values verbatim ("1.5% with PBI vs 9.8%"), and at the size the card is viewed in a text thread a 1.5% bar is a few pixels. The ratio form earns its space because a dot's position relative to the null isn't something the sentence conveys.
 
-**The Telegram channel post does not carry a mark**, and can't: it links to `/<date>/`, which unfurls the *date* card — a day summary with no single study to draw. The plan's "OG card + Telegram" was one surface, not two.
+**The Telegram channel post does not carry a mark**, and can't: it links to `/<date>/`, which unfurls the *date* card — a day summary with no single study to draw.
+
+### Channel post and date card: one fact, one surface (v0.40)
+
+Telegram renders the message text and then the link-preview card **directly beneath it**, so the pair is read as a single unit. They must not say the same thing twice.
+
+| Surface | Owns | Never carries |
+|---|---|---|
+| **OG date card** | the clinical takeaway (`top_line`), the date, the study count | inventory, links |
+| **Channel post body** | the inventory (verdict emoji · trial · site) and the link | `top_line` |
+
+The card owns the takeaway because it is also the **only** thing a reader sees when the `/<date>/` URL is shared anywhere outside Telegram. It has to stand alone; the body does not.
+
+**A single-study day collapses the body** to `1 study · GI Lower · 🧪 early signal`. The card headline already names that trial, so a full study line there was the same fact a third time. Site and verdict are what the card lacks.
+
+**The date card headline is two-tier.** `splitHeadline` breaks `top_line` at *its own* punctuation into a lead (large) and a qualifier (smaller, muted), so the finding outranks the caveat. It never rewrites, re-orders or summarises: decomposing the sentence into invented fields was proposed in review and rejected, because `top_line` is grounded prose with effect sizes verbatim and paraphrasing it would put unsourced clinical claims on the most-shared surface the project has. It only splits at paren depth 0 (never tearing `(HR 0.43, P=0.008)` across two type sizes), requires the lead to be ≥40% of the sentence (or a leading topic phrase becomes the big type and the finding gets demoted), and abstains rather than strand a runt qualifier.
+
+**A headline with nothing after it centres vertically.** Top-aligning one alone left ~300px of dead canvas that read as truncation. A card WITH an effect mark stays top-aligned, because the mark must sit directly under the number it draws.
 
 **Longitudinal magnitude (v0.37, E5).** When the same trial reports a *different* number than the last time the digest covered it, the card says so: a muted `updated from HR 0.92 (95% CI 0.71-1.19) · 2026-05-17` line under the mark, linking back to the earlier card, plus a **hollow** dot at the earlier estimate on the same axis.
 
@@ -242,7 +259,7 @@ Twenty-two slugs, ordered roughly head-to-toe for solid tumors, then liquid tumo
 ## Embeds & third-party
 
 - **Twitter/X widget.** `platform.twitter.com/widgets.js` is loaded once in `Base.astro`. Source-card blockquotes become native X cards (images served from Twitter CDN — no IP cost to us). If the widget fails or the user is offline, the blockquote fallback is graceful.
-- **Social preview cards (v0.14 T4).** Every page carries `og:image` + `twitter:card` (summary_large_image) so a shared link renders a branded 1200×630 preview instead of a bare URL. The cards are generated at build time from `src/lib/share-image.ts` (satori → SVG → resvg → PNG) and served from `/og/*.png` (default, per-date, per-site) plus `/og/study/<date>-<slug>.png` (v0.21: per-study card — study name + headline number + verdict pill, the preview a shared study link unfurls to). The card is **synthesized text only** (Newsreader serif on warm `#f7f5f0`: wordmark, date · conference, the curated top-line, a study-count or verdict label, and the curator handle) — never a figure or slide pixel, so it stays inside the publish boundary by construction. The verdict label, when present, uses the shared `VERDICT_COLOR` token (no emoji: satori would need a separate emoji font, and the colored text label reads cleaner). Font: vendored static Newsreader instances (`src/assets/og-fonts/`, OFL) because satori can't read the variable woff2 the site ships.
+- **Social preview cards (v0.14 T4).** Every page carries `og:image` + `twitter:card` (summary_large_image) so a shared link renders a branded 1200×630 preview instead of a bare URL. The cards are generated at build time from `src/lib/share-image.ts` (satori → SVG → resvg → PNG) and served from `/og/*.png` (default, per-date, per-site) plus `/og/study/<date>-<slug>.png` (v0.21: per-study card — study name + headline number + verdict pill, the preview a shared study link unfurls to). The card is **synthesized text only** (Newsreader serif on warm `#f7f5f0`: wordmark, date · conference, the curated top-line (split into a lead + muted qualifier on date cards, see above), a study-count or verdict label, and the curator handle) — never a figure or slide pixel, so it stays inside the publish boundary by construction. The verdict label, when present, uses the shared `VERDICT_COLOR` token (no emoji: satori would need a separate emoji font, and the colored text label reads cleaner). Font: vendored static Newsreader instances (`src/assets/og-fonts/`, OFL) because satori can't read the variable woff2 the site ships.
 - **Footer disclaimer.** Always present. Marks the site as AI-generated summary, not medical advice. Required for the audience and the legal posture.
 
 ## What to fix vs. leave alone

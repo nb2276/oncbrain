@@ -2,6 +2,38 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.40.0] - 2026-08-03
+
+The channel post said the same thing three times. Now it says it once.
+
+### Changed
+- **The Telegram post and the card it previews no longer repeat each other.**
+  The card carries the day's finding; the message carries what the card cannot,
+  which is the list of trials and the link. On a day with a single study the
+  message shrinks to the disease site and the verdict, because the card headline
+  has already named the trial.
+- **The date card reads as a composition instead of a paragraph.** The headline
+  now breaks at the writer's own punctuation, so the result leads and the caveat
+  follows in smaller, quieter type. A headline with nothing beneath it sits in
+  the middle of the card rather than at the top with an empty half below.
+- Fewer trials are listed before the post says "and N more", because a long
+  message pushes the card off the bottom of a phone screen, and the card is the
+  part people actually look at.
+
+### Notes
+- Nothing on the card is rewritten or summarised. The sentence is the one the
+  curator wrote; only the point where it breaks is chosen. Splitting it into
+  invented fields was considered and rejected, because effect sizes are quoted
+  verbatim here and a paraphrase would put an unsourced clinical claim on the
+  most-shared surface the project has.
+- Per-study cards are untouched: their headline stays at the top so the
+  effect-size mark can sit directly beneath the number it draws.
+
+### Fixed
+- The check that copyrighted paper text never reaches the site could time out
+  under load and fail as though it had found a breach. A guard that cries wolf
+  teaches you to ignore it.
+
 ## [0.39.2] - 2026-08-01
 
 ### Added
