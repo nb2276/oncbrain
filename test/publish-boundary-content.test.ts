@@ -62,6 +62,14 @@ function distinctiveLines(text: string | null): string[] {
 
 const hasInputs = existsSync(DB_PATH) && existsSync(DIST);
 
+// Generous timeouts, deliberately. This is an O(probes x published-bytes) audit
+// over the whole built site (~60MB, ~700 files) and it is SUPPOSED to be
+// thorough rather than quick. It first shipped on the 5s default, passed alone
+// at 3.75s, and then timed out under full-suite parallelism — a flaky IP guard
+// is worse than none. If this ever feels slow, raise the budget; do NOT cut the
+// probe count, which is the coverage.
+const AUDIT_TIMEOUT_MS = 120_000;
+
 describe.skipIf(!hasInputs)('publish boundary — content, not just field names', () => {
   it('no local-only sentence reaches dist/ unless it is ordinary public metadata', () => {
     const db = new Database(DB_PATH, { readonly: true });
@@ -100,7 +108,7 @@ describe.skipIf(!hasInputs)('publish boundary — content, not just field names'
     } finally {
       db.close();
     }
-  });
+  }, AUDIT_TIMEOUT_MS);
 
   it('the vault PDFs themselves never appear in dist', () => {
     const db = new Database(DB_PATH, { readonly: true });
@@ -117,5 +125,5 @@ describe.skipIf(!hasInputs)('publish boundary — content, not just field names'
     } finally {
       db.close();
     }
-  });
+  }, AUDIT_TIMEOUT_MS);
 });

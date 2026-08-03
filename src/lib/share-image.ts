@@ -65,6 +65,9 @@ export interface ShareCard {
   // (a card with no figure numbers simply has nothing to vouch for) — the mark
   // is additive-positive only, matching the DESIGN.md "cards earn their pixels".
   figuresSourced?: boolean;
+  // v0.40: the qualifying half of a two-tier headline, set smaller and muted
+  // below the lead. Only the date card uses it today (see splitHeadline).
+  subhead?: string | null;
   // v0.36 slice 4: the effect-size mark, so a shared study link carries its
   // magnitude and not just its name. The ratio form needs its corpus ruler;
   // paired bars scale to themselves.
@@ -95,6 +98,51 @@ export function defaultCard(handle: string): ShareCard {
   };
 }
 
+/**
+ * Split a curated top_line into a lead and a qualifier at ITS OWN punctuation.
+ *
+ * This never rewrites, re-orders or summarises: it only chooses where to break
+ * a sentence the curator already wrote. Decomposing the sentence into invented
+ * fields ("Caveat: …") was considered and rejected — top_line is grounded prose
+ * with effect sizes verbatim, and paraphrasing it would put unsourced clinical
+ * claims on the most-shared surface the project has.
+ *
+ * Rules that matter:
+ *   - Only splits at depth 0, so the comma in "(HR 0.43, P=0.008)" is not a
+ *     clause break.
+ *   - The lead must be at least 40% of the sentence. Without that floor a
+ *     leading topic phrase ("Single-fraction lung SABR (pooled n=1687):")
+ *     becomes the big type and the actual finding gets demoted to small.
+ *   - Prefers ';' then ':' then ',', and among candidates the most balanced.
+ * Returns rest=null when no split earns its place; 30 of 39 corpus days split.
+ */
+export function splitHeadline(raw: string): { lead: string; rest: string | null } {
+  const t = (raw ?? '').trim();
+  const MIN_LEAD = 40;
+  const MIN_REST = 24;
+  const cands: Record<string, number[]> = { ';': [], ':': [], ',': [] };
+  let depth = 0;
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i]!;
+    if (ch === '(' || ch === '[') depth++;
+    else if (ch === ')' || ch === ']') depth = Math.max(0, depth - 1);
+    else if (depth === 0 && (ch === ';' || ch === ':' || ch === ',') && t[i + 1] === ' ') {
+      cands[ch]!.push(i);
+    }
+  }
+  const mid = t.length / 2;
+  for (const sep of [';', ':', ','] as const) {
+    const ok = cands[sep]!.filter(
+      (i) => i >= MIN_LEAD && t.length - (i + 2) >= MIN_REST && i >= 0.4 * t.length,
+    );
+    if (ok.length) {
+      const i = ok.reduce((a, b) => (Math.abs(a - mid) <= Math.abs(b - mid) ? a : b));
+      return { lead: t.slice(0, i), rest: t.slice(i + 2) };
+    }
+  }
+  return { lead: t, rest: null };
+}
+
 export function digestCard(opts: {
   date: string;
   topLine: string;
@@ -106,10 +154,12 @@ export function digestCard(opts: {
   const conf = opts.conference ? ` · ${opts.conference}` : '';
   const studies = `${opts.studyCount} ${opts.studyCount === 1 ? 'study' : 'studies'}`;
   const sites = `${opts.siteCount} disease ${opts.siteCount === 1 ? 'site' : 'sites'}`;
-  const headline = opts.topLine?.trim() ? opts.topLine : `${studies} across ${sites}`;
+  const raw = opts.topLine?.trim() ? opts.topLine : `${studies} across ${sites}`;
+  const { lead, rest } = splitHeadline(raw);
   return {
     eyebrow: `${opts.date}${conf}`,
-    headline,
+    headline: lead,
+    subhead: rest,
     tagLabel: `${opts.studyCount} ${opts.studyCount === 1 ? 'STUDY' : 'STUDIES'}`,
     handle: opts.handle,
   };
@@ -275,9 +325,26 @@ export async function renderShareSvg(card: ShareCard): Promise<string> {
   // under the headline it illustrates and the slack falls below both. Putting
   // the mark after a flex:1 headline pushed it to the bottom edge, crowding the
   // verdict label with a lake of dead space above it.
+  // Will the effect mark actually PAINT? Not just "is there an effect": the
+  // paired form and an off-scale estimate both abstain, and a card that abstains
+  // has the same empty canvas as one with no effect at all.
+  const marked = card.effect?.datum.form === 'ratio' && !!card.effect.domain;
+  const sub = card.subhead?.trim();
   children.push(
     div(
-      { flex: 1, flexDirection: 'column', alignItems: 'flex-start', marginTop: 40, overflow: 'hidden' },
+      {
+        flex: 1,
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        // CENTER when nothing follows the headline. Top-aligning a lone
+        // paragraph left ~300px of dead canvas under it and read as a document
+        // that had been cut off, rather than a composition. A marked card stays
+        // top-aligned because the mark has to sit directly under the number it
+        // draws.
+        justifyContent: marked ? 'flex-start' : 'center',
+        marginTop: 40,
+        overflow: 'hidden',
+      },
       [
         div(
           // wordBreak so a long UNBROKEN token (no spaces) wraps instead of
@@ -285,7 +352,23 @@ export async function renderShareSvg(card: ShareCard): Promise<string> {
           { fontSize: headlineSize(headline), fontWeight: 700, lineHeight: 1.2, color: FG, wordBreak: 'break-word' },
           headline,
         ),
-        card.effect ? effectMark(card.effect.datum, card.effect.domain) : div({}, ''),
+        // The qualifier, clearly subordinate: smaller, muted, lighter. Same
+        // sentence the curator wrote, just no longer competing with its own
+        // headline for weight.
+        sub
+          ? div(
+              {
+                marginTop: 18,
+                fontSize: Math.round(headlineSize(headline) * 0.6),
+                fontWeight: 400,
+                lineHeight: 1.35,
+                color: MUTED,
+                wordBreak: 'break-word',
+              },
+              sub,
+            )
+          : div({}, ''),
+        marked ? effectMark(card.effect!.datum, card.effect!.domain) : div({}, ''),
       ],
     ),
   );

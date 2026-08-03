@@ -23,7 +23,12 @@ export type ChannelArtifact = {
   };
 };
 
-const MAX_STUDIES = 12;
+// Telegram collapses a long message behind "Show more", and the link preview
+// sits BELOW the text — so a long body pushes the card out of view, which is the
+// one thing a scrolling reader actually looks at. 8 keeps the post inside the
+// fold on a phone; the corpus reaches 18 studies on its busiest day, so the
+// overflow line is load-bearing, not theoretical.
+const MAX_STUDIES = 8;
 
 export function formatChannelPost(artifact: ChannelArtifact, siteUrl: string): string {
   const sites = artifact.digest.sites.filter((s) => s.studies.length > 0);
@@ -31,7 +36,13 @@ export function formatChannelPost(artifact: ChannelArtifact, siteUrl: string): s
   const conf = artifact.conference?.name ? ` · ${artifact.conference.name}` : '';
 
   const lines: string[] = [`🧠 oncbrain · ${artifact.date}${conf}`];
-  if (artifact.digest.top_line?.trim()) lines.push('', artifact.digest.top_line.trim());
+
+  // top_line is DELIBERATELY absent here. The OG card renders it as its
+  // headline, and Telegram shows that card directly beneath this text, so
+  // including it prints the same sentence twice in one post. The two surfaces
+  // own different jobs: the CARD carries the clinical takeaway (it is also the
+  // only thing a reader sees when the URL is shared anywhere else, so it has to
+  // stand alone), and the BODY carries the inventory and the link.
 
   // One scannable line per study: verdict emoji · name — site (preprint flag).
   const studyLines: string[] = [];
@@ -43,9 +54,24 @@ export function formatChannelPost(artifact: ChannelArtifact, siteUrl: string): s
       studyLines.push(`${emoji} ${study.name} — ${meta.label}${pre}`);
     }
   }
-  const shown = studyLines.slice(0, MAX_STUDIES);
-  if (studyLines.length > MAX_STUDIES) shown.push(`…and ${studyLines.length - MAX_STUDIES} more`);
-  if (shown.length) lines.push('', ...shown);
+
+  if (studyLines.length === 1) {
+    // A single-study day is the case the curator flagged: the card headline
+    // already names that trial, so repeating its full name here is a third
+    // printing of one fact. Keep only what the card does NOT carry — the
+    // disease site and the SOC verdict.
+    const site = sites[0]!;
+    const study = site.studies[0]!;
+    const meta = getDiseaseSite(site.disease_site);
+    const v = study.verdict ? VERDICT_META[study.verdict.soc_implication] : null;
+    const verdict = v ? ` · ${v.emoji} ${v.label.toLowerCase()}` : '';
+    const pre = study.is_preprint ? ' · preprint' : '';
+    lines.push('', `1 study · ${meta.label}${verdict}${pre}`);
+  } else if (studyLines.length > 1) {
+    const shown = studyLines.slice(0, MAX_STUDIES);
+    if (studyLines.length > MAX_STUDIES) shown.push(`…and ${studyLines.length - MAX_STUDIES} more`);
+    lines.push('', ...shown);
+  }
 
   lines.push('', `Full digest → ${url}`);
   return lines.join('\n');
