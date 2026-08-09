@@ -74,11 +74,16 @@ export class PdfToolError extends Error {
 export type PdfText = {
   text: string;
   via: 'text' | 'ocr';
+  // The same document in -layout mode, when the text layer was usable. Column
+  // alignment survives here, so table blocks keep their row associations.
+  // Absent on the OCR path (a page image has no second reading of its layer).
+  layoutText?: string;
 };
 
 export type ExtractPdfTextOptions = {
   // Injection seams for tests; default to the real poppler + Vision pipeline.
   runText?: (absPath: string) => Promise<string>;
+  runLayoutText?: (absPath: string) => Promise<string>;
   runOcr?: (absPath: string) => Promise<string>;
   minWords?: number;
   timeoutMs?: number;
@@ -91,11 +96,20 @@ export async function extractPdfText(
 ): Promise<PdfText> {
   const minWords = opts.minWords ?? MIN_TEXT_WORDS;
   const runText = opts.runText ?? ((p: string) => pdftotext(p, opts.timeoutMs));
+  const runLayoutText = opts.runLayoutText ?? ((p: string) => pdftotextLayout(p, opts.timeoutMs));
   const runOcr = opts.runOcr ?? ((p: string) => rasterizeAndOcr(p, opts.timeoutMs));
 
   const layer = (await runText(absPath)).trim();
   if (isUsableTextLayer(layer, minWords)) {
-    return { text: layer, via: 'text' };
+    // Second cheap poppler pass for table fidelity. Best-effort: a failure here
+    // must not cost us a text layer we already have in hand.
+    let layoutText: string | undefined;
+    try {
+      layoutText = (await runLayoutText(absPath)).trim() || undefined;
+    } catch {
+      layoutText = undefined;
+    }
+    return { text: layer, via: 'text', layoutText };
   }
 
   // Empty/garbled/watermark-only text layer → treat as scanned, OCR the pages.
@@ -174,6 +188,23 @@ function uniqueLines(text: string): string {
 // pdftotext <abs> - → text on stdout.
 async function pdftotext(absPath: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<string> {
   return runPoppler('pdftotext', ['-q', '-enc', 'UTF-8', absPath, '-'], timeoutMs, spawn as SpawnFn);
+}
+
+// pdftotext -layout: preserves the VISUAL column arrangement instead of reading
+// order. Wrong for prose (a two-column journal page interleaves both columns
+// onto every line) but necessary for TABLES, where reading order detaches a
+// column from its rows. On BEACON's Table 1 the reading-order layer emits nine
+// class definitions and then a loose tail of "17/18 (94.4%)" / "15/18 (83.3%)"
+// with nothing tying a percentage to a class — an invitation to attach the
+// wrong agreement to the wrong recommendation. -layout keeps them on one line.
+// fulltext-sections uses this variant for table/figure blocks only.
+async function pdftotextLayout(absPath: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<string> {
+  return runPoppler(
+    'pdftotext',
+    ['-q', '-enc', 'UTF-8', '-layout', absPath, '-'],
+    timeoutMs,
+    spawn as SpawnFn,
+  );
 }
 
 // Rasterize the first MAX_OCR_PAGES pages to PNGs in a temp dir, OCR each with
