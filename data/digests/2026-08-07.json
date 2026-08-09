@@ -1,256 +1,230 @@
 {
   "date": "2026-08-07",
   "conference": null,
-  "generated_at": 1786297048365,
+  "generated_at": 1786310433706,
   "digest": {
-    "top_line": "TNTCRT: 3yr DFS 74.8% v 66.0%, HR 0.674 (0.489-0.929) for doublet-LC TNT, but locoregional failure identical (6.03% v 6.19%).",
-    "tldr": "Rectal owned the day, and both trials say the same thing to a rad onc: the RT question is settled, the sequencing question isn't. TNTCRT moved DFS entirely through distant control with LRR flat; STELLAR showed 5x5Gy IMRT non-inferior to 50Gy/25fx (3y LRR 8.4% v 11.0%) with toxicity driven by chemo, not RT. Prostate stayed imaging-only: PSMA PET still not a validated response biomarker.",
+    "top_line": "STELLAR: 5x5 Gy + CAPOX TNT non-inferior on 3-yr DFS (64.5% v 62.3%, HR 0.883) with 3-yr OS 86.5% v 75.1% (HR 0.67).",
+    "tldr": "Two Chinese phase 3 TNT trials land the same week and split on where the gain comes from: STELLAR's 5x5 short-course buys OS (86.5% v 75.1%) with no LRR or DM signal behind it, while TNTCRT's long-course doublet buys distant control (MFS HR 0.655) with locoregional failure flat at ~6% in both arms. Lower GI carried the day; prostate was PSMA PET imaging, not therapy.",
     "sites": [
       {
-        "disease_site": "prostate",
-        "intro": "Both items are PSMA PET interpretation, not therapy: androgen-axis regulation of PSMA expression and BCR natural history off treatment.",
+        "disease_site": "lower-gi",
+        "intro": "Both TNT trials leave locoregional control untouched vs nCRT, so the RT question is now sequencing and fractionation, not whether pelvic RT is doing the work.",
         "studies": [
           {
-            "name": "USPCC 2026 Point-Counterpoint: PSMA PET as Response Assessment",
-            "tldr": "Conference point-counterpoint arguing PSMA uptake tracks AR signaling, not tumor burden, so serial PSMA PET is not yet a response biomarker.",
+            "name": "STELLAR",
+            "tldr": "3-yr DFS 64.5% vs 62.3% (HR 0.883, NI margin 1.43) for 5x5 Gy + CAPOX vs 50 Gy/25f CRT in LARC.",
             "details": [
-              "🔍 USPCC 2026 point-counterpoint session (Steven Rowe, UT Southwestern); position: PSMA PET has no present role in response assessment",
-              "🔍 Core argument: PSMA expression is dynamically regulated by the androgen axis, not a static marker of tumor burden",
-              "📊 Zukotynski 18F-DCFPyL trial (n=16 evaluable, pre-ARSI and 2-4 mo post): median time to therapy change 9.6 mo (95% CI 6.9-14.2)",
-              "📊 Same cohort: median OS 28.6 mo (95% CI 18.3-NA)",
+              "🔍 Multicenter open-label phase III, 16 Chinese hospitals, N=599 randomized 1:1, ITT; median f/u 35.0 mo",
+              "🔍 cT3-4 and/or cN+ distal/middle-third rectal adenocarcinoma, age 18-70, ECOG 0-1, MRI-staged centrally by 3 radiologists",
+              "📐 NI margin prespecified at HR 1.43 (equivalently 3-yr DFS ≥54% assuming 65% in CRT arm), one-sided alpha 0.05, ≥194 DFS events",
               {
-                "text": "📊 Uptake-change metrics stratify outcomes (Zukotynski, 18F-DCFPyL pre/post ARSI)",
+                "text": "📊 3-yr efficacy, TNT (5 Gy x5 → 4 CAPOX) vs CRT (50 Gy/25f + capecitabine)",
                 "table": {
                   "columns": [
-                    "Metric",
-                    "Median time to therapy change",
-                    "Median OS",
-                    "HR"
+                    "Endpoint",
+                    "TNT",
+                    "CRT",
+                    "Effect size"
                   ],
                   "rows": [
                     [
-                      "Low DPSM",
-                      "12.2 mo (11.3-NA)",
-                      "37.2 mo (28.9-NA)",
-                      "5.03 (1.17-21.65)"
+                      "DFS (1°)",
+                      "64.5% (58.3-70.7)",
+                      "62.3% (56.1-68.5)",
+                      "HR 0.883, one-sided 95% CI to 1.11, P<.001 NI"
                     ],
                     [
-                      "High DPSM",
-                      "6.5 mo (4.6-NA), p=0.0001",
-                      "17.8 mo (13.9-NA), p=0.02",
-                      "same comparison"
+                      "OS",
+                      "86.5% (82.1-90.8)",
+                      "75.1% (69.4-80.8)",
+                      "HR 0.67 (0.46-0.97), P=.033"
                     ],
                     [
-                      "Low DASM",
-                      "12.2 mo (11.3-NA)",
-                      "NA (37.2-NA)",
-                      "9.31 (1.81-47.87)"
+                      "MFS",
+                      "77.1% (71.7-82.6)",
+                      "75.3% (70.0-80.7)",
+                      "HR 0.88 (0.63-1.24), P=.475"
                     ],
                     [
-                      "High DASM",
-                      "6.9 mo (6.1-NA), p=0.003",
-                      "17.8 mo (13.9-NA), p=0.002",
-                      "same comparison"
+                      "LRR",
+                      "8.4% (4.6-12.2)",
+                      "11.0% (6.5-15.5)",
+                      "HR 0.80 (0.45-1.44), P=.461"
+                    ],
+                    [
+                      "pCR + sustained cCR",
+                      "21.8%",
+                      "12.3%",
+                      "P=.002"
+                    ],
+                    [
+                      "R0 resection",
+                      "91.5%",
+                      "87.8%",
+                      "P=.189"
                     ]
                   ]
                 }
               },
-              "⚠️ Both HR CIs are enormous (1.17-21.65 and 1.81-47.87) off 16 pts; prognostic separation, not a validated response metric",
-              "📊 Markowski BAT series: 6 men imaged at baseline and 3 mo, 3 progressed; PSMA PET flagged progression earlier than conventional imaging",
-              "⚠️ Flare vs true progression is unresolved: ADT/ARSI initiation itself moves PSMA expression, so an early rising SUV is uninterpretable as burden",
-              "🔍 Repeatability data reviewed (Bland-Altman, ICC, within-subject CV) across SUVmax, SUVmean, SUVtotal, tumor volume; lesion identification and segmentation variability flagged as limiting serial quantitation",
-              "🔗 RECIP 1.0 (Gafita, JNM 2022) offered as the counterweight: PET plus CT categories (PD/PR/SD/CR) built for post-radioligand response, still needing validation outside that setting",
-              "❓ Take-home: kinetics of androgen-axis effects on PSMA and AI-assisted lesion detection are the named prerequisites"
+              "📐 All TNT pts completed 5 Gy x5 without dose reduction; CRT arm had 1.4% RT dose reduction, 2.4% interruption",
+              "🔍 IMRT in ALL pts, both arms: CTV mesorectum, presacral, internal iliac, obturator, ischiorectal fossa; external iliac only if cT4b; superior border sacral promontory, inferior 2-3 cm below tumor; PTV expansion 0.5-1.0 cm",
+              {
+                "text": "⚠️ Acute grade 3-4 toxicity during preop treatment, 26.5% vs 12.6% (P<.001), driven by heme not bowel",
+                "subdetails": [
+                  "Hematologic G3-4: 15.8% TNT vs 2.0% CRT (P<.001)",
+                  "Thrombocytopenia G3-4: 11.1% vs 0.7% (P<.001)",
+                  "Proctitis G3-4: 4.7% vs 3.1% (P=.307)",
+                  "Diarrhea G3-4: 6.4% vs 4.8% (P=.398)",
+                  "Grade III+ surgical complications: 14.0% vs 15.7% (P=.625)"
+                ]
+              },
+              "📊 Preop full-dose completion 74.8% TNT vs 93.2% CRT (P<.001); adjuvant chemo completion 60.0% vs 48.3% (P=.009)",
+              "🔗 3-yr LRR 8.4%/11.0% in line with RAPIDO and PRODIGE 23 (4%-8.3%), far below Polish II (21%-22%), the only one of the four without mandated adjuvant chemo",
+              "⚠️ OS gain is a secondary endpoint on 107 cancer deaths, not powered for it; authors note Polish II's OS benefit vanished by 8 yr",
+              "⚠️ Unlike RAPIDO and PRODIGE 23, no 3-yr DM reduction with TNT (22.8% v 24.7%), so the OS signal has no MFS or LRR mechanism behind it",
+              "⚠️ Chinese-only cohort, age capped at 70 (median 55), middle/low rectum only; upper rectum untested"
             ],
             "figures": [],
-            "nct": null,
+            "nct": "NCT02533271",
             "tweet_ids": [
-              1000000073
+              1000000070
             ],
-            "slug": "psma-pet-response-assessment-review",
-            "significance": "For an RT reader the operative caution is oligomet SBRT selection: if a post-ADT scan drives whether to treat 3 lesions or 5, ARSI-induced uptake change can move lesion count without moving disease. RECIP 1.0 was built for post-radioligand response, not for pre-SBRT target selection.",
-            "monday_clinic": "For a man on an ARSI or BAT whose restaging PSMA PET is being read as response or progression, this argues the scan's uptake change is confounded by androgen-axis effects on PSMA expression; it does not question PSMA PET for initial staging or lesion detection in an untreated or hormone-naive setting.",
-            "primary_endpoint": null,
-            "analysis_sections": null,
+            "slug": "stellar",
+            "verdict": {
+              "soc_implication": "confirmatory",
+              "rationale": "Prespecified noninferiority met in a randomized phase III with adequate events. Consistent with Polish II and RAPIDO; supports an already guideline-listed short-course TNT option.",
+              "audience": "cT3-4 and/or cN+ distal/middle-third rectal adenocarcinoma, age ≤70, ECOG 0-1"
+            },
+            "significance": "Every pt got IMRT, both arms, and 3-yr LRR was 8.4% with 5 Gy x5 alone, so the elective-nodal CTV (mesorectum, presacral, internal iliac, obturator, ischiorectal fossa) holds at a hypofractionated dose. The added grade 3-4 toxicity was hematologic (15.8% v 2.0%), from the CAPOX, not the pelvis: proctitis and diarrhea were flat.",
+            "monday_clinic": "In cT3-4 or node-positive middle or distal rectal cancer under age 70 with good performance status, this supports 5 Gy x5 plus preop CAPOX as an alternative to 50 Gy/25f chemoradiation; it does not address upper-third tumors, and late toxicity and organ-preservation durability are not yet reported.",
+            "primary_endpoint": {
+              "name": "3-year disease-free survival",
+              "klass": "surrogate",
+              "stat_value": "64.5% v 62.3%",
+              "stat_detail": "HR 0.883, one-sided 95% CI to 1.11, P<.001 for noninferiority (margin 1.43)"
+            },
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Multicenter open-label randomized phase III, 1:1, **N=599** across 16 hospitals in 11 Chinese provinces, enrolled Aug 2015 to Aug 2018. Stratified by location, clinical stage, and MRF status; median follow-up **35.0 months** (range 8.3-63.9)."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**cT3-4 and/or cN+** rectal adenocarcinoma of the distal or middle third, age **18-70**, ECOG 0-1, no distant metastases, no prior anticancer treatment. Median age 55, **85.8% v 83.5% clinical stage III**, MRF involvement in ~56% of both arms; EMVI was imbalanced (53.4% TNT v 42.1% CRT)."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "TNT arm: **5 Gy x 5** over one week. CRT arm: **50 Gy in 25 fractions** over 5 weeks with concurrent capecitabine 825 mg/m² BID. **All patients received IMRT** in both arms, with CTV covering mesorectum, presacral space, internal iliac, obturator, and ischiorectal fossa (external iliac only for cT4b), superior border at the sacral promontory, inferior 2-3 cm distal to the tumor, PTV expansion 0.5-1.0 cm, with per-center QA."
+              },
+              {
+                "label": "Regimen",
+                "body": "TNT: **4 cycles CAPOX** (oxaliplatin 130 mg/m² d1, capecitabine 1,000 mg/m² BID d1-14) starting 7-14 days after RT, then TME, then 2 further CAPOX cycles. CRT: concurrent capecitabine, then TME, then **6 cycles CAPOX**. TME was recommended 6-8 weeks after preoperative treatment in both arms."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary: 3-year DFS**, noninferiority with a prespecified **HR margin of 1.43** (an 11% absolute margin against an assumed 65% CRT rate), one-sided alpha 0.05, powered at ≥194 events. Secondary: OS, MFS, locoregional recurrence, surgical complications, toxicity, completion rate, and pCR plus sustained cCR."
+              },
+              {
+                "label": "Results",
+                "body": "Noninferiority was met, and the OS difference favoring TNT is a secondary finding resting on 107 cancer deaths with no accompanying MFS or LRR separation. Sustained cCR without surgery reached **9.4% v 3.4%**, with regrowth in 2 of 28 and 1 of 10 respectively."
+              },
+              {
+                "label": "Safety",
+                "body": "Acute grade III-V toxicity during preoperative treatment was **26.5% v 12.6%** (P<.001), almost entirely hematologic (grade 3-4 heme **15.8% v 2.0%**, thrombocytopenia 11.1% v 0.7%). Pelvic toxicity did not differ (proctitis G3-4 4.7% v 3.1%, diarrhea 6.4% v 4.8%), and grade III+ surgical complications were similar (14.0% v 15.7%, P=.625)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The third randomized trial of short-course RT plus chemotherapy against long-course CRT. **LRR 8.4%/11.0%** matches RAPIDO and PRODIGE 23 (4%-8.3%) and is well below Polish II (21%-22%), but unlike RAPIDO and PRODIGE 23 there was **no 3-year DM reduction** (22.8% v 24.7%). The OS gain echoes Polish II, where the benefit disappeared by 8 years."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents cT3-4 or node-positive middle and distal rectal cancer in patients aged 70 or younger with ECOG 0-1 treated with IMRT. Does not represent upper-third rectal tumors, patients over 70, or those needing a non-oxaliplatin systemic backbone."
+              },
+              {
+                "label": "Limitations",
+                "body": "Late toxicity and quality of life are deferred to a later report, so the durable pelvic cost of 5 Gy x 5 with IMRT is still unmeasured. The one-sided noninferiority CI with an upper bound of 1.11 against a 1.43 margin leaves room for a real DFS decrement, and the authors concede a narrower margin or larger sample would have been preferable. EMVI was imbalanced toward the TNT arm at baseline (53.4% v 42.1%)."
+              }
+            ],
             "relevant_specialties": [
               "radonc",
-              "medonc"
+              "medonc",
+              "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Bears on metastasis-directed therapy: a restaging PSMA PET after ARSI start can change apparent lesion count and SUV without a change in burden, which is exactly the input to oligomet SBRT target selection. RECIP 1.0 was validated post-radioligand, not for pre-SBRT planning.",
-              "medonc": "Argues against treating a rising or falling SUV as an ARSI response signal. Uptake-change metrics were prognostic (DPSM HR 5.03, DASM HR 9.31) in 16 pts, but prognostic separation is not a response endpoint, and the CIs are wide enough that no line-of-therapy switch should hang on them."
+              "radonc": "5 Gy x 5 delivered by IMRT to a full elective pelvic CTV gave 3-yr LRR of 8.4%, so nodal coverage holds at the hypofractionated dose and every patient completed RT without reduction. The excess grade 3-4 toxicity was hematologic (15.8% v 2.0%) from CAPOX, with proctitis and diarrhea flat, so the pelvis is not what you are trading away, at least on acute data.",
+              "medonc": "Moving chemotherapy preoperatively raised planned-cycle completion (74.8% full-dose preop, and 60.0% v 48.3% completing adjuvant), but 4 cycles of CAPOX bought no distant metastasis reduction (22.8% v 24.7%), unlike the more intensive FOLFOX or FOLFIRINOX backbones in RAPIDO and PRODIGE 23. The toxicity cost was hematologic and front-loaded.",
+              "surgonc": "R0 resection was 91.5% v 87.8% (P=.189) and grade III+ surgical complications 14.0% v 15.7% (P=.625), so short-course RT with a 21-week median interval from RT start to surgery did not compromise the operation. Sustained cCR managed nonoperatively was 9.4% v 3.4%, relevant to organ-preservation discussions, though regrowth data are thin (2 of 28)."
             },
             "open_questions": [
-              "Kinetics of androgen-axis therapy effects on PSMA expression",
-              "RECIP validation outside the radioligand-therapy setting",
-              "Reproducibility of AI-assisted lesion identification and segmentation"
+              "Durability of the OS difference beyond 3 years",
+              "Late toxicity and quality of life after 5 Gy x 5 plus CAPOX",
+              "Whether more preoperative chemotherapy cycles reduce distant metastasis"
             ],
-            "consort": null,
-            "modality": null,
-            "intent": null,
-            "methodology": null,
-            "content_type": "review",
-            "discussed_trials": [
-              "RECIP"
-            ],
+            "consort": {
+              "enrolled": 629,
+              "excluded": 30,
+              "randomized": 599,
+              "arms": [
+                {
+                  "label": "TNT (5 Gy x 5 + CAPOX)",
+                  "allocated": 302,
+                  "analyzed": 302
+                },
+                {
+                  "label": "CRT (50 Gy/25f + capecitabine)",
+                  "allocated": 297,
+                  "analyzed": 297
+                }
+              ]
+            },
+            "modality": "combined",
+            "intent": "curative",
+            "methodology": "phase-3-rct",
             "significance_perspective": "Radiation oncology",
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "PSMA PET response assessment prostate",
-                "RECIP PSMA PET lutetium"
+                "short course radiotherapy rectal cancer long term",
+                "rectal cancer radiotherapy quality of life late toxicity",
+                "total neoadjuvant therapy rectal consolidation chemotherapy"
               ],
               "queries_failed": [],
-              "candidates_returned": 22,
-              "fetched_at": "2026-08-09T17:36:47.820Z",
+              "candidates_returned": 56,
+              "fetched_at": "2026-08-09T21:18:03.244Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [
               {
                 "type": "paper",
-                "id": 73
+                "id": 70
               }
             ]
           },
           {
-            "name": "PSMA-PET BCR Natural History Study",
-            "tldr": "Baseline of first 130 PSMA-positive BCR men: most with PSA-DT >9-12mo still show PET lesions, yet ~2/3 observed off therapy.",
-            "details": [
-              "🔍 Prospective NCI natural-history cohort; baseline data on first 130 pts, study ongoing, median f/u ~2 yrs",
-              "🔍 Eligibility: BCR after definitive therapy, all post-salvage RT or declined it; PSA ≥0.5 required for entry",
-              "🔍 Imaging schedule: baseline PSMA PET; negative → annual, any finding (incl. equivocal) → q6mo",
-              "📊 Only ~1/3 of pts have gone on therapy; the majority are observed off treatment",
-              "📊 Vast majority of pts with PSA-DT >9mo and >12mo had PSMA PET findings when PSA >5",
-              "📊 Sites described: nodal disease, prostate-bed recurrence, occasional small equivocal bone lesions",
-              "📊 Companion Madan poster: conventional-imaging progression in 5 of the first ~150 pts at ~1.5yr f/u",
-              "📊 >95% had no abrupt PET change discordant with PSA/PSA-DT behavior",
-              "⚠️ Baseline cross-sectional read only; no per-arm outcomes, no HR, no effect size reported in source",
-              "⚠️ Therapy not mandated: intermittent ADT, ARPI, SBRT, Radium-223 trials all permitted, so any evolution signal is confounded",
-              "⚠️ Single-center NCI referral cohort; enrichment for trial-seeking pts limits generalizability",
-              "⚠️ Source is a conference video interview, not a peer-reviewed report; numbers are spoken approximations"
-            ],
-            "figures": [],
-            "nct": null,
-            "tweet_ids": [
-              1000000072
-            ],
-            "slug": "psma-pet-bcr-natural-history",
-            "verdict": {
-              "soc_implication": "early-signal",
-              "rationale": "Single-arm observational cohort, baseline cross-section of 130 pts, no outcome endpoint reached; heterogeneous permitted therapies. Descriptive only, cannot define who safely defers treatment.",
-              "audience": "PSMA-positive biochemically recurrent prostate ca, post-definitive + salvage…"
-            },
-            "significance": "The RT-relevant read is that these men are all post-salvage-RT failures, so PET-detected nodal and prostate-bed lesions land squarely in the metastasis-directed-therapy decision. SBRT was permitted, not protocolized, and no per-lesion local control is reported in source, so this bounds the observation arm rather than defining an SBRT indication.",
-            "monday_clinic": "In PSMA-positive BCR after definitive therapy and salvage RT with slow PSA doubling time, this supports observation as a defensible option rather than reflex systemic therapy for PET-only findings; it does not speak to men with rapid doubling times or conventional-imaging metastases.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Prospective **natural history** cohort at the NCI following men with PSMA-positive BCR with serial PSMA PET. Data presented are the **baseline cross-section of the first 130 pts**; median follow-up is about **2 years** with interim longitudinal data still pending."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Recurrence after definitive therapy, with **salvage radiation already delivered or declined** in post-prostatectomy pts. Entry requires **PSA ≥0.5**. Explicitly framed as a state that would not have qualified for historical metastatic trials, since the disease is invisible on conventional imaging."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Salvage RT is a prior-therapy gate rather than a study intervention. On study, **SBRT is permitted** alongside any therapy lasting under six months; dose, fractionation and target volume are **not reported in source**."
-              },
-              {
-                "label": "Endpoints",
-                "body": "This analysis relates **baseline PSMA PET findings to PSA doubling time**, the field's working risk metric in BCR. Longitudinal endpoints (PET evolution, conventional-imaging progression) are the stated goal but not yet reported."
-              },
-              {
-                "label": "Results",
-                "body": "Most pts with **PSA-DT >9mo and >12mo** still had PSMA PET findings once **PSA exceeded 5**, chiefly nodal, prostate-bed, and small equivocal bone lesions. **About one third** started therapy; the rest were observed. A companion analysis found conventional-imaging progression in **5 of ~150 pts** at roughly 1.5yr, and **>95%** showed no PET change discordant with PSA kinetics."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents PSMA-positive BCR after definitive therapy including salvage RT, PSA ≥0.5, largely slow PSA doubling time. Does not represent conventional-imaging mCSPC, de novo metastatic disease, or PSMA-negative BCR."
-              },
-              {
-                "label": "Limitations",
-                "body": "Therapy was physician-choice and time-limited rather than randomized, so PET evolution mixes treated and untreated pts. All numbers here come from a **spoken conference interview**, not a peer-reviewed dataset, and the 130-pt baseline slice cannot yet separate indolent from lethal PSMA-positive BCR."
-              },
-              {
-                "label": "Discussion",
-                "body": "The framing argument is that PSMA PET created a **disease state, not new disease**: these men existed in historical BCR trials, undetected. The overtreatment risk the investigators name is real, since mCSPC doublet or triplet approaches are being applied to pts whose natural history may run many years untreated."
-              }
-            ],
-            "relevant_specialties": [
-              "radonc",
-              "medonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Every pt here has already failed or declined salvage RT, so PET-positive nodes and bed recurrences are the exact population being offered metastatic-directed SBRT. SBRT was allowed but not protocolized and no local control data is reported in source, so this cohort argues for a defensible observation comparator rather than an SBRT indication.",
-              "medonc": "The signal is against reflex mCSPC-style systemic therapy for PET-only disease: about a third went on therapy, and conventional-imaging progression hit 5 of ~150 pts at 1.5yr. Intermittent ADT and ARPI approaches were used selectively, framing PSA doubling time, not PET positivity alone, as the trigger."
-            },
-            "open_questions": [
-              "Which PSMA PET features predict conventional-imaging progression",
-              "Whether observation is safe in PSMA-positive BCR with fast doubling time",
-              "Role of metastasis-directed SBRT vs observation in PET-only recurrence"
-            ],
-            "consort": null,
-            "modality": null,
-            "intent": null,
-            "methodology": "real-world-evidence",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "PSMA PET biochemical recurrence observation",
-                "metastasis-directed SBRT biochemical recurrence prostate"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 26,
-              "fetched_at": "2026-08-09T17:36:49.583Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 72
-              }
-            ]
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "lower-gi",
-        "intro": "Two phase III LARC trials, both keeping RT constant within arm: TNTCRT tests the chemo backbone under LCRT, STELLAR tests 5x5Gy against 50Gy/25fx, and neither moves locoregional failure.",
-        "studies": [
-          {
             "name": "TNTCRT",
-            "tldr": "3yr DFS 74.8% v 66.0%, HR 0.674 (0.489-0.929), P=.016 for doublet-LC TNT over nCRT in high-risk LARC.",
+            "tldr": "3-yr DFS 74.8% v 66.0%, HR 0.674, for doublet-CAPOX TNT vs nCRT in high-risk LARC; locoregional failure unchanged.",
             "details": [
-              "🔍 Phase 3 multicenter RCT, N=458 (232 doublet-LC TNT v 226 nCRT), enrolled Jun 2017 to Dec 2023, median f/u 51mo",
-              "🔍 Eligibility: stage II/III LARC, age 18-70, ≥1 MRI high-risk feature (cT4a-b, cN2, MRF+, or cT3c-d with EMVI)",
-              "🔍 High-risk enrichment real: cT4 47.82%, cN2 75.98%, threatened MRF 70.96%, EMVI 54.80%",
-              "💊 Experimental: 1 cycle induction CAPOX → LCRT with 2 cycles concurrent CAPOX → 3 cycles consolidation CAPOX → TME",
-              "💊 Control: LCRT with concurrent capecitabine → TME → 6 cycles adjuvant CAPOX starting 4-8wk post-op",
-              "⚠️ RT dose/fractionation and target volume not reported in source text; both arms got LCRT, so the trial isolates the chemo backbone, not the RT question",
               {
-                "text": "📊 Efficacy and safety, doublet-LC TNT v nCRT",
+                "text": "📊 Efficacy by arm (3-yr rates unless noted)",
                 "table": {
                   "columns": [
                     "Endpoint",
                     "Doublet-LC TNT",
                     "nCRT",
-                    "Effect"
+                    "Effect size"
                   ],
                   "rows": [
                     [
-                      "3yr DFS (1°)",
+                      "3-yr DFS (1° EP)",
                       "74.8%",
                       "66.0%",
                       "HR 0.674 (0.489-0.929), P=.016"
                     ],
                     [
-                      "3yr MFS",
+                      "3-yr MFS",
                       "77.7%",
                       "67.6%",
-                      "HR 0.655 (0.469-0.915)"
+                      "HR 0.655 (0.469-0.915), P=.013"
                     ],
                     [
                       "pCR",
@@ -265,36 +239,66 @@
                       "P=.943"
                     ],
                     [
-                      "3yr OS",
+                      "3-yr OS",
                       "90.2%",
                       "87.5%",
                       "P=.167"
-                    ],
-                    [
-                      "G3+ AE, neoadjuvant phase",
-                      "27.59%",
-                      "8.56%",
-                      "P<.001"
-                    ],
-                    [
-                      "G3+ AE, entire course",
-                      "28.02%",
-                      "24.32%",
-                      "P=.371"
-                    ],
-                    [
-                      "Major postop complications",
-                      "3.98%",
-                      "2.94%",
-                      "P=.567"
                     ]
                   ]
                 }
               },
-              "📊 TME rate ~87% doublet-LC TNT v ~90% nCRT after neoadjuvant therapy",
-              "🔗 Sits alongside RAPIDO, PRODIGE-23, STELLAR; unlike RAPIDO/STELLAR this keeps LCRT rather than short-course, so the LCRT-v-SCRT question stays open",
-              "⚠️ All benefit is distant: MFS moved, locoregional failure did not (6.03% v 6.19%), and OS is not separated at 51mo",
-              "⚠️ Age cap 70; benefit-risk in older pts untested per the authors"
+              {
+                "text": "📊 Toxicity and surgical morbidity by arm",
+                "table": {
+                  "columns": [
+                    "Event",
+                    "Doublet-LC TNT",
+                    "nCRT",
+                    "P"
+                  ],
+                  "rows": [
+                    [
+                      "G≥3 AE, neoadjuvant phase",
+                      "27.59%",
+                      "8.56%",
+                      "<.001"
+                    ],
+                    [
+                      "Severe toxicity, entire course",
+                      "28.02%",
+                      "24.32%",
+                      ".371"
+                    ],
+                    [
+                      "Major postoperative complications",
+                      "3.98%",
+                      "2.94%",
+                      ".567"
+                    ]
+                  ]
+                }
+              },
+              "🔍 Phase 3, N=458 (232 v 226), accrued 2017-2023, median f/u 51 mo, age 18-70",
+              {
+                "text": "💊 Regimen by arm",
+                "subdetails": [
+                  "TNT: induction CAPOX x1 → LCRT + concurrent CAPOX x2 → consolidation CAPOX x3 → TME",
+                  "nCRT: LCRT + concurrent capecitabine → TME → adjuvant CAPOX x6 at 4-8 wks"
+                ]
+              },
+              "📐 LCRT in both arms; RT dose, fractionation, target volume not reported in source text",
+              {
+                "text": "🔍 High-risk MRI features at baseline",
+                "subdetails": [
+                  "cT4 47.82%",
+                  "cN2 75.98%",
+                  "Threatened mesorectal fascia 70.96%",
+                  "EMVI 54.80%"
+                ]
+              },
+              "⚠️ DFS gain rests on distant control; OS curves have not separated at 3 years",
+              "⚠️ Age capped at 70; author states benefit-risk above that needs further study",
+              "🔗 Source names RAPIDO, PRODIGE-23, STELLAR as TNT precedents; no head-to-head data"
             ],
             "figures": [],
             "nct": "NCT03177382",
@@ -305,57 +309,53 @@
             "slug": "tntcrt",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Randomised phase 3, primary DFS endpoint met with adequate follow-up, but supports an already-recognized TNT paradigm rather than displacing it; OS immature.",
-              "audience": "Stage II/III rectal, ≥1 MRI high-risk feature (cT4, cN2, MRF+, EMVI), age ≤70"
+              "rationale": "Randomized phase 3, primary DFS met at 51-mo median f/u, but TNT is already established by RAPIDO/PRODIGE-23/STELLAR; adds a regimen option, not a paradigm.",
+              "audience": "High-risk stage II/III LARC (cT4, cN2, MRF+, or EMVI+), age ≤70"
             },
-            "significance": "Locoregional failure was identical (6.03% v 6.19%, P=.943) while MFS moved (77.7% v 67.6%), so intensifying the concurrent and sandwich chemo buys distant control, not local control, on an unchanged LCRT backbone. RT dose and target volume are not in the source text, which limits transfer. The decision this moves is chemo intensity around RT, not the RT prescription.",
-            "monday_clinic": "In stage II/III rectal cancer aged 70 or younger with an MRI high-risk feature (cT4, cN2, threatened MRF, or EMVI), this supports doublet CAPOX delivered around long-course RT rather than concurrent capecitabine plus adjuvant chemo; it does not speak to low-risk cT3 disease, pts over 70, or short-course TNT.",
+            "significance": "Locoregional failure was identical (6.03% v 6.19%, P=.943) with the entire chemo course moved preoperatively, so intensifying systemic therapy around LCRT costs nothing in local control. RT dose, fractionation and target volume are absent from the source text, which gates transfer. The decision this moves is chemo sequencing, not RT technique.",
+            "monday_clinic": "In high-risk stage II/III rectal cancer aged 70 or under with cT4, cN2, involved mesorectal fascia, or EMVI, this supports delivering the full CAPOX course before surgery rather than adjuvantly; it does not extend to pts over 70 or to stage II/III disease without a high-risk MRI feature.",
             "primary_endpoint": {
               "name": "Disease-free survival",
               "klass": "surrogate",
               "stat_value": "HR 0.674",
-              "stat_detail": "95% CI 0.489-0.929, P=.016; 3yr DFS 74.8% v 66.0%"
+              "stat_detail": "95% CI 0.489-0.929, P=.016; 3-yr DFS 74.8% v 66.0%"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Multicenter randomized **phase 3**, N=**458** (doublet-LC TNT n=232, nCRT n=226), accrual June 2017 to December 2023, median follow-up **51 months**. **Primary:** disease-free survival."
+                "body": "Multicenter **randomized phase 3**, N=458, accrual June 2017 to December 2023, median follow-up **51 months**. Blinding is not stated in the source."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Stage II/III LARC aged **18 to 70** with at least **1 MRI high-risk feature**: cT4a-b, cN2, mesorectal fascia involvement, or cT3c-d with extramural vascular invasion. Baseline burden was genuinely high risk: cT4 **47.82%**, cN2 **75.98%**, threatened MRF **70.96%**, EMVI **54.80%**."
+                "body": "Stage II/III LARC aged **18 to 70** with at least 1 MRI high-risk feature (cT4a-b, cN2, involved mesorectal fascia, or cT3c-d with EMVI). Baseline burden was heavy on every axis, with **cN2 in 75.98%** and a **threatened MRF in 70.96%**."
               },
               {
                 "label": "Regimen",
-                "body": "Experimental arm: 1 cycle induction **CAPOX**, then LCRT with 2 cycles concurrent CAPOX, then 3 cycles consolidation CAPOX, then surgery. Control arm: LCRT with **concurrent capecitabine**, surgery, then 6 cycles adjuvant CAPOX beginning 4 to 8 weeks postoperatively."
+                "body": "Doublet-LC TNT: **1 cycle induction CAPOX**, LCRT with **2 cycles concurrent CAPOX**, **3 cycles consolidation CAPOX**, then surgery. Control: LCRT with **concurrent capecitabine**, surgery, then **6 cycles adjuvant CAPOX** starting 4 to 8 weeks postoperatively."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**Long-course RT in both arms**; the randomisation changes the chemotherapy around it, not the radiation. Dose, fractionation, and target volume are **not reported in source text**."
+                "body": "**LCRT in both arms**, so radiotherapy is held constant and the randomization tests chemotherapy intensity and sequencing around it. **Dose, fractionation and target volume are not reported in the source text.** Roughly **87%** of TNT pts and **90%** of nCRT pts went on to total mesorectal excision."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary:** DFS. **Secondary** reported here: MFS, pCR, locoregional failure, overall survival, grade ≥3 adverse events, major postoperative complications."
-              },
-              {
-                "label": "Results",
-                "body": "Primary endpoint met; the distant-versus-local split is the read, with **locoregional failure unchanged** and OS not yet separated (P=.167). See the arm-by-arm table above."
+                "body": "**Primary: disease-free survival.** Secondary endpoints included MFS, pCR, locoregional failure, overall survival, and toxicity across the neoadjuvant phase and the whole treatment course."
               },
               {
                 "label": "Safety",
-                "body": "Neoadjuvant grade ≥3 AEs roughly tripled (**27.59% v 8.56%**, P<.001), but across the entire treatment course the difference washed out (28.02% v 24.32%, P=.371) because the control arm's toxicity was deferred to adjuvant CAPOX. Major postoperative complications were comparable (3.98% v 2.94%)."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents high-risk stage II/III LARC aged 70 or younger with MRI-defined cT4, cN2, threatened MRF, or EMVI. Does not represent pts over 70, low-risk cT3N0-1 disease, or short-course RT-based TNT schedules."
+                "body": "The excess grade ≥3 toxicity is confined to the **neoadjuvant phase**; across the full treatment course, and for major postoperative complications, the arms converge, because the control arm pays its chemotherapy cost after surgery instead."
               },
               {
                 "label": "vs leading data",
-                "body": "The authors position this against **RAPIDO**, **PRODIGE-23**, and **STELLAR**, and explicitly call for comparison against short-course RT-based or nondoublet-concurrent TNT regimens. The phase 2 predecessor of this regimen reported a **36.2%** complete response rate."
+                "body": "The source names **RAPIDO, PRODIGE-23 and STELLAR** as the phase 3 TNT precedents but reports no cross-trial numbers. The phase 2 precursor of this regimen reported a complete response rate of **36.2%**."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents high-risk stage II/III LARC aged 18 to 70 with cT4, cN2, involved mesorectal fascia, or EMVI. Does not represent pts over 70, or stage II/III disease carrying no high-risk MRI feature."
               },
               {
                 "label": "Limitations",
-                "body": "The control arm's adjuvant chemo is a **known weak link** (delivery after TME is unreliable), so part of the DFS gap may reflect chemo received rather than sequencing itself. Single-country accrual over 6.5 years, no reported organ-preservation or functional endpoints yet, and **OS remains immature** at 51 months."
+                "body": "The DFS interval reaches **0.929** and OS shows no separation, so the benefit rests on distant control with a modest margin. Late toxicity, function and quality of life are still pending per the authors, which matters for a regimen whose whole cost is delivered upfront."
               }
             ],
             "relevant_specialties": [
@@ -364,14 +364,14 @@
               "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The RT prescription is the constant, not the variable: LCRT in both arms, and locoregional failure was identical (6.03% v 6.19%, P=.943) despite a pCR jump to 26.37%. So the higher pCR does not translate into local control here, and with dose, fractionation, and target volume absent from source text, this does not move the RT prescription. It does keep LCRT viable in the TNT era where RAPIDO and STELLAR pushed short course.",
-              "medonc": "The real randomisation is chemo delivery: sandwiched CAPOX around RT versus concurrent capecitabine plus 6 cycles of postoperative CAPOX. Sandwiching moved MFS (77.7% v 67.6%, HR 0.655) at the cost of tripled neoadjuvant grade ≥3 toxicity (27.59% v 8.56%), though whole-course severe toxicity was comparable (28.02% v 24.32%). This informs when to give the oxaliplatin, not whether.",
-              "surgonc": "Intensified neoadjuvant therapy did not degrade the operation: major postoperative complications 3.98% v 2.94% (P=.567). Roughly 87% versus 90% went on to TME, and pCR rose to 26.37% from 9.80%, which is the rate that feeds watch-and-wait discussions, though no organ-preservation endpoint is reported in source."
+              "radonc": "Locoregional failure was identical (6.03% v 6.19%), so moving the whole CAPOX course preoperatively costs nothing in local control while pCR rises to 26.37%, enlarging the pool for a watch-and-wait discussion. RT dose, fractionation and target volume are absent from the source text, which gates transfer.",
+              "medonc": "The variable here is chemotherapy, not radiotherapy: uninterrupted doublet CAPOX delivered entirely before surgery beat capecitabine chemoRT plus 6 adjuvant CAPOX cycles on DFS and MFS. The excess grade ≥3 toxicity sits in the neoadjuvant phase only and converges across the full course.",
+              "surgonc": "Intensified preoperative therapy did not degrade the operation: major postoperative complications were 3.98% v 2.94%, and roughly 87% versus 90% of pts proceeded to total mesorectal excision. The pCR jump to 26.37% is the number that will drive organ-preservation conversations at MDT."
             },
             "open_questions": [
-              "Doublet-LC TNT versus short-course RT-based TNT",
-              "Benefit-risk in pts over 70",
-              "Whether higher pCR translates to organ preservation"
+              "Doublet-LC TNT versus short-course RT-based TNT regimens head to head",
+              "Benefit-risk of intensified TNT in pts over 70",
+              "Whether the higher pCR translates into durable organ preservation"
             ],
             "consort": {
               "enrolled": null,
@@ -459,57 +459,79 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* diagnosis of rectal adenocarcinoma localised 0 - 12 cm from the anocutaneous line as measured by rigid rectoscopy (i.e. lower and middle third of the rectum)\n* Staging requirements: High-resolution, thin-sliced (i.e. 3mm) magnetic resonance imaging (MRI) of the pelvis is the…",
-                "answers_question": "Doublet-LC TNT versus short-course RT-based TNT",
-                "relevance_phrase": "randomised SCRT-TNT vs LC-CRT-TNT, both consolidation"
+                "answers_question": "Doublet-LC TNT versus short-course RT-based TNT regimens head to head",
+                "relevance_phrase": "randomised SCRT-TNT vs CRT-TNT, both w/ consolidation"
               },
               {
-                "nct": "NCT07258797",
-                "brief_title": "Short Course or Long Course Radiotherapy as Total Neoadjuvant Therapy in Locally Advanced Rectal Cancer",
-                "overall_status": "NOT_YET_RECRUITING",
+                "nct": "NCT06417476",
+                "brief_title": "Short-course Radiotherapy or Long-course Chemoradiation Followed by mFOLFOXIRI Consolidation Chemotherapy for Organ Preservation in Low Rectal Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
-                  "NA"
+                  "PHASE2"
                 ],
-                "enrollment_count": 150,
-                "primary_completion_date": "2028-12",
-                "brief_summary": "This study compares two standard radiotherapy approaches (short-course vs. long-course) given before surgery in patients with locally advanced rectal cancer. The goal is to see which treatment is more effective and better tolerated.",
+                "enrollment_count": 66,
+                "primary_completion_date": "2025-09",
+                "brief_summary": "Given the growing focus on preserving organ function and the utilization of neoadjuvant therapy, it is important to investigate and enhance the application of comprehensive neoadjuvant therapy in low rectal cancer. This approach aims to minimize or circumvent the organ dysfunction and subsequent decline in quality of life associated with radical surgery, with improving disease-free survival (DFS), while . Consequently, we propose to initiate a multicenter clinical trial to examine the medium-…",
                 "conditions": [
-                  "Adenocarcinoma of the Rectum"
+                  "Rectal Neoplasms"
                 ],
                 "interventions": [
                   {
-                    "name": "SCRT : 25 Gy in 5 fractions over 1 week to the pelvis using IGRT technique",
+                    "name": "Short-course radiotherapy",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "LCRT + Consolidation Chemotherapy",
+                    "name": "Irinotecan",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Oxaliplatin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Calcium Formate",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Fluorouracil",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Long-course chemoradiation",
                     "type": "RADIATION"
+                  },
+                  {
+                    "name": "Capecitabine",
+                    "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically confirmed adenocarcinoma of the rectum\n2. Locally advanced disease based on MRI including cT3-T4 and/or node positive disease (cN1 or N2)\n3. Tumor located within 15 cm from the anal verge (confirmed by endoscopy or MRI)\n4. ECOG performance status 0-2\n5.…",
-                "answers_question": "Doublet-LC TNT versus short-course RT-based TNT",
-                "relevance_phrase": "SCRT 25Gy/5F vs LCRT plus consolidation chemo"
+                "eligibility_brief": "Inclusion Criteria:\n\nDiagnosis: Histologically confirmed rectal adenocarcinoma. Preoperative Staging: Clinical stages cT2-4aN0-2. Tumor Location: Tumor's lower edge within 8cm from the anus, potentially affecting anal preservation or function.\n\nMetastasis Screening: Preoperative chest, abdomen, and…",
+                "answers_question": "Doublet-LC TNT versus short-course RT-based TNT regimens head to head",
+                "relevance_phrase": "SCRT vs LC-CRT, same mFOLFOXIRI consolidation"
               },
               {
-                "nct": "NCT07551479",
-                "brief_title": "SCRT Based iTNT vs. LCRT Based TNT for MSS Locally Advanced Rectal Cancer",
-                "overall_status": "NOT_YET_RECRUITING",
+                "nct": "NCT07113275",
+                "brief_title": "A Clinical Trial Comparing Long-Course Versus Short-Course Radiotherapy Followed by Immunotherapy Combined With Total Neoadjuvant Therapy (TNT) to Long-Course Radiotherapy Followed by TNT in Locally Advanced Rectal Cancer",
+                "overall_status": "RECRUITING",
                 "phase": [
                   "PHASE3"
                 ],
-                "enrollment_count": 612,
-                "primary_completion_date": "2032-12",
-                "brief_summary": "In this prospective, multicentre, randomized phase III trial, 612 locally advanced rectal cancer (LARC, T3-4/N+M0) patients with at least one high-risk features (lower location (≤5cm), cT4, cN2, MRF+, EMVI+, TD+) will be included, and randomly assigned to TNT group and iTNT group (1:1). TNT group receives long-course chemoradiotherapy (50Gy/25Fx concurrent with oral capecitabine) followed by 6 cycles of CAPOX. iTNT group receives short-course radiotherapy (25Gy/5Fx) followed by 6 cycles of…",
+                "enrollment_count": 444,
+                "primary_completion_date": "2028-01",
+                "brief_summary": "This study is a national multicenter, prospective randomized, placebo- controlled Phase III clinical trial designed to investigate the potential therapeutic benefit of immunotherapy combined with total neoadjuvant therapy (TNT) and to compare the efficacy of different radiotherapy modalities followed by immunotherapy.",
                 "conditions": [
-                  "Locally Advanced Rectal Cancer (LARC)",
-                  "MSS (Microsatellite Stable)"
+                  "Rectal Cancer",
+                  "Total Neoadjuvant Therapy",
+                  "Radiotherapy",
+                  "Immunotherapy"
                 ],
                 "interventions": [
                   {
-                    "name": "short-course radiaotherapy",
+                    "name": "Short-course radiotherapy",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "long-course chemoradiaothearpy",
+                    "name": "Long-course radiotherapy",
                     "type": "RADIATION"
                   },
                   {
@@ -521,13 +543,21 @@
                     "type": "DRUG"
                   },
                   {
-                    "name": "PD-1 inhibitor",
+                    "name": "HLX10",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "TME surgery",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "HLX10 placebo",
                     "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria\n\n1. Age 18-75 years old, female and male;\n2. Pathological confirmed adenocarcinoma;\n3. The distance from anal verge ≤ 10 cm;\n4. MSI/MMR status: MSS/pMMR;\n5. Clinical stage T3-4 and/or N+, without distance metastases;\n6. At least one of the following factors is present: distance…",
-                "answers_question": "Doublet-LC TNT versus short-course RT-based TNT",
-                "relevance_phrase": "phase 3 SCRT iTNT vs LCRT TNT, high-risk LARC"
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients or their family members agree to participate in the study and sign the informed consent form;\n2. Age 18-75 years, male or female;\n3. Histologically confirmed Locally Advanced rectal adenocarcinoma;\n4. Immunohistochemistry and/or genetic testing confirmed…",
+                "answers_question": "Doublet-LC TNT versus short-course RT-based TNT regimens head to head",
+                "relevance_phrase": "phase 3 SCRT vs LCRT arms within TNT"
               },
               {
                 "nct": "NCT07118800",
@@ -553,72 +583,86 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically confirmed diagnosis of adenocarcinoma of the rectum\n2. Age ≥75 years\n3. WHO performance status 0-1\n4. cT3a-b with maximum diameter \\> 5 cm, T3c-d or cT4 tumor on pretreatment pelvic MRI\n5. General condition considered suitable for radical pelvic surgery and a…",
-                "answers_question": "Benefit-risk in pts over 70",
-                "relevance_phrase": "age >=75 randomised SCRT +/- FOLFOX4s, QoL endpoint"
+                "answers_question": "Benefit-risk of intensified TNT in pts over 70",
+                "relevance_phrase": "NACRE-2: SCRT +/- FOLFOX4s, age >=75, QoL endpoint"
               },
               {
-                "nct": "NCT06758830",
-                "brief_title": "Total Neoadjuvant Therapy and Organ Preservation Versus Surgery for Rectal Cancer.",
-                "overall_status": "RECRUITING",
+                "nct": "NCT04246684",
+                "brief_title": "Short RT Versus RCT,Followed by Chemo.and Organ Preservation for Interm and High-risk Rectal Cancer Patients",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
-                  "PHASE2",
                   "PHASE3"
                 ],
-                "enrollment_count": 400,
-                "primary_completion_date": "2029-12",
-                "brief_summary": "This study hypothesizes that approximately 50% of rectal cancer patients can preserve their rectum using a watch-and-wait strategy if they achieve a complete or near-complete clinical response to total neoadjuvant therapy (TNT). The objective is to determine whether the complications, quality of life, and survival rates of rectal cancer patients who have achieved a complete or near-complete clinical response to TNT, followed by a watch-and-wait approach, are comparable to those of patients who…",
+                "enrollment_count": 702,
+                "primary_completion_date": "2023-09",
+                "brief_summary": "The hereby proposed ACO/ARO/AIO-18.1 randomized trial aims to directly compare the newly established TNT concepts applying either short-course RT according to RAPIDO, or CRT according to CAO/ARO/AIO-04/-12, both followed by consolidation chemotherapy, and surgery or a watch\\&wait (W\\&W) approach for patients with clinical complete response (cCR).\n\nThe ACO/ARO/AIO-18.1 study incorporates several novel and innovative aspects to further optimize multimodal rectal cancer treatment, partly…",
                 "conditions": [
-                  "Rectal Cancer",
-                  "Total Neoadjuvant Treatment",
-                  "Neoadjuvant Therapy",
-                  "Radiotherapy",
-                  "Chemotherapy",
-                  "Organ Preservation",
-                  "Radiotherapy Side Effect",
-                  "Chemotherapy Side Effects",
-                  "Chemoradiotherapy",
-                  "Low Anterior Resection Syndrome",
-                  "Quality of Life"
+                  "Rectal Cancer Stage III"
                 ],
                 "interventions": [
                   {
-                    "name": "Radiation Therapy",
+                    "name": "Oxaliplatin, 85 mg/m2",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "5FU; 2400 mg/m2",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "5FU, 250 mg/m2",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "5FU, 2400 mg/m2",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Oxaliplatin 50 mg/m2",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Folinic Acid, 400 mg/m2",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Radiotherapy control, 5x5 Gy: 25 Gy",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "Chemoradiotherapy",
+                    "name": "Capecitabine, 1000 mg/m2",
                     "type": "DRUG"
                   },
                   {
-                    "name": "Consolidation Chemotherapy",
+                    "name": "Oxaliplatin 85 mg/m2",
                     "type": "DRUG"
                   },
                   {
-                    "name": "Surgery",
-                    "type": "PROCEDURE"
+                    "name": "radiotherapy experimental, 30 x 1,8 Gy: 54 Gy",
+                    "type": "RADIATION"
                   },
                   {
-                    "name": "Part two",
-                    "type": "OTHER"
+                    "name": "Capecitabine, 825 mg/m2",
+                    "type": "DRUG"
                   },
                   {
-                    "name": "Adjuvant treatment",
-                    "type": "OTHER"
+                    "name": "Oxaliplatin, 130 mg/m2",
+                    "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Part One\n\nInclusion Criteria:\n\n* Over 18 years of age.\n* Participants who agreed to participate in the study signed an informed consent form.\n* The Eastern Cooperative Oncology Group (ECOG) score ranges from 0 to 2.\n* Pathologically confirmed rectal adenocarcinoma.\n* Tumor up to 10 cm from the…",
-                "answers_question": "Whether higher pCR translates to organ preservation",
-                "relevance_phrase": "TNT responders to W&W vs surgery, 400 pts"
+                "eligibility_brief": "Inclusion Criteria:\n\n* diagnosis of rectal adenocarcinoma localised 0 - 12 cm from the anocutaneous line as measured by rigid rectoscopy (i.e. lower and middle third of the rectum)\n* Staging requirements: High-resolution, thin-sliced (i.e. 3mm) magnetic resonance imaging (MRI) of the pelvis is the…",
+                "answers_question": "Whether the higher pCR translates into durable organ preservation",
+                "relevance_phrase": "W&W arm for cCR pts after either TNT schedule"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "short-course radiotherapy total neoadjuvant rectal",
-                "watch and wait rectal organ preservation"
+                "rectal cancer short-course radiotherapy",
+                "elderly rectal cancer neoadjuvant",
+                "organ preservation rectal cancer"
               ],
               "queries_failed": [],
-              "candidates_returned": 36,
-              "fetched_at": "2026-08-09T17:37:02.806Z",
+              "candidates_returned": 49,
+              "fetched_at": "2026-08-09T21:19:30.023Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -631,227 +675,323 @@
                 "id": 69
               }
             ]
-          },
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "prostate",
+        "intro": "Both entries are PSMA PET interpretation, not treatment: what a positive scan in BCR obligates, and whether uptake change can be read as response at all.",
+        "studies": [
           {
-            "name": "STELLAR",
-            "tldr": "3y DFS 64.5% vs 62.3%, HR 0.883 (upper bound 1.11 < 1.43 margin): 5x5Gy + CAPOX noninferior to long-course CRT in LARC.",
+            "name": "PSMA PET BCR Natural History Study",
+            "tldr": "Baseline data on 130 PSMA-positive BCR men; most with PSADT >9-12mo still had PET findings, yet only ~1/3 started therapy.",
             "details": [
-              "🔍 Multicenter open-label phase III, 16 Chinese hospitals, N=599 (TNT 302 / CRT 297), median f/u 35.0mo",
-              "🔍 cT3-4 and/or cN+ distal or middle-third rectal ca; 85.8% vs 83.5% stage III; MRF+ 56% both arms",
-              "📐 RT technique: all pts IMRT. TNT 5Gy x5; CRT 50Gy/25fx with concurrent capecitabine 825mg/m² BID",
-              "📐 CTV covered mesorectum, presacral space, internal iliac + obturator nodes, ischiorectal fossa; external iliac only if cT4b; superior border sacral promontory, inferior 2-3cm below tumor; CTV→PTV 0.5-1.0cm",
-              "📊 3y LRR 8.4% (95% CI 4.6-12.2) TNT vs 11.0% (6.5-15.5) CRT, HR 0.80 (0.45-1.44), p=.461",
-              "📊 3y MFS 77.1% vs 75.3%, HR 0.88 (0.63-1.24), p=.475: no distant-metastasis gain, unlike RAPIDO/PRODIGE 23",
-              "📊 3y OS 86.5% vs 75.1%, HR 0.67 (0.46-0.97), p=.033 (secondary EP, open-label, unadjusted for multiplicity)",
-              "⚠️ OS gain is the weak link: no MFS or LRR difference to explain it, and Polish II's early OS benefit vanished at 8y",
-              "📊 pCR + sustained cCR 21.8% TNT vs 12.3% CRT, p=.002; cCR 11.1% vs 4.4%, organ preservation without surgery 9.4% vs 3.4%",
-              "📊 RT delivery favored short-course: all TNT pts completed 5Gy x5 without dose reduction vs 1.4% dose reduction and 2.4% interruption in CRT",
-              "⚠️ Preop grade III-V toxicity 26.5% vs 12.6% (p<.001), driven by hematologic 15.8% vs 2.0%: the cost is chemo, not RT",
-              "🔗 3y LRR (8.4%/11.0%) in line with RAPIDO and PRODIGE 23 (4%-8.3%) and far below Polish II (21%-22%), where all pts got IMRT here",
-              "⚠️ Preop completion 82.6% vs 95.2% and full-dose 74.8% vs 93.2% (both p<.001): the TNT advantage was postop, 60.0% vs 48.3% completing planned adjuvant cycles (p=.009)",
-              "⚠️ Chinese-only population, age 18-70, median 55: younger than a typical Western LARC cohort",
+              "🔍 Prospective NCI natural-history cohort, N=130 at baseline; ongoing, median f/u ~2yr",
+              "🔍 Eligibility: post-definitive therapy BCR, PSA ≥0.5, salvage RT already given or declined",
+              "🔍 Imaging schedule: baseline PSMA PET; negative → annual, any finding (incl equivocal) → q6mo",
+              "📊 Majority with PSADT >9mo and >12mo had PSMA PET findings when PSA was above 5",
+              "📊 Sites of disease described as nodal, prostate bed recurrence, occasional small equivocal bone lesions",
+              "📊 Only about a third have gone on therapy so far; majority observed off treatment",
               {
-                "text": "📊 Grade 3-4 acute toxicity during preoperative treatment",
-                "table": {
-                  "columns": [
-                    "Toxicity",
-                    "TNT (n=298)",
-                    "CRT (n=293)",
-                    "P"
-                  ],
-                  "rows": [
-                    [
-                      "Hematologic",
-                      "47 (15.8)",
-                      "6 (2.0)",
-                      "<.001"
-                    ],
-                    [
-                      "Leukopenia",
-                      "17 (5.7)",
-                      "5 (1.7)",
-                      ".01"
-                    ],
-                    [
-                      "Thrombocytopenia",
-                      "33 (11.1)",
-                      "2 (0.7)",
-                      "<.001"
-                    ],
-                    [
-                      "GI",
-                      "31 (10.4)",
-                      "22 (7.5)",
-                      ".223"
-                    ],
-                    [
-                      "Proctitis",
-                      "14 (4.7)",
-                      "9 (3.1)",
-                      ".307"
-                    ],
-                    [
-                      "Diarrhea",
-                      "19 (6.4)",
-                      "14 (4.8)",
-                      ".398"
-                    ]
-                  ]
-                }
+                "text": "📊 Progression on conventional imaging (companion Madan poster, ~1.5yr f/u)",
+                "subdetails": [
+                  "5 patients out of the first ~150 progressed on conventional imaging",
+                  "Stated >95% had no abrupt PET change discordant from PSA kinetics"
+                ]
               },
-              {
-                "text": "📐 OS subgroup HRs favoring TNT (Fig 3), the only ones reaching significance",
-                "table": {
-                  "columns": [
-                    "Subgroup",
-                    "OS HR",
-                    "95% CI",
-                    "P"
-                  ],
-                  "rows": [
-                    [
-                      "cT4",
-                      "0.362",
-                      "0.152 to 0.859",
-                      ".021"
-                    ],
-                    [
-                      "Distance to anal verge ≤5 cm",
-                      "0.540",
-                      "0.318 to 0.916",
-                      ".022"
-                    ],
-                    [
-                      "cT2-3",
-                      "0.752",
-                      "0.493 to 1.149",
-                      ".187"
-                    ],
-                    [
-                      "Distance to anal verge >5 cm",
-                      "0.808",
-                      "0.468 to 1.394",
-                      ".443"
-                    ]
-                  ]
-                }
-              },
-              "⚠️ Those two OS subgroups are unadjusted post-hoc splits of an already-secondary endpoint; DFS was flat in both (cT4 HR 0.621, ≤5cm HR 0.706)",
-              "⚠️ Surgical burden similar: grade III+ complications 14.0% vs 15.7% (p=.625); R0 91.5% vs 87.8% (p=.189)"
+              "🔍 Therapy on study limited to courses <6mo: intermittent ADT, intermittent ARPI trials, Radium-223, SBRT allowed",
+              "⚠️ Designed pre-EMBARK, so the observation arm predates current BCR treatment norms",
+              "⚠️ Source is a conference interview transcript, not a peer-reviewed report; no CIs, no denominators for the PSADT strata",
+              "⚠️ Selection bias: NCI referral cohort, patients willing to be observed; not a consecutive registry"
             ],
             "figures": [],
-            "nct": "NCT02533271",
+            "nct": null,
             "tweet_ids": [
-              1000000070
+              1000000072
             ],
-            "slug": "stellar",
+            "slug": "psma-bcr-natural-history",
             "verdict": {
-              "soc_implication": "confirmatory",
-              "rationale": "Prespecified noninferiority met with adequate power in a randomised phase III; aligns with Polish II, RAPIDO, PRODIGE 23 supporting short-course TNT as a recognized option.",
-              "audience": "cT3-4 and/or cN+ distal or middle-third rectal adenocarcinoma, age 18-70"
+              "soc_implication": "early-signal",
+              "rationale": "Baseline cross-sectional read of an ongoing single-institution cohort; no comparator, no outcome endpoint yet, numbers reported only as narrative in an interview.",
+              "audience": "PSMA-positive biochemical recurrence, post-salvage RT or RT declined, PSA ≥0.5"
             },
-            "significance": "For an RT reader the real finding is delivery, not survival: every TNT pt finished 5Gy x5 with no dose reduction vs 1.4% reduced and 2.4% interrupted on 50Gy/25fx, and 3y LRR stayed at 8.4% with IMRT and standard mesorectal plus internal iliac coverage. The excess grade 3-4 toxicity was hematologic (15.8% v 2.0%), so shortening the RT course costs one week of clinic time, not local control.",
-            "monday_clinic": "In cT3-4 or node-positive middle or low rectal cancer heading to TME, this supports 5x5Gy followed by CAPOX as an alternative to 50Gy/25fx chemoradiation when treatment-time compression or adjuvant chemo compliance is the constraint; it does not extend to upper-third tumors or pts over 70, neither of whom were enrolled.",
-            "primary_endpoint": {
-              "name": "3-year disease-free survival",
-              "klass": "surrogate",
-              "stat_value": "64.5% v 62.3%",
-              "stat_detail": "HR 0.883 (one-sided 95% CI to 1.11), P < .001 for noninferiority"
-            },
+            "significance": "The RT-relevant read is that a positive PET at PSA >5 is near-universal even at PSADT >12mo, so PET positivity alone does not identify who needs metastasis-directed SBRT. Prostate bed recurrence was among the described sites, which reopens a salvage-RT target question in men already treated with salvage RT.",
+            "monday_clinic": "In post-salvage-RT BCR men with slow PSADT and a positive PSMA PET, this supports observation as a defensible option pending follow-up data; it does not speak to men with rapid PSADT or conventional-imaging metastases.",
+            "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Multicenter **open-label randomized phase III** noninferiority trial, 1:1, N=599, 16 hospitals across 11 Chinese provinces, accrued Aug 2015 to Aug 2018. Stratified by location, clinical stage and MRF status; median follow-up **35.0 months**. Prespecified NI margin **HR 1.43** (equivalently an 11% absolute DFS margin), one-sided alpha 0.05, ≥194 events for 80% power."
+                "body": "Prospective **natural history** cohort at the NCI, ongoing, median follow-up **~2 years**. The reported analysis is **baseline imaging of the first 130 patients**, a single timepoint correlating PSMA PET findings with PSA doubling time."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Age **18-70**, ECOG 0-1, **cT3-4 and/or node-positive** rectal adenocarcinoma of the distal or middle third, no distant metastases and no prior anticancer treatment. Median age 55, **MRF involvement 56%** in both arms, clinical stage III in 85.8% vs 83.5%. Staging was **central MRI** read independently by three radiologists; recurrent disease and second primaries excluded."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "TNT arm received **5 Gy x 5** over one week, CRT arm **50 Gy in 25 fractions** over 5 weeks with concurrent capecitabine 825 mg/m² BID. **All patients received IMRT**, the only one of the four TNT trials to do so. CTV covered mesorectum, presacral space, internal iliac, obturator nodes and ischiorectal fossa, external iliac only for cT4b; superior border at the sacral promontory, inferior 2-3 cm below the tumor, CTV to PTV expansion 0.5-1.0 cm with 95% PTV coverage."
+                "body": "Men with **BCR after definitive therapy**, all of whom had already received **salvage radiation or declined it**. Entry requires **PSA ≥0.5**; these are patients who would not have qualified for metastatic trials before PSMA PET existed."
               },
               {
                 "label": "Regimen",
-                "body": "TNT: four cycles of CAPOX (oxaliplatin 130 mg/m² day 1, capecitabine 1,000 mg/m² BID days 1-14) starting 7-14 days after RT, then TME, then **two** postoperative CAPOX cycles. CRT: concurrent capecitabine, TME, then **six** postoperative CAPOX cycles. TME was recommended 6-8 weeks after preoperative treatment in both arms, with watch-and-wait permitted for cCR."
+                "body": "Therapy is **physician's choice, not mandated**, and capped at courses lasting **under six months**: intermittent ADT, intermittent ARPI protocols, a Radium-223 trial, or SBRT. **Only about a third** have started any therapy."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "SBRT is permitted as a **short-course option**, not protocol-mandated; no dose, fractionation, or target-volume detail is reported in source. All enrollees are **post-salvage RT or salvage-RT decliners**, so the prostate bed has usually already been treated."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary: 3-year DFS** (locoregional failure, distant metastasis, second primary or death from any cause). Secondary: OS, MFS, locoregional recurrence, surgical complications, toxicity and completion rates, plus rates of radical resection and complete response."
+                "body": "The presented analysis is descriptive: **PSMA PET positivity versus PSA doubling time** at baseline. Longitudinal endpoints (PET evolution, conventional-imaging progression) are stated as still being analyzed."
               },
               {
                 "label": "Results",
-                "body": "Noninferiority was met and locoregional control was equivalent. The **3y OS difference (86.5% v 75.1%, HR 0.67) is a secondary endpoint** with no corresponding MFS or LRR signal to explain it, and disappeared on subgroup analysis."
-              },
-              {
-                "label": "Safety",
-                "body": "Preoperative grade III-V toxicity **26.5% v 12.6%** (P < .001), almost entirely hematologic (grade 3-4 **15.8% v 2.0%**), with thrombocytopenia 11.1% v 0.7%. GI and proctitis grade 3-4 did not differ. Grade III+ surgical complications 14.0% v 15.7% (P = .625) with no 30-day postoperative deaths; adjuvant-phase grade III-IV toxicity was **lower** with TNT (3.3% v 11.8%, P = .003)."
-              },
-              {
-                "label": "vs leading data",
-                "body": "3y LRR of 8.4% and 11.0% match RAPIDO and PRODIGE 23 (**4%-8.3%**) and sit far below Polish II (**21%-22%**). Unlike RAPIDO and PRODIGE 23, STELLAR showed **no reduction in 3-year distant metastasis** (22.8% v 24.7%); like Polish II it showed an early OS gain, which in Polish II had vanished by 8 years."
+                "body": "The **majority** of men with PSADT **>9mo and >12mo** had PSMA PET findings once **PSA exceeded 5**, chiefly nodal, prostate bed, and small equivocal bone lesions. In the companion follow-up poster, **5 of the first ~150** progressed on conventional imaging at about 1.5 years."
               },
               {
                 "label": "Applies to",
-                "body": "Represents cT3-4 or node-positive middle and distal rectal adenocarcinoma in patients aged 18-70 treated with IMRT and oxaliplatin-based chemotherapy. Does not represent upper-third rectal tumors, patients over 70, or the unresectable fixed cT3/cT4 population that dominated Polish II."
+                "body": "Represents PSMA-positive BCR after definitive therapy plus salvage RT, PSA ≥0.5, largely favorable PSA kinetics. Does not represent conventionally metastatic disease, de novo mCSPC, or men who have never had salvage RT considered."
               },
               {
                 "label": "Limitations",
-                "body": "The 11% NI margin was wide, and the authors concede a narrower margin or larger sample would have been preferable in retrospect. Late toxicity and quality of life are deferred to a future report, so the durable pelvic cost of 5 Gy x 5 in this cohort is unmeasured; 53 patients who did not achieve cCR refused surgery, blurring the TME denominator."
+                "body": "Numbers reach the reader only through an interview transcript: no stratum denominators, no confidence intervals, no per-PSADT-band positivity rates. The **five progression events** come from a separate poster on an overlapping but differently sized cohort (~150), so it cannot be aligned to the 130-patient baseline set."
+              },
+              {
+                "label": "Discussion",
+                "body": "The stated framing is that PSMA-positive BCR is a **new disease state**, visible only because the scan changed, and that treating it as mCSPC risks **overtreatment** in men who historically waited years for conventional metastases. The cohort's value will be longitudinal, whether PET change adds anything over PSA kinetics."
               }
             ],
             "relevant_specialties": [
               "radonc",
-              "medonc",
-              "surgonc"
+              "medonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Compressing 50Gy/25fx to 5Gy x5 cost nothing in local control (3y LRR 8.4% v 11.0%, p=.461) with IMRT and mesorectal plus internal iliac coverage, and every TNT pt completed RT without dose reduction. The excess grade 3-4 toxicity was hematologic (15.8% v 2.0%), from the CAPOX, not the pelvis. Late toxicity is still unreported.",
-              "medonc": "Moving CAPOX in front of surgery raised completion of planned adjuvant cycles to 60.0% v 48.3% (p=.009) and cut adjuvant grade III-IV toxicity to 3.3% v 11.8% (p=.003), but four preop cycles bought no distant control (3y MFS 77.1% v 75.3%, p=.475). Sequencing, not intensity, is what changed.",
-              "surgonc": "Preoperative sequence did not degrade the operation: R0 91.5% v 87.8% (p=.189), grade III+ complications 14.0% v 15.7% (p=.625), no 30-day deaths, median stay 8 days in both arms. Sustained cCR without surgery reached 9.4% v 3.4%, so more low tumors arrive as watch-and-wait candidates."
+              "radonc": "Near-universal PET positivity at PSA >5, even at PSADT >12mo, means a positive scan by itself cannot select men for metastasis-directed SBRT. Prostate bed recurrence appears among described sites in a cohort already given salvage RT, which bears on re-irradiation and target questions.",
+              "medonc": "Only about a third started therapy and 5 of ~150 progressed on conventional imaging at ~1.5yr, arguing against reflexively applying mCSPC doublet or triplet approaches to PSMA-detected BCR. It supports observation or intermittent short-course therapy while awaiting longitudinal data."
             },
             "open_questions": [
-              "Does the 3-year OS advantage survive 5-10 year follow-up",
-              "Late toxicity and quality of life after 5x5Gy plus CAPOX",
-              "Durability of watch-and-wait after short-course TNT"
+              "Does PET change add prognostic value over PSA doubling time",
+              "Which PSMA-positive BCR men can safely be observed off therapy",
+              "Role of metastasis-directed SBRT vs observation in this state"
             ],
-            "consort": {
-              "enrolled": 629,
-              "excluded": 30,
-              "randomized": 599,
-              "arms": [
-                {
-                  "label": "TNT (5 Gy x 5 + CAPOX)",
-                  "allocated": 302,
-                  "analyzed": 302
-                },
-                {
-                  "label": "CRT (50 Gy/25f + capecitabine)",
-                  "allocated": 297,
-                  "analyzed": 297
-                }
-              ]
+            "consort": null,
+            "modality": null,
+            "intent": null,
+            "methodology": "real-world-evidence",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT03630666",
+                "brief_title": "Comparison of Intermittent Androgen Deprivation Therapy With or Without Irradiation Recovery in Prostate Cancer Patients",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 256,
+                "primary_completion_date": "2026-06",
+                "brief_summary": "Metastatic prostate cancer has traditionally been regarded as an incurable dissemination of disease, and treatment is focused on delaying progression rather than eliminating all tumor burden. Local therapies, and specifically radiotherapy, have been directed at quality of life endpoints and not at improving survival. However, advances in imaging and systemic therapy have identified a population of 'oligometastatic' patients who have a lower burden of metastatic disease (usually ≤5 lesions), who…",
+                "conditions": [
+                  "Prostate Cancer",
+                  "Oligometastasis"
+                ],
+                "interventions": [
+                  {
+                    "name": "IADT",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "IADT + radiotherapy",
+                    "type": "COMBINATION_PRODUCT"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically-proven prostate adenocarcinoma\n* Age ≥ 18 years\n* Performance Status 0-1\n* Prior radical prostate treatment (surgery and/or radiotherapy)\n* ≤ 5 metastatic pelvic lymph nodes detected by FCH-PET or PSMA-PET\n* Upper limit of metastatic lymph nodes: aortic…",
+                "answers_question": "Role of metastasis-directed SBRT vs observation in this state",
+                "relevance_phrase": "randomised IADT ± RT for ≤5 PSMA-PET pelvic nodes"
+              },
+              {
+                "nct": "NCT04787744",
+                "brief_title": "Veterans Affairs Seamless Phase II/III Randomized Trial of STAndard Systemic theRapy With or Without PET-directed Local Therapy for Oligometastatic pRosTate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2",
+                  "PHASE3"
+                ],
+                "enrollment_count": 464,
+                "primary_completion_date": "2026-09",
+                "brief_summary": "This is a prospective, open-label, multi-center seamless phase II to phase III randomized clinical trial designed to compare SST with or without PET-directed local therapy in improving the castration-resistant prostate cancer-free survival (CRPC-free survival) for Veterans with oligometastatic prostate cancer. Oligometastasis will be defined as 1-10 sites of metastatic disease based on the clinical determination of the LSI which incorporates all imaging, clinical, and pathologic data available.",
+                "conditions": [
+                  "Prostate Cancer",
+                  "Oligometastasis",
+                  "Oligorecurrence",
+                  "Recurrent Prostate Cancer",
+                  "Metastatic Prostate Cancer",
+                  "De Novo Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "PET-directed Local Therapy using Surgery",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "PET-directed Local Therapy using Radiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Salvage Local Therapy for locally recurrent disease",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Goserelin, Histrelin, Leuprolide & Triptorelin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Nilutamide, Flutamide, & Bicalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Degarelix & Relugolix",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Docetaxel +/- prednisone",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Abiraterone + Prednisone",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Abiraterone + Methylprednisolone",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Apalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT + Enzalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Prostate-directed Radiation for De novo oligometastatic prostate cancer",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\nAge 18 years. Ability to provide Informed Consent for participation in the study ECOG Performance Status 2 at time of enrollment. Prostate cancer, confirmed histologically or cytologically. If original documentation of histology and cytology are not available, documentation of…",
+                "answers_question": "Role of metastasis-directed SBRT vs observation in this state",
+                "relevance_phrase": "randomised SST ± PET-directed local therapy, CRPC-FS"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "PSMA PET biochemical recurrence observation prostate",
+                "metastasis-directed SBRT oligorecurrent prostate"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 16,
+              "fetched_at": "2026-08-09T21:17:42.453Z",
+              "rerank_outcome": "picked_N"
             },
-            "modality": "combined",
-            "intent": "curative",
-            "methodology": "phase-3-rct",
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 72
+              }
+            ]
+          },
+          {
+            "name": "USPCC 2026: PSMA PET Response Assessment",
+            "tldr": "n=16 prospective data: PSMA uptake change is prognostic (mOS 17.8 vs 37.2mo) but AR-regulated, so not a valid response measure.",
+            "details": [
+              "📊 Rowe's thesis: PSMA expression is AR-regulated, so post-treatment uptake change may not track burden",
+              "🔍 Point-counterpoint talk, not new data; built on Zukotynski 2021, Markowski 2021, RECIP 1.0",
+              {
+                "text": "📊 Time to therapy change and OS by PSMA PET response metric (Zukotynski, n=16)",
+                "table": {
+                  "columns": [
+                    "Metric",
+                    "Median time to therapy change",
+                    "Median OS"
+                  ],
+                  "rows": [
+                    [
+                      "Low DPSM",
+                      "12.2 mo (95% CI 11.3-NA)",
+                      "37.2 mo (95% CI 28.9-NA)"
+                    ],
+                    [
+                      "High DPSM",
+                      "6.5 mo (95% CI 4.6-NA), p=0.0001",
+                      "17.8 mo (95% CI 13.9-NA), p=0.02"
+                    ],
+                    [
+                      "Low DASM",
+                      "12.2 mo (95% CI 11.3-NA)",
+                      "NA (95% CI 37.2-NA)"
+                    ],
+                    [
+                      "High DASM",
+                      "6.9 mo (95% CI 6.1-NA), p=0.003",
+                      "17.8 mo (95% CI 13.9-NA), p=0.002"
+                    ]
+                  ]
+                }
+              },
+              "📐 OS by unfavorable DPSM: HR 5.03 (95% CI 1.17-21.65)",
+              "📐 OS by unfavorable DASM: HR 9.31 (95% CI 1.81-47.87)",
+              "⚠️ Only 16 evaluable pts; HR CIs run 1.17-21.65 and 1.81-47.87, magnitude unstable",
+              "💊 BAT series: 3 of 6 men progressed on PSMA PET at 3mo, before conventional imaging",
+              "🔍 Repeatability assessed with Bland-Altman, ICC, within-subject CoV across SUVmax, SUVmean, SUVtotal, tumor volume",
+              "🔗 RECIP 1.0 grades PD/PR/SD/CR by combining PSMA PET with CT, designed for radioligand therapy"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000073
+            ],
+            "slug": "psma-pet-response-assessment-review",
+            "significance": "Serial PSMA PET after starting abiraterone or enzalutamide reads AR signaling, not burden, so a post-treatment scan is not a response map. The stratification is real (median OS 17.8 vs 37.2 mo by DPSM) but prognostic, and RECIP 1.0 was built for radioligand therapy, not AR-axis agents.",
+            "monday_clinic": "In men with metastatic APMR restaged on PSMA PET 2 to 4 months after starting abiraterone or enzalutamide, an increase in uptake is prognostic but not established as progression; it does not extend to men whose PSMA PET follows radioligand therapy.",
+            "primary_endpoint": null,
+            "analysis_sections": null,
+            "relevant_specialties": [
+              "radonc",
+              "medonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "PSMA PET drives metastasis-directed target selection, and this argues the post-AR-agent scan is not a burden map: uptake moves with androgen receptor signaling. RECIP 1.0 was designed for radioligand therapy response, so the source does not extend it to scans taken after abiraterone or enzalutamide.",
+              "medonc": "The switch decision is the point: high DPSM carried median time to therapy change 6.5 mo vs 12.2 mo for low DPSM (p=0.0001), so the pattern stratifies prognosis. It does not establish that increased uptake at 2 to 4 months equals progression warranting a change of AR-axis agent."
+            },
+            "open_questions": [
+              "Kinetics of AR-axis therapy effects on PSMA expression",
+              "Reliability of lesion identification and segmentation on serial PSMA PET",
+              "RECIP validation outside radioligand therapy settings"
+            ],
+            "consort": null,
+            "modality": null,
+            "intent": null,
+            "methodology": null,
+            "content_type": "review",
+            "discussed_trials": [
+              "RECIP 1.0"
+            ],
             "significance_perspective": "Radiation oncology",
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "short-course radiotherapy rectal cancer long-term survival",
-                "rectal cancer radiotherapy late toxicity quality of life",
-                "rectal cancer watch and wait organ preservation"
+                "PSMA PET enzalutamide",
+                "RECIP PSMA PET response"
               ],
-              "queries_failed": [],
-              "candidates_returned": 55,
-              "fetched_at": "2026-08-09T17:37:11.963Z",
+              "queries_failed": [
+                {
+                  "term": "RECIP PSMA PET response",
+                  "reason": "timeout"
+                }
+              ],
+              "candidates_returned": 20,
+              "fetched_at": "2026-08-09T21:20:09.261Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [
               {
                 "type": "paper",
-                "id": 70
+                "id": 73
               }
             ]
           }
