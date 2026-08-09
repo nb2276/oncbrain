@@ -119,6 +119,14 @@ export type DigestSourceRef =
   | { type: 'paper'; id: number }
   | { type: 'slide'; id: number };
 
+// Did this excerpt come from composeExcerpt (section-selected, labeled blocks)
+// or is it a legacy leading slice of raw pdftotext output? Only the former emits
+// `## ` block labels at line start, so the stored value identifies itself and no
+// migration flag is needed.
+function isSectionComposed(excerpt: string): boolean {
+  return /^## /m.test(excerpt);
+}
+
 function isTweet(i: DigestInputItem): i is DigestInputTweet {
   return !i.source_type || i.source_type === 'tweet';
 }
@@ -145,7 +153,22 @@ function itemToTweetShape(item: DigestInputItem): DigestInputTweet {
     if (item.journal) parts.push(`Journal: ${item.journal}${item.pub_date ? ` (${item.pub_date})` : ''}`);
     if (item.abstract) parts.push(`\nAbstract:\n${item.abstract}`);
     if (item.fulltext_excerpt_md)
-      parts.push(`\nMethods/Results excerpt:\n${item.fulltext_excerpt_md}`);
+      // The label has to match what the row ACTUALLY holds, and the corpus is
+      // mixed: rows enriched before fulltext-sections.ts are still a leading
+      // slice (front matter, disclosures, a truncated abstract) and are re-read
+      // by every past-date rebuild. Telling the agent those omissions were
+      // deliberate and that ordering is meaningful would be a worse lie than the
+      // old "Methods/Results excerpt" — that one under-promised and the agent
+      // reported a number missing; this one would over-promise and invite it to
+      // read significance into an order that isn't there.
+      //
+      // A composed excerpt is self-identifying: composeExcerpt emits `## ` block
+      // labels, and a raw pdftotext slice does not.
+      parts.push(
+        isSectionComposed(item.fulltext_excerpt_md)
+          ? `\nFull-text excerpt (section-selected: tables and figure captions first, then body; references and disclosures omitted; sections may be truncated):\n${item.fulltext_excerpt_md}`
+          : `\nFull-text excerpt (leading extract of the document; may be front matter rather than Methods/Results, and may stop mid-section):\n${item.fulltext_excerpt_md}`,
+      );
     if (item.figure_ocr_md)
       parts.push(
         // OCR of figure pages: recovers numbers printed inside figures (subgroup
