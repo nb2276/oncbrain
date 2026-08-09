@@ -90,6 +90,27 @@ const MIN_SECTION_CHARS = 600;
 // statement whose content IS the grid) still fills the window with tables.
 const TABLE_TIER_MAX_FRACTION = 0.6;
 
+// FLOOR on the table tier's SHARE of the finished excerpt. The ceiling above
+// stops tables starving prose; this stops the reverse, which is what actually
+// happened when the budget grew.
+//
+// Measured on BEACON-HCC: at a 24,000 budget the four tables were 33% of the
+// excerpt and the analyst rendered the class-by-framework grid as a table on the
+// card. At 50,000 the SAME four tables — byte-identical, 7,859 chars, Table 4
+// present in both — were 19%, because everything around them doubled, and the
+// rendered artifact disappeared. The tables were never dropped from the input.
+// They were diluted out of the model's attention.
+//
+// So once tables are placed, the prose tier gets a ceiling that keeps their
+// share at or above this fraction, and the budget simply goes unspent rather
+// than being filled with prose that pushes the grid off the card.
+const TABLE_TIER_MIN_FRACTION = 0.3;
+
+// ...but never enforce that floor so hard that a paper with one small table
+// ends up with almost no prose. Below this the floor is ignored: a 500-char
+// table does not justify truncating the excerpt to 1,600 chars.
+const MIN_USEFUL_EXCERPT_CHARS = 12_000;
+
 // Above this share of the document, the leading unheaded block is the article
 // rather than its title page — see segmentDocument for the regression this
 // prevents.
@@ -685,7 +706,22 @@ export function composeExcerpt(rawText: string, opts: ComposeOptions = {}): Comp
 
   const tierCap = Math.round(maxChars * TABLE_TIER_MAX_FRACTION);
   for (const s of inFillOrder(isTableTier)) tryPlace(s, tierCap);
-  for (const s of inFillOrder((k) => !isTableTier(k))) tryPlace(s, maxChars);
+
+  // Hold the table tier's share above the floor by bounding what prose may add.
+  // `spent` here is exactly the table tier, since nothing else has been placed.
+  const proseCeiling =
+    spent > 0
+      ? Math.min(maxChars, Math.max(MIN_USEFUL_EXCERPT_CHARS, Math.round(spent / TABLE_TIER_MIN_FRACTION)))
+      : maxChars;
+  // The abstract is exempt from the prose ceiling, because it is only ever in
+  // `usable` when the caller captured NO separate abstract column — so it is the
+  // one the analyst will see, not a duplicate. Squeezing it out to protect the
+  // table ratio would trade a real loss for a cosmetic one.
+  if (includeAbstract) for (const s of inFillOrder((k) => k === 'abstract')) tryPlace(s, maxChars);
+  for (const s of inFillOrder((k) => !isTableTier(k) && k !== 'abstract')) tryPlace(s, proseCeiling);
+
+  // Give-back pass runs against the FULL budget: a table-dominant paper should
+  // still fill the window with tables.
   for (const s of inFillOrder(isTableTier)) tryPlace(s, maxChars);
 
   // Table tier first, document order within each tier.

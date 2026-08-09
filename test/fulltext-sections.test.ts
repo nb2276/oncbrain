@@ -370,6 +370,39 @@ describe('composeExcerpt', () => {
     expect(out.kept.some((k) => k.kind === 'methods')).toBe(true);
   });
 
+  it('holds the table tier above its share floor as the budget grows', () => {
+    // The regression this exists for: on BEACON-HCC the four tables were 33% of
+    // a 24,000-char excerpt and the analyst rendered the grid as a table on the
+    // card; at 50,000 the SAME tables were 19% and the rendered table vanished.
+    // Nothing was dropped from the input — it was diluted out of attention.
+    const doc = [
+      ...[1, 2, 3].flatMap((n) => [`Table ${n}. Allocation grid ${n}`, pad(`T${n}Row`, 14), '']),
+      'METHODS',
+      pad('Methods', 60),
+      '',
+      'DISCUSSION',
+      pad('Discussion', 60),
+    ].join('\n');
+    const share = (max: number) => {
+      const c = composeExcerpt(doc, { maxChars: max });
+      const t = c.kept.filter((k) => k.kind === 'table').reduce((n, k) => n + k.chars, 0);
+      return t / c.text.length;
+    };
+    // Sections are placed whole, never sliced to hit a ratio exactly, so the
+    // realised share lands just under the floor. What matters is that it does
+    // not collapse as the budget grows: 19% is what produced the regression.
+    for (const budget of [24_000, 50_000, 100_000]) {
+      expect(share(budget)).toBeGreaterThan(0.25);
+    }
+  });
+
+  it('ignores the floor when the tables are too small to justify it', () => {
+    // A 500-char table must not truncate the whole excerpt to ~1,600 chars.
+    const doc = ['Table 1. Small', 'a  b  c', '', 'RESULTS', pad('Result', 80)].join('\n');
+    const out = composeExcerpt(doc, { maxChars: 50_000 });
+    expect(out.text.length).toBeGreaterThan(11_000); // MIN_USEFUL_EXCERPT_CHARS is 12_000
+  });
+
   it('gives unused prose budget back to the tables', () => {
     // The flip side: a consensus statement whose content IS the grid should
     // still fill the window with tables rather than leaving the cap unspent.
