@@ -69,7 +69,14 @@ import {
   type AcronymCoverageIndex,
 } from './acronym-coverage.ts';
 import { extractTextAcronymKeys, studyDedupKey } from './study-dedup.ts';
-import { extractPdfText, extractPdfFigureOcr, MAX_FIGURE_OCR_CHARS, PdfToolError } from './pdf-text.ts';
+import {
+  extractPdfText,
+  extractPdfFigureOcr,
+  MAX_FIGURE_OCR_CHARS,
+  PdfToolError,
+  type PdfText,
+} from './pdf-text.ts';
+import { composeExcerpt, DEFAULT_EXCERPT_CHARS } from './fulltext-sections.ts';
 import { extractPdfFigureStructured, MAX_FIGURE_STRUCTURED_CHARS } from './figure-extract.ts';
 import { enrichPmcOaFigures, resolvePmcIdForDoi } from './pmc-oa.ts';
 import { enrichHtmlFigures, isHtmlFigureOcrEnabled } from './html-figures.ts';
@@ -306,7 +313,12 @@ async function enrichPaperItem(
     saveInput = {
       ...saveInput,
       abstract: oa.abstract,
-      fulltext_excerpt_md: oa.fulltext ? oa.fulltext.slice(0, MAX_FULLTEXT_CHARS) : saveInput.fulltext_excerpt_md,
+      fulltext_excerpt_md: oa.fulltext
+        ? composeExcerpt(oa.fulltext, {
+            maxChars: MAX_FULLTEXT_CHARS,
+            includeAbstract: !oa.abstract,
+          }).text
+        : saveInput.fulltext_excerpt_md,
     };
   }
 
@@ -425,8 +437,15 @@ function replyForPaperMerge(title: string, r: SavePaperResult, queuedDate: strin
   return `Already on file: ${title}. Nothing new to add.`;
 }
 
-// Cap stored full text so a long PDF doesn't bloat the artifact; ~2000 tokens.
-const MAX_FULLTEXT_CHARS = 8000;
+// Cap stored full text. The window is spent by fulltext-sections.ts, which fills
+// it with tables and figure captions first and drops references / disclosures /
+// front matter — so this is a budget for CONTENT, where the old 8000-char head
+// slice was a budget for whatever happened to be on page 1. Override with
+// FULLTEXT_EXCERPT_CHARS; see DEFAULT_EXCERPT_CHARS for the tradeoff.
+const MAX_FULLTEXT_CHARS = (() => {
+  const raw = Number.parseInt(process.env.FULLTEXT_EXCERPT_CHARS ?? '', 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_EXCERPT_CHARS;
+})();
 // MAX_FIGURE_OCR_CHARS is imported from pdf-text.ts (single source of truth,
 // shared with the backfill CLI).
 
@@ -475,7 +494,7 @@ async function enrichPdfPaper(
 
   // 3. Extract text (poppler writes need a file path; OCR fallback is internal).
   const tmpPdf = join(tmpdir(), `oncbrain-pdf-${randomBytes(8).toString('hex')}.pdf`);
-  let extracted: { text: string; via: 'text' | 'ocr' };
+  let extracted: PdfText;
   // Figure OCR (Path A): numbers printed inside figures (KM medians, forest-plot
   // estimates, image-rendered tables) are invisible to pdftotext. When we used
   // the text layer, OCR just the figure pages so the build-time study agent can
@@ -624,7 +643,11 @@ async function enrichPdfPaper(
       journal: meta.journal,
       pub_date: meta.pub_date,
       abstract: meta.abstract,
-      fulltext_excerpt_md: extracted.text.slice(0, MAX_FULLTEXT_CHARS),
+      fulltext_excerpt_md: composeExcerpt(extracted.text, {
+        maxChars: MAX_FULLTEXT_CHARS,
+        layoutText: extracted.layoutText,
+        includeAbstract: !meta.abstract,
+      }).text,
       figure_ocr_md: figureOcr ? figureOcr.slice(0, MAX_FIGURE_OCR_CHARS) : null,
       figure_structured_md: figureStructured ? figureStructured.slice(0, MAX_FIGURE_STRUCTURED_CHARS) : null,
       bookmark_date: item.bookmark_date,
@@ -864,7 +887,12 @@ async function resolveTradeArticle(
     journal: meta.journal ?? tradePressLabel(url), // most trade sites omit og:site_name
     pub_date: meta.pub_date,
     abstract: ogDescription,
-    fulltext_excerpt_md: articleText ? articleText.slice(0, MAX_FULLTEXT_CHARS) : null,
+    fulltext_excerpt_md: articleText
+      ? composeExcerpt(articleText, {
+          maxChars: MAX_FULLTEXT_CHARS,
+          includeAbstract: !ogDescription,
+        }).text
+      : null,
     bookmark_date: item.bookmark_date,
     curator_note: note,
     inbox_item_id: item.id,
