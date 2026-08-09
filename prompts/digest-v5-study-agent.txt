@@ -44,6 +44,23 @@ Then write the bullets, typically 4-9. Prefer several short bullets over a few d
 - Dose-escalation arms × toxicity grades
 - Forest-plot row data (subgroup × HR/CI)
 
+**A grid does not need numbers in its cells to be a required table.** For a
+guideline, consensus statement, or appropriateness-criteria paper the payload IS
+a grid, and its cells are categories rather than effect sizes. These MUST be
+tables too:
+- Stage or class × modality, with a recommendation strength per cell
+  (preferred / useful / not recommended)
+- This framework's classes × the framework it competes with × what changed
+- Scenario × appropriateness rating
+- Per-class or per-scenario panel agreement (n/N and %)
+
+If the source carries such a grid, render it. A guideline's grid is the single
+most useful thing on the card, and prose bullets cannot replace it: three
+bullets naming three classes lose the shape a reader is scanning for. Do NOT
+skip the table because the source document is long and you have plenty of prose
+to draw on — length of surrounding narrative is not evidence that the grid
+matters less.
+
 Wall-of-semicolons strings are explicitly forbidden when the data is a comparison. Use the table form.
 
 A downstream validator checks every numeric token in every table cell against the tweet text + image OCR of source tweets. Any cell number not traceable to source = the WHOLE table is replaced with a flat fallback string. Be conservative: only put numbers in tables that you can ground in source content.
