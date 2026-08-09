@@ -11,6 +11,7 @@ export const VERDICT_META: Record<SocImplication, { emoji: string; label: string
   'confirmatory': { emoji: '🔄', label: 'Confirmatory' },
   'early-signal': { emoji: '🧪', label: 'Early signal' },
   'methodologically-limited': { emoji: '⚠️', label: 'Caveats dominate' },
+  'consensus': { emoji: '🧭', label: 'Consensus' },
   'unclear': { emoji: '❔', label: 'Unclear' },
 };
 
@@ -55,6 +56,7 @@ export const VERDICT_COLOR: Record<SocImplication, string> = {
   'confirmatory': '#0a4b8a',
   'early-signal': '#1a6a7a',
   'methodologically-limited': '#8a3a1a',
+  'consensus': '#5a3a8a',
   'unclear': '#555',
 };
 

@@ -168,6 +168,14 @@ and doesn't establish for the population studied.
   efficacy), open-label with subjective endpoint, high control crossover,
   sponsor-funded with selection bias, primary endpoint not reported in
   source.
+- 🧭 `consensus`. **Document-type issue, not a result issue.** A guideline,
+  consensus statement, Delphi panel, or appropriateness-criteria paper. Its
+  output is an allocation or a recommendation, and any "agreement" or
+  "concordance" figure it reports is opinion measured against opinion, not an
+  outcome. Use this instead of stretching the efficacy verdicts onto a document
+  that has no efficacy endpoint: a framework cannot be `confirmatory` of a
+  survival benefit it never measured, and calling it `challenges-soc` implies a
+  result where there is only a position. Say what it changes in the rationale.
 - `unclear`. Source content does not give enough to classify. Default
   when uncertain.
 

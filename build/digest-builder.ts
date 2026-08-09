@@ -51,7 +51,7 @@ import { markFigureSourcedDetails } from '../src/lib/source-tier.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
 import { buildPriorIndex, findPriorEstimate, studiesFromArtifacts } from '../src/lib/prior-estimate.ts';
 import { clampPreprintVerdict } from '../src/lib/preprint.ts';
-import { stripReviewVerdicts } from '../src/lib/content-type.ts';
+import { stripReviewVerdicts, coerceConsensusVerdicts } from '../src/lib/content-type.ts';
 import { ingestApprovedResolutions, crossDateResolvedPapers } from '../src/lib/review-trial-ingest.ts';
 import { fetchPubMedPaper, type PubMedPaper } from '../src/lib/pubmed-client.ts';
 import { listResolutions } from '../src/lib/db.ts';
@@ -712,6 +712,15 @@ export async function buildOneDate(
   const strippedReviewVerdicts = stripReviewVerdicts(digest);
   if (strippedReviewVerdicts > 0) {
     console.log(`  stripped ${strippedReviewVerdicts} verdict(s) from review studies`);
+  }
+
+  // v0.41: a consensus/guideline document takes the `consensus` verdict. Same
+  // post-override phase and same reasoning: the efficacy taxonomy has no bucket
+  // for a paper with no efficacy endpoint, and leaving it to the prompt produced
+  // a different answer on every build of the same document.
+  const coercedConsensus = coerceConsensusVerdicts(digest);
+  if (coercedConsensus > 0) {
+    console.log(`  set ${coercedConsensus} consensus-guideline verdict(s) to 'consensus'`);
   }
 
   // v0.17 (T6): link each review's discussed-trial acronyms to the same-date

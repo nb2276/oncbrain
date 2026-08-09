@@ -558,8 +558,7 @@ function captionKey(heading: string | null): string {
     .toLowerCase()
     .replace(/\s+/g, ' ')
     .replace(/[^a-z0-9 ]/g, '')
-    .trim()
-    .slice(0, 60);
+    .trim();
 }
 
 // Does this -layout block actually LOOK like a grid, or is it running prose that
@@ -723,11 +722,19 @@ export function auditRowAssociation(text: string): RowAssociation {
 // suppress its own real table from the card, or smuggle text into a bracket the
 // model has been told to obey. Neutralise it everywhere a body is emitted, with
 // a zero-width space that survives display but breaks the literal match.
-const MARKER_OPENER = /\[(?=row association)/;
-const MARKER_OPENER_ALL = /\[(?=row association)/g;
+// Two strings in a composed excerpt are OURS and carry meaning the analyst acts
+// on: the `## ` block label (which also tells llm-pipeline the row is composed
+// at all) and the `[row association uncertain: ...]` marker, which the Phase 2
+// prompt keys a hard MUST-NOT-RENDER rule on. Section bodies are emitted verbatim
+// from untrusted PDF text, so a document containing either is writing into a
+// privileged channel: it could forge a section boundary we never created,
+// suppress its own real table, or flip a legacy row's provenance label. Defuse
+// both with a zero-width space, which survives display and breaks the match.
+const FORGEABLE = /^(## )|\[(?=row association)/gm;
+const FORGEABLE_PROBE = /^(## )|\[(?=row association)/m;
 
 function neutralizeMarkers(text: string): string {
-  return text.replace(MARKER_OPENER_ALL, '[\u200b');
+  return text.replace(FORGEABLE, (m) => (m === '## ' ? '#\u200b# ' : '[\u200b'));
 }
 
 // Map caption → layout-mode body for every table/figure in the -layout pass.
@@ -842,7 +849,7 @@ export function composeExcerpt(rawText: string, opts: ComposeOptions = {}): Comp
     // Defuse any forged marker in the SOURCE before our own is added, for every
     // section kind — a prose block can carry one too. Done once, here, so the
     // real marker prepended below stays intact.
-    if (MARKER_OPENER.test(full)) {
+    if (FORGEABLE_PROBE.test(full)) {
       full = neutralizeMarkers(full);
       body = truncateCleanly(full, budget);
     }
@@ -902,6 +909,21 @@ export function composeExcerpt(rawText: string, opts: ComposeOptions = {}): Comp
   chunks.push(...staged.map((x) => x.chunk));
 
   const text = chunks.join('\n\n').trim();
+
+  // Nothing was SEGMENTED, only wrapped. Europe PMC's stripJats collapses all
+  // whitespace, so an OA body arrives as one line, becomes a single `body`
+  // section, and is emitted as `## Body` + the whole document — at which point
+  // llm-pipeline's `/^## /m` provenance test says "section-selected: references
+  // and disclosures omitted" over text where nothing was selected or omitted.
+  // That is the exact over-promise the label branch exists to avoid, so report
+  // it as the fallback it actually is.
+  // The signature is ONE unheaded body block and nothing dropped: no heading was
+  // ever found, so `## Body` is a label we invented for the whole document. A
+  // single block that DID come from a heading (a one-table appendix, a lone
+  // Results section) is genuinely segmented and keeps its label.
+  const unsegmented =
+    kept.length === 1 && kept[0]!.kind === 'body' && kept[0]!.heading === null && droppedKinds.size === 0;
+  if (unsegmented) return fallback();
 
   // Fall back only on evidence that segmentation FAILED: nothing was placed.
   //

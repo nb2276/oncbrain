@@ -37,6 +37,37 @@ export function isValidContentType(v: unknown): v is ContentType {
 // not suppress it. The builder calls this AFTER applying curator overrides, so a
 // curator verdict edit can't reintroduce one. Structural (not DigestOutput-
 // typed) to keep this module a leaf. Mutates in place; returns the count stripped.
+// A consensus/guideline document takes the `consensus` verdict, deterministically.
+//
+// The efficacy taxonomy has no bucket for a paper with no efficacy endpoint, and
+// across five BEACON-HCC builds the analyst returned `unclear`,
+// `challenges-soc`, `confirmatory`, `confirmatory` and `challenges-soc` for the
+// same document — run-to-run variance, not a signal. Both quality-eval personas
+// flagged it independently. Adding the enum to VOICE.md and to the prompt was
+// not enough on its own: the next build still chose `challenges-soc`.
+//
+// So enforce it here, the same posture as stripReviewVerdicts. `consensus` is a
+// DOCUMENT-TYPE verdict, orthogonal to whether the document agrees with current
+// practice — what it changes belongs in the rationale, which is preserved. The
+// methodology tag is assigned deterministically upstream, so this is a mapping,
+// not a second judgement.
+export function coerceConsensusVerdicts(digest: {
+  sites: Array<{
+    studies: Array<{ methodology?: string | null; verdict?: { soc_implication?: string } | null }>;
+  }>;
+}): number {
+  let coerced = 0;
+  for (const site of digest.sites) {
+    for (const study of site.studies) {
+      if (study.methodology !== 'consensus-guideline') continue;
+      if (!study.verdict || study.verdict.soc_implication === 'consensus') continue;
+      study.verdict.soc_implication = 'consensus';
+      coerced++;
+    }
+  }
+  return coerced;
+}
+
 export function stripReviewVerdicts(digest: {
   sites: Array<{ studies: Array<{ content_type?: ContentType; verdict?: unknown }> }>;
 }): number {
