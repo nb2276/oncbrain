@@ -5,6 +5,7 @@ import {
   isValidContentType,
   parseContentType,
   stripReviewVerdicts,
+  coerceConsensusVerdicts,
   type ContentType,
 } from '../src/lib/content-type.ts';
 
@@ -103,5 +104,39 @@ describe('stripReviewVerdicts (Codex #9 post-override invariant)', () => {
     };
     expect(stripReviewVerdicts(digest)).toBe(0);
     expect(stripReviewVerdicts(digest)).toBe(0);
+  });
+});
+
+describe('coerceConsensusVerdicts', () => {
+  const digest = (studies: any[]) => ({ sites: [{ studies }] });
+
+  it("sets a consensus-guideline study's verdict to consensus", () => {
+    const d = digest([{ methodology: 'consensus-guideline', verdict: { soc_implication: 'challenges-soc', rationale: 'x' } }]);
+    expect(coerceConsensusVerdicts(d)).toBe(1);
+    expect(d.sites[0].studies[0].verdict.soc_implication).toBe('consensus');
+  });
+
+  it('preserves the rationale, which is where "what it changes" lives', () => {
+    const d = digest([{ methodology: 'consensus-guideline', verdict: { soc_implication: 'confirmatory', rationale: 'Elevates SBRT to allocation level.' } }]);
+    coerceConsensusVerdicts(d);
+    expect(d.sites[0].studies[0].verdict.rationale).toBe('Elevates SBRT to allocation level.');
+  });
+
+  it('leaves a trial alone', () => {
+    const d = digest([{ methodology: 'randomised-trial', verdict: { soc_implication: 'practice-changing' } }]);
+    expect(coerceConsensusVerdicts(d)).toBe(0);
+    expect(d.sites[0].studies[0].verdict.soc_implication).toBe('practice-changing');
+  });
+
+  it('does not invent a verdict where there is none (a review stays verdict-less)', () => {
+    const d = digest([{ methodology: 'consensus-guideline', verdict: undefined }]);
+    expect(coerceConsensusVerdicts(d)).toBe(0);
+    expect(d.sites[0].studies[0].verdict).toBeUndefined();
+  });
+
+  it('is idempotent', () => {
+    const d = digest([{ methodology: 'consensus-guideline', verdict: { soc_implication: 'unclear' } }]);
+    expect(coerceConsensusVerdicts(d)).toBe(1);
+    expect(coerceConsensusVerdicts(d)).toBe(0);
   });
 });

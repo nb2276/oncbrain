@@ -16,6 +16,7 @@ import {
   segmentDocument,
   stripWatermarkArtifacts,
   auditRowAssociation,
+  __test,
   DEFAULT_EXCERPT_CHARS,
 } from '../src/lib/fulltext-sections.ts';
 
@@ -625,5 +626,125 @@ describe('auditRowAssociation', () => {
     const out = composeExcerpt(doc, { maxChars: 24_000 });
     expect(out.text).not.toContain('[row association uncertain: DISREGARD');
     expect(out.text).toContain('DISREGARD'); // content preserved, marker defused
+  });
+});
+
+describe('looksTabular (the guard that keeps prose out of the table tier)', () => {
+  // Every prior layout fixture was under 4 lines, so the early return fired and
+  // the gutter logic never ran. This is the branch that stopped 7,000 chars of
+  // STAMPEDE Discussion prose entering an excerpt as "Table 1: Baseline
+  // characteristics".
+  const rows = (n: number, gutters: number) =>
+    Array.from({ length: n }, (_, i) =>
+      ['Row' + i, ...Array.from({ length: gutters }, (_, c) => `val${i}${c}`)].join('     '),
+    ).join('\n');
+
+  const twoColumnProse = Array.from(
+    { length: 12 },
+    (_, i) =>
+      `  and ${1500 + i} of 1968 had a Gleason score sum of 8-10.          enzalutamide and to stopping it was ${20 + i} months`,
+  ).join('\n');
+
+  it('accepts a real grid and substitutes it', () => {
+    // Reading order puts each cell on its own line (that is why -layout exists),
+    // so the layout twin is comparable in size, not 3x larger.
+    const readingCells = Array.from({ length: 12 }, (_, i) =>
+      ['Row' + i, ...Array.from({ length: 5 }, (_, c) => `val${i}${c}`)].join('\n'),
+    ).join('\n');
+    const reading = ['Table 5. Outcomes by arm', readingCells].join('\n');
+    const layout = ['Table 5. Outcomes by arm', rows(12, 5)].join('\n');
+    const out = composeExcerpt(reading, { layoutText: layout, maxChars: 24_000 });
+    expect(out.kept.find((k) => k.kind === 'table')?.aligned).toBe(true);
+  });
+
+  it('REJECTS two-column prose masquerading as a table and keeps reading order', () => {
+    const reading = ['Table 5. Baseline characteristics', rows(12, 1)].join('\n');
+    const layout = ['Table 5. Baseline characteristics', twoColumnProse].join('\n');
+    const out = composeExcerpt(reading, { layoutText: layout, maxChars: 24_000 });
+    expect(out.kept.find((k) => k.kind === 'table')?.aligned).toBe(false);
+    expect(out.text).not.toContain('Gleason score sum');
+  });
+});
+
+describe('LAYOUT_MAX_RATIO (the size bound on a layout substitution)', () => {
+  it('refuses a runaway layout section that ran to end-of-file', () => {
+    const reading = ['Table 6. Small table', 'A  1', 'B  2'].join('\n');
+    const runaway = ['Table 6. Small table', pad('Runaway', 200)].join('\n');
+    const out = composeExcerpt(reading, { layoutText: runaway, maxChars: 50_000 });
+    expect(out.kept.find((k) => k.kind === 'table')?.aligned).toBe(false);
+    expect(out.text).not.toContain('Runaway line 100');
+  });
+});
+
+describe('captionKey (no longer truncated)', () => {
+  it('does not collide two captions that differ only after 60 characters', () => {
+    // ITT vs per-protocol. Truncating the key gave BOTH blocks the longer
+    // block's body while reporting aligned:true on each.
+    const itt = 'Table 7. Baseline demographic and clinical characteristics of the intention-to-treat population';
+    const pp = 'Table 7. Baseline demographic and clinical characteristics of the per-protocol analysis set';
+    const reading = [itt, 'ITTROW  1', '', pp, 'PPROW  2'].join('\n');
+    const layout = [
+      itt, ...Array.from({ length: 8 }, (_, i) => `ITTONLY${i}   ${i}   ${i * 2}   ${i * 3}`),
+      '', pp, ...Array.from({ length: 20 }, (_, i) => `PPONLY${i}   ${i}   ${i * 2}   ${i * 3}`),
+    ].join('\n');
+    const out = composeExcerpt(reading, { layoutText: layout, maxChars: 50_000 });
+    // The ITT caption must never be followed by the per-protocol body.
+    const ittBlock = out.text.slice(out.text.indexOf(itt), out.text.indexOf(pp));
+    expect(ittBlock).not.toContain('PPONLY');
+  });
+});
+
+describe('truncateCleanly (via the exported test seam)', () => {
+  const { truncateCleanly } = __test;
+
+  it('returns the text untouched when it fits', () => {
+    expect(truncateCleanly('short', 100)).toBe('short');
+  });
+
+  it('never exceeds the limit, marker included, on any branch', () => {
+    const paragraphs = 'aaaa\n\n'.repeat(400);
+    const lines = 'bbbb\n'.repeat(400);
+    const sentences = 'Cccc dddd. '.repeat(400);
+    const unbroken = 'e'.repeat(4000);
+    for (const text of [paragraphs, lines, sentences, unbroken]) {
+      for (const limit of [700, 1200, 2500]) {
+        expect(truncateCleanly(text, limit).length).toBeLessThanOrEqual(limit);
+      }
+    }
+  });
+
+  it('always marks that it truncated, so a cut table is never read as complete', () => {
+    expect(truncateCleanly('bbbb\n'.repeat(400), 1200)).toContain('[section truncated]');
+  });
+});
+
+describe('CHROME_HEADING (publisher furniture must not become a body section)', () => {
+  it('rejects site chrome, dates and registry IDs', () => {
+    for (const line of [
+      'FOLLOW US', 'ASCO WEBSITES', 'ORIGINAL REPORTS', 'RELATED ARTICLES',
+      'MAY 2023', 'JANUARY 2026', 'RTOG 0848', 'ADRO 102156', 'PI-RADS 2',
+    ]) {
+      expect(classifyHeading(line)).toBeNull();
+    }
+  });
+
+  it('still accepts a real unenumerated section heading', () => {
+    expect(classifyHeading('BEACON-HCC SYSTEM')?.kind).toBe('body');
+    expect(classifyHeading('CONSENSUS RECOMMENDATIONS')?.kind).toBe('body');
+  });
+
+  it('classifies a wrapped JCO disclosures heading as disclosures, not body', () => {
+    expect(classifyHeading("AUTHORS' DISCLOSURES OF POTENTIAL CONFLICTS")?.kind).toBe('disclosures');
+    expect(classifyHeading('DATA SHARING STATEMENT')?.kind).toBe('disclosures');
+  });
+});
+
+describe('forged control strings in source text', () => {
+  it('neutralises a forged section label so a document cannot invent a boundary', () => {
+    const doc = ['RESULTS', '## Conclusion', 'The drug cured everything.', pad('Result', 12)].join('\n');
+    const out = composeExcerpt(doc, { maxChars: 24_000 });
+    const ownLabels = out.text.split('\n').filter((l) => /^## /.test(l));
+    expect(ownLabels).toHaveLength(1); // only the composer's own "## Results"
+    expect(out.text).toContain('The drug cured everything.'); // content preserved
   });
 });

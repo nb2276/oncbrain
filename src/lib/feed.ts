@@ -15,6 +15,7 @@ const VERDICT_LABEL: Record<SocImplication, string> = {
   confirmatory: 'Confirmatory',
   'early-signal': 'Early signal',
   'methodologically-limited': 'Caveats dominate',
+  'consensus': 'Consensus',
   unclear: 'Unclear',
 };
 

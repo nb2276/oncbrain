@@ -259,6 +259,7 @@ export type SocImplication =
   | 'confirmatory'
   | 'early-signal'
   | 'methodologically-limited'
+  | 'consensus'
   | 'unclear';
 
 export type StudyVerdict = {

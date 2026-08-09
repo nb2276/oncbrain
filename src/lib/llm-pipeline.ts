@@ -123,6 +123,15 @@ export type DigestSourceRef =
 // or is it a legacy leading slice of raw pdftotext output? Only the former emits
 // `## ` block labels at line start, so the stored value identifies itself and no
 // migration flag is needed.
+// Identity + abstract for a paper runs well under this; the excerpt is what
+// follows. Deliberately generous so a long abstract is never clipped.
+export const GROUPING_TEXT_MAX_CHARS = 4_000;
+
+export function capForGrouping(text: string): string {
+  if (text.length <= GROUPING_TEXT_MAX_CHARS) return text;
+  return `${text.slice(0, GROUPING_TEXT_MAX_CHARS).trimEnd()}\n…[full-text excerpt omitted for clustering; the study agent receives it in full]`;
+}
+
 function isSectionComposed(excerpt: string): boolean {
   return /^## /m.test(excerpt);
 }
@@ -536,6 +545,7 @@ export type SocImplication =
   | 'confirmatory'
   | 'early-signal'
   | 'methodologically-limited'
+  | 'consensus'
   | 'unclear';
 
 export const SOC_IMPLICATIONS: readonly SocImplication[] = [
@@ -544,6 +554,7 @@ export const SOC_IMPLICATIONS: readonly SocImplication[] = [
   'confirmatory',
   'early-signal',
   'methodologically-limited',
+  'consensus',
   'unclear',
 ] as const;
 
@@ -1149,10 +1160,18 @@ async function runGroupingPhase(
   const template = readFileSync(promptPath, 'utf-8');
 
   const manifest = buildImageManifest(tweets);
+  // Phase 1 is CLUSTERING, and it is the one phase whose input scales with the
+  // number of sources on the day rather than per study. Handing it the full
+  // section-composed excerpt put ~70,000 chars into a single call on a 5-paper
+  // date, and would have put ~250-300k there once the back catalogue is
+  // backfilled — on the claude-cli subscription window, which is the binding
+  // constraint. Grouping needs identity (title, journal, abstract, NCT), not
+  // the back-matter tables. `itemToTweetShape` emits those first, so a head cap
+  // keeps everything clustering uses and drops the part it does not.
   const tweetsForPrompt = tweets.map((t) => ({
     id: t.id,
     author: t.author,
-    text: t.text,
+    text: capForGrouping(t.text),
     note: t.note ?? null,
   }));
 

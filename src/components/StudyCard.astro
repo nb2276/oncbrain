@@ -1224,6 +1224,7 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   .study.verdict-confirmatory { --verdict-color: var(--accent); }
   .study.verdict-early-signal { --verdict-color: #1a6a7a; }
   .study.verdict-methodologically-limited { --verdict-color: #8a3a1a; }
+  .study.verdict-consensus { --verdict-color: #5a3a8a; }
   .study.verdict-unclear { --verdict-color: var(--fg-muted); }
 
   /* T1-B: color the card's left border for the ATTENTION verdicts only, so a
@@ -2183,6 +2184,7 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   :global(:root:not([data-theme='light'])) .study.verdict-challenges-soc { --verdict-color: #d99a4a; }
   :global(:root:not([data-theme='light'])) .study.verdict-early-signal { --verdict-color: #6fbfd6; }
   :global(:root:not([data-theme='light'])) .study.verdict-methodologically-limited { --verdict-color: #d9785a; }
+  :global(:root:not([data-theme='light'])) .study.verdict-consensus { --verdict-color: #b49ae0; }
 
   /* Share affordance anchored to the top-right of .study-head. On wide
      figures-present cards (grid: head | figs at >=1200px) the head is the
