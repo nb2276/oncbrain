@@ -4,59 +4,18 @@ Open work for oncbrain, seeded from CHANGELOG "Not yet shipped" sections and per
 
 Format: `- [scope] description (source)`
 
-## Full-text excerpting (deferred from v0.41, all surfaced by the ship reviews)
+## Full-text excerpting (v0.41 follow-ups — all closed in v0.42)
 
 - **Row-association REPAIR (the withhold half shipped in v0.41).** **Priority:
   P2.** Detection and refusal are live; the fold was removed after review showed
   it corrupted rows. A trustworthy repair needs a positive row-label test (not
   "any leftmost line without a value cell"), a real value grammar, and document
-  order rather than indent order. Worth doing: 24 of 56 corpus table blocks are
-  currently refused, and some of those are guideline grids worth rendering.
+  order rather than indent order. Worth doing: 31 of 69 corpus table blocks are
+  currently refused, and some are guideline grids worth rendering.
   (v0.41 pre-merge review)
-- **The verdict taxonomy has no bucket for a consensus document.** **Priority:
-  P2.** Across five BEACON builds the verdict came back `unclear`,
-  `challenges-soc`, `confirmatory`, `confirmatory`, `challenges-soc` — run-to-run
-  variance, not a budget effect. Both eval personas flagged it independently:
-  a taxonomy built for efficacy trials is being stretched onto a Delphi document
-  whose "concordance" is opinion validated against opinion. (v0.41 quality-eval)
-- **Phase 1 grouping receives the full excerpt for every paper of the day.**
-  **Priority: P1.** `llm-pipeline.ts:1152` puts the whole `itemToTweetShape`
-  payload — including `fulltext_excerpt_md` — into `{{TWEETS_JSON}}`. The v0.41
-  sizing analysis modelled Phase 2 only, which is per-study; Phase 1 is per-day
-  and scales with N. Measured: 2026-08-07 currently sends 70,620 chars to
-  grouping, and after `backfill:fulltext --all` a 5-6 paper date becomes
-  ~250-300k chars (~65-75k tokens) in a single call on the claude-cli
-  subscription window. Clustering needs title and abstract, not tables — cap or
-  strip the excerpt for Phase 1. (v0.41 ship pre-landing review)
-- **A document can forge a `## ` block label.** **Priority: P2.** Section bodies
-  are emitted verbatim and `## ` is the structural marker, so a PDF containing
-  the literal line `## Results` is indistinguishable from a composer label, and
-  a legacy head slice containing one flips `isSectionComposed` and picks up the
-  "references and disclosures omitted" provenance claim it has not earned.
-  Measured 0 of 40 legacy rows affected today. Fix: neutralise the marker in
-  section bodies, or emit a delimiter a document cannot contain. (v0.41 ship
-  pre-landing review)
-- **`isSectionComposed` mislabels the PMC-OA path.** **Priority: P2.**
-  `europepmc-client.ts:184` collapses whitespace, so an OA body arrives as one
-  line, composes to a single `## Body` block, and matches `/^## /m` — the agent
-  is told the block is section-selected when nothing was segmented. (v0.41 ship
-  coverage audit)
-- **`captionKey` truncates at 60 chars, so ITT and per-protocol tables
-  collide.** **Priority: P2.** Two captions differing only after char 60 map to
-  one key; longest-wins then gives both blocks the same body, each reporting
-  `aligned: true`. (v0.41 ship coverage audit)
-- **`publish-boundary-content` probes now sample only the table tier.**
-  **Priority: P3.** The test takes the first 6 eligible lines per paper; since
-  `FILL_ORDER` puts tables first, the Results and Discussion prose most likely
-  to be paraphrased is never sampled. Measured coverage 10.6%. Sample across
-  `## ` blocks instead of taking the head. (v0.41 ship pre-landing review)
-- **Coverage gaps in `fulltext-sections`.** **Priority: P3.** `looksTabular`'s
-  gutter path and `LAYOUT_MAX_RATIO` have zero test execution (every layout
-  fixture is under 4 lines, so the early return fires); `truncateCleanly` has no
-  direct test despite `__test` being exported for it; `CHROME_HEADING` is
-  untested; the three `composeExcerpt` call sites in `inbox-enrichment.ts` and
-  the whole `backfill-fulltext.ts` CLI have no tests. Audit put the diff at 55%.
-  (v0.41 ship coverage audit)
+- **Broaden the quality-eval evidence base.** **Priority: P2.** The 50,000
+  default rests on one date, three personas, one run (6.7 → 7.4). Run it across
+  several dates before treating the number as settled. (v0.41)
 
 ## v0.12 — tag filter rail extensions (deferred from v0.11 via /autoplan)
 

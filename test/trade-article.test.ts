@@ -115,6 +115,46 @@ describe('trade-press article enrichment', () => {
     expect(paper.fulltext_excerpt_md).toContain('NCT04736199');
   });
 
+  it('keeps the numbers when the article HAS section headings (composer path)', async () => {
+    // The composer regression this guards: a sectioned trade article whose
+    // numbers-bearing lede sits above the first heading was classified as front
+    // matter and dropped, losing the effect size AND the NCT — the NCT being
+    // what the cross-day coverage index keys on. The other trade tests use
+    // heading-free single paragraphs, which take the fallback path and never
+    // exercise segmentation at all.
+    const db = freshDb();
+    mockedFetchText.mockResolvedValue(`<html><head>
+      <meta property="og:title" content="Sectioned Trade Piece">
+      <meta property="og:site_name" content="UroToday">
+    </head><body><article>
+      <p>In the randomised trial (NCT04736199), disease-free survival favoured the
+      experimental arm, hazard ratio 0.54 (95% CI 0.39-0.75), with 3-year DFS of
+      74.8% versus 66.0%.</p>
+      <h2>Background and Study Design</h2>
+      <p>Investigators enrolled adults across 41 centres between 2019 and 2023 and
+      randomised them one to one, stratified by stage and centre, with the primary
+      endpoint assessed by blinded independent review at three years.</p>
+      <h2>Results</h2>
+      <p>The experimental arm met its primary endpoint with a consistent effect
+      across the prespecified subgroups and no new safety signals were seen.</p>
+      <h2>Disclosure</h2>
+      <p>The study was funded by the sponsor; several authors report consulting fees.</p>
+    </article></body></html>`);
+
+    const url = 'https://www.urotoday.com/conference-highlights/asco-2026/sectioned.html';
+    expect((await runEnrichmentLoop(db, inboxTradeUrl(db, url, 507))).enriched).toBe(1);
+    const excerpt = (db.prepare('SELECT fulltext_excerpt_md AS x FROM papers').get() as { x: string }).x;
+
+    expect(excerpt).toContain('NCT04736199');
+    expect(excerpt).toContain('0.54');
+    expect(excerpt).toContain('74.8%');
+    // A short trade article takes the composer's fallback path (its whole body
+    // is the leading block, and FRONT_TRUST_MIN_DOC_CHARS refuses to treat that
+    // as droppable front matter), so nothing is dropped here. That is the point:
+    // the failure mode was dropping, and the numbers survive either way.
+    expect(excerpt.length).toBeGreaterThan(200);
+  });
+
   it('does NOT key the row on a foreign DOI linked in a related-coverage block', async () => {
     const db = freshDb();
     mockedFetchText.mockResolvedValue(PAGE_FOREIGN_RELATED_DOI);

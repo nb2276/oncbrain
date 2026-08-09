@@ -2,6 +2,48 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.42.0] - 2026-08-09
+
+Everything v0.41 left open, closed.
+
+### Fixed
+- **Phase 1 grouping was handed the full excerpt for every paper of the day.**
+  The v0.41 sizing analysis modelled Phase 2, which is per-study; Phase 1 is
+  per-day and scales with N. Measured on 2026-08-07: 71,421 chars into a single
+  clustering call, heading for ~250-300k once the back catalogue is backfilled,
+  on the claude-cli subscription window that is the binding constraint.
+  Clustering needs identity (title, journal, abstract, NCT), which
+  `itemToTweetShape` emits before the excerpt, so a 4,000-char head cap keeps all
+  of it: 71,421 → 19,864 chars, 28%.
+- **A guideline no longer gets an efficacy verdict it cannot earn.** New
+  `consensus` verdict (🧭). Across five builds of the same BEACON-HCC document
+  the analyst returned `unclear`, `challenges-soc`, `confirmatory`,
+  `confirmatory`, `challenges-soc` — run-to-run variance, which both quality-eval
+  personas flagged independently. Adding the enum to VOICE.md and to the prompt
+  was NOT enough: the next build still chose `challenges-soc`. It is now assigned
+  deterministically at build time from the `consensus-guideline` methodology tag,
+  the same posture as `stripReviewVerdicts`. The rationale is preserved, which is
+  where "what it changes" belongs.
+- **`isSectionComposed` claimed section-selection over an unsegmented body.**
+  Europe PMC collapses whitespace, so an OA body arrives as one line, became a
+  single `## Body` block, and the study agent was told references and disclosures
+  had been omitted when nothing had been. One unheaded body block with nothing
+  dropped now reports as the fallback it is.
+- **`captionKey` truncated at 60 characters**, so an ITT table and a
+  per-protocol table whose captions diverge only after that collided and both
+  received the longer block's body while each reported `aligned: true`.
+- **A source document could forge a `## ` section label**, inventing a boundary
+  the composer never created and flipping a legacy row's provenance. Both
+  forgeable control strings are now defused where a body is emitted.
+
+### Added
+- Tests for every branch the v0.41 audit found uncovered: `looksTabular`'s gutter
+  path and `LAYOUT_MAX_RATIO` (the two guards that keep prose out of the table
+  tier, which had zero execution because every fixture was under four lines),
+  `truncateCleanly` via its already-exported seam, `CHROME_HEADING`, the
+  trade-press call site with a realistic sectioned article, the backfill CLI's
+  guards, and the grouping cap. 2,069 tests, up from 2,041.
+
 ## [0.41.0] - 2026-08-09
 
 The analyst was reading the title page. Now it reads the tables.
