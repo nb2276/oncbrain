@@ -6,6 +6,23 @@ Format: `- [scope] description (source)`
 
 ## Full-text excerpting (deferred from v0.41, all surfaced by the ship reviews)
 
+- **A rendered table can be confidently wrong where a bullet would only be
+  vague.** **Priority: P0.** `pdftotext -layout` restores row association only
+  for rows whose cell text fits ONE line; where a cell wraps, the label and its
+  value land on different lines again. In the v0.41 quality-eval the 24,000 arm
+  rendered BEACON's panel-agreement table and pinned real published percentages
+  to the wrong classes (1B/1C got values belonging to 2/3A), which the
+  oncologist persona caught: "don't screenshot that table for tumor board
+  without checking the PDF first." Now that artifacts are prioritised this is
+  the top risk: detect tables whose row-association is uncertain (orphaned
+  value lines, value count != row count) and either repair them or withhold the
+  block, so the analyst cannot render one. (v0.41 quality-eval)
+- **The verdict taxonomy has no bucket for a consensus document.** **Priority:
+  P2.** Across five BEACON builds the verdict came back `unclear`,
+  `challenges-soc`, `confirmatory`, `confirmatory`, `challenges-soc` — run-to-run
+  variance, not a budget effect. Both eval personas flagged it independently:
+  a taxonomy built for efficacy trials is being stretched onto a Delphi document
+  whose "concordance" is opinion validated against opinion. (v0.41 quality-eval)
 - **Phase 1 grouping receives the full excerpt for every paper of the day.**
   **Priority: P1.** `llm-pipeline.ts:1152` puts the whole `itemToTweetShape`
   payload — including `fulltext_excerpt_md` — into `{{TWEETS_JSON}}`. The v0.41

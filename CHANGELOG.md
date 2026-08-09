@@ -50,6 +50,21 @@ The analyst was reading the title page. Now it reads the tables.
   gets the honest "may be front matter rather than Methods/Results" wording
   instead of a claim that its omissions were deliberate.
 
+### Artifacts
+- **The table tier now has a share FLOOR, not just a ceiling.** Tables led the
+  excerpt but shrank proportionally as the budget grew: on BEACON-HCC the same
+  four tables (byte-identical, 7,859 chars) were 33% of a 24,000-char excerpt and
+  19% of a 50,000-char one, and the rendered class-by-framework grid disappeared
+  from the card. Nothing was dropped from the input; it was diluted out of
+  attention. Prose is now capped once tables are placed.
+- **A grid no longer needs numbers in its cells to be a required table.** The
+  Phase 2 must-table list was entirely numeric-outcome shaped, so it never
+  covered the thing a guideline actually carries: stage or class by modality with
+  a recommendation strength, this framework versus the one it competes with,
+  scenario by appropriateness rating, per-class panel agreement.
+- Measured with `quality-eval` on 2026-08-08, 24,000 vs 50,000: overall
+  **6.7 → 7.4**, accuracy **6.0 → 7.7**, oncologist persona **5.0 → 7.8**.
+
 ### Guards worth knowing about
 Each of these exists because it was measured failing, not anticipated:
 - Watermark stripping is gated on **repetition and on being a slice of a real
