@@ -6,17 +6,13 @@ Format: `- [scope] description (source)`
 
 ## Full-text excerpting (deferred from v0.41, all surfaced by the ship reviews)
 
-- **A rendered table can be confidently wrong where a bullet would only be
-  vague.** **Priority: P0.** `pdftotext -layout` restores row association only
-  for rows whose cell text fits ONE line; where a cell wraps, the label and its
-  value land on different lines again. In the v0.41 quality-eval the 24,000 arm
-  rendered BEACON's panel-agreement table and pinned real published percentages
-  to the wrong classes (1B/1C got values belonging to 2/3A), which the
-  oncologist persona caught: "don't screenshot that table for tumor board
-  without checking the PDF first." Now that artifacts are prioritised this is
-  the top risk: detect tables whose row-association is uncertain (orphaned
-  value lines, value count != row count) and either repair them or withhold the
-  block, so the analyst cannot render one. (v0.41 quality-eval)
+- **Row-association REPAIR (the withhold half shipped in v0.41).** **Priority:
+  P2.** Detection and refusal are live; the fold was removed after review showed
+  it corrupted rows. A trustworthy repair needs a positive row-label test (not
+  "any leftmost line without a value cell"), a real value grammar, and document
+  order rather than indent order. Worth doing: 24 of 56 corpus table blocks are
+  currently refused, and some of those are guideline grids worth rendering.
+  (v0.41 pre-merge review)
 - **The verdict taxonomy has no bucket for a consensus document.** **Priority:
   P2.** Across five BEACON builds the verdict came back `unclear`,
   `challenges-soc`, `confirmatory`, `confirmatory`, `challenges-soc` — run-to-run

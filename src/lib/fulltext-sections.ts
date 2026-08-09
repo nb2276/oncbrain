@@ -615,19 +615,45 @@ function looksTabular(text: string): boolean {
 // mistaken for a value.
 function valueOnlyLine(line: string): { col: number; value: string } | null {
   const t = line.trim();
+  const col = line.length - line.trimStart().length;
   if (!t) return null;
-  if (!/\d/.test(t) && !/^n\/?a$/i.test(t)) return null;
-  if (/[A-Za-z]{3,}/.test(t.replace(/n\/a/gi, ''))) return null;
-  return { col: line.length - line.trimStart().length, value: t };
+  if (/^n\/?a$/i.test(t)) return { col, value: t };
+  // ANY letter disqualifies. The earlier "no 3-letter run" test accepted
+  // `cT4a`, `pN1`, `pT3b`, `G3`, `5-FU`, `P < 0.001` and `95% CI` as values —
+  // and the first five of those are ROW LABELS, which is how a real JCO row
+  // (`cT4a  30 (9.9)  11 (3.7)`) got consumed and re-attached to a download
+  // stamp. Same "value present, label gone" hazard the watermark gate guards.
+  if (/[A-Za-z]/.test(t)) return null;
+  if (!/\d/.test(t)) return null;
+  return { col, value: t };
 }
 
 export type RowAssociation = {
-  status: 'clean' | 'repaired' | 'uncertain';
+  status: 'clean' | 'uncertain';
   text: string;
   note: string | null;
 };
 
-export function repairRowAssociation(text: string): RowAssociation {
+// This function DETECTS and REFUSES. It does not repair.
+//
+// A forced-mapping repair was implemented and then removed, because review
+// showed it produced exactly the corruption the marker exists to prevent, minus
+// the warning. Three independent defects, each reproduced on the real corpus:
+//   - Orphans were folded in INDENT order, not document order. A right-aligned
+//     numeric column varies in indent by construction (`18 (94.4)` vs
+//     `117 (65.0)`), so the fold order was digit-width order and every value
+//     landed on the wrong row — while the note claimed "document order".
+//   - Any leftmost line with no value-shaped cell counted as a value-less row,
+//     so column headers, group headers and publisher footers absorbed values.
+//     All 3 repairs the corpus produced were wrong; one attached a real
+//     `cT4a  30 (9.9)  11 (3.7)` row to a `Downloaded from ascopubs.org` stamp.
+//   - The fold was destructive (the source line was dropped), so the correct
+//     association was not merely shadowed but erased.
+// Repair needs a positive row-label test and a real value grammar before it can
+// be trusted. Until then refusing is free: at the shipped default the repair
+// branch fired on 0 of 25 aligned table blocks, so nothing is lost by removing
+// it. See TODOS.md.
+export function auditRowAssociation(text: string): RowAssociation {
   const lines = text.split('\n');
   const bodyIndents = lines
     .filter((l) => l.trim().length > 0)
@@ -635,28 +661,26 @@ export function repairRowAssociation(text: string): RowAssociation {
   if (bodyIndents.length === 0) return { status: 'clean', text, note: null };
   const labelIndent = Math.min(...bodyIndents);
 
-  // Partition into label lines (leftmost column bears text) and orphan values.
   const labelIdx: number[] = [];
   const orphans: Array<{ i: number; col: number; value: string }> = [];
   for (const [i, line] of lines.entries()) {
     if (!line.trim()) continue;
+    // The caption is not a row.
+    if (TABLE_HEADING.test(line.trim()) || FIGURE_HEADING.test(line.trim())) continue;
     const indent = line.length - line.trimStart().length;
     const v = valueOnlyLine(line);
-    // The caption is not a row. Counting it as one let a detached value be
-    // folded onto the table's own title, which is worse than the bug this
-    // function exists to fix.
-    if (TABLE_HEADING.test(line.trim()) || FIGURE_HEADING.test(line.trim())) continue;
     if (v && indent > labelIndent + 2) orphans.push({ i, ...v });
     else if (indent <= labelIndent + 2) labelIdx.push(i);
   }
+
   if (orphans.length === 0) {
     // No indentation signal. That is not proof of health: READING-ORDER
     // extraction is flush-left by construction, so a fully detached table looks
     // identical to a clean one under an indent heuristic — and reading order is
-    // where association is most broken. Fall back to a run detector. Values
+    // the text used whenever the layout substitution is rejected. Values
     // belonging to different rows arrive as consecutive value-only lines with
-    // no label between them; a genuinely flat two-column table alternates
-    // label, value, label, value, so its runs are length 1.
+    // no label between them; a genuinely flat two-column table alternates label,
+    // value, label, value, so its runs are length 1.
     let run = 0;
     let longestRun = 0;
     for (const line of lines) {
@@ -675,54 +699,35 @@ export function repairRowAssociation(text: string): RowAssociation {
     return { status: 'clean', text, note: null };
   }
 
-  // A label line is value-less if nothing AFTER its first column gutter looks
-  // like a value. Testing the whole line for a digit does not work: the row
-  // label itself is routinely numeric ("Class 1B", "T2", "Grade 3"), so every
-  // row would look like it already carried its value.
-  // A cell counts as this row's value only if it is VALUE-SHAPED — no real
-  // words. A definition cell routinely contains digits ("Unifocal HCC >3 cm but
-  // ≤8 cm"), so testing for a digit alone marks every wrapped prose row as
-  // already-valued and the detached numbers below it go unnoticed.
+  // A row label carries its own value only if a VALUE-SHAPED cell follows it.
+  // The label itself is routinely numeric ("Class 1B", "T2"), so a digit on the
+  // line proves nothing, and a definition cell contains digits too
+  // ("Unifocal HCC >3 cm but <=8 cm").
   const needy = labelIdx.filter((i) => {
     const cells = lines[i]!.slice(labelIndent).split(/\s{2,}/).slice(1);
     return !cells.some((c) => valueOnlyLine(c) !== null);
   });
   if (needy.length === 0) return { status: 'clean', text, note: null };
 
-  // Group orphans into columns. Indents within COLUMN_TOLERANCE are one column.
-  const COLUMN_TOLERANCE = 3;
-  const columns: Array<{ col: number; items: typeof orphans }> = [];
-  for (const o of orphans.sort((a, b) => a.col - b.col || a.i - b.i)) {
-    const bucket = columns.find((c) => Math.abs(c.col - o.col) <= COLUMN_TOLERANCE);
-    if (bucket) bucket.items.push(o);
-    else columns.push({ col: o.col, items: [o] });
-  }
-
-  // Forced mapping only: one column whose orphan count equals the value-less
-  // label count. More columns, or a count mismatch, means guessing.
-  const usable = columns.filter((c) => c.items.length === needy.length);
-  if (usable.length !== 1) {
-    return {
-      status: 'uncertain',
-      text,
-      note: `row association uncertain: ${needy.length} row label(s) carry no value on their own line and the ${orphans.length} detached value(s) cannot be matched to them unambiguously`,
-    };
-  }
-
-  // Pair in document order and fold each value onto its label line.
-  const column = usable[0]!;
-  const out = [...lines];
-  const consumed = new Set<number>();
-  needy.forEach((lineNo, n) => {
-    const o = column.items[n]!;
-    out[lineNo] = `${out[lineNo]!.trimEnd()}  ${o.value}`;
-    consumed.add(o.i);
-  });
   return {
-    status: 'repaired',
-    text: out.filter((_, i) => !consumed.has(i)).join('\n'),
-    note: `row association repaired: ${needy.length} detached value(s) folded back onto their row labels in document order`,
+    status: 'uncertain',
+    text,
+    note: `row association uncertain: ${needy.length} row label(s) carry no value on their own line and ${orphans.length} value(s) are detached from their rows`,
   };
+}
+
+// The `[row association uncertain: ...]` marker is OUR text, and the Phase 2
+// prompt keys a hard MUST-NOT-RENDER rule on that literal string. Section bodies
+// are emitted verbatim from an untrusted PDF, so a document that contains the
+// marker would be writing into a privileged instruction channel: it could
+// suppress its own real table from the card, or smuggle text into a bracket the
+// model has been told to obey. Neutralise it everywhere a body is emitted, with
+// a zero-width space that survives display but breaks the literal match.
+const MARKER_OPENER = /\[(?=row association)/;
+const MARKER_OPENER_ALL = /\[(?=row association)/g;
+
+function neutralizeMarkers(text: string): string {
+  return text.replace(MARKER_OPENER_ALL, '[\u200b');
 }
 
 // Map caption → layout-mode body for every table/figure in the -layout pass.
@@ -834,15 +839,22 @@ export function composeExcerpt(rawText: string, opts: ComposeOptions = {}): Comp
     // the reading-order block, where association is most broken of all. Running
     // this before the looksTabular decision let the fallback silently discard
     // the marker and hand over an unaudited block.
+    // Defuse any forged marker in the SOURCE before our own is added, for every
+    // section kind — a prose block can carry one too. Done once, here, so the
+    // real marker prepended below stays intact.
+    if (MARKER_OPENER.test(full)) {
+      full = neutralizeMarkers(full);
+      body = truncateCleanly(full, budget);
+    }
+
     let assocNote: string | null = null;
     if (s.kind === 'table') {
       // Tables only. A figure caption has no rows, so "row association" is
-      // meaningless there and the marker would be noise the analyst has to
-      // reason past.
-      const assoc = repairRowAssociation(full);
+      // meaningless there and the marker would be noise the analyst reasons past.
+      const assoc = auditRowAssociation(full);
       assocNote = assoc.note;
-      if (assoc.status !== 'clean') {
-        full = assoc.status === 'uncertain' ? `[${assoc.note}]\n${full}` : assoc.text;
+      if (assoc.status === 'uncertain') {
+        full = `[${assoc.note}]\n${full}`;
         body = truncateCleanly(full, budget);
       }
     }

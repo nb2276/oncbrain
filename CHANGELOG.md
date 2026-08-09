@@ -65,6 +65,29 @@ The analyst was reading the title page. Now it reads the tables.
 - Measured with `quality-eval` on 2026-08-08, 24,000 vs 50,000: overall
   **6.7 → 7.4**, accuracy **6.0 → 7.7**, oncologist persona **5.0 → 7.8**.
 
+### Row association
+- **A table whose values cannot be tied to its rows is now refused, not
+  rendered.** `pdftotext -layout` restores row association only for rows whose
+  cell text fits one line; where a cell wraps, the label and its value land on
+  separate lines. The analyst guessed, and BEACON's panel-agreement table reached
+  the card with real published percentages against the wrong classes — which the
+  quality-eval oncologist flagged as "don't screenshot that table for tumor board
+  without checking the PDF first." Such blocks are now marked
+  `[row association uncertain: ...]` and the Phase 2 prompt forbids rendering
+  them as a table or attributing their values to rows; an unattributed range is
+  still allowed. 24 of 56 table blocks in the corpus are marked.
+- **Detection only. A forced-mapping repair was written and then removed**,
+  because review showed it reproduced the corruption it was meant to fix: it
+  folded values in indent order rather than document order (a right-aligned
+  numeric column scrambles every row), it counted column headers and publisher
+  footers as rows, and the fold was destructive. All three repairs it produced on
+  the corpus were wrong, one attaching a real `cT4a` row to a download stamp.
+  Refusing costs nothing measurable — the repair branch fired on 0 of 25 aligned
+  blocks at the shipped default.
+- The marker is our own instruction channel written into untrusted PDF text, so
+  a forged `[row association ...]` in a source document is defused before ours is
+  added.
+
 ### Guards worth knowing about
 Each of these exists because it was measured failing, not anticipated:
 - Watermark stripping is gated on **repetition and on being a slice of a real
