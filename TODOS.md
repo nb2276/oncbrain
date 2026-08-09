@@ -61,11 +61,6 @@ Format: `- [scope] description (source)`
   untested; the three `composeExcerpt` call sites in `inbox-enrichment.ts` and
   the whole `backfill-fulltext.ts` CLI have no tests. Audit put the diff at 55%.
   (v0.41 ship coverage audit)
-- **Run `npm run quality-eval` at 24,000 vs 50,000.** **Priority: P2.** Every
-  number behind the 50,000 default is *coverage* — how much source reaches the
-  prompt. Whether it makes the analyst better or merely bigger is unmeasured,
-  and the one A/B done by hand was mixed: STELLAR gained 76 grounded numbers,
-  BEACON lost its rendered comparison table and flipped verdict. (v0.41)
 
 ## v0.12 — tag filter rail extensions (deferred from v0.11 via /autoplan)
 
@@ -136,6 +131,14 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 - **OCR is macOS-only.** Linux/CI builds produce uniformly null captions; scanned-PDF OCR (v0.8 PR2) needs the Mac Vision binary + poppler.
 - **Figure caption validator checks numeric tokens only.** Can't catch mislabeled axes or wrong-arm attribution.
 - **Disease-site classification uses MeSH terms / keywords, not author affiliations.** Explicit product decision, not a deferred item.
+
+## Completed (v0.41.0, 2026-08-09)
+
+- **Run `npm run quality-eval` at 24,000 vs 50,000.** Done on 2026-08-08 with the
+  artifact floor and grid rule in place: overall 6.7 → 7.4, accuracy 6.0 → 7.7,
+  oncologist persona 5.0 → 7.8. 50,000 kept. The 24,000 arm is what surfaced the
+  P0 above — it rendered the panel-agreement table with percentages pinned to the
+  wrong classes. **Completed:** v0.41.0 (2026-08-09)
 
 ## Completed (v0.20.1, 2026-06-17)
 
