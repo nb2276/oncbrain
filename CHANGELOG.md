@@ -2,6 +2,72 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.41.0] - 2026-08-09
+
+The analyst was reading the title page. Now it reads the tables.
+
+### Fixed
+- **`fulltext_excerpt_md` was the first 8,000 characters of the PDF, which for a
+  text-layer paper is the title page, the author affiliations and the
+  conflict-of-interest block.** `llm-pipeline` labelled that block
+  "Methods/Results excerpt" while it contained neither. Measured across the 31
+  filed PDFs: 30 were truncated, the median analyst saw ~10% of the document,
+  and the leading slice reached **zero** table blocks and **zero** figure
+  captions. BEACON-HCC was cut mid-word inside its abstract at `framewor`, so
+  the four tables carrying the consensus — at offsets 17,888 through 71,000 —
+  were never seen, and the published card correctly reported the allocation
+  rules as "not in source text". Trials survived the bug only because
+  `papers.abstract` is a separate column carrying the primary endpoint;
+  guidelines and consensus statements, whose payload is back-matter tables, did
+  not.
+
+### Added
+- **`src/lib/fulltext-sections.ts`** — segments a document at its own headings,
+  drops references, disclosures and front matter, then spends the character
+  budget in priority order: tables and figure captions first, then Results, then
+  the article body. Pure functions, no LLM: the structure is recoverable by rule
+  from poppler output, so paying a model to find it would be slower and less
+  repeatable than a regex.
+- **A second `pdftotext -layout` pass, used for table blocks only.**
+  Reading-order extraction detaches a table's column from its rows — BEACON's
+  Table 1 emitted nine class definitions and then a loose run of `17/18 (94.4%)`
+  and `15/18 (83.3%)` with nothing tying a percentage to a class. Layout mode
+  keeps the row intact. Prose stays on reading-order, where `-layout`
+  interleaves a two-column page into nonsense.
+- **`npm run backfill:fulltext`** (`--id` / `--date` / `--all` / `--dry-run`) to
+  re-extract already-filed PDFs. No LLM, no network. Deliberately does not
+  rebuild any digest: a backfill must not silently change what a published day
+  says.
+
+### Changed
+- Excerpt budget 8,000 → 50,000 characters, overridable with
+  `FULLTEXT_EXCERPT_CHARS` (drop it to 8,000 for a mass rebuild). The floor
+  matters more than the ceiling: at the *old* 8,000 the section-aware fill
+  already reaches 46 table blocks where the head slice reached none, for the
+  same token spend.
+- The Phase 2 prompt label now states what the row actually holds. A composed
+  excerpt is self-identifying (it emits `## ` block labels); a legacy head slice
+  gets the honest "may be front matter rather than Methods/Results" wording
+  instead of a claim that its omissions were deliberate.
+
+### Guards worth knowing about
+Each of these exists because it was measured failing, not anticipated:
+- Watermark stripping is gated on **repetition and on being a slice of a real
+  watermark word**. A frequency-only gate deleted `ENRT`/`MDT` (both PEACE
+  V-STORM arms), `TNT`/`CRT` (both STELLAR arms) and `SOC` (STAMPEDE's control);
+  matching single letters deleted `G3`, `T2`, `N0` off their own table rows.
+- A `-layout` block replaces its reading-order twin only if it is within 3× the
+  size **and** looks like a grid (≥2 column gutters per line). Without the shape
+  test, ~7,000 characters of two-column Discussion prose entered one excerpt
+  under `## Table 1: Baseline characteristics`.
+- The leading block is treated as droppable front matter only when it is under a
+  quarter of the document **and** the document is over 15,000 characters. A
+  trade-press PDF whose first heading was "Background and Study Design"
+  otherwise lost its entire numbers-bearing lede — the DFS hazard ratio, the
+  pCR, and the NCT — while reporting success.
+- The backfill CLI honours `savePaper`'s OCR-downgrade rule and skips scanned
+  PDFs, so `--all` cannot overwrite a clean PMC excerpt with noisy Vision OCR.
+
 ## [0.40.0] - 2026-08-03
 
 The channel post said the same thing three times. Now it says it once.
