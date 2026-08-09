@@ -15,6 +15,7 @@ import {
   composeExcerpt,
   segmentDocument,
   stripWatermarkArtifacts,
+  repairRowAssociation,
   DEFAULT_EXCERPT_CHARS,
 } from '../src/lib/fulltext-sections.ts';
 
@@ -539,5 +540,98 @@ describe('composeExcerpt with a -layout companion pass', () => {
     const out = composeExcerpt(READING_ORDER, { layoutText: mismatched });
     expect(out.text).not.toContain('999/999');
     expect(out.kept.find((k) => k.kind === 'table')?.aligned).toBe(false);
+  });
+});
+
+describe('repairRowAssociation', () => {
+  // The P0 from the v0.41 quality-eval. `-layout` restores row association only
+  // for rows whose cell text fits ONE line; where a cell wraps, the label and
+  // its value land on separate lines and the pairing has to be inferred. The
+  // analyst inferred it wrong and put real published percentages against the
+  // wrong BEACON classes — a table a clinician could have carried into a tumor
+  // board. Repair when the mapping is forced, refuse when it is not.
+
+  it('leaves a table whose rows all carry their own value alone', () => {
+    const t = [
+      'Table 9. Outcomes',
+      ' Class 1A     Unifocal, small        18/18 (100%)',
+      ' Class 1B     Unifocal, larger       17/18 (94.4%)',
+    ].join('\n');
+    const r = repairRowAssociation(t);
+    expect(r.status).toBe('clean');
+    expect(r.text).toBe(t);
+  });
+
+  it('folds detached values back onto their labels when the mapping is forced', () => {
+    // Two value-less labels, exactly two detached values in one column, in row
+    // order. That is not a guess.
+    const t = [
+      'Table 9. Agreement',
+      ' Class 1B     Unifocal HCC over 3 cm but under 8 cm with no',
+      ' Class 1C     Unifocal HCC over 3 cm with a poor prognostic',
+      '                                                17/18',
+      '                                                16/18',
+    ].join('\n');
+    const r = repairRowAssociation(t);
+    expect(r.status).toBe('repaired');
+    const rows = r.text.split('\n').filter((l) => l.includes('Class'));
+    expect(rows[0]).toContain('17/18');
+    expect(rows[1]).toContain('16/18');
+    // the orphan lines are consumed, not duplicated
+    expect(r.text.match(/17\/18/g)).toHaveLength(1);
+  });
+
+  it('REFUSES when the detached values cannot be matched one-to-one', () => {
+    const t = [
+      'Table 9. Agreement',
+      ' Class 1B     wrapped cell text here',
+      ' Class 1C     wrapped cell text here',
+      '                                                17/18',
+      '                                                16/18',
+      '                                                15/18',
+    ].join('\n');
+    const r = repairRowAssociation(t);
+    expect(r.status).toBe('uncertain');
+    expect(r.note).toMatch(/uncertain/);
+    expect(r.text).toBe(t); // untouched — no guessing
+  });
+
+  it('does not pair values across different columns', () => {
+    // One orphan in the agreement column and one far right in a different
+    // column: matching them to two labels would invent an association.
+    const t = [
+      'Table 9. Agreement',
+      ' Class 1B     wrapped cell text here',
+      ' Class 1C     wrapped cell text here',
+      '              17/18',
+      '                                                              N/A',
+    ].join('\n');
+    expect(repairRowAssociation(t).status).toBe('uncertain');
+  });
+
+  it('never mistakes a wrapped PROSE cell for a detached value', () => {
+    const t = [
+      'Table 9. Principles',
+      ' Class 1B     Surgical resection is preferred for patients without',
+      '              cirrhosis or with Child-Pugh A disease and no portal',
+      ' Class 1C     Transplant is preferred where portal hypertension is',
+      '              present, including a history of decompensation.',
+    ].join('\n');
+    expect(repairRowAssociation(t).status).toBe('clean');
+  });
+
+  it('marks an uncertain table in the composed excerpt so it cannot be rendered', () => {
+    const doc = [
+      'Table 9. Agreement',
+      ' Class 1B     wrapped cell text here that is long enough to matter',
+      ' Class 1C     wrapped cell text here that is long enough to matter',
+      '                                                17/18',
+      '                                                16/18',
+      '                                                15/18',
+      pad('T9Row', 10),
+    ].join('\n');
+    const out = composeExcerpt(doc, { maxChars: 24_000 });
+    expect(out.text).toContain('[row association uncertain');
+    expect(out.kept.find((k) => k.kind === 'table')?.rowAssociation).toMatch(/uncertain/);
   });
 });

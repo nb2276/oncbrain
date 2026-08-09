@@ -522,6 +522,9 @@ export type ComposedExcerpt = {
     truncated: boolean;
     // True when this block came from the -layout pass (tables/figures only).
     aligned: boolean;
+    // Set when a table block's detached row values were repaired, or when the
+    // pairing was refused as ambiguous. Null for a clean block.
+    rowAssociation: string | null;
   }>;
   droppedKinds: SectionKind[];
   // True when segmentation was unusable and we fell back to a head-slice.
@@ -579,6 +582,147 @@ function looksTabular(text: string): boolean {
   if (lines.length < 4) return true; // too small to judge; size guard covers it
   const gridded = lines.filter((l) => (l.trimStart().match(GUTTER) ?? []).length >= 2).length;
   return gridded / lines.length >= TABULAR_MIN_LINE_FRACTION;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Row association
+// ────────────────────────────────────────────────────────────────────────────
+//
+// `-layout` restores a table's row association only for rows whose cell text
+// fits ONE line. Where a cell wraps, the label and its value land on separate
+// lines and the pairing has to be inferred:
+//
+//     Class 1B                     <- label, no value on its line
+//     Class 1C                     <- label, no value on its line
+//                     17/18        <- belongs to 1B
+//                     16/18        <- belongs to 1C
+//
+// A reader with the rendered page pairs these by eye. An analyst reading the
+// text stream guesses, and in the v0.41 quality-eval it guessed wrong: BEACON's
+// panel-agreement table reached the card with real published percentages pinned
+// to the wrong classes, which an oncologist would have carried into a tumor
+// board. A wrong bullet is vague; a wrong TABLE looks authoritative.
+//
+// So: repair when the pairing is forced, refuse when it is not. Orphan values
+// are grouped by their COLUMN (their indent), because a multi-column table
+// scatters orphans from different columns through the same block and pairing
+// across columns would invent associations. Within one column, values appear in
+// row order, so N orphans and exactly N value-less labels is a forced mapping.
+// Any other count is ambiguous and the block is marked instead.
+
+// A line carrying nothing but a cell value: numbers, ratios, percentages, N/A.
+// Rejects anything with a real word in it, so a wrapped prose cell is never
+// mistaken for a value.
+function valueOnlyLine(line: string): { col: number; value: string } | null {
+  const t = line.trim();
+  if (!t) return null;
+  if (!/\d/.test(t) && !/^n\/?a$/i.test(t)) return null;
+  if (/[A-Za-z]{3,}/.test(t.replace(/n\/a/gi, ''))) return null;
+  return { col: line.length - line.trimStart().length, value: t };
+}
+
+export type RowAssociation = {
+  status: 'clean' | 'repaired' | 'uncertain';
+  text: string;
+  note: string | null;
+};
+
+export function repairRowAssociation(text: string): RowAssociation {
+  const lines = text.split('\n');
+  const bodyIndents = lines
+    .filter((l) => l.trim().length > 0)
+    .map((l) => l.length - l.trimStart().length);
+  if (bodyIndents.length === 0) return { status: 'clean', text, note: null };
+  const labelIndent = Math.min(...bodyIndents);
+
+  // Partition into label lines (leftmost column bears text) and orphan values.
+  const labelIdx: number[] = [];
+  const orphans: Array<{ i: number; col: number; value: string }> = [];
+  for (const [i, line] of lines.entries()) {
+    if (!line.trim()) continue;
+    const indent = line.length - line.trimStart().length;
+    const v = valueOnlyLine(line);
+    // The caption is not a row. Counting it as one let a detached value be
+    // folded onto the table's own title, which is worse than the bug this
+    // function exists to fix.
+    if (TABLE_HEADING.test(line.trim()) || FIGURE_HEADING.test(line.trim())) continue;
+    if (v && indent > labelIndent + 2) orphans.push({ i, ...v });
+    else if (indent <= labelIndent + 2) labelIdx.push(i);
+  }
+  if (orphans.length === 0) {
+    // No indentation signal. That is not proof of health: READING-ORDER
+    // extraction is flush-left by construction, so a fully detached table looks
+    // identical to a clean one under an indent heuristic — and reading order is
+    // where association is most broken. Fall back to a run detector. Values
+    // belonging to different rows arrive as consecutive value-only lines with
+    // no label between them; a genuinely flat two-column table alternates
+    // label, value, label, value, so its runs are length 1.
+    let run = 0;
+    let longestRun = 0;
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      if (TABLE_HEADING.test(line.trim()) || FIGURE_HEADING.test(line.trim())) continue;
+      run = valueOnlyLine(line) ? run + 1 : 0;
+      longestRun = Math.max(longestRun, run);
+    }
+    if (longestRun >= 2) {
+      return {
+        status: 'uncertain',
+        text,
+        note: `row association uncertain: ${longestRun} consecutive value-only lines with no row label between them, so the values cannot be tied to rows`,
+      };
+    }
+    return { status: 'clean', text, note: null };
+  }
+
+  // A label line is value-less if nothing AFTER its first column gutter looks
+  // like a value. Testing the whole line for a digit does not work: the row
+  // label itself is routinely numeric ("Class 1B", "T2", "Grade 3"), so every
+  // row would look like it already carried its value.
+  // A cell counts as this row's value only if it is VALUE-SHAPED — no real
+  // words. A definition cell routinely contains digits ("Unifocal HCC >3 cm but
+  // ≤8 cm"), so testing for a digit alone marks every wrapped prose row as
+  // already-valued and the detached numbers below it go unnoticed.
+  const needy = labelIdx.filter((i) => {
+    const cells = lines[i]!.slice(labelIndent).split(/\s{2,}/).slice(1);
+    return !cells.some((c) => valueOnlyLine(c) !== null);
+  });
+  if (needy.length === 0) return { status: 'clean', text, note: null };
+
+  // Group orphans into columns. Indents within COLUMN_TOLERANCE are one column.
+  const COLUMN_TOLERANCE = 3;
+  const columns: Array<{ col: number; items: typeof orphans }> = [];
+  for (const o of orphans.sort((a, b) => a.col - b.col || a.i - b.i)) {
+    const bucket = columns.find((c) => Math.abs(c.col - o.col) <= COLUMN_TOLERANCE);
+    if (bucket) bucket.items.push(o);
+    else columns.push({ col: o.col, items: [o] });
+  }
+
+  // Forced mapping only: one column whose orphan count equals the value-less
+  // label count. More columns, or a count mismatch, means guessing.
+  const usable = columns.filter((c) => c.items.length === needy.length);
+  if (usable.length !== 1) {
+    return {
+      status: 'uncertain',
+      text,
+      note: `row association uncertain: ${needy.length} row label(s) carry no value on their own line and the ${orphans.length} detached value(s) cannot be matched to them unambiguously`,
+    };
+  }
+
+  // Pair in document order and fold each value onto its label line.
+  const column = usable[0]!;
+  const out = [...lines];
+  const consumed = new Set<number>();
+  needy.forEach((lineNo, n) => {
+    const o = column.items[n]!;
+    out[lineNo] = `${out[lineNo]!.trimEnd()}  ${o.value}`;
+    consumed.add(o.i);
+  });
+  return {
+    status: 'repaired',
+    text: out.filter((_, i) => !consumed.has(i)).join('\n'),
+    note: `row association repaired: ${needy.length} detached value(s) folded back onto their row labels in document order`,
+  };
 }
 
 // Map caption → layout-mode body for every table/figure in the -layout pass.
@@ -686,6 +830,22 @@ export function composeExcerpt(rawText: string, opts: ComposeOptions = {}): Comp
       full = s.text;
       body = truncateCleanly(full, budget);
     }
+    // Audit row association on the text that was ACTUALLY chosen — which may be
+    // the reading-order block, where association is most broken of all. Running
+    // this before the looksTabular decision let the fallback silently discard
+    // the marker and hand over an unaudited block.
+    let assocNote: string | null = null;
+    if (s.kind === 'table') {
+      // Tables only. A figure caption has no rows, so "row association" is
+      // meaningless there and the marker would be noise the analyst has to
+      // reason past.
+      const assoc = repairRowAssociation(full);
+      assocNote = assoc.note;
+      if (assoc.status !== 'clean') {
+        full = assoc.status === 'uncertain' ? `[${assoc.note}]\n${full}` : assoc.text;
+        body = truncateCleanly(full, budget);
+      }
+    }
     // A section truncated below the floor is a header row with no data under it,
     // which reads as a delivered table and is worse than no table at all.
     if (body.length < Math.min(MIN_SECTION_CHARS, full.length)) return;
@@ -698,6 +858,7 @@ export function composeExcerpt(rawText: string, opts: ComposeOptions = {}): Comp
       chars: body.length,
       truncated: body.length < full.length,
       aligned: aligned !== undefined,
+      rowAssociation: assocNote,
     });
   };
 
