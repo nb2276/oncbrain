@@ -2,6 +2,50 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.44.0] - 2026-08-10
+
+At-rest card reconciliation: the two prose caps that actually bind now match
+what the model needs, and the headline number stops being bolded twice.
+
+### Changed
+- **`significance` 55 → 65 words (hard ceiling 75); `monday_clinic` bounded at
+  50.** Measured over the 122 published cards, these are the ONLY at-rest caps
+  that bind: 62% of `significance` values sit within 10% of the cap and 28
+  exceed it, and `monday_clinic` had no numeric cap at all while running to a
+  53-word maximum. The instruction now matches the artifact instead of being
+  routinely overrun. The TL;DR (median 19 of 25 words) and verdict `rationale`
+  (median 23 of 30) caps were deliberately left alone: nothing presses on them,
+  so raising them would buy nothing.
+
+### Fixed
+- **The endpoint statistic was hero-bolded twice, one line apart.** Since v0.30
+  the card leads with `primary_endpoint.stat_value` and renders the TL;DR
+  directly beneath it; both ran through `emphasizeStats`, and both promoted
+  their first effect-size token to the same `.stat-key` hero class. On 52% of
+  the cards carrying an endpoint (27/52) the reader's eye landed on the
+  identical bolded number twice. The card now paints a TL;DR token that
+  restates a quantity already shown above as PLAIN TEXT. Across the corpus this
+  takes duplicate hero emphasis from 27 cards to **0**, with no card losing a
+  number and no other emphasis touched (a `p=0.021` the endpoint does not carry
+  keeps its own).
+
+  Done at the DISPLAY layer, not in the prompt, deliberately: the TL;DR renders
+  ALONE — with no endpoint block beside it — in the RSS feed, the search index,
+  the flat RecentFeed on the home and /studies pages, and the Obsidian export.
+  Telling Phase 2 to drop the statistic from the field would have silently
+  stripped it from four surfaces to de-duplicate one. The stored `tldr` is
+  unchanged; only the painting differs.
+
+  Matching compares MEASURE-ANCHORED ATOMS ("hr 0.48", "64.5%", "20.4 mo"), not
+  whole strings. String containment was implemented first and failed on the two
+  shapes the corpus actually contains: a compound endpoint stat whose component
+  the TL;DR restates (`35.8 vs 20.4 mo, HR 0.48` against `HR 0.48 (0.25-0.91)`),
+  and the journal `v` / `vs` abbreviation (`64.5% v 62.3%` against
+  `64.5% vs 62.3%`). Atoms also make it safe in the direction that matters:
+  `HR 0.6` and `HR 0.62` are simply different atoms, so a shorter decimal can
+  never swallow a longer one's emphasis, and an unanchored number (a bare
+  `0.62`, a lone p-value) is never matched at all.
+
 ## [0.43.2] - 2026-08-10
 
 Three defects found by adversarial + codex review of the v0.41-v0.43 excerpting
