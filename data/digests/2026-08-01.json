@@ -1,22 +1,23 @@
 {
   "date": "2026-08-01",
   "conference": null,
-  "generated_at": 1785657692573,
+  "generated_at": 1786393070398,
   "digest": {
-    "top_line": "SIB-CRT in LARC: 9yr OS 74.3% vs 48.9% (HR 0.43, P=0.008) with a 56Gy PGTV boost, despite identical pCR (15.2% vs 18.4%).",
-    "tldr": "One lower-GI readout: a 106-pt randomized phase 2 says a simultaneous integrated boost to 56Gy buys 9-year OS, DFS, MFS and LC, but pCR did not move, so the mechanism for a ~25-point OS split is unexplained and MFS (HR 0.48) tracks LC (HR 0.40) too closely for a pelvic boost alone. Hypothesis-generating for dose escalation in chemo-naive LARC, not yet a reason to leave 50Gy/25fx.",
+    "top_line": "SIB-CRT for LARC: 9-yr OS 74.3% vs 48.9% (HR 0.43, P=0.008) off a 56-60 Gy boost, with pCR flat and no toxicity cost.",
+    "tldr": "Lower-GI carries the day, and it is a dose question: a 106-pt randomized phase 2 missed its pCR primary endpoint yet separated on every 9-yr survival endpoint, LC 87.1% vs 70.1% (HR 0.40). MFS moving as hard as LC (HR 0.48) is the part that does not follow from a local boost.",
     "sites": [
       {
         "disease_site": "lower-gi",
-        "intro": "Dose escalation in LARC, from an accrual window (2013-2015) that predates TNT, RAPIDO and PRODIGE-23.",
+        "intro": "Single trial, and it argues the pCR surrogate is the wrong readout for a rectal boost.",
         "studies": [
           {
             "name": "SIB-CRT vs Standard CRT for LARC (NCT02195141)",
-            "tldr": "9yr OS 74.3% vs 48.9% (HR 0.43, P=0.008) with SIB dose escalation to 56Gy PGTV, despite identical pCR.",
+            "tldr": "9-yr OS 74.3% vs 48.9% (HR 0.43, P=0.008) with SIB dose escalation to 56-60 Gy, despite identical pCR.",
             "details": [
-              "🔍 Randomized phase 2, N=106 (55 SIB-CRT / 51 CRT), enrolled Aug 2013 to Feb 2015, median f/u 116.6mo",
-              "📐 RT: both arms 50Gy/25fx pelvis; SIB arm adds 56Gy to PGTV and 60Gy to lateral metastatic nodes when present",
-              "📊 pCR was NOT improved: 15.2% vs 18.4%, P=0.695, so the survival split is not mediated by pathologic downstaging",
+              "🔍 Randomized phase 2, N=106 (55 SIB-CRT / 51 CRT), stage II/III rectal adenocarcinoma, accrued Aug 2013 to Feb 2015",
+              "🔍 RT: both arms 50 Gy/25 fx to pelvis; SIB arm added 56 Gy to PGTV and 60 Gy to lateral metastatic nodes when present",
+              "🔍 Radical surgery planned 6-8 wks post-CRT; median f/u 116.6 mo",
+              "📊 1° EP pCR was NEGATIVE: 15.2% vs 18.4%, P=0.695. Every survival endpoint is secondary",
               {
                 "text": "📊 9-year ITT outcomes, SIB-CRT vs CRT",
                 "table": {
@@ -28,16 +29,16 @@
                   ],
                   "rows": [
                     [
-                      "OS",
-                      "74.3%",
-                      "48.9%",
-                      "HR 0.43, P=0.008"
-                    ],
-                    [
                       "DFS",
                       "70.8%",
                       "47.4%",
                       "HR 0.46, P=0.013"
+                    ],
+                    [
+                      "OS",
+                      "74.3%",
+                      "48.9%",
+                      "HR 0.43, P=0.008"
                     ],
                     [
                       "MFS",
@@ -60,26 +61,25 @@
                   ]
                 }
               },
-              "⚠️ MFS gain (HR 0.48) as large as LC gain (HR 0.40) is biologically hard to attribute to a pelvic boost",
-              "📊 Acute G3 toxicity 14.5% SIB-CRT vs 19.6% CRT, mostly radiation dermatitis",
-              "📊 Curative treatment (surgery or watch-and-wait) reached in 89.1% (49/55) vs 78.4% (40/51), P=0.135",
-              "⚠️ Benefit confined to the chemo-naive subgroup (9yr DFS 70.8%, HR 0.343, P=.014); no added benefit with periop chemo",
-              "⚠️ N=106 phase 2 with ~25-point absolute OS separation; effect size implausibly large for a boost alone, and OS/DFS were secondary",
-              "⚠️ 2013-2015 accrual predates TNT; both arms are pre-RAPIDO/PRODIGE-23 standards"
+              "📊 Acute G3 toxicity 14.5% SIB-CRT vs 19.6% CRT, mostly radiation dermatitis. No toxicity cost to the boost",
+              "📊 Curative treatment (radical surgery or W&W) reached in 89.1% (49/55) vs 78.4% (40/51), P=0.135",
+              "⚠️ MFS moved as much as LC (HR 0.48 vs 0.40), which a local dose boost should not do. Distant control is the harder claim",
+              "⚠️ Subgroup: benefit confined to pts who got NO perioperative chemo (9-yr DFS 70.8%, HR 0.343, P=0.014); no added benefit with chemo. Exploratory, hypothesis-generating",
+              "⚠️ N=106 phase 2 with a negative 1° EP; 9-yr survival separations of 23-25 absolute points off ~50 pts/arm are fragile to a handful of events"
             ],
             "figures": [],
             "nct": "NCT02195141",
             "tweet_ids": [
               1000000068
             ],
-            "slug": "larc-sib-crt",
+            "slug": "nct02195141",
             "verdict": {
               "soc_implication": "early-signal",
-              "rationale": "Randomized phase 2, N=106, survival endpoints secondary; benefit driven by a chemo-naive subgroup and unexplained by the null pCR primary.",
+              "rationale": "Randomized phase 2, N=106, primary endpoint (pCR) not met; survival gains are secondary endpoints with wide event-count fragility. Confirmatory phase 3 needed before dose escalation changes practice.",
               "audience": "Stage II/III rectal adenocarcinoma, neoadjuvant chemoradiation candidates"
             },
-            "significance": "The primary endpoint (pCR) was flat, so the survival separation cannot be read as a downstaging effect, and LC (87.1% vs 70.1%) and MFS (70.8% vs 47.2%) moved together. That pattern, plus benefit only in chemo-naive pts, frames SIB to 56Gy as a boost worth testing where periop chemo is not deliverable, not a general escalation.",
-            "monday_clinic": "In stage II/III LARC pts who are not candidates for perioperative chemotherapy, this supports testing an SIB boost to the primary as a long-term-control strategy; it does not extend to pts receiving standard periop chemo, where no added benefit was seen.",
+            "significance": "The boost was modest and deliverable on standard IMRT, 56 Gy to PGTV and 60 Gy to involved lateral nodes on a 50 Gy/25 fx pelvis, with acute G3 toxicity no higher (14.5% vs 19.6%). It moves the dose-escalation question in chemo-ineligible pts, where the DFS benefit concentrated (HR 0.343, P=0.014).",
+            "monday_clinic": "In stage II/III rectal cancer where perioperative chemotherapy is not an option, this supports discussing an integrated boost to the primary and involved lateral nodes; it does not extend to pts receiving full TNT-style systemic therapy, where no added benefit appeared.",
             "primary_endpoint": {
               "name": "Pathological complete response",
               "klass": "surrogate",
@@ -89,48 +89,63 @@
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Prospective **randomized phase 2** trial, 1:1, **N=106** (55 SIB-CRT, 51 CRT), accrued August 2013 to February 2015. Median follow-up **116.6 months**."
+                "body": "Prospective **randomized phase 2**, 1:1, **N=106** (55 SIB-CRT, 51 CRT), accrued Aug 2013 to Feb 2015. Median follow-up **116.6 months**, unusually long for a rectal dose-escalation trial."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**Stage II/III rectal adenocarcinoma** planned for neoadjuvant chemoradiotherapy. Radical surgery was planned **6 to 8 weeks** after chemoradiation."
+                "body": "**Stage II/III rectal adenocarcinoma** planned for neoadjuvant chemoradiation then radical surgery. Perioperative chemotherapy was not mandated, which becomes the axis of the key subgroup."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Control arm: **50 Gy/25 fx** to the pelvis. Experimental arm: same 50 Gy/25 fx pelvis with **simultaneous integrated boost to 56 Gy to PGTV** and **60 Gy to lateral metastatic nodes** when present."
+                "body": "Both arms **50 Gy/25 fx to the pelvis**. The experimental arm added a simultaneous integrated boost of **56 Gy to PGTV** and **60 Gy to lateral metastatic nodes** when present. Surgery **6-8 weeks** after chemoradiation."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary: pCR rate.** Secondary: DFS, OS, MFS, local control, cancer-specific survival and toxicity."
+                "body": "**Primary: pCR rate.** Secondary: DFS, OS, MFS, local control, cancer-specific survival, toxicity. The reported long-term separations therefore all sit on secondary endpoints."
+              },
+              {
+                "label": "Results",
+                "body": "**Primary endpoint negative**: pCR 15.2% vs 18.4%, P=0.695. Every 9-year survival and control endpoint favored SIB-CRT (see table); curative treatment rate 89.1% vs 78.4% did not reach significance (P=0.135)."
               },
               {
                 "label": "Safety",
-                "body": "Acute grade 3 toxicity **14.5% (SIB-CRT) vs 19.6% (CRT)**, primarily radiation dermatitis. No late toxicity reported in source."
+                "body": "Acute grade 3 toxicity **14.5% (SIB-CRT) vs 19.6% (CRT)**, predominantly radiation dermatitis. **No toxicity penalty** for the boost in the acute window; late toxicity is not reported in the source."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Dose escalation in LARC has repeatedly bought pCR without survival (the RECTAL-BOOST randomized trial found no improvement in its endpoint), and the field moved toward systemic intensification with RAPIDO and PRODIGE-23 rather than higher RT dose. This trial inverts that pattern: **no pCR gain but a large survival gain**, the opposite of the usual dose-escalation signature."
               },
               {
                 "label": "Applies to",
-                "body": "Represents stage II/III rectal adenocarcinoma treated with long-course neoadjuvant chemoradiation, particularly pts not receiving perioperative chemotherapy. Does not represent pts managed with total neoadjuvant therapy or short-course RT."
+                "body": "Represents stage II/III rectal adenocarcinoma treated with long-course chemoradiation and planned radical surgery, particularly pts not receiving perioperative chemotherapy. Does not represent TNT-treated pts, cT4/beyond-TME disease, or short-course regimens."
               },
               {
                 "label": "Limitations",
-                "body": "The **primary endpoint was null** while every time-to-event secondary was positive, an internally inconsistent pattern for a boost acting through the pelvis. **Accrual closed in 2015**, before TNT became standard, and the subgroup that drove the benefit was defined by chemotherapy receipt, which was not randomized."
+                "body": "Single trial of ~50 pts per arm generating 23-25 point absolute survival gaps, a magnitude larger than modern phase 3 systemic intensification produced, so a small imbalance in events or baseline stage could carry it. The chemo-naive subgroup is exploratory and unpowered, and the 2013-2015 accrual predates routine TNT."
+              },
+              {
+                "label": "Discussion",
+                "body": "The internal logic is strained: a boost confined to PGTV and lateral nodes plausibly explains the **LC gain (87.1% vs 70.1%)**, but MFS moved nearly as much (HR 0.48), which requires either that local failure seeded distant disease or that the arms differed in something unmeasured. The result argues dose escalation deserves a properly powered phase 3, not that it is established."
               }
             ],
+            "interpretation": "The strangest thing about this trial is what did not move. Dose escalation in locally advanced rectal cancer has a consistent signature in the literature: more dose buys more pathological response, and the survival curves then fail to follow. Here the signature is exactly inverted. pCR was flat (15.2% vs 18.4%, P=0.695), the endpoint the trial was actually powered for and the endpoint dose escalation is supposed to move, and yet at nearly ten years every survival and control measure separates by 20-plus absolute points. A reader should treat that inversion as the central question, not as a bonus finding, because the mechanism usually invoked for a boost, better tumor regression, is precisely the mechanism this trial failed to demonstrate.\n\nThere are two readings. The generous one is that pCR is a poor surrogate for what a boost achieves, that residual viable disease at the primary and in lateral nodes drives both local failure and later distant seeding, and that sterilizing it improves cure without changing the binary pathological readout. The local control result (87.1% vs 70.1%, HR 0.40) is the part of the data most consistent with that story and the part most mechanistically defensible for a radiation oncologist, since the boost volume and the failure site coincide. The skeptical reading is that an MFS hazard ratio of 0.48, nearly identical to the local control hazard ratio, is more than a 6 Gy boost to the primary should be able to deliver. Micrometastatic control by a pelvic boost is a strong claim, and the honest alternative is that a small randomized cohort produced correlated separations across every endpoint because of a modest imbalance in the underlying risk of the two arms.\n\nSize is the constraint on confidence. Roughly fifty patients per arm followed to nine years generates survival differences larger than either RAPIDO or PRODIGE-23 achieved through full systemic intensification, which should give pause rather than reassurance. A treatment effect that outperforms the field's largest phase 3 efforts, delivered by a modest dose increment in a trial designed to answer a different question, is the profile of a result that regresses on replication. The curative treatment rate (89.1% vs 78.4%, P=0.135) hints that more SIB patients simply reached definitive local therapy, which would be a real benefit but a different one from radiobiological superiority.\n\nThe subgroup finding is where this becomes clinically usable and simultaneously most fragile. Benefit concentrated in patients who received no perioperative chemotherapy (9-year DFS 70.8%, HR 0.343, P=0.014) and vanished in those who did. That is biologically coherent, since escalated local therapy would matter most when systemic therapy is absent, but it is exploratory, unpowered, and drawn from an already small trial. What it usefully identifies is the population where the question remains genuinely open: patients who cannot tolerate or will not receive systemic intensification. In an era where the field's answer to rectal cancer has been TNT, the trial's own data suggest dose escalation adds nothing on top of chemotherapy, which narrows rather than broadens its reach.\n\nFor the boost to become practice it would need a phase 3 powered on disease-free survival rather than pCR, with late toxicity reported, in a chemo-ineligible or chemo-deferred population. Until then this is a signal worth carrying into a multidisciplinary discussion for the patient who will not get systemic therapy, not a reason to escalate dose generally.",
             "relevant_specialties": [
               "radonc",
-              "medonc"
+              "medonc",
+              "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The escalation is modest and deliverable, 56 Gy SIB to PGTV inside a 50 Gy/25 fx pelvis, with acute G3 toxicity no worse (14.5% vs 19.6%). LC 87.1% vs 70.1% (HR 0.40) is the on-target signal; the equally large MFS gain (HR 0.48) is not, and that mismatch is the reason to treat this as hypothesis-generating rather than a reason to boost routinely.",
-              "medonc": "The interaction is the med onc read: SIB benefit was confined to pts who got no perioperative chemotherapy (9yr DFS 70.8%, HR 0.343, P=.014), with none added in those who did. That frames escalated RT as a substitute where systemic therapy cannot be delivered, not an addition on top of a standard chemo backbone."
+              "radonc": "The boost is modest and deliverable: 56 Gy to PGTV and 60 Gy to involved lateral nodes simultaneously integrated into a standard 50 Gy/25 fx pelvis, with acute G3 toxicity no higher (14.5% vs 19.6%). Local control 87.1% vs 70.1% (HR 0.40) is the mechanistically defensible part and moves the dose-escalation question in chemo-ineligible pts.",
+              "medonc": "The benefit disappeared in pts who received perioperative chemotherapy and concentrated in those who did not (9-yr DFS 70.8%, HR 0.343, P=0.014). That argues escalated RT substitutes for, rather than adds to, systemic intensification, so it does not challenge a TNT strategy; it offers an option when chemotherapy is not deliverable.",
+              "surgonc": "Curative treatment (radical surgery or watch-and-wait) was reached in 89.1% vs 78.4% (P=0.135), with surgery planned at 6-8 weeks in both arms and pCR unchanged (15.2% vs 18.4%). The boost did not compromise resection timing or feasibility, and the local control gain bears on lateral nodal management."
             },
             "open_questions": [
-              "Does SIB dose escalation add anything on a total neoadjuvant therapy backbone?",
-              "Late GI toxicity and anorectal function after 56-60Gy SIB",
-              "Replication of the survival benefit in an adequately powered phase 3"
+              "Does dose escalation improve DFS in a phase 3 powered on survival?",
+              "Late toxicity after simultaneous integrated boost not reported in source",
+              "Does the boost add anything on top of total neoadjuvant therapy?"
             ],
             "consort": {
-              "enrolled": 106,
+              "enrolled": null,
               "excluded": null,
               "randomized": 106,
               "arms": [
@@ -152,84 +167,35 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT07297030",
-                "brief_title": "SIB-RT Combined With CAPOX and PD-1 for High-Risk Rectal Cancer",
-                "overall_status": "NOT_YET_RECRUITING",
+                "nct": "NCT04095299",
+                "brief_title": "Standard Dose Versus High Dose of Radiotherapy in Rectal Preservation With Chemo-radiotherapy in Rectal Cancer Patients",
+                "overall_status": "RECRUITING",
                 "phase": [
-                  "PHASE2"
+                  "PHASE3"
                 ],
-                "enrollment_count": 37,
-                "primary_completion_date": "2026-05",
-                "brief_summary": "The biological effective dose of short-course radiotherapy is relatively lower compared to long-course radiotherapy, which may lead to an increased local recurrence rate in patients with mid to low rectal cancer who are at high risk of locally advanced disease due to insufficient radiation dose. Combining short-course radiotherapy with simultaneous integrated boost (SIB) and immunotherapy-chemo regimens could potentially further enhance tumor regression and improve local control, providing a…",
+                "enrollment_count": 162,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "In recent years, an increasing number of retrospective and prospective observational studies have indicated that a subset of rectal cancer patients may avoid surgery if they can achieve a complete response to chemoradiotherapy. Prospective trials, including the previous Danish Watchful Waiting trials (NCT00952926, NCT02438839) in early rectal cancer have demonstrated high levels of organ preservation with dose-escalation, but it is unclear whether this was primarily due to tumor stage or dose…",
                 "conditions": [
-                  "Rectal Cancer"
+                  "Cancer of Rectum"
                 ],
                 "interventions": [
                   {
-                    "name": "SIB-SCRT",
+                    "name": "50.4 Gy to the tumor and elective volume",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "CAPOX",
-                    "type": "DRUG"
+                    "name": "62 Gy to the clinical tumor volume and 50.4 Gy to the elective volume",
+                    "type": "RADIATION"
                   },
                   {
-                    "name": "Immunotherapy",
+                    "name": "Capecitabine 825 mg/m2 twice daily on weekdays",
                     "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Participants must voluntarily agree to join this study and sign an informed consent form.\n* Age at the time of signing the informed consent form must be between 18 and 75 years.\n* Histologically confirmed diagnosis of rectal adenocarcinoma.\n* High-risk locally advanced…",
-                "answers_question": "Does SIB dose escalation add anything on a total neoadjuvant therapy backbone?",
-                "relevance_phrase": "SIB-SCRT plus CAPOX and PD-1 in high-risk LARC"
-              },
-              {
-                "nct": "NCT04815694",
-                "brief_title": "THeragnostic Utilities for Neoplastic DisEases of the Rectum by MRI Guided Radiotherapy",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 179,
-                "primary_completion_date": "2027-01",
-                "brief_summary": "Neoadjuvant chemoradiation therapy (nCRT) is the standard treatment modality for locally advanced rectal cancer (LARC), and patients achieving complete response (CR) generally have improved local control, metastasis-free survival, and overall survival.\n\nThe aim of this clinical trial is to investigate the impact of radiotherapy dose escalation in rectal cancer by identifying poor responders during treatment using the Early Tumor Regression Index (ERI). Patients are treated using magnetic…",
-                "conditions": [
-                  "Neoadjuvant Chemoradiotherapy",
-                  "Locally Advanced Rectal Cancer",
-                  "Pathological Complete Response"
-                ],
-                "interventions": [
-                  {
-                    "name": "RT Dose escalation in LARC patients with an Early Regression Index > 13.1 at second week on nCRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histological proven adenocarcinoma of the rectum;\n* cT2-4, or cN0-2 (also extramesorectal nodes), or mesorectal fascia involvement for tumor (MRF+) or extramural venous invasion (EMVI+);\n* cM0;\n* No prior radiotherapy in pelvic region;\n* Tumour located between 0 and 15 cm…",
-                "answers_question": "Does SIB dose escalation add anything on a total neoadjuvant therapy backbone?",
-                "relevance_phrase": "ERI-triggered nCRT dose escalation on MR-linac"
-              },
-              {
-                "nct": "NCT07616297",
-                "brief_title": "Higher Radiation Dose to the Tumor May Help Avoid Surgery in Rectal Cancer Patients",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 25,
-                "primary_completion_date": "2029-08",
-                "brief_summary": "The goal of this prospective study is to evaluate if a higher radiation dose to the tumor can increase the organ preservation rate in non-locally advanced rectal cancer.",
-                "conditions": [
-                  "Rectal Cancer",
-                  "Radiation Oncology"
-                ],
-                "interventions": [
-                  {
-                    "name": "Simultaneous integrated boost to the tumor and positive mesorectal lymph nodes",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥18 years\n* Eastern cooperative oncology group (ECOG) performance status ≤2\n* Histologically confirmed rectal adenocarcinoma\n* Non-locally advanced rectal cancer, defined as (magnetic resonance imaging (MRI)-based) T1-3, N0/N1 (≤3 positive mesorectal lymph nodes), MX/M0\n*…",
-                "answers_question": "Late GI toxicity and anorectal function after 56-60Gy SIB",
-                "relevance_phrase": "SIB to tumor + mesorectal nodes, organ-preservation cohort"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histopathologically verified adenocarcinoma of the rectum\n* MDT conference finds patient a candidate for rectal resection\n* Clinical tumor category cT1-3\n* MRI findings\n\n  * Maximal cross-sectional size of 4.5 cm (axial plane relative to the rectum)\n  * Lowest edge of tumor…",
+                "answers_question": "Does dose escalation improve DFS in a phase 3 powered on survival?",
+                "relevance_phrase": "phase 3 randomised 62 Gy vs 50.4 Gy in rectum"
               },
               {
                 "nct": "NCT07200141",
@@ -263,55 +229,106 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Age ≥18 and \\<80 years\n2. Histologically confirmed rectal adenocarcinoma\n3. Tumor located within 10 cm from the anal verge\n4. MRI staging: T3-T4 and/or N+, M0 (AJCC 8th edition)\n5. ECOG performance status 0-2\n6. Adequate bone marrow function: WBC ≥3×10⁹/L, ANC ≥1.5×10⁹/L,…",
-                "answers_question": "Replication of the survival benefit in an adequately powered phase 3",
-                "relevance_phrase": "randomised GTV SIB 58.75Gy vs 50Gy/25f in LARC"
+                "answers_question": "Does dose escalation improve DFS in a phase 3 powered on survival?",
+                "relevance_phrase": "randomised SIB 58.75 Gy vs 50 Gy, CR endpoint"
               },
               {
-                "nct": "NCT03051464",
-                "brief_title": "Randomizing Two Radiotherapy Boost Options to Avoid Rectal Cancer Surgery",
-                "overall_status": "RECRUITING",
+                "nct": "NCT02505750",
+                "brief_title": "Safety of a Boost (CXB or EBRT) in Combination With Neoadjuvant Chemoradiotherapy for Early Rectal Adenocarcinoma",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
-                  "PHASE2",
                   "PHASE3"
                 ],
-                "enrollment_count": 131,
-                "primary_completion_date": "2028-01",
-                "brief_summary": "A randomized study of 131 patients. Patients with a clinical T2-3 N0-1 rectal cancer will be randomized to two arms (arm A: standard chemoradiation (45 Gy in 25 with concomitant 5-FU or Xeloda chemotherapy) and an external beam boost of 9 Gy compared to arm B: standard chemoradiation (45 Gy in 25 with concomitant 5-FU or Xeloda chemotherapy) and followed by a brachytherapy boost of 30 Gy in 3 fractions).",
+                "enrollment_count": 148,
+                "primary_completion_date": "2023-06",
+                "brief_summary": "The investigators propose to conduct a randomised study on cT2, cT3a-b tumours less than 5 cm using two different techniques of radiotherapy boost following neoadjuvant chemoradiotherapy (nCRT) (CAP45): EBRT (9 Gy/5 fractions) or CXB (90 Gy/3 fractions). The endpoint will be organ preservation at 3 years without non-salvageable local pelvic recurrence. The proof of this concept will be of most benefit for all patients but especially for the elderly who usually are not fit for or keen to undergo…",
                 "conditions": [
-                  "Stage II Rectal Cancer",
-                  "Organ Preservation",
-                  "Non-operative Treatment",
-                  "Rectal Cancer (Stage III)",
-                  "Rectal Cancer Patients"
+                  "Rectal Neoplasms"
                 ],
                 "interventions": [
                   {
-                    "name": "Complete responders and Non-complete responders",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Chemoradiation + EBRT Boost",
+                    "name": "3D conformal EBRT",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "Chemoradiation + HDRBT Boost",
-                    "type": "RADIATION"
+                    "name": "Contact X-ray brachytherapy 50 kV",
+                    "type": "DEVICE"
+                  },
+                  {
+                    "name": "Capecitabine",
+                    "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Rectal cancer patients, clinically staged as T2-T3a,b N0-1 by MRI or endoscopic/trans-rectal ultrasound\n* Rectal cancer staged as N0-1 by MRI or EUS/TRUS\n* No metastatic lesion\n* Rectal tumor occupying less than half of the circumference\n* Tumor less than 5 cm on its largest…",
-                "answers_question": "Replication of the survival benefit in an adequately powered phase 3",
-                "relevance_phrase": "randomised 9Gy EBRT boost vs 30Gy HDR brachy boost"
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Adenocarcinoma of the rectum classified clinically T2, T3a, T3b (penetration in the mesorectal fat between 1 to 5 mm) by TNM classification (Tumour Node Metastase), \\< 5 cm largest diameter, \\< half rectal circumference (by MRI staging), N0-N1 (any node \\< 8 mm diameter on…",
+                "answers_question": "Late toxicity after simultaneous integrated boost not reported in source",
+                "relevance_phrase": "randomised boost safety, EBRT 9 Gy vs CXB 90 Gy"
+              },
+              {
+                "nct": "NCT05916040",
+                "brief_title": "Total Neoadjuvant Treatment of Rectal Cancer by MRI-guided Radiotherapy",
+                "overall_status": "RECRUITING",
+                "phase": null,
+                "enrollment_count": 35,
+                "primary_completion_date": "2025-06",
+                "brief_summary": "The TNTRect trial is a prospective observational study that will evaluate the outcome of MR-guided stereotactic body radiotherapy (SBRT) with a simultaneous integrated boost in a hypofractionated treatment of rectum cancer. Patients will be treated in 5 daily fractions of 5 Gy within an overall treatment time (OTT) of 5 days. A simultaneous integrated boost (SIB) till 30Gy will be delivered to the gross tumor volume. Patients will be treated with daily adaptive radiotherapy and online tumor…",
+                "conditions": [
+                  "Rectal Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Radiotherapy with MRIdian with simultaneous integrated boost",
+                    "type": "DEVICE"
+                  },
+                  {
+                    "name": "Questionnaires before, during and after radiotherapy",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Locally advanced rectal cancer\n\nExclusion Criteria:\n\n* Patients with unresectable metastatic disease at diagnosis\n* Patients with an ECOG performance status \\> 2\n* Patients not deemed fit for radiotherapy, chemotherapy or surgery",
+                "answers_question": "Late toxicity after simultaneous integrated boost not reported in source",
+                "relevance_phrase": "MR-guided SIB to 30 Gy with QoL questionnaires"
+              },
+              {
+                "nct": "NCT07297030",
+                "brief_title": "SIB-RT Combined With CAPOX and PD-1 for High-Risk Rectal Cancer",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 37,
+                "primary_completion_date": "2026-05",
+                "brief_summary": "The biological effective dose of short-course radiotherapy is relatively lower compared to long-course radiotherapy, which may lead to an increased local recurrence rate in patients with mid to low rectal cancer who are at high risk of locally advanced disease due to insufficient radiation dose. Combining short-course radiotherapy with simultaneous integrated boost (SIB) and immunotherapy-chemo regimens could potentially further enhance tumor regression and improve local control, providing a…",
+                "conditions": [
+                  "Rectal Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "SIB-SCRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "CAPOX",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Immunotherapy",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Participants must voluntarily agree to join this study and sign an informed consent form.\n* Age at the time of signing the informed consent form must be between 18 and 75 years.\n* Histologically confirmed diagnosis of rectal adenocarcinoma.\n* High-risk locally advanced…",
+                "answers_question": "Does the boost add anything on top of total neoadjuvant therapy?",
+                "relevance_phrase": "SIB-SCRT plus CAPOX and PD-1 in high-risk LARC"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "rectal cancer total neoadjuvant therapy dose escalation",
-                "rectal cancer simultaneous integrated boost toxicity",
-                "rectal chemoradiotherapy boost randomized"
+                "rectal cancer dose escalation chemoradiotherapy",
+                "simultaneous integrated boost rectal radiotherapy",
+                "total neoadjuvant therapy rectal radiation boost"
               ],
               "queries_failed": [],
-              "candidates_returned": 24,
-              "fetched_at": "2026-08-02T08:01:16.778Z",
+              "candidates_returned": 42,
+              "fetched_at": "2026-08-10T20:17:31.260Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [

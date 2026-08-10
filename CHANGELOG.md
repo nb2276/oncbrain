@@ -2,6 +2,47 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.45.1] - 2026-08-10
+
+Rebuilds the five most recent dates onto v0.45, plus the two fixes that rebuild
+surfaced.
+
+### Content
+- **12 studies across 2026-07-29 / 07-31 / 08-01 / 08-07 / 08-08 rebuilt.**
+  Every one now carries an `interpretation` (12/12), median 542 words (497-606).
+  Audited against their own sources: **99 distinct numbers, 0 ungrounded**, and
+  no prose run shared with the licensed full text.
+
+- **The v0.45 coverage rule is now VERIFIED**, which the release itself could not
+  claim. Over these 12 studies `vs leading data` went **41% → 100%** and
+  `Discussion` **66% → 100%**, while the source-dependent sections correctly did
+  NOT inflate (`Results` 75% → 75%, `Safety` 41% → 41%). The rule moved the
+  interpretive sections and left the descriptive ones alone.
+
+### Fixed
+- **`interpretation` could carry a DERIVED number.** A real emission wrote "MDA
+  under 1.6mm" over source values of 1.55 and 1.42: the claim was true, the
+  threshold was invented, and "1.6" appears nowhere in the paper. The prompt now
+  forbids computing, rounding or synthesising a new number to summarise several
+  source values — quote the source's own. This is the one grounding miss in 117
+  numbers across the first audited build.
+- **`npm run override` had no `--interpretation` flag**, so v0.45's claim that
+  the field is curator-editable was only half true: the key was accepted from a
+  sidecar but nothing could write one. Added, with an empty value clearing it.
+
+### Notes
+- **A rebuild changes slugs, and slugs are the per-study permalink AND the
+  override target.** These five dates kept 5 per-study URLs and broke 7. It also
+  broke an override mid-session: a sidecar written against `irock` silently
+  became a no-op when the next build renamed the study to
+  `irock-rcc-sabr-contouring`, reported only as a WARN. Pre-existing behavior,
+  not from this release, but it makes a full backfill materially more expensive
+  than it looks. See TODOS.
+- One rebuild dropped all three tags from an already-correct study
+  (DBCG SKAGEN-1), caught by `digest-schema-migration` and restored via the tag
+  overrides. Rebuild output is not monotonic; the test suite is what makes that
+  safe to notice.
+
 ## [0.45.0] - 2026-08-10
 
 The long read. Ingestion is the expensive part of a study-agent call and it is
