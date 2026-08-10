@@ -122,3 +122,34 @@ describe('auditDigestSelfConsistency', () => {
     expect(out).toContain('0.87, 0.76');
   });
 });
+
+describe('typographic normalisation', () => {
+  it('treats a Lancet middle dot as a decimal point', () => {
+    // Found by running the audit on a real rebuild: PEACE V-STORM's TL;DR wrote
+    // "HR 0.62 ... p=0.063" while its own table wrote "0·62" and "0·063". Same
+    // numbers, two typographies, and the audit called the headline untraceable.
+    const study = {
+      slug: 'peace-v-storm',
+      tldr: '4-yr MFS 76% vs 63%, HR 0.62 (80% CI 0.44-0.86), p=0.063.',
+      details: [
+        {
+          text: '📊 Outcomes',
+          table: {
+            columns: ['Endpoint', 'ENRT', 'MDT', 'HR (80% CI)', 'p'],
+            rows: [['Metastasis-free survival', '76% (69-81)', '63% (56-69)', '0·62 (0·44-0·86)', '0·063']],
+          },
+        },
+      ],
+    };
+    expect(findUntraceableHeadline(study)).toBeNull();
+  });
+
+  it('still reports a genuine mismatch when the typography matches', () => {
+    const study = {
+      slug: 'real-slip',
+      tldr: 'HR 0·70 for DFS.',
+      details: [{ text: 'x', table: { columns: ['Endpoint', 'HR'], rows: [['DFS', '0·62']] } }],
+    };
+    expect(findUntraceableHeadline(study)?.values).toEqual(['0.70']);
+  });
+});

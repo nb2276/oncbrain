@@ -2,6 +2,16 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.43.1] - 2026-08-10
+
+### Fixed
+- **The self-consistency audit read a Lancet middle dot as a different number.**
+  Found by running it on a real rebuild: PEACE V-STORM's TL;DR wrote
+  `HR 0.62 ... p=0.063` while its own table wrote `0·62` and `0·063` — the same
+  values, two typographies — and the audit reported the headline as untraceable.
+  Now normalised through the same character class `figure-extract` already uses
+  for exactly this reason. Corpus flags stay at 1 of 122 (CAN-2409, real).
+
 ## [0.43.0] - 2026-08-09
 
 Every number on a card was grounded. The card still disagreed with itself.

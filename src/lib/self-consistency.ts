@@ -41,6 +41,8 @@
 // ADVISORY, never fatal. It logs for the curator the way tag emissions and
 // magnitude moves do; a false positive must not be able to block the 1am build.
 
+import { normalizeNumericText } from './figure-extract.ts';
+
 // Percentages and decimals only. Bare integers are years, doses, arm sizes and
 // fraction counts — matching them adds noise without adding signal.
 // The trailing guard rejects a following DIGIT, not a following period: a body
@@ -50,7 +52,12 @@ const VALUE_RE = /(\d[\d,]*\.?\d*)\s*%|(?<![\d.])(\d+\.\d+)(?!\d)/g;
 
 export function extractValues(text: string): Set<string> {
   const out = new Set<string>();
-  for (const m of String(text ?? '').matchAll(VALUE_RE)) {
+  // Lancet and its imitators typeset the decimal point as a MIDDLE DOT, so a
+  // table reading "0·62" and a TL;DR reading "0.62" are the same number written
+  // two ways. Without this the audit reported PEACE V-STORM's headline HR as
+  // untraceable when its own table carried it verbatim. Shares the reasoning
+  // (and the character class) with figure-extract's normalizeNumericText.
+  for (const m of normalizeNumericText(String(text ?? '')).matchAll(VALUE_RE)) {
     out.add(m[1] !== undefined ? `${m[1].replace(/,/g, '')}%` : m[2]!);
   }
   return out;
