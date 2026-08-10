@@ -10,6 +10,7 @@
 // (audience, figure, detail bullets/tables, open questions, attribution) folds
 // behind a native <details> expander. Sources stay in their own collapsible.
 import { linkifyCitations } from '../lib/extract.ts';
+import { isDuplicateStat } from '../lib/stat-dedupe.ts';
 import EffectMark from './EffectMark.astro';
 import { effectForStudy, axisBucket, describeEffect } from '../lib/effect-size.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
@@ -133,18 +134,25 @@ function toSlideUrl(filePath: string): string {
     ? '/slides/' + filePath.slice('data/slide-photos/'.length)
     : filePath;
 }
+// v0.44: `suppress` is the endpoint stat_value already painted above the TL;DR.
+// A token that duplicates it is left as PLAIN TEXT — same words, no second
+// bolding — so the hero number is emphasized once, in the endpoint slot. It
+// also does not consume the stat-key slot, which lets a genuinely different
+// effect size later in the sentence take the emphasis instead. See
+// src/lib/stat-dedupe.ts for why this is a display fix and not a prompt rule.
 // v0.30: emphasize the numbers that carry the result. Runs AFTER linkifyCitations,
 // so it operates only on text between tags (never inside an <a href>) and does NOT
 // re-escape (the text is already escaped). The first effect-size token (HR/OR/RR or
 // a "% vs %") is the one driving the headline → .stat-key; other stats → .stat.
 // The p-value pattern also matches the escaped `p&lt;`/`p&gt;` forms.
-function emphasizeStats(html: string): string {
+function emphasizeStats(html: string, suppress?: string | null): string {
   if (!html) return html;
   let keyed = false;
   const TOK = /\b(?:a?HR|OR|RR|IRR)\s*[=:]?\s*\d+\.\d+(?:\s*\((?:95%\s*CI[:\s]*)?[\d.]+\s*[–-]\s*[\d.]+\))?|\b\d{1,3}(?:\.\d)?%(?:\s*vs\.?\s*\d{1,3}(?:\.\d)?%)?|\bp\s*(?:[=<>]|&lt;|&gt;)\s*0?\.\d+|\b\d+(?:\.\d)?\s*(?:mo|months|yr|years|wks|weeks)\b/gi;
   return html.replace(/<[^>]+>|[^<]+/g, (seg) => {
     if (seg.charAt(0) === '<') return seg;
     return seg.replace(TOK, (tok) => {
+      if (isDuplicateStat(tok, suppress)) return tok;
       const isEffect = /^(?:a?HR|OR|RR|IRR)/i.test(tok) || tok.indexOf('%') !== -1;
       const cls = isEffect && !keyed ? ((keyed = true), 'stat stat-key') : 'stat';
       return `<span class="${cls}">${tok}</span>`;
@@ -493,7 +501,7 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       )}
     </div>
   )}
-  <p class:list={['study-tldr', study.primary_endpoint?.stat_value && 'study-tldr--plain']}><span class="tldr-label">TL;DR</span><span set:html={emphasizeStats(linkifyCitations(stripStudyNamePrefix(study.tldr, study.name)))} /></p>
+  <p class:list={['study-tldr', study.primary_endpoint?.stat_value && 'study-tldr--plain']}><span class="tldr-label">TL;DR</span><span set:html={emphasizeStats(linkifyCitations(stripStudyNamePrefix(study.tldr, study.name)), study.primary_endpoint?.stat_value)} /></p>
   </div>{/* /.glance */}
   {provenanceOutlet && (
     <p class="study-provenance">
