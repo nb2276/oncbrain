@@ -10,6 +10,7 @@
 //   npm run override -- --date=2026-05-20 --unsuppress=<slug>
 //   npm run override -- --date=2026-05-20 --edit=<slug> --tldr="..." [--name="..."] [--nct=NCT...]
 //   npm run override -- --date=2026-05-20 --edit=<slug> --curator-note="Your take on this study."
+//   npm run override -- --date=2026-05-20 --edit=<slug> --interpretation="..."   # empty clears it
 //   npm run override -- --date=2026-05-20 --edit=<slug> --curator-note=    # empty clears the note
 //   npm run override -- --date=2026-05-20 --edit=<slug> --modality=radiation [--intent=palliative] [--methodology=phase-3-rct]
 //   npm run override -- --date=2026-05-20 --edit=<slug> --modality=    # empty value clears the LLM emission
@@ -90,7 +91,7 @@ function main(): void {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     console.error(
       'Usage: npm run override -- --date=YYYY-MM-DD ' +
-        '[--list | --suppress=slug | --unsuppress=slug | --edit=slug (--tldr=.. --name=.. --nct=.. --curator-note=..) | --top-line=.. --digest-tldr=.. | --clear]',
+        '[--list | --suppress=slug | --unsuppress=slug | --edit=slug (--tldr=.. --name=.. --nct=.. --curator-note=.. --interpretation=..) | --top-line=.. --digest-tldr=.. | --clear]',
     );
     process.exit(1);
   }
@@ -144,6 +145,13 @@ function main(): void {
     // its own callout). Empty value clears it (mapped to null).
     if (typeof args['curator-note'] === 'string') {
       edit.curator_note = args['curator-note'].trim() === '' ? null : args['curator-note'];
+    }
+    // v0.45: the long-form interpretation. Editable because it is by far the
+    // longest thing Phase 2 writes, so a single ungrounded clause in it should
+    // be fixable without re-running a study agent. Empty value clears it, which
+    // is also how you retract one wholesale.
+    if (typeof args.interpretation === 'string') {
+      edit.interpretation = args.interpretation.trim() === '' ? null : args.interpretation;
     }
     // v0.10: tag field overrides. parseTagFlag (shared with the unit tests
     // and with applyOverrides' sidecar-validation layer) handles case
