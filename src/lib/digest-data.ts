@@ -419,6 +419,9 @@ export type DigestArtifact = {
   date: string; // YYYY-MM-DD
   conference: { slug: string; name: string } | null;
   generated_at: number;
+  // v0.46: slugs this date published in the past and no longer carries.
+  // Mirrored from build/digest-builder.ts — keep the shape in lockstep.
+  slug_aliases?: string[];
   digest: {
     top_line: string;
     tldr: string;
@@ -613,6 +616,31 @@ export type StudyPageEntry = {
   papers: DigestArtifactPaper[];
   slides: DigestArtifactSlide[];
 };
+
+// v0.46: every retired per-study path, with the date page to send it to.
+//
+// Without these a permalink broken by a rebuild returns HTTP 200 carrying the
+// HOME PAGE — `.do/app.yaml` sets `catchall_document: index.html`, so a dead
+// path never 404s and the reader lands on the site with no indication their
+// link was wrong. A redirect to the date is always truthful: the study is
+// either on that page under its current name, or the curator suppressed it.
+//
+// Guards against shadowing a live study: an alias whose param collides with a
+// real study page is dropped, so the redirect can never win over real content.
+export function listRetiredStudyPaths(): Array<{ param: string; date: string }> {
+  const live = new Set(listStudyPages().map((e) => e.param));
+  const out: Array<{ param: string; date: string }> = [];
+  const seen = new Set<string>();
+  for (const d of listDigests()) {
+    for (const retired of d.slug_aliases ?? []) {
+      const param = `${d.date}-${retired}`;
+      if (live.has(param) || seen.has(param)) continue;
+      seen.add(param);
+      out.push({ param, date: d.date });
+    }
+  }
+  return out;
+}
 
 export function listStudyPages(): StudyPageEntry[] {
   const out: StudyPageEntry[] = [];

@@ -9,6 +9,7 @@ import Base from '../../layouts/Base.astro';
 import StudyCard from '../../components/StudyCard.astro';
 import {
   listStudyPages,
+  listRetiredStudyPaths,
   stripStudyNamePrefix,
   type StudyPageEntry,
 } from '../../lib/digest-data.ts';
@@ -31,7 +32,22 @@ export async function getStaticPaths() {
   // passed through props.
   const siblingPreviews = buildSiblingPreviews(listDigestsStrict());
   const trialHistory = buildTrialHistory(listDigestsStrict());
-  return listStudyPages().map((entry) => {
+  // v0.46: retired per-study paths render a redirect to their date rather than
+  // being swallowed by the DO catchall, which serves the home page with HTTP 200
+  // for any dead path. Emitted alongside the real pages so both live under the
+  // single /study/<param>/ route.
+  const retiredPaths = listRetiredStudyPaths().map((r) => ({
+    params: { slug: r.param },
+    props: {
+      redirectTo: `/${r.date}/`,
+      entry: null,
+      siblings: [],
+      trialHistory: [],
+      tagChips: [],
+      dataTags: '',
+    },
+  }));
+  return [...retiredPaths, ...listStudyPages().map((entry) => {
     const siblingKey = studyKeyString({ date: entry.date, resolvedSlug: entry.resolvedSlug });
     return {
       params: { slug: entry.param },
@@ -41,58 +57,89 @@ export async function getStaticPaths() {
         trialHistory: trialHistory.get(siblingKey) ?? [],
         tagChips: studyTagChips(entry.study, entry.conference),
         dataTags: studyDataTags(entry.study, entry.disease_site, entry.conference?.slug ?? null),
+        redirectTo: null,
       },
     };
-  });
+  })];
 }
 
 interface Props {
-  entry: StudyPageEntry;
+  // null on a retired-slug redirect page, which has no study to render.
+  entry: StudyPageEntry | null;
+  redirectTo?: string | null;
   siblings: SiblingPreview[];
   trialHistory: TrialAppearance[];
   tagChips: Array<{ slug: string; label: string }>;
   dataTags: string;
 }
 
-const { entry, siblings, trialHistory, tagChips, dataTags } = Astro.props as Props;
-const meta = getDiseaseSite(entry.disease_site);
+const { entry, siblings, trialHistory, tagChips, dataTags, redirectTo } = Astro.props as Props;
+const meta = entry ? getDiseaseSite(entry.disease_site) : null;
 // v0.45: the long-form interpretive read. This page is the ONLY surface that
 // renders it — the date and site pages stay a 90-second scan, and this page
 // previously rendered the identical card, duplicating them and earning nothing.
 // Split on blank lines because paragraph structure is the one piece of shape
 // `parseInterpretation` preserves.
 const interpretation =
-  typeof entry.study.interpretation === 'string' && entry.study.interpretation.trim()
+  entry && typeof entry.study.interpretation === 'string' && entry.study.interpretation.trim()
     ? entry.study.interpretation.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
     : null;
-const description =
-  stripStudyNamePrefix(entry.study.tldr ?? '', entry.study.name) ||
-  entry.study.tldr ||
-  `${meta.label} study from ${entry.date}.`;
+const description = entry
+  ? stripStudyNamePrefix(entry.study.tldr ?? '', entry.study.name) ||
+    entry.study.tldr ||
+    `${meta!.label} study from ${entry.date}.`
+  : 'This study moved.';
 ---
 
+{
+  /*
+   * v0.46: a retired per-study path. Rebuilding a date can rename a study, and
+   * the slug is the permalink; this page is what a link published under the old
+   * name now resolves to. Rendered WITHOUT the site shell on purpose — it is a
+   * redirect, not a destination, and pulling in Base would ship the full header
+   * and fonts for a page nobody reads. noindex keeps the duplicate out of search
+   * while the meta refresh + canonical carry a crawler to the real date.
+   */
+}
+{
+  redirectTo ? (
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <title>Moved — oncbrain</title>
+        <meta name="robots" content="noindex, follow" />
+        <meta http-equiv="refresh" content={`0; url=${redirectTo}`} />
+        <link rel="canonical" href={redirectTo} />
+      </head>
+      <body>
+        <p>
+          This study has been renamed. <a href={redirectTo}>Continue to {redirectTo}</a>
+        </p>
+      </body>
+    </html>
+  ) : (
 <Base
-  title={`${entry.study.name} — oncbrain`}
+  title={`${entry!.study.name} — oncbrain`}
   description={description}
   wide={true}
-  ogImage={`/og/study/${entry.param}.png`}
+  ogImage={`/og/study/${entry!.param}.png`}
 >
   <nav class="crumb">
     <a href="/">← all dates</a>
-    {entry.conference && <a href={`/conferences/${entry.conference.slug}/`}>{entry.conference.name}</a>}
-    <a href={`/${entry.date}/`}>{entry.date}</a>
-    <a href={`/sites/${entry.disease_site}/`}>
-      <span class="crumb-emoji" aria-hidden="true">{meta.emoji}</span>{meta.label}
+    {entry!.conference && <a href={`/conferences/${entry!.conference.slug}/`}>{entry!.conference.name}</a>}
+    <a href={`/${entry!.date}/`}>{entry!.date}</a>
+    <a href={`/sites/${entry!.disease_site}/`}>
+      <span class="crumb-emoji" aria-hidden="true">{meta!.emoji}</span>{meta!.label}
     </a>
   </nav>
 
   <StudyCard
-    study={entry.study}
-    anchorId={entry.param}
-    bookmarks={entry.bookmarks}
-    papers={entry.papers}
-    slides={entry.slides}
-    shareUrl={`/study/${entry.param}/`}
+    study={entry!.study}
+    anchorId={entry!.param}
+    bookmarks={entry!.bookmarks}
+    papers={entry!.papers}
+    slides={entry!.slides}
+    shareUrl={`/study/${entry!.param}/`}
     tagChips={tagChips}
     siblings={siblings}
     trialHistory={trialHistory}
@@ -110,6 +157,8 @@ const description =
     )
   }
 </Base>
+  )
+}
 
 <style>
   .crumb {
