@@ -1935,6 +1935,10 @@ export function parseConsort(raw: unknown): ConsortDiagram | null {
 //     verdict (see below) rather than mislabel a strong rationale as 'unclear'.
 //   - rationale: trimmed; capped at 40 words (prompt asks for 30, allow slop)
 //   - audience: trimmed string or null; capped at 120 chars (prompt asks 80)
+// The prompt asks for 80; this is the hard ceiling with slop, per the contract
+// documented above parseVerdict.
+const AUDIENCE_MAX_CHARS = 120;
+
 export function parseVerdict(raw: unknown): StudyVerdict | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
   const obj = raw as Record<string, unknown>;
@@ -1965,10 +1969,14 @@ export function parseVerdict(raw: unknown): StudyVerdict | undefined {
   // 80-char slice cut mid-word ("...2012-2016 coho"), which breaks the card's
   // always-visible eligibility gate. Word-boundary keeps the gate readable.
   const audienceRaw = typeof obj.audience === 'string' ? obj.audience.trim() : '';
+  // 120, matching this function's own contract two comments up. The code capped
+  // at 80 while the comment said 120, and 15 of 104 published cards shipped an
+  // eligibility gate cut mid-phrase — the one line on the card that tells a
+  // reader whether the study applies to their patient.
   const audience: string | null = audienceRaw.length === 0
     ? null
-    : audienceRaw.length > 80
-      ? audienceRaw.slice(0, 80).replace(/\s+\S*$/, '').trimEnd() + '…'
+    : audienceRaw.length > AUDIENCE_MAX_CHARS
+      ? audienceRaw.slice(0, AUDIENCE_MAX_CHARS).replace(/\s+\S*$/, '').trimEnd() + '…'
       : audienceRaw;
   return { soc_implication: soc, rationale, audience };
 }

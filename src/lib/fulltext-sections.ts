@@ -73,7 +73,17 @@
 // The floor is what matters most and it is already met at any of these: at 8000
 // the old head-slice reached ZERO tables and ZERO figure captions, because the
 // bug was never the size of the window — it was what the window was spent on.
-export const DEFAULT_EXCERPT_CHARS = 50_000;
+//
+// SET TO 40,000, DOWN FROM 50,000. Adversarial review measured that 40k->50k
+// buys ZERO additional tables and ZERO additional Results characters, and that
+// the median stored excerpt is 11,740 chars anyway (only 8 of 54 papers reach
+// 49k), so the budget is a ceiling most papers never touch. 40k keeps the one
+// thing the step above 24k does buy — truncated table blocks drop from 6 to 1 —
+// at ~15% less prompt. And the quality evidence that once argued for 50k does
+// not survive replication: six quality-eval runs over a BYTE-IDENTICAL artifact
+// scored 6.4/6.6/6.8/6.9/6.9/6.9, so the 6.7-vs-7.4 result that motivated 50k
+// sits inside the instrument's own noise.
+export const DEFAULT_EXCERPT_CHARS = 40_000;
 
 // Don't bother including a section we can only show a sliver of; below this a
 // truncated section is more likely to mislead (half a table, a dangling clause)
@@ -336,6 +346,22 @@ const MAX_CAPTION_CHARS = 300;
 // sentence ("Results were consistent across …"), not a section break.
 const MAX_HEADING_CHARS = 90;
 
+// A heading whose kind causes its span to be DROPPED must look like a LABEL,
+// not like a sentence that happens to open with the label's word. Length alone
+// cannot separate them: "AUTHORS' DISCLOSURES OF POTENTIAL CONFLICTS" is five
+// words and a real heading, while "Funding Cancer Research UK grant C1234" is
+// six and a funding statement. Case does separate them.
+function looksLikeLabel(bare: string): boolean {
+  const t = bare.trim();
+  if (!t) return false;
+  if (/[:.]$/.test(t)) return true; // "Conflicts of Interest:"
+  const words = t.split(/\s+/);
+  if (words.length <= 2) return true; // "Funding", "Data Availability"
+  if (!/[a-z]/.test(t)) return true; // ALL CAPS
+  // Title Case: every substantial word capitalised. Connectors may be lower.
+  return words.every((w) => w.length < 4 || /^[^a-z]/.test(w));
+}
+
 // An unenumerated ALL-CAPS section heading. Requires a real word (>=3 letters)
 // so a stray initialism row or a lone acronym doesn't split a section, and
 // forbids terminal sentence punctuation so a shouted sentence isn't a heading.
@@ -367,6 +393,10 @@ const CHROME_HEADING = new RegExp(
 export function classifyHeading(line: string): { kind: SectionKind; heading: string } | null {
   const s = line.trim();
   if (!s) return null;
+  // A contact line or URL is publisher furniture, never a section boundary.
+  // "reprints@oup.com" matched the `reprints?` disclosures keyword and took the
+  // next 2,636 characters of consensus voting with it.
+  if (/[@]|:\/\//.test(s)) return null;
 
   // Captions are checked BEFORE the section-name length gate, and against their
   // own longer ceiling — a long caption is still a caption.
@@ -403,6 +433,26 @@ export function classifyHeading(line: string): { kind: SectionKind; heading: str
     // Guard against "Results and Discussion of the pooled cohort analysis" —
     // allow a couple of extra words (subtitles are common) but not a clause.
     if (bare.split(/\s+/).length > 6) return null;
+    // A DROP-kind heading is held to a much tighter bar than a keep-kind one,
+    // because the consequence is asymmetric: matching it deletes everything up
+    // to the next recognized heading, whereas a wrong keep-kind only misfiles a
+    // block that is still delivered. First-word matching plus a 6-word ceiling
+    // let real content through that gate and silently destroyed it:
+    //   "Funding Cancer Research UK grant C1234"    -> disclosures
+    //   "Summary of cohort and radiation planning"  -> abstract
+    // The second is a REAL body section of a dose-escalation paper; classifying
+    // it as `abstract` deleted 4,350 chars carrying the dose story
+    // (BED 82.9 Gy, 50 Gy/25 fx + 18 Gy/6 fx carbon boost). The EANO
+    // radiation-necrosis consensus lost 2,636 chars — the consensus votes
+    // themselves — to a wrapped "reprints@oup.com" line. `fellBack` was false
+    // on all 31 filed PDFs, so none of it was visible.
+    //
+    // A genuine drop heading is a LABEL ("Funding", "Disclosures:",
+    // "Acknowledgements"), not a sentence that opens with the label's word.
+    // `abstract` is included here even though it is not in DROPPED_KINDS: it is
+    // dropped by default (the caller stores papers.abstract separately), so a
+    // false match has the same destructive consequence.
+    if ((DROPPED_KINDS.has(kind) || kind === 'abstract') && !looksLikeLabel(bare)) return null;
     return { kind, heading: s };
   }
 
