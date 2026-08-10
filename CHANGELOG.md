@@ -2,6 +2,41 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.43.0] - 2026-08-09
+
+Every number on a card was grounded. The card still disagreed with itself.
+
+### Added
+- **A self-consistency audit.** `validateStudyTables` grounds every table cell
+  against source content, so no cell carries a number the paper doesn't contain.
+  Nothing checked the card against ITSELF, and the multi-date quality-eval kept
+  finding the gap: *"contradicts its own table's 92% whole-group value — the
+  single most visible number on that card isn't the one in its table"*, *"a table
+  that contradicts its own headline number"*, *"fix the 92%→90% RFS slip"*. Both
+  numbers are grounded, so every existing guard passed.
+
+  The invariant: when a card renders a table, every value in its TL;DR should
+  appear somewhere in the card's own body. Advisory — it logs for the curator the
+  way tag emissions and magnitude moves do, and can never block the 1am build.
+
+### Why it is shaped this way
+- **Label matching was built first and thrown away.** Prose and tables name the
+  same quantity differently ("RFS" vs "Freedom from biochemical/clinical
+  relapse", "overall" vs "Whole group"), so anchoring on a row label missed the
+  real slips entirely; loosening it to proximity produced 200 flags over 122
+  cards, essentially all spurious, because a label like "Tamoxifen" appears in
+  prose in a dozen unrelated contexts. Traceability needs no synonym dictionary.
+- **Calibrated on the corpus, not guessed.** Over the 41 published digests (122
+  cards, 61 with a table) it flags 1 — CAN-2409, whose TL;DR headline
+  `DFS HR 0.70 (0.52-0.94, p=0.016)` appears nowhere else on a card whose only
+  table is a safety table. Against the experimental rebuilds where the eval found
+  contradictions it flags 3 of 3, including a fabricated POSEIDON subgroup HR
+  that a separate eval had independently called out.
+- **Scoped to cards that render a table.** Without one, a headline number
+  legitimately appears only in the TL;DR, and the same rule flags 11 of 122.
+- Bare integers are excluded: years, doses, fraction counts and arm sizes are not
+  claims, and matching them adds noise without signal.
+
 ## [0.42.0] - 2026-08-09
 
 Everything v0.41 left open, closed.

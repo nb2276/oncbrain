@@ -52,6 +52,10 @@ import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib
 import { buildPriorIndex, findPriorEstimate, studiesFromArtifacts } from '../src/lib/prior-estimate.ts';
 import { clampPreprintVerdict } from '../src/lib/preprint.ts';
 import { stripReviewVerdicts, coerceConsensusVerdicts } from '../src/lib/content-type.ts';
+import {
+  auditDigestSelfConsistency,
+  formatUntraceableHeadlines,
+} from '../src/lib/self-consistency.ts';
 import { ingestApprovedResolutions, crossDateResolvedPapers } from '../src/lib/review-trial-ingest.ts';
 import { fetchPubMedPaper, type PubMedPaper } from '../src/lib/pubmed-client.ts';
 import { listResolutions } from '../src/lib/db.ts';
@@ -685,6 +689,12 @@ export async function buildOneDate(
   // application — these are the raw LLM emissions, separate from curator-
   // applied corrections (override summary logs immediately after).
   console.log(`  tag emissions: ${formatTagEmissionStats(summarizeTagEmissions(digest))}`);
+
+  // Advisory: a card whose TL;DR states a number its own body never repeats. The
+  // quality-eval caught several of these — "the single most visible number on
+  // that card isn't the one in its table" — and nothing else looks for them,
+  // because every value involved is individually grounded. Never fatal.
+  console.log(`  ${formatUntraceableHeadlines(auditDigestSelfConsistency(digest))}`);
 
   // Apply durable curator overrides last, so suppressed/edited studies survive
   // every rebuild (the LLM regenerates the digest from scratch each run).
