@@ -440,6 +440,21 @@ export type DigestStudy = {
   // (mockup parity) instead of the emoji-IMRD buckets; absent → the emoji buckets.
   // Prose-level grounding (same as the detail bullets). Mirrored in digest-data.ts.
   analysis_sections?: AnalysisSection[] | null;
+  // v0.45: the long-form interpretive read, rendered ONLY on the standalone
+  // /study/<slug>/ page — never on the date or site cards, which stay a
+  // 90-second scan. 350-600 words of argument about what the result means
+  // against prior data and how its methodology should move confidence.
+  //
+  // Scoped to INTERPRETATION, not reportage, and that boundary is deliberate:
+  // the site is commentary on a copyrighted literature, not a substitute for
+  // it. A comprehensive retelling of a paper would be both the weakest thing to
+  // publish and the least useful to a subspecialist who can read the paper.
+  // `test/publish-boundary-content.test.ts` is the mechanical backstop — it
+  // fails if a sentence of the licensed full text reaches dist/.
+  //
+  // Null is the honest common case (thin abstract, conference tweet). Mirrored
+  // in digest-data.ts — keep the shape in lockstep.
+  interpretation?: string | null;
   // v0.31: which subspecialties this study meaningfully informs a decision for —
   // radiation / medical / surgical oncology. Judged by Phase 2 from the study's
   // actual clinical implications, NOT its modality tag (an RT-vs-surgery trial or
@@ -1796,6 +1811,7 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     // in validatePrimaryEndpoint). Absent === no stated primary → TL;DR head.
     primary_endpoint: parsePrimaryEndpoint(root.primary_endpoint),
     analysis_sections: parseAnalysisSections(root.analysis_sections),
+    interpretation: parseInterpretation(root.interpretation),
     relevant_specialties: parseRelevantSpecialties(root.relevant_specialties),
     significance_by_specialty: parseSignificanceBySpecialty(root.significance_by_specialty),
     open_questions: parseOpenQuestions(root.open_questions),
@@ -2004,6 +2020,38 @@ export function parseSignificance(raw: unknown): string | null {
   if (cleaned.length < SIGNIFICANCE_MIN_CHARS) return null;
   return cleaned.length > SIGNIFICANCE_MAX_CHARS
     ? cleaned.slice(0, SIGNIFICANCE_MAX_CHARS).trimEnd()
+    : cleaned;
+}
+
+// v0.45: the long-form interpretation. Same shape-guard as `significance` but
+// with its own bounds, because the two have opposite failure modes: a
+// significance that runs long is a bloated callout, whereas an interpretation
+// that comes back SHORT means the model padded or abstained badly and the
+// section is not worth rendering. The floor is therefore high (a real 350-word
+// section clears it easily; a hedging two-sentence stub does not) and the
+// ceiling is generous, guarding only against runaway generation.
+const INTERPRETATION_MAX_CHARS = 6000;
+const INTERPRETATION_MIN_CHARS = 600;
+export function parseInterpretation(raw: unknown): string | null {
+  let text: string;
+  if (typeof raw === 'string') {
+    text = raw;
+  } else if (Array.isArray(raw)) {
+    text = raw.filter((s): s is string => typeof s === 'string').join(' ');
+  } else {
+    return null;
+  }
+  // Paragraph breaks are the one piece of structure this field keeps, so the
+  // collapse is per-line rather than whole-string (significance is one
+  // paragraph and can collapse everything).
+  const cleaned = text
+    .split(/\n\s*\n/)
+    .map((p) => p.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n\n');
+  if (cleaned.length < INTERPRETATION_MIN_CHARS) return null;
+  return cleaned.length > INTERPRETATION_MAX_CHARS
+    ? cleaned.slice(0, INTERPRETATION_MAX_CHARS).trimEnd()
     : cleaned;
 }
 

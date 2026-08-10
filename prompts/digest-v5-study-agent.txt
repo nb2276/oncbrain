@@ -244,8 +244,61 @@ Rules:
   layer (comparator vintage, unblinded QoL, subgroup fragility, missing follow-up).
   If the only limitation is the one the rationale already states, OMIT the
   Limitations section — do not repeat it.
+- `vs leading data` and `Discussion` are EXPECTED, not optional, whenever the
+  source supports them. Measured over the published corpus they appear on only
+  54% and 45% of cards while `Design` reaches 93% — the descriptive sections get
+  written and the INTERPRETIVE ones get skipped. They are the two the reader
+  cannot reconstruct from the abstract, so write them whenever you can ground
+  them: `vs leading data` = how this result sits against the trials that
+  currently define practice (name them), `Discussion` = what the result means
+  and what it does not settle. Omit ONLY when the source genuinely gives you no
+  comparative or interpretive footing, never merely to be brief.
 - Omit `analysis_sections` (or emit []) for a review / thin abstract with no
   structured depth — the card then falls back to the terse bullets.
+
+═══ INTERPRETATION (long-form, for the standalone study page) ═══
+
+Emit an `interpretation` string: the long read a subspecialist wants when they
+have decided this study matters and want to understand it properly WITHOUT
+opening the paper. 350-600 words, 3-5 paragraphs, plain prose (no headings, no
+bullets, no tables).
+
+This is the ONE place in the schema with room to develop an argument. Everything
+else on the card is compressed to a scan. Use the room.
+
+SCOPE — INTERPRETATION, NOT REPORTAGE. This is the hard boundary and it is not
+stylistic. Write about what the result MEANS: how it sits against the trials
+that currently define practice, which methodological choices should move a
+reader's confidence and in which direction, what the effect size is likely to
+look like in a less selected population, which decision it changes and which it
+leaves untouched, and what would have to be true for it to be wrong. Do NOT
+write a fuller recounting of the paper's contents — not a walk through every
+table, not a systematic recitation of secondary endpoints, not a restatement of
+the methods section. The published site is a commentary on the literature, not a
+substitute for it; a comprehensive retelling of a copyrighted paper is both the
+least useful thing you can write here and the thing this section must never
+become. Numbers appear only where an argument needs them.
+
+Hard rules:
+- GROUNDED, absolutely. Same no-fabrication bar as everywhere else: every number
+  verbatim from the source, every comparator trial real and named only when you
+  are certain it exists. A long section is more room to invent, not licence to.
+  When you are unsure a comparison is real, make the point without it.
+- NEVER quote or closely paraphrase consecutive sentences of the source text.
+  Write your own sentences about it. The full text you were given is licensed
+  input, not publishable copy.
+- DISTINCT FROM the other prose surfaces, which are all short and all published
+  alongside it. `significance` = the one additive detail and the decision it
+  moves. `monday_clinic` = which patient. `Discussion`/`Limitations` sections =
+  one to three sentences each. `interpretation` is not a longer version of any
+  of them and must not open by restating them; it is the argument they only
+  gesture at. If you find yourself expanding `significance`, stop and write the
+  comparative and methodological reasoning instead.
+- ABSTAIN by setting it to **null** when the source is a thin abstract, a
+  conference tweet, or anything else that gives you no interpretive footing. A
+  padded 400 words of hedging is far worse than no section. Roughly: if you
+  cannot name how this sits against prior data AND say something specific about
+  its methodology, emit null.
 
 ═══ RELEVANT SPECIALTIES (who this study informs) ═══
 Emit `relevant_specialties`: which oncology subspecialties this study MEANINGFULLY informs
@@ -363,6 +416,7 @@ Rules for `significance_by_specialty`:
     {"label": "Applies to", "body": "Represents taxane-exposed 2L mCRPC. Does not extend to 1L or visceral-only disease."},
     {"label": "Limitations", "body": "Open-label; QoL secondary unblinded. Comparator predates modern sequencing."}
   ],
+  "interpretation": "Taken against ARASENS and PEACE-1, this is the first trial to test the question in a population those two excluded, and the direction of the result is consistent with both rather than a departure from them. The magnitude is smaller than PEACE-1 reported, which is what one would expect given the comparator here is a modern backbone rather than the 2015-era control arm ... (350-600 words; interpretation, not a retelling)",
   "relevant_specialties": ["radonc", "medonc"],
   "significance_by_specialty": {
     "radonc": "Local control is the RT read: the node-positive subgroup reached 91% in-field control at 3y (Fig 3) with 60Gy/20fx to involved nodes, transferable to standard practice, moving the elective-nodal-coverage decision.",
@@ -408,6 +462,12 @@ Rules:
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
 - `figures`: 0-4 items, ordered most-informative first. Each `url` must be EXACTLY one of the image URLs in the manifest below — don't invent URLs, don't repeat the same URL twice. Abstain (empty array `[]`) rather than promote weak images.
 - `verdict` is REQUIRED. Pick `soc_implication` from the taxonomy in the VOICE block above (7 enums). A guideline, consensus statement, Delphi panel or appropriateness-criteria paper takes `consensus` — do not stretch an efficacy verdict onto a document with no efficacy endpoint. When uncertain, default conservatively (prefer `unclear` over guessing; prefer `early-signal` or `confirmatory` over `practice-changing`). `rationale` ≤30 words and explains the VERDICT CHOICE (not the trial result). `audience` ≤80 chars, one-line eligibility gate, or null when applicability is too broad to compress.
+- `interpretation` is the long-form read for the standalone study page (see the
+  INTERPRETATION section above): 350-600 words of argument about what the result
+  MEANS against prior data and how its methodology should move confidence. Not a
+  retelling of the paper, not a longer `significance`. Grounded, no fabricated
+  comparators, never a close paraphrase of the source text. **null** when the
+  source gives no interpretive footing.
 - `significance` is the perspective-framed "why it matters" prose (see the SIGNIFICANCE section above). 2 to 3 sentences, aim ≤65 words (hard ceiling 75), written for the SPECIALTY PERSPECTIVE reader. Lead with the SUBTLE additive detail the bullets drop (subgroup/figure/table signal, technique parameter, local-regional endpoint) and name the decision it moves; do NOT restate the verdict's maturity caveat or open with a preamble sentence. Grounded (no fabricated numbers, no em dashes, no banned vocab). Set to **null** when there is nothing additive beyond the bullets or no specialty-specific "so what". A forced angle is worse than none.
 - `significance_by_specialty` is the per-specialty "why it matters" map (see that section above): one key per specialty in `relevant_specialties`, each 2 to 3 grounded sentences from that reader's decision lens, so the site can swap the prose to the reader's chosen field. Same no-fabrication bar as `significance`; entries must differ in emphasis, not just wording; null when nothing specialty-specific is additive.
 - `monday_clinic` is the one-sentence clinic-decision line, ≤50 words (see the MONDAY CLINIC section above): which patient this moves and, where it sharpens the read, which it does NOT. Evidence-context framing only, never a directive or dose (not medical advice). Grounded (no fabricated numbers/populations, no em dashes, no banned vocab). Set to **null** when it would just restate `significance` or when there is no single clinic-actionable read. A forced clinic sentence is worse than none.
