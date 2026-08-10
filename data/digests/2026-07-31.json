@@ -1,363 +1,191 @@
 {
   "date": "2026-07-31",
   "conference": null,
-  "generated_at": 1785573006908,
+  "generated_at": 1786332911366,
   "digest": {
-    "top_line": "POSEIDON IPD (n=6057): adding HT to postop RT misses OS (HR 0.87, 0.76-1.01, p=0.06); benefit concentrates at pre-RT PSA >0.5 (interaction p=0.02).",
-    "tldr": "Prostate carried the day, and both readings push RT decisions toward patient selection over blanket intensification: POSEIDON says HT with salvage RT earns its OS case only at higher pre-RT PSA (NNT 125 at ≤0.2 vs 25 at >1.0), while GÖTEBORG-1 shows 25yr PC-specific survival of 94% on AS against 68% failure-free at 22yr. Elsewhere the signal is planning-level: MIBC dose escalation cut invasive local recurrence (SHR 0.20) with no added G2+ toxicity, and immune-sparing lung SBRT spared 13.4% of ALC reduction.",
+    "top_line": "POSEIDON (6057 pts): adding HT to postop RT gave no OS benefit (HR 0·87, 0·76–1·01), with signal confined to pre-PORT PSA >0·5.",
+    "tldr": "Prostate carried the day: POSEIDON says salvage RT alone suffices below PSA 0·5, and GÖTEBORG-1's 25-yr AS data shows 94% PC-specific survival but 68% failure-free at 22 yr. RT technique gains elsewhere: immune-sparing lung SBRT cut G3 lymphopenia to 0%, and MIBC SIB boost dropped 2y invasive local recurrence 27·5% → 5·5%.",
     "sites": [
       {
-        "disease_site": "kidney",
-        "intro": "First IROCK consensus contours for RCC SABR, with the least agreement on exactly the cases that need it most (IVC thrombus extent, ablation cavity).",
+        "disease_site": "thoracic",
+        "intro": "First randomised test of planning to spare circulating lymphocytes rather than only meeting standard OAR constraints.",
         "studies": [
           {
-            "name": "IROCK Contouring Guidelines",
-            "tldr": "First international consensus contouring guideline for RCC SABR; median DSC 0.85 across 4 cases, 16 radiation oncologists.",
+            "name": "NCT04273893 (Immune-Cell-Sparing SBRT)",
+            "tldr": "Overall ALC-reduction improvement 13.4% (95% CI 2.8-24.0), p=0.01, favoring immune-organ-sparing lung SBRT planning.",
             "details": [
-              "🔍 Modified-Delphi style consensus: 16 rad oncs affiliated with IROCK contoured 4 scenarios, refined over 2 consensus meetings",
-              "🔍 Cases: >10cm tumor with IVC tumor thrombus; central tumor abutting hilum; post-nephrectomy local recurrence; ablation-cavity recurrence post-RFA",
-              "📐 Agreement analyzed by STAPLE (95% CI); median DSC 0.85, median MDA 2.17mm, median HD 9.00mm",
-              "📐 Median DSC >0.70 for every case (the paper's threshold for \"good agreement\")",
               {
-                "text": "📊 Consensus iGTV statements by case",
-                "subdetails": [
-                  "Case 1: include primary tumor + entire tumor thrombus; exclude bland thrombus",
-                  "Case 2: include all tumor visible on sim imaging, account for internal motion",
-                  "Case 3: include all visible gross tumor; surgical clips need not be included",
-                  "Case 4: include visible gross recurrence + the entire ablation cavity"
-                ]
+                "text": "🔍 Randomized phase II, N=51 (25 optimized / 26 standard), single institution, 2020-2023, unmasked, stratified by tumor location",
+                "source_tier": "figure"
               },
-              "📊 OAR dose constraints take priority over target volume coverage in planning",
-              "📊 Ipsilateral renal cortex = ipsilateral parenchyma minus iGTV, renal pelvis, renal vasculature, proximal ureter; hilum contour optional",
-              "🔍 Contrast-enhanced MRI and/or multiphasic contrast CT encouraged, with expert radiology review, to separate tumor from bland thrombus",
-              "⚠️ 2-way ANOVA: DSC and HD differed significantly by case but not by participant; MDA differed by both case and participant",
-              "⚠️ Greatest variation in Case 1 (superior extent of IVC thrombus, target size) and Case 4 (ablation cavity), so the hardest cases are the least standardized",
-              "⚠️ Renal cortex and renal hilum remain investigational substructures: neither has been separately correlated with renal-function outcomes",
-              "⚠️ Expert-opinion consensus, no outcome data; contour agreement is a surrogate, not local control or toxicity"
-            ],
-            "figures": [],
-            "nct": null,
-            "tweet_ids": [
-              1000000066
-            ],
-            "slug": "irock-rcc-sabr-contouring",
-            "verdict": {
-              "soc_implication": "confirmatory",
-              "rationale": "Expert consensus contouring guideline, no outcome data. Standardizes an emerging practice rather than testing it; agreement metrics are process surrogates.",
-              "audience": "Localized/recurrent RCC being planned for SABR (incl. IVC thrombus, post-RFA…"
-            },
-            "significance": "The high-variance cases are the actionable part: superior extent of IVC tumor thrombus (Case 1) and the post-RFA ablation cavity (Case 4) drove the spread even among IROCK experts, and consensus is to include both entirely in the iGTV. The renal cortex definition (kidney minus iGTV, pelvis, vasculature, proximal ureter) gives a reproducible denominator for renal-function constraints.",
-            "monday_clinic": "For a localized RCC pt being planned for SABR with IVC tumor thrombus or a recurrence in a prior RFA cavity, this supports carrying the full thrombus or cavity in the iGTV and letting OAR constraints outrank coverage; it does not inform dose, fractionation, or whether SABR beats nephrectomy.",
-            "primary_endpoint": null,
-            "analysis_sections": [
+              "🔍 Both arms met RTOG 0813/0915 constraints; optimized arm additionally minimized dose to heart, great vessels, lymph-node-stations, thoracic-spine",
               {
-                "label": "Design",
-                "body": "International expert consensus exercise under IROCK. **16 radiation oncologists** independently contoured 4 clinical scenarios plus 2 investigational renal substructures, with contours analyzed by **STAPLE (95% CI)** and statements refined over **2 consensus meetings**."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Target scenarios: large (**>10 cm**) tumor with **IVC tumor thrombus**, central tumor abutting the renal hilum, post-nephrectomy local recurrence, and **ablation cavity recurrence after RFA**. Consensus: **any tumor thrombus or ablation cavity is included in the target volume**, bland thrombus is excluded, surgical clips can be excluded when uninvolved, and the iGTV must account for internal motion."
-              },
-              {
-                "label": "Endpoints",
-                "body": "Contour agreement metrics rather than clinical outcomes: **dice similarity coefficient (DSC)**, Mean Distance to Agreement (MDA), and Hausdorff Distance (HD) per case."
-              },
-              {
-                "label": "Results",
-                "body": "Median **DSC 0.85**, median **MDA 2.17 mm**, median **HD 9.00 mm**. Median DSC was **>0.70 for every case**, the paper's bar for good agreement; 2-way ANOVA showed DSC and HD differed by case but not by participant."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents radiation oncologists planning SABR for localized or locally recurrent RCC, including IVC thrombus and post-ablation cavity targets. Does not represent metastatic RCC, dose/fractionation selection, or OAR constraint definitions beyond the renal cortex/hilum contours."
-              },
-              {
-                "label": "Limitations",
-                "body": "Agreement was weakest exactly where the guidance is most needed: **Case 1** (superior extent of IVC thrombus) and **Case 4** (ablation cavity) carried the largest MDA/HD spread. The renal cortex and hilum are labeled **investigational**, since neither substructure has been separately correlated with post-SABR renal function, so contouring them does not yet come with a constraint to meet."
-              },
-              {
-                "label": "Discussion",
-                "body": "The instruction to let **OAR constraints outrank target coverage** is the planning-philosophy statement here, and it differs from the coverage-first habit of most SABR sites. Combined with expert radiology review to separate tumor from bland thrombus, the guideline is mostly about avoiding the two errors that inflate a renal target: over-including thrombus and over-including cavity."
-              }
-            ],
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The variance concentrated in Case 1 (superior extent of IVC tumor thrombus) and Case 4 (post-RFA ablation cavity), and consensus includes both entirely in the iGTV. Renal cortex is defined as ipsilateral parenchyma minus iGTV, renal pelvis, vasculature, and proximal ureter, giving a reproducible denominator for renal-dose reporting."
-            },
-            "open_questions": [
-              "Does limiting renal hilum dose reduce adverse events?",
-              "Does renal cortex dose predict post-SABR renal function loss?",
-              "Do consensus contours improve local control or toxicity?"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": "curative",
-            "methodology": "consensus-guideline",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "renal cell carcinoma stereotactic radiation renal function",
-                "kidney SABR local control primary renal"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 22,
-              "fetched_at": "2026-08-01T08:26:18.534Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 66
-              }
-            ]
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "bladder",
-        "intro": "Retrospective TMT series putting a SIB boost to the primary tumour bed on the table for invasive local control, without a randomised comparator.",
-        "studies": [
-          {
-            "name": "Dose-Escalated RT for MIBC (TMT)",
-            "tldr": "SHR 0.20 (0.05-0.89) for invasive local recurrence with SIB dose escalation in TMT; no OS or MFS difference.",
-            "details": [
-              "📊 1° signal: invasive local control favored escalation, SHR 0.20 (0.05, 0.89), p=0.035, adjusted for T stage",
-              {
-                "text": "🔍 Multicentre retrospective, N=107, TMT with contemporary technique, 2015-2025, median f/u 23 mo",
+                "text": "🔍 SBRT 45-60 Gy in 5 fx (BED 85.5-132 Gy) via IMRT/VMAT; ITV from 4DCT, PTV margin 5 mm radial / 8 mm sup-inf",
                 "source_tier": "figure"
               },
               {
-                "text": "🔍 RT dose by cohort (SIB to primary lesion in the escalated arm)",
+                "text": "📊 Average % reduction in optimized vs standard plans (integral dose, V5, V10)",
                 "table": {
                   "columns": [
-                    "Schedule",
-                    "Standard dose",
-                    "Dose escalation"
+                    "Organ",
+                    "Integral dose",
+                    "V5",
+                    "V10"
                   ],
                   "rows": [
                     [
-                      "20-fraction",
-                      "55Gy/20fx whole bladder",
-                      "up to 60Gy/20fx to primary"
+                      "Aorta",
+                      "35%",
+                      "48%",
+                      "69%"
                     ],
                     [
-                      "32-fraction",
-                      "64Gy/32fx whole bladder",
-                      "up to 70Gy/32fx to primary"
+                      "Heart",
+                      "21%",
+                      "43%",
+                      "68%"
+                    ],
+                    [
+                      "Vena cava",
+                      "37%",
+                      "58%",
+                      "75%"
+                    ],
+                    [
+                      "Thoracic spine",
+                      "57%",
+                      "87%",
+                      "92%"
+                    ],
+                    [
+                      "Lymph-node-stations",
+                      "37%",
+                      "58%",
+                      "68%"
+                    ],
+                    [
+                      "Total lung - PTV",
+                      "5%",
+                      "8%",
+                      "0%"
                     ]
                   ]
                 },
                 "source_tier": "figure"
               },
-              "📊 Non-invasive local control p=0.8, MFS p=0.8, OS p=0.5: the benefit was confined to invasive recurrence",
-              "📐 No difference in G2+ GU (p=0.8) or G2+ GI (p=0.9) toxicity between cohorts",
-              "📊 No escalated pt required salvage cystectomy for invasive recurrence vs 2 standard-dose pts",
-              "🔗 Rationale is the mapping data cited by the authors: most invasive relapses arise near the original muscle-invasive tumour site",
-              "⚠️ Retrospective, non-randomised; escalation cohort selection (fitness, tumour visibility for GTV boost) is unmeasured confounding",
-              "⚠️ Wide CI (0.05-0.89) on few events; the point estimate of 0.20 is fragile",
               {
-                "text": "⚠️ 23-mo median f/u is short for late GU toxicity after a bladder SIB, and effect sizes for the null endpoints are reported as p-values only in the abstract",
-                "source_tier": "figure"
-              }
-            ],
-            "figures": [],
-            "nct": null,
-            "tweet_ids": [
-              1000000065
-            ],
-            "slug": "mibc-dose-escalation-tmt",
-            "verdict": {
-              "soc_implication": "early-signal",
-              "rationale": "Retrospective, N=107, single health-district cohorts; no randomised comparator and the invasive-LC estimate rests on few events. Authors themselves call for prospective study.",
-              "audience": "MIBC undergoing trimodality therapy, fit for a boost-eligible GTV"
-            },
-            "significance": "The escalation was a simultaneous integrated boost to the primary lesion, not a whole-bladder dose lift, so the whole bladder stayed at 55Gy/20fx or 64Gy/32fx and G2+ GU/GI toxicity was unchanged (p=0.8, p=0.9). That is the parameter that makes this transferable: the decision it moves is whether to contour a GTV boost at TMT planning, and the benefit was specific to invasive recurrence (non-invasive LC p=0.8).",
-            "monday_clinic": "In MIBC pts proceeding to TMT with a resolvable primary GTV, this supports considering an SIB to the tumour bed within a standard whole-bladder schedule; it does not inform pts with non-invasive relapse risk alone, nor does it alter the cystectomy-vs-TMT choice.",
-            "primary_endpoint": {
-              "name": "2-year local control, invasive disease",
-              "klass": "local-control",
-              "stat_value": "SHR 0.20",
-              "stat_detail": "[0.05, 0.89], p = 0.035, adjusted for T stage"
-            },
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "**Multicentre retrospective analysis** of MIBC pts treated with TMT using contemporary radiotherapy technique, **2015 to 2025**. **N=107**, median follow-up **23 months**. Sydney centres (Liverpool and Macarthur), ethics-approved, no external funding."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Standard cohort: **55Gy in 20 fractions** or **64Gy in 32 fractions** as a uniform dose to the whole bladder. Escalation cohort: a **simultaneous integrated boost** to the primary lesion, up to **60Gy in 20 fractions** or **70Gy in 32 fractions**, with the whole-bladder dose unchanged."
-              },
-              {
-                "label": "Endpoints",
-                "body": "**Primary:** 2-year local control, analysed separately for **invasive** and **non-invasive** disease. Secondary: metastasis-free survival, overall survival, bladder preservation, toxicity."
-              },
-              {
-                "label": "Results",
-                "body": "Dose escalation was associated with better invasive local control, **SHR 0.20 [0.05, 0.89], p = 0.035**, after adjusting for T stage. **No difference** in non-invasive local control (p=0.8), MFS (p=0.8) or OS (p=0.5)."
-              },
-              {
-                "label": "Safety",
-                "body": "Both cohorts tolerated RT well with **no difference in grade 2 or greater GU (p=0.8) or GI (p=0.9)** toxicity. No escalated pt required **salvage cystectomy** for invasive recurrence, versus two standard-dose pts."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents MIBC pts selected for trimodality therapy with a boostable primary tumour site. Does not represent pts going to upfront radical cystectomy, nor those treated with radiotherapy alone because chemotherapy was contraindicated."
-              },
-              {
-                "label": "Limitations",
-                "body": "Allocation to escalation was clinical, not randomised, so tumour visibility and pt fitness plausibly track with the boost. The invasive-LC confidence interval (0.05 to 0.89) rests on few events, and 23 months is short for late GU effects of a bladder boost."
-              }
-            ],
-            "relevant_specialties": [
-              "radonc",
-              "medonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The escalation was an SIB to the primary lesion, whole-bladder dose held at 55Gy/20fx or 64Gy/32fx, and G2+ GU/GI was unchanged (p=0.8, p=0.9). The decision it moves is whether to contour a GTV boost at TMT planning; the gain was confined to invasive recurrence, with non-invasive LC flat (p=0.8).",
-              "medonc": "Concurrent chemotherapy was the fixed backbone in both cohorts, so the invasive-LC signal (SHR 0.20) is attributable to the RT boost, not the regimen. For a med onc this argues for referring TMT candidates to a centre offering a boost rather than changing systemic choice, with MFS and OS unchanged (p=0.8, p=0.5)."
-            },
-            "open_questions": [
-              "Does SIB dose escalation hold up in a prospective randomised TMT trial?",
-              "Late GU toxicity of a bladder boost beyond 2 years",
-              "Which pts have a GTV definable enough post-TURBT to boost?"
-            ],
-            "consort": null,
-            "modality": "combined",
-            "intent": "curative",
-            "methodology": "retrospective",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "bladder preservation trimodality radiotherapy boost",
-                "muscle invasive bladder radiotherapy late toxicity"
-              ],
-              "queries_failed": [
-                {
-                  "term": "bladder preservation trimodality radiotherapy boost",
-                  "reason": "empty"
+                "text": "📐 ALC % change from baseline by timepoint (model-estimated)",
+                "table": {
+                  "columns": [
+                    "Timepoint",
+                    "Optimized",
+                    "Standard",
+                    "Between-group difference"
+                  ],
+                  "rows": [
+                    [
+                      "Immediately post-SBRT",
+                      "-16%",
+                      "-31%",
+                      "15.1% (95% CI 3.7-26.5), p=0.01"
+                    ],
+                    [
+                      "4 weeks",
+                      "-22%",
+                      "-34%",
+                      "12.3% (95% CI 0.2-24.5), p=0.05"
+                    ],
+                    [
+                      "6 months",
+                      "-16%",
+                      "-26%",
+                      "10.4% (95% CI -4.7-25.5), p=0.17"
+                    ]
+                  ]
                 }
-              ],
-              "candidates_returned": 11,
-              "fetched_at": "2026-08-01T08:26:20.753Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
+              },
               {
-                "type": "paper",
-                "id": 65
-              }
-            ]
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "thoracic",
-        "intro": "Randomised phase II asking whether SBRT plan optimization around circulating-blood OARs preserves lymphocytes; surrogate endpoint only, and a preprint.",
-        "studies": [
-          {
-            "name": "Immune Cell Sparing RT",
-            "tldr": "ALC reduction improved 13.4% (95% CI 2.8-24.0, p=0.01) with immune-sparing SBRT planning vs standard, 29.5% in central tumors.",
-            "details": [
-              "📊 1° signal: ALC change from baseline at end-Tx / 4wk / 6mo, optimized -16%, -22%, -16% vs standard -31%, -34%, -26%",
-              "📐 Overall all-time-point improvement in ALC reduction 13.4 (5.3) %, 95% CI 2.8 to 24.0, p=0.01",
-              "📊 Central tumors carried the effect: optimized -8%, -18%, -14% vs standard -39%, -43%, -47%",
-              "📐 Central-tumor improvement 29.5 (9.6) %, 95% CI 10.1 to 48.9, p=0.004",
-              {
-                "text": "🔍 Phase II randomized, single-institution (UVA), 55 enrolled Feb 2020 to Apr 2023, 51 analyzed (25 optimized / 26 standard)",
+                "text": "📊 Central tumors (n=15) gained most: overall ALC-reduction improvement 29.5% (95% CI 10.1-48.9), p=0.004",
                 "source_tier": "figure"
               },
-              "🔍 Both arms met RTOG 0813/0915 dosimetric criteria; optimized plans additionally constrained heart, great vessels, thoracic spine, lymph-node stations",
-              "💊 G3 lymphopenia 15.4% standard vs 0% optimized; 2.8× more optimized pts had an ALC increase post-SBRT",
               {
-                "text": "📐 Average % reduction, optimized vs standard plans (integral dose / V5 / V10)",
-                "subdetails": [
-                  "Thoracic spine: 57% / 87% / 92%",
-                  "Vena cava: 37% / 58% / 75%",
-                  "Aorta: 35% / 48% / 69%",
-                  "Heart: 21% / 43% / 68%",
-                  "Lymph-node stations: 37% / 58% / 68%",
-                  "Total lung minus PTV: 5% / 8% / 0%"
-                ],
+                "text": "📊 Peripheral PTV >20cc (n=18): improvement 13.5%, 95% CI -3.8 to 20.9, p=0.124; peripheral PTV <20cc showed no difference",
                 "source_tier": "figure"
               },
-              "⚠️ Survival signals are underpowered and not significant: 2yr EFS 75.0% (SE 10.8) vs 59.8% (SE 11.2), p=0.10; 2yr OS 93.4% (SE 6.1) vs 69.4% (SE 10.5), p=0.14",
-              "⚠️ Those survival numbers are in treatment-naive pts only, and the arms were imbalanced: 88.5% treatment-naive standard vs 64.0% optimized, central tumors 36.0% optimized vs 23.1% standard",
-              "⚠️ medRxiv preprint, not peer reviewed; surrogate endpoint (ALC), no tumor-control or immune-function endpoint"
+              "📊 G3 lymphopenia 15.4% standard vs 0% optimized (risk difference -15.4%, 95% CI -29.2 to -1.5, p=0.04)",
+              "📊 LN-stations V5 below vs above 35.4cc median: two-year OS 91.8% vs 57.5%, p=0.02",
+              "⚠️ OS/EFS were unplanned subgroup analyses, not powered; all-patient OS p=0.23, EFS p=0.27",
+              "⚠️ Baseline imbalance favors caution: more central tumors in optimized arm (36.0% vs 23.1%), more treatment-naive in standard arm (88.5% vs 64.0%)",
+              "⚠️ ALC is a surrogate; no immune-function or tumor-control readout ties the spared lymphocytes to the survival trend",
+              "🔗 Prior prospective RT+IO data cited by the authors linked lower post-RT ALC to worse PFS (p=.009) and OS (p=.026); this is the first trial to spare prospectively"
             ],
             "figures": [],
             "nct": "NCT04273893",
             "tweet_ids": [
               1000000067
             ],
-            "slug": "lung-sbrt-immune-sparing",
+            "slug": "nct04273893-immune-sparing-sbrt",
             "verdict": {
               "soc_implication": "early-signal",
-              "rationale": "Preprint, single-center randomized phase II, N=51, surrogate dosimetric/hematologic endpoint. Survival differences are non-significant and confounded by baseline imbalance in treatment-naive fraction.",
-              "audience": null
+              "rationale": "Preprint, not peer-reviewed. Single-institution randomized phase II, N=51, surrogate primary (ALC); survival analyses unplanned and underpowered. Confirmatory multi-institutional trial named by authors.",
+              "audience": "Early-stage NSCLC (cT1-T2 N0), medically inoperable or declined surgery, pre-RT…"
             },
-            "significance": "The transferable part is the planning recipe: optimized plans hit RTOG 0813/0915 constraints while cutting V5 to thoracic spine 87%, vena cava 58%, heart 43%, so this is achievable on existing planning systems without dose compromise to the ITV (70-80 Gy to ≥70% of ITV in both arms). Central tumors, where blood and nodal stations sit in the low-dose bath, drove the effect (29.5%, p=0.004), so that is where adding immune-rich OARs to the optimizer is worth the planning time.",
-            "monday_clinic": "For an early-stage lung SBRT patient with a central tumor who is a candidate for subsequent immunotherapy, this supports adding heart, great vessels, spine and nodal stations as optimization structures when target coverage is unaffected; it does not extend to locally advanced NSCLC or conventionally fractionated thoracic RT, and it does not establish a survival benefit.",
-            "primary_endpoint": null,
+            "significance": "The planning ask is concrete: add heart, great vessels, thoracic spine and lymph-node stations as low-dose OARs and drive V5/V10 down (thoracic spine V5 fell 87%, lymph-node stations 58%) without breaching RTOG 0813/0915. Benefit concentrated in central tumors and peripheral PTV >20cc; peripheral PTV <20cc gained nothing, so the effort is worth spending selectively.",
+            "monday_clinic": "For a medically inoperable early-stage NSCLC pt with a central or larger (>20cc PTV) tumor, this supports adding immune-rich low-dose OAR objectives to an otherwise standard 5-fraction plan; it does not apply to small peripheral tumors, where the two planning approaches were indistinguishable.",
+            "primary_endpoint": {
+              "name": "ALC depletion vs standard planning (all timepoints)",
+              "klass": "surrogate",
+              "stat_value": "13.4% less ALC reduction",
+              "stat_detail": "SE 5.3, 95% CI 2.8-24.0, p=0.014"
+            },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Randomized **phase II**, single institution (University of Virginia), accrual Feb 12 2020 to Apr 5 2023, database lock Jun 30 2024. **55 randomized, 4 withdrew/ineligible, 51 analyzed** (25 optimized, 26 standard). Interim toxicity analysis prespecified."
+                "body": "Randomized **phase II**, single institution, 2020-2023. 55 enrolled, 4 withdrew/ineligible, **51 randomized 1:1** (25 optimized, 26 standard), stratified by tumor location, **treatment assignment not masked**. Database lock June 30 2024."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**Early-stage lung cancer treated with SBRT**. Median age 74 in both arms (optimized range 56-90, standard 55-89). Baseline ALC 0.79 to 2.97 x10⁹ cells/L. Arms were imbalanced: **central tumors 36.0% optimized vs 23.1% standard**, treatment-naive **64.0% vs 88.5%**."
+                "body": "Early-stage NSCLC (AJCC v8), pathologic or imaging-confirmed, **unable or unwilling to undergo surgery**; ECOG 0-2; pre-RT **ALC >0.5 x10⁹/L**. Recurrent previously treated NSCLC eligible. Median age 74 both arms; cT1 in 25/25 optimized and 23/26 standard."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Both arms met **RTOG 0813/0915** dosimetric criteria. The optimized arm additionally minimized dose to circulating blood and lymphatics: **heart, great vessels, lymph-node stations, thoracic spine**. Target coverage was preserved, with **70% or more of the ITV receiving 70-80 Gy** in the five illustrated cases."
+                "body": "**SBRT 45-60 Gy in 5 fractions** (BED 85.5-132 Gy), IMRT or VMAT, 6X-FFF, daily CBCT. Both arms met **RTOG 0813/0915** criteria; the optimized arm additionally minimized dose to heart, great vessels, **lymph-node stations** (Chapet atlas, down to 40 cGy/fx) and thoracic spine. PTV = ITV + **5 mm radial, 8 mm sup-inf**."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary read is RIIS**, measured as absolute lymphocyte count change from baseline at end of treatment, 4 weeks and 6 months. Secondary: grade 3 lymphopenia, dose-volume correlates of RIIS, and exploratory EFS/OS."
-              },
-              {
-                "label": "Results",
-                "body": "Overall all-time-point improvement in ALC reduction **13.4 (5.3) %, 95% CI 2.8 to 24.0, p=0.01**; central tumors **29.5 (9.6) %, 95% CI 10.1 to 48.9, p=0.004**. Dose to heart, great vessels, thoracic spine and lymph nodes correlated significantly with RIIS."
+                "body": "**Primary:** less in vivo lymphocyte depletion with optimized planning at end-of-treatment, 4 weeks and 6 months, plus safety/toxicity comparison. OS and EFS were **unplanned exploratory** Kaplan-Meier analyses."
               },
               {
                 "label": "Safety",
-                "body": "**Grade 3 lymphopenia 15.4% in the standard arm, 0% in the optimized arm**. **2.8 times more** optimized pts had an ALC increase after SBRT. No added toxicity from the optimized planning is reported in the source."
+                "body": "G3+ AEs: **2 optimized** (lung infection) vs **4 standard** (dyspnea, hypoxia, lung infection); all recovered. G2 events in 6 (24%) optimized vs 9 (35%) standard. **No G2+ pneumonitis and no G4+ toxicity** in either arm, so the added low-dose objectives cost nothing in toxicity."
               },
               {
                 "label": "Applies to",
-                "body": "Represents early-stage lung cancer treated with definitive SBRT, particularly central tumors near heart, great vessels, spine and nodal stations. Does not represent locally advanced NSCLC, conventionally fractionated thoracic RT, or pts receiving concurrent immunotherapy."
+                "body": "Represents medically inoperable early-stage NSCLC treated with 5-fraction SBRT, particularly central or PTV >20cc tumors. Does not represent locally advanced disease, conventionally fractionated thoracic RT, or concurrent chemo/immunotherapy, all of which were exclusions."
               },
               {
                 "label": "Limitations",
-                "body": "Exploratory survival is in **treatment-naive pts only**, the subgroup where the arms differ most (88.5% vs 64.0%), so the 2yr OS gap (93.4% vs 69.4%, p=0.14) is not interpretable as an effect of planning. No immune-function or tumor-control endpoint links the ALC gain to outcome."
+                "body": "Randomization left the arms unbalanced on the two variables that most move the survival read: central tumors 36.0% vs 23.1% and treatment-naive 88.5% standard vs 64.0% optimized, so the OS trend is reported only in the treatment-naive subset. Static organ dose is a surrogate for dose to circulating lymphocytes, and the authors note the correlation coefficients are small."
               },
               {
                 "label": "Discussion",
-                "body": "This is the first randomized test of treating circulating blood and lymphatics as an OAR rather than modeling it retrospectively. It establishes that the constraint is achievable within existing protocol limits; whether preserved ALC converts to disease control, especially alongside immunotherapy, is untested here."
+                "body": "The mechanism argument is dosimetric, not immunologic: heart and great-vessel V5/V10 stand in for blood transiting a high-flux volume, thoracic spine and nodes for resident lymphocytes. Multiple immune OARs compete for the same dose reduction (Fig 2), so the authors argue for a cumulative per-plan immune-kill objective rather than per-organ constraints."
               }
             ],
             "relevant_specialties": [
-              "radonc",
-              "medonc"
+              "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The planning recipe transfers: optimized plans met RTOG 0813/0915 while cutting V5 to thoracic spine 87%, vena cava 58% and heart 43%, with ≥70% of ITV still at 70-80 Gy. Central tumors drove the benefit (29.5%, p=0.004), so that is where adding immune-rich OARs to the optimizer earns its planning time.",
-              "medonc": "Grade 3 lymphopenia was 15.4% standard vs 0% optimized, which matters most when SBRT precedes or accompanies checkpoint blockade, since post-RT ALC tracks with response. Nothing here establishes a disease-control benefit, so it does not change systemic selection or sequencing yet."
+              "radonc": "This is a planning-objective change, not a prescription change: same 45-60 Gy in 5 fx meeting RTOG 0813/0915, plus heart, great vessels, thoracic spine and lymph-node stations contoured as low-dose OARs. Achieved V5 reductions were 87% (spine) and 58% (nodes) with no increase in G3+ toxicity, and the gain was confined to central and PTV >20cc cases."
             },
             "open_questions": [
-              "Does preserved ALC translate into disease control or survival",
-              "Effect when SBRT is combined with checkpoint inhibition",
-              "Generalizability beyond single-institution planning expertise"
+              "Does immune sparing translate to OS or EFS benefit in a powered trial?",
+              "Which immune-rich OAR carries the dominant RIIS contribution?",
+              "Does immune-sparing planning add to SBRT plus immunotherapy?"
             ],
             "consort": {
               "enrolled": 55,
-              "excluded": null,
+              "excluded": 4,
               "randomized": 51,
               "arms": [
                 {
@@ -380,12 +208,12 @@
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "lymphocyte sparing radiotherapy lung",
-                "SBRT immunotherapy early stage lung"
+                "lymphocyte sparing radiation lung",
+                "SBRT immunotherapy early stage NSCLC"
               ],
               "queries_failed": [],
-              "candidates_returned": 10,
-              "fetched_at": "2026-08-01T08:26:25.323Z",
+              "candidates_returned": 7,
+              "fetched_at": "2026-08-09T23:04:48.360Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [
@@ -399,103 +227,492 @@
         "open_questions": null
       },
       {
-        "disease_site": "prostate",
-        "intro": "Two long-horizon reads on when to treat and when to intensify: PSA-gated hormone therapy with postop RT, and 25-year outcomes of surveillance in a screened cohort.",
+        "disease_site": "kidney",
+        "intro": "First international consensus contouring guideline for RCC SABR, CT-only by design.",
         "studies": [
           {
-            "name": "GÖTEBORG-1",
-            "tldr": "PC-specific survival 94% at 25yr on active surveillance, but failure-free survival fell to 68% at 22yr.",
+            "name": "IROCK RCC Contouring Guidelines",
+            "tldr": "First international consensus contouring guideline for RCC SABR; 16 experts, median DSC 0.85 across 4 scenarios.",
             "details": [
+              "🔍 16 RCC SABR experts (US, Canada, Australia, Netherlands, India), all with ≥10 prior RCC SABR cases; 14/16 treated ≥10 in the prior 12mo",
+              "🔍 4 CT-only cases: >10cm tumor + IVC thrombus, central tumor abutting hilum, post-nephrectomy local recurrence, post-RFA residual",
+              "🔍 STAPLE 95% consensus contour per case; refined over 2 online meetings (May, June 2024); statements revised to 100% agreement",
               {
-                "text": "🔍 Prospective AS cohort nested in the Göteborg-1 screening trial: 488 men, 1995-2014, follow-up closed Dec 31 2023",
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔍 Risk mix: very-low-risk 251 (51%), low-risk 129 (26%), intermediate-risk 108 (22%); 6 high-risk excluded",
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔍 Median age 66 (IQR 63-68), median PSA 4.1 ng/ml (IQR 3.4-5.4), median PSA density 0.12 (IQR 0.09-0.16)",
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔍 Median follow-up 18.0 yr (IQR 14.7-22.1) among men alive at last follow-up",
-                "source_tier": "figure"
-              },
-              {
-                "text": "📊 Whole cohort at 22 yr: treatment-free survival 38%, failure-free survival 68%",
-                "source_tier": "figure"
-              },
-              {
-                "text": "📊 Outcomes by baseline risk group (KM estimates)",
+                "text": "📊 Contour agreement vs consensus by case (median, IQR)",
                 "table": {
                   "columns": [
-                    "Endpoint (timepoint)",
-                    "Very low risk",
-                    "Low risk",
-                    "Intermediate risk"
+                    "Case",
+                    "DSC",
+                    "MDA (mm)",
+                    "HD (mm)"
                   ],
                   "rows": [
                     [
-                      "Treatment-free survival (19 yr)",
-                      "55%",
-                      "35%",
-                      "30%"
+                      "1 · >10cm + IVC thrombus",
+                      "0.85, 0.79-0.85",
+                      "6.69, 5.88-8.79",
+                      "64.60, 64.44-86.40"
                     ],
                     [
-                      "Failure-free survival (19 yr)",
-                      "85%",
-                      "74%",
-                      "55%"
+                      "2 · central, abutting hilum",
+                      "0.90, 0.84-0.93",
+                      "1.55, 1.00-2.09",
+                      "7.92, 5.35-9.98"
                     ],
                     [
-                      "PC-specific survival (24 yr)",
-                      "99%",
-                      "92%",
-                      "85%"
+                      "3 · post-RN local recurrence",
+                      "0.91, 0.88-0.93",
+                      "1.42, 1.18-1.89",
+                      "6.18, 6.00-7.12"
                     ],
                     [
-                      "Overall survival (24 yr)",
-                      "38%",
-                      "34%",
-                      "22%"
+                      "4 · post-RFA residual",
+                      "0.75, 0.60-0.79",
+                      "2.50, 2.12-2.99",
+                      "9.00, 9.00-12.39"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📐 Overall metrics and ANOVA",
+                "subdetails": [
+                  "Median DSC 0.85 (range 0.40-0.95); >0.70 for every case",
+                  "Median MDA 2.17mm (range 0.71-10.82); median HD 9.00mm (range 4.00-89.31)",
+                  "DSC, MDA, HD all differed by case (P<.05); by participant only MDA differed (P=.03), DSC P=.07, HD P=.45"
+                ]
+              },
+              {
+                "text": "📐 Target volume rules per scenario",
+                "subdetails": [
+                  "iGTV includes primary tumor + entire tumor thrombus; bland thrombus excluded",
+                  "iGTV includes gross tumor recurrence + the entire post-RFA ablation cavity",
+                  "Surgical clips not involved with tumor can be left out of the iGTV",
+                  "No margin for microscopic spread; most common PTV margin was uniform 5mm on iGTV"
+                ]
+              },
+              "📐 5mm PTV margin assumes supine vacuum-cushion immobilization, 4D-CT sim, IV contrast, daily CBCT; varies with MRI-sim or adaptive workflows",
+              "📐 Ipsilateral renal parenchyma = whole ipsilateral kidney minus iGTV, renal pelvis, renal vasculature, proximal ureter",
+              "⚠️ Renal hilum explicitly NOT a dose-limiting OAR: optional contour only, since constraining it may push dose into remaining parenchyma",
+              "📐 OAR constraints take priority over target coverage; heterogeneous PTV dose with steep gradient is the stated tradeoff, hotspot inside the iGTV",
+              "💊 Bowel/stomach mitigation: NPO for hours pre-sim and pre-treatment, simethicone or alpha-galactosidase, bowel prep, PRVs, adaptive RT if available",
+              "🔗 Suggested 1/3/5-fraction dose objectives and OAR constraints (Table 2) are drawn from FASTRACK-II and AQuOS-II (NCT05023265) protocols, not derived here",
+              "⚠️ CT-only exercise by design; participants themselves asked for MRI, and the authors concede MRI availability would likely have narrowed the variation",
+              "⚠️ No recontouring after the 2 consensus meetings, so the post-guideline agreement gain is asserted, not measured",
+              "⚠️ Widest spread was Case 1 (superior extent of IVC thrombus, HD median 64.60mm) and Case 4 (how much RFA cavity to include, DSC 0.75)"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000066
+            ],
+            "slug": "irock-rcc-contouring",
+            "verdict": {
+              "soc_implication": "consensus",
+              "rationale": "Expert consensus contouring atlas, not an outcome study; DSC/MDA/HD measure inter-observer agreement, not efficacy. Recommendations unvalidated prospectively.",
+              "audience": "Localized RCC considered for SABR, incl. IVC thrombus, central, post-RN or…"
+            },
+            "significance": "The two decision-carrying rules are the ones most likely to be got wrong: cover the entire ablation cavity, not just the residual nodule, and the entire tumor thrombus while excluding bland thrombus. Renal hilum is deliberately not a dose-limiting OAR. Case 4 DSC 0.75 and Case 1 HD median 64.60mm mark where experts still disagree.",
+            "monday_clinic": "For a localized RCC patient being planned for SABR with an IVC thrombus or a post-RFA cavity, this defines the iGTV extent and the 5mm PTV margin under 4D-CT plus daily CBCT; it does not speak to whether SABR or nephrectomy is the right choice.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "International consensus contouring exercise under IROCK, panel convened at **ASTRO 2023**. Each participant contoured the **iGTV** on 4 CT-only cases plus 2 investigational renal substructures; a **STAPLE** algorithm generated the 95% consensus contour, refined over **2 online meetings** (May and June 2024)."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**16 radiation oncologists** from the US, Canada, Australia, the Netherlands and India. Sole inclusion criterion was **≥10 prior RCC SABR cases**; 14 of 16 had treated ≥10 in the preceding 12 months. All 16 contoured targets for every case; **12 and 13** contoured the renal cortex and renal hilum respectively, the rest judging those structures not relevant."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**No margin for microscopic spread**: iGTV = ITV, and the most common recommended PTV expansion was a **uniform 5 mm**, premised on supine vacuum-cushion immobilization, 4D-CT sim, IV contrast and daily CBCT. Participants used **1, 3, or 5 fractions**; suggested coverage objectives and OAR constraints (Table 2) are adapted from **FASTRACK-II** and **AQuOS-II** rather than generated by this panel."
+              },
+              {
+                "label": "Endpoints",
+                "body": "Agreement metrics only: **DSC**, **Mean Distance to Agreement** and **Hausdorff Distance** of each participant's contour against the consensus contour, with a 2-way ANOVA across cases and participants. There is **no clinical endpoint** here."
+              },
+              {
+                "label": "Results",
+                "body": "Median DSC **0.85** (range 0.40-0.95), median MDA **2.17 mm**, median HD **9.00 mm**; DSC exceeded **0.70** in every case. Agreement tracked case complexity, not operator: DSC and HD differed significantly by case but not by participant (**P=.07** and **P=.45**), while MDA differed by participant (**P=.03**)."
+              },
+              {
+                "label": "Discussion",
+                "body": "The substantive novelty is renal substructure handling. Ipsilateral renal parenchyma is defined as the whole ipsilateral kidney **minus iGTV, renal pelvis, renal vasculature and proximal ureter**, and the hilum is explicitly **not a dose-limiting OAR**, on the reasoning that sparing it would displace dose into the remaining functional parenchyma. Where OAR constraints and target coverage conflict, **constraints win**, accepting heterogeneous target dose with a steep gradient."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents localized RCC planned for SABR, including large tumors with IVC tumor thrombus, central tumors abutting the hilum, post-nephrectomy local recurrence and post-RFA residual disease. Does not represent metastatic RCC, non-RCC renal histologies, or centers planning on MRI, since only CT was distributed."
+              },
+              {
+                "label": "Limitations",
+                "body": "CT-only distribution likely inflated the measured variance, and participants were never asked to recontour after the consensus meetings, so the claimed improvement is untested. Implementation depends on multidisciplinary access to urology, IR and nephrology plus advanced planning technology, and the recommendations have not been validated in a prospective trial."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Two rules carry the planning decision: the entire post-RFA ablation cavity goes in the iGTV, not just the residual nodule, and the whole tumor thrombus goes in while bland thrombus stays out. The 5mm PTV margin is conditional on 4D-CT and daily CBCT. Renal hilum stays an optional contour, never a dose-limiting OAR."
+            },
+            "open_questions": [
+              "Does renal hilum dose actually drive stenosis or ureteric stricture?",
+              "Would MRI-based simulation reduce the Case 1 and Case 4 variance?",
+              "Do these contours improve outcomes prospectively?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "consensus-guideline",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "renal cell carcinoma stereotactic radiation renal function",
+                "MRI guided adaptive kidney SABR",
+                "primary renal cell carcinoma SABR trial"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 19,
+              "fetched_at": "2026-08-09T23:04:41.562Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 66
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "bladder",
+        "intro": "Retrospective SIB dose escalation in TMT, with a local-control gain that does not carry to OS or MFS.",
+        "studies": [
+          {
+            "name": "Dose-Escalated RT for MIBC",
+            "tldr": "2y invasive local recurrence 5.5% vs 27.5% with SIB dose escalation in TMT; SHR 0.20 (0.05-0.89), p=0.035, no OS or MFS difference.",
+            "details": [
+              {
+                "text": "🔍 Multicentre retrospective, 3 centres, Mar 2015 to May 2025, N=107 (39 escalated / 68 standard), median f/u 23mo (range 3-104)",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📐 Standard: 55Gy/20fx or 64Gy/32fx whole bladder. Escalation: SIB to 60Gy/20fx or 70Gy/32fx to the primary lesion",
+                "source_tier": "figure"
+              },
+              "📊 2y cumulative incidence invasive recurrence 5.5% (escalation) vs 27.5% (standard); crude 2/39 (5.1%) vs 16/68 (23.5%)",
+              "📐 Univariable Fine-Gray SHR 0.21 (0.05-0.94), p=0.04; multivariable adjusted for T stage SHR 0.20 (0.05-0.89), p=0.035",
+              {
+                "text": "📊 Escalation vs standard across endpoints",
+                "table": {
+                  "columns": [
+                    "Endpoint (2y)",
+                    "Dose escalation",
+                    "Standard",
+                    "Effect"
+                  ],
+                  "rows": [
+                    [
+                      "Invasive local recurrence",
+                      "5.5%",
+                      "27.5%",
+                      "SHR 0.20 (0.05, 0.89), p = 0.035"
+                    ],
+                    [
+                      "Non-invasive recurrence",
+                      "6.7%",
+                      "9.9%",
+                      "SHR 0.88 (0.23 - 3.33), p = 0.98"
+                    ],
+                    [
+                      "Metastasis",
+                      "21.1%",
+                      "32.3%",
+                      "p = 0.79"
+                    ],
+                    [
+                      "Overall survival",
+                      "71.1%",
+                      "64.4%",
+                      "p = 0.5"
+                    ],
+                    [
+                      "G2+ GU toxicity",
+                      "7 (17.9%)",
+                      "15 (22.1%)",
+                      "p=0.8"
+                    ],
+                    [
+                      "G2+ GI toxicity",
+                      "2 (5.1%)",
+                      "5 (7.4%)",
+                      "p=0.9"
+                    ]
+                  ]
+                }
+              },
+              "📊 Only 1 of 2 invasive recurrences in the escalated cohort was inside the boost field; 14 of 16 standard-dose invasive recurrences were at the original tumour site",
+              {
+                "text": "⚠️ Escalation cohort was cleaner at baseline: single tumour focus 39 (100%) vs 44 (65%), hydronephrosis 4 (10%) vs 19 (28%), T3 3 (8%) vs 11 (16%)",
+                "source_tier": "figure"
+              },
+              "⚠️ Multivariable model adjusted for T stage only, so focality and hydronephrosis imbalance is unadjusted",
+              "⚠️ 3 standard-dose recurrences were presumed invasive on CT (no cystoscopy, comorbidity); all escalation-cohort recurrences were cystoscopy-confirmed",
+              "🔍 Chemo omitted in 51% for poor PS/comorbidity; absence of chemo carried worse OS (HR 2.83 [1.42, 5.63], p < 0.01 on MVA)",
+              "📊 Salvage cystectomy: 2 (2.9%) standard for invasive recurrence vs 1 (2.5%) escalation for BCG-refractory non-invasive disease; most invasive relapses were unfit for surgery"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000065
+            ],
+            "slug": "mibc-dose-escalation-rt",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Retrospective 3-centre cohort, 39 escalated pts, 2 invasive events; escalation arm enriched for unifocal, non-hydronephrotic, T2 disease. Hypothesis-generating only.",
+              "audience": "MIBC, T2-T3 N0-N1, TMT after TURBT, curative intent, incl. chemo-unfit"
+            },
+            "significance": "The signal is local, not systemic: invasive recurrence fell 27.5% to 5.5% at 2y with no MFS or OS shift, and 1 of the 2 escalated failures was still inside the boost. Deliverable as SIB 60Gy/20fx or 70Gy/32fx with daily CBCT, no G2+ GU/GI penalty (p=0.8, p=0.9), so it moves the boost-volume question, not patient selection for TMT.",
+            "monday_clinic": "In unifocal T2 MIBC going to TMT, including chemo-unfit pts, this supports discussing an SIB boost to the primary lesion as a local-control question; it does not extend to multifocal disease (0 of 39 escalated pts) or change the metastatic or survival calculus.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Multicentre **retrospective** analysis across three centres, March 2015 to May 2025, chosen to capture daily CBCT image guidance. **N=107** (39 dose-escalated, 68 standard), median follow-up **23 months** (range 3-104)."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "MIBC after TURBT treated with RT with or without concurrent chemo, curative intent; **node-positive allowed** if non-metastatic, palliative-intent excluded. T2 in 92 (86%), node-positive 13, ECOG 2-3 in 54 (50%)."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Standard cohort: **55Gy/20fx or 64Gy/32fx** to whole bladder. Escalation: **simultaneous integrated boost to 60Gy/20fx or 70Gy/32fx** to the primary lesion. Hypofractionation in 97 (91%); empty-bladder CT sim, planning MRI and FDG PET fused in selected pts; daily CBCT in all but one."
+              },
+              {
+                "label": "Regimen",
+                "body": "Concurrent chemo in 52 (49%): 22 (56%) escalation vs 30 (44%) standard. The **51% who had no chemo** were mostly excluded for poor performance status and comorbidity, not by protocol."
+              },
+              {
+                "label": "Endpoints",
+                "body": "2-year local control for invasive and non-invasive disease, metastasis-free survival, overall survival, bladder preservation, and toxicity. Fine-Gray competing-risk analysis for recurrence; **no single registered primary endpoint** is stated."
+              },
+              {
+                "label": "Results",
+                "body": "Only invasive local control separated. Chemo omission (HR 2.83 [1.42, 5.63], p < 0.01) and hydronephrosis (HR 0.34 [0.16, 0.71], p < 0.01 for its absence) drove OS instead of dose."
+              },
+              {
+                "label": "Safety",
+                "body": "**G2+ GU** 17.9% escalation vs 22.1% standard (p=0.8); **G2+ GI** 5.1% vs 7.4% (p=0.9). Grade 3 toxicity in 2 pts (2.9%), **both in the standard arm**. No treatment stopped early for toxicity."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents unifocal T2-dominant MIBC without hydronephrosis treated by TMT with daily CBCT, including chemo-unfit pts. Does not represent multifocal disease, since 0 of 39 escalated pts had multiple foci and all 24 multifocal pts sat in the standard arm."
+              },
+              {
+                "label": "Limitations",
+                "body": "Two invasive events in the escalated arm carry the entire SHR, so the interval (0.05, 0.89) is fragile. Recurrence ascertainment differed by arm (3 standard-dose recurrences were imaging-presumed, all escalation recurrences cystoscopy-confirmed), and median 23-month follow-up under-counts late in-bladder failure."
+              },
+              {
+                "label": "Discussion",
+                "body": "The pattern-of-failure data is the more transferable read: 14 of 16 standard-dose invasive recurrences were at the original tumour site, which is the anatomic argument for boosting the GTV rather than escalating the whole bladder. Whether the 5.5% figure survives a prospective trial with balanced focality is the open question the authors themselves raise."
+              }
+            ],
+            "relevant_specialties": [
+              "radonc",
+              "medonc",
+              "surgonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "SIB to 60Gy/20fx or 70Gy/32fx to the GTV, not whole-bladder escalation, is the deliverable technique here, and it cost nothing in G2+ GU or GI toxicity (p=0.8, p=0.9). With 14 of 16 standard-dose invasive failures at the original tumour site, this moves the boost-volume decision in TMT planning.",
+              "medonc": "Half the cohort (51%) got no concurrent chemo, and chemo omission was the strongest OS covariate (HR 2.83 [1.42, 5.63], p < 0.01) while dose escalation moved neither MFS (p = 0.79) nor OS (p = 0.5). For a chemo-unfit MIBC pt, a boost addresses the bladder, not the systemic risk.",
+              "surgonc": "Salvage cystectomy rates were low in both arms (2.9% standard, 2.5% escalation), but the authors note most invasive relapses never reached surgery because pts were unfit at recurrence. In a comorbid TMT population, better up-front local control matters more than salvage availability."
+            },
+            "open_questions": [
+              "Does the invasive local control gain survive prospective randomisation?",
+              "Is multifocal MIBC safely boostable?",
+              "Does the 5.5% figure hold beyond 23-month follow-up?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "retrospective",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "bladder preservation dose escalation radiotherapy",
+                "bladder preservation radiotherapy",
+                "muscle invasive bladder simultaneous integrated boost"
+              ],
+              "queries_failed": [
+                {
+                  "term": "bladder preservation dose escalation radiotherapy",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 21,
+              "fetched_at": "2026-08-09T23:04:40.321Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 65
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "prostate",
+        "intro": "Two long-horizon datasets reframe when to add treatment: hormones to postop RT, and any treatment at all in screen-detected disease.",
+        "studies": [
+          {
+            "name": "GÖTEBORG-1",
+            "tldr": "PC-specific survival 94% at 25 yr on AS, but failure-free survival fell to 68% at 22 yr.",
+            "details": [
+              {
+                "text": "🔍 488 screen-detected men on AS from the Göteborg-1 screening trial, 1995-2014; median f/u 18.0 yr (IQR 14.7-22.1)",
+                "source_tier": "figure"
+              },
+              {
+                "text": "🔍 Risk mix: 251 (51%) very-low, 129 (26%) low, 108 (22%) intermediate; high-risk excluded (n=6)",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 KM outcomes for the whole cohort",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "15 yr",
+                    "20 yr",
+                    "25 yr"
+                  ],
+                  "rows": [
+                    [
+                      "PC-specific survival",
+                      "97% (CI 95-99%)",
+                      "95% (CI 93-98%)",
+                      "94% (CI 91-98%)"
+                    ],
+                    [
+                      "Overall survival",
+                      "63% (CI 58-67%)",
+                      "46% (CI 41-51%)",
+                      "32% (CI 26-38%)"
+                    ],
+                    [
+                      "Treatment-free survival",
+                      "48% (CI 43-54%)",
+                      "43% (CI 37-50%)",
+                      "38% (CI 31-46%) at 22 yr"
+                    ],
+                    [
+                      "Failure-free survival",
+                      "81% (CI 77-85%)",
+                      "74% (CI 68-81%)",
+                      "68% (CI 60-78%) at 22 yr"
                     ]
                   ]
                 },
                 "source_tier": "figure"
               },
               {
-                "text": "📊 232 men discontinued AS; definitive local therapy in 185",
-                "subdetails": [
-                  "Radical prostatectomy: 141",
-                  "Radiation therapy: 44",
-                  "Hormonal treatment: 47"
-                ],
+                "text": "📊 By risk group (PC-specific + OS at 24 yr; treatment-free at 19 yr)",
+                "table": {
+                  "columns": [
+                    "Risk group",
+                    "PC-specific survival 24 yr",
+                    "Overall survival 24 yr",
+                    "Treatment-free 19 yr"
+                  ],
+                  "rows": [
+                    [
+                      "Very low",
+                      "99% (CI 97-100)",
+                      "38% (CI 30-48)",
+                      "55% (CI 48-63)"
+                    ],
+                    [
+                      "Low",
+                      "92% (CI 83-100)",
+                      "34% (CI 26-45)",
+                      "35% (CI 26-47)"
+                    ],
+                    [
+                      "Intermediate",
+                      "85% (CI 75-95)",
+                      "22% (CI 12-37)",
+                      "30% (CI 18-48)"
+                    ]
+                  ]
+                },
                 "source_tier": "figure"
               },
               {
-                "text": "📊 81 failures over follow-up",
-                "subdetails": [
-                  "Hormonal treatment: 44",
-                  "PSA relapse after curative treatment, no hormones: 18",
-                  "PC death: 14",
-                  "Metastatic disease: 5"
-                ],
+                "text": "📊 232 of 488 discontinued AS: 141 radical prostatectomy, 44 radiotherapy, 47 hormonal treatment",
                 "source_tier": "figure"
               },
               {
-                "text": "⚠️ No predefined AS protocol; PSA q6-12mo and biopsy only on clinical progression signals",
+                "text": "📊 81 failures: 14 PC deaths, 5 metastatic alive, 44 started HT, 18 PSA relapse post-curative treatment",
                 "source_tier": "figure"
               },
               {
-                "text": "⚠️ Pre-MRI era: sextant biopsies until 2009, prediagnostic MRI in only 21 of 488 pts, so baseline risk was likely understaged",
+                "text": "📐 Multivariable Cox predictors of failure",
+                "table": {
+                  "columns": [
+                    "Factor",
+                    "HR",
+                    "95% CI",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "Gleason 6 vs 7",
+                      "3.12",
+                      "1.59-6.13",
+                      "<0.001"
+                    ],
+                    [
+                      "PSA density (doubling)",
+                      "1.78",
+                      "1.22-2.59",
+                      "0.003"
+                    ],
+                    [
+                      "T stage T1c vs T2a-c",
+                      "1.89",
+                      "1.08-3.30",
+                      "0.025"
+                    ],
+                    [
+                      "PSA (doubling)",
+                      "1.37",
+                      "0.84-2.25",
+                      "0.2"
+                    ],
+                    [
+                      "Age (yr)",
+                      "1.03",
+                      "0.97-1.09",
+                      "0.4"
+                    ]
+                  ]
+                },
                 "source_tier": "figure"
               },
               {
-                "text": "⚠️ Competing mortality dominates: 264 all-cause deaths vs 14 PC deaths, OS 32% at 25 yr for the whole cohort",
+                "text": "🔗 Treatment-free survival 48% at 15 yr, vs 55% Toronto AS cohort (15 yr) and 49% PASS (10 yr)",
                 "source_tier": "figure"
               },
-              "🔗 vs ProtecT, where AS carried a higher metastasis risk than immediate treatment; here failure accrued steadily rather than plateauing"
+              "🔗 PC mortality below PIVOT (11.4%) and roughly one-fifth of SPCG-4, reflecting screen-detected vs clinically diagnosed pts",
+              "⚠️ No predefined AS protocol or surveillance criteria; sextant biopsies until 2009, prediagnostic MRI in only 21 pts",
+              "⚠️ Pre-2005 Gleason grading means some \"low-risk\" tumors would reclassify as intermediate today",
+              "⚠️ 'Failure' pools PSA relapse, HT initiation, metastasis and PC death; a low-value untreated PSA relapse counts the same as a death"
             ],
             "figures": [],
             "nct": null,
@@ -505,48 +722,52 @@
             "slug": "goteborg-1",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Prospective single-strategy cohort, no randomised comparator to immediate treatment; risk stratification predates MRI and 12-core biopsy, limiting transfer to current AS entry criteria.",
-              "audience": "Screen-detected very-low- to intermediate-risk prostate cancer, median age 66"
+              "rationale": "Prospective single-strategy cohort within a screening RCT, no randomised AS vs immediate-treatment comparison; extends known low-mortality AS data from 15 to 25 yr.",
+              "audience": "Screen-detected very-low- to intermediate-risk prostate cancer, pre-MRI era…"
             },
-            "significance": "The RT-relevant signal is when surveillance ends, not whether it is safe: 44 of 488 men reached radiotherapy and 18 had PSA relapse after curative treatment with no hormones, so salvage-eligible disease keeps arriving past 20 yr. Intermediate-risk failure-free survival was 55% at 19 yr vs 85% very-low-risk, the widest split in the dataset.",
-            "monday_clinic": "In screen-detected intermediate-risk disease considering surveillance, the 55% failure-free survival at 19 yr argues for counselling on decades-long monitoring rather than a discharge point; it does not speak to MRI-staged, targeted-biopsy cohorts entering AS today.",
+            "significance": "44 of 488 men reached RT off AS, and 18 failures were post-curative PSA relapse, so deferral shifts a share of pts into salvage rather than de novo definitive RT. Failure accrued steadily past 10 yr with no plateau, which argues for keeping the curative-intent RT window open decades out, not just through year 15.",
+            "monday_clinic": "For a man weighing AS for screen-detected intermediate-risk disease, these data put PC-specific survival at 85% at 24 yr and treatment-free survival at 30% at 19 yr against 99% and 55% for very-low-risk, informing how the surveillance conversation is framed; it does not speak to MRI-staged or high-risk pts, who were excluded.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Prospective observational cohort inside the **Göteborg-1** PSA screening trial. Of 1052 screen-detected cancers diagnosed 1995 to 2014, 494 (47%) had AS as primary strategy; **488** low- or intermediate-risk men analysed. Kaplan-Meier estimates for treatment-free, failure-free, PC-specific, and overall survival."
+                "body": "Prospective cohort nested in the Göteborg-1 PSA screening RCT: of 1052 screen-detected PCs (1995-2014), 494 (47%) had AS as primary strategy and **488 were analysed**. No randomisation of AS against immediate treatment. Follow-up closed December 31, 2023; **median 18.0 yr** among men alive."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Very low risk (T1c, Gleason 6, PSA density <0.15, <3 positive cores) **251**, low risk **129**, intermediate risk (T1-2, Gleason ≤7, PSA <20 ng/ml) **108**. Median age **66 yr**, median PSA **4.1 ng/ml**. High-risk (Gleason ≥8) excluded."
+                "body": "**Very low risk 251 (51%), low 129 (26%), intermediate 108 (22%)**; high-risk excluded. Median age 66 yr (IQR 63-68), median PSA 4.1 ng/ml, median PSA density 0.12 ng/ml/cm³. Intermediate risk allowed **T1-2, Gleason 7, PSA <20**."
               },
               {
                 "label": "Regimen",
-                "body": "PSA every **6-12 mo**, repeat biopsy only on signs of clinical progression (PSA and/or stage); early rebiopsy if <2 mm cancer on the diagnostic core. Treatment recommended on PSA, grade, or stage progression, or by patient preference."
+                "body": "AS defined as no treatment within 6 mo of diagnosis, with **PSA every 6-12 mo** and rebiopsy on clinical or PSA progression. **No predefined protocol**: sextant biopsies to 2009, then 10-12 core; prediagnostic MRI in 21 pts."
               },
               {
                 "label": "Radiotherapy",
-                "body": "RT was the discontinuation route for **44 of 232** men leaving AS, versus 141 prostatectomy and 47 hormonal. Post-treatment **PSA relapse** was defined as ≥0.2 ng/ml after RP or nadir +2 ng/ml after radiation."
+                "body": "RT was a discontinuation route, not a randomised arm: **44 of 488** received radiotherapy off AS vs 141 radical prostatectomy and 47 hormonal treatment. Dose, fractionation and target volume are not reported. Post-RT relapse was defined as **nadir +2 ng/ml**, post-RP as **PSA ≥0.2**."
               },
               {
                 "label": "Endpoints",
-                "body": "Treatment-free, failure-free, PC-specific, and overall survival from diagnosis. Failure counted PC death, metastasis, hormonal treatment, or PSA relapse after curative treatment. Curves truncated at 22 yr, and 24 yr / 19 yr in risk-stratified analyses."
+                "body": "Kaplan-Meier treatment-free, failure-free, PC-specific and overall survival. **Failure** = noncurative PSA relapse, starting hormonal treatment, metastasis, or PC death, whichever came first. Curves truncated at 22 yr for treatment- and failure-free survival for want of men at risk."
               },
               {
                 "label": "Results",
-                "body": "PC-specific survival **94% at 25 yr**; 14 PC deaths against 264 all-cause deaths. Treatment-free survival **38%** and failure-free survival **68%** at 22 yr; overall survival **32%** at 25 yr."
+                "body": "**232 men discontinued AS, 81 failed, 14 died of PC.** The risk-group split is the read: PC-specific survival at 24 yr ran 99% very-low vs **85% intermediate**, and treatment-free survival at 19 yr 55% vs 30%."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Mortality tracks ProtecT (3.4%) and the Toronto cohort (5.7% at 15 yr), and sits above the <1% seen in PRIAS and PASS at 10 yr. It is roughly half PIVOT's 11.4% and a fifth of SPCG-4, which the authors attribute to screen-detected versus clinically diagnosed disease."
               },
               {
                 "label": "Applies to",
-                "body": "Represents screen-detected very-low- to intermediate-risk prostate cancer diagnosed by sextant or 12-core biopsy without MRI staging. Does not represent MRI-staged, targeted-biopsy AS cohorts or Gleason ≥8 disease, which was excluded."
+                "body": "Represents screen-detected very-low- to intermediate-risk prostate cancer diagnosed without MRI or targeted biopsy. Does not represent contemporary MRI-staged AS cohorts, high-risk disease (excluded), or clinically detected tumors."
               },
               {
                 "label": "Limitations",
-                "body": "No predefined surveillance protocol, so biopsy timing varied with individual urologist practice and failure detection is not standardised. Risk assignment used sextant biopsies before 2009 with prediagnostic MRI in only 21 men, so some intermediate-risk failures may be understaged high-risk disease enrolled at baseline."
+                "body": "The failure composite is heterogeneous: an untreated PSA relapse held at low values for years counts alongside a PC death, inflating the 68% failure-free figure as a proxy for lost cure. Risk-group differences were **not formally tested** for significance, so the very-low vs intermediate gap is descriptive."
               },
               {
                 "label": "Discussion",
-                "body": "Failure accrued without a plateau: **no safe window** for stopping surveillance emerges across 22 yr. With OS 32% at 25 yr against 94% PC-specific survival, competing mortality, not prostate cancer, decides most of these men's outcome."
+                "body": "Nearly half of all failures occurred **>10 yr after diagnosis**, tracking a lead time the authors put at 5-12 yr. The authors read this as no safe window for stopping surveillance rather than as a case against AS."
               }
             ],
             "relevant_specialties": [
@@ -555,147 +776,30 @@
               "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Radiotherapy was the exit route for 44 of the 232 men who left AS, and 18 men had PSA relapse after curative treatment without hormones, so post-AS salvage-eligible disease keeps presenting past 20 yr. Intermediate-risk failure-free survival 55% at 19 yr vs 85% very-low-risk frames who arrives in an RT clinic later.",
-              "medonc": "44 of 81 failures were hormonal treatment, the single largest failure category, well above the 14 PC deaths and 5 metastatic events. Systemic therapy, not cancer death, is the dominant downstream endpoint of surveillance, and it accrued steadily across two decades rather than clustering early.",
-              "surgonc": "Radical prostatectomy accounted for 141 of 232 AS discontinuations, the commonest exit. With treatment-free survival 38% at 22 yr and only 30% at 19 yr in intermediate-risk men, most surveillance patients eventually reach an operative decision, many at an older age than at diagnosis (median 66 at entry)."
+              "radonc": "44 of 488 men came to RT off AS and 18 failures were PSA relapse after curative treatment, so deferral moves a share of pts from de novo definitive RT into salvage. Failure accrued past 10 yr with no plateau, which keeps the curative-intent RT window open decades out.",
+              "medonc": "44 men started hormonal treatment as their failure event, mostly for symptoms, and HT was the primary treatment in 8 of the 14 PC deaths. Gleason 6 vs 7 carried HR 3.12 (1.59-6.13) for failure, the strongest gate on who should not be watched.",
+              "surgonc": "Radical prostatectomy was the dominant exit from AS at 141 of 488, and PSA density doubling carried HR 1.78 (1.22-2.59) for failure. Sextant biopsy to 2009 means baseline undersampling drove some of that late crossover to surgery."
             },
             "open_questions": [
-              "Do MRI and targeted biopsy change these long-term AS failure rates?",
-              "Optimal surveillance intensity and stopping age given competing mortality",
-              "Whether intermediate-risk disease belongs on surveillance at all"
+              "Does MRI-based AS monitoring lower the late failure rate?",
+              "Can surveillance be safely de-intensified in very-low-risk men after 15 yr?",
+              "Is late salvage after AS curative as often as de novo treatment?"
             ],
             "consort": null,
             "modality": null,
             "intent": "curative",
             "methodology": "real-world-evidence",
             "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT05558241",
-                "brief_title": "Micro-UltraSound In Cancer - Active Surveillance",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 210,
-                "primary_completion_date": "2026-08",
-                "brief_summary": "This study will compare the two imaging modalities (MRI and micro-ultrasound) during Active Surveillance of prostate cancer (PCa). Progression to clinically significant PCa will be assessed by first taking micro-US targeted samples (while blinded to MRI results), followed by MRI targeted samples, finishing with 12 systematic biopsy cores. The primary goal is to compare microUS to MRI for the detection of ≥GG2 PCa at confirmatory biopsy. This study will also collect blood samples from…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "High-resolution micro-ultrasound",
-                    "type": "DEVICE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Adult men with Gleason Grade Group 1 prostate cancer managed by active surveillance who require a confirmatory prostate biopsy\n\nExclusion Criteria:\n\n* Men who cannot undergo a prostate MRI\n* Men who cannot undergo a prostate biopsy",
-                "answers_question": "Do MRI and targeted biopsy change these long-term AS failure rates?",
-                "relevance_phrase": "microUS vs MRI targeting for ≥GG2 at confirmatory bx"
-              },
-              {
-                "nct": "NCT06280781",
-                "brief_title": "Imperial Prostate 9 - ATLAS (Approaches To Long-Term Active Surveillance)",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 1263,
-                "primary_completion_date": "2029-06",
-                "brief_summary": "The goal of this intervention study is for patients on active surveillance for prostate cancer, to demonstrate that use of regular MRI scans is better able to detect cancer progression over 5 years compared to the current NICE defined strategy.\n\nResearch Question P - In patients who are on active surveillance for low to medium risk prostate cancer, I - is the use of regular MRI scans C - compared to current NICE defined standard of care, O - better at detecting cancer progression with less cost…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "MRI Scans",
-                    "type": "DIAGNOSTIC_TEST"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age 18 years or above (no upper limit)\n* Patients with a prostate (either cis-male gender or trans-female gender with no prior androgen deprivation hormone use at all).\n* Diagnostic bi-parametric or multiparametric MRI\n* Diagnostic systematic biopsy +/- targeted biopsy\n* A…",
-                "answers_question": "Do MRI and targeted biopsy change these long-term AS failure rates?",
-                "relevance_phrase": "RCT: serial MRI vs NICE AS protocol for progression"
-              },
-              {
-                "nct": "NCT04692675",
-                "brief_title": "Multiparametric Magnetic Resonance Imaging of the Prostate to Assess Disease Progression and Genomics in Patients Undergoing Active Surveillance for Prostate Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 508,
-                "primary_completion_date": "2029-09",
-                "brief_summary": "Background:\n\nActive surveillance (AS) is a standard approach to treat low and intermediate risk prostate cancer. For AS, disease progression is monitored. AS uses biopsies, prostate specific antigen (PSA) blood tests, and other tools. Researchers want to see if multiparametric magnetic resonance imaging (mpMRI) can help improve AS.\n\nObjective:\n\nTo see if mpMRI can improve how people are monitored during AS.\n\nEligibility:\n\nMen age 18 and older who have been diagnosed with prostate cancer within…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "mpMRI",
-                    "type": "DIAGNOSTIC_TEST"
-                  }
-                ],
-                "eligibility_brief": "* INCLUSION CRITERIA:\n* Participants must have confirmed histopathological diagnosis of adenocarcinoma of the prostate within 2 years prior to study entry. Pathologic diagnosis must be confirmed by Laboratory of Pathology, NCI. If archival tissue is unavailable or insufficient for this purpose, a…",
-                "answers_question": "Do MRI and targeted biopsy change these long-term AS failure rates?",
-                "relevance_phrase": "n=508 mpMRI-guided AS monitoring, 2029 readout"
-              },
-              {
-                "nct": "NCT07207902",
-                "brief_title": "Surveillance or Focal Therapy",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 400,
-                "primary_completion_date": "2026-08",
-                "brief_summary": "Patients with newly diagnosed low-intermediate risk prostate cancer often are not advised of all the options in an easy to understand way. This trial will show patients a 2 minute animated Explainer video to better understand their treatment options. Patients will choose their treatment choice (surveillance, focal therapy, or standard treatment option) and we will determine disease related anxiety and decision regret scores.",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Explainer video",
-                    "type": "BEHAVIORAL"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Gleason 3+3 (GG 1) or 3+4 (GG2)\n* ≤4 cores\n* T1c-T2\n* Prostate \\< 60cc\n* MRI non-focal or PIRADS 3-4 in peripheral gland\n* Absence of significant anterior disease\n\nExclusion Criteria:\n\n* Anal stenosis\n* Prostatic calfcifations\n* Latex allergy\n* Gleason grade group 3-5\n*…",
-                "answers_question": "Whether intermediate-risk disease belongs on surveillance at all",
-                "relevance_phrase": "GG2 pts choosing AS vs focal vs radical; regret score"
-              },
-              {
-                "nct": "NCT05948657",
-                "brief_title": "Evaluation of Prostate Specific Membrane Antigen Positron Emission Tomography-Computed Tomography in Active Surveillance for Prostate CancEr",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 200,
-                "primary_completion_date": "2028-12",
-                "brief_summary": "This study will be assessing the ability of PSMA-PET CT to determine the absence of clinically significant prostate cancer in patients on active surveillance (AS) with low risk and favorable intermediate-risk prostate cancer.",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "PSMA-PET CT",
-                    "type": "DIAGNOSTIC_TEST"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Males aged ≥ 18.\n* Histologically confirmed low or favorable intermediate risk prostate cancer per NCCN guidelines. (Note: Grade Group 2 must have 20% or less involvement in every core and no presence of cribiform or intraductal carcinoma).\n* PSA \\< 20 ng/ml.\n* Ability to…",
-                "answers_question": "Whether intermediate-risk disease belongs on surveillance at all",
-                "relevance_phrase": "PSMA-PET to rule out csPCa in favorable IR on AS"
-              }
-            ],
+            "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "MRI targeted biopsy active surveillance prostate",
-                "active surveillance intermediate-risk prostate cancer",
-                "surveillance intensity prostate cancer cohort"
+                "MRI active surveillance prostate",
+                "salvage radiotherapy active surveillance prostate"
               ],
               "queries_failed": [],
-              "candidates_returned": 39,
-              "fetched_at": "2026-08-01T08:26:29.326Z",
-              "rerank_outcome": "picked_N"
+              "candidates_returned": 31,
+              "fetched_at": "2026-08-09T23:04:46.042Z",
+              "rerank_outcome": "abstained"
             },
             "source_ids": [
               {
@@ -706,43 +810,71 @@
           },
           {
             "name": "POSEIDON",
-            "tldr": "OS HR 0.87 (0.76-1.01), p=0.06 adding hormone therapy to postop RT; 0.7% absolute at 10y, PSA-dependent interaction p=0.02.",
+            "tldr": "IPD meta-analysis, 6057 pts: adding HT to PORT did not improve OS (HR 0·87, 95% CI 0·76–1·01, p=0·06).",
             "details": [
-              "📊 1° EP overall survival: HR 0.87 (95% CI 0.76-1.01), p=0.06, primary not met",
-              "📊 10y OS 84.3% with hormone therapy vs 83.6% RT alone, projected absolute 0.7%",
-              "📊 10y MFS 77.9% vs 74.1%, absolute 3.8%, HR 0.79, p<0.001",
-              "⚠️ MFS did not hold as an OS surrogate in their analysis, so the MFS gain can't carry an OS claim",
-              "🔍 IPD from six randomised phase 3 trials, 6057 pts, median f/u 9.0y (IQR 7.2-10.7)",
+              "🔍 IPD meta-analysis of 6 randomised comparisons via MARCAP (RTOG 9601, GETUG-AFU 16, RADICALS x3, NRG/RTOG 0534); 5026 pts in the primary HT-vs-no-HT comparison, median f/u 9·0 yrs (IQR 7·2–10·7)",
+              "📊 10-yr OS 83·6% (81·8–85·4) PORT alone vs 84·3% (82·7–86·0) PORT+HT; absolute 0·7% at 10 yrs",
+              "📊 MFS improved with HT: HR 0·79 (95% CI 0·70–0·89), p<0·001; 10-yr MFS 74·1% vs 77·9%",
+              "⚠️ MFS gain did not clear the ICECaP surrogate threshold: upper 95% CI bound crossed HR 0·81 at every pre-PORT PSA value, so the MFS signal is not expected to translate into an OS benefit",
               {
-                "text": "📊 OS effect by hormone therapy duration",
+                "text": "📊 OS by pre-PORT PSA stratum (HT added to PORT)",
                 "table": {
                   "columns": [
-                    "Comparison",
-                    "n",
-                    "OS effect"
+                    "Pre-PORT PSA (ng/mL)",
+                    "HR (95% CI)",
+                    "p",
+                    "10-yr OS RT alone",
+                    "10-yr OS RT+HT"
                   ],
                   "rows": [
                     [
-                      "PORT ± short-term HT (4-6 mo)",
-                      "3938",
-                      "95% CI upper bound crossed 1.0 at every PSA value"
+                      "≤0·20",
+                      "1·14 (0·83–1·57)",
+                      "0·43",
+                      "89·9%",
+                      "87·4%"
                     ],
                     [
-                      "PORT ± long-term HT (24 mo)",
-                      "1088",
-                      "upper bound fell below 1.0 only at PSA >1.6 ng/mL"
+                      "0·21–0·50",
+                      "0·94 (0·74–1·19)",
+                      "0·70",
+                      "84·9%",
+                      "84·5%"
                     ],
                     [
-                      "Short vs long HT (exploratory)",
-                      "n/a",
-                      "HR 0.89, p=0.37"
+                      "0·51–1·00",
+                      "0·72 (0·54–0·96)",
+                      "0·02",
+                      "76·4%",
+                      "80·9%"
+                    ],
+                    [
+                      ">1·00",
+                      "0·69 (0·48–0·98)",
+                      "0·03",
+                      "72·4%",
+                      "80·5%"
                     ]
                   ]
                 }
               },
-              "📐 Pre-PORT PSA interaction p=0.02 for >0.5 vs ≤0.5 ng/mL",
-              "📊 NNT 125 at PSA ≤0.2 ng/mL vs 25 at PSA >1.0 ng/mL",
-              "⚠️ Enrollment predates PSMA PET and Decipher, so today's low-PSA pts would be restaged first"
+              "📐 Categorical 4-strata PSA interaction was not significant (pinteraction=0·08); the binary >0·5 vs ≤0·5 ng/mL interaction was (pinteraction=0·02), confirmed in the two-stage within-trial model (p=0·03)",
+              "📊 Short-term HT (4–6 mo, 4 trials, n=3938): no OS benefit (HR 0·93, 0·77–1·11) but MFS improved (HR 0·82, 0·71–0·95)",
+              "📊 Long-term HT (24 mo, 2 trials, n=1088): OS HR 0·79 (0·63–1·00), p=0·049; MFS HR 0·74 (0·60–0·91), p=0·004",
+              "📐 No significant interaction by HT duration (pinteraction=0·17); long-term-HT trials enrolled higher pre-PORT PSA and more adverse pathology",
+              "📊 Prolonging short-term to long-term HT (RADICALS, n=1523): OS HR 0·89 (0·68–1·16), p=0·37; MFS HR 0·76 (0·61–0·95), p=0·02",
+              {
+                "text": "📐 NNT to prevent one death at 10 yrs by pre-PORT PSA (any HT added)",
+                "subdetails": [
+                  "PSA 0·0–0·5 ng/mL: negative (point estimates numerically favoured PORT alone; imprecise)",
+                  "PSA 0·51–1·00 ng/mL: 22",
+                  "PSA >1·00 ng/mL: 12"
+                ]
+              },
+              "⚠️ Spline analysis: for long-term HT the upper 95% CI bound for OS HR crossed 1·0 only at PSA ≥1·6 ng/mL, far above the median 0·3 ng/mL seen in modern early salvage",
+              "⚠️ No multiplicity correction applied; the authors state secondary subgroup findings are hypothesis-generating",
+              "⚠️ Trials predate Decipher and PSMA PET; discussant Koontz notes applicability is limited to PET-negative biochemical recurrence",
+              "🔗 Contrast with the definitive-RT setting (MARCAP 2022, Lancet Oncol): ADT with intact-prostate RT improves OS, whereas the postoperative setting here does not"
             ],
             "figures": [],
             "nct": null,
@@ -750,55 +882,56 @@
               1000000063,
               1000000062
             ],
-            "slug": "poseidon-ipd-metaanalysis",
+            "slug": "poseidon",
             "verdict": {
               "soc_implication": "challenges-soc",
-              "rationale": "IPD from six randomised phase 3 trials, prespecified OS primary, 9y follow-up; the null result diverges from routine short-term ADT alongside post-prostatectomy RT.",
-              "audience": "Post-RP biochemical recurrence, pre-PORT PSA mostly ≤0.5 ng/mL, PET-negative"
+              "rationale": "IPD meta-analysis of six randomised phase 3 trials, prespecified interaction analyses, 9-yr median f/u. Null OS contradicts routine HT with early salvage PORT.",
+              "audience": "Post-prostatectomy biochemical recurrence, PET-negative, pre-PORT PSA ≤0·5 ng/mL"
             },
-            "significance": "The decision that moves is hormone therapy omission with post-prostatectomy RT: NNT 125 at PSA ≤0.2 vs 25 at PSA >1.0 ng/mL, and the long-term CI clears 1.0 only above PSA 1.6. The 3.8% 10y MFS gain failed surrogacy for OS, so it can't carry ADT on its own.",
-            "monday_clinic": "In a man with PET-negative biochemical recurrence and pre-RT PSA of 0.5 ng/mL or less, this supports prostate-bed radiotherapy without hormone therapy; it does not extend to PET-positive recurrence or to PSA above 1.0 ng/mL.",
-            "primary_endpoint": null,
+            "significance": "The decision this moves is HT omission at early salvage: at PSA ≤0·5 ng/mL the OS point estimates numerically favoured PORT alone (≤0·20: HR 1·14, 10-yr OS 89·9% vs 87·4%), and the MFS gain never cleared the ICECaP 0·81 threshold at any PSA. Where HT is warranted (PSA >0·5), 4–6 months matched 24 (prolongation OS HR 0·89, p=0·37).",
+            "monday_clinic": "In PET-negative post-prostatectomy biochemical recurrence salvaged at PSA ≤0·5 ng/mL, this questions routinely adding hormone therapy to prostate-bed radiotherapy; it does not extend to PET-positive nodal or metastatic recurrence, or to pre-PORT PSA above 0·5 ng/mL where a survival signal persisted.",
+            "primary_endpoint": {
+              "name": "Overall survival",
+              "klass": "overall-survival",
+              "stat_value": "HR 0·87",
+              "stat_detail": "95% CI 0·76–1·01, p=0·06; 10-yr OS 84·3% vs 83·6%"
+            },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**IPD meta-analysis** of six randomised phase 3 trials of postoperative radiotherapy with or without hormone therapy, N=**6057**, assembled through the MARCAP consortium (PROSPERO CRD42019134376). Pooled trials were RTOG 9601, GETUG-AFU-16, RADICALS (three trials) and RTOG 0534. Median follow-up **9.0 years** (IQR 7.2-10.7)."
+                "body": "One-stage **individual patient data meta-analysis** (MARCAP consortium, PROSPERO CRD42019134376) of six randomised phase 3 comparisons of postoperative radiotherapy with or without hormone therapy, stratified by trial with univariable Cox models. **6057 patients**, median follow-up **9·0 years** (IQR 7·2–10·7); 5026 contributed to the primary comparison. Systematic search to Dec 15, 2024; single-centre trials and trials without metastasis or survival data excluded."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Recurrent prostate cancer after radical prostatectomy referred for PORT. Across the **5026** men randomised to radiotherapy with or without hormone therapy the median pre-PORT PSA was **0.3 ng/mL**; short-term stratum n=3938 (median PSA 0.3), long-term stratum n=1088 (median PSA 0.5)."
+                "body": "Post-radical-prostatectomy men receiving prostate-bed radiotherapy for recurrent or adverse-feature disease. Median pre-PORT PSA **0·3 ng/mL** overall (0·3 in the short-term-HT trials, **0·5** in the long-term-HT trials); Gleason 7 in 67–68%, positive margins 58–60%, pT3a in ~35–38%. Race and ethnicity data unavailable."
               },
               {
                 "label": "Regimen",
-                "body": "Hormone therapy was either **short-term, 4 to 6 months**, or **long-term, 24 months**, added to postoperative radiotherapy."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Target was the **prostate bed with or without pelvic lymph nodes**. Dose, fractionation and target-volume detail are **not reported in the source text** and differ across the six pooled trials, so transfer to a given technique cannot be read off this analysis."
+                "body": "**Short-term hormone therapy 4–6 months** versus **long-term 24 months**. The short-term trials predominantly used GnRH agonists; RTOG 9601 used high-dose bicalutamide monotherapy, and RADICALS three-way used 24 months of GnRH-agonist ADT in 425 (86%) of 492 patients plus a 6-month group."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary: overall survival.** Metastasis-free survival was reported alongside it. Tests for interaction by pre-PORT PSA and by hormone therapy duration were prespecified, and non-linear associations between pre-PORT PSA and overall survival were modelled."
+                "body": "**Primary: overall survival.** Secondary: metastasis-free survival, event-free survival, biochemical recurrence (Fine–Gray). Prespecified interaction tests on pre-PORT PSA and hormone therapy duration, with 10-year restricted mean survival time and absolute Kaplan–Meier differences alongside the hazard ratios."
               },
               {
                 "label": "Results",
-                "body": "No interaction by hormone therapy duration (p**interaction**=0.17), but a significant interaction with pre-PORT PSA above vs at or below 0.5 ng/mL (p**interaction**=0.02). Short-term hormone therapy showed **no OS or MFS benefit at any PSA below 2.4 ng/mL**; long-term hormone therapy above PSA 0.5 gave OS **HR 0.79, p=0.049**."
-              },
-              {
-                "label": "Safety",
-                "body": "No comparative toxicity data in the source. The authors set the null result against the known burden of hormone therapy on quality of life, cardiovascular, metabolic, musculoskeletal, sexual and neurocognitive function, and against **other-cause mortality offsetting cancer-specific benefit** in nonaggressive disease."
+                "body": "**No OS benefit overall (HR 0·87, 0·76–1·01, p=0·06)**, absolute 10-year gain 0·7%. MFS improved (HR 0·79, p<0·001) but the effect did not meet the ICECaP surrogate threshold at any PSA, so it cannot be read as an OS proxy."
               },
               {
                 "label": "vs leading data",
-                "body": "Of the pooled trials only **RTOG 9601** showed an OS benefit, and it was a late-salvage trial. A prior aggregate study-level meta-analysis of the same trials also found no OS benefit; what the IPD adds is the **pre-PORT PSA threshold** and the duration read."
+                "body": "RTOG 9601 remains the only single trial showing an OS benefit, and it was **late salvage** at a PSA far above contemporary practice. The definitive-radiotherapy MARCAP analysis (Lancet Oncol 2022) found ADT improves OS with an intact prostate; the postoperative setting does not reproduce that."
               },
               {
                 "label": "Applies to",
-                "body": "Represents PET-negative biochemical recurrence after radical prostatectomy with pre-PORT PSA at or below 0.5 ng/mL. Does not represent PET-positive nodal recurrence, or pts selected by Decipher or PSMA PET, both of which postdate this enrollment."
+                "body": "Represents PET-negative post-prostatectomy biochemical recurrence treated with prostate-bed radiotherapy at low pre-PORT PSA. Does not represent PET-positive nodal or metastatic recurrence, biomarker-selected (Decipher) patients, or pre-PORT PSA above 1·6 ng/mL where the long-term hormone therapy signal emerged."
               },
               {
                 "label": "Limitations",
-                "body": "The long-term hormone therapy stratum is small (n=1088), so the PSA above 1.6 ng/mL signal rests on few pts, and the short vs long duration comparison was exploratory. Median pre-PORT PSA of 0.3 ng/mL means the higher-PSA strata driving the interaction are thinly populated."
+                "body": "Trial-level confounding by indication persists across strata: the long-term-HT comparison drew on only two trials with higher PSA and more adverse pathology, so its OS HR 0·79 is not cleanly separable from **case mix**. RTOG 9601 contributes bicalutamide monotherapy, not ADT, to that pooled long-term estimate, and enrollment predates PSMA PET staging."
+              },
+              {
+                "label": "Discussion",
+                "body": "The invited discussant framed the result as **either practice-changing or practice-supporting depending on current practice**, and restricted applicability to PET-negative recurrence. NRG GU006 (NCT03371719) tests whether PAM50 identifies a differential benefit from short-term hormone therapy with apalutamide added to PORT."
               }
             ],
             "relevant_specialties": [
@@ -806,13 +939,13 @@
               "medonc"
             ],
             "significance_by_specialty": {
-              "radonc": "PORT itself is unchanged; what moves is whether hormone therapy rides along. At pre-RT PSA of 0.2 ng/mL or less the NNT is 125 against a 0.7% projected 10y absolute OS gain, and the long-term CI clears 1.0 only above PSA 1.6 ng/mL.",
-              "medonc": "Duration is the systemic read: 24 months buys nothing over 4 to 6 months (exploratory HR 0.89, p=0.37) and there is no duration interaction (p=0.17). The 3.8% MFS gain failed surrogacy for OS, so hormone therapy toxicity trades against a non-surrogate endpoint. Biomarker selection (NRG-GU-006, BALANCE) is the open path."
+              "radonc": "At early salvage (PSA ≤0·5 ng/mL) the OS point estimates numerically favoured prostate-bed radiotherapy alone (≤0·20 ng/mL: HR 1·14, 10-yr OS 89·9% vs 87·4%), and the MFS gain never cleared the ICECaP 0·81 threshold. The omit-versus-add decision is the one that moves; where PSA exceeds 0·5, 4–6 months matched 24.",
+              "medonc": "Duration, not intensity, is the read: prolonging 4–6 months to 24 gave no OS gain (HR 0·89, p=0·37) despite better MFS (HR 0·76, p=0·02). The long-term pooled estimate rests on two trials, one of which used bicalutamide monotherapy, so androgen-blockade class and duration are confounded with case mix."
             },
             "open_questions": [
-              "Which biomarker identifies men who still benefit from hormone therapy with PORT",
-              "Does PSMA PET restaging shift the PSA threshold for adding hormone therapy",
-              "Optimal hormone therapy duration above PSA 1.6 ng/mL"
+              "Biomarker to predict hormone therapy benefit with postoperative radiotherapy",
+              "Does PSMA PET-guided salvage change the hormone therapy calculus",
+              "Whether MFS is a valid surrogate for OS in the postoperative setting"
             ],
             "consort": null,
             "modality": "combined",
@@ -821,123 +954,55 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT05050084",
-                "brief_title": "Two Studies for Patients With Unfavorable Intermediate Risk Prostate Cancer Testing Less Intense Treatment for Patients With a Low Gene Risk Score and Testing a More Intense Treatment for Patients With a Higher Gene Risk Score, The Guidance Trial",
+                "nct": "NCT06894628",
+                "brief_title": "Genomics and Efficacy of Post-prostatectomy Salvage Radiotherapy With 'Extreme' Hypofractionation",
+                "overall_status": "RECRUITING",
+                "phase": null,
+                "enrollment_count": 103,
+                "primary_completion_date": "2027-11",
+                "brief_summary": "The study aims to validate the Decipher® genomic test, in which patients with biochemical recurrence after radical prostatectomy are treated with salvage radiotherapy with extreme hypofractionation (5+ Gy/fraction).\n\nValidating the Decipher® genomic classifier based on the expression of 22 RNA genes in the prospective study \"esSBRT\"",
+                "conditions": [
+                  "Prostatic Neoplasms"
+                ],
+                "interventions": [],
+                "eligibility_brief": "Inclusion Criteria:\n\n* patients enrolled at IRE under the \"esSBRT\" protocol (meeting the criteria of the same);\n* patients who express written informed consent personally or through their legal representative/witness/curator/guardian/support administrator (participation in the ancillary study and…",
+                "answers_question": "Biomarker to predict hormone therapy benefit with postoperative radiotherapy",
+                "relevance_phrase": "Decipher 22-gene classifier validated in post-RP salvage RT"
+              },
+              {
+                "nct": "NCT03582774",
+                "brief_title": "Multicenter Randomized Trial of 68Ga-PSMA-11 PET/CT Based SRT After Radical Prostatectomy",
                 "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
                   "PHASE3"
                 ],
-                "enrollment_count": 2050,
-                "primary_completion_date": "2026-11",
-                "brief_summary": "This phase III trial uses the Decipher risk score to guide therapy selection. Decipher score is based on the activity of 22 genes in prostate tumor and may predict how likely it is for recurrent prostate cancer to spread (metastasize) to other parts of the body. Decipher score in this study is used for patient selection and the two variations of treatment to be studied: intensification for higher Decipher score or de-intensification for low Decipher score. Patients with higher Decipher risk…",
+                "enrollment_count": 193,
+                "primary_completion_date": "2027-07",
+                "brief_summary": "This phase III trial studies how well Gallium Ga 68-labeled PSMA-11 (68Ga-PSMA-11) positron emission tomography (PET)/computed tomography (CT) works in diagnosing participants with prostate cancer that has come back after surgery. 68Ga-PSMA-11 are taken up by cancer cells. Diagnostic procedures, such as PET/CT scans, may help find and diagnose prostate cancer and find out how far the disease has spread. Giving 68Ga-PSMA-11 with PET/CT may help doctors plan better for salvage radiation therapy…",
                 "conditions": [
-                  "Prostate Adenocarcinoma"
+                  "Recurrent Prostate Carcinoma"
                 ],
                 "interventions": [
                   {
-                    "name": "Bicalutamide",
-                    "type": "DRUG"
+                    "name": "Best Practice",
+                    "type": "OTHER"
                   },
                   {
-                    "name": "Buserelin",
-                    "type": "DRUG"
+                    "name": "Computed Tomography",
+                    "type": "PROCEDURE"
                   },
                   {
-                    "name": "Darolutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Degarelix",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Flutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Goserelin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Histrelin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Leuprolide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Radiation Therapy",
+                    "name": "Gallium Ga 68-labeled PSMA-11",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "Relugolix",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Triptorelin",
-                    "type": "DRUG"
+                    "name": "Positron Emission Tomography",
+                    "type": "PROCEDURE"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically (histologically or cytologically) proven diagnosis of adenocarcinoma of the prostate within 270 days prior to registration\n* Unfavorable intermediate risk prostate cancer, defined as having ALL the following bulleted criteria:\n\n  * Has at least one intermediate…",
-                "answers_question": "Which biomarker identifies men who still benefit from hormone therapy with PORT",
-                "relevance_phrase": "Decipher score gates ADT intensification vs de-esc"
-              },
-              {
-                "nct": "NCT06274047",
-                "brief_title": "PROSTATE-IQ: Parallel RandOmized STudy of Personalized Apalutamide Treatment and Evaluation to Improve Quality of Life in Post-Operative Radiation With Androgen Axis Suppression. A Phase III Multi-center Study for Men With Detectable PSA After Prostatectomy for Prostate Cancer.",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 120,
-                "primary_completion_date": "2027-06",
-                "brief_summary": "1. Personalize treatment for prostate cancer based on how aggressive the disease is and\n2. Learn if apalutamide-based treatment can help to reduce fatigue and other side effects of treatment in participants who are being treated with radiation therapy for prostate cancer, as compared to standard therapy.",
-                "conditions": [
-                  "Androgen Axis Suppression",
-                  "Prostatectomy",
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Apalutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Androgen Deprivation Therapy",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically confirmed prostate cancer.\n2. PSA ≥ 0.1 after radical prostatectomy.\n3. Candidate for salvage radiation and ADT treatment, as determined by treating physician.\n4. Age \\>18 at the time of consent.\n5. ECOG Performance Status ≤ 2.\n6. Demonstrate adequate organ…",
-                "answers_question": "Which biomarker identifies men who still benefit from hormone therapy with PORT",
-                "relevance_phrase": "post-RP RT, Decipher-personalized apalutamide vs ADT"
-              },
-              {
-                "nct": "NCT04794777",
-                "brief_title": "Comparing \"Salvage\" Radiotherapy and Individualized PSMA PET/CT Targeted Treatment in With Relapsing Prostate Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 450,
-                "primary_completion_date": "2027-10",
-                "brief_summary": "Less than 50% of patients receiving salvage radiation therapy (SRT) to the pelvis as treatment for prostate cancer relapsing after surgery will achieve undetectable Prostate Specific Antigen (PSA) levels. Despite SRT, two-thirds of patients will again develop elevated PSA, 20% will have distant metastases, and 10% will die from prostate cancer within 10 years. The reason for this is probably preexisting distant metastasis and lymph node metastasises which need to better targeted directly.…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Individualised therapy",
-                    "type": "COMBINATION_PRODUCT"
-                  },
-                  {
-                    "name": "Standard salvage therapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patients previously treated for prostate cancer with radical prostatectomy and now having a biochemical recurrence (BCR) defined as: PSA \\>0.2 \\<2.0 ng/mL, and increasing measured twice.\n* Multidisciplinary conference (MDK) decision to offer the patient SRT\n* Signed Informed…",
-                "answers_question": "Does PSMA PET restaging shift the PSA threshold for adding hormone therapy",
-                "relevance_phrase": "PSMA-directed vs standard salvage, PSA 0.2-2.0"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histopathology proven prostate cancer.\n* Planned SRT for recurrence after primary prostatectomy.\n* Prostate-specific antigen (PSA) \\>= 0.1 ng/ml at time of enrollment.\n* Willingness to undergo radiotherapy.\n* Treating radiation oncologist intends to incorporate 68Ga-PSMA-11…",
+                "answers_question": "Does PSMA PET-guided salvage change the hormone therapy calculus",
+                "relevance_phrase": "randomised 68Ga-PSMA-11 vs standard planning for SRT"
               },
               {
                 "nct": "NCT07234981",
@@ -959,50 +1024,69 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Prior biopsy proven prostate cancer for which they underwent a radical prostatectomy with curative intent.\n2. Evidence of biochemical recurrence as defined by NCCN: Persistent positive PSA post-radical prostatectomy (RP) or an undetectable PSA after RP with a subsequent…",
-                "answers_question": "Does PSMA PET restaging shift the PSA threshold for adding hormone therapy",
-                "relevance_phrase": "PSMA-PET/MRI-guided salvage RT from PSA >0.1 post-RP"
+                "answers_question": "Does PSMA PET-guided salvage change the hormone therapy calculus",
+                "relevance_phrase": "PSMA-PET/MRI-guided de-escalated post-RP salvage RT"
               },
               {
-                "nct": "NCT04181203",
-                "brief_title": "Combined Apalutamide, Radiotherapy, and LHRH Agonist in Prostate Cancer Patients After Prostatectomy",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "nct": "NCT05781217",
+                "brief_title": "Short Versus Long-term Androgen Deprivation Therapy With Salvage Radiotherapy in Prostate Cancer. URONCOR 0624",
+                "overall_status": "RECRUITING",
                 "phase": [
                   "PHASE3"
                 ],
-                "enrollment_count": 490,
-                "primary_completion_date": "2028-09",
-                "brief_summary": "This is a multicenter, randomized, open label, phase III study comparing the efficacy and safety of apatulamide combined with concomitant prostate-bed salvage radiotherapy (SRT) and androgen deprivation therapy (ADT) versus concomitant prostate-bed SRT and ADT in high-risk postprostatectomy biochemically relapsed prostate cancer patients.",
+                "enrollment_count": 534,
+                "primary_completion_date": "2023-12",
+                "brief_summary": "The optimal indication for ADT has long been a point of controversy, at least until the results of randomised trials comparing RT with and without ADT were published. NCCN guidelines and most retrospective series and left the decision to prescribe ADT in combination with RT to the discretion of the treating physician, despite a lack of clear scientific evidence to support this recommendation. The percentage of patients in those retrospective series who received hormone therapy ranged from 33%…",
+                "conditions": [
+                  "Prostate Cancer",
+                  "Salvage Radiotherapy",
+                  "Biochemical Recurrence",
+                  "Androgen Deprivation Therapy",
+                  "Metastases-free Survival"
+                ],
+                "interventions": [
+                  {
+                    "name": "triptorelin, goserelin, leuprorelin",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients with histologically-confirmed prostate cancer treated with radical prostatectomy. Patients who have not undergone lymph node dissection are eligible for inclusion.\n2. Biochemical recurrence after prostatectomy: BCR is defined as a PSA value ≥ 0.2 ng/mL, with at…",
+                "answers_question": "Whether MFS is a valid surrogate for OS in the postoperative setting",
+                "relevance_phrase": "phase 3 ADT duration w/ SRT, MFS a listed condition"
+              },
+              {
+                "nct": "NCT04242017",
+                "brief_title": "Long-term Better Than Short-term ADT With Salvage RT",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2",
+                  "PHASE3"
+                ],
+                "enrollment_count": 394,
+                "primary_completion_date": "2026-02",
+                "brief_summary": "A randomized, multicenter, prospective PHASE II trial to assess the effect of short- versus long-term adjuvant ADT with high dose salvage radiotherapy on distant metastasis free survival in case of biochemical relapse (BR) after radical prostatectomy.",
                 "conditions": [
                   "Prostate Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "Apalutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Salvage radiotherapy (SRT)",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Luteinising Hormone Releasing Hormone agonist (LHRHa)",
+                    "name": "Triptoreline",
                     "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients must have signed a written informed consent form prior to any trial specific procedures\n2. Age ≥18 years old and ≤80 years old\n3. Histologically confirmed diagnosis of prostate adenocarcinoma treated primarily with radical prostatectomy\n4. Tumor stage pT2, pT3 or…",
-                "answers_question": "Optimal hormone therapy duration above PSA 1.6 ng/mL",
-                "relevance_phrase": "apalutamide + ADT vs ADT with prostate-bed SRT"
+                "eligibility_brief": "Inclusion Criteria:\n\n* History of histologically proven prostate cancer, treated with RP and ePLND. All patients have to be pN0. The minimal template for ePLND is defined as the removal of the external iliac, internal iliac and obturator nodes (standard template). Removal of the presacral and…",
+                "answers_question": "Whether MFS is a valid surrogate for OS in the postoperative setting",
+                "relevance_phrase": "randomised short vs long ADT with SRT, 1° EP is DMFS"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "Decipher biomarker prostate radiotherapy",
-                "PSMA PET salvage radiotherapy",
-                "androgen deprivation salvage radiotherapy"
+                "genomic classifier prostate salvage radiotherapy",
+                "PSMA PET salvage radiotherapy prostatectomy"
               ],
               "queries_failed": [],
-              "candidates_returned": 37,
-              "fetched_at": "2026-08-01T08:29:43.175Z",
+              "candidates_returned": 21,
+              "fetched_at": "2026-08-09T23:05:38.818Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
