@@ -13,6 +13,13 @@ Format: `- [scope] description (source)`
   order rather than indent order. Worth doing: 31 of 69 corpus table blocks are
   currently refused, and some are guideline grids worth rendering.
   (v0.41 pre-merge review)
+- **Extend self-consistency beyond the headline.** **Priority: P3.** v0.43 checks
+  the TL;DR against the card body when a table is present, which is where the
+  eval found the failures. It does NOT catch a contradiction between two body
+  surfaces (a bullet vs an analysis section), nor a card without a table, nor the
+  "5,026 vs 6,057 pts for the same HR" shape, which needs quantity identity
+  rather than value traceability. Label matching was tried and does not work;
+  a synonym map for endpoint names is the plausible next step. (v0.43)
 - **Broaden the quality-eval evidence base.** **Priority: P2.** The 50,000
   default rests on one date, three personas, one run (6.7 → 7.4). Run it across
   several dates before treating the number as settled. (v0.41)
