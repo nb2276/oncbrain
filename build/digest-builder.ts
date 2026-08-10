@@ -49,6 +49,7 @@ import {
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { markFigureSourcedDetails } from '../src/lib/source-tier.ts';
 import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
+import { persistSlugs } from '../src/lib/slug-persistence.ts';
 import { buildPriorIndex, findPriorEstimate, studiesFromArtifacts } from '../src/lib/prior-estimate.ts';
 import { clampPreprintVerdict } from '../src/lib/preprint.ts';
 import { stripReviewVerdicts, coerceConsensusVerdicts } from '../src/lib/content-type.ts';
@@ -386,6 +387,13 @@ type DigestArtifact = {
   date: string; // YYYY-MM-DD
   conference: { slug: string; name: string } | null;
   generated_at: number;
+  // v0.46: per-study slugs this date has published in the PAST but no longer
+  // carries, so /study/<date>-<retired>/ can redirect instead of silently
+  // serving the home page (the DO catchall returns 200 for any dead path).
+  // ACCUMULATES across rebuilds — it is merged forward from the previous
+  // artifact, never recomputed, or the second rebuild would forget the first
+  // rebuild's rename.
+  slug_aliases?: string[];
   digest: DigestOutput;
   bookmarks: Array<{
     id: number;
@@ -440,11 +448,13 @@ function buildArtifact(
   // Their stored fetched_via reflects their ORIGINAL date's ingestion (which may
   // not be 'review-resolved'), so force the provenance-pill flag for them.
   forceResolvedFromReview: Set<number> = new Set(),
+  slugAliases: string[] = [],
 ): DigestArtifact {
   return {
     date,
     conference,
     generated_at: Date.now(),
+    slug_aliases: slugAliases.length > 0 ? slugAliases : undefined,
     digest,
     bookmarks: bookmarks.map((b) => ({
       id: b.id,
@@ -516,6 +526,25 @@ function buildArtifact(
         }))
       : undefined,
   };
+}
+
+// v0.46: the previously published artifact for this same date, or null. Used to
+// hold slugs across a rebuild. Best-effort by design: a first build, a
+// hand-deleted artifact or a malformed file must not fail the build, it just
+// means there is no prior slug to honour.
+function readPublishedArtifact(args: Args, date: string): DigestArtifact | null {
+  try {
+    const p = resolve(args.outDir, `${date}.json`);
+    if (!existsSync(p)) return null;
+    return JSON.parse(readFileSync(p, 'utf8')) as DigestArtifact;
+  } catch {
+    return null;
+  }
+}
+
+function readPublishedStudies(args: Args, date: string): DigestStudy[] {
+  const prev = readPublishedArtifact(args, date);
+  return prev ? prev.digest.sites.flatMap((site) => site.studies) : [];
 }
 
 function writeArtifact(args: Args, artifact: DigestArtifact): { json: string; obsidian: string } {
@@ -696,6 +725,36 @@ export async function buildOneDate(
   // because every value involved is individually grounded. Never fatal.
   console.log(`  ${formatUntraceableHeadlines(auditDigestSelfConsistency(digest))}`);
 
+  // v0.46: hold each study's PUBLISHED slug across the rebuild. Phase 1 derives
+  // the slug from the name it just wrote, so a rebuild silently renames studies
+  // and moves their permalinks — five dates rebuilt on 2026-08-10 broke 7 of 12
+  // per-study URLs. Identity comes from provenance (same source rows = same
+  // card), not the name.
+  //
+  // MUST run BEFORE overrides: a curator sidecar is keyed to the slug the
+  // curator saw on the live site, so the persisted slug is the one it has to
+  // match. Running after would reintroduce exactly the silent no-op this fixes.
+  // Merged forward from the previous artifact so aliases accumulate; a second
+  // rebuild must not forget the first rebuild's rename.
+  let retiredSlugs: string[] = readPublishedArtifact(args, date)?.slug_aliases ?? [];
+  const previousStudies = readPublishedStudies(args, date);
+  if (previousStudies.length > 0) {
+    const flat = digest.sites.flatMap((site) => site.studies);
+    const { slugs, retired } = persistSlugs(previousStudies, flat);
+    let held = 0;
+    flat.forEach((study, i) => {
+      if (study.slug !== slugs[i]) held++;
+      study.slug = slugs[i];
+    });
+    if (held > 0 || retired.length > 0) {
+      console.log(
+        `  slug persistence: held ${held} published slug(s) across the rebuild` +
+          (retired.length > 0 ? `; retired ${retired.length} (${retired.join(', ')})` : ''),
+      );
+    }
+    retiredSlugs = [...new Set([...retiredSlugs, ...retired])];
+  }
+
   // Apply durable curator overrides last, so suppressed/edited studies survive
   // every rebuild (the LLM regenerates the digest from scratch each run).
   const overrides = loadOverrides(date, args.overridesDir);
@@ -748,7 +807,11 @@ export async function buildOneDate(
   }
   if (priorHits.length === 0) console.log('  magnitude moved: none');
 
-  const artifact = buildArtifact(date, confMeta, bookmarks, allPapers, slidesForDate, digest, crossDateIds);
+  // Any alias pointing at a slug the date now carries again is stale — drop it
+  // so a live study can never be shadowed by a redirect to itself.
+  const liveSlugs = new Set(digest.sites.flatMap((site) => site.studies.map((x) => x.slug)));
+  const aliases = retiredSlugs.filter((x) => !liveSlugs.has(x));
+  const artifact = buildArtifact(date, confMeta, bookmarks, allPapers, slidesForDate, digest, crossDateIds, aliases);
   const paths = writeArtifact(args, artifact);
   console.log(`  wrote ${paths.json}`);
   console.log(`  wrote ${paths.obsidian}`);

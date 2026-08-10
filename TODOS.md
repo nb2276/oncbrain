@@ -112,22 +112,6 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
   any comparison; reserve the personas for qualitative "what is wrong with
   this" reading. Rationale is in the `build/quality-eval.ts` header.
 
-## Slug instability across rebuilds (surfaced 2026-08-10 by the v0.45.1 rebuild)
-
-- **A rebuild can rename a study, which silently breaks its permalink AND any
-  curator override targeting it.** **Priority: P2.** Rebuilding five dates kept
-  5 per-study URLs and broke 7 (e.g. `/study/2026-08-07-stellar-tnt-larc/` →
-  `…-stellar/`). Two consequences, both silent: (a) `.do/app.yaml` sets
-  `catchall_document: index.html`, so a dead per-study link returns **HTTP 200
-  with the home page**, never a 404 — a shared link degrades into "the site"
-  with no error anywhere; (b) an override sidecar keyed to the old slug becomes
-  a no-op, reported only as `WARN edit slug(s) not found`. This was hit live:
-  an `irock` override was written and the next build renamed the study to
-  `irock-rcc-sabr-contouring`. Makes a full back-catalogue backfill materially
-  more expensive than it looks. Candidate fixes: a stable per-study id
-  independent of the name, and/or an alias map emitting redirects for retired
-  slugs, and/or matching overrides on NCT before slug.
-
 ## Known limitations (informational — not on a roadmap)
 
 - **OCR is macOS-only.** Linux/CI builds produce uniformly null captions; scanned-PDF OCR (v0.8 PR2) needs the Mac Vision binary + poppler.

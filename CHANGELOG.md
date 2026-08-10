@@ -2,6 +2,56 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.46.0] - 2026-08-10
+
+Slug instability, fixed at the cause and repaired for what it already broke.
+
+### Fixed
+- **A rebuild no longer renames a study's URL.** `study.slug` came from Phase 1,
+  derived from the NAME the LLM had just written, so rebuilding a date silently
+  moved permalinks: `stellar-tnt-larc` → `stellar`, `larc-sib-crt` →
+  `nct02195141`, `irock` → `irock-rcc-sabr-contouring`. Identity now comes from
+  PROVENANCE instead of the name — the same study is assembled from the same
+  source rows, which the LLM cannot rewrite — and the previously published slug
+  is held across the rebuild.
+
+  Matching is deliberately conservative, because reusing a slug WRONGLY (a
+  published URL pointing at a different study) is worse than the breakage it
+  fixes. An unchanged slug ranks first, then NCT equality, then source overlap;
+  matching is strictly one-to-one so a cluster split hands the published slug to
+  one half and mints a fresh one for the other; and **a stated NCT
+  disagreement vetoes the match outright** even when the two share every source,
+  mirroring `prior-estimate.ts` (one source can legitimately cover two trials).
+
+  Runs BEFORE overrides are applied, which is required rather than incidental: a
+  curator sidecar is keyed to the slug on the live site, so the persisted slug is
+  the one it has to match. Running it after would reintroduce the silent no-op.
+
+- **Retired per-study paths now redirect instead of silently serving the home
+  page.** `.do/app.yaml` sets `catchall_document: index.html`, so a dead
+  `/study/<date>-<slug>/` returned **HTTP 200 with the home page** — never a
+  404, no error anywhere, a shared link just quietly decaying into "the site".
+  Each retired path now renders a `noindex` redirect to its date, which is
+  always truthful: the study is either on that page under its current name, or
+  the curator suppressed it.
+
+  **181 retired paths across 29 dates** were recovered from git history — every
+  slug any date has ever published that it no longer carries. The scale is the
+  finding: this was not the 7 paths the v0.45.1 rebuild broke, it has been
+  happening on every rebuild for the life of the project.
+
+  Aliases ACCUMULATE (merged forward from the previous artifact, never
+  recomputed) or a second rebuild would forget the first one's rename, and an
+  alias colliding with a live study is dropped so a redirect can never shadow
+  real content.
+
+### Notes
+- Verified end-to-end by renaming a published slug and rebuilding: Phase 1
+  emitted `beacon-hcc`, the build held the published name, and no spurious alias
+  was recorded. The 29 seeded artifacts are a byte-exact additive edit (239
+  insertions, 0 deletions) — the round-trip was checked against the builder's own
+  serialization before touching a published file.
+
 ## [0.45.1] - 2026-08-10
 
 Rebuilds the five most recent dates onto v0.45, plus the two fixes that rebuild
