@@ -2,6 +2,59 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.45.0] - 2026-08-10
+
+The long read. Ingestion is the expensive part of a study-agent call and it is
+already paid: prompt 9,150 tokens + VOICE 4,030 + excerpt ~2,935 median is ~16k
+input against ~1,100 output tokens for everything a card shows. Generated
+analysis is ~7% on top. And the material is there — across the 51 cards backed
+by a full-text excerpt, the excerpts hold 2,183 distinct measure-anchored
+quantities and the cards use 943 of them (43%).
+
+### Added
+- **`interpretation`: a 350-600 word interpretive read, rendered ONLY on the
+  standalone `/study/<slug>/` page.** Not on the date or site pages, which stay
+  a 90-second scan. That page previously rendered the identical StudyCard,
+  duplicating the date page and earning nothing; it is now the depth
+  destination. Curator-editable and clearable via `npm run override`.
+
+  **Scoped to interpretation, not reportage**, and the boundary is deliberate
+  rather than stylistic: how the result sits against the trials that define
+  practice, which methodological choices should move confidence and in which
+  direction, which decision it changes and which it leaves untouched. NOT a
+  fuller retelling of the paper. The site is commentary on a copyrighted
+  literature, not a substitute for it — a comprehensive retelling would be both
+  the weakest thing to publish and the least useful to a subspecialist who can
+  read the paper. `test/publish-boundary-content.test.ts` is the mechanical
+  backstop; the prompt additionally forbids close paraphrase of consecutive
+  source sentences.
+
+  The parser abstains below a 600-char floor. Its failure mode is the inverse of
+  `significance`: a short interpretation means the model padded or abstained
+  badly, and half a section is worse than none.
+
+  Verified end-to-end on a real rebuild (2026-07-15, STAMPEDE): 567 words in 4
+  paragraphs, **all 15 distinct numbers verbatim in the source**, and **zero
+  12-word runs shared with the source text** (no quotation). Renders on exactly
+  1 of 122 study pages — the one date rebuilt — and on no date page.
+
+### Changed
+- **`vs leading data` and `Discussion` are now EXPECTED sections, not optional.**
+  Measured over the corpus they appeared on 54% and 45% of cards while `Design`
+  reached 93%: the descriptive sections got written and the interpretive ones
+  got skipped, which is backwards for the reader who cannot reconstruct them
+  from an abstract. NOTE: this rule is shipped but NOT yet verified — the single
+  date rebuilt already carried both sections before the change, so it is no
+  evidence either way. Coverage needs a multi-date rebuild to measure.
+
+### Notes
+- **A rebuild can change a study's slug, and therefore its permalink.** The
+  2026-07-15 rebuild renamed the study, moving it from
+  `/study/2026-07-15-stampede-abi-enza/` to
+  `…-stampede-abi-enza-nonmet/`. Pre-existing rebuild behavior, unrelated to
+  this release, but it means a backfill silently breaks previously shared
+  per-study links. No content artifact ships in this release for that reason.
+
 ## [0.44.0] - 2026-08-10
 
 At-rest card reconciliation: the two prose caps that actually bind now match

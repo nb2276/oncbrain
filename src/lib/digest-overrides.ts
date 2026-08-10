@@ -42,6 +42,10 @@ const EDITABLE_STUDY_KEYS = [
   'key_figure_caption',
   'key_figure_url',
   'consort',
+  // v0.45: the long-form interpretation. Editable for the same reason as the
+  // other prose surfaces — it is the longest thing the LLM writes, so a bad one
+  // must be fixable (or clearable with null) without re-running Phase 2.
+  'interpretation',
   // v0.10: cross-cutting tag fields. The Phase 2 LLM emits these but is
   // imperfect on hard semantic calls (palliative vs curative, phase 2 vs
   // phase 3). Curator overrides land here so a wrong emission can be fixed

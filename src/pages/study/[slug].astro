@@ -13,6 +13,7 @@ import {
   type StudyPageEntry,
 } from '../../lib/digest-data.ts';
 import { getDiseaseSite } from '../../lib/disease-sites.ts';
+import { linkifyCitations } from '../../lib/extract.ts';
 import { studyDataTags } from '../../lib/study-data-tags.ts';
 import {
   buildSiblingPreviews,
@@ -55,6 +56,15 @@ interface Props {
 
 const { entry, siblings, trialHistory, tagChips, dataTags } = Astro.props as Props;
 const meta = getDiseaseSite(entry.disease_site);
+// v0.45: the long-form interpretive read. This page is the ONLY surface that
+// renders it — the date and site pages stay a 90-second scan, and this page
+// previously rendered the identical card, duplicating them and earning nothing.
+// Split on blank lines because paragraph structure is the one piece of shape
+// `parseInterpretation` preserves.
+const interpretation =
+  typeof entry.study.interpretation === 'string' && entry.study.interpretation.trim()
+    ? entry.study.interpretation.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+    : null;
 const description =
   stripStudyNamePrefix(entry.study.tldr ?? '', entry.study.name) ||
   entry.study.tldr ||
@@ -88,6 +98,17 @@ const description =
     trialHistory={trialHistory}
     dataTags={dataTags}
   />
+
+  {
+    interpretation && (
+      <section class="interpretation" aria-labelledby="interpretation-heading">
+        <h2 id="interpretation-heading">The longer read</h2>
+        {interpretation.map((para) => (
+          <p set:html={linkifyCitations(para)} />
+        ))}
+      </section>
+    )
+  }
 </Base>
 
 <style>
@@ -103,4 +124,34 @@ const description =
   .crumb a + a::before { content: '· '; color: var(--border); margin-right: 0.25rem; }
   .crumb a:hover { color: var(--accent); }
   .crumb-emoji { margin-right: 0.3rem; }
+  /* The one long-form reading surface on the site. Constrained to a reading
+     measure even though the page is wide={true} — the card above wants the
+     width, running prose does not. All colors come from the Base.astro custom
+     properties so both themes are covered by construction. */
+  .interpretation {
+    max-width: 34rem;
+    margin: 2.5rem auto 0;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+  }
+  .interpretation h2 {
+    margin: 0 0 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .interpretation p {
+    margin: 0 0 1.05rem;
+    font-size: 1.02rem;
+    line-height: 1.68;
+    color: var(--fg);
+  }
+  .interpretation p:last-child { margin-bottom: 0; }
+  @media (max-width: 640px) {
+    .interpretation { margin-top: 2rem; padding-top: 1.5rem; }
+    .interpretation p { font-size: 1rem; line-height: 1.62; }
+  }
 </style>
