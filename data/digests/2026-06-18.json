@@ -1,56 +1,95 @@
 {
   "date": "2026-06-18",
   "conference": null,
-  "generated_at": 1784439506919,
+  "generated_at": 1786371021825,
   "digest": {
-    "top_line": "PRIMARY2: PSMA-PET biopsy triage non-inferior for csPCa (12% vs 16%, diff -3.7%), avoiding biopsy in 49% of equivocal/negative-MRI men.",
-    "tldr": "Prostate carried the day's signal. PRIMARY2 shows PSMA-PET can triage biopsy in biopsy-naive men with non-suspicious/equivocal MRI: non-inferior csPCa detection while sparing biopsy in nearly half. Open-label, single-country ([68Ga]PSMA-11 only), and long-term miss rate of avoided biopsies still maturing.",
+    "top_line": "PRIMARY2: PSMA-PET triage of PI-RADS 2-3 MRI cut csPCa detection 12% vs 16% (diff -3·7%, p=0·0093 NI) and avoided biopsy in 49%.",
+    "tldr": "Prostate carried the day, and it is a diagnostic-pathway result, not a treatment one: PSMA-PET as a pre-biopsy triage step in equivocal MRI held non-inferior csPCa detection while halving biopsies and cutting insignificant-cancer overdiagnosis 32% → 14%. Fewer, better-selected men reaching definitive RT is the downstream consequence; 6·0-month median f/u and differential missing biopsy data cap confidence.",
     "sites": [
       {
         "disease_site": "prostate",
-        "intro": "Diagnostic biopsy-triage question, not a therapy signal: where PSMA-PET slots into the pre-biopsy pathway.",
+        "intro": "First randomised test of PSMA-PET as a pre-biopsy triage tool, upstream of any RT decision but shaping who arrives at one.",
         "studies": [
           {
             "name": "PRIMARY2",
-            "tldr": "Non-inferior csPCa detection (12% vs 16%, diff -3.7%) with PSMA-PET biopsy triage, avoiding biopsy in 49% of equivocal/negative-MRI men.",
+            "tldr": "csPCa 12% vs 16% (diff -3·7%, 95% CI -8·9 to 1·5; p=0·0093 non-inferiority) with PSMA-PET triage; biopsy avoided in 49%.",
             "details": [
-              "📊 Co-1° csPCa (Gleason ≥3+4, ≥10% pattern 4): 12% (39/331) PSMA-PET vs 16% (51/329) systematic biopsy",
-              "📐 Risk difference -3.7% (95% CI -8.9 to 1.5), p=0.0093; non-inferiority margin 10% met",
-              "📊 Co-1° biopsy avoided in 49% (163/331) of PSMA-PET arm (95% CI 44-55), p<0.0001 vs 20% threshold",
+              "🔍 Phase 3 non-inferiority RCT, 1:1, N=660, seven Australian hospitals, unmasked, stratified by site",
+              "🔍 Biopsy-naive men, PI-RADS 2 or 3 MRI plus ≥1 clinical red flag (PSA density >0·1, family hx, abnormal DRE, BRCA, PSA >10, PSADT <36mo, PSA velocity >0·75/yr), PSA ≤20, ≤cT2",
+              "📊 Co-primary 1: csPCa (Gleason 3+4 with ≥10% pattern 4 or higher) 39/331 (12%) experimental vs 51/329 (16%) control; difference -3·7% (95% CI -8·9 to 1·5), p=0·0093 against a 10% margin",
+              "📊 Co-primary 2: PSMA-PET avoided biopsy in 163/331 (49%, 95% CI 44 to 55), p<0·0001 vs the 20% threshold",
+              "📊 Clinically insignificant cancer 105/329 (32%) control vs 46/331 (14%) experimental, difference -18% (97·5% CI -25 to -11), p<0·0001",
               {
-                "text": "📊 Post-biopsy adverse events (among those biopsied)",
+                "text": "📊 Alternate csPCa definitions and sensitivity analyses (ITT unless stated)",
                 "table": {
                   "columns": [
-                    "AE",
-                    "PSMA-PET",
-                    "Systematic biopsy"
+                    "Analysis",
+                    "Control",
+                    "Experimental",
+                    "Difference (CI)"
                   ],
                   "rows": [
                     [
-                      "Pain",
-                      "33 (21%)",
-                      "62 (21%)"
+                      "Gleason ≥3+4=7 (any pattern 4)",
+                      "79 (24%) of 329",
+                      "56 (17%) of 331",
+                      "-7·1% (95% CI -13·2 to -1·0)"
                     ],
                     [
-                      "Haematuria",
-                      "60 (38%)",
-                      "126 (43%)"
+                      "Gleason ≥4+3=7",
+                      "16 (5%)",
+                      "14 (4%)",
+                      "-0·6% (-3·8 to 2·5)"
                     ],
                     [
-                      "Haematospermia",
-                      "77 (48%)",
-                      "133 (45%)"
+                      "Covariate-adjusted",
+                      "13%",
+                      "8%",
+                      "-4·8% (95% CI -9·5 to -0·1)"
+                    ],
+                    [
+                      "Per-protocol",
+                      "47 (18%) of 255",
+                      "27 (11%) of 236",
+                      "-7·0% (95% CI -13·3 to -0·7)"
+                    ],
+                    [
+                      "Received-protocol-biopsy post-hoc",
+                      "51 (17%) of 294",
+                      "39 (12%) of 324",
+                      "-5·3% (95% CI -11·0 to 0·3)"
                     ]
                   ]
                 }
               },
-              "🔍 Phase 3 non-inferiority RCT, 7 Australian sites, N=660 biopsy-naive men, 1:1, unmasked",
-              "🔍 Eligible: non-suspicious/equivocal MRI (PI-RADS 2 in 51%, 3 in 49%) + high clinical risk, PSA ≤20, ≤cT2",
-              "🔍 PET-positive (PRIMARY score 3-5) → targeted transperineal biopsy; PET-negative (1-2) avoided biopsy",
-              "🔗 Extends the earlier PRIMARY diagnostic-accuracy study into a randomised biopsy-triage design",
-              "⚠️ Open-label; no masking of participants or investigators",
-              "⚠️ Follow-up ongoing: long-term safety of avoided biopsies (missed csPCa) not yet confirmed",
-              "⚠️ Single-country (Australia), one tracer ([68Ga]PSMA-11); health-economics + other radiopharmaceuticals unvalidated"
+              {
+                "text": "📊 csPCa by baseline MRI category",
+                "table": {
+                  "columns": [
+                    "MRI",
+                    "Control",
+                    "Experimental"
+                  ],
+                  "rows": [
+                    [
+                      "PI-RADS 2",
+                      "22 (12%) of 180",
+                      "15 (10%) of 155"
+                    ],
+                    [
+                      "PI-RADS 3",
+                      "29 (19%) of 149",
+                      "24 (14%) of 176"
+                    ]
+                  ]
+                }
+              },
+              "📐 PRIMARY score negative (1-2) in 166 (50%) of 329 scanned; positive (3-5) in 163 (50%); central vs local reader κ=0·81 (95% CI 0·75-0·87)",
+              "📐 Cores per biopsied participant 24·8 (SD 9·0) control vs 19·6 (12·1) experimental; no biopsy in 35 (11%) control vs 173 (52%) experimental",
+              "⚠️ Biopsy data missing differentially: 35 (11%) control vs 7 (2%) experimental did not get protocol biopsy, and the worst-case analysis crosses the 10% margin once four of those 35 control men truly harbour csPCa",
+              "⚠️ Median follow-up only 6·0 months (IQR 5·1-7·0); the 159 unbiopsied PSMA-negative men have PSA surveillance, not a histological reference standard",
+              "⚠️ No masking of participants or investigators, and control-arm PI-RADS 3 men could add MRI-targeted cores, so biopsy technique differed by arm beyond the imaging question",
+              "🔗 Only prior data were the non-randomised PRIMARY (2021) NPV study; this is the first randomised test of PSMA-PET as a pre-biopsy triage tool"
             ],
             "figures": [],
             "nct": "NCT05154162",
@@ -60,127 +99,103 @@
             "slug": "primary2",
             "verdict": {
               "soc_implication": "challenges-soc",
-              "rationale": "Phase 3 non-inferiority RCT met both co-primary endpoints; PSMA-PET biopsy triage diverges from biopsy-all standard. Open-label, single-country, follow-up ongoing.",
-              "audience": "Biopsy-naive men, high clinical risk, PI-RADS 2-3 MRI, PSA ≤20, ≤cT2"
+              "rationale": "Randomised phase 3, co-primary endpoints met, prespecified margin. Divergence from MRI-only pathway is real, though unmasked with 6-month follow-up and differential missing biopsies.",
+              "audience": "Biopsy-naive men, PI-RADS 2-3 MRI with a clinical red flag, PSA ≤20, ≤cT2"
             },
-            "significance": null,
-            "monday_clinic": null,
-            "primary_endpoint": null,
+            "significance": "The number that gates transferability is the PET threshold, not the HR: PRIMARY score 1-2 sent men to PSA surveillance, and SUVmax ran 3·9 (IQR 3·3-4·6) in negatives vs 5·2 (4·3-7·1) in positives, with κ=0·81 between central and local readers. For a radiation oncologist this changes who arrives in clinic, halving insignificant Gleason 6 referrals (32% to 14%) without losing csPCa.",
+            "monday_clinic": "In a biopsy-naive man with PI-RADS 2-3 MRI, PSA ≤20 and a clinical red flag, this supports PSMA-PET as a triage step before transperineal biopsy; it does not speak to men with PI-RADS 4-5 MRI, prior biopsy, or known prostate cancer.",
+            "primary_endpoint": {
+              "name": "Clinically significant prostate cancer (Gleason ≥3+4 with ≥10% pattern 4)",
+              "klass": "surrogate",
+              "stat_value": "12% vs 16%",
+              "stat_detail": "difference -3·7% (95% CI -8·9 to 1·5), p=0·0093, margin 10%"
+            },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Multicentre non-inferiority **phase 3 RCT**, **7 Australian hospitals**, N=**660** biopsy-naive men, randomised **1:1**, unmasked, stratified by site. Recruited Mar 2022 to Aug 2025; follow-up ongoing."
+                "body": "Investigator-initiated **phase 3, multicentre, non-inferiority RCT** at seven Australian hospitals, 1:1 randomisation via REDCap with block sizes of two or four, stratified by site. **No masking** of participants or investigators. Enrolment March 2, 2022 to Aug 24, 2025; data cutoff Dec 5, 2025; **median follow-up 6·0 months** (IQR 5·1-7·0)."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Clinical suspicion of significant prostate cancer with non-suspicious or equivocal MRI (**PI-RADS 2 in 51%, PI-RADS 3 in 49%**) plus high clinical risk (PSA density >0.1, abnormal DRE, family history, BRCA, PSA >10). **PSA ≤20 ng/mL, ≤cT2**; median age 61, median PSA 5.2."
+                "body": "808 assessed, 148 excluded (124 declined, 22 ineligible), **660 randomised**. Biopsy-naive men with **PI-RADS 2 or 3** MRI plus at least one red flag (PSA density >0·1 ng/mL/mL, abnormal DRE, strong family history, BRCA, PSA >10, PSA doubling time <36 months, or PSA velocity >0·75 ng/mL per year), PSA ≤20 ng/mL, clinical T2 or less. Median age 61 (IQR 56-66), median PSA 5·2 ng/mL, median PSA density 0·13; PI-RADS 2 in 335 (51%), PI-RADS 3 in 325 (49%). Ethnicity not collected."
+              },
+              {
+                "label": "Regimen",
+                "body": "Experimental arm: pelvic-only **[68Ga]Ga-PSMA-11 PET-CT within 28 days** of randomisation, 1·8-2·2 MBq/kg (median administered 164 MBq, IQR 149-182), oral or IV furosemide 20 mg recommended, acquisition 60-70 min post-injection (median uptake time 61 min), low-dose CT without contrast, two bed steps from the iliac crests down. Whole-body PET was recommended when intraprostatic SUVmax reached 12 or more, or for seminal vesicle, nodal or distant uptake, and was done in 35 (11%). Scored centrally and locally, masked to MRI, on the five-point PRIMARY score with a second central reviewer as tiebreaker."
               },
               {
                 "label": "Endpoints",
-                "body": "**Co-primary:** proportion with clinically significant cancer (Gleason ≥3+4, ≥10% pattern 4; **non-inferiority margin 10%**) and proportion of the PET arm avoiding biopsy by 6 months (**20% threshold**), by intention-to-treat."
+                "body": "**Co-primary:** proportion with clinically significant prostate cancer (Gleason 3+4 with ≥10% pattern 4 or higher on transperineal biopsy within 3 months), non-inferiority margin **10%**; and proportion in the PET arm avoiding biopsy within 6 months, against a **20% threshold**. Secondary: clinically insignificant cancer, alternate csPCa definitions, core number, interobserver variability, and biopsy complications by PRECISION and SHIM questionnaires."
               },
               {
                 "label": "Results",
-                "body": "Both co-primary endpoints met: csPCa detection **non-inferior** with PET triage, and biopsy avoided in nearly half the PET arm. Post-biopsy AE rates similar between arms."
+                "body": "Both co-primary endpoints met. **PRIMARY score positive (3-5) in 163 (50%)** of 329 scanned participants and negative (1-2) in 166 (50%), with score 1 in 30 (9%) and score 2 in 136 (41%); reader agreement κ=0·81 (95% CI 0·75-0·87). No cancer on biopsy fell from 138 (42%) of 329 to 73 (22%) of 331."
+              },
+              {
+                "label": "Safety",
+                "body": "Among biopsied participants, post-biopsy symptom rates were similar: **pain 33 (21%) experimental vs 62 (21%) control**, haematuria 60 (38%) vs 126 (43%), haematospermia 77 (48%) vs 133 (45%). Erectile dysfunction on SHIM was unchanged from baseline in both arms (50 [31%] of 160 vs 91 [31%] of 294 after biopsy). The safety gain is structural, not pharmacological: 173 (52%) of the experimental arm had no biopsy at all."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The only prior evidence was the **non-randomised PRIMARY (2021)** study, which reported improved negative predictive value for csPCa in an MRI-triaged population going to systematic transperineal biopsy. The authors' own search found **no randomised trials** of [68Ga]Ga-PSMA-11 PET-CT in the diagnostic setting, so this is the first randomised read on PSMA-PET as a pre-biopsy triage step rather than a staging tool."
               },
               {
                 "label": "Applies to",
-                "body": "Represents biopsy-naive men with high clinical risk but PI-RADS 2-3 MRI and PSA ≤20. Does not represent PI-RADS 4-5 MRI, prior biopsy, PSA >20, or ≥cT3 disease."
+                "body": "Represents biopsy-naive men with equivocal (PI-RADS 3) or non-suspicious (PI-RADS 2) MRI, at least one clinical red flag, PSA 20 ng/mL or less, and clinical T2 disease or less. Does not represent men with PI-RADS 4-5 MRI, prior biopsy or known prostate cancer, PSA above 20, or those already staged for definitive therapy."
               },
               {
                 "label": "Limitations",
-                "body": "Open-label with no masking; follow-up ongoing, so long-term safety of avoided biopsies is unconfirmed. Single-country, single tracer ([68Ga]PSMA-11); **health-economic and cross-radiopharmaceutical generalisability untested**."
+                "body": "Protocol biopsy data were **missing differentially**: 35 (11%) control vs 7 (2%) experimental. The prespecified worst-case scenario crosses the 10% margin once **four of the 35 unbiopsied control men** truly had csPCa, so non-inferiority rests on a thin assumption about missing histology. The 159 PSMA-negative men who skipped biopsy have PSA surveillance rather than a reference standard, and at 6 months only 51 (8%) have had prostatectomy and seven (1%) radiotherapy, so the durability of a negative PET is untested."
+              },
+              {
+                "label": "Discussion",
+                "body": "The trial reframes PSMA-PET from a staging tool into a **diagnostic triage** step, and its practical yield is as much about overdiagnosis as detection: insignificant cancer fell from 32% to 14% and mean cores per biopsied man from 24·8 to 19·6. Health-economic analysis and validation with other PSMA radiopharmaceuticals are named by the authors as the gaps before implementation."
               }
             ],
             "relevant_specialties": [
+              "radonc",
               "surgonc"
             ],
+            "significance_by_specialty": {
+              "radonc": "The referral stream changes upstream of RT: insignificant Gleason 6 diagnoses fell from 105 (32%) of 329 to 46 (14%) of 331 with csPCa detection preserved (12% vs 16%). Fewer low-grade men enter surveillance or treatment discussions, though at 6 months only seven (1%) participants had received radiotherapy, so downstream treatment patterns are unreported.",
+              "surgonc": "Half the men (163 of 331, 49%) avoided transperineal biopsy entirely, and among those biopsied mean cores fell from 24·8 (SD 9·0) to 19·6 (12·1) because sampling was PET-targeted rather than systematic. The urological decision this moves is whether a PI-RADS 2-3 man with a red flag goes to the biopsy list at all."
+            },
             "open_questions": [
-              "Safety of avoiding biopsy in PET-negative men over longer follow-up",
-              "Generalisability beyond Australia and to other PSMA radiopharmaceuticals",
-              "Health-economic impact of PSMA-PET-first diagnostic pathway"
+              "Durability of a negative PSMA-PET beyond 6 months of PSA surveillance",
+              "Generalisability to other PSMA radiopharmaceuticals beyond [68Ga]Ga-PSMA-11",
+              "Cost-effectiveness of PET triage versus systematic biopsy"
             ],
             "consort": {
-              "enrolled": 660,
-              "excluded": null,
+              "enrolled": 808,
+              "excluded": 148,
               "randomized": 660,
               "arms": [
                 {
-                  "label": "[68Ga]PSMA-11 PET-CT",
-                  "allocated": 331,
-                  "analyzed": 331
-                },
-                {
-                  "label": "Systematic transperineal biopsy",
+                  "label": "Systematic transperineal biopsy (control)",
                   "allocated": 329,
                   "analyzed": 329
+                },
+                {
+                  "label": "[68Ga]Ga-PSMA-11 PET-CT (experimental)",
+                  "allocated": 331,
+                  "analyzed": 331
                 }
               ]
             },
             "modality": null,
-            "intent": null,
+            "intent": "curative",
             "methodology": "phase-3-rct",
-            "related_trials": [
-              {
-                "nct": "NCT06330909",
-                "brief_title": "Image-guided Focal Dose Escalation- Primary pc Treated With Primary External Beam Hypofract.Stereotactic rt",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 374,
-                "primary_completion_date": "2025-08",
-                "brief_summary": "Technical advances in radiotherapy (RT) treatment planning and delivery have substantially changed RT concepts for primary prostate cancer (PCa) by (i) enabling a reduction of treatment time and by (ii) enabling a safe delivery of high RT doses. Several studies proposed a dose-response relationship for patients with primary prostate cancer (PCa) and especially in patients with high-risk features a dose escalation should lead to improved tumor control. In parallel to the improvements in RT…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Radiotherapy (RT) Arm A - IMRT/IGRT/SBRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Radiotherapy (RT) Arm B - IMRT/IGRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically confirmed adenocarcinoma of the prostate (histological confirmation can be based on tissue taken at any time, but a re-biopsy should be considered if the biopsy is more than 12 months old)\n2. Primary localized PCa (cN0 and cM0 in mpMRI and PSMA PET):\n\n   *…",
-                "answers_question": "Safety of avoiding biopsy in PET-negative men over longer follow-up",
-                "relevance_phrase": "candidate match"
-              },
-              {
-                "nct": "NCT04222634",
-                "brief_title": "Metastasis-directed Therapy in Castration-refractory Prostate Cancer",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 18,
-                "primary_completion_date": "2023-07",
-                "brief_summary": "The aim is to define the postponement of next line systemic treatment (NEST), by the use of metastasis-directed therapy in patients with oligoprogressive castration-refractory prostate cancer. This will be defined by the NEST-free survival.\n\nFurthermore the investigators will use 18F PSMA PET-CT as investigational imaging, to assess the predictive value and impact on treatment policy.",
-                "conditions": [
-                  "Castration-resistant Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Radiotherapy (SBRT) and/or surgery (metastasectomy)",
-                    "type": "OTHER"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically proven initial diagnosis of adenocarcinoma of the prostate\n* mCRPC setting, with testosterone level \\< 50 ng/dl or 1.7 nmol/l\n* Oligoprogressive disease, defined as a maximum of 3 extracranial metastases in any organ system OR local recurrence, diagnosed on…",
-                "answers_question": "Generalisability beyond Australia and to other PSMA radiopharmaceuticals",
-                "relevance_phrase": "candidate match"
-              }
-            ],
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "PSMA PET prostate biopsy",
-                "PSMA PET prostate diagnosis"
+                "PSMA PET biopsy naive prostate diagnosis",
+                "piflufolastat PSMA PET prostate diagnosis"
               ],
               "queries_failed": [],
-              "candidates_returned": 36,
-              "fetched_at": "2026-07-19T02:24:48.440Z",
-              "rerank_outcome": "fallback"
+              "candidates_returned": 12,
+              "fetched_at": "2026-08-10T14:10:01.153Z",
+              "rerank_outcome": "abstained"
             },
             "source_ids": [
               {

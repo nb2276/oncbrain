@@ -1,140 +1,188 @@
 {
   "date": "2026-07-14",
   "conference": null,
-  "generated_at": 1784424914683,
+  "generated_at": 1786335128410,
   "digest": {
-    "top_line": "TREASURE: consolidative thoracic RT on an atezo-maintenance backbone in ES-SCLC halted early for toxicity; mOS 6.7 vs 13.4mo (HR 1.55, ns), SAEs 61% vs 18%.",
-    "tldr": "Thoracic carried the day's only signal, and it's a negative one for RT: TREASURE shows consolidative TRT (30 Gy/10) on an atezolizumab-maintenance backbone adds no OS in unselected ES-SCLC while tripling SAEs, driven by lymphopenia-linked infections. The CREST-era benefit of thoracic RT doesn't transfer onto an IO backbone.",
+    "top_line": "Consolidative TRT + atezolizumab maintenance in ES-SCLC: mOS 6.7 vs 13.4 mo (HR 1.55), halted for fatal toxicity (19.4% vs 3.0%).",
+    "tldr": "One thoracic randomised phase 2 carries the day, and it is a stop sign: adding 30 Gy/10 fx consolidative TRT to atezolizumab maintenance in ES-SCLC halved mOS and quadrupled fatal AEs, with TRT (not atezolizumab) tracking AE risk. Echoes PACIFIC-2 and CheckMate-73L on RT plus checkpoint blockade. Halted at 68 of 104 pts, so efficacy is descriptive.",
     "sites": [
       {
         "disease_site": "thoracic",
-        "intro": "One study, and it argues against adding consolidative thoracic RT to IO maintenance in unselected ES-SCLC.",
+        "intro": "Consolidative thoracic RT layered onto checkpoint maintenance in ES-SCLC: toxicity, not efficacy, ended the trial.",
         "studies": [
           {
-            "name": "TREASURE",
-            "tldr": "mOS 6.7 vs 13.4mo (HR 1.55, ns) adding consolidative TRT to atezo maintenance; halted early for SAEs 61% vs 18%.",
+            "name": "Consolidative TRT + Atezolizumab Maintenance in ES-SCLC",
+            "tldr": "mOS 6.7 vs 13.4 mo (HR 1.55, P = .34) adding consolidative TRT to atezolizumab maintenance; halted for fatal toxicity.",
             "details": [
-              "🔍 Phase 2 open-label RCT (AIO-TRK-0320), 20 sites Germany/Austria; 68 randomized (34/arm) of planned 104, stopped early by SMC for fatal SAEs in arm A",
-              "🔍 ES-SCLC with ≥stable disease after induction carboplatin-etoposide-atezolizumab; consolidative TRT = 30 Gy in 10 fractions added to atezo maintenance",
+              "🔍 Randomised phase 2, 20 sites in Germany and Austria, N=68 (34 per arm), open-label",
+              "🔍 TRT 30 Gy in 10 fx to postinduction thoracic primary plus nodal metastases",
               {
-                "text": "📊 TRT + atezolizumab vs atezolizumab alone",
+                "text": "📊 Efficacy by arm (ITT)",
                 "table": {
                   "columns": [
                     "Endpoint",
-                    "+TRT (arm A)",
-                    "Atezo alone (arm B)",
-                    "Effect"
+                    "Atezo + TRT",
+                    "Atezo only",
+                    "Effect size"
                   ],
                   "rows": [
                     [
-                      "mOS",
+                      "Median OS",
                       "6.7 mo (5.1-9.0)",
                       "13.4 mo (10.7-17.5)",
-                      "HR 1.55 (0.90-2.69), P=.34"
+                      "HR 1.55 (0.90-2.69), P = .34"
                     ],
                     [
-                      "mPFS",
+                      "Median PFS",
                       "2.4 mo (1.3-3.9)",
                       "2.6 mo (1.2-3.9)",
-                      "HR 0.92 (0.54-1.55), P=.85"
+                      "HR 0.92 (0.54-1.55), P = .85"
                     ],
                     [
-                      "SAEs",
-                      "61.3%",
-                      "18.2%",
-                      "P<.001"
+                      "1-y OS",
+                      "30.3% (15.9-46.1)",
+                      "56.6% (37.9-71.6)",
+                      "not reported"
                     ],
                     [
-                      "Fatal AEs",
-                      "19.4%",
-                      "3.0%",
-                      "P=.04"
+                      "2-y OS",
+                      "24.2% (11.4-39.6)",
+                      "15.7% (5.7-30.2)",
+                      "not reported"
                     ]
                   ]
                 }
               },
-              "⚠️ Underpowered by early stop: design needed 92 pts / 66 events for 80% power (assumed HR 0.57); OS HR 1.55 is not a reliable efficacy estimate",
-              "⚠️ Mechanism: persistent lymphocyte depletion after TRT drove infection and respiratory SAEs; pts with fatal AEs in arm A had lower baseline DLCO",
-              "🔗 vs CREST (pre-immunotherapy): modest OS benefit from thoracic RT after chemo; TREASURE finds that benefit does not transfer onto an IO-maintenance backbone",
-              "⚠️ Unselected population, no lung-function gating; authors argue against routine use, RT only in carefully selected pts"
+              {
+                "text": "⚠️ Toxicity by arm (safety population)",
+                "table": {
+                  "columns": [
+                    "Event",
+                    "Atezo + TRT",
+                    "Atezo only",
+                    "P"
+                  ],
+                  "rows": [
+                    [
+                      "Any AE",
+                      "30 (96.8%)",
+                      "25 (75.8%)",
+                      ".02"
+                    ],
+                    [
+                      "SAE",
+                      "19 (61.3%)",
+                      "6 (18.2%)",
+                      "<.001"
+                    ],
+                    [
+                      "Fatal AE",
+                      "6 (19.4%)",
+                      "1 (3.0%)",
+                      ".04"
+                    ],
+                    [
+                      "Treatment-related AE",
+                      "71.0%",
+                      "30.3%",
+                      ".001"
+                    ],
+                    [
+                      "Treatment-related SAE",
+                      "29.0%",
+                      "6.1%",
+                      ".01"
+                    ]
+                  ]
+                }
+              },
+              "📊 ALC below normal by cycle 2 in 91.7% of arm A vs 13.6% (P < .001)",
+              "📐 TRT tracked with AE risk (HR 2.47, 1.15-5.32, P = .01), atezolizumab exposure did not (HR 0.57, P = .06)",
+              "🔗 Arm B mOS 13.4 mo and 1-y OS 56.6% exceed the IMpower133 atezolizumab arm (12.3 mo, 51.7%)",
+              "🔗 Echoes PACIFIC-2 and CheckMate-73L: more fatal toxicity when thoracic RT meets checkpoint blockade",
+              "⚠️ Halted at 68 of 104 planned pts; power drastically reduced, so the efficacy read is descriptive"
             ],
             "figures": [],
             "nct": "NCT04462276",
             "tweet_ids": [
               1000000050
             ],
-            "slug": "treasure-trt-sclc",
+            "slug": "nct04462276",
             "verdict": {
               "soc_implication": "challenges-soc",
-              "rationale": "Randomised harm signal (SAEs 61% vs 18%, fatal 19% vs 3%) argues against adding consolidative TRT to IO maintenance, contesting emerging RT enthusiasm; OS worse but underpowered by early stop.",
-              "audience": "ES-SCLC, ≥stable disease after chemo-IO induction; unselected"
+              "rationale": "Randomised, prespecified safety endpoints; SAE and fatal-AE differences significant despite the early halt. OS underpowered and descriptive, but the toxicity signal contests consolidative TRT in the IO era.",
+              "audience": "ES-SCLC, at least SD after carboplatin-etoposide-atezolizumab induction"
             },
-            "significance": "The harm, not the null OS, is the RT read: SAEs 61% vs 18%, fatal AEs 19% vs 3%, driven by post-TRT lymphocyte depletion and low baseline DLCO in the fatal cases. 30Gy/10fx consolidative TRT on atezo maintenance is net harmful in unselected ES-SCLC; any future use needs lung-function gating.",
-            "monday_clinic": "In unselected ES-SCLC with at least stable disease after chemo-IO induction, this evidence argues against routinely adding consolidative thoracic RT to atezolizumab maintenance; it does not address the good-lung-function subset the authors flag as possibly selectable.",
+            "significance": "Baseline DLCO SB separated the fatal cases (45.3 vs 56.7, P = .04), the only patient-level signal found, since no dosimetric parameter and no concurrent vs sequential timing tracked with SAEs. Dose was modest (30 Gy/10 fx to postinduction volumes), so the harm is not a dose-escalation artefact.",
+            "monday_clinic": "In unselected ES-SCLC with at least stable disease after carboplatin-etoposide-atezolizumab induction, this questions adding consolidative TRT during maintenance outside a trial; it does not address TRT integrated with induction chemoimmunotherapy or delivered without concurrent PD-L1 blockade.",
             "primary_endpoint": {
               "name": "Overall survival",
               "klass": "overall-survival",
               "stat_value": "6.7 vs 13.4 mo",
-              "stat_detail": "HR 1.55 (95% CI 0.90-2.69), P=.34; TRT arm worse, ns"
+              "stat_detail": "HR 1.55 (95% CI 0.90-2.69), P = .34; primary end point not met"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Phase 2 open-label RCT (AIO-TRK-0320), 1:1, 20 sites in Germany/Austria. Planned 104 pts; **halted early by the SMC after 68 randomized** (34/arm) for excess fatal SAEs in the TRT arm. Recruited 2020-2022, last follow-up Sept 2024, post-hoc survival update April 2026."
+                "body": "Multicenter open-label phase 2 RCT (TREASURE, AIO-TRK-0320), randomised 1:1 at 20 sites in Germany and Austria, accruing September 2020 to August 2022 with follow-up to September 2024. Powered for a **20% absolute gain in 12-month survival (72% vs 52%, HR 0.57)**, needing 66 events and 104 randomised pts."
               },
               {
                 "label": "Population & inclusion",
-                "body": "ES-SCLC with **at least stable disease after induction carboplatin-etoposide-atezolizumab**. Baseline well balanced between arms and between pts with vs without SAEs. **Unselected for lung function.**"
+                "body": "ES-SCLC with **at least stable disease** after induction carboplatin, etoposide and atezolizumab; 96 assessed, 68 randomised (71%). Stratified by brain metastases, induction response and prophylactic cranial irradiation. Baseline ECOG, comorbidity, pulmonary function and thoracic tumour burden were balanced between arms."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**Consolidative TRT 30 Gy in 10 fractions** added to atezolizumab maintenance (arm A) vs atezolizumab maintenance alone (arm B)."
+                "body": "**30 Gy in 10 fractions**, target volume delineated on the postinduction thoracic primary and nodal metastases. Doses and volumes sat within or below typical clinical ranges and below established OAR thresholds. Concurrent vs sequential delivery relative to atezolizumab was **not** associated with AE occurrence."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary: overall survival.** Secondary included PFS and safety."
+                "body": "**Primary: OS** from randomisation to death from any cause. Secondary: PFS plus frequency and severity of AEs and SAEs. Stratified log-rank and multivariable Cox in ITT, with per-protocol and fatal-AE-excluded sensitivity sets."
               },
               {
                 "label": "Results",
-                "body": "Primary OS **not met**: the TRT arm was numerically worse with no PFS difference and sharply higher serious and fatal toxicity (see table)."
+                "body": "A sensitivity analysis excluding fatal AEs gave consistent OS, so the arm A deficit is **not solely driven by those deaths**. A post hoc update after 19 further months of follow-up was unchanged."
               },
               {
                 "label": "Safety",
-                "body": "SAEs dominated by **infection and respiratory disorders**, linked to **radiation-induced lymphocyte depletion**; fatal-AE pts in arm A had **lower baseline DLCO**. No other risk factors identified."
-              },
-              {
-                "label": "vs leading data",
-                "body": "**CREST** (pre-immunotherapy) showed a modest OS benefit from thoracic RT after chemo; TREASURE tested that strategy on an **IMpower133-style IO-maintenance backbone** and found harm, not benefit."
+                "body": "SAEs were predominantly infections (urinary, pulmonary) and respiratory disorders, with dysphagia, esophagitis, fever and skin events also more frequent in arm A. The prespecified pneumonitis gate was passed (1 grade 3 or higher event among the first 23 arm A pts); the excess sat in **non-pneumonitis fatal SAEs**. Grade 3 or higher trAEs in arm A (**26%**) exceed benchmarks for atezolizumab alone and for consolidative TRT without immunotherapy."
               },
               {
                 "label": "Applies to",
-                "body": "Represents unselected ES-SCLC pts with at least stable disease after chemo-immunotherapy induction. Does not represent lung-function-selected pts or those with poor baseline DLCO, in whom TRT was not separately tested."
+                "body": "Represents unselected ES-SCLC pts with at least stable disease after chemoimmunotherapy induction, receiving consolidative TRT during atezolizumab maintenance. Does not represent limited-stage SCLC, TRT integrated with induction chemoimmunotherapy, or pts selected by baseline pulmonary function."
               },
               {
                 "label": "Limitations",
-                "body": "Open-label; **small N (68) and early termination** leave OS underpowered with a wide CI. Phase 2; efficacy conclusions provisional, though the safety signal is robust."
+                "body": "Causal attribution was contested: treating investigators judged 4 arm A deaths unrelated, the SMC reclassified 3 as possibly or probably related. Open-label, and no clinical or dosimetric parameter predicted SAEs, so no criterion emerges for selecting pts who might still receive TRT safely."
+              },
+              {
+                "label": "Discussion",
+                "body": "PFS was superimposable while OS diverged, pointing to treatment-related toxic effects rather than accelerated progression as the driver. OS curves crossed at roughly 24 months, but few pts remained at risk, so that late reversal carries little weight."
               }
             ],
             "relevant_specialties": [
               "radonc",
               "medonc"
             ],
+            "significance_by_specialty": {
+              "radonc": "Baseline DLCO SB separated the fatal cases (45.3 vs 56.7, P = .04), the only patient-level signal, while dose, volume and concurrent vs sequential timing did not track with SAEs. At 30 Gy in 10 fx to postinduction volumes, this harm is not a dose-escalation artefact.",
+              "medonc": "The maintenance-only arm reached mOS 13.4 mo and 1-y OS 56.6%, above the IMpower133 atezolizumab arm (12.3 mo, 51.7%), so the comparator was not underperforming. Lymphopenia persisted to cycle 4 (69.2% vs 8.3% below normal), which reframes infection surveillance in any irradiated pt on maintenance."
+            },
             "open_questions": [
-              "Which lung-function-selected ES-SCLC pts might tolerate consolidative TRT on IO maintenance",
-              "Whether lower-dose or delayed TRT lessens lymphocyte depletion and infection risk"
+              "Can baseline DLCO or lymphocyte-sparing planning select pts who tolerate consolidative TRT?",
+              "Does deferring TRT until after maintenance avoid the lymphodepletion-infection cascade?"
             ],
             "consort": {
-              "enrolled": null,
+              "enrolled": 96,
               "excluded": null,
               "randomized": 68,
               "arms": [
                 {
-                  "label": "TRT + atezolizumab",
+                  "label": "Atezolizumab + TRT",
                   "allocated": 34,
                   "analyzed": null
                 },
                 {
-                  "label": "Atezolizumab alone",
+                  "label": "Atezolizumab only",
                   "allocated": 34,
                   "analyzed": null
                 }
@@ -144,43 +192,16 @@
             "intent": "palliative",
             "methodology": "phase-2-trial",
             "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT06672133",
-                "brief_title": "Adebrelimab Combined with Chemotherapy and Thoracic Radiotherapy for First-line Treatment of ES-SCLC",
-                "overall_status": "NOT_YET_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 524,
-                "primary_completion_date": "2029-06",
-                "brief_summary": "This phase III trial compares the effect of adding radiation therapy to the usual maintenance therapy with adebrelimab versus adebrelimab alone in patients who have already received debrelimab plus chemotherapy for the treatment of extensive stage small cell lung cancer.",
-                "conditions": [
-                  "Extensive Stage Lung Small Cell Carcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "Adebrelimab",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Radiation Therapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Aged 18-75 years, male or female;\n2. Histologically or cytologically confirmed extensive stage small cell lung cancer (according to the Veterans Lung Administration Lung Study Group, VALG stage);\n3. ECOG performance status score 0 \\~ 1;\n4. No prior line of systemic therapy…",
-                "answers_question": "Which lung-function-selected ES-SCLC pts might tolerate consolidative TRT on IO maintenance",
-                "relevance_phrase": "phase 3 consolidative TRT on adebrelimab IO maintenance"
-              }
-            ],
+            "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "thoracic radiotherapy small cell"
+                "consolidative radiotherapy small cell lung",
+                "radiotherapy immunotherapy sequencing lung"
               ],
               "queries_failed": [],
-              "candidates_returned": 20,
-              "fetched_at": "2026-07-19T01:33:59.942Z",
-              "rerank_outcome": "picked_N"
+              "candidates_returned": 33,
+              "fetched_at": "2026-08-10T04:11:55.012Z",
+              "rerank_outcome": "abstained"
             },
             "source_ids": [
               {

@@ -1,49 +1,118 @@
 {
   "date": "2026-05-27",
   "conference": null,
-  "generated_at": 1784476820704,
+  "generated_at": 1786371119449,
   "digest": {
-    "top_line": "SENOMAC: 5-yr RFS 89.7% vs 88.7% (HR 0.89) — completion ALND omittable for 1-2 macromet sentinel nodes, but nodal RT reached ~90% of both arms.",
-    "tldr": "Breast carried the day. SENOMAC extends Z0011/AMAROS to a macromet-only cohort including mastectomy, T3, and extracapsular extension, confirming completion ALND adds nothing at 46.8-mo f/u. RT caveat drives the read: ~90% of both arms got nodal irradiation, so this validates dropping ALND WITH regional nodal RT, not omitting axillary treatment.",
+    "top_line": "SENOMAC: 5-yr RFS 89.7% vs 88.7%, HR 0.89 (0.66-1.19) — completion ALND omittable after 1-2 SN macromets, with nodal RT in ~89%.",
+    "tldr": "Breast carried the day's only data. SENOMAC extends axillary de-escalation past Z0011/AMAROS into T3, mastectomy, and extracapsular extension, but the omission is nodal-RT-covered omission (~89% both arms) with no protocol-defined target volume or dose, so the RT field is inherited from national guidelines rather than tested. Primary endpoint is OS and is not reported.",
     "sites": [
       {
         "disease_site": "breast",
-        "intro": "De-escalating axillary surgery in a setting where the nodal basin is still being irradiated.",
+        "intro": "Axillary de-escalation moves into the populations prior trials excluded, on a nodal RT backbone the protocol never specified.",
         "studies": [
           {
             "name": "SENOMAC",
-            "tldr": "5-yr RFS 89.7% vs 88.7%, HR 0.89 (0.66-1.19): omitting completion ALND noninferior, with nodal RT given in ~90% of both arms.",
+            "tldr": "5-yr RFS 89.7% vs 88.7%, HR 0.89 (0.66-1.19), noninferior omitting completion ALND after 1-2 SN macromets.",
             "details": [
-              "📊 1° EP is overall survival (not yet reported); this presents the prespecified secondary recurrence-free survival",
+              "🔍 Phase 3 noninferiority, 67 hospitals in 5 countries, N=2766 enrolled 2015-2021; per-protocol 2540",
+              "🔍 Eligibility widened vs prior trials: cN0 T1-T3, mastectomy allowed, extracapsular extension allowed, 1-2 SN macromets (>2mm)",
+              "📐 Noninferiority margin: upper CI bound for recurrence-or-death HR had to be <1.44; observed 1.19, P<0.001",
+              "📊 Nodal RT in ~89% of both arms (1192/1326 SLNB-only, 1058/1197 dissection); whole-breast RT mandatory after BCS",
+              "⚠️ Protocol stipulated NO specific nodal target volumes or doses, so this is 'nodal RT as per national guidelines', not a defined field",
+              "📐 RT quality control: 1154 plans reviewed; eCRF matched plan in 99.3% for breast/chest wall, 96.6% for nodal target volumes",
+              "📊 pN upstaging in the dissection arm: pN2 in 9.9% and pN3 in 3.0%, vs pN2 0.5% and pN3 0% in the SLNB-only arm",
+              "📊 Non-SN metastases found in 403/1167 (34.5%) dissected pts; 31.3% with one SN macromet, 51.3% with two",
+              "🔗 vs Z0011 (BCS + whole-breast tangents only) and AMAROS (axillary RT replaced ALND): SENOMAC excluded micromets, allowed T3 and ECE, and enrolled >1/3 mastectomy pts",
+              "⚠️ Median f/u 46.8 mo (range 1.5-94.5) in a mostly luminal population that recurs late; 5-yr read is early",
+              "⚠️ Primary endpoint is OS (switched from BCSS in 2020) and is NOT reported here; this paper reports the secondary RFS endpoint",
               {
-                "text": "📊 Recurrence-free survival by arm",
+                "text": "📊 Recurrence + death by type (per-protocol, SLNB-only vs ALND)",
                 "table": {
                   "columns": [
-                    "Endpoint",
-                    "SNB only",
-                    "cALND"
+                    "Event",
+                    "SLNB only (N=1335)",
+                    "ALND (N=1205)"
                   ],
                   "rows": [
                     [
-                      "5-yr RFS",
-                      "89.7% (87.5-91.9)",
-                      "88.7% (86.3-91.1)"
+                      "Local recurrence",
+                      "12 (0.9)",
+                      "10 (0.8)"
                     ],
                     [
-                      "HR recurrence/death",
-                      "0.89 (0.66-1.19)",
-                      "ref"
+                      "Regional recurrence",
+                      "6 (0.4)",
+                      "6 (0.5)"
+                    ],
+                    [
+                      "Distant recurrence",
+                      "44 (3.3)",
+                      "53 (4.4)"
+                    ],
+                    [
+                      "Death",
+                      "62 (4.6)",
+                      "69 (5.7)"
+                    ],
+                    [
+                      "Recurrence or death as first event",
+                      "95 (7.1)",
+                      "96 (8.0)"
                     ]
                   ]
                 }
               },
-              "🔍 Phase 3 noninferiority, 1:1, N=2766 enrolled (2540 per-protocol), 67 sites in 5 countries, median f/u 46.8 mo",
-              "🔍 cN0 T1-T3 with 1-2 sentinel-node macrometastases (>2mm); extends beyond Z0011 to mastectomy, T3, extracapsular extension, and men",
-              "🔍 Nodal RT (incl. nodal target volumes) reached 89.9% (SNB-only) and 88.4% (cALND): axillary basin irradiated in ~90% of both arms",
-              "🔗 vs Z0011 and AMAROS: both showed no ALND benefit at 10 yr; SENOMAC confirms in a larger macromet-only cohort with new subgroups",
-              "⚠️ RT confounds attribution: this validates dropping ALND WITH regional nodal irradiation, not omitting axillary treatment entirely",
-              "⚠️ Secondary RFS at 46.8-mo median f/u is short for ER+ biology",
-              "⚠️ Noninferiority margin (HR 1.44) is generous"
+              {
+                "text": "📊 Subgroup HRs for recurrence or death (SLNB only vs ALND), all crossing 1.00 except ER+/HER2+",
+                "table": {
+                  "columns": [
+                    "Subgroup",
+                    "Events SLNB only",
+                    "Events ALND",
+                    "HR (95% CI)"
+                  ],
+                  "rows": [
+                    [
+                      "T3",
+                      "5/73",
+                      "10/74",
+                      "0.47 (0.16-1.39)"
+                    ],
+                    [
+                      "Mastectomy",
+                      "41/490",
+                      "45/430",
+                      "0.79 (0.52-1.21)"
+                    ],
+                    [
+                      "Breast-conserving",
+                      "48/845",
+                      "46/775",
+                      "0.98 (0.65-1.47)"
+                    ],
+                    [
+                      "Extracapsular extension",
+                      "34/461",
+                      "31/409",
+                      "0.94 (0.58-1.54)"
+                    ],
+                    [
+                      "2 macrometastases",
+                      "13/192",
+                      "19/197",
+                      "0.79 (0.39-1.59)"
+                    ],
+                    [
+                      "ER-positive, HER2-positive",
+                      "3/84",
+                      "10/88",
+                      "0.26 (0.07-0.96)"
+                    ]
+                  ]
+                }
+              },
+              "⚠️ The ER+/HER2+ subgroup 'favoring' omission (HR 0.26, 13 events total) is a fragile subgroup finding, not a signal to act on",
+              "⚠️ Only 10 male pts enrolled over 7 yrs, so the stated aim of covering men was not met and no sex subgroup was possible"
             ],
             "figures": [],
             "nct": "NCT02240472",
@@ -53,184 +122,92 @@
             "slug": "senomac",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Randomised phase 3 noninferiority; prespecified secondary RFS met, extends Z0011/AMAROS de-escalation to mastectomy/T3/ECE/men. Primary OS not yet reported.",
+              "rationale": "Prespecified secondary endpoint of a phase 3 noninferiority trial, margin cleared with wide distance; extends Z0011/AMAROS to mastectomy, T3 and ECE rather than contradicting them.",
               "audience": "cN0 T1-T3 breast cancer, 1-2 sentinel-node macrometastases"
             },
-            "significance": "Nodal RT with nodal target volumes reached ~90% in both arms (89.9% vs 88.4%), so SENOMAC validates dropping completion ALND within regional nodal irradiation, not omitting axillary treatment. For the RT reader it positions nodal RT as the axillary treatment when SNB shows 1-2 macromets; it does not test omitting both surgery and RT.",
-            "monday_clinic": "In cN0 breast cancer with 1-2 sentinel-node macrometastases who receive regional nodal RT, this supports omitting completion ALND, including mastectomy, T3, extracapsular extension, and men; it does not extend to patients treated without nodal radiotherapy.",
-            "primary_endpoint": {
-              "name": "Recurrence-free survival (secondary)",
-              "klass": "surrogate",
-              "stat_value": "HR 0.89",
-              "stat_detail": "95% CI 0.66-1.19, NI met (margin 1.44); primary OS not yet reported"
-            },
+            "significance": "Nodal RT is the hidden co-intervention: 89.9% and 88.4% of the two arms got regional nodal irradiation, so this is axillary de-escalation ON TOP OF nodal RT, closer to AMAROS/OTOASOR than to Z0011. Target volumes and doses to specific nodal levels are not reported (detailed RT review ongoing), so the field that made omission safe is undefined.",
+            "monday_clinic": "In cN0 T1-T3 disease with one or two sentinel-node macrometastases who will receive regional nodal irradiation, including after mastectomy or with extracapsular extension, this supports omitting completion axillary dissection; it does not speak to pts who will get no nodal RT, or to 3+ macrometastases.",
+            "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Phase 3 **noninferiority** RCT, 1:1, **N=2766** enrolled (2540 per-protocol), 67 sites across 5 countries; median follow-up **46.8 mo**. Reports the prespecified **secondary RFS**; primary **OS not yet reported**."
+                "body": "Prospective randomised **phase 3 noninferiority** trial, 1:1, 67 hospitals in Sweden, Denmark, Germany, Greece and Italy. **Primary endpoint is overall survival** (changed from breast cancer-specific survival in 2020); this report covers the prespecified secondary endpoint of recurrence-free survival. Median follow-up **46.8 months** (range 1.5 to 94.5)."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**cN0 T1-T3** breast cancer with **1-2 sentinel-node macrometastases** (>2mm). Extends eligibility beyond Z0011 to **mastectomy, T3, extracapsular extension, and men**."
+                "body": "cN0 **T1 to T3** breast cancer with **one or two sentinel-node macrometastases** (>2 mm); preoperative axillary ultrasound mandatory. Deliberately included groups prior trials excluded: **mastectomy** (36.7% and 35.7%), **extracapsular extension** (about one third), **T3** (5.5% and 6.1%). Median age 61; 87.3% and 85.8% ER-positive HER2-negative."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Nodal RT including nodal target volumes reached **89.9%** (SNB-only) and **88.4%** (cALND). ALND omission was therefore tested **within regional nodal irradiation**, not as omission of axillary treatment."
-              },
-              {
-                "label": "Endpoints",
-                "body": "**Primary: overall survival** (not reported in source). This analysis: prespecified **secondary recurrence-free survival**, per-protocol and modified ITT."
+                "body": "**No protocol-specified target volumes or doses**; RT followed national guidelines, which in Sweden and Denmark means routine nodal irradiation. Nodal RT reached **1192/1326 (89.9%)** in the SLNB-only group and **1058/1197 (88.4%)** in the dissection group. Whole-breast RT after BCS was mandatory. Source-data verification of 1154 plans showed eCRF-to-plan concordance of 99.3% for breast/chest wall and 96.6% for nodal volumes."
               },
               {
                 "label": "Results",
-                "body": "**Noninferiority met**: the upper confidence bound stayed below the prespecified **1.44** margin (P<0.001) across **191** recurrence-or-death events."
+                "body": "5-yr recurrence-free survival **89.7% (87.5-91.9)** vs **88.7% (86.3-91.1)**. Regional recurrence was rare and balanced (6 vs 6). 5-yr OS 92.9% vs 92.0%; 5-yr breast cancer-specific survival 97.1% vs 96.6%. Dissection removed a mean of 15 nodes vs 2 with SLNB alone."
               },
               {
                 "label": "vs leading data",
-                "body": "Consistent with **Z0011** (breast-conserving + whole-breast RT) and **AMAROS** (axillary RT replacing ALND), both null for ALND benefit at 10 yr. SENOMAC adds the **macromet-only, mastectomy/T3/ECE/male** groups in a larger cohort."
+                "body": "Z0011 enrolled 1999-2004 (BCS only, ~40% micromets, protocol-prohibited nodal RT in 19%) and AMAROS 2001-2010 (only 248 mastectomy pts, ECE not reported). SENOMAC restricts to macromets and adds mastectomy, T3 and ECE. Because nodal irradiation was near-universal, the authors place these results alongside **AMAROS and OTOASOR**, not POSNOC, SINODAR-ONE or Z0011."
               },
               {
                 "label": "Applies to",
-                "body": "Represents cN0 T1-T3 breast cancer with 1-2 sentinel-node macrometastases receiving guideline adjuvant therapy and nodal RT. Does not represent clinically node-positive disease, 3+ positive nodes, or patients not receiving nodal radiotherapy."
+                "body": "Represents cN0 T1-T3 pts with one or two sentinel-node macrometastases receiving guideline adjuvant systemic therapy and nodal RT, including after mastectomy and with extracapsular extension. Does not represent pts managed without nodal irradiation, those with 3 or more macrometastases, micrometastasis-only disease, or men (only 10 enrolled)."
               },
               {
                 "label": "Limitations",
-                "body": "This is the **secondary RFS** endpoint, not the OS primary, at a **46.8-mo** median follow-up short for ER+ biology. The **HR 1.44** noninferiority margin is generous, and ~90% nodal RT confounds attribution to surgical omission alone."
+                "body": "The **overall survival primary endpoint is not reported here**, and a mostly luminal population recurring late makes a 46.8-month read early. Detailed nodal target-volume and dose data are pending, so the RT that underwrote omission cannot yet be specified. Withdrawal was higher in the dissection arm, reflecting pts' wish to avoid the operation."
+              },
+              {
+                "label": "Discussion",
+                "body": "The dissection arm's node counts show what omission gives up in staging, not outcome: **pN2 in 9.9% and pN3 in 3.0%** of dissected pts vs 0.5% and 0% with SLNB only, and non-sentinel metastases in **34.5%** overall (51.3% when two sentinel nodes were involved). Occult nodal disease is common and, with systemic therapy plus nodal RT, apparently does not need surgical clearance."
               }
             ],
             "relevant_specialties": [
               "radonc",
+              "medonc",
               "surgonc"
             ],
+            "significance_by_specialty": {
+              "radonc": "Nodal irradiation was the co-intervention, not a footnote: 89.9% and 88.4% of the arms received it, so omission was tested on top of regional RT and reads with AMAROS and OTOASOR rather than Z0011. Target volumes and doses to specific nodal levels are not reported, with the detailed RT review still ongoing, so the field that made this safe is unspecified.",
+              "medonc": "Systemic therapy was near-universal (about 65% chemotherapy, 93% endocrine, 9% HER2-directed) and assigned by national guidelines, so omission was tested with a modern backbone in place. Losing completion dissection removes the pN2/pN3 information (9.9% and 3.0% of dissected pts) that some regimen decisions have historically leaned on.",
+              "surgonc": "Extends axillary omission past the Z0011 fence: mastectomy (36.7%), T3 (5.5%) and extracapsular extension (about a third) all sat inside eligibility, and none of those subgroup HRs excluded 1.00. Completion dissection found non-sentinel disease in 34.5% and upstaged 9.9% to pN2, so the tradeoff is staging information, not recurrence."
+            },
             "open_questions": [
-              "Overall survival (primary endpoint) result still pending",
-              "Can nodal RT be omitted alongside ALND in this population?",
-              "Durability beyond 5 years in ER+ disease"
+              "Which nodal target volumes and doses underwrote safe omission",
+              "Overall survival, the primary endpoint, at mature follow-up",
+              "Is omission safe without regional nodal irradiation"
             ],
-            "consort": null,
+            "consort": {
+              "enrolled": 2766,
+              "excluded": null,
+              "randomized": 2540,
+              "arms": [
+                {
+                  "label": "Sentinel-node biopsy only",
+                  "allocated": 1335,
+                  "analyzed": null
+                },
+                {
+                  "label": "Completion axillary-lymph-node dissection",
+                  "allocated": 1205,
+                  "analyzed": null
+                }
+              ]
+            },
             "modality": "surgery",
             "intent": "curative",
             "methodology": "phase-3-rct",
             "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT04517266",
-                "brief_title": "Evaluating Omitting of Internal Mammary Irradiation Among Early Stage Intermediate Risk (N1) Breast Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 214,
-                "primary_completion_date": "2025-10",
-                "brief_summary": "The effect of internal mammary irradiation (IMI) added to whole-breast or thoracic-wall irradiation plus supraclavicular (SVC) irradiation after surgery on survival among women with early-stage intermediate risk (N1) breast cancer remains debated. The present study aimed to identified patient could be omitted from internal mammary lymph node irradiation by using a clinical-genomic model.",
-                "conditions": [
-                  "Breast Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "omit of IMI group",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "IMI group",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* • Histologically confirmed invasive breast cancer\n\n  * Underwent radical surgery with either mastectomy or breast conserving surgery and axillary lymph node dissection (ALND)\n  * The number of positive lymph node should be 1-3 (N1).\n  * Clinical high risk breast cancer (≥2…",
-                "answers_question": "Can nodal RT be omitted alongside ALND in this population?",
-                "relevance_phrase": "randomized omit internal mammary RT in N1"
-              },
-              {
-                "nct": "NCT04320979",
-                "brief_title": "Postmastecomy Internal Mammary Nodal Irradiation for High-risk Breast Cancer Patients",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 2400,
-                "primary_completion_date": "2025-11",
-                "brief_summary": "The purpose of this study is to evaluate the impact of internal mammary nodal irradiation on disease-free survival in high-risk breast cancer patients treated with mastectomy or breast-conserving surgery.",
-                "conditions": [
-                  "Breast Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "internal mammary nodal irradiation",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "no internal mammary nodal irradiation",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Eastern Cooperative Oncology Group Performance Status Scale 0-2\n* Histologically confirmed invasive breast cancer\n* Underwent total mastectomy/breast-conserving surgery and axillary dissection(10 or more axillary lymph nodes detected) and negative margins\n* Patients who had…",
-                "answers_question": "Can nodal RT be omitted alongside ALND in this population?",
-                "relevance_phrase": "phase 3 IMN RT vs no IMN RT, DFS endpoint"
-              },
-              {
-                "nct": "NCT05634889",
-                "brief_title": "The T-REX Trial: Tailored Regional External Beam Radiotherapy in Clinically Node-negative Breast Cancer Patients With 1-2 Sentinel Node Macrometastases.",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 1350,
-                "primary_completion_date": "2028-12",
-                "brief_summary": "T-REX is a randomized multicenter, non-inferiority trial.\n\nAim: To evaluate whether regional radiotherapy may safely be omitted in clinically node negative breast cancer patients with one or two sentinel node macrometastases and an estrogen receptor positive, HER2-negative tumor. Leading to an improved quality of life and reduced side effects, without worsening recurrence free survival at five years.\n\nIntervention: Patients will be randomized to locoregional radiotherapy towards the…",
-                "conditions": [
-                  "Breast Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "De-escalation",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Primary unifocal or multifocal invasive breast cancer T1-T2.\n2. Clinically N0.\n3. Macrometastasis (\\>2mm) in 1-2 lymph nodes at sentinel node biopsy.\n4. Oral and written consent.\n5. Age ≥ 18 years.\n6. All resection margins are tumor free (no tumor on ink).\n7. Primary tumor…",
-                "answers_question": "Can nodal RT be omitted alongside ALND in this population?",
-                "relevance_phrase": "omit regional RT, 1-2 SN macromets, ER+/HER2-"
-              },
-              {
-                "nct": "NCT04069884",
-                "brief_title": "RecurIndex Guided Avoidance of Regional Nodal Irradiation for Node Positive Breast Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 540,
-                "primary_completion_date": "2029-08",
-                "brief_summary": "The purpose of this study is to validate whether clinically low-risk, and RecurIndex high-risk N1 patients receiving regional lymph node radiotherapy can further improve clinical outcomes.",
-                "conditions": [
-                  "Breast Cancer",
-                  "Radiation"
-                ],
-                "interventions": [
-                  {
-                    "name": "regional nodal irradiation",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "WBI",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "chestwall XRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years old, ≤ 70 years old.\n* Eastern Cooperative Oncology Group (ECOG) ≤ 2.\n* Postoperative pathology is clearly diagnosed as invasive breast cancer.\n* Meet the clinical definition of low risk: ①Axillary lymph node micrometastasis (N1mic) or ②N1 patients who meet the…",
-                "answers_question": "Can nodal RT be omitted alongside ALND in this population?",
-                "relevance_phrase": "RecurIndex-guided RNI avoidance in N1"
-              }
-            ],
+            "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "regional nodal irradiation breast"
+                "regional nodal irradiation sentinel node breast",
+                "axillary dissection omission sentinel macrometastasis"
               ],
               "queries_failed": [],
-              "candidates_returned": 20,
-              "fetched_at": "2026-07-19T15:58:59.707Z",
-              "rerank_outcome": "picked_N"
+              "candidates_returned": 13,
+              "fetched_at": "2026-08-10T14:11:42.070Z",
+              "rerank_outcome": "abstained"
             },
             "source_ids": [
               {
