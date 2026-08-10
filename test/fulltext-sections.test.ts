@@ -227,6 +227,32 @@ describe('classifyHeading', () => {
     expect(classifyHeading('USA.')).toBeNull();
     expect(classifyHeading('NCI')).toBeNull();
   });
+
+  // A drop-kind keyword ("funding", "disclosure", "summary", "author") used to
+  // match on FIRST WORD alone, so any prose line opening with one was classified
+  // as a section to delete — and everything under it to the next heading went
+  // with it. EANO's consensus lost 2,611 chars of votes that way. The fix asks a
+  // different question: does this line have the SHAPE of a label?
+  it('drops a real label heading but not prose that merely opens with its keyword', () => {
+    // real labels — short, or punctuated, or title-case
+    // one 'disclosures' kind covers COI, funding, acknowledgments and availability
+    expect(classifyHeading('Funding')?.kind).toBe('disclosures');
+    expect(classifyHeading('Conflicts of Interest:')?.kind).toBe('disclosures');
+    expect(classifyHeading('Data Availability')?.kind).toBe('disclosures');
+    // the ALL-CAPS multi-word form a real journal actually prints
+    expect(classifyHeading("AUTHORS' DISCLOSURES OF POTENTIAL CONFLICTS")?.kind).toBe('disclosures');
+
+    // prose openings that must NOT delete the section they head
+    expect(classifyHeading('Summary of cohort and radiation planning parameters')).toBeNull();
+    expect(classifyHeading('Funding Cancer Research UK grant C1234 supported this work')).toBeNull();
+    expect(classifyHeading('Author response to reviewer comments on the primary endpoint')).toBeNull();
+  });
+
+  it('never treats a contact line or a URL as a heading', () => {
+    // "reprints@oup.com" sat under a Reprints label and swallowed the rest
+    expect(classifyHeading('For permissions contact reprints@oup.com')).toBeNull();
+    expect(classifyHeading('Data available at https://doi.org/10.1200/JCO.24.00001')).toBeNull();
+  });
 });
 
 describe('segmentDocument', () => {

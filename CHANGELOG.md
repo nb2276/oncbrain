@@ -2,6 +2,53 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.43.2] - 2026-08-10
+
+Three defects found by adversarial + codex review of the v0.41-v0.43 excerpting
+work, plus the correction of a measurement claim that work rested on.
+
+### Fixed
+- **A drop-kind heading matched on its FIRST WORD, so prose that opened with one
+  deleted the section beneath it.** `classifyHeading` treated any line starting
+  with a keyword like "funding", "summary", "disclosure" or "author" as a
+  section to discard — and everything under it, to the next heading, went too.
+  A real consensus paper (EANO) lost 2,611 characters of its recommendation
+  votes to a line reading `Summary of cohort and radiation planning`. The fix
+  asks a different question: does the line have the SHAPE of a label
+  (short, or punctuated, or title-case) rather than merely start like one, and
+  an email address or URL is never a heading. A flat word-count cap was tried
+  first and failed both ways — it rejected the real
+  `AUTHORS' DISCLOSURES OF POTENTIAL CONFLICTS` heading and still let the
+  prose through. Across the 54-paper corpus this recovers **11,093 characters**
+  with the table count unchanged at 69.
+- **`verdict.audience` was truncated at 80 characters while its own contract
+  said 120.** 15 of 104 published cards shipped an eligibility gate cut
+  mid-phrase — the one line that tells a reader whether a study applies to
+  their patient. The cap now matches the documented contract.
+
+### Changed
+- **Excerpt budget 50,000 → 40,000 characters.** Measurement showed 40k → 50k
+  buys ZERO additional tables and zero additional Results characters, and the
+  median stored excerpt is 11,740 chars (only 8 of 54 papers reach 49k). 40k
+  keeps the one thing the step above 24k does buy — truncated table blocks drop
+  from 6 to 1 — at ~15% less prompt.
+
+### Documentation
+- **`npm run quality-eval` must not be used to A/B two build configurations.**
+  Six runs over a byte-identical artifact scored 6.4/6.6/6.8/6.9/6.9/6.9, so
+  run-to-run noise exceeds every config difference measured during v0.41-v0.43;
+  the personas do not correlate with each other (r ~ +0.13) and the judge reads
+  the digest JSON, not the rendered card. **Several quality claims recorded in
+  the v0.41.0 and v0.42.0 notes rest on single runs and are hereby marked
+  UNMEASURED** — including the 6.7 → 7.4 result that motivated the 50k budget.
+  The excerpting work's DETERMINISTIC gains are unaffected and stand: tables,
+  grounded-number counts, and figure/table reach are exact counts.
+- **TODOS: the richer excerpt is landing behind the fold.** Grounded numbers per
+  card roughly doubled (594 → 1226) while the share visible AT REST fell
+  20.6% → 12.9%, because at-rest surfaces are hard-capped by prompt design.
+  Converting richer source into a better 90-second read is a card at-rest budget
+  decision, not another prompt or validator change.
+
 ## [0.43.1] - 2026-08-10
 
 ### Fixed

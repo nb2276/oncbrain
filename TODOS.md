@@ -88,6 +88,30 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 - **Review consistency on secondary surfaces (v0.16 ship review — red-team + adversarial).** **Priority: P3.** A `content_type:review` reads as a 🗞️ press round-up on the date / site / tag pages (shared `railEmojiForStudy`) but four other study surfaces don't yet distinguish it: (1) the home `RecentFeed` shows the disease-site emoji (it deliberately flags only practice-changing with 🚀 — decide whether a review warrants its own marker there); (2) the Telegram channel post (`channel-post.ts`) renders a neutral bullet; (3) the OG / share-image (`share-image.ts`, `og/study/[date]/[slug].png.ts`) shows no review marker; (4) the Obsidian vault twin (`renderObsidian`) omits the `discussed_trials` list + review framing, so a review note is a bare verdict-less study. All are **design/scope judgments, not bugs** — the web milestone is intentionally first. Decide per-surface whether to mirror the review treatment (consider exporting `REVIEW_GLYPH` everywhere) or document it as web-only.
 - **Harden v0.16 trade-press classification + extraction (ship adversarial + codex structured review).** **Priority: P3.** Three non-blocking robustness items surfaced at ship: (a) **Ground `discussed_trials` against the source text** (codex review P2 #2) — currently the cap/length/charset filter accepts any 2–40-char alphanumeric token, so a hallucinated acronym renders verbatim; add a word-boundary case-insensitive check that each retained acronym appears in the cluster's source text + image OCR before persisting (must include OCR-only sources + handle `STOMP/ORIOLE` slash-joined spellings so it doesn't drop legit names — needs its own real-build verify). (b) **Make `content_type` curator-overridable** (codex adversarial) — `content_type`/`discussed_trials` are not in `EDITABLE_STUDY_KEYS` (`digest-overrides.ts`), so a Phase-1 misclassification can't be durably corrected and `stripReviewVerdicts` re-strips the verdict every rebuild; add a durable override path (and skip the strip when a curator pins `content_type:study_report`). (c) **Warn on an invalid (non-empty) `content_type`** from a live Phase-1 response so a model typo that silently falls open to `study_report` is observable rather than silent. **Context:** eng plan `docs/plans/trade-press-format.md`; the conservative `study_report` default is deliberate (back-compat), so (a)/(c) tighten without changing the default.
 
+## Card at-rest budget (surfaced 2026-08-09 by adversarial review of v0.41-v0.43)
+
+- **The richer excerpt is landing BEHIND THE FOLD.** **Priority: P2.** Across 15
+  rebuilt dates the excerpt work roughly doubled the grounded numbers on the
+  cards (594 → 1226) and raised bullets 235 → 317, but the share of those
+  numbers visible AT REST fell 20.6% → 12.9%. The at-rest surfaces (TL;DR,
+  primary endpoint, why-it-matters) are hard-capped by prompt design, so extra
+  material can only go into the fold. Converting richer source into a better
+  90-second read is therefore a decision about **what the card shows at rest** —
+  a design question for `StudyCard.astro` + the Phase 2 at-rest caps — not
+  another prompt or validator change. Do not attempt it by loosening grounding.
+
+- **Do not A/B build configurations with `npm run quality-eval`.** **Priority:
+  P1 (process).** Six runs over a byte-identical artifact scored 6.4/6.6/6.8/
+  6.9/6.9/6.9, so run-to-run noise (SD ~0.2, and up to 4 points on a single
+  persona axis) exceeds every config difference measured during v0.41-v0.43.
+  The personas also do not correlate with each other (r ~ +0.13), and the judge
+  reads the digest JSON rather than the rendered card. Several conclusions
+  recorded in the v0.41 "Completed" section below rest on single runs and should
+  be treated as UNMEASURED, not as findings. Use the deterministic counters
+  (tables, grounded numbers, self-consistency flags, truncated table blocks) for
+  any comparison; reserve the personas for qualitative "what is wrong with
+  this" reading. Rationale is in the `build/quality-eval.ts` header.
+
 ## Known limitations (informational — not on a roadmap)
 
 - **OCR is macOS-only.** Linux/CI builds produce uniformly null captions; scanned-PDF OCR (v0.8 PR2) needs the Mac Vision binary + poppler.

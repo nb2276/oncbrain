@@ -14,6 +14,24 @@
 // Distinct from `npm run eval`: this is a curator-facing reading tool, not a
 // CI gate. No threshold, no pass/fail. Just structured multi-persona feedback
 // the curator can act on before the next build:day.
+//
+// DO NOT USE THE SCORES TO A/B TWO BUILD CONFIGURATIONS. This was tried during
+// v0.41-v0.43 to choose an excerpt budget, and the numbers cannot carry that
+// weight. Measured on a BYTE-IDENTICAL artifact, six runs scored
+// 6.4 / 6.6 / 6.8 / 6.9 / 6.9 / 6.9 (SD ~0.2) — so a 6.7-vs-7.4 difference
+// between two configs sits inside the instrument's own noise, and a
+// single-run "clear win" traced back to ONE judge's accuracy axis moving
+// 3 -> 8 on a statistic whose run-to-run range is 4 points. The three personas
+// also barely agree with each other (r ~ +0.13 across axes), so averaging them
+// does not cancel the noise the way averaging independent measurements would.
+// Two further confounds: the judge reads the digest JSON, not the rendered
+// card, so it cannot see what is above the fold; and any two builds separated
+// by a prompt edit differ on more than the variable under test.
+//
+// If you need to compare two configurations, use the DETERMINISTIC counters
+// instead — table count, grounded-number count, self-consistency flags,
+// truncated-table-block count — which are exact and reproducible. Reach for
+// the personas only for "read this and tell me what is wrong with it".
 
 import 'dotenv/config';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';

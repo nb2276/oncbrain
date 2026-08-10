@@ -1707,13 +1707,13 @@ describe('parseVerdict', () => {
   it('truncates an over-long audience at a WORD boundary, not mid-word', () => {
     // regression: a raw slice(0,80) cut "...2012-2016 cohort)" to "...2012-2016 coho"
     const long =
-      'Early breast cancer, breast-conserving surgery + whole-breast RT (2012-2016 cohort of registry patients)';
+      'Early breast cancer, breast-conserving surgery + whole-breast RT (2012-2016 cohort of registry patients) with node-negative disease and no adjuvant systemic therapy';
     const v = parseVerdict({ soc_implication: 'confirmatory', rationale: 'r', audience: long });
     expect(v?.audience).toBeTruthy();
-    expect(v!.audience!.length).toBeLessThanOrEqual(81); // 80 word-boundary + ellipsis
+    expect(v!.audience!.length).toBeLessThanOrEqual(121); // 120 word-boundary + ellipsis
     expect(v!.audience!.endsWith('…')).toBe(true);
-    // the mid-word "coho" fragment must be gone
-    expect(v!.audience).not.toContain('coho');
+    // the mid-word fragment must be gone
+    expect(v!.audience).not.toMatch(/\bcoho…?$/);
     // whatever remains before the ellipsis is a whole word from the original
     expect(long).toContain(v!.audience!.replace(/…$/, '').trimEnd());
   });

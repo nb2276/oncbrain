@@ -91,17 +91,29 @@ describe('parseVerdict', () => {
     expect(v?.audience).toBeNull();
   });
 
-  it('truncates audience > 80 chars at a WORD boundary with an ellipsis', () => {
+  it('leaves a 100-char audience intact — the cap is 120, matching its contract', () => {
+    // The code capped at 80 while parseVerdict's own contract comment said 120,
+    // so 15 of 104 published cards shipped an eligibility gate cut mid-phrase.
+    const hundred =
+      'Localized intermediate-risk prostate cancer after prostatectomy with rising PSA and adverse path';
+    expect(hundred.length).toBeGreaterThan(80);
+    expect(hundred.length).toBeLessThan(120);
+    const v = parseVerdict({ soc_implication: 'confirmatory', rationale: 'r', audience: hundred });
+    expect(v?.audience).toBe(hundred);
+    expect(v?.audience?.endsWith('…')).toBe(false);
+  });
+
+  it('truncates audience > 120 chars at a WORD boundary with an ellipsis', () => {
     // was a raw slice(0,80) that cut mid-word ("...2012-2016 coho"); now cuts at
     // the last whole word so the always-visible eligibility gate stays readable.
     const longAudience =
-      'Localized intermediate-risk prostate cancer after radical prostatectomy with rising PSA and adverse pathology';
+      'Localized intermediate-risk prostate cancer after radical prostatectomy with rising PSA and adverse pathology on final specimen review';
     const v = parseVerdict({
       soc_implication: 'confirmatory',
       rationale: 'r',
       audience: longAudience,
     });
-    expect(v?.audience?.length).toBeLessThanOrEqual(81); // ≤80 at a word boundary + ellipsis
+    expect(v?.audience?.length).toBeLessThanOrEqual(121); // ≤120 at a word boundary + ellipsis
     expect(v?.audience?.endsWith('…')).toBe(true);
     // pre-ellipsis text is a whole-word prefix of the original (no mid-word fragment)
     expect(longAudience).toContain(v!.audience!.replace(/…$/, '').trimEnd());
