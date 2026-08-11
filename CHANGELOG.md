@@ -2,6 +2,44 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.49.0] - 2026-08-11
+
+The back catalogue is current: **0 of 41 dates stale**, 110 of 118 studies carry
+an `interpretation`, 73 per-arm CONSORT outcomes.
+
+### Fixed
+- **An unmatched SUPPRESS override now fails the build instead of warning.**
+  This bit for real on the final rebuild. A suppress override is the curator's
+  explicit decision to hide a card — almost always a cross-date duplicate — and
+  the slug is its only handle. Rebuilding renamed three studies, so three
+  overrides silently stopped applying and three deliberately-hidden duplicates
+  went live, announced by nothing but a `WARN` inside a summary line:
+  `radiosa` → `radiosa-mfs-posthoc`, `extend` → `extend-trial`,
+  `peace2-pelvic-rt` → `peace-2`. RADIOSA, EXTEND and PEACE-2 each rendered
+  twice.
+
+  It fails rather than guesses. Resolving the intended study by acronym was
+  considered and rejected: `studyDedupKey` derives from the study NAME while an
+  override stores a SLUG, so any fallback is inference — and over-suppressing
+  (silently deleting a card the curator wants) is as bad as under-suppressing.
+  A failed build is loud and one CLI call to fix; a silent republication is
+  invisible. Operationally cheap: a fresh date cannot carry a stale override, so
+  this can only fire on a rebuild of a past date, which is precisely the hazard.
+
+  Note this is the SECOND failure mode of slug-keyed overrides found this
+  cycle, after v0.46's edit-override no-op. Slug persistence (v0.46) does not
+  cover it, because a suppressed study is absent from the published artifact and
+  therefore has no previous slug to hold.
+
+### Content
+- **2026-05-17 and 2026-05-18 rebuilt** — the last two stale dates, and the
+  oldest artifacts in the corpus (built 2026-07-19). 13 more per-arm outcomes,
+  all grounded. IMPORT HIGH carries THREE arms with three outcomes, a shape no
+  positional value-pairing could have expressed.
+- The three restored suppressions take cross-date duplicate groups from **6 to
+  3**; the remaining three (RTOG-0848, SUPREMO, ARTO) are pre-existing curator
+  decisions, listed by `npm run find:dups`.
+
 ## [0.48.2] - 2026-08-11
 
 Rebuilds 23 more dates. 39 of 41 dates are now current.
