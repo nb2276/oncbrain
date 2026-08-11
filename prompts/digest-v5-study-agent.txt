@@ -453,8 +453,8 @@ Rules for `significance_by_specialty`:
     "excluded": 74,
     "randomized": 1166,
     "arms": [
-      { "label": "PPN-SBRT", "allocated": 583, "analyzed": 560 },
-      { "label": "P-SBRT", "allocated": 583, "analyzed": 571 }
+      { "label": "PPN-SBRT", "allocated": 583, "analyzed": 560, "outcome": "3yr PFS 71.2%" },
+      { "label": "P-SBRT", "allocated": 583, "analyzed": 571, "outcome": "3yr PFS 58.4%" }
     ]
   }
 }
@@ -511,6 +511,11 @@ Rules:
 - each figure `caption` is numeric-only, from that image's OCR overlays only. Use the table form for comparison figures (2+ arms × multiple endpoints); flat string is acceptable only for non-comparison figures. Null if no OCR numbers available (image still kept).
 - `nct` only if explicit in tweets/OCR. Format: "NCTxxxxxxxx" or null.
 - `consort`: a CONSORT participant flow, ONLY for randomized trials where the source explicitly reports per-arm patient counts. Provide `randomized` (total) and `arms` (≥2, each `label` + `allocated`); add `enrolled`, `excluded`, and per-arm `analyzed` ONLY when those exact numbers are reported. Set to **null** for single-arm studies, retrospective series, meta-analyses, or whenever you lack the total randomized and ≥2 arm counts. NEVER invent, estimate, or back-calculate a count — every number must appear in the source.
+- per-arm `outcome` (optional) is that arm's PRIMARY-ENDPOINT result as a short label, ≤48 chars, e.g. "3yr DFS 64.5%" or "mOS 35.8 mo". It becomes the last node of the rendered flow, so the reader sees allocation AND result in one chain. Rules, and they are strict because this is the one field that ATTRIBUTES a number to a group:
+  - Give the SAME endpoint for every arm, the one in `primary_endpoint`. Do not mix DFS for one arm and OS for the other.
+  - Attach each value to the arm the SOURCE attributes it to. Do NOT assume the paper lists arms in the same order you did, and do not carry over the left-to-right order of a "X vs Y" phrase — that convention is not stable across journals.
+  - Verbatim from the source, with its unit. Never compute a difference, a percentage change, or an arm value the paper does not state.
+  - Emit `null` for EVERY arm (omit the field) when the source reports only a combined effect size (an HR with no per-arm figures), when you have a value for one arm but not the other, or whenever you are not certain which arm a number belongs to. A missing outcome row costs the reader nothing; a result printed under the wrong arm is a clinical error.
 
 ═══ TRUST BOUNDARY ═══
 

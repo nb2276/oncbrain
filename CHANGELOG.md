@@ -2,6 +2,44 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.48.0] - 2026-08-10
+
+### Added
+- **The CONSORT flow carries the RESULT as its last link.** Each arm now ends in
+  its primary-endpoint outcome, so the diagram runs enrolled → randomized →
+  allocated → *result* and the two arms' numbers sit directly under each other
+  for comparison instead of the flow stopping at allocation.
+
+  **The outcome is emitted by Phase 2 and attached to the arm — never inferred
+  here from the order of `primary_endpoint.stat_value`.** That inference was
+  built as a hypothesis, measured, and rejected: of the 36 studies carrying a
+  consort object, 15 have two parseable endpoint values but **zero** carry arm
+  labels, **zero** have a detail table that passes `armColumns`, and **zero**
+  can have labels matched to arms. The ordering convention is not stable either
+  — DBCG-HYPO states its CONTROL arm first (`24.7% vs 19.5%` against arms
+  `[50 Gy/25 fr, 40 Gy/15 fr]`) while bladder-adjuvant-rt states the
+  experimental arm first, and IMPORT-HIGH has three arms against three values.
+  Positional matching would eventually print the experimental result under the
+  control arm, which is a clinical error rather than a layout bug.
+
+  Guards, because this is the one consort field that ATTRIBUTES a number to a
+  patient group: the prompt requires the same endpoint across arms, verbatim
+  values, source-stated attribution (explicitly NOT the left-to-right order of
+  an "X vs Y" phrase), and abstention for ALL arms when any of that is
+  uncertain. The parser caps the label at 48 chars and drops prose rather than
+  truncating it mid-number, and the renderer shows the outcome row only when
+  EVERY arm has one — a result under one arm and a blank under the other reads
+  as "the other arm had no result", a different and wrong claim.
+
+  The field is OMITTED when absent rather than written as null, matching how
+  `content_type` omits its default: 74 of the corpus's 76 arms have no outcome
+  and emitting a null on each would rewrite every consort object for no gain.
+
+  Verified on a real rebuild (2026-05-27, SENOMAC): sentinel-node-biopsy-only
+  → `5yr RFS 89.7%`, completion-axillary-dissection → `5yr RFS 88.7%`, matching
+  the source sentence "89.7% ... in the sentinel-node biopsy-only group and
+  88.7%" — attribution read from the text, not from position.
+
 ## [0.47.0] - 2026-08-10
 
 ### Fixed

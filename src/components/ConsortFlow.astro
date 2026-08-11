@@ -12,7 +12,15 @@
 //
 // Renders nothing below two arms: a "flow" with one box is not a flow, and the
 // diagram's whole job is showing how the randomised groups divide.
-type ConsortArm = { label: string; allocated: number; analyzed?: number | null };
+type ConsortArm = {
+  label: string;
+  allocated: number;
+  analyzed?: number | null;
+  // v0.48: this arm's primary-endpoint result, model-attributed. See the
+  // ConsortArm comment in llm-pipeline.ts for why it is never inferred here
+  // from the order of the endpoint's "X vs Y" text.
+  outcome?: string | null;
+};
 export type Consort = {
   enrolled?: number | null;
   excluded?: number | null;
@@ -24,6 +32,13 @@ interface Props {
 }
 const { consort } = Astro.props;
 const show = Boolean(consort && Array.isArray(consort.arms) && consort.arms.length >= 2);
+// The outcome row renders only when EVERY arm has one. A flow showing a result
+// under one arm and a blank under the other reads as "the other arm had no
+// result", which is a different and wrong claim — the prompt already asks the
+// model to abstain for all arms together, and this enforces it at the render.
+const showOutcomes = Boolean(
+  show && consort!.arms.every((a) => typeof a.outcome === 'string' && a.outcome.trim().length > 0),
+);
 ---
 
 {
@@ -49,6 +64,7 @@ const show = Boolean(consort && Array.isArray(consort.arms) && consort.arms.leng
               {a.analyzed != null && (
                 <div class="consort-arm-line consort-analyzed">analyzed <b>{a.analyzed}</b></div>
               )}
+              {showOutcomes && <div class="consort-outcome">{a.outcome}</div>}
             </div>
           ))}
         </div>
@@ -112,4 +128,17 @@ const show = Boolean(consort && Array.isArray(consort.arms) && consort.arms.leng
   .consort-arm-line { color: var(--fg-muted); line-height: 1.4; }
   .consort-arm-line b { color: var(--fg); font-weight: 700; }
   .consort-analyzed { font-size: 0.78rem; }
+  /* The result, as the arm's last link. Set apart by a rule and the accent so
+     the eye can compare the two arms' numbers directly without re-reading the
+     allocation counts above them. Colour comes from the theme tokens, so both
+     themes are covered by construction. */
+  .consort-outcome {
+    margin-top: 0.35rem;
+    padding-top: 0.3rem;
+    border-top: 1px solid var(--border);
+    color: var(--fg);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.35;
+  }
 </style>
