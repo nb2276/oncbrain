@@ -2,6 +2,39 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.47.0] - 2026-08-10
+
+### Fixed
+- **CONSORT diagrams rendered nowhere, and had not since v0.30.** StudyCard has
+  TWO mutually exclusive fold renderers: the v0.30 structured `analysis_sections`
+  fold and the legacy emoji-IMRD `depthSections` fold, the latter gated behind
+  `!hasAnalysisSections`. The CONSORT markup lived ONLY in the legacy branch, so
+  when v0.30 (fbfa55e) made Phase 2 emit `analysis_sections` for 94% of cards,
+  that branch — and the only CONSORT render path with it — switched off.
+
+  **36 of 122 studies carry renderable consort data (>=2 arms). All 36 were
+  suppressed. Zero diagrams rendered, for eight releases.**
+
+  Nothing failed loudly, which is why it survived: `parseConsort` still parsed,
+  the field still shipped in every artifact, `consort` stayed in
+  `EDITABLE_STUDY_KEYS`, and the scoped CSS still shipped in every page's bundle
+  with no markup to match. That orphaned CSS was the tell — `.consort-flow`
+  styles present in `dist`, `class="consort-flow"` count zero.
+
+  The diagram now lives in its own component (`ConsortFlow.astro`) used by BOTH
+  folds, so the two paths cannot drift again, and the structured fold renders it
+  as its own `Enrolment` row (mirroring the Results-table fallback beside it).
+  Removed 54 lines of CSS that were duplicated into StudyCard.
+
+  Verified: 0 -> 36 study pages, 208 pages total. STELLAR now draws
+  629 enrolled -> 30 excluded -> 599 randomized -> 302 / 297.
+
+### Notes
+- The regression test asserts the END of the chain — markup present in `dist`,
+  checked across the structured and legacy fold populations SEPARATELY. A unit
+  test on `parseConsort` would have stayed green through the entire outage. It
+  was verified meaningful by reverting the fix: it fails listing all 36 studies.
+
 ## [0.46.0] - 2026-08-10
 
 Slug instability, fixed at the cause and repaired for what it already broke.
