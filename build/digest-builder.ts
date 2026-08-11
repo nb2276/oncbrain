@@ -762,6 +762,36 @@ export async function buildOneDate(
     const applied = applyOverrides(digest, overrides, { digestDate: date });
     digest = applied.digest;
     console.log(`  applied overrides: ${formatOverrideSummary(applied.summary)}`);
+    // v0.49: an unmatched SUPPRESS is fatal, not a warning.
+    //
+    // A suppress override is the curator's explicit decision to hide a card —
+    // in practice almost always a cross-date duplicate. The slug is the only
+    // handle it has, and a rebuild can rename a study, so the override silently
+    // stops applying and the hidden card is PUBLISHED AGAIN with nothing but a
+    // WARN buried in a summary line. That is exactly what happened rebuilding
+    // 2026-05-17 and 2026-05-18: `radiosa` became `radiosa-mfs-posthoc`,
+    // `extend` became `extend-trial`, `peace2-pelvic-rt` became `peace-2`, and
+    // three deliberately-suppressed duplicates went live.
+    //
+    // Fail rather than guess. Matching the intended study by acronym was
+    // considered and rejected: `studyDedupKey` derives from the study NAME
+    // while an override stores a SLUG, so any fallback is inference, and
+    // over-suppressing (silently deleting a card the curator wants) is as bad
+    // as under-suppressing. A failed build is loud, safe and one CLI call to
+    // fix; a silent republication is invisible.
+    //
+    // Low operational risk: a fresh date cannot have a stale override, so this
+    // can only fire on a REBUILD of a past date, which is where the hazard is.
+    if (applied.summary.suppressMissing.length > 0) {
+      const missing = applied.summary.suppressMissing.join(', ');
+      throw new Error(
+        `Suppress override(s) did not match any study on ${date}: ${missing}\n` +
+          `  A rebuild probably renamed the study, so a card the curator hid would be PUBLISHED AGAIN.\n` +
+          `  Check the current slugs and repoint the override:\n` +
+          `    npm run override -- --date=${date} --list\n` +
+          `    npm run override -- --date=${date} --unsuppress=<old> --suppress=<new>`,
+      );
+    }
   }
 
   // v0.14.5 (E5): re-assert the preprint verdict cap AFTER overrides. A curator

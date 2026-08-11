@@ -112,6 +112,17 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
   any comparison; reserve the personas for qualitative "what is wrong with
   this" reading. Rationale is in the `build/quality-eval.ts` header.
 
+## Overrides are keyed on a slug the LLM can rename (surfaced 2026-08-11)
+
+- **Give overrides an identity that survives a rename.** **Priority: P2.** Two
+  distinct failures this cycle: an EDIT override silently no-op'd (v0.45.1) and
+  three SUPPRESS overrides silently republished hidden duplicates (v0.49.0). The
+  suppress case is now fatal, so it cannot pass unnoticed, but the underlying
+  fragility remains and edits still only WARN. Slug persistence (v0.46) does not
+  help a suppressed study, which is absent from the published artifact and so has
+  no previous slug to hold. Candidate: record `nct` and `name` in the override
+  sidecar when it is written, and match on those before the slug.
+
 ## Known limitations (informational — not on a roadmap)
 
 - **Three traps when auditing the corpus by hand against the DB.** (1) `source_ids[].type` is `tweet`, NOT `bookmark`, so keying on the wrong string silently yields EMPTY source text and every number reads as ungrounded. (2) The bookmarks OCR column is `image_ocr_texts` (plural). (3) Stored abstracts encode the middle dot as `&#xb7;`, which `normalizeNumericText` does not decode. All three produced false "ungrounded" verdicts while verifying v0.48 arm outcomes.
