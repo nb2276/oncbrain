@@ -114,6 +114,8 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 ## Known limitations (informational — not on a roadmap)
 
+- **Three traps when auditing the corpus by hand against the DB.** (1) `source_ids[].type` is `tweet`, NOT `bookmark`, so keying on the wrong string silently yields EMPTY source text and every number reads as ungrounded. (2) The bookmarks OCR column is `image_ocr_texts` (plural). (3) Stored abstracts encode the middle dot as `&#xb7;`, which `normalizeNumericText` does not decode. All three produced false "ungrounded" verdicts while verifying v0.48 arm outcomes.
+
 - **The middle dot appears HTML-entity-encoded in stored abstracts.** `15&#xb7;1` rather than `15·1`, which `normalizeNumericText` (figure-extract.ts) does not decode. Harmless today — no production grounding path compares against entity-encoded text — but it produced two false "ungrounded number" verdicts in a manual audit of v0.48 arm outcomes, so any future grounding check that reads `papers.abstract` must decode entities first.
 
 - **OCR is macOS-only.** Linux/CI builds produce uniformly null captions; scanned-PDF OCR (v0.8 PR2) needs the Mac Vision binary + poppler.
