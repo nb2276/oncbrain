@@ -1,71 +1,66 @@
 {
   "date": "2026-07-01",
   "conference": null,
-  "generated_at": 1786334255107,
+  "generated_at": 1786409525760,
   "digest": {
-    "top_line": "RTOG 1112: adding SBRT to sorafenib in locally advanced HCC gives mOS 15.8 vs 12.3mo, HR 0.77 (90% CI 0.59-1.01), 1-sided P=.06.",
-    "tldr": "Both items are RT-defining but neither settles its question. RTOG 1112 is the first randomised phase 3 of liver SBRT and misses its prespecified 1-sided OS test (P=.06) against a comparator (sorafenib) that IO-doublets have since displaced, though PFS is clean (HR 0.55). Head/neck reirradiation gets 31 consensus statements, with elective nodal irradiation rejected at 100% agreement.",
+    "top_line": "RTOG 1112: SBRT before sorafenib in HCC, mOS 15.8 vs 12.3mo, HR 0.77 (90% CI 0.59-1.01, P=.06); adjusted HR 0.72, P=.04.",
+    "tldr": "Two RT-decision documents, opposite ends of the evidence ladder. RTOG 1112 gives the first phase 3 read on adding personalized 5-fx SBRT to systemic therapy in macrovascular-invasion HCC: PFS clearly moves (HR 0.55), OS misses on the primary 1-sided test, and the control predates IO. Head and neck gets consensus, not data: 24 of 31 reirradiation statements at ≥85%, elective nodal irradiation off the table at 100%.",
     "sites": [
       {
         "disease_site": "hepatobiliary",
-        "intro": "Personalized 5-fraction SBRT (27.5-50 Gy, adapted to liver function) in a 74% macrovascular-invasion population: the PFS signal holds, the OS read is hostage to an obsolete systemic backbone.",
+        "intro": "Randomised evidence that SBRT is the added variable, in an arm-to-arm design where sorafenib is common to both, but read against a systemic backbone the field has since replaced.",
         "studies": [
           {
             "name": "RTOG 1112",
-            "tldr": "mOS 15.8 vs 12.3mo, HR 0.77 (90% CI 0.59-1.01, 1-sided P=.06) adding SBRT to sorafenib in locally advanced HCC.",
+            "tldr": "mOS 15.8 vs 12.3mo, HR 0.77 (90% CI 0.59-1.01), 1-sided P=.06; adjusted HR 0.72, P=.04; PFS HR 0.55.",
             "details": [
+              "📊 1° EP OS missed formal significance: 15.8 vs 12.3 mo, HR 0.77 (90% CI 0.59-1.01), 1-sided P=.06",
+              "📐 Stratification-adjusted OS HR 0.72 (95% CI 0.52-0.99), 2-sided P=.04",
+              "📊 mPFS 9.2 vs 5.5 mo, HR 0.55 (95% CI 0.40-0.75), P<.001",
+              "🔍 Personalized SBRT 27.5 to 50 Gy in 5 fx, delivered before sorafenib",
+              "🔍 Phase 3, 1:1, N=193 randomized / 177 eligible; accrual stopped early when SOC systemic therapy changed",
+              "🔍 Enriched for macrovascular invasion: 131/177 (74.0%); HCC unsuitable for or refractory to local-regional therapy",
               {
-                "text": "📊 SBRT + sorafenib vs sorafenib alone",
+                "text": "⚠️ Reasons the OS read is fragile",
+                "subdetails": [
+                  "Underpowered: early closure after SOC shift to IO-based 1L",
+                  "Primary OS test was 1-sided at the 90% CI, the adjusted HR is the secondary framing",
+                  "Sorafenib control predates atezo/bev and durva/treme era"
+                ]
+              },
+              "💊 Both arms received sorafenib; SBRT is the only added variable, so the delta is RT-attributable",
+              {
+                "text": "📊 Treatment-related toxicity and QoL",
                 "table": {
                   "columns": [
-                    "Endpoint",
-                    "SBRT + sorafenib",
+                    "Measure",
                     "Sorafenib",
-                    "Effect size"
+                    "SBRT + sorafenib",
+                    "P"
                   ],
                   "rows": [
                     [
-                      "Median OS (unadjusted)",
-                      "15.8 mo (90% CI 11.4-19.2)",
-                      "12.3 mo (90% CI 10.6-14.3)",
-                      "HR 0.77 (90% CI 0.59-1.01), 1-sided P=.06"
-                    ],
-                    [
-                      "OS adjusted for stratification",
-                      "n/a",
-                      "n/a",
-                      "HR 0.72 (95% CI 0.52-0.99), 2-sided P=.04"
-                    ],
-                    [
-                      "Median PFS",
-                      "9.2 mo (95% CI 7.5-11.9)",
-                      "5.5 mo (95% CI 3.4-6.3)",
-                      "HR 0.55 (95% CI 0.40-0.75), P<.001"
-                    ],
-                    [
-                      "TR grade 3+ AEs",
-                      "39/83 (47%)",
-                      "37/88 (42%)",
+                      "Tx-related G3+ AE",
+                      "37 of 88 (42%)",
+                      "39 of 83 (47%)",
                       "P=.52"
                     ],
                     [
-                      "Improved QoL at 6mo",
-                      "6/17 (35%)",
-                      "2/20 (10%)",
-                      "not reported"
+                      "Tx-related deaths",
+                      "2",
+                      "1",
+                      "n/a"
+                    ],
+                    [
+                      "Improved QoL at 6 mo",
+                      "2 of 20 (10%)",
+                      "6 of 17 (35%)",
+                      "n/a"
                     ]
                   ]
                 }
               },
-              "🔍 Personalized SBRT 27.5-50 Gy in 5 fractions, dose adapted to liver function",
-              "🔍 Phase 3, 1:1, N=193 randomized / 177 eligible, accrual April 2013 to March 2021",
-              "🔍 Stratified by performance status, liver function, degree of metastases, macrovascular invasion",
-              "📊 Macrovascular invasion in 131/177 (74.0%), the population most likely to fail intrahepatically",
-              "⚠️ Primary OS endpoint not met on the prespecified 1-sided test (P=.06); the P=.04 is the adjusted analysis",
-              "⚠️ Accrual stopped early after SOC systemic therapy changed; sorafenib is no longer a first-line comparator",
-              "🔗 Comparator vintage is the core limitation: IMbrave150-era atezo/bev and durva/treme now define 1L, and SBRT was never tested against them",
-              "⚠️ QoL denominators are tiny (17 and 20 evaluable pts at 6mo); read as hypothesis-generating, not a QoL result",
-              "📊 Treatment-related deaths: 2 with sorafenib (1 liver failure), 1 with SBRT + sorafenib (lung infection)"
+              "⚠️ QoL denominators are tiny (20 and 17 evaluable), so the 6-month signal is descriptive only"
             ],
             "figures": [],
             "nct": "NCT01730937",
@@ -75,63 +70,76 @@
             "slug": "rtog-1112",
             "verdict": {
               "soc_implication": "challenges-soc",
-              "rationale": "Randomised phase 3, prespecified OS primary missed at P=.06 but PFS strongly positive and adjusted OS positive; comparator arm is now obsolete systemic therapy.",
-              "audience": "Locally advanced HCC unsuitable/refractory to local-regional therapy, 74%…"
+              "rationale": "Randomised phase 3, prespecified OS primary, but 1-sided P=.06 misses and accrual closed early; comparator arm is sorafenib, now superseded.",
+              "audience": "Locally advanced HCC unsuitable for local-regional therapy, 74% macrovascular invasion"
             },
-            "significance": "The RT-attributable signal is PFS: HR 0.55 (0.40-0.75), a 3.7mo median gain, in a cohort 74% macrovascular-invasion positive where intrahepatic failure drives death. Personalized 27.5-50 Gy/5fx added no excess grade 3+ toxicity (47% vs 42%, P=.52), so the open decision is whether SBRT layers onto modern IO doublets, not whether it is deliverable.",
-            "monday_clinic": "In locally advanced HCC with macrovascular invasion unsuitable for local-regional therapy, this supports considering SBRT alongside first-line systemic therapy; it does not establish benefit added to current IO-based regimens, since the control arm was sorafenib.",
+            "significance": "The PFS signal is where SBRT earns its place: 9.2 vs 5.5 mo, HR 0.55 (95% CI 0.40-0.75), in a cohort 74% macrovascular-invasion positive, at 27.5 to 50 Gy in 5 fx with no excess G3+ toxicity (47% vs 42%, P=.52). That moves the add-SBRT-to-systemic decision in vascular-invasion HCC, even with sorafenib as the backbone.",
+            "monday_clinic": "In locally advanced HCC with macrovascular invasion who are unsuitable for or refractory to local-regional therapy, this supports adding 5-fraction SBRT to first-line systemic therapy; it does not address SBRT layered onto current IO-based regimens.",
             "primary_endpoint": {
               "name": "Overall survival",
               "klass": "overall-survival",
               "stat_value": "15.8 vs 12.3 mo",
-              "stat_detail": "HR 0.77 (90% CI 0.59-1.01), 1-sided P=.06, primary not met"
+              "stat_detail": "HR 0.77, 90% CI 0.59-1.01, 1-sided P=.06 (did not meet)"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Multicenter **phase 3 RCT**, 1:1, sorafenib vs SBRT followed by sorafenib. **193 randomized, 177 eligible**; accrual April 2013 to March 2021, **stopped early** when standard-of-care systemic therapy changed. Stratified by performance status, liver function, degree of metastases, macrovascular invasion."
+                "body": "Multicenter **phase 3 RCT**, 1:1, stratified by performance status, liver function, degree of metastases and macrovascular invasion. **193 randomized, 177 eligible**; accrual April 2013 to March 2021, stopped early once standard-of-care systemic therapy changed."
               },
               {
                 "label": "Population & inclusion",
-                "body": "HCC **unsuitable for or refractory to standard local-regional therapies** and candidates for first-line systemic therapy. 150/177 (84.7%) male, median age 66 (IQR 60-72). **Macrovascular invasion in 131 (74.0%)**."
+                "body": "HCC **unsuitable for or refractory to standard local-regional therapies** and candidates for first-line systemic therapy. 150 of 177 (84.7%) male, median age 66 (IQR 60-72), **macrovascular invasion in 131 (74.0%)**."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**Personalized SBRT, 27.5 to 50 Gy in 5 fractions**, the dose individualized rather than fixed, then followed by sorafenib. No elective nodal or extrahepatic target volume reported in source."
+                "body": "**Personalized SBRT, 27.5 to 50 Gy in 5 fractions**, delivered before sorafenib. The dose range is individualized rather than fixed, so the prescription reflects liver reserve and target geometry, not a single protocol dose."
+              },
+              {
+                "label": "Regimen",
+                "body": "Sorafenib in both arms; the experimental arm added SBRT first. **The systemic backbone is identical**, so the difference is attributable to radiation."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary: overall survival.** Secondary: PFS, adverse events, quality of life. Data cutoff July 1, 2022."
+                "body": "**Primary: overall survival.** Secondary: progression-free survival, adverse events, quality of life. The primary OS comparison was tested 1-sided with 90% CIs."
+              },
+              {
+                "label": "Results",
+                "body": "OS **15.8 vs 12.3 mo**, HR 0.77 (90% CI 0.59-1.01), 1-sided P=.06; adjusted for stratification factors HR 0.72 (95% CI 0.52-0.99), 2-sided P=.04. PFS **9.2 vs 5.5 mo**, HR 0.55 (95% CI 0.40-0.75), P<.001."
               },
               {
                 "label": "Safety",
-                "body": "Treatment-related grade 3+ AEs **39/83 (47%) with SBRT + sorafenib vs 37/88 (42%) with sorafenib, P=.52**. Treatment-related deaths: 2 sorafenib (death NOS, liver failure), 1 SBRT arm (lung infection). No excess hepatic toxicity signal reported in source."
+                "body": "Treatment-related G3+ AEs **47% (39 of 83) with SBRT vs 42% (37 of 88)** with sorafenib alone, P=.52. Treatment-related deaths: 2 sorafenib (unspecified, liver failure), 1 SBRT arm (lung infection)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The sorafenib comparator is the SHARP-era standard, and 1L HCC has since moved to IO-based combinations, which is why accrual closed. No randomised trial has yet tested SBRT against, or added to, those current regimens."
               },
               {
                 "label": "Applies to",
-                "body": "Represents locally advanced HCC with macrovascular invasion that has exhausted or cannot receive local-regional therapy, entering first-line systemic treatment. Does not represent pts receiving contemporary IO-based first-line regimens, resectable or transplant-eligible disease, or Child-Pugh C liver function."
+                "body": "Represents locally advanced HCC with a high macrovascular-invasion burden, unsuitable for or refractory to local-regional therapy, on first-line sorafenib. Does not represent pts on current IO-based first-line systemic therapy or those still eligible for TACE/ablation."
               },
               {
                 "label": "Limitations",
-                "body": "The sorafenib control predates atezolizumab-bevacizumab and durvalumab-tremelimumab, so the absolute survival on both arms sits below modern 1L expectations and the SBRT increment is untested on an IO backbone. **Early accrual closure** left the trial underpowered for its own primary test, and QoL was assessed in only 17 and 20 evaluable pts at 6 months."
+                "body": "Early closure leaves the OS test underpowered, and the 2-sided P=.04 comes from the stratification-adjusted model rather than the primary unadjusted analysis. QoL was assessed in only 20 and 17 evaluable pts at 6 months, too few to weigh against the toxicity comparison."
               },
               {
                 "label": "Discussion",
-                "body": "A 3.5mo median OS gain with **HR 0.72 (0.52-0.99)** after adjustment, alongside a **PFS HR 0.55**, is the strongest randomised evidence to date that hepatic SBRT adds to systemic therapy in locally advanced HCC. The read is whether that increment survives the swap of sorafenib for an IO doublet, which no randomised trial has yet answered."
+                "body": "The consistency between an OS HR of 0.77 and a PFS HR of 0.55 in a 74% macrovascular-invasion cohort argues the local effect is real and that OS dilution reflects competing liver and systemic events, not absence of benefit. What it does not settle is whether that local effect survives on top of a systemic backbone that already controls disease better than sorafenib did."
               }
             ],
+            "interpretation": "The result that matters here is not the primary endpoint but the distance between the two effect sizes. Progression-free survival moved with an HR of 0.55 and a 95% CI of 0.40 to 0.75, an unambiguous separation; overall survival moved with an HR of 0.77 and a 90% CI whose upper bound touches 1.01. That pattern is what one expects when a local intervention does exactly what it is supposed to do in a population whose competing risks are large. Three quarters of these pts had macrovascular invasion, and in that setting death arrives by several routes, only one of which SBRT can obstruct. Reading the missed 1-sided P=.06 as evidence that SBRT does not help inverts the logic of the trial.\n\nStill, the adjusted analysis deserves scepticism rather than relief. Adjusting for stratification factors produced an HR of 0.72 with a 2-sided P of .04, and it is tempting to treat that as the true answer that the primary test failed to reach. It is not. The stratified model was not the primary test, and a trial that closes accrual early is exactly the setting where a secondary analytic framing crossing the conventional threshold should move confidence less than it appears to. What should move confidence is the internal coherence: a large PFS effect, a directionally concordant OS effect, and a toxicity profile that does not pay for either. Treatment-related grade 3 or higher events were 47 percent with SBRT versus 42 percent without, a difference that does not distinguish the arms, and there was one treatment-related death in the SBRT arm against two in the control. A local therapy that buys nearly four months of median PFS without a toxicity penalty in a cirrhotic population is a favourable trade on its face.\n\nThe harder problem is the comparator. Accrual stopped because first-line systemic therapy for HCC changed underneath the trial, and sorafenib is no longer the backbone anyone builds on. This does not make the RT question obsolete, but it changes what the trial can answer. Sorafenib exerted weak disease control, which maximises the room a local therapy has to contribute; a backbone with better systemic control compresses that room, and the PFS advantage could shrink accordingly. It could also grow, if better systemic control means pts live long enough for in-liver progression to become the dominant event. Both readings are consistent with these data, and nothing in this trial adjudicates between them.\n\nFor practice, the prescription itself is unusually transferable. Personalized SBRT at 27.5 to 50 Gy in 5 fractions is a range, not a dose, which reflects the reality that liver reserve and target geometry rather than tumour biology set the ceiling in HCC. A department already delivering liver SBRT can reproduce this without protocol-specific technique. The decision this trial informs is whether to offer SBRT to a patient with macrovascular invasion who has exhausted or never qualified for local-regional therapy and is starting systemic treatment, and the answer it supports is yes, with the caveat that the evidence for the combination is anchored to a systemic agent no longer in first-line use. What would have to be true for this to be wrong is that the PFS benefit is driven by radiographic in-field change rather than clinically meaningful disease control, or that the same intervention layered on modern systemic therapy adds toxicity in a liver already stressed by an immune-based regimen. Neither is addressed by these data.",
             "relevant_specialties": [
               "radonc",
               "medonc"
             ],
             "significance_by_specialty": {
-              "radonc": "PFS HR 0.55 (0.40-0.75) with personalized 27.5-50 Gy/5fx, no excess grade 3+ toxicity (47% vs 42%, P=.52), in a 74% macrovascular-invasion cohort. This is the randomised evidence that makes liver SBRT defensible at tumor board for pts exhausting local-regional options; the dose was individualized to liver function, so it transfers only with that planning discipline.",
-              "medonc": "The comparator is sorafenib, not an IO doublet, so this does not answer whether SBRT adds to atezolizumab-bevacizumab. What it does establish is that layering hepatic SBRT before systemic therapy cost nothing in grade 3+ toxicity (47% vs 42%, P=.52), which lowers the barrier to referring a macrovascular-invasion patient for RT while continuing planned systemic treatment."
+              "radonc": "Personalized SBRT at 27.5 to 50 Gy in 5 fractions produced mPFS 9.2 vs 5.5 mo, HR 0.55 (95% CI 0.40-0.75), in a cohort 74% macrovascular-invasion positive, with G3+ toxicity indistinguishable from systemic therapy alone (47% vs 42%, P=.52). That is the case for offering liver SBRT alongside systemic therapy in vascular-invasion HCC.",
+              "medonc": "The systemic backbone was fixed at sorafenib in both arms, so the OS and PFS deltas reflect the addition of RT, not drug choice. The open question for a med onc is sequencing: whether the HR 0.55 PFS gain persists on an IO-based first-line backbone, which is untested here."
             },
             "open_questions": [
-              "Does SBRT add to atezolizumab-bevacizumab or durvalumab-tremelimumab?",
-              "Optimal SBRT dose within the 27.5-50 Gy/5fx personalized range",
-              "Which macrovascular invasion subgroups derive the OS benefit?"
+              "Does SBRT benefit persist on IO-based first-line systemic therapy",
+              "Optimal sequencing of SBRT relative to systemic therapy start",
+              "Which macrovascular-invasion subgroups gain most from SBRT"
             ],
             "consort": {
               "enrolled": null,
@@ -139,14 +147,16 @@
               "randomized": 193,
               "arms": [
                 {
-                  "label": "SBRT + sorafenib",
-                  "allocated": 83,
-                  "analyzed": null
-                },
-                {
                   "label": "Sorafenib",
                   "allocated": 88,
-                  "analyzed": null
+                  "analyzed": null,
+                  "outcome": "mOS 12.3 mo"
+                },
+                {
+                  "label": "SBRT + sorafenib",
+                  "allocated": 83,
+                  "analyzed": null,
+                  "outcome": "mOS 15.8 mo"
                 }
               ]
             },
@@ -155,29 +165,6 @@
             "methodology": "phase-3-rct",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
-              {
-                "nct": "NCT05488522",
-                "brief_title": "SBRT With Atezo/Bev for HCC",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE1"
-                ],
-                "enrollment_count": 18,
-                "primary_completion_date": "2026-12",
-                "brief_summary": "A phase I dose escalation and pharmacodynamic study of repeated dose stereotactic body radiotherapy (SBRT) administered with concurrent atezolizumab and bevacizumab for patients with advanced hepatocellular carcinoma (HCC)",
-                "conditions": [
-                  "Hepatocellular Carcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "SBRT + atezolizumab and bevacizumab",
-                    "type": "BIOLOGICAL"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Subjects must have hepatocellular carcinoma (HCC) that is not amenable to curative-intent surgical or ablation (where surgery or ablation are not indicated due to disease extent, co-morbidities, or other technical reasons) and systemic therapy is indicated.\n\nExclusion…",
-                "answers_question": "Does SBRT add to atezolizumab-bevacizumab or durvalumab-tremelimumab?",
-                "relevance_phrase": "phase 1 concurrent SBRT with atezo-bev, safety first"
-              },
               {
                 "nct": "NCT07166406",
                 "brief_title": "Testing Immunotherapy With or Without Stereotactic Body Radiation Therapy in Patients With Advanced Liver Cancer, HELIO-RT Trial",
@@ -244,58 +231,64 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* PRIOR TO STEP 1 REGISTRATION:\n* Diagnosis of hepatocellular carcinoma (HCC) by at least 1 criterion listed below:\n\n  * Pathologically (histologically or cytologically) proven diagnosis of HCC (strongly recommended)\n  * Radiographically proven (American Association for the…",
-                "answers_question": "Does SBRT add to atezolizumab-bevacizumab or durvalumab-tremelimumab?",
-                "relevance_phrase": "phase 3 IO +/- SBRT, atezo-bev or durva-treme arms"
+                "answers_question": "Does SBRT benefit persist on IO-based first-line systemic therapy",
+                "relevance_phrase": "phase 3 IO +/- SBRT in advanced HCC"
               },
               {
-                "nct": "NCT05488522",
-                "brief_title": "SBRT With Atezo/Bev for HCC",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE1"
-                ],
-                "enrollment_count": 18,
-                "primary_completion_date": "2026-12",
-                "brief_summary": "A phase I dose escalation and pharmacodynamic study of repeated dose stereotactic body radiotherapy (SBRT) administered with concurrent atezolizumab and bevacizumab for patients with advanced hepatocellular carcinoma (HCC)",
-                "conditions": [
-                  "Hepatocellular Carcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "SBRT + atezolizumab and bevacizumab",
-                    "type": "BIOLOGICAL"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Subjects must have hepatocellular carcinoma (HCC) that is not amenable to curative-intent surgical or ablation (where surgery or ablation are not indicated due to disease extent, co-morbidities, or other technical reasons) and systemic therapy is indicated.\n\nExclusion…",
-                "answers_question": "Optimal SBRT dose within the 27.5-50 Gy/5fx personalized range",
-                "relevance_phrase": "SBRT dose escalation with concurrent atezo-bev"
-              },
-              {
-                "nct": "NCT07668570",
-                "brief_title": "SBRT Plus QL1706 as Second-Line Therapy for Hepatocellular Carcinoma",
+                "nct": "NCT06592612",
+                "brief_title": "Second-line Systemic Therapy Combined with SBRT for HCC with Oligoprogression After Standard First-line Systemic Treatment",
                 "overall_status": "NOT_YET_RECRUITING",
                 "phase": [
-                  "PHASE4"
+                  "PHASE2"
                 ],
-                "enrollment_count": 36,
-                "primary_completion_date": "2029-07",
-                "brief_summary": "This is a prospective, single-arm, single-center exploratory clinical study designed to evaluate the efficacy and safety of stereotactic body radiation therapy (SBRT) combined with QL1706 in patients with hepatocellular carcinoma who have received one prior line of systemic therapy and experienced radiographic disease progression or intolerance.\n\nEligible patients will receive SBRT to all evaluable intrahepatic lesions at a total dose of 25-50 Gy delivered in 5 fractions. Within 7-14 days after…",
+                "enrollment_count": 70,
+                "primary_completion_date": "2026-10",
+                "brief_summary": "Approximately 70% of hepatocellular carcinoma (HCC) patients are diagnosed at an advanced stage, with no opportunity for curative treatments. For these patients, systemic therapies are the main treatment modalities. However, the objective response rates of first-line systemic treatments are currently only 20-35%, and most patients inevitably develop drug resistance and disease progression during treatment, thus taking second-line therapies. Second-line treatment options include regorafenib,…",
                 "conditions": [
-                  "HCC - Hepatocellular Carcinoma"
+                  "Hepatocellular Carcinoma",
+                  "Oligoprogression"
                 ],
                 "interventions": [
                   {
-                    "name": "Stereotactic Body Radiation Therapy (SBRT)",
+                    "name": "SBRT and second-line systemic therapy",
                     "type": "RADIATION"
                   },
                   {
-                    "name": "QL1706",
+                    "name": "Second-line systemic therapy",
                     "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Male or female patients aged 18 to 75 years, inclusive.\n* Eastern Cooperative Oncology Group performance status score of 0 or 1.\n* Pathologically confirmed hepatocellular carcinoma, based on at least one lesion or previous biopsy confirming hepatocellular carcinoma.\n*…",
-                "answers_question": "Optimal SBRT dose within the 27.5-50 Gy/5fx personalized range",
-                "relevance_phrase": "SBRT 25-50 Gy/5fx to all intrahepatic lesions"
+                "eligibility_brief": "Inclusion Criteria:\n\n1. KPS (Karnofsky Performance Status) score ≥ 80;\n2. Pathologically, or clinically diagnosed hepatocellular carcinoma (HCC) based on the \\&#34; Chinese Guidelines for the Diagnosis and Treatment of Hepatocellular Carcinoma (2024 Edition) \\&#34;;\n3. Patients with…",
+                "answers_question": "Optimal sequencing of SBRT relative to systemic therapy start",
+                "relevance_phrase": "SBRT added at oligoprogression on 2nd-line"
+              },
+              {
+                "nct": "NCT07274774",
+                "brief_title": "SBRT Plus Systemic Therapy vs Systemic Therapy Alone in BCLC C Hepatocellular Carcinoma",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 184,
+                "primary_completion_date": "2027-11",
+                "brief_summary": "This prospective, multicenter, phase II randomized controlled trial compares the efficacy and safety of SBRT combined with systemic therapy versus systemic therapy alone in BCLC stage C hepatocellular carcinoma (HCC). The primary objective is to compare overall survival (OS) between the two arms. Secondary objectives include progression-free survival (PFS), objective response rate (ORR), quality of life (QoL), and incidence and severity of adverse events (AEs). Eligible patients will be…",
+                "conditions": [
+                  "Hepatocellular Carcinoma",
+                  "BCLC Stage C Hepatocellular Carcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Systemic therapy",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Age 18-70 years.\n2. Histologically or clinically diagnosed HCC per national guidelines.\n3. BCLC stage C (CNLC IIIA/IIIB), including PVTT and/or extrahepatic metastases amenable to protocol procedures.\n4. Child-Pugh class A or B (score ≤7).\n5. At least one measurable lesion…",
+                "answers_question": "Optimal sequencing of SBRT relative to systemic therapy start",
+                "relevance_phrase": "SBRT + systemic vs systemic alone, BCLC C, OS 1°"
               },
               {
                 "nct": "NCT05992220",
@@ -325,19 +318,54 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Older than 19 years of age, lower than 80 years of age\n* Child-Pugh class A hepatic function\n* Eastern Cooperative Oncology Group (ECOG) performance status (PS) of 0-1\n* Patients with HCC \\[diagnosed according to AASLD guidelines\\] invading the intrahepatic vascular system\n*…",
-                "answers_question": "Which macrovascular invasion subgroups derive the OS benefit?",
-                "relevance_phrase": "randomised EBRT to vascular invasion on atezo-bev"
+                "answers_question": "Which macrovascular-invasion subgroups gain most from SBRT",
+                "relevance_phrase": "atezo/bev +/- EBRT to the invaded vessel"
+              },
+              {
+                "nct": "NCT06725121",
+                "brief_title": "Using Radiotherapy and Immunotherapy to Treat Advanced Liver Cancer Before Transplant",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE1",
+                  "PHASE2"
+                ],
+                "enrollment_count": 48,
+                "primary_completion_date": "2031-06",
+                "brief_summary": "The goal of this clinical trial is to learn if locoregional therapy and immunotherapy can be used together to help patients with hepatocellular carcinoma (HCC) and macrovascular invasion achieve liver transplantation.\n\nThe main questions it aims to answer are:\n\n* How many patients will achieve transplant with this treatment strategy?\n* What will the 5-year survival and recurrence-free survival rates be for these patients?\n\nParticipants will:\n\n* Undergo a biopsy of the tumor.\n* Receive…",
+                "conditions": [
+                  "Hepatocellular Carcinoma (HCC)",
+                  "Macrovascular Invasion",
+                  "Liver Transplant Surgery",
+                  "Downstaging"
+                ],
+                "interventions": [
+                  {
+                    "name": "Atezolizumab & Bevacizumab",
+                    "type": "BIOLOGICAL"
+                  },
+                  {
+                    "name": "Yttrium-90 (Y-90)",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Stereotactic body radiotherapy (SBRT)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age 18-70\n* Weight \\> 30 kg\n* Child Pugh Turcotte score A5 to B7\n* Macrovascular invasion (Vp1-3)\n* Total tumour volume \\< 350 cm3\n* Alpha Fetoprotein \\< 5000 ng/mL\n* No extrahepatic disease\n* No other contraindications to undergo a LT\n* Eastern Cooperative Oncology Group…",
+                "answers_question": "Which macrovascular-invasion subgroups gain most from SBRT",
+                "relevance_phrase": "Vp1-3 only, SBRT + atezo/bev to transplant"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "atezolizumab bevacizumab hepatocellular radiotherapy",
-                "stereotactic body radiotherapy hepatocellular dose escalation",
+                "hepatocellular carcinoma SBRT atezolizumab",
+                "hepatocellular stereotactic radiotherapy sequencing",
                 "hepatocellular portal vein tumor thrombus radiotherapy"
               ],
               "queries_failed": [],
-              "candidates_returned": 33,
-              "fetched_at": "2026-08-10T03:57:07.233Z",
+              "candidates_returned": 25,
+              "fetched_at": "2026-08-11T00:51:42.546Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -352,127 +380,138 @@
       },
       {
         "disease_site": "head-neck",
-        "intro": "Opinion, not outcome: the reirradiation statements that most change practice (RPA III eligibility, 66 Gy definitive dose, SBRT dose, cord/brainstem limits) are exactly the ones that stalled at moderate consensus.",
+        "intro": "Reirradiation practice codified by ReCOG/ESTRO/ASTRO: agreement is strongest on selection and target volume, weakest on cumulative cord and brainstem limits.",
         "studies": [
           {
-            "name": "ReCOG/ESTRO/ASTRO HNSCC Reirradiation Consensus",
-            "tldr": "31 statements, 24 (77%) at high consensus (≥85%); elective nodal irradiation not recommended, 100% agreement.",
+            "name": "ReCOG HNSCC Reirradiation Consensus",
+            "tldr": "International consensus: 24 of 31 statements reached ≥85% agreement; elective nodal irradiation not recommended (100%), definitive CTV = GTV + 5 mm.",
             "details": [
-              "🔍 Expert-driven clinical practice statement, single formal voting round, 17-panellist international ReCOG panel, fixed denominator (no opinion retained)",
-              "📐 Consensus thresholds prespecified: high ≥85%, moderate 70-84%, low <70%; evidence levels 1-4 adapted from Oxford CEBM",
+              "🔍 31 clinical practice statements, single formal voting round by 17 radiation oncologists; agree/disagree/no opinion, denominator fixed at 17",
+              "🔍 Thresholds predefined: high ≥85%, moderate 70-84%, low <70%. 24 (77%) reached high consensus",
+              "🔍 Endorsed by ReCOG, ESTRO Reirradiation Focus Group, and ASTRO. Nasopharynx and rare histologies excluded",
               {
-                "text": "📊 Statements reaching 100% agreement (evidence level in parentheses)",
-                "subdetails": [
-                  "Review previous plan to separate in-field recurrence from marginal failure (3)",
-                  "No reirradiation for recurrence <6mo from previous RT, except urgent palliation (2)",
-                  "Postoperative reirradiation for RPA class I with positive margins or ECE (2)",
-                  "Elective nodal irradiation not recommended: no OS gain, more toxicity (3)",
-                  "Carotid encasement >180° and previous ulceration elevate blowout risk (3)",
-                  "Mandible ORN risk rises with cumulative EQD2 >114-119 Gy (3)"
-                ]
-              },
-              {
-                "text": "📊 Dose corridors by technique / setting (consensus %, evidence level)",
+                "text": "📊 Dose and technique statements by scenario (agreement, evidence level)",
                 "table": {
                   "columns": [
-                    "Setting",
-                    "Recommended dose",
+                    "Scenario",
+                    "Recommendation",
                     "Consensus",
-                    "Evidence"
+                    "Evidence level"
                   ],
                   "rows": [
                     [
-                      "Definitive IMRT",
-                      "66 Gy",
-                      "moderate (82%)",
-                      "4"
-                    ],
-                    [
-                      "Postoperative IMRT",
-                      "60 Gy",
-                      "high (94%)",
+                      "Definitive, GTV >25 cc",
+                      "IMRT preferred, superior to SBRT",
+                      "88%",
                       "3"
                     ],
                     [
-                      "SBRT",
-                      "~40 Gy in 5 fractions",
-                      "moderate (76%)",
+                      "Definitive, GTV ≤25 cc (cT1-T2)",
+                      "IMRT or SBRT, similar outcomes",
+                      "88%",
                       "3"
                     ],
                     [
-                      "Definitive CTV margin",
-                      "GTV + 5 mm",
-                      "high (94%)",
+                      "Definitive IMRT dose",
+                      "66 Gy commonly used",
+                      "82%",
                       "4"
                     ],
                     [
-                      "Hyperfractionation",
-                      "option, no clear gain",
-                      "moderate (76%)",
+                      "Definitive CTV",
+                      "GTV + 5 mm margin",
+                      "94%",
+                      "4"
+                    ],
+                    [
+                      "Postoperative technique",
+                      "Normofractionated IMRT over SBRT",
+                      "94%",
+                      "3"
+                    ],
+                    [
+                      "Postoperative dose",
+                      "60 Gy commonly used",
+                      "94%",
+                      "3"
+                    ],
+                    [
+                      "SBRT dose",
+                      "~40 Gy in five fractions",
+                      "76%",
+                      "3"
+                    ],
+                    [
+                      "Elective nodal irradiation",
+                      "Not recommended",
+                      "100%",
                       "3"
                     ]
                   ]
                 }
               },
               {
-                "text": "📊 Technique choice by RPA class and GTV volume (consensus %)",
+                "text": "📊 Patient-selection statements by interval and RPA class",
                 "table": {
                   "columns": [
                     "Scenario",
                     "Statement",
-                    "Consensus"
+                    "Consensus",
+                    "Evidence level"
                   ],
                   "rows": [
                     [
-                      "Postoperative",
-                      "Normofractionated IMRT preferred over SBRT",
-                      "high (94%)"
+                      "Recurrence <6 mo",
+                      "Reirradiation generally not advised",
+                      "100%",
+                      "2"
                     ],
                     [
-                      "RPA II, ≤25 cc / cT1-T2",
-                      "IMRT or SBRT, similar outcomes",
-                      "high (88%)"
+                      "Recurrence 6-12 mo",
+                      "Highly selected cases only",
+                      "88%",
+                      "2"
                     ],
                     [
-                      "RPA II, >25 cc",
-                      "IMRT superior to SBRT",
-                      "high (88%)"
+                      "RPA class I, R1 or ECE",
+                      "Postoperative reirradiation considered",
+                      "100%",
+                      "2"
                     ],
                     [
-                      "Larynx / hypopharynx unresected",
-                      "SBRT with caution, severe toxicity risk",
-                      "high (94%)"
+                      "R0 unlikely, margins negative",
+                      "Reirradiation can still be considered",
+                      "82%",
+                      "4"
                     ],
                     [
-                      "Selected OAR-limited cases",
-                      "Proton therapy can be considered",
-                      "high (88%)"
+                      "RPA class III",
+                      "Generally no curative-intent reirradiation",
+                      "76%",
+                      "3"
                     ],
                     [
-                      "<25 cc oral cavity / oropharynx",
-                      "Brachytherapy valid, expert centres",
-                      "high (88%)"
+                      "Previous plan review",
+                      "Distinguish in-field vs marginal failure",
+                      "100%",
+                      "3"
                     ]
                   ]
                 }
               },
               {
-                "text": "📐 Cumulative OAR constraints, all in EQD2 (α/β 2 for late tissues)",
+                "text": "⚠️ OAR thresholds carry the lowest agreement in the document",
                 "subdetails": [
-                  "Carotid: avoid >120-125 Gy (94%, level 3)",
-                  "Spinal cord D0·1 cc ≤50 Gy, brainstem ≤55 Gy (70%, level 4)",
-                  "Cord/brainstem surface ~60 Gy acceptable case-by-case (94%, level 4)",
-                  "Recovery factors 10-25% only with caution and documentation (88%, level 4)"
+                  "Carotid cumulative EQD2 >120-125 Gy (α/β=2) avoided when feasible: 94%",
+                  "Mandible ORN risk rises above cumulative EQD2 114-119 Gy: 100%",
+                  "Spinal cord D0.1cc ≤50 Gy, brainstem ≤55 Gy as target: 70%, the lowest in the set",
+                  "Higher thresholds (~60 Gy) at cord or brainstem surface case-by-case: 94%"
                 ]
               },
-              "🔗 RPA classes from Ward: 2-yr OS 61·9% (I, n=91), 40·0% (II, n=230), 16·8% (III, n=81)",
-              "🔗 Caudell 505-pt cohort drives the dose statement: 2-yr OS 49·3% (≥66 Gy) vs 34·2% (60·0-65·9) vs 30·4% (<60 Gy)",
-              "🔗 Vargo 2018 IMRT vs SBRT in RPA II: 2-yr OS 35·4% vs 18·6%, p<0·001; no difference when SBRT ≥35 Gy/5 fx to ≤25 cc",
-              "⚠️ 7 of 31 statements only moderate, and they cluster on the decisions that actually matter: RPA III eligibility, 66 Gy reference dose, SBRT dose, cord/brainstem limits",
-              "⚠️ Single voting round, no iterative Delphi; agreement is opinion measured against opinion, not an outcome",
-              "⚠️ Most dose-accumulation and delineation statements sit at evidence level 4 (expert consensus / extrapolation)",
-              "⚠️ Pooled toxicity across 39 studies (3766 pts): G3+ acute 32%, late 29%, carotid blowout up to 4%",
-              "⚠️ Nasopharynx and rare histologies excluded; no randomised data on sequencing reirradiation vs first-line IO"
+              "📐 Evidence levels are mostly 3 and 4; only the interval and RPA class I statements reach level 2, none level 1",
+              "⚠️ The seven moderate-agreement statements cluster on dose prescription, fractionation, and cumulative cord/brainstem limits, not on selection principles",
+              "⚠️ Single voting round, no iterative Delphi, and no re-vote after discussion, so disagreement is recorded rather than resolved",
+              "⚠️ Panel of 17 with a 10-member core drafting group; agreement is opinion measured against opinion, not an outcome"
             ],
             "figures": [],
             "nct": null,
@@ -480,51 +519,64 @@
               1000000036
             ],
             "slug": "hnscc-reirradiation-consensus",
-            "significance": "The operational cut is volume, not phase: ≤25 cc RPA II recurrences take IMRT or SBRT interchangeably (88%), >25 cc take IMRT (88%), and postoperative takes IMRT over SBRT (94%). Elective nodal irradiation is off at 100% agreement. Larynx/hypopharynx SBRT carries the explicit caution.",
-            "monday_clinic": "In a previously irradiated HNSCC recurrence being worked up for salvage, this frames selection by interval (<6mo generally off), resection status, and GTV volume, and it does not address nasopharyngeal recurrence or rare histologies.",
+            "significance": "Two statements change planning immediately: elective nodal irradiation is off (100% agreement, no locoregional-failure or OS gain in the 505-pt Caudell cohort, more acute toxicity), and volume, not phase preference, picks the technique at 25 cc. Below 25 cc IMRT and SBRT are called equivalent (88%); above it IMRT is preferred (88%).",
+            "monday_clinic": "In a previously irradiated HNSCC recurrence being contoured this week, this supports omitting elective nodal volumes and using GTV + 5 mm for definitive CTV; it does not cover nasopharyngeal recurrence or rare histologies, which were excluded.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Expert-driven clinical practice statement from ReCOG. Core group of six radiation oncologists, three physicists and one research fellow drafted; **31 statements** went to a **single formal voting round** of **17 international radiation oncologists** (agree / disagree / no opinion, fixed 17-panellist denominator). No second round."
+                "body": "Expert-driven clinical practice statement. A core group of **six radiation oncologists, three physicists, and one research fellow** drafted statements from the literature, then an international panel of **17 radiation oncologists** voted once on **31 statements** (agree / disagree / no opinion, no-opinion retained in the denominator). **No second round.**"
               },
               {
-                "label": "Endpoints",
-                "body": "Output is **agreement percentage plus an evidence level**, not an efficacy result. Thresholds prespecified: high **≥85%**, moderate **70-84%**, low **<70%**. **24 of 31 (77%)** reached high consensus; the 7 moderate statements clustered on unfavourable-prognosis subgroups, narrow therapeutic ratio, and dose prescription/fractionation."
+                "label": "Population & inclusion",
+                "body": "Recurrent or second-primary **HNSCC within a previously irradiated region**, definitive or postoperative reirradiation. **Nasopharyngeal cancers and rare histologies are excluded**, the former covered by separate 2021 international recommendations."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Definitive: **CTV = GTV + 5 mm** (94%), IMRT ~**66 Gy** for >25 cc (82%), **SBRT ~40 Gy/5 fx** for ≤25 cc (76%). Postoperative: IMRT ~**60 Gy** (94%), preferred over SBRT (94%). **Elective nodal irradiation not recommended** (100%), on Caudell's 505-pt cohort where ENI in 186 (36·8%) gave no locoregional-failure or OS gain and more acute toxicity."
+                "body": "Definitive: **CTV = GTV + 5 mm** (94%), IMRT to **~66 Gy** for GTV >25 cc, IMRT or SBRT below 25 cc, SBRT at an equivalent **~40 Gy in five fractions**. Postoperative: normofractionated **IMRT ~60 Gy** (94%), SBRT discouraged for lack of data. **Elective nodal irradiation is not recommended in either setting (100%)**."
+              },
+              {
+                "label": "Endpoints",
+                "body": "The output is **agreement**, not an outcome. Each statement carries an observed agreement percentage against predefined thresholds (high ≥85%, moderate 70-84%, low <70%) plus an Oxford-adapted evidence level 1 to 4."
+              },
+              {
+                "label": "Results",
+                "body": "**24 of 31 (77%) statements reached high consensus.** The seven moderate statements cluster on R0-unlikely postoperative indications (82%), RPA class III exclusion (76%), postoperative CTV rules (82%), the 66 Gy reference dose (82%), hyperfractionation (76%), SBRT dose (76%), and cord/brainstem cumulative limits (**70%, the lowest**)."
               },
               {
                 "label": "Safety",
-                "body": "Cumulative dose in **EQD2**, α/β 2-3 Gy for late tissues. Carotid **>120-125 Gy** raises blowout risk (94%); in a 1554-pt reirradiated cohort blowout occurred in 41 (2·6%) with 29 of 38 (76%) mortality. Mandible ORN rises above **114-119 Gy**; ORN rates 2-18% across 18 of 39 studies."
+                "body": "The supporting literature reports pooled grade 3 or higher acute toxicity of **32%** and late toxicity of **29%** across 39 studies (3766 pts). Carotid blowout occurred in **41 (2.6%) of 1554** reirradiated pts with carotid involvement, with mortality in **29 (76%) of 38** with data. Mandibular osteoradionecrosis rates ranged **2% to 18%**."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The technique statements track Vargo's multi-institutional comparison: in RPA class II, IMRT gave 2-yr OS **35.4% vs 18.6%** for SBRT (p<0.001), but the difference vanished for **≥35 Gy in five fractions to ≤25 cc or T1-T2** targets. The 66 Gy threshold comes from Caudell's 505-pt cohort (2-yr OS **49.3% with ≥66 Gy vs 34.2% at 60.0-65.9 Gy vs 30.4% below 60 Gy**), the same cohort that found no locoregional-control or OS gain from elective nodal irradiation."
               },
               {
                 "label": "Applies to",
-                "body": "Represents recurrent or second primary HNSCC in a previously irradiated field considered for definitive or postoperative reirradiation. Does not represent nasopharyngeal carcinoma or rare histologies, both explicitly excluded."
+                "body": "Represents recurrent or second-primary HNSCC being considered for definitive or postoperative reirradiation. Does not represent nasopharyngeal recurrence, rare histologies, or benign disease."
               },
               {
                 "label": "Limitations",
-                "body": "Agreement was measured once, with no opportunity for panellists to revise after seeing the distribution, so the 77% high-consensus figure is not a converged Delphi result. The dose-accumulation and delineation panels sit almost entirely at **evidence level 4**, and the authors themselves frame the thresholds as pragmatic planning objectives rather than evidence-based limits."
+                "body": "Agreement was computed with **no-opinion votes left in the denominator**, so a statement can read as moderate because panellists abstained rather than objected, and the text does not report how often that happened. Evidence levels are also **assigned to the highest available direct evidence**, so a level 3 label does not mean the specific dose corridor or margin was tested at that level."
               },
               {
                 "label": "Discussion",
-                "body": "Lowest agreement fell on cumulative **cord (≤50 Gy) and brainstem (≤55 Gy)** constraints, reflecting disagreement over how conservative to be and how to model tissue recovery. Sequencing reirradiation against first-line immune checkpoint inhibitors has **no randomised data**; non-randomised combination data show no unexpected safety signal to date."
+                "body": "The moderate-agreement statements are the informative ones: they mark where the field genuinely splits (cord and brainstem cumulative limits, hyperfractionation, SBRT dose), and the authors read that split as clinical uncertainty rather than process failure. Sequencing against first-line immune checkpoint inhibitors is explicitly left open, with **no randomised data** on whether to treat locally first or defer."
               }
             ],
+            "interpretation": "The useful way to read this document is by its disagreements. Twenty-four of thirty-one statements cleared 85%, and the ones that did not are not scattered: they sit on dose prescription, fractionation, and cumulative organ-at-risk limits. Where the panel agreed completely (review the prior plan, avoid reirradiation inside six months, skip elective nodal volumes), the statements describe things most experienced centres already do. Where it fell to 70% (a cumulative cord D0.1cc of 50 Gy or less, brainstem 55 Gy or less), the statement is precisely the number a planner most wants handed to them. That inversion is the honest signal in the paper, and it should temper how firmly any single threshold here is quoted back in a tumour board.\n\nThe elective nodal irradiation statement is the one that carries real practice weight, and it is worth noting how thin its footing is relative to its 100% agreement. It rests largely on Caudell's 505-patient multi-institution cohort, where 186 patients received elective coverage without a reduction in locoregional failure or a gain in overall survival, but with more acute toxicity. That is retrospective, and elective coverage in a reirradiated neck is exactly the kind of decision confounded by why the treating physician chose it. The panel's unanimity probably reflects that the toxicity argument is compelling on its own: in a field where pooled grade 3 or higher late toxicity runs at 29% and carotid blowout mortality is reported at 76% among those with data, an intervention with no demonstrated efficacy signal and a demonstrated toxicity cost does not need randomised refutation to be dropped.\n\nThe technique guidance is more defensible because it is volume-conditioned rather than modality-preferential. The Vargo comparison showed IMRT beating SBRT on 2-year overall survival in RPA class II, 35.4% versus 18.6%, but that gap closed when SBRT was restricted to 35 Gy or more in five fractions for targets of 25 cc or less. So the 25 cc line the panel draws is not an arbitrary cut point, it is the reconstruction of a subgroup in which the two techniques stopped differing. A reader should treat it as a statement about target selection and SBRT dose adequacy, not about SBRT being inferior. Underdosed SBRT to a large infiltrative recurrence is the failure mode the data actually identify.\n\nWhat should move confidence downward is the voting mechanics. No-opinion responses stayed in the denominator, which means a statement can land at 76% because four panellists declined to vote rather than because four disagreed, and the paper does not separate those. There was a single round with no re-vote after discussion, so the moderate statements record an unresolved split rather than a considered one. Combined with evidence levels that are mostly 3 and 4, and none level 1, the appropriate posture is to use the high-consensus statements as defaults and the moderate ones as prompts for individual discussion.\n\nThe gap the document names but cannot fill is sequencing against immune checkpoint inhibitors. With first-line IO now routine in recurrent or metastatic disease, the practical question is whether to reirradiate a symptomatic local recurrence before starting systemic therapy or after. The panel states plainly that no randomised data define this, and that the available combination data show no unexpected safety signal. That is a fair reading of the evidence and also an admission that the single most common decision point in this population is currently outside the reach of consensus.",
             "relevant_specialties": [
               "radonc",
               "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Volume and resection status, not phase of prior disease, drive technique: ≤25 cc RPA II takes IMRT or SBRT interchangeably (88%), >25 cc takes IMRT (88%), postoperative takes IMRT (94%) at ~60 Gy. Elective nodal irradiation is off at 100%, and cumulative carotid EQD2 >120-125 Gy is the hard planning ceiling.",
-              "surgonc": "Salvage surgery stays the preferred first move when feasible, and the panel extends postoperative reirradiation past strict pathology: with R0 unlikely on preoperative imaging or surgical assessment, reirradiation can be considered even without reported positive margins (82%). RPA class I (resected, >2 yr interval) with positive margins or ECE is the 100%-agreement indication."
+              "radonc": "Two statements change planning immediately: elective nodal irradiation is off (100% agreement, no locoregional-failure or OS gain in the 505-pt Caudell cohort, more acute toxicity), and volume picks the technique at 25 cc, IMRT and SBRT equivalent below (88%), IMRT preferred above (88%). Definitive CTV is GTV + 5 mm (94%).",
+              "surgonc": "The panel decouples the reirradiation decision from final margin status: reirradiation can be considered when R0 is unlikely on preoperative imaging or surgical assessment even if pathology does not report positive margins (82%), because recurrent tumour sits as small islets in fibrotic tissue. RPA class I (resected, >2 yr interval) with R1 or extracapsular extension is the clearest postoperative indication (100%)."
             },
             "open_questions": [
               "Optimal sequencing of reirradiation vs first-line immune checkpoint inhibitors",
-              "Validated cumulative dose constraints and tissue recovery models",
-              "Whether RPA class III patients should be systematically excluded"
+              "Validated tissue recovery factor for cord and brainstem cumulative dose",
+              "Whether hyperfractionated reirradiation improves outcomes outside nasopharynx"
             ],
             "consort": null,
             "modality": "radiation",
@@ -565,7 +617,7 @@
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically (histologically or cytologically) confirmed diagnosis of locoregional recurrent or any new primary squamous cell carcinoma of the head and neck (including of the nasopharynx or paranasal sinus) that is not amenable to curative resection.\n\n  * Patients for whom…",
                 "answers_question": "Optimal sequencing of reirradiation vs first-line immune checkpoint inhibitors",
-                "relevance_phrase": "SBRT reRT +/- pembro, PFS 1' EP"
+                "relevance_phrase": "SBRT reirradiation +/- pembrolizumab, PFS 1° EP"
               },
               {
                 "nct": "NCT07026474",
@@ -612,46 +664,23 @@
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Written informed consent obtained from the subject prior to performing any protocol-related procedures.\n* Age ≥ 18 years at time of study entry.\n* Eastern Cooperative Oncology Group (ECOG) performance status of 0, 1 or 2.\n* Locoregionally recurrent or second primary HNSCC.\n*…",
                 "answers_question": "Optimal sequencing of reirradiation vs first-line immune checkpoint inhibitors",
-                "relevance_phrase": "ph3 re-RCT + sequential pembro vs pembro alone"
-              },
-              {
-                "nct": "NCT05313191",
-                "brief_title": "Prospective Evaluation of Pencil Beam Scanning Proton Therapy for Previously Irradiated Tumors",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 1800,
-                "primary_completion_date": "2028-01",
-                "brief_summary": "The goal of this clinical research trial is to study the use of differing investigational doses and scheduling for Proton Therapy for tumors previously treated with radiation therapy. Generally, when patients are first treated for cancer with radiation therapy, they are treated with traditional photon (or x-ray) radiation therapy, which uses high-energy waves to kill tumor cells. In some cases, the cancer either returns or a new tumor can present in a different part of the body. With the usual…",
-                "conditions": [
-                  "CNS Cancer",
-                  "Head and Neck Cancer",
-                  "GI Cancer",
-                  "Gynecologic Cancer",
-                  "Prostate Cancer",
-                  "Thoracic Cancer",
-                  "Breast Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Pencil Beam Scanning Proton Therapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age 18 years\n* Patient provides study specific informed consent prior to study entry.\n* Documented history and physical exam within 90 days prior to registration.\n* ECOG PS 0, 1, or 2 within 90 days prior to registration\n\nExclusion Criteria:\n\n* Non malignant systemic disease…",
-                "answers_question": "Validated cumulative dose constraints and tissue recovery models",
-                "relevance_phrase": "prospective PBS proton reRT dose/schedule registry"
+                "relevance_phrase": "phase 3 re-CRT + sequential pembro vs pembro alone"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "reirradiation pembrolizumab head neck recurrent",
-                "cumulative dose reirradiation head neck"
+                "reirradiation pembrolizumab head neck",
+                "reirradiation cumulative dose spinal cord",
+                "hyperfractionated reirradiation head neck"
               ],
-              "queries_failed": [],
-              "candidates_returned": 5,
-              "fetched_at": "2026-08-10T03:57:13.052Z",
+              "queries_failed": [
+                {
+                  "term": "hyperfractionated reirradiation head neck",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 4,
+              "fetched_at": "2026-08-11T00:51:48.838Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [

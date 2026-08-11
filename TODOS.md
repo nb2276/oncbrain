@@ -114,6 +114,8 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 ## Known limitations (informational — not on a roadmap)
 
+- **The middle dot appears HTML-entity-encoded in stored abstracts.** `15&#xb7;1` rather than `15·1`, which `normalizeNumericText` (figure-extract.ts) does not decode. Harmless today — no production grounding path compares against entity-encoded text — but it produced two false "ungrounded number" verdicts in a manual audit of v0.48 arm outcomes, so any future grounding check that reads `papers.abstract` must decode entities first.
+
 - **OCR is macOS-only.** Linux/CI builds produce uniformly null captions; scanned-PDF OCR (v0.8 PR2) needs the Mac Vision binary + poppler.
 - **Figure caption validator checks numeric tokens only.** Can't catch mislabeled axes or wrong-arm attribution.
 - **Disease-site classification uses MeSH terms / keywords, not author affiliations.** Explicit product decision, not a deferred item.

@@ -1,7 +1,7 @@
 {
   "date": "2026-06-12",
   "conference": null,
-  "generated_at": 1784441558377,
+  "generated_at": 1786410512320,
   "slug_aliases": [
     "eau-2026-mdt-sbrt-oligomet-prostate",
     "eau-2026-mdt-sbrt-review",
@@ -9,944 +9,26 @@
     "eau2026-mdt-sbrt-review"
   ],
   "digest": {
-    "top_line": "WOLVERINE IPD meta-analysis (472 pts): MDT+SOC PFS HR 0.44, rPFS 0.60; OS HR 0.63 misses significance (p=0.051), no proven survival gain yet.",
-    "tldr": "Metastasis-directed SBRT dominates the day: consistent PFS gains across oligomet prostate (WOLVERINE HR 0.44, ORIOLE 0.30, RADIOSA 0.43, ARTO 0.35) in both HSPC and CRPC, but every OS signal stays short of significance. Durable survival benefit and de novo/synchronous disease remain open (STAMPEDE2 pending).",
+    "top_line": "ARTO: adding SBRT to abiraterone in oligometastatic CRPC lifts biochemical response 92% vs 68.3% (OR 5.34), PFS HR 0.35.",
+    "tldr": "An all-prostate day, and all of it is metastasis-directed RT. ARTO pushes MDT into the castration-resistant setting on an ARSI backbone, and RADIOSA asks the mirror question in metachronous oligorecurrence: 6mo ADT on top of SBRT, cPFS 32.2 vs 15.1mo (HR 0.43). WOLVERINE's IPD pool (472 pts) holds PFS at HR 0.44 but leaves OS at HR 0.63 (0.39-1.00), so the survival case stays unmade.",
     "sites": [
       {
         "disease_site": "prostate",
-        "intro": "Entire day is metastasis-directed SBRT in oligometastatic prostate: four randomized/pooled datasets plus an EAU evidence review, all showing progression benefit but no mature OS signal.",
+        "intro": "Five reads on the same decision: whether ablating oligometastatic deposits changes disease course, and what systemic therapy belongs alongside it.",
         "studies": [
           {
-            "name": "ORIOLE",
-            "tldr": "6-mo progression 19% vs 61% favoring SABR (P=.005); mPFS NR vs 5.8mo, HR 0.30 (0.11-0.81) in oligomet HSPC.",
-            "details": [
-              {
-                "text": "📊 SABR vs observation, primary + biochemical endpoints",
-                "table": {
-                  "columns": [
-                    "Endpoint",
-                    "SABR",
-                    "Observation",
-                    "Effect"
-                  ],
-                  "rows": [
-                    [
-                      "6-mo progression (composite)",
-                      "7/36 (19%)",
-                      "11/18 (61%)",
-                      "P=.005"
-                    ],
-                    [
-                      "6-mo PSA progression",
-                      "4/36 (11%)",
-                      "9/18 (50%)",
-                      "P=.005"
-                    ],
-                    [
-                      "Median PFS",
-                      "Not reached",
-                      "5.8 mo",
-                      "HR 0.30 (0.11-0.81), P=.002"
-                    ],
-                    [
-                      "Median biochemical PFS",
-                      "Not reached",
-                      "6.4 mo",
-                      "HR 0.31 (0.13-0.75), P=.002"
-                    ]
-                  ]
-                }
-              },
-              "🔍 Phase 2 RCT, N=54, 2:1 SABR:observation, 3 US radiation centers; recurrent HSPC, 1-3 conventional-imaging mets, off ADT ≥6mo",
-              "📊 Local control 98.9% at 6 mo",
-              "No grade ≥3 AEs; QoL (BPI) unchanged between arms",
-              {
-                "text": "📊 Completeness of PSMA ablation drives outcome (no untreated vs any untreated PET-avid lesion)",
-                "table": {
-                  "columns": [
-                    "Endpoint",
-                    "No untreated",
-                    "Any untreated",
-                    "Effect"
-                  ],
-                  "rows": [
-                    [
-                      "6-mo progression",
-                      "1/19 (5%)",
-                      "6/16 (38%)",
-                      "P=.03"
-                    ],
-                    [
-                      "Median PFS",
-                      "Not reached",
-                      "11.8 mo",
-                      "HR 0.26 (0.09-0.76), P=.006"
-                    ],
-                    [
-                      "New mets 180d",
-                      "3/19 (15.8%)",
-                      "10/16 (62.5%)",
-                      "P=.006"
-                    ],
-                    [
-                      "DMFS",
-                      "29.0 mo",
-                      "6.0 mo",
-                      "HR 0.19 (0.07-0.54), P<.001"
-                    ]
-                  ]
-                }
-              },
-              "🔍 PSMA-PET blinded to planning: 16/36 SABR pts had PET-avid lesions left untreated → completeness of ablation, not SABR alone, tracked with outcome",
-              "🔗 vs STOMP (phase 2 MDT in oligomet PC): concordant progression/ADT-deferral benefit from metastasis-directed therapy",
-              "⚠️ Small (N=54) phase 2; composite surrogate primary read at only 6 mo, not OS-powered",
-              "⚠️ Conventional-imaging enrollment under-detects PET-avid disease; observation arm open-label",
-              "SABR induced clonotypic T-cell expansion; baseline clonality tracked progression (0.082085 vs 0.026051, P=.03)"
-            ],
-            "figures": [],
-            "nct": "NCT02680587",
-            "tweet_ids": [
-              1000000034
-            ],
-            "slug": "oriole",
-            "verdict": {
-              "soc_implication": "early-signal",
-              "rationale": "Phase 2, N=54; composite progression primary read at only 6mo. Randomised but small, short f/u. Concordant with STOMP MDT signal; awaits phase 3.",
-              "audience": "Recurrent HSPC, 1-3 conventional-imaging mets, off ADT ≥6mo"
-            },
-            "significance": "The RT read is completeness, not SABR alone: among SABR pts, leaving any PSMA-avid lesion untreated collapsed DMFS to 6.0 vs 29.0 mo (HR 0.19, 0.07-0.54). Conventional imaging under-stages, so PSMA-PET staging plus total consolidation, not partial MDT, is the decision this moves. SABR dose/fractionation not reported in source.",
-            "monday_clinic": "In recurrent HSPC with 1-3 conventional-imaging mets and off ADT ≥6mo, this supports metastasis-directed SABR to defer systemic therapy; it does not extend to higher-volume or castration-resistant disease.",
-            "primary_endpoint": {
-              "name": "Progression at 6 months (composite)",
-              "klass": "surrogate",
-              "stat_value": "19% vs 61%",
-              "stat_detail": "P=.005; SABR vs observation"
-            },
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Phase 2 randomized trial, **2:1 SABR vs observation**, N=54 at 3 US radiation centers. **Primary:** composite progression at 6 mo. Median follow-up 18.8 mo."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Recurrent hormone-sensitive prostate cancer, **1-3 asymptomatic mets ≤5 cm** on conventional imaging, prior definitive treatment of the primary. **No ADT within 6 mo.** Median age 68."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "SABR to all conventional-imaging metastases; **PSMA-PET obtained but blinded to planning**. Dose/fractionation not reported in source. Local control **98.9%** at 6 mo."
-              },
-              {
-                "label": "Discussion",
-                "body": "Because PET was blinded, **16/36 SABR pts had untreated PET-avid lesions**; any untreated lesion collapsed DMFS to **6.0 vs 29.0 mo** (HR 0.19). Total consolidation, not SABR per se, drove the benefit."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Concordant with **STOMP** (phase 2 MDT in oligomet PC): both show metastasis-directed therapy delays progression and defers ADT. The pooled ORIOLE+STOMP analysis reinforced the signal."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents recurrent hormone-sensitive oligometastatic prostate cancer, 1-3 mets, off ADT. Does not represent higher-volume, castration-resistant, or ADT-dependent disease."
-              },
-              {
-                "label": "Limitations",
-                "body": "Phase 2, **N=54**; composite surrogate primary read at 6 mo, not OS-powered. Open-label observation control. Conventional-imaging staging misses PET-avid disease."
-              }
-            ],
-            "relevant_specialties": [
-              "radonc",
-              "medonc"
-            ],
-            "open_questions": [
-              "Overall survival benefit of metastasis-directed SABR",
-              "Role of PSMA-PET staging before consolidative SABR",
-              "SABR benefit in higher-volume or ADT-dependent disease"
-            ],
-            "consort": {
-              "enrolled": null,
-              "excluded": null,
-              "randomized": 54,
-              "arms": [
-                {
-                  "label": "SABR",
-                  "allocated": 36,
-                  "analyzed": 36
-                },
-                {
-                  "label": "Observation",
-                  "allocated": 18,
-                  "analyzed": 18
-                }
-              ]
-            },
-            "modality": "radiation",
-            "intent": "palliative",
-            "methodology": "phase-2-trial",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT06563388",
-                "brief_title": "Stereotactic Ablative Radiotherapy (SABR) for the Treatment of Patients With Metastatic Cancer, ID-COMET Trial",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 800,
-                "primary_completion_date": "2032-09",
-                "brief_summary": "This protocol is comprised of three unblinded, randomized, single-center studies to evaluate the impact of immediate versus three-month delayed comprehensive ablative treatment on survival in newly diagnosed metastatic patients with lung (Trial 1), colorectal (Trial 2), and prostate (Trial 3) cancers",
-                "conditions": [
-                  "Oligometastasis",
-                  "Lung Cancer",
-                  "Colo-rectal Cancer",
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Stereotactic Ablative Radiotherapy",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Best Practice",
-                    "type": "OTHER"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age 1 year or older.\n* Willing to provide informed consent.\n* ECOG ≤ 3.\n* Life expectancy \\> 6 months.\n* Trials 1-3: Histologically confirmed lung, prostate or colorectal malignancy with metastatic disease detected on imaging. Biopsy of metastasis is preferred, but not…",
-                "answers_question": "Overall survival benefit of metastasis-directed SABR",
-                "relevance_phrase": "phase 3 SABR vs 3-mo delay, survival endpoint"
-              },
-              {
-                "nct": "NCT03762759",
-                "brief_title": "Fluciclovine F18 or Ga68-PSMA PET/CT to Enhance Prostate Cancer Outcomes",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 140,
-                "primary_completion_date": "2025-05",
-                "brief_summary": "This phase II trial studies how well a positron emission tomography (PET)/computed tomography (CT) scan using fluciclovine F18 compared with a PET/CT scan with 68Ga-PSMA works in planning radiation treatments and enhancing outcomes in patients with prostate adenocarcinoma. Fluciclovine F18 and 68Ga-PSMA are types of tracers, called radiotracers, that are injected and can accumulate in tumor cells to develop images of them during a PET/CT scan. It is not yet known whether giving fluciclovine F18…",
-                "conditions": [
-                  "Prostate Adenocarcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "Computed Tomography",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Fluciclovine F18",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Gallium Ga68-labeled PSMA-11",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Positron Emission Tomography",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Adenocarcinoma of the prostate, post radical-prostatectomy\n* Detectable prostate-specific antigen (PSA)\n* Eastern Cooperative Oncology Group (ECOG)/Zubrod performance status of 0-2\n* No definitive findings for skeletal metastasis on technetium 99-m methyl diphosphonate (MDP)…",
-                "answers_question": "Role of PSMA-PET staging before consolidative SABR",
-                "relevance_phrase": "PSMA vs fluciclovine PET for RT planning"
-              },
-              {
-                "nct": "NCT03582774",
-                "brief_title": "Multicenter Randomized Trial of 68Ga-PSMA-11 PET/CT Based SRT After Radical Prostatectomy",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 193,
-                "primary_completion_date": "2027-07",
-                "brief_summary": "This phase III trial studies how well Gallium Ga 68-labeled PSMA-11 (68Ga-PSMA-11) positron emission tomography (PET)/computed tomography (CT) works in diagnosing participants with prostate cancer that has come back after surgery. 68Ga-PSMA-11 are taken up by cancer cells. Diagnostic procedures, such as PET/CT scans, may help find and diagnose prostate cancer and find out how far the disease has spread. Giving 68Ga-PSMA-11 with PET/CT may help doctors plan better for salvage radiation therapy…",
-                "conditions": [
-                  "Recurrent Prostate Carcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "Best Practice",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Computed Tomography",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Gallium Ga 68-labeled PSMA-11",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Positron Emission Tomography",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histopathology proven prostate cancer.\n* Planned SRT for recurrence after primary prostatectomy.\n* Prostate-specific antigen (PSA) \\>= 0.1 ng/ml at time of enrollment.\n* Willingness to undergo radiotherapy.\n* Treating radiation oncologist intends to incorporate 68Ga-PSMA-11…",
-                "answers_question": "Role of PSMA-PET staging before consolidative SABR",
-                "relevance_phrase": "randomized 68Ga-PSMA PET-guided RT vs standard"
-              },
-              {
-                "nct": "NCT04302454",
-                "brief_title": "Androgen Deprivation Therapy for Oligo-recurrent Prostate Cancer in Addition to radioTherapy",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 280,
-                "primary_completion_date": "2027-10",
-                "brief_summary": "The overall aim of this project is to test the hypothesis that the addition of ADT to metastasis-directed radiotherapy (MDRT) in well-selected PCa patients with oligo-metastatic disease prolongs the metastases progression-free survival (MPFS) compared to MDRT alone.",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Radiotherapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Leuprorelin",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion criteria:\n\n1. Histologically proven initial diagnosis of adenocarcinoma of the Prostate.\n2. Biochemical recurrence of prostate cancer following primary local prostate treatment (radical prostatectomy, primary radiotherapy or radical prostatectomy +/- prostate bed adjuvant salvage…",
-                "answers_question": "SABR benefit in higher-volume or ADT-dependent disease",
-                "relevance_phrase": "phase 3 MDRT ± ADT vs MDRT alone, MPFS"
-              },
-              {
-                "nct": "NCT06978296",
-                "brief_title": "HIghly MetAstatic Life Prolonging Therapy-Resistant Prostate Cancer: Role of Stereotactic Radiotherapy for Bone and Lymph Node Metastases (HIMARS)",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 18,
-                "primary_completion_date": "2028-05",
-                "brief_summary": "The investigators propose redefining this concept by focusing on volume rather than the number of metastases. To achieve this, the investigators aim to determine the Maximum Tolerated Volume (MTV) of metastatic lesions treatable with SRT (Stereotaxic radiotherapy) in a phase 1 study. In this study, the investigators will recruit patients with high-volume metastatic disease in bones or lymph nodes and progressively irradiate a volume-escalated subset of the total lesions. The selection will…",
-                "conditions": [
-                  "Prostate Cancer Metastatic Disease",
-                  "Oligometastatic Prostate Cancer (OMPC)"
-                ],
-                "interventions": [
-                  {
-                    "name": "Stereotactic body radiotherapy (SBRT)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Metastatic prostate cancer with clinical progression after the use of androgen-receptor pathway inhibitor, chemotherapy or any other life-prolonging therapy. Patient could have been treated previously by RadioLigand Therapy (RLT).\n* Performance Status \\< 3\n* Bone and/or lymph…",
-                "answers_question": "SABR benefit in higher-volume or ADT-dependent disease",
-                "relevance_phrase": "SBRT volume-escalation in high-volume mets"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "oligometastatic prostate stereotactic radiation",
-                "PSMA PET prostate radiation",
-                "stereotactic radiation prostate metastases"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 50,
-              "fetched_at": "2026-07-19T06:07:22.200Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 34
-              }
-            ]
-          },
-          {
-            "name": "RADIOSA",
-            "tldr": "mcPFS 32.2 vs 15.1mo, HR 0.43 (0.26-0.72), p=0.001 adding 6mo ADT to metastasis-directed SBRT in oligorecurrent HSPC.",
-            "details": [
-              "📊 1° EP clinical PFS by arm",
-              "🔍 Single-centre randomised open-label phase 2 (Milan); N=105, 1:1, median f/u 31 mo",
-              "🔍 Metachronous oligorecurrent HSPC, ≤3 lesions (nodal/bone) on PSMA-PET or MRI, post-radical local tx; median age 70",
-              "📐 SBRT 30 Gy/3 fx every other day (EQD2 98.6 Gy, α/β 1.5, BED >100 Gy), all sites both arms",
-              "💊 SBRT+ADT arm: 6 mo LHRH-analogue ADT started within 1 wk before SBRT",
-              "⚠️ 1° EP clinical PFS (surrogate); single-centre, open-label, N=105",
-              "⚠️ ADT's own progression-delaying effect confounds the add-on read; no SBRT-vs-observation arm",
-              {
-                "text": "📊 Toxicity minimal, no late effects",
-                "subdetails": [
-                  "1 G1 GI AE (SBRT alone)",
-                  "1 G3 GU AE (left ureter stenosis, SBRT+ADT)",
-                  "22 G1 ADT-related AEs, all resolved",
-                  "No treatment-related deaths"
-                ]
-              },
-              "🔗 STOMP/ORIOLE established MDT vs observation; RADIOSA instead tests adding short ADT onto SBRT"
-            ],
-            "figures": [],
-            "nct": "NCT03940235",
-            "tweet_ids": [
-              1000000033
-            ],
-            "slug": "radiosa",
-            "verdict": {
-              "soc_implication": "confirmatory",
-              "rationale": "Single-centre open-label phase 2, N=105; 1° EP is clinical PFS (surrogate), not OS. Consistent with STOMP/ORIOLE MDT signals; not definitive enough to change practice.",
-              "audience": "Metachronous oligorecurrent HSPC, ≤3 lesions, post-radical local tx"
-            },
-            "significance": "Both arms get ablative SBRT (30 Gy/3fx, BED >100 Gy) to all sites, so the trial isolates the 6-mo ADT add-on, not SBRT's own contribution (no observation arm). The decision it moves: whether to layer short ADT onto metastasis-directed SBRT. SBRT alone still gave 15.1-mo cPFS in selected pts.",
-            "monday_clinic": "In metachronous oligorecurrent hormone-sensitive prostate cancer with ≤3 lesions on PSMA-PET, this supports adding 6 mo ADT to metastasis-directed SBRT for longer cPFS; it does not address synchronous or polymetastatic disease, and SBRT alone remains reasonable in carefully selected pts.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "**Single-centre, randomised, open-label** phase 2 (European Institute of Oncology, Milan). N=**105** randomised 1:1 (52 SBRT alone, 53 SBRT+ADT); modified ITT, 51/arm analysed. Median follow-up **31 mo**."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "**Metachronous oligorecurrent hormone-sensitive prostate cancer** after radical local treatment; **≤3 lesions** (pelvic/extra-regional nodal or bone) on PSMA-PET or MRI; ECOG 0-1; median age 70. Stratified by PSMA-DT (≤3 vs >3 mo), site (node vs bone), imaging."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "SBRT **30 Gy in 3 fractions** every other day (EQD2 98.6 Gy at α/β 1.5, **BED >100 Gy**), or equivalent by site. All oligometastatic sites treated in both arms."
-              },
-              {
-                "label": "Regimen",
-                "body": "The SBRT+ADT arm added **6 months** of LHRH-analogue ADT starting within 1 week before SBRT."
-              },
-              {
-                "label": "Endpoints",
-                "body": "**Primary: clinical progression-free survival.** OS and time-to-CRPC were not the primary read."
-              },
-              {
-                "label": "Results",
-                "body": "Adding short ADT roughly doubled median cPFS; effect sizes in the results table."
-              },
-              {
-                "label": "Safety",
-                "body": "Near-absent RT toxicity: **1 G1 GI, 1 G3 GU** (left ureter stenosis, SBRT+ADT), no late effects. ADT added **22 G1 AEs, all resolved**. No treatment-related deaths."
-              },
-              {
-                "label": "vs leading data",
-                "body": "First RCT of adding short ADT to MDT in metachronous oligorecurrent HSPC. STOMP/ORIOLE established MDT vs observation; RADIOSA instead **isolates the ADT add-on** onto an SBRT backbone."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents metachronous oligorecurrent hormone-sensitive prostate cancer with ≤3 lesions after radical local treatment. Does not represent synchronous, polymetastatic (>3 lesions), or castration-resistant disease."
-              },
-              {
-                "label": "Limitations",
-                "body": "**Single-centre, open-label**, N=105. Primary endpoint is clinical PFS, a surrogate; ADT's own progression-delaying effect confounds the SBRT+ADT arm. Optimal ADT duration untested."
-              }
-            ],
-            "relevant_specialties": [
-              "radonc",
-              "medonc"
-            ],
-            "open_questions": [
-              "Optimal duration of ADT added to SBRT",
-              "Biomarkers predicting benefit from SBRT alone",
-              "Whether cPFS gain translates to OS or delayed CRPC"
-            ],
-            "consort": {
-              "enrolled": 218,
-              "excluded": 113,
-              "randomized": 105,
-              "arms": [
-                {
-                  "label": "SBRT alone",
-                  "allocated": 52,
-                  "analyzed": 51
-                },
-                {
-                  "label": "SBRT + ADT",
-                  "allocated": 53,
-                  "analyzed": 51
-                }
-              ]
-            },
-            "modality": "combined",
-            "intent": null,
-            "methodology": "phase-2-trial",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT04302454",
-                "brief_title": "Androgen Deprivation Therapy for Oligo-recurrent Prostate Cancer in Addition to radioTherapy",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 280,
-                "primary_completion_date": "2027-10",
-                "brief_summary": "The overall aim of this project is to test the hypothesis that the addition of ADT to metastasis-directed radiotherapy (MDRT) in well-selected PCa patients with oligo-metastatic disease prolongs the metastases progression-free survival (MPFS) compared to MDRT alone.",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Radiotherapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Leuprorelin",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion criteria:\n\n1. Histologically proven initial diagnosis of adenocarcinoma of the Prostate.\n2. Biochemical recurrence of prostate cancer following primary local prostate treatment (radical prostatectomy, primary radiotherapy or radical prostatectomy +/- prostate bed adjuvant salvage…",
-                "answers_question": "Optimal duration of ADT added to SBRT",
-                "relevance_phrase": "phase 3 ADT added to MDRT vs MDRT alone"
-              },
-              {
-                "nct": "NCT06378866",
-                "brief_title": "Stereotactic Body Radiation Therapy Plus Immediate or Delayed Androgen Receptor Pathway Inhibitor and Androgen Deprivation Therapy or Salvage Radiation Therapy for the Treatment of Prostate Cancer, DIVINE Trial",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 532,
-                "primary_completion_date": "2031-02",
-                "brief_summary": "This phase II trial studies the effects of stereotactic body radiation therapy (SBRT) and the timing of treatment with androgen receptor pathway inhibitor (ARPI) plus androgen deprivation therapy (ADT) in treating patients with hormone sensitive prostate cancer that has spread from where it first started to other places in the body (metastatic), and that has come back after a period of improvement (recurrent). It also studies the effects of salvage radiation therapy (sXRT) on prostate cancer…",
-                "conditions": [
-                  "Recurrent Castration-Sensitive Prostate Carcinoma",
-                  "Recurrent Prostate Cancer",
-                  "Castration-resistant Prostate Cancer",
-                  "Biochemically Recurrent Prostate Carcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "Abiraterone",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Apalutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Biospecimen Collection",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Bone Scan",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Computed Tomography",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Darolutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Degarelix",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Enzalutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Goserelin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Histrelin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Leuprolide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Magnetic Resonance Imaging",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Patient Observation",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Positron Emission Tomography",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Prednisone",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Questionnaire Administration",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Relugolix",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Stereotactic Body Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Triptorelin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Image-Guided Therapy",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years\n* Disease characteristics:\n\n  * DEVIATE (Groups A and B only):\n\n    * Clinical confirmation of metachronous (metastatic) recurrent hormone-sensitive prostate cancer\n    * Five (5) or fewer metastases with at least one metastasis beyond the pelvis on advanced…",
-                "answers_question": "Optimal duration of ADT added to SBRT",
-                "relevance_phrase": "tests timing of ADT+ARPI added to SBRT in mHSPC"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "androgen deprivation stereotactic prostate",
-                "biomarker stereotactic oligometastatic prostate"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 27,
-              "fetched_at": "2026-07-19T06:07:48.551Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 33
-              }
-            ]
-          },
-          {
-            "name": "WOLVERINE",
-            "tldr": "PFS HR 0.44, rPFS HR 0.60 favor MDT added to SOC in oligomet prostate; OS HR 0.63 non-sig (p=0.051).",
-            "details": [
-              "📊 MDT+SOC vs SOC efficacy (trial-level and patient-level HRs)",
-              "🔍 IPD meta-analysis, 6 phase 2 RCTs, 472 pts (MDT+SOC 248 vs SOC 224), median f/u 40.7mo (IQR 25.6-53.7)",
-              "🩻 Pooled MDT trials: EXTEND intermittent-HT, EXTEND continuous-HT, STOMP, ORIOLE, ARTO, COMET-SABR (prostate subgroup, 16 men)",
-              {
-                "text": "🔍 Pooled population",
-                "subdetails": [
-                  "65% castration-sensitive (n=375), rest CRPC-enriched (ARTO entirely CRPC)",
-                  "85.5% (n=491) had prior definitive local therapy",
-                  "Median PSA 1.9 both arms"
-                ]
-              },
-              "⚠️ OS coprimary missed significance (p=0.051); PFS/rPFS/CRFS are surrogates, no proven survival gain",
-              "⚠️ All 7 component trials phase 2, non-blinded randomization ('some concerns' RoB); open-label, PSA-driven endpoints",
-              {
-                "text": "🔗 Sensitivity analysis excluding observation-only-SOC trials (STOMP, ORIOLE, COMET-SABR)",
-                "subdetails": [
-                  "PFS HR 0.46 (0.34-0.63), P<0.001",
-                  "rPFS HR 0.56 (0.36-0.89), P=0.014",
-                  "CRFS HR 0.46 (0.23-0.91), P=0.025",
-                  "OS HR 0.65 (0.37-1.13), P=0.13"
-                ]
-              },
-              {
-                "text": "⚠️ Baseline imbalance: SOC arm not fully matched",
-                "subdetails": [
-                  "SOC arm older: median 71 vs 68 yr",
-                  "More 2nd-gen ARPI in SOC: 59.8% (n=134) vs 50.4% (n=125)"
-                ]
-              }
-            ],
-            "figures": [],
-            "nct": null,
-            "tweet_ids": [
-              1000000031
-            ],
-            "slug": "wolverine",
-            "verdict": {
-              "soc_implication": "confirmatory",
-              "rationale": "IPD meta-analysis of 6 phase-2 non-blinded RCTs; PFS/rPFS/CRFS clearly hit but OS non-significant. Reinforces the emerging MDT-for-oligomet signal (STOMP, ORIOLE), doesn't establish survival.",
-              "audience": "Oligometastatic prostate cancer (≤5 mets), predominantly castration-sensitive"
-            },
-            "significance": "MDT here is predominantly SBRT, and the RT-attributable read is that benefit held in the sensitivity analysis excluding observation-only-SOC trials (PFS HR 0.46, CRFS HR 0.46), so MDT adds on a systemic backbone, not just vs nothing. OS stayed non-significant (HR 0.63, p=0.051): the gain is delaying progression and castration resistance, not proven survival.",
-            "monday_clinic": "In castration-sensitive oligometastatic prostate cancer, up to 5 mets and mostly post definitive local therapy, the pooled evidence supports MDT plus SOC to delay progression and castration resistance; it does not establish a survival benefit nor extend to the CRPC-predominant setting.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "**IPD meta-analysis** (PROSPERO CRD42023479078) of 7 phase 2 RCTs; the primary MDT-efficacy analysis pooled **6 trials** randomizing **472 men** to MDT+SOC (n=248) vs SOC (n=224). Median follow-up **40.7 mo** (IQR 25.6-53.7)."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Oligometastatic (**up to 5 mets**) prostate cancer; **65% castration-sensitive** (n=375), ARTO entirely CRPC and EXTEND baskets CRPC-enriched. **85.5% (n=491)** had prior definitive local therapy; median PSA 1.9 both arms."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "MDT is delivered per each component trial (EXTEND, STOMP, ORIOLE, ARTO, COMET-SABR), predominantly **SBRT-based**. **Dose, fractionation, target volume, and modality breakdown are not reported** in this meta-analysis, so the technique-transfer question can't be answered from source."
-              },
-              {
-                "label": "Endpoints",
-                "body": "**Coprimary: PFS and OS.** Secondary: rPFS and castration resistance-free survival (CRFS)."
-              },
-              {
-                "label": "Results",
-                "body": "MDT plus SOC improved PFS, rPFS, and CRFS across both trial- and patient-level analyses; **overall survival did not reach significance** (effect sizes in the table above)."
-              },
-              {
-                "label": "vs leading data",
-                "body": "STOMP and ORIOLE (observation-controlled SBRT trials) drove the early MDT signal; this pooled IPD **extends the PFS/CRFS benefit across 6 trials** and shows it persists on a systemic-therapy backbone in the observation-excluded sensitivity analysis."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents oligometastatic (≤5 mets) prostate cancer, mostly castration-sensitive and post definitive local therapy. Does not represent CRPC-predominant or higher-volume metastatic disease, nor a proven overall-survival benefit."
-              },
-              {
-                "label": "Limitations",
-                "body": "All 7 component trials are phase 2 with **non-blinded randomization** ('some concerns' RoB) and open-label PSA-driven endpoints. **OS non-significant** (p=0.051). SOC arm slightly older (71 vs 68) and more often on 2nd-gen ARPI (59.8% vs 50.4%)."
-              }
-            ],
-            "relevant_specialties": [
-              "radonc",
-              "medonc"
-            ],
-            "open_questions": [
-              "Does MDT extend overall survival in oligometastatic prostate cancer?",
-              "Optimal MDT (SBRT) target volume and dose across trials",
-              "MDT benefit in CRPC vs castration-sensitive disease"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": "meta-analysis",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT04115007",
-                "brief_title": "Prostate-cancer Treatment Using Stereotactic Radiotherapy for Oligometastases Ablation in Hormone-sensitive Patients",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 550,
-                "primary_completion_date": "2026-06",
-                "brief_summary": "INDICATION: Oligometastatic hormone-sensitive prostate cancer patients. METHODOLOGY: Open label, double arm, randomized 1:1, multicenter phase III study.\n\nPRIMARY OBJECTIVE: To assess the efficacy of ablative radiotherapy (SBRT applied to all oligometastases) administered to all gross tumor sites (metastases and prostate if applicable), in oligometastatic hormone-sensitive prostate cancer patients.",
-                "conditions": [
-                  "Oligometastatic Hormone Sensitive Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Stereotactic Body Radiotherapy (SBRT) + Standard of care",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Standard of care",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "DIAGNOSIS AND INCLUSION CRITERIA:\n\n1. Histologically proven adenocarcinoma of the prostate (any T stage, Gleason score, or prostate specific antigen (PSA) level);\n2. Defined as M1 based on the presence of at least one bone metastasis;\n3. Diagnostic workup including functional imaging (F or…",
-                "answers_question": "Does MDT extend overall survival in oligometastatic prostate cancer?",
-                "relevance_phrase": "phase 3 SBRT + SOC vs SOC in oligomet HSPC"
-              },
-              {
-                "nct": "NCT04787744",
-                "brief_title": "Veterans Affairs Seamless Phase II/III Randomized Trial of STAndard Systemic theRapy With or Without PET-directed Local Therapy for Oligometastatic pRosTate Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2",
-                  "PHASE3"
-                ],
-                "enrollment_count": 464,
-                "primary_completion_date": "2026-09",
-                "brief_summary": "This is a prospective, open-label, multi-center seamless phase II to phase III randomized clinical trial designed to compare SST with or without PET-directed local therapy in improving the castration-resistant prostate cancer-free survival (CRPC-free survival) for Veterans with oligometastatic prostate cancer. Oligometastasis will be defined as 1-10 sites of metastatic disease based on the clinical determination of the LSI which incorporates all imaging, clinical, and pathologic data available.",
-                "conditions": [
-                  "Prostate Cancer",
-                  "Oligometastasis",
-                  "Oligorecurrence",
-                  "Recurrent Prostate Cancer",
-                  "Metastatic Prostate Cancer",
-                  "De Novo Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "PET-directed Local Therapy using Surgery",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "PET-directed Local Therapy using Radiation",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Salvage Local Therapy for locally recurrent disease",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Goserelin, Histrelin, Leuprolide & Triptorelin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "ADT + Nilutamide, Flutamide, & Bicalutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Degarelix & Relugolix",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "ADT + Docetaxel +/- prednisone",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "ADT + Abiraterone + Prednisone",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "ADT + Abiraterone + Methylprednisolone",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "ADT + Apalutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "ADT + Enzalutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Prostate-directed Radiation for De novo oligometastatic prostate cancer",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\nAge 18 years. Ability to provide Informed Consent for participation in the study ECOG Performance Status 2 at time of enrollment. Prostate cancer, confirmed histologically or cytologically. If original documentation of histology and cytology are not available, documentation of…",
-                "answers_question": "Does MDT extend overall survival in oligometastatic prostate cancer?",
-                "relevance_phrase": "phase 2/3 systemic ± PET-directed local therapy"
-              },
-              {
-                "nct": "NCT06978296",
-                "brief_title": "HIghly MetAstatic Life Prolonging Therapy-Resistant Prostate Cancer: Role of Stereotactic Radiotherapy for Bone and Lymph Node Metastases (HIMARS)",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 18,
-                "primary_completion_date": "2028-05",
-                "brief_summary": "The investigators propose redefining this concept by focusing on volume rather than the number of metastases. To achieve this, the investigators aim to determine the Maximum Tolerated Volume (MTV) of metastatic lesions treatable with SRT (Stereotaxic radiotherapy) in a phase 1 study. In this study, the investigators will recruit patients with high-volume metastatic disease in bones or lymph nodes and progressively irradiate a volume-escalated subset of the total lesions. The selection will…",
-                "conditions": [
-                  "Prostate Cancer Metastatic Disease",
-                  "Oligometastatic Prostate Cancer (OMPC)"
-                ],
-                "interventions": [
-                  {
-                    "name": "Stereotactic body radiotherapy (SBRT)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Metastatic prostate cancer with clinical progression after the use of androgen-receptor pathway inhibitor, chemotherapy or any other life-prolonging therapy. Patient could have been treated previously by RadioLigand Therapy (RLT).\n* Performance Status \\< 3\n* Bone and/or lymph…",
-                "answers_question": "Optimal MDT (SBRT) target volume and dose across trials",
-                "relevance_phrase": "phase 1 max-tolerated-volume SBRT escalation"
-              },
-              {
-                "nct": "NCT06462963",
-                "brief_title": "OligoCare TwiCs (Trials Within Cohorts) Trial Comparing Acute Toxicity in Single-fraction vs Multiple-fraction SBRT for Metastasis-directed Treatment (SPRINT)",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 302,
-                "primary_completion_date": "2029-02",
-                "brief_summary": "The goal of this clinical trial is to evaluate single-fraction metastases-directed SBRT in the broader radiation oncology community and to compare its safety and efficacy profile with the current Standard of Care (SoC) of multiple-fraction SBRT in patients with oligometastatic disease of primary breast, prostate, NSCLC and colorectal cancer having all lesions that will be treated with radical radiotherapy amenable to single-fraction SBRT.\n\nThe main question/hypothesis this clinical trial aims…",
-                "conditions": [
-                  "Breast Cancer",
-                  "Prostate Cancer",
-                  "NSCLC",
-                  "Colorectal Cancer",
-                  "Oligometastatic Disease"
-                ],
-                "interventions": [
-                  {
-                    "name": "single-fraction SBRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "multiple-fraction SBRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patient is part of the RP1822-OligoCare. As in OligoCare, ALL active cancer lesions (loco-regional primary and all oligometastases) were or will be treated with radical intent (surgery or radiotherapy).\n* All lesions that will be treated with radical radiotherapy have to be…",
-                "answers_question": "Optimal MDT (SBRT) target volume and dose across trials",
-                "relevance_phrase": "single- vs multi-fraction SBRT for mets"
-              },
-              {
-                "nct": "NCT06585007",
-                "brief_title": "Metastasis-directed Therapy in Oligoprogressive Castration-refractory Prostate Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 246,
-                "primary_completion_date": "2029-01",
-                "brief_summary": "Evaluation of the impact of metastasis-directed therapy in patients with castration-refractory prostate cancer and a maximum of 5 progressive lesions.",
-                "conditions": [
-                  "Castration-resistant Prostate Cancer",
-                  "Oligoprogressive"
-                ],
-                "interventions": [
-                  {
-                    "name": "Radiotherapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "metastasectomy",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\nParticipants eligible for inclusion in this Trial must meet all the following criteria:\n\n* Written informed consent of the participant or their legally authorized representative has been obtained prior to any screening procedures.\n* Acinar adenocarcinoma (inclusive…",
-                "answers_question": "MDT benefit in CRPC vs castration-sensitive disease",
-                "relevance_phrase": "phase 3 MDT in oligoprogressive CRPC"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "metastasis-directed oligometastatic prostate",
-                "SBRT oligometastatic prostate",
-                "metastasis-directed castration-resistant prostate"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 45,
-              "fetched_at": "2026-07-19T06:07:54.489Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 31
-              }
-            ]
-          },
-          {
             "name": "ARTO",
-            "tldr": "Adding SBRT to abiraterone lifted 6-mo PSA response to 92% vs 68.3% (OR 5.34) and cut progression (PFS HR 0.35) in oligomet CRPC.",
+            "tldr": "Adding SBRT to abiraterone in oligometastatic CRPC: biochemical response 92% vs 68.3%, OR 5.34; PFS HR 0.35.",
             "details": [
-              {
-                "text": "📊 6-month biochemical outcomes by arm",
-                "table": {
-                  "columns": [
-                    "Endpoint (6mo)",
-                    "AAP+SBRT",
-                    "AAP alone",
-                    "Effect size"
-                  ],
-                  "rows": [
-                    [
-                      "Biochemical response (PSA ≥50% drop)",
-                      "92%",
-                      "68.3%",
-                      "OR 5.34 (2.05-13.88), P=.001"
-                    ],
-                    [
-                      "Complete BR (PSA <0.2 ng/mL)",
-                      "56%",
-                      "23.2%",
-                      "OR 4.22 (2.12-8.38), P<.001"
-                    ]
-                  ]
-                }
-              },
-              "📊 PFS (secondary): HR 0.35 (0.21-0.57), P<.001 favoring the SBRT arm",
-              "🔍 Randomized phase II, N=157, oligomet CRPC (≤3 nonvisceral mets), 1:1 AAP ± SBRT to all sites",
-              "🔍 SBRT delivered to all sites of disease concomitant with first-line AAP; dose/fractionation not reported in source",
-              "⚠️ 1° EP is a PSA surrogate (biochemical response), not a clinical endpoint; no OS reported in source",
-              "🔗 Extends the metastasis-directed SBRT signal from ORIOLE/STOMP (hormone-sensitive oligomet) into first-line CRPC on an ARSI backbone",
-              "⚠️ Phase II, N=157; PFS is secondary, definitive OS + phase III confirmation still needed"
+              "🔍 Multicenter randomized phase 2, N=157 enrolled Jan 2019 to Sep 2022, 1:1 AAP alone vs AAP + SBRT to all disease sites",
+              "🔍 Eligibility: oligometastatic CRPC, three or fewer nonvisceral metastatic lesions",
+              "📊 1° EP was biochemical response (PSA decrease ≥50% from baseline at 6 months), a surrogate, not survival",
+              "📐 Complete biochemical response (PSA <0.2 ng/mL at 6mo) 56% vs 23.2%, OR 4.22 (95% CI 2.12-8.38), P<.001",
+              "📐 PFS HR 0.35 (95% CI 0.21-0.57), P<.001 favoring SBRT",
+              "⚠️ RT dose, fractionation and target-volume detail not reported in source abstract; transferability to the reader's technique cannot be judged from this text",
+              "⚠️ No toxicity data in source abstract, so the SBRT-attributable AE burden of treating up to 3 lesions is unquantified here",
+              "⚠️ PSA-based 1° EP is directly perturbed by ablating PSA-producing deposits; a biochemical win does not establish disease-course benefit",
+              "🔗 Sits alongside STOMP and ORIOLE, which tested metastasis-directed therapy in hormone-sensitive oligometastatic disease; ARTO's contribution is the castration-resistant setting on an ARSI backbone"
             ],
             "figures": [],
             "nct": "NCT03449719",
@@ -955,161 +37,76 @@
             ],
             "slug": "arto",
             "verdict": {
-              "soc_implication": "confirmatory",
-              "rationale": "Randomized phase II, primary hit, named comparator (AAP alone); primary is a PSA surrogate, so supportive of the emerging oligomet MDT paradigm rather than practice-setting.",
-              "audience": "Oligometastatic CRPC, ≤3 nonvisceral mets, first-line abiraterone"
+              "soc_implication": "early-signal",
+              "rationale": "Randomized phase 2 with a 6-month PSA surrogate primary endpoint; no OS, no reported toxicity, and phase 3 confirmation in CRPC is absent.",
+              "audience": "Oligometastatic CRPC, ≤3 nonvisceral lesions, starting first-line abiraterone"
             },
-            "significance": "The RT read is total metastatic consolidation: SBRT to all ≤3 CRPC sites concurrent with abiraterone more than doubled complete PSA response (56% vs 23.2%) and cut progression risk (HR 0.35). It pushes MDT beyond hormone-sensitive oligomet (ORIOLE/STOMP) into first-line CRPC, moving the decision to irradiate every lesion, not defer.",
-            "monday_clinic": "In oligometastatic CRPC (≤3 nonvisceral mets) starting first-line abiraterone, this supports adding SBRT to all sites for deeper PSA response and longer PFS; it does not extend to visceral or polymetastatic disease.",
+            "significance": "The systemic backbone is fixed (AAP both arms), so the entire effect is RT-attributable: PFS HR 0.35 for ablating ≤3 nonvisceral lesions. That isolates the metastasis-directed question in castration-resistant disease, where prior randomized MDT data sit in the hormone-sensitive setting. Dose and fractionation are not in the source text, which limits direct transfer.",
+            "monday_clinic": "In castration-resistant pts with three or fewer nonvisceral metastases starting first-line abiraterone, this supports considering metastasis-directed SBRT concurrently; it does not extend to visceral, higher-volume, or hormone-sensitive metastatic disease.",
             "primary_endpoint": {
-              "name": "Biochemical response (PSA ≥50% drop at 6mo)",
+              "name": "Biochemical response (PSA decrease ≥50% at 6 months)",
               "klass": "surrogate",
-              "stat_value": "92% vs 68.3%",
-              "stat_detail": "OR 5.34 (95% CI 2.05-13.88), P=.001"
+              "stat_value": "92% v 68.3%",
+              "stat_detail": "OR 5.34 (95% CI, 2.05 to 13.88; P = .001)"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Multicenter randomized phase II, 1:1, N=157, enrolled Jan 2019-Sep 2022. **Primary:** 6-month biochemical response."
+                "body": "Multicenter **randomized phase 2**, 1:1 allocation, **N=157** enrolled January 2019 to September 2022. Median follow-up not reported in source."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Oligometastatic **castration-resistant** prostate cancer with **≤3 nonvisceral** metastatic lesions, in the first-line abiraterone setting."
+                "body": "**Oligometastatic castrate-resistant prostate cancer**, defined as **three or fewer nonvisceral metastatic lesions**. Visceral disease excluded by definition."
               },
               {
                 "label": "Regimen",
-                "body": "Both arms received abiraterone acetate + prednisone (AAP). The experimental arm added concomitant SBRT."
+                "body": "Both arms received **abiraterone acetate and prednisone (AAP)**. The experimental arm added concomitant SBRT, so AAP is a **fixed backbone** and the randomized contrast is radiotherapy alone."
               },
               {
                 "label": "Radiotherapy",
-                "body": "SBRT to **all** sites of disease, concomitant with AAP. **Dose/fractionation not reported** in source."
+                "body": "**SBRT to all sites of disease**, delivered concomitantly with AAP. **Dose, fractionation and target-volume detail are not reported in the source text**, which gates how directly the result transfers to a given SBRT practice."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary:** biochemical response (PSA drop ≥50% at 6mo). Secondary: complete BR (PSA <0.2 ng/mL), PFS."
-              },
-              {
-                "label": "Results",
-                "body": "Primary endpoint and PFS both met, favoring the SBRT arm (see results table)."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Extends the metastasis-directed SBRT benefit seen in ORIOLE/STOMP (hormone-sensitive oligomet) into first-line CRPC."
+                "body": "**Primary: biochemical response**, PSA decrease ≥50% from baseline at 6 months. Secondary: **complete biochemical response** (PSA <0.2 ng/mL at 6 months) and **progression-free survival**. No survival endpoint reported."
               },
               {
                 "label": "Applies to",
-                "body": "Represents oligometastatic CRPC (≤3 nonvisceral mets) on first-line abiraterone. Does not represent visceral, polymetastatic, or hormone-sensitive disease."
+                "body": "Represents castration-resistant pts with three or fewer nonvisceral metastases beginning first-line abiraterone. Does not represent visceral, higher-volume, or hormone-sensitive metastatic disease."
               },
               {
                 "label": "Limitations",
-                "body": "Phase II, N=157. Primary endpoint is a PSA surrogate with **no OS** reported; dose/fractionation and long-term durability not in source."
+                "body": "**No toxicity reported in source**, so the added burden of ablating up to three lesions is unquantified. PSA endpoints are **mechanically sensitive to removing PSA-producing deposits**, and the 6-month timepoint precedes any durability read."
+              },
+              {
+                "label": "vs leading data",
+                "body": "STOMP and ORIOLE established the randomized signal for metastasis-directed therapy in **hormone-sensitive** oligometastatic disease. ARTO's addition is that the signal persists on an **ARSI backbone in castration-resistant** disease, a setting those trials did not test."
+              },
+              {
+                "label": "Discussion",
+                "body": "The **PFS HR 0.35** is the more meaningful of the two results, since it is less mechanically coupled to ablating PSA-producing lesions than the primary endpoint. What remains unsettled is whether deferring progression on an ARSI translates into anything durable, which a phase 2 sized for a 6-month PSA readout cannot answer."
               }
             ],
+            "interpretation": "The design decision that makes ARTO worth reading is that both arms received the same systemic therapy. Abiraterone plus prednisone is fixed, randomization applies only to whether the three or fewer nonvisceral deposits are ablated, and so every part of the effect is attributable to radiotherapy. Trials of metastasis-directed therapy frequently confound the local question with a change in systemic management, and this one does not.\n\nWhere it sits against prior randomized data is the second point. STOMP and ORIOLE tested metastasis-directed therapy in hormone-sensitive oligometastatic disease, and both reported a benefit on progression-based endpoints in populations still responsive to androgen deprivation. ARTO asks whether the same holds once resistance has emerged and an androgen receptor pathway inhibitor is the backbone. A reasonable prior would be that the benefit shrinks in castration-resistant disease, since the biology that produced resistance is less likely to be confined to the visible lesions. The reported PFS hazard ratio of 0.35 does not look attenuated relative to that prior, which is the result's genuinely informative feature.\n\nThe primary endpoint is the weakest part of the argument, and it is worth being explicit about why. Biochemical response was defined as a PSA decrease of at least 50 percent from baseline at six months. Ablating PSA-producing deposits lowers PSA by direct mechanism, independent of any effect on the disease course, so a difference of 92 percent versus 68.3 percent should not move a reader's confidence very far on its own. The same objection applies with more force to complete biochemical response at a threshold of 0.2 ng/mL, where the arm that had its measurable lesions treated is structurally advantaged. The progression-free survival result carries the weight here, and it is a secondary endpoint in a phase 2 trial, which is precisely the configuration that most often fails to replicate at scale.\n\nTwo things absent from the source constrain what a radiation oncologist can do with this. Dose, fractionation and target volume are not reported, so whether the result transfers to a given SBRT practice cannot be assessed from this text. Toxicity is likewise unreported, which matters more than usual when the intervention is ablating up to three separate sites in men who will remain on systemic therapy afterward. The decision this study informs, whether to offer metastasis-directed therapy at the point of castration resistance rather than waiting, turns partly on that toxicity number, and it is not here.\n\nFor the result to be wrong in the way phase 2 results are usually wrong, the progression-free survival separation would have to reflect the endpoint's dependence on the same imaging and PSA signals that treatment directly alters, rather than a real change in disease trajectory. That is a live possibility and the trial's size does not exclude it. What ARTO establishes is that the question is worth a properly powered trial in castration-resistant disease with a survival endpoint and reported late toxicity, not that the practice should change now.",
             "relevant_specialties": [
               "radonc",
               "medonc"
             ],
+            "significance_by_specialty": {
+              "radonc": "The randomized contrast is SBRT alone, since AAP is fixed in both arms: PFS HR 0.35 (95% CI 0.21-0.57) for ablating ≤3 nonvisceral lesions. This moves the offer-MDT-at-castration-resistance decision, though dose, fractionation and target volume are absent from the source text, so technique transfer cannot be judged.",
+              "medonc": "Systemic management is unchanged: both arms received first-line abiraterone and prednisone, so nothing here alters drug choice or sequencing. The read is whether to involve radiation oncology at the start of AAP in low-volume CRPC, with progression deferred (HR 0.35) but no survival endpoint reported."
+            },
             "open_questions": [
-              "OS benefit of adding SBRT in oligomet CRPC",
-              "Optimal SBRT dose/fractionation for CRPC metastases",
-              "Does MDT delay next systemic therapy in CRPC?"
+              "Does the PFS benefit translate to overall survival",
+              "SBRT-attributable toxicity when ablating up to three sites",
+              "Whether benefit holds beyond three lesions"
             ],
             "consort": null,
-            "modality": "radiation",
+            "modality": "combined",
             "intent": "palliative",
             "methodology": "phase-2-trial",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
-              {
-                "nct": "NCT06585007",
-                "brief_title": "Metastasis-directed Therapy in Oligoprogressive Castration-refractory Prostate Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 246,
-                "primary_completion_date": "2029-01",
-                "brief_summary": "Evaluation of the impact of metastasis-directed therapy in patients with castration-refractory prostate cancer and a maximum of 5 progressive lesions.",
-                "conditions": [
-                  "Castration-resistant Prostate Cancer",
-                  "Oligoprogressive"
-                ],
-                "interventions": [
-                  {
-                    "name": "Radiotherapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "metastasectomy",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\nParticipants eligible for inclusion in this Trial must meet all the following criteria:\n\n* Written informed consent of the participant or their legally authorized representative has been obtained prior to any screening procedures.\n* Acinar adenocarcinoma (inclusive…",
-                "answers_question": "OS benefit of adding SBRT in oligomet CRPC",
-                "relevance_phrase": "phase 3 MDT vs SOC in oligoprogressive CRPC"
-              },
-              {
-                "nct": "NCT06276465",
-                "brief_title": "Treatment With Darolutamide +/- Radiation Therapy for Patients With a Castration Resistant Cancer and Metastases Detected by Functional Imaging",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 336,
-                "primary_completion_date": "2029-10",
-                "brief_summary": "In earlier stages of prostate cancer, male sexual hormones (androgens) stimulate the growth of cancer cells. Castration-resistant prostate cancer (CRPC) means that the prostate cancer continued to grow despite patients are taking hormone therapy to control the disease. One of the standard treatments for these patients is so-called 'new generation' hormonal therapy. These hormone therapies include apalutamide, enzalutamide, or darolutamide. They work by blocking androgen receptors that play an…",
-                "conditions": [
-                  "Prostatic Cancer, Castration-Resistant"
-                ],
-                "interventions": [
-                  {
-                    "name": "Darolutamide 300 mg",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Stereotactic body radiation therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Androgen deprivation therapy",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Patient must have signed a written informed consent prior to any trial specific procedures. When the patient is physically unable to give their written consent, a trusted person of their choice, independent from the investigator or the sponsor, can confirm in writing the…",
-                "answers_question": "OS benefit of adding SBRT in oligomet CRPC",
-                "relevance_phrase": "phase 3 darolutamide ± SBRT in metastatic CRPC"
-              },
-              {
-                "nct": "NCT06462963",
-                "brief_title": "OligoCare TwiCs (Trials Within Cohorts) Trial Comparing Acute Toxicity in Single-fraction vs Multiple-fraction SBRT for Metastasis-directed Treatment (SPRINT)",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 302,
-                "primary_completion_date": "2029-02",
-                "brief_summary": "The goal of this clinical trial is to evaluate single-fraction metastases-directed SBRT in the broader radiation oncology community and to compare its safety and efficacy profile with the current Standard of Care (SoC) of multiple-fraction SBRT in patients with oligometastatic disease of primary breast, prostate, NSCLC and colorectal cancer having all lesions that will be treated with radical radiotherapy amenable to single-fraction SBRT.\n\nThe main question/hypothesis this clinical trial aims…",
-                "conditions": [
-                  "Breast Cancer",
-                  "Prostate Cancer",
-                  "NSCLC",
-                  "Colorectal Cancer",
-                  "Oligometastatic Disease"
-                ],
-                "interventions": [
-                  {
-                    "name": "single-fraction SBRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "multiple-fraction SBRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patient is part of the RP1822-OligoCare. As in OligoCare, ALL active cancer lesions (loco-regional primary and all oligometastases) were or will be treated with radical intent (surgery or radiotherapy).\n* All lesions that will be treated with radical radiotherapy have to be…",
-                "answers_question": "Optimal SBRT dose/fractionation for CRPC metastases",
-                "relevance_phrase": "single- vs multi-fraction SBRT for oligomets"
-              },
               {
                 "nct": "NCT02685397",
                 "brief_title": "Management of Castration-Resistant Prostate Cancer with Oligometastases",
@@ -1147,26 +144,110 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Age 18 or older and willing and able to provide informed consent;\n2. Histologically confirmed adenocarcinoma of the prostate without neuroendocrine differentiation or small cell features;\n3. Ongoing androgen deprivation therapy with a Gonadotropin-releasing hormone (GnRH)…",
-                "answers_question": "Does MDT delay next systemic therapy in CRPC?",
-                "relevance_phrase": "SBRT to postpone 2nd-line systemic tx in CRPC"
+                "answers_question": "Does the PFS benefit translate to overall survival",
+                "relevance_phrase": "randomised SBRT in oligomet CRPC on ARSi backbone"
               },
               {
-                "nct": "NCT04070209",
-                "brief_title": "Management of Oligoprogressive Castration Resistant Prostate Cancer (PCS X)",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "nct": "NCT06585007",
+                "brief_title": "Metastasis-directed Therapy in Oligoprogressive Castration-refractory Prostate Cancer",
+                "overall_status": "RECRUITING",
                 "phase": [
-                  "PHASE2"
+                  "PHASE3"
                 ],
-                "enrollment_count": 66,
-                "primary_completion_date": "2030-11",
-                "brief_summary": "This is the first pilot phase II trial assessing the response of SBRT layered on Darolutamide (BAY1841788) on RPFS and deferring palliative second line systemic therapy in M0CRPC with oligoprogression.",
+                "enrollment_count": 246,
+                "primary_completion_date": "2029-01",
+                "brief_summary": "Evaluation of the impact of metastasis-directed therapy in patients with castration-refractory prostate cancer and a maximum of 5 progressive lesions.",
                 "conditions": [
-                  "Metastatic Prostate Cancer",
-                  "Castration-resistant Prostate Cancer"
+                  "Castration-resistant Prostate Cancer",
+                  "Oligoprogressive"
                 ],
                 "interventions": [
                   {
-                    "name": "Darolutamide (BAY1841788)",
+                    "name": "Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "metastasectomy",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\nParticipants eligible for inclusion in this Trial must meet all the following criteria:\n\n* Written informed consent of the participant or their legally authorized representative has been obtained prior to any screening procedures.\n* Acinar adenocarcinoma (inclusive…",
+                "answers_question": "Does the PFS benefit translate to overall survival",
+                "relevance_phrase": "phase 3 MDT in castration-refractory, up to 5 lesions"
+              },
+              {
+                "nct": "NCT06205316",
+                "brief_title": "SBRT Versus Hypofractionated Radiotherapy for Biochemically Recurrent or Oligometastatic Prostate Adenocarcinoma",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 118,
+                "primary_completion_date": "2030-01",
+                "brief_summary": "This phase III trial tests the side effects of stereotactic body radiation therapy (SBRT) compared to hypofractionated radiotherapy for treating patients with prostate adenocarcinoma that has come back after a period of improvement (recurrent) or that has spread from where it first started (primary site) to a limited number of sites (oligometastatic). SBRT is a type of external radiation therapy that uses special equipment to position a patient and precisely deliver radiation to tumors in the…",
+                "conditions": [
+                  "Biochemically Recurrent Prostate Carcinoma",
+                  "Oligometastatic Prostate Carcinoma",
+                  "Recurrent Prostate Adenocarcinoma",
+                  "Stage IIB Prostate Cancer AJCC v8",
+                  "Stage IIC Prostate Cancer AJCC v8",
+                  "Stage III Prostate Cancer AJCC v8",
+                  "Stage IV Prostate Cancer AJCC v8"
+                ],
+                "interventions": [
+                  {
+                    "name": "Antiandrogen Therapy",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Biospecimen Collection",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Hypofractionated Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Positron Emission Tomography",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Stereotactic Body Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Survey Administration",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Magnetic Resonance Imaging",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed prostate adenocarcinoma at the time of surgery\n* Pathologic stages T2-T3b, Nx or N0-1, M0-1 as staged by the pathology report (American Joint Committee on Cancer \\[AJCC\\] Criteria 8th edition \\[Ed.\\])\n* PSA post radical prostatectomy ≥ 0.1 and \\< 2.0…",
+                "answers_question": "SBRT-attributable toxicity when ablating up to three sites",
+                "relevance_phrase": "phase 3 powered on SBRT toxicity vs hypofx RT"
+              },
+              {
+                "nct": "NCT07717268",
+                "brief_title": "Fractionated Stereotactic Radiotherapy Plus Second-generation Antiandrogen for Oligometastatic Castration-resistant Prostate Cancer Patients.",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 51,
+                "primary_completion_date": "2030-05",
+                "brief_summary": "The objectives of the study are to analyze the results obtained in survival, safety and quality of life after the combination of SBRT plus second-generation antiandrogen in patients diagnosed with metastatic castration-resistant prostate cancer in oligometastasis (≤5).\n\nHence, the investigators evaluate the results of the combination of two widely used treatments in prostate cancer: SBRT plus the 'standard of care' for patients with mCRPC, second-generation antiandrogens (abiraterone and…",
+                "conditions": [
+                  "Prostatic Neoplasms, Castration-Resistant"
+                ],
+                "interventions": [
+                  {
+                    "name": "Xtandi",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Zytiga® (Abiraterone Acetate)",
                     "type": "DRUG"
                   },
                   {
@@ -1174,19 +255,44 @@
                     "type": "RADIATION"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria (Part 1):\n\n* Histologically confirmed adenocarcinoma of the prostate without neuroendocrine differentiation or small cell features;\n* M0CRPC at study entry defined as follows:\n\n  1. Ongoing androgen deprivation therapy with a LHRH agonist or bilateral orchiectomy (i.e., surgical…",
-                "answers_question": "Does MDT delay next systemic therapy in CRPC?",
-                "relevance_phrase": "SBRT + darolutamide to defer 2nd-line in M0CRPC"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients with histologically prostate adenocarcinoma, confirmed with a biopsy.\n* Testosterone in biochemical castration ranges (testosterone \\<50 ng/ml or 1.7 nmol/L) and documented progression: biochemical according to Phoenix criteria or distant by radiological confirmation…",
+                "answers_question": "SBRT-attributable toxicity when ablating up to three sites",
+                "relevance_phrase": "SBRT + abiraterone/enza in mCRPC, safety endpoint"
+              },
+              {
+                "nct": "NCT06978296",
+                "brief_title": "HIghly MetAstatic Life Prolonging Therapy-Resistant Prostate Cancer: Role of Stereotactic Radiotherapy for Bone and Lymph Node Metastases (HIMARS)",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 18,
+                "primary_completion_date": "2028-05",
+                "brief_summary": "The investigators propose redefining this concept by focusing on volume rather than the number of metastases. To achieve this, the investigators aim to determine the Maximum Tolerated Volume (MTV) of metastatic lesions treatable with SRT (Stereotaxic radiotherapy) in a phase 1 study. In this study, the investigators will recruit patients with high-volume metastatic disease in bones or lymph nodes and progressively irradiate a volume-escalated subset of the total lesions. The selection will…",
+                "conditions": [
+                  "Prostate Cancer Metastatic Disease",
+                  "Oligometastatic Prostate Cancer (OMPC)"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic body radiotherapy (SBRT)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Metastatic prostate cancer with clinical progression after the use of androgen-receptor pathway inhibitor, chemotherapy or any other life-prolonging therapy. Patient could have been treated previously by RadioLigand Therapy (RLT).\n* Performance Status \\< 3\n* Bone and/or lymph…",
+                "answers_question": "Whether benefit holds beyond three lesions",
+                "relevance_phrase": "volume-escalated SRT in high-volume mets, MTV endpoint"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "stereotactic radiation castration-resistant prostate",
-                "stereotactic radiation oligometastatic prostate"
+                "metastasis-directed radiotherapy castration-resistant prostate",
+                "SBRT oligometastatic prostate toxicity",
+                "oligometastatic prostate stereotactic lesion number"
               ],
               "queries_failed": [],
-              "candidates_returned": 33,
-              "fetched_at": "2026-07-19T06:07:00.740Z",
+              "candidates_returned": 40,
+              "fetched_at": "2026-08-11T01:04:57.290Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -1197,91 +303,115 @@
             ]
           },
           {
-            "name": "EAU 2026: What Evidence Do We Have from Intensification with SBRT?",
-            "tldr": "MDT/SBRT delays progression in oligorecurrent HSPC; ARTO the lone randomized OS signal (CRPC); de novo evidence pending (STAMPEDE2).",
+            "name": "WOLVERINE",
+            "tldr": "IPD meta-analysis of 6 randomised phase 2 trials, 472 pts: MDT improved PFS (HR 0.44, 0.35-0.56), OS non-significant (HR 0.63, 0.39-1.00, p=0.051).",
             "details": [
-              "🔍 EAU 2026 thematic session (V. Fonteyne, Ghent radonc): MDT/SBRT evidence across oligometastatic prostate cancer states",
-              {
-                "text": "📊 MDT trial landscape by oligometastatic setting (directional; no effect sizes reported in source)",
-                "table": {
-                  "columns": [
-                    "Trial",
-                    "Setting",
-                    "Key finding"
-                  ],
-                  "rows": [
-                    [
-                      "STOMP + ORIOLE",
-                      "Metachronous oligorecurrent HSPC",
-                      "Excellent local control, delayed progression, minimal toxicity"
-                    ],
-                    [
-                      "RADIOSA",
-                      "Oligomet HSPC",
-                      "ADT + MDT improved PFS vs MDT alone"
-                    ],
-                    [
-                      "WOLVERINE",
-                      "Oligometastatic HSPC",
-                      "MDT improved PFS + rPFS, delayed CRPC; OS not significant"
-                    ],
-                    [
-                      "ARTO",
-                      "Oligometastatic CRPC",
-                      "MDT + SOC improved PFS; signal for OS + PCSS"
-                    ],
-                    [
-                      "RAVENS",
-                      "Oligometastatic",
-                      "Ra-223 + MDT: no PFS or MFS benefit"
-                    ]
-                  ]
-                }
-              },
-              "🔍 Most evidence is metachronous oligorecurrent HSPC; de novo / synchronous evidence remains thin",
-              "🔍 De novo oligomet RCTs pending: STAMPEDE2 (SBRT), PLATON, TERPS, OLIGOPRESTO",
-              "💊 De-escalation: SOLAR (n=21, synchronous) tested stopping ADT post-MDT, more favorable than SATURN (metachronous); hypothesis-generating",
-              "📊 RAVENS: adding Ra-223 to MDT improved neither PFS nor MFS vs MDT alone",
-              "🔍 LUNAR (Lu-177) ongoing in the same MDT-plus-radioligand question",
-              "⚠️ Small trials, heterogeneous inclusion + endpoints; guideline integration remains difficult",
-              "🔍 Selection debated: ≤5-lesion cutoff crude; PSMA PET burden (PP3) + biomarkers proposed to refine"
+              "📊 Trial-level vs patient-level HRs across endpoints (6 trials, n=472)",
+              "🔍 Systematic review + IPD meta-analysis, PROSPERO CRD42023479078; 2975 screened, 7 studies / 574 men",
+              "🔍 Primary efficacy set: 6 trials randomising MDT+SOC (n=248) vs SOC (n=224), median f/u 40.7mo (IQR 25.6-53.7)",
+              "🔍 Constituent trials: EXTEND intermittent-HT, EXTEND continuous-HT, STOMP, ORIOLE, ARTO, SABR-COMET prostate subgroup (16 men)",
+              "📊 Sensitivity analysis dropping the observation-SOC trials (STOMP, ORIOLE, COMET-SABR) held: PFS HR 0.46 (0.34-0.63), rPFS HR 0.56 (0.36-0.89), CRFS HR 0.46 (0.23-0.91), OS HR 0.65 (0.37-1.13)",
+              "📐 OS HR<1 in every individual trial, but the pooled CI touches unity; CRFS analysis restricted to CSPC (n=257)",
+              "⚠️ All 7 are phase 2; risk-of-bias flagged \"some concerns\" for most, driven by non-blinded randomisation",
+              "⚠️ Heterogeneous SOC: observation in all or part of 3 trials, ARTO entirely CRPC, EXTEND baskets did not require prior primary-tumour treatment",
+              "⚠️ Arms not fully balanced: 59.8% (n=134) SOC vs 50.4% (n=125) MDT received a 2nd-gen ARPI, and SOC pts were older (median 71 vs 68)",
+              "⚠️ rPFS carried moderate inter-trial heterogeneity (I²=50%); Egger's test underpowered at 6-7 studies"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
-              1000000024
+              1000000031
             ],
-            "slug": "eau2026-oligomet-sbrt-review",
-            "significance": "The RT-actionable split is by oligomet state: MDT/SBRT evidence is strongest in metachronous oligorecurrence (STOMP, ORIOLE), while de novo rests on pending RCTs (STAMPEDE2, PLATON, OLIGOPRESTO). ARTO is the lone randomized OS signal, but in castration-resistant disease. Adding Ra-223 to MDT (RAVENS) gave no PFS/MFS benefit.",
-            "monday_clinic": "In metachronous oligorecurrent HSPC with ≤5 lesions, the evidence supports SBRT-MDT to delay systemic therapy; it does not yet extend to de novo synchronous oligomets, where randomized data (STAMPEDE2, OLIGOPRESTO) are pending.",
+            "slug": "wolverine",
+            "verdict": {
+              "soc_implication": "confirmatory",
+              "rationale": "Pools only phase 2 trials with non-blinded randomisation and mixed SOC; co-primary OS missed (p=0.051). Supports existing MDT practice rather than establishing level 1 evidence.",
+              "audience": "Oligometastatic prostate cancer, up to 5 mets, mostly castration-sensitive"
+            },
+            "significance": "The endpoint that survives every sensitivity cut is PFS (HR 0.44, and 0.46 excluding the observation-SOC trials), while OS stops at HR 0.63 (0.39-1.00, p=0.051). CRFS 0.58 in CSPC is the more decision-relevant signal, since delaying castration resistance is what MDT is being asked to buy. Nothing here resolves dose, target, or which oligo burden benefits.",
+            "monday_clinic": "In castration-sensitive oligometastatic prostate cancer with up to five lesions and a treated primary, this supports adding MDT for progression-free and castration resistance-free benefit; it does not establish an OS benefit, and the CRPC-only and untreated-primary populations are thinly represented.",
             "primary_endpoint": null,
-            "analysis_sections": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Systematic review and **individual patient data** meta-analysis (X-MET collaboration), PROSPERO CRD42023479078. Searched Embase, PubMed, CENTRAL, MEDLINE and ClinicalTrials.gov to Nov 3 2023, updated May 4 2025; dual independent screening in Covidence, Cochrane RoB 2.0. Of 2975 studies screened, **7 phase 2 trials randomising 574 men** were included."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Published randomised prospective trials in **oligometastatic (up to five metastases) prostate cancer** with data sufficient for PFS and OS. Most patients were **castration-sensitive (n=375, 65%)**; ARTO enrolled entirely CRPC and the two EXTEND baskets a CRPC subset. The primary tumour had received prior definitive local therapy in **491 patients (85.5%)**, required in every trial except the EXTEND baskets and ARTO."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Co-primary: progression-free survival and overall survival.** Secondary: radiographic PFS and castration resistance-free survival. Primary analysis restricted to the six trials randomising MDT plus SOC versus SOC, with both a random-effects trial-level analysis and a patient-level analysis stratified by trial."
+              },
+              {
+                "label": "Results",
+                "body": "Effect sizes are in the endpoint table. Trial- and patient-level estimates agreed closely on all four endpoints, and OS showed **HR<1 in every individual trial** without reaching significance in aggregate."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The constituent trials are the ones that currently drive MDT practice: **STOMP** and **ORIOLE** (small randomised phase 2, ADT-free intervals and progression), **ARTO** (MDT added to abiraterone in CRPC), the two **EXTEND** hormone baskets, and the prostate subgroup of **SABR-COMET** (16 men). Pooling them raises precision on PFS but cannot add the phase 3 evidence none of them supply, and the ongoing randomised phase 3 programmes remain the gate."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents men with up to five metastases, largely castration-sensitive, with a previously treated primary. Does not represent higher-volume metastatic disease, unselected CRPC, or patients whose primary was never definitively treated."
+              },
+              {
+                "label": "Limitations",
+                "body": "The SOC arm was not one thing: observation in all or part of STOMP, ORIOLE and COMET-SABR, and second-generation ARPI use differed between arms (**59.8%, n=134 in SOC vs 50.4%, n=125 in MDT**), which cuts against MDT rather than for it. Four abstract-only randomised primary analyses could not supply IPD and were excluded, and the prostate contribution from SABR-COMET is 16 men."
+              },
+              {
+                "label": "Discussion",
+                "body": "PFS is where the estimate is tight and consistent; OS is where the question stays open, and at **p=0.051** the honest read is an underpowered signal, not a negative result. The endpoint most likely to matter to practice is **CRFS (HR 0.58) in castration-sensitive disease**, because deferring castration resistance is the outcome MDT is being asked to deliver."
+              }
+            ],
+            "interpretation": "The value of this analysis is not that it found a new effect but that it fixes the size of an old one. MDT in oligometastatic prostate cancer has been practised on the strength of small randomised phase 2 trials, each individually too small to do more than point in a direction. Pooling individual patient data from six of them puts a tight interval around the progression-free survival estimate, HR 0.44 (0.35-0.56), and the near-identical patient-level estimate of 0.45 says the pooling is not being driven by one trial's weighting. That is a real gain in precision. It is not a gain in evidence level, and the distinction matters: six phase 2 trials pooled remain six phase 2 trials, with the risk-of-bias assessment flagging non-blinded randomisation across most of them.\n\nThe overall survival result is where readers will disagree, and the disagreement is worth being explicit about. HR 0.63 with a confidence interval of 0.39 to 1.00 and p=0.051 is not a negative result; every individual trial showed HR<1, and the sensitivity analysis excluding the observation-controlled trials returned HR 0.65 in the same direction with a wider interval. What it is, is underpowered. Four hundred and seventy-two patients across trials designed to detect progression signals will not settle survival, and treating a p-value one thousandth above a threshold as evidence of absence would be as wrong as treating it as evidence of effect. The correct reading is that the survival question has not been answered here and the phase 3 programme still owns it.\n\nTwo features of the pooled population should move confidence in opposite directions. The one that strengthens the result is the imbalance in second-generation ARPI use: more patients in the standard-of-care arm received an ARPI, 59.8% versus 50.4%, and the standard-of-care patients were older. If anything that biases the comparison against MDT, so the observed benefit is unlikely to be an artefact of better systemic therapy in the intervention arm. The one that weakens generalisability is the heterogeneity of what standard of care meant. In STOMP, ORIOLE and SABR-COMET the control arm was observation in all or part of the population, which makes the progression-free survival comparison partly a comparison of treatment against no treatment rather than of local therapy added to systemic therapy. The sensitivity analysis excluding those three is the analysis that most closely matches how these patients are managed now, and it holds: PFS HR 0.46, rPFS 0.56, CRFS 0.46.\n\nFor a radiation oncologist the most useful number is castration resistance-free survival, HR 0.58 in the castration-sensitive subset, because that is the outcome MDT is implicitly being asked to buy. Deferring castration resistance is a plausible mechanism by which local ablation could translate into something patients feel, and it is measured here rather than assumed. What the analysis cannot tell you is how to deliver it. Dose, fractionation, target selection, whether all lesions or only progressing ones need treatment, and what upper bound on lesion number still benefits, are all invisible in a pooled analysis of trials that made these choices differently. The trial-level heterogeneity in radiographic PFS, I²=50%, is a hint that those choices are not interchangeable. This tightens the case for offering MDT in castration-sensitive oligometastatic disease with a treated primary; it does not standardise how.",
             "relevant_specialties": [
               "radonc",
               "medonc"
             ],
+            "significance_by_specialty": {
+              "radonc": "The endpoint that survives every sensitivity cut is PFS (HR 0.44, and 0.46 excluding the observation-SOC trials), and CRFS 0.58 in CSPC is what MDT is being asked to buy. None of the constituent trials' dose, fractionation or target-selection choices are resolved by pooling, and rPFS carried I²=50% heterogeneity, so how to deliver MDT stays a local decision.",
+              "medonc": "MDT deferred castration resistance (CRFS HR 0.58) in the castration-sensitive subset (n=257), which is the sequencing-relevant read: the question is whether local therapy buys time before ARPI escalation. Note the SOC arm actually got MORE second-generation ARPI (59.8% vs 50.4%), so the systemic backbone was not favouring MDT."
+            },
             "open_questions": [
-              "Optimal patient selection for MDT beyond lesion count",
-              "MDT benefit in de novo synchronous oligometastatic HSPC",
-              "Whether radioligand therapy added to MDT improves outcomes"
+              "Does MDT extend overall survival in a phase 3 population",
+              "Optimal dose, fractionation and target selection for prostate MDT",
+              "Upper bound on metastasis number that still benefits"
             ],
             "consort": null,
             "modality": "radiation",
-            "intent": null,
-            "methodology": null,
-            "content_type": "review",
-            "discussed_trials": [
-              "STOMP",
-              "ORIOLE",
-              "RADIOSA",
-              "ARTO",
-              "WOLVERINE",
-              "STAMPEDE2",
-              "PLATON",
-              "TERPS"
-            ],
+            "intent": "palliative",
+            "methodology": "meta-analysis",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
+              {
+                "nct": "NCT04115007",
+                "brief_title": "Prostate-cancer Treatment Using Stereotactic Radiotherapy for Oligometastases Ablation in Hormone-sensitive Patients",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 550,
+                "primary_completion_date": "2026-06",
+                "brief_summary": "INDICATION: Oligometastatic hormone-sensitive prostate cancer patients. METHODOLOGY: Open label, double arm, randomized 1:1, multicenter phase III study.\n\nPRIMARY OBJECTIVE: To assess the efficacy of ablative radiotherapy (SBRT applied to all oligometastases) administered to all gross tumor sites (metastases and prostate if applicable), in oligometastatic hormone-sensitive prostate cancer patients.",
+                "conditions": [
+                  "Oligometastatic Hormone Sensitive Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic Body Radiotherapy (SBRT) + Standard of care",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Standard of care",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "DIAGNOSIS AND INCLUSION CRITERIA:\n\n1. Histologically proven adenocarcinoma of the prostate (any T stage, Gleason score, or prostate specific antigen (PSA) level);\n2. Defined as M1 based on the presence of at least one bone metastasis;\n3. Diagnostic workup including functional imaging (F or…",
+                "answers_question": "Does MDT extend overall survival in a phase 3 population",
+                "relevance_phrase": "phase 3 SBRT to all oligomets, 550 pts, mHSPC"
+              },
               {
                 "nct": "NCT04787744",
                 "brief_title": "Veterans Affairs Seamless Phase II/III Randomized Trial of STAndard Systemic theRapy With or Without PET-directed Local Therapy for Oligometastatic pRosTate Cancer",
@@ -1352,45 +482,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\nAge 18 years. Ability to provide Informed Consent for participation in the study ECOG Performance Status 2 at time of enrollment. Prostate cancer, confirmed histologically or cytologically. If original documentation of histology and cytology are not available, documentation of…",
-                "answers_question": "MDT benefit in de novo synchronous oligometastatic HSPC",
-                "relevance_phrase": "randomized SST +/- local therapy, de novo arm"
-              },
-              {
-                "nct": "NCT06150417",
-                "brief_title": "MDRT in Prostate Cancer Treated With Long-term Androgen Deprivation Therapy in the STAMPEDE Trial (METANOVA)",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 200,
-                "primary_completion_date": "2028-12",
-                "brief_summary": "The purpose of this study is to find out if giving radiation therapy (RT) to areas of metastatic prostate cancer at the time a participant is diagnosed will help control disease better than the usual treatment. This treatment is called metastasis-directed radiotherapy (MDRT).\n\nThe usual treatment for prostate cancer that has spread to other parts of the body is to give lifelong treatment with hormone therapy (also known as androgen deprivation therapy or ADT). Participants may also be given…",
-                "conditions": [
-                  "Prostate Cancer",
-                  "Malignant Neoplasm of Prostate",
-                  "Secondary Malignant Neoplasm of Prostate"
-                ],
-                "interventions": [
-                  {
-                    "name": "Androgen deprivation therapy (ADT)",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Androgen receptor signaling inhibitor (ARSI)",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Local Therapy: Radical Prostatectomy (RP) or Radiotherapy (RT)",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Metastasis directed radiotherapy (MDRT)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Participant must be ≥ 18 years of age.\n* Participant must have an ECOG performance status ≤ 1.\n* Histologic confirmation of prostate adenocarcinoma of the prostate gland, with evidence of metastasis on imaging by conventional imaging (MRI, CT, or 99mTc bone scan) or PSMA…",
-                "answers_question": "MDT benefit in de novo synchronous oligometastatic HSPC",
-                "relevance_phrase": "MDRT at diagnosis (synchronous), phase 2 vs ADT"
+                "answers_question": "Does MDT extend overall survival in a phase 3 population",
+                "relevance_phrase": "seamless ph2/3, CRPC-free survival, PET-directed"
               },
               {
                 "nct": "NCT04983095",
@@ -1422,26 +515,62 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically confirmed prostate cancer (ICD-O-3 C61)\n2. WHO/ECOG performance status 0-1\n3. 1-3 skeletal or extra pelvic lymph node metastases detected by PSMA-PET/CT in de novo prostate cancer or PSA-relapse after definitive RT or prostatectomy\n4. Willing and able to…",
-                "answers_question": "MDT benefit in de novo synchronous oligometastatic HSPC",
-                "relevance_phrase": "phase 3 MD-SBRT, incl de novo oligomet HSPC arm"
+                "answers_question": "Does MDT extend overall survival in a phase 3 population",
+                "relevance_phrase": "randomised ph3 MD-SBRT vs standard tx, 1-3 mets"
               },
               {
-                "nct": "NCT07150715",
-                "brief_title": "Alpha-Emitting Radionuclide or Beta-Emitting Radionuclide With Metastasis-Directed Stereotactic Body Radiotherapy for the Treatment of Recurrent, Oligometastatic Prostate Adenocarcinoma",
+                "nct": "NCT06462963",
+                "brief_title": "OligoCare TwiCs (Trials Within Cohorts) Trial Comparing Acute Toxicity in Single-fraction vs Multiple-fraction SBRT for Metastasis-directed Treatment (SPRINT)",
                 "overall_status": "RECRUITING",
                 "phase": [
-                  "PHASE2"
+                  "NA"
                 ],
-                "enrollment_count": 107,
-                "primary_completion_date": "2030-10",
-                "brief_summary": "This phase II trial compares the use of 225Ac-PSMA-617 to 177Lu-PSMA-617, along with stereotactic body radiotherapy for the treatment of prostate cancer that has come back after a period of improvement (recurrent) and that has spread from where it first started (primary site) to multiple other places in the body (oligometastatic). 225Ac-PSMA-617 and 177Lu-PSMA-617 are radioactive drugs. They bind to a protein called a PSMA receptor, which is found on some prostate tumor cells. 225Ac-PSMA-617 or…",
+                "enrollment_count": 302,
+                "primary_completion_date": "2029-02",
+                "brief_summary": "The goal of this clinical trial is to evaluate single-fraction metastases-directed SBRT in the broader radiation oncology community and to compare its safety and efficacy profile with the current Standard of Care (SoC) of multiple-fraction SBRT in patients with oligometastatic disease of primary breast, prostate, NSCLC and colorectal cancer having all lesions that will be treated with radical radiotherapy amenable to single-fraction SBRT.\n\nThe main question/hypothesis this clinical trial aims…",
                 "conditions": [
-                  "Oligometastatic Prostate Adenocarcinoma",
-                  "Recurrent Prostate Adenocarcinoma"
+                  "Breast Cancer",
+                  "Prostate Cancer",
+                  "NSCLC",
+                  "Colorectal Cancer",
+                  "Oligometastatic Disease"
                 ],
                 "interventions": [
                   {
-                    "name": "Actinium Ac 225 Vipivotide Tetraxetan",
+                    "name": "single-fraction SBRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "multiple-fraction SBRT",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patient is part of the RP1822-OligoCare. As in OligoCare, ALL active cancer lesions (loco-regional primary and all oligometastases) were or will be treated with radical intent (surgery or radiotherapy).\n* All lesions that will be treated with radical radiotherapy have to be…",
+                "answers_question": "Optimal dose, fractionation and target selection for prostate MDT",
+                "relevance_phrase": "single- vs multi-fraction SBRT, acute toxicity 1° EP"
+              },
+              {
+                "nct": "NCT06205316",
+                "brief_title": "SBRT Versus Hypofractionated Radiotherapy for Biochemically Recurrent or Oligometastatic Prostate Adenocarcinoma",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 118,
+                "primary_completion_date": "2030-01",
+                "brief_summary": "This phase III trial tests the side effects of stereotactic body radiation therapy (SBRT) compared to hypofractionated radiotherapy for treating patients with prostate adenocarcinoma that has come back after a period of improvement (recurrent) or that has spread from where it first started (primary site) to a limited number of sites (oligometastatic). SBRT is a type of external radiation therapy that uses special equipment to position a patient and precisely deliver radiation to tumors in the…",
+                "conditions": [
+                  "Biochemically Recurrent Prostate Carcinoma",
+                  "Oligometastatic Prostate Carcinoma",
+                  "Recurrent Prostate Adenocarcinoma",
+                  "Stage IIB Prostate Cancer AJCC v8",
+                  "Stage IIC Prostate Cancer AJCC v8",
+                  "Stage III Prostate Cancer AJCC v8",
+                  "Stage IV Prostate Cancer AJCC v8"
+                ],
+                "interventions": [
+                  {
+                    "name": "Antiandrogen Therapy",
                     "type": "DRUG"
                   },
                   {
@@ -1449,69 +578,531 @@
                     "type": "PROCEDURE"
                   },
                   {
-                    "name": "Gallium Ga 68 Gozetotide",
-                    "type": "OTHER"
+                    "name": "Hypofractionated Radiation Therapy",
+                    "type": "RADIATION"
                   },
                   {
-                    "name": "Lutetium Lu 177 Vipivotide Tetraxetan",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "PSMA PET-CT Scan",
+                    "name": "Positron Emission Tomography",
                     "type": "PROCEDURE"
                   },
                   {
                     "name": "Stereotactic Body Radiation Therapy",
                     "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Oligorecurrent prostate cancer as determined by the presence of 1-5 asymptomatic lesions outside the prostate or prostate bed identified on PSMA PET/CT by local readers\n* Serum testosterone \\> 150 ng/dL\n* Age ≥ 18 years\n* Eastern Cooperative Oncology Group (ECOG) performance…",
-                "answers_question": "Whether radioligand therapy added to MDT improves outcomes",
-                "relevance_phrase": "225Ac vs 177Lu-PSMA added to SBRT, oligomet PCa"
-              },
-              {
-                "nct": "NCT05496959",
-                "brief_title": "177-Lutetium-PSMA Before Stereotactic Body Radiotherapy for the Treatment of Oligorecurrent Prostate Cancer, The LUNAR Study",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 93,
-                "primary_completion_date": "2032-09",
-                "brief_summary": "This phase II trial tests whether 177-Lutetium-PSMA given before stereotactic body radiotherapy (SBRT) works to improve cancer control rate in patients with 1-5 prostate cancer tumors that have come back after prior treatment (oligorecurrent). Radioactive drugs, such as 177-Lutetium-PSMA, may carry radiation directly to tumor cells and not harm normal cells. SBRT uses special equipment to position a patient and deliver radiation to tumors with high precision. This method may kill tumor cells…",
-                "conditions": [
-                  "Oligometastatic Prostate Carcinoma",
-                  "Prostate Adenocarcinoma",
-                  "Recurrent Prostate Adenocarcinoma",
-                  "Stage IVB Prostate Cancer AJCC v8"
-                ],
-                "interventions": [
-                  {
-                    "name": "Lutetium Lu-177 PNT2002",
-                    "type": "DRUG"
                   },
                   {
-                    "name": "Quality-of-Life Assessment",
+                    "name": "Survey Administration",
                     "type": "OTHER"
                   },
                   {
-                    "name": "Stereotactic Body Radiation Therapy",
-                    "type": "RADIATION"
+                    "name": "Magnetic Resonance Imaging",
+                    "type": "PROCEDURE"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Oligorecurrent prostate cancer as determined by the presence of 1-5 asymptomatic lesions outside the prostate or prostate bed identified on PSMA PET/CT by local readers\n* Age \\>= 18 years\n* Eastern Cooperative Oncology Group (ECOG) performance status =\\< 2\n* No indication for…",
-                "answers_question": "Whether radioligand therapy added to MDT improves outcomes",
-                "relevance_phrase": "177Lu-PSMA before SBRT, control rate EP (LUNAR)"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed prostate adenocarcinoma at the time of surgery\n* Pathologic stages T2-T3b, Nx or N0-1, M0-1 as staged by the pathology report (American Joint Committee on Cancer \\[AJCC\\] Criteria 8th edition \\[Ed.\\])\n* PSA post radical prostatectomy ≥ 0.1 and \\< 2.0…",
+                "answers_question": "Optimal dose, fractionation and target selection for prostate MDT",
+                "relevance_phrase": "ph3 SBRT vs hypofx RT in oligomet/BCR prostate"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "metastasis-directed prostate oligometastatic",
-                "lutetium PSMA oligometastatic prostate"
+                "metastasis-directed therapy oligometastatic prostate randomized",
+                "SBRT oligometastatic prostate dose"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 33,
+              "fetched_at": "2026-08-11T01:05:06.904Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 31
+              }
+            ]
+          },
+          {
+            "name": "ORIOLE",
+            "tldr": "6-mo composite progression 19% vs 61% with SABR (P=.005); mPFS not reached vs 5.8 mo, HR 0.30.",
+            "details": [
+              "📊 1° EP composite progression at 6mo: 7/36 (19%) SABR vs 11/18 (61%) observation, P=.005",
+              "📐 mPFS not reached vs 5.8mo, HR 0.30 (95% CI 0.11-0.81), P=.002",
+              "📐 Median biochemical PFS not reached vs 6.4mo, HR 0.31 (0.13-0.75), P=.002",
+              "🔍 Phase 2, 3 university-affiliated US centers, 80 screened → 54 randomized 2:1 SABR vs obs, May 2016-Mar 2018",
+              "🔍 Eligibility: 1-3 asymptomatic mets arising within prior 6mo, ≤5.0cm; conventional imaging (CT/MRI/bone scan) only",
+              "🔍 Prior definitive local therapy required; no ADT within 6mo of enrollment or ≥3yr total",
+              "📊 Local control 98.9% at 6mo; no grade 3+ toxic effects in either arm",
+              {
+                "text": "📊 PSMA-PET blinding created a within-SABR natural experiment (16/36 had untreated PET-avid lesions)",
+                "subdetails": [
+                  "Progression at 6mo: 1/19 (5%) no untreated lesions vs 6/16 (38%) any untreated, P=.03",
+                  "mPFS not reached vs 11.8mo, HR 0.26 (0.09-0.76), P=.006",
+                  "New lesions at 180d: 3/19 (15.8%) vs 10/16 (62.5%), P=.006",
+                  "Median distant MFS 29.0 vs 6.0mo, HR 0.19 (0.07-0.54), P<.001"
+                ]
+              },
+              "⚠️ Composite 1° EP includes ADT initiation for any reason, an unblinded clinician decision in an open trial",
+              "⚠️ Gleason grade imbalanced against observation (mean 8 vs 7); N=54 leaves the HR CI wide",
+              "⚠️ Median f/u 18.8mo (range 5.8-35.0); no OS or long-term endpoint at this cutoff",
+              "🔗 Contemporaneous with STOMP (2018), which also randomized metastasis-directed therapy vs surveillance in oligorecurrent hormone-sensitive disease; ORIOLE adds the PSMA-PET consolidation signal"
+            ],
+            "figures": [],
+            "nct": "NCT02680587",
+            "tweet_ids": [
+              1000000034
+            ],
+            "slug": "oriole",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Phase 2, N=54, 6-month composite primary including ADT initiation, median f/u 18.8mo. Hypothesis-generating for MDT; no OS or definitive endpoint.",
+              "audience": "Hormone-sensitive oligorecurrent prostate ca, 1-3 mets on conventional imaging, ADT-free"
+            },
+            "significance": "The actionable RT parameter is target selection, not dose: 16 of 36 SABR pts had PSMA-avid lesions left untreated because planning was blinded to PET, and those men progressed at 38% vs 5% by 6mo (distant MFS 6.0 vs 29.0mo, HR 0.19). That argues total consolidation of PET-avid disease, so PSMA-PET-based planning is the decision this moves.",
+            "monday_clinic": "In hormone-sensitive oligorecurrent prostate cancer with 1-3 conventionally imaged mets and no recent ADT, this supports deferring ADT with SABR to all PET-avid sites; it does not speak to de novo synchronous oligometastatic or castration-resistant disease.",
+            "primary_endpoint": {
+              "name": "Progression at 6 months (composite)",
+              "klass": "surrogate",
+              "stat_value": "19% vs 61%",
+              "stat_detail": "7/36 vs 11/18, P=.005"
+            },
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**Phase 2, 2-arm randomized** trial across 3 US radiation facilities affiliated with one university hospital. 80 men screened, **54 randomized 2:1** to SABR or observation, accrual May 2016 to March 2018, data cutoff May 20 2019. Median follow-up **18.8 months** (range 5.8-35.0)."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Recurrent **hormone-sensitive** prostate cancer with **1 to 3 metastases** detected on conventional imaging (CT, MRI, or bone scan), asymptomatic, arisen within the prior 6 months, no larger than **5.0 cm**. Prior definitive treatment of the primary required; salvage prostate-bed or pelvic RT allowed. **No ADT within 6 months** of enrollment or 3 or more years total. Median age 68 in both arms; Gleason grade ran higher in the observation arm (mean 8 vs 7)."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "SABR to metastatic sites, with **treatment planning blinded to PSMA-PET**, so PET-avid lesions outside the conventional-imaging map were left untreated in **16 of 36** SABR pts. Dose and fractionation are not reported in the source text. **Local control 98.9%** at 6 months."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary:** progression at 6 months, a **composite** of PSA rise, radiographic progression on conventional imaging, symptomatic progression, **ADT initiation for any reason**, or death. Secondary: SABR toxicity, 6-month local control, PFS, Brief Pain Inventory QoL, and concordance between conventional imaging and PSMA-PET."
+              },
+              {
+                "label": "Safety",
+                "body": "**No grade 3 or higher** adverse events in either arm. No differences in Brief Pain Inventory scores between arms or within either arm over time."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Sits alongside **STOMP**, the other randomized trial of metastasis-directed therapy versus surveillance in oligorecurrent hormone-sensitive disease, and reaches the same directional conclusion from an independent population. What ORIOLE adds is the **PSMA-PET consolidation** question, which STOMP's choline-PET-selected design could not isolate."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents hormone-sensitive oligorecurrent prostate cancer with 1 to 3 metastases on conventional imaging, off ADT, after definitive local therapy. Does not represent de novo synchronous oligometastatic disease, castration-resistant disease, or men with more than 3 lesions."
+              },
+              {
+                "label": "Limitations",
+                "body": "The composite primary is driven partly by **ADT initiation for any reason**, a clinician decision made without blinding in an open trial, so the treating team's knowledge of arm allocation can move the endpoint directly. The **PET-untreated-lesion comparison is a within-arm post-randomization subgroup** (19 vs 16 men), not a randomized contrast, and the men whose conventional imaging missed more disease plausibly had more disease to begin with."
+              },
+              {
+                "label": "Discussion",
+                "body": "The trial makes two distinct claims and they carry different weight. That SABR beats observation on a 6-month composite in a 54-man phase 2 is a **signal, not a standard**; that leaving PSMA-avid disease untreated tracks with earlier and more distant failure is the finding that changed how the field plans these treatments, even though it rests on an observational contrast inside one arm."
+              }
+            ],
+            "interpretation": "ORIOLE arrived at the same time as STOMP and pointed the same direction, and that convergence is most of why metastasis-directed therapy stopped being an unusual choice in oligorecurrent hormone-sensitive prostate cancer. Two small randomized trials, run in different health systems with different imaging pathways, both found that treating a handful of visible lesions delayed the events clinicians care about. Neither was powered for survival and neither claimed to be. The honest reading of the pair is that they established the state as worth treating prospectively, not that they settled dose, extent, or whether the delay in ADT translates into anything durable.\n\nThe headline number deserves less weight than it usually gets. Progression at 6 months was a composite that counted PSA rise, imaging progression, symptoms, death, and ADT initiation for any reason. In an open trial with no blinding, that last component is a decision made by a clinician who knows which arm the patient is in, and the observation arm is precisely where the reflex to start ADT is strongest. Some of the 61% versus 19% gap reflects biology and some reflects behavior, and the trial's design cannot separate them. The biochemical PFS result (HR 0.31) is less contaminated because PSA is measured rather than decided, and it moves in the same direction, which is reassuring without being conclusive at this sample size. A hazard ratio of 0.30 with an interval running to 0.81 in 54 men is compatible with a large effect and with a modest one.\n\nThe part of ORIOLE that changed practice was not the randomized comparison at all. Because treatment planning was blinded to PSMA-PET, 16 of 36 men in the SABR arm walked out with radiographically occult disease deliberately left in place, and the trial got an unplanned look at what incomplete consolidation costs. Those men progressed at 38% versus 5% by 6 months, and their median distant metastasis-free survival was 6.0 months against 29.0. The magnitude is striking enough that it reframed the operational question from whether to treat oligometastatic disease to which map to treat from. But this is a post-randomization comparison of two groups defined by what their scans showed, and the men with more PET-avid disease than conventional imaging revealed almost certainly had more disease burden overall. The comparison is confounded by the very thing it measures. It should raise confidence that PET-guided target selection matters; it does not establish that consolidating every avid lesion converts a poor-prognosis patient into a good one.\n\nWhat should temper the transfer to a general clinic is how selected this population was. Enrollment required metastases visible on conventional imaging that appeared within the prior 6 months, capped at three and at 5.0 cm, in men off ADT and treated definitively for the primary. That is a narrow slice, and it excludes the de novo synchronous presentations and the castration-resistant patients for whom the same question is often asked. Gleason grade also ran higher in the observation arm, which in a 54-man trial is not a rounding error. Local control at 98.9% and no grade 3 or higher toxicity say the intervention is safe and does what it mechanically claims to do, which is the least surprising and most reliable result in the paper.\n\nThe question ORIOLE leaves open is whether delaying ADT by treating visible lesions changes anything a patient experiences years later, or whether it substitutes an early local intervention for a later systemic one at equivalent long-term cost. Answering that takes a trial powered for survival with follow-up measured in years, not a 6-month composite in 54 men.",
+            "relevant_specialties": [
+              "radonc",
+              "medonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Target selection, not dose, is the transferable parameter: planning was blinded to PSMA-PET, so 16/36 SABR pts had avid lesions untreated, and they progressed 38% vs 5% at 6mo with distant MFS 6.0 vs 29.0mo (HR 0.19). That argues for PET-based planning and total consolidation of avid disease. Dose and fractionation are not reported in source text.",
+              "medonc": "The comparator here is observation with ADT deferral, not a systemic regimen, so the read is about sequencing: SABR pushed median PFS from 5.8 months to not reached in men deliberately kept off ADT. Whether that delay costs anything downstream is untested at 18.8 months median follow-up."
+            },
+            "open_questions": [
+              "Does deferring ADT via SABR change overall survival",
+              "Optimal SABR dose and fractionation for prostate oligometastases",
+              "Does PSMA-PET-guided total consolidation improve outcomes prospectively"
+            ],
+            "consort": {
+              "enrolled": 80,
+              "excluded": null,
+              "randomized": 54,
+              "arms": [
+                {
+                  "label": "SABR",
+                  "allocated": 36,
+                  "analyzed": null,
+                  "outcome": "6mo progression 19%"
+                },
+                {
+                  "label": "Observation",
+                  "allocated": 18,
+                  "analyzed": null,
+                  "outcome": "6mo progression 61%"
+                }
+              ]
+            },
+            "modality": "radiation",
+            "intent": "palliative",
+            "methodology": "phase-2-trial",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT06654336",
+                "brief_title": "Study of Recurrence-directed Therapy (RDT) With or Without Androgen-Deprivation Therapy (ADT) In Patients With Radio-recurrent Oligo-metastatic Hormone/Castrate Sensitive Prostate Cancer (romCSPC)",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 162,
+                "primary_completion_date": "2031-04",
+                "brief_summary": "The goal of this study is to determine whether the addition of Androgen Deprivation Therapy (ADT) utilizing the study drug ELIGARD® to Recurrence- Directed Therapy (RDT) improves progression-free survival (PFS) compared to RDT alone in patients with early radio-recurrent oligo-metastatic castrate / hormone sensitive prostate cancer (romCSPC). Participants will be assessed at standard of care clinic visits every 3 months. The follow-up period is 36 months.",
+                "conditions": [
+                  "Prostate Adenocarcinoma",
+                  "Castration Sensitive Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Recurrence-directed therapy (RDT)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "ELIGARD 22.5mg",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Previous biopsy-proven localized prostate adenocarcinoma (without predominant features of sarcomatoid, small cell or neuroendocrine carcinoma) treated with definitive or salvage radiotherapy ≥ 2 years or more before enrollment.\n2. Recurrent Oligo-metastatic CSPC, M0 on…",
+                "answers_question": "Does deferring ADT via SABR change overall survival",
+                "relevance_phrase": "randomises RDT alone vs RDT + ADT, PFS primary"
+              },
+              {
+                "nct": "NCT06462963",
+                "brief_title": "OligoCare TwiCs (Trials Within Cohorts) Trial Comparing Acute Toxicity in Single-fraction vs Multiple-fraction SBRT for Metastasis-directed Treatment (SPRINT)",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 302,
+                "primary_completion_date": "2029-02",
+                "brief_summary": "The goal of this clinical trial is to evaluate single-fraction metastases-directed SBRT in the broader radiation oncology community and to compare its safety and efficacy profile with the current Standard of Care (SoC) of multiple-fraction SBRT in patients with oligometastatic disease of primary breast, prostate, NSCLC and colorectal cancer having all lesions that will be treated with radical radiotherapy amenable to single-fraction SBRT.\n\nThe main question/hypothesis this clinical trial aims…",
+                "conditions": [
+                  "Breast Cancer",
+                  "Prostate Cancer",
+                  "NSCLC",
+                  "Colorectal Cancer",
+                  "Oligometastatic Disease"
+                ],
+                "interventions": [
+                  {
+                    "name": "single-fraction SBRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "multiple-fraction SBRT",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patient is part of the RP1822-OligoCare. As in OligoCare, ALL active cancer lesions (loco-regional primary and all oligometastases) were or will be treated with radical intent (surgery or radiotherapy).\n* All lesions that will be treated with radical radiotherapy have to be…",
+                "answers_question": "Optimal SABR dose and fractionation for prostate oligometastases",
+                "relevance_phrase": "single- vs multi-fraction SBRT, acute toxicity primary"
+              },
+              {
+                "nct": "NCT06276465",
+                "brief_title": "Treatment With Darolutamide +/- Radiation Therapy for Patients With a Castration Resistant Cancer and Metastases Detected by Functional Imaging",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 336,
+                "primary_completion_date": "2029-10",
+                "brief_summary": "In earlier stages of prostate cancer, male sexual hormones (androgens) stimulate the growth of cancer cells. Castration-resistant prostate cancer (CRPC) means that the prostate cancer continued to grow despite patients are taking hormone therapy to control the disease. One of the standard treatments for these patients is so-called 'new generation' hormonal therapy. These hormone therapies include apalutamide, enzalutamide, or darolutamide. They work by blocking androgen receptors that play an…",
+                "conditions": [
+                  "Prostatic Cancer, Castration-Resistant"
+                ],
+                "interventions": [
+                  {
+                    "name": "Darolutamide 300 mg",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Stereotactic body radiation therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Androgen deprivation therapy",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Patient must have signed a written informed consent prior to any trial specific procedures. When the patient is physically unable to give their written consent, a trusted person of their choice, independent from the investigator or the sponsor, can confirm in writing the…",
+                "answers_question": "Does PSMA-PET-guided total consolidation improve outcomes prospectively",
+                "relevance_phrase": "phase 3 darolutamide +/- SBRT to functional-imaging mets"
+              },
+              {
+                "nct": "NCT07691697",
+                "brief_title": "PSMA PET-Guided Progression-Directed Radiotherapy for Oligoprogressive Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": null,
+                "enrollment_count": 1000,
+                "primary_completion_date": "2030-12",
+                "brief_summary": "PSMA-OLIGO-PRO is a multicenter ambispective observational real-world registry evaluating outcomes after PSMA PET-guided progression-directed radiotherapy for oligoprogressive prostate cancer. The registry includes retrospectively identified patients treated before June 26, 2026 and prospectively enrolled patients from June 26, 2026 onward.\n\nEligible patients have metastatic hormone-sensitive or castration-resistant prostate cancer, are receiving active systemic therapy, and develop a limited…",
+                "conditions": [
+                  "Oligoprogressive Prostate Cancer",
+                  "Metastatic Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Progression-Directed Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age 18 years or older.\n* Diagnosis of prostate cancer.\n* Metastatic hormone-sensitive prostate cancer or metastatic castration-resistant prostate cancer.\n* Receiving active systemic therapy at the time of oligoprogression.\n* Oligoprogression defined as up to five new and/or…",
+                "answers_question": "Does PSMA-PET-guided total consolidation improve outcomes prospectively",
+                "relevance_phrase": "prospective registry, PSMA PET-guided directed RT"
+              },
+              {
+                "nct": "NCT04983095",
+                "brief_title": "Metastasis Directed Stereotactic Body Radiotherapy for Oligo Metastatic Hormone Sensitive Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 118,
+                "primary_completion_date": "2031-12",
+                "brief_summary": "The study is an open label, multi-centre, randomized phase III study. The patients will be randomised in a 1:1 ratio to treatment consisting of\n\n* Arm A: MD-SBRT in addition to standard treatment\n* Arm B: Standard treatment\n\nStudy population: Patients with hormone sensitive prostate cancer (HSPC) with oligometastatic disease detected by PSMA-PET/DT. This includes patients with de novo oligometastatic HSPC and recurrent HSPC after primary RT or prostatectomy.\n\nPrimary endpoint: Failure free…",
+                "conditions": [
+                  "Prostate Cancer Metastatic",
+                  "Radiation Therapy",
+                  "Positron-Emission Tomography"
+                ],
+                "interventions": [
+                  {
+                    "name": "stereotactic body radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "androgen deprivation therapy",
+                    "type": "COMBINATION_PRODUCT"
+                  },
+                  {
+                    "name": "Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically confirmed prostate cancer (ICD-O-3 C61)\n2. WHO/ECOG performance status 0-1\n3. 1-3 skeletal or extra pelvic lymph node metastases detected by PSMA-PET/CT in de novo prostate cancer or PSA-relapse after definitive RT or prostatectomy\n4. Willing and able to…",
+                "answers_question": "Does PSMA-PET-guided total consolidation improve outcomes prospectively",
+                "relevance_phrase": "randomised MD-SBRT vs SOC, PSMA-PET-defined 1-3 mets"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "metastasis-directed therapy oligometastatic prostate survival",
+                "PSMA PET guided stereotactic prostate oligometastatic"
               ],
               "queries_failed": [],
               "candidates_returned": 22,
-              "fetched_at": "2026-07-19T06:10:56.157Z",
+              "fetched_at": "2026-08-11T01:05:10.438Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 34
+              }
+            ]
+          },
+          {
+            "name": "EAU 2026: What Evidence Do We Have from Intensification with SBRT?",
+            "tldr": "Session review of MDT in oligometastatic prostate: ARTO the only randomised OS signal; no effect sizes reported in source.",
+            "details": [
+              "🔍 EAU 2026 thematic session talk (Fonteyne, Ghent), a round-up of prior trials, not a new dataset",
+              {
+                "text": "📊 MDT evidence by setting, as characterised in the session (no effect sizes reported in source)",
+                "table": {
+                  "columns": [
+                    "Trial",
+                    "Setting",
+                    "Reported signal"
+                  ],
+                  "rows": [
+                    [
+                      "STOMP / ORIOLE",
+                      "Metachronous oligorecurrent HSPC",
+                      "Local control, delayed progression, minimal toxicity"
+                    ],
+                    [
+                      "RADIOSA",
+                      "Oligorecurrent HSPC",
+                      "ADT + MDT improved PFS vs MDT alone"
+                    ],
+                    [
+                      "WOLVERINE",
+                      "Oligometastatic PCa",
+                      "PFS and rPFS improved, CRPC delayed, OS not significant"
+                    ],
+                    [
+                      "ARTO",
+                      "Castration-resistant oligometastatic",
+                      "PFS plus OS and PCSS improved vs SOC alone"
+                    ],
+                    [
+                      "RAVENS",
+                      "Oligometastatic PCa",
+                      "Ra-223 added to MDT: no PFS or MFS gain"
+                    ]
+                  ]
+                }
+              },
+              "📊 ARTO framed as the first randomised trial suggesting an OS and PCSS benefit from adding MDT",
+              "⚠️ That OS signal is one trial, in castration-resistant disease, and unreplicated in this evidence base",
+              "⚠️ WOLVERINE gained PFS, rPFS and delayed CRPC, but no significant OS difference",
+              "🔍 De novo synchronous evidence is thin; STAMPEDE2, PLATON, TERPS and OLIGOPRESTO still accruing",
+              "🔍 SOLAR (21 pts) asked whether testosterone can recover with PSA suppressed after MDT",
+              "⚠️ SOLAR vs SATURN (synchronous vs metachronous) is a cross-trial comparison, hypothesis-generating only",
+              "🔍 Eligibility still keys on a lesion count of up to five; PSMA PET burden proposed as a finer stratifier"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000024
+            ],
+            "slug": "eau2026-oligomet-sbrt-review",
+            "significance": "Selection is the weak point, not delivery: eligibility still rests on a lesion count of up to five, while the PSMA PET burden analysis cited suggests imaging-derived burden stratifies more finely. Adding Ra-223 to MDT (RAVENS) gained neither PFS nor MFS, so intensifying the radiation side has no support yet; the live decision is whether to ablate at all outside metachronous oligorecurrence.",
+            "monday_clinic": "In metachronous oligorecurrent hormone-sensitive disease with a low lesion burden, this supports MDT to delay progression and defer systemic therapy; it does not extend to de novo synchronous presentation, where STAMPEDE2, PLATON, TERPS and OLIGOPRESTO are still accruing.",
+            "primary_endpoint": null,
+            "analysis_sections": null,
+            "interpretation": "The shape of this evidence base matters more than any single trial in it. Almost everything supporting metastasis-directed therapy in prostate cancer was generated in the metachronous oligorecurrent setting, in trials the speaker herself characterised as small and heterogeneous in inclusion criteria and endpoints. That is why MDT has not converted into guideline language despite years of positive-sounding readouts: the trials were sized to detect progression-free survival differences in populations selected on imaging, and progression-free survival in a PSA-monitored, scan-monitored disease responds to ablation almost mechanically. Removing the lesions you can see delays the next scan-detected event. Whether it changes the disease is a separate question, and it is the one the field has not answered.\n\nAgainst that background, ARTO is the outlier worth arguing about. It is presented here as the first randomised trial suggesting an overall survival and prostate-cancer-specific survival benefit from adding MDT to systemic therapy, and if it holds it is the only result in the session that would move MDT from a reasonable option to an expected one. Two things temper it. It was run in castration-resistant oligometastatic disease, which is not where most MDT is offered, so the population that gained is not the population most readers are treating. And WOLVERINE, testing the same idea in hormone-sensitive disease, gained progression-free and radiographic progression-free survival and delayed castration resistance without a significant overall survival difference. The two results are not incompatible, but they diverge on the only endpoint that settles the argument, and the conservative read is that one survival signal in one setting is a hypothesis rather than a standard.\n\nThe de-escalation strand is the more interesting one for a radiation oncologist and the least mature. SOLAR enrolled 21 patients to ask whether testosterone can be allowed to recover after MDT while PSA stays suppressed, which reframes ablation as a way of buying a systemic-therapy holiday rather than as an intensification on top of it. The comparison drawn against SATURN, with outcomes appearing more favourable in synchronous than metachronous disease, is a cross-trial comparison of separately selected populations and cannot support the inference that earlier MDT works better. It is a reasonable hypothesis, and it is the kind of hypothesis that has previously survived several small series and then failed a randomised test.\n\nTwo negatives are worth carrying out of the session. RAVENS found no progression-free or metastasis-free survival gain from adding Ra-223 to MDT, which argues against assuming radioligand therapy and ablation are additive; LUNAR will test the same premise with Lu-177 and should not be expected to succeed simply because the isotope is newer. And the selection criterion itself, a lesion count of up to five, is arbitrary in the way anatomic thresholds usually are. The PSMA PET burden work raised at the end is the more defensible direction: burden measured on the imaging that now defines the disease should stratify better than counting spots on it. Until trials randomise on biology rather than lesion count, MDT will keep generating progression-free survival wins in populations chosen to produce them, and the de novo synchronous question that STAMPEDE2, PLATON, TERPS and OLIGOPRESTO are built to answer will stay the one that actually decides practice.",
+            "relevant_specialties": [
+              "radonc",
+              "medonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "MDT is being asked to earn its place on selection, not technique: the up-to-five lesion cutoff is the enrolment gate across these trials, and RAVENS found no PFS or MFS gain from adding Ra-223 to ablation. Outside metachronous oligorecurrence the RT case is unproven, with STAMPEDE2, PLATON, TERPS and OLIGOPRESTO still accruing.",
+              "medonc": "The systemic read is de-escalation, not addition: SOLAR (21 pts) asked whether testosterone can recover with PSA suppressed after MDT, and WOLVERINE delayed castration resistance without a significant OS gain. ARTO's OS and PCSS signal sits in castration-resistant disease, so it does not license dropping systemic therapy in hormone-sensitive pts."
+            },
+            "open_questions": [
+              "Does MDT benefit de novo synchronous oligometastatic HSPC?",
+              "Can systemic therapy be safely de-escalated after MDT?",
+              "Which imaging or biomarker metric selects MDT candidates?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": null,
+            "content_type": "review",
+            "discussed_trials": [
+              "STOMP",
+              "ORIOLE",
+              "RADIOSA",
+              "ARTO",
+              "WOLVERINE",
+              "STAMPEDE2",
+              "PLATON",
+              "TERPS"
+            ],
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT06198387",
+                "brief_title": "Radiotherapy for Prostate and Oligo-metastatic Lesions in Patients With Low-burden Oligo-metastatic Prostate Cancer",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 30,
+                "primary_completion_date": "2025-09",
+                "brief_summary": "The existing large prospective study demonstrates the benefits of primary radiotherapy in patients with low-volume oligo-metastatic prostate cancer (OMPC), and there is also more evidence of the benefits of local metastasis-directed therapy (MDT) for metastatic lesions. But there is no results from prospective study to demonstrate the efficacy of radiotherapy for prostate and oligo-metastases. Therefore, the aim of the protocol is to illustrate the efficacy of radiotherapy for prostate and…",
+                "conditions": [
+                  "Oligo-metastatic Prostate Carcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "hormone and RT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "ADT combined with abiraterone",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Aged 18 years or over at the time of registration\n* Eastern Cooperative Oncology Group (ECOG) performance status score ≤ 2;\n* Histologically confirmed prostate adenocarcinoma via prostate biopsy;\n* Assessment conducted via single-photon emission computed tomography (SPECT),…",
+                "answers_question": "Does MDT benefit de novo synchronous oligometastatic HSPC?",
+                "relevance_phrase": "prospective prostate + oligomet RT in low-burden OMPC"
+              },
+              {
+                "nct": "NCT07686016",
+                "brief_title": "Prostate Radiotherapy and Metastasis-Directed Therapy in Synchronous Oligometastatic Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": null,
+                "enrollment_count": 700,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "This is an ambispective, multicenter, observational real-world registry of patients with synchronous de novo oligometastatic prostate cancer, defined as prostate cancer with up to 10 extraregional metastatic lesions diagnosed at initial presentation or within 6 months of the primary diagnosis.\n\nThe study will evaluate outcomes after comprehensive local and metastasis-directed treatment. Eligible patients receive definitive prostate-directed radiotherapy, which may include external-beam…",
+                "conditions": [
+                  "Prostate Cancer",
+                  "Metastatic Prostate Cancer",
+                  "Oligometastatic Prostate Cancer",
+                  "Synchronous Oligometastatic Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Definitive Prostate-Directed Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Metastasis-Directed Stereotactic Body Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Pelvic Lymph Node Irradiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Prostate Brachytherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed adenocarcinoma of the prostate.\n* Male sex.\n* Age 18 years or older.\n* Synchronous de novo metastatic prostate cancer diagnosed at initial presentation or within 6 months of primary prostate cancer diagnosis.\n* Up to 10 extraregional metastatic…",
+                "answers_question": "Does MDT benefit de novo synchronous oligometastatic HSPC?",
+                "relevance_phrase": "700-pt registry, MDT SBRT in de novo synchronous"
+              },
+              {
+                "nct": "NCT05717582",
+                "brief_title": "Maximal Cytoreductive Therapies on Post-treatment Metastases in Pts With mHSPC During Apalutamide Plus ADT Treatment",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 47,
+                "primary_completion_date": "2025-12",
+                "brief_summary": "To assess the feasibility and safety of Maximal cytoreductive therapies in patients with de novo mCSPC who achieve ≤10 oligopersistent metastases on PSMA PET CT after initial 3-month systemic treatment with apalutamide plus ADT. Maximal cytoreductive therapies consist of 1.cytoreductive radical prostatectomy with/without PLND guided by post-treatment PET 2.metastasis-directed therapy with radiation guided by post-treatment oligopersistent metastases. All patients receive continuous systemic…",
+                "conditions": [
+                  "Metastatic Prostate Cancer",
+                  "Castration-Sensitive Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "apalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "androgen deprivation therapy",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "cytoreductive radical prostatectomy with/without pelvic lymph node dissection",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "metastasis-directed therapy with radiation",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Able to understand and willing to sign the informed consent;\n2. Aged ≥18 years;\n3. Histologically or cytologically confirmed prostate adenocarcinoma (primary small cell carcinoma or signet-ring cell carcinoma of the prostate are not allowed, however adenocarcinoma with…",
+                "answers_question": "Which imaging or biomarker metric selects MDT candidates?",
+                "relevance_phrase": "post-ADT PSMA PET oligopersistence gates MDT"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "metastasis-directed therapy synchronous prostate",
+                "de-escalation oligometastatic prostate",
+                "PSMA PET burden prostate"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 23,
+              "fetched_at": "2026-08-11T01:07:29.572Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -1526,6 +1117,323 @@
               "RADIOSA": "radiosa",
               "ORIOLE": "oriole"
             }
+          },
+          {
+            "name": "RADIOSA",
+            "tldr": "cPFS 32.2 vs 15.1 mo, HR 0.43, adding 6 months of ADT to ablative SBRT in metachronous oligorecurrence.",
+            "details": [
+              "📊 1° endpoint (clinical PFS) by arm",
+              "🔍 Single-centre randomised open-label phase 2 in Milan; 105 randomised, 51 per arm analysed",
+              "🔍 Eligibility: ≤3 nodal or bone lesions on next-generation imaging after radical local treatment, ECOG 0-1",
+              "📐 SBRT 30 Gy/3 fx every other day; stated EQD2 98.6 Gy (α/β 1.5), BED >100 Gy",
+              "💊 ADT arm: 6 months LHRH analogue started within 1 week before SBRT",
+              {
+                "text": "📊 Safety across both arms",
+                "subdetails": [
+                  "One G1 GI event (SBRT alone)",
+                  "One G3 GU event: left ureter stenosis (SBRT with ADT)",
+                  "22 G1 ADT-related events, all resolved at last follow-up",
+                  "No late toxicities, no treatment-related deaths"
+                ]
+              },
+              "⚠️ Open-label cPFS: castration lowers PSA, and PSA is what triggers the restaging that defines the event",
+              "⚠️ Median f/u 31 mo (IQR 16-36) sits below the combination arm's 32.2-mo median",
+              "🔗 STOMP and ORIOLE tested MDT vs observation; this tests adding short ADT on top of MDT"
+            ],
+            "figures": [],
+            "nct": "NCT03940235",
+            "tweet_ids": [
+              1000000033
+            ],
+            "slug": "radiosa",
+            "verdict": {
+              "soc_implication": "confirmatory",
+              "rationale": "Randomised, prespecified primary cPFS hit (HR 0.43). Single-centre, N=105, surrogate composite endpoint, so it supports adding short ADT to MDT rather than establishing it.",
+              "audience": "Metachronous oligorecurrent hormone-sensitive prostate cancer, ≤3 lesions"
+            },
+            "significance": "The RT is nearly free here: one G3 event (left ureter stenosis) and no late toxicity across 105 pts treated to a stated BED >100 Gy, so the entire cost of this decision is 6 months of castration. SBRT alone still gave 15.1-mo cPFS, the benchmark for deferring systemic therapy in a selected pt.",
+            "monday_clinic": "In a man with metachronous oligorecurrence, three or fewer nodal or bone lesions after radical local treatment, this supports adding a short ADT course to ablative SBRT over SBRT alone; it does not extend to synchronous, higher-volume, or castration-resistant disease.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Single-centre **randomised open-label phase 2** at the European Institute of Oncology, Milan. **105 pts** assigned 1:1 between Aug 1, 2019 and April 30, 2023; median follow-up **31 months** (IQR 16-36). Modified intention-to-treat analysis, 3 pts lost to follow-up."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**Metachronous oligorecurrent** hormone-sensitive disease: biochemical progression after radical local treatment with **≤3 lesions** (pelvic nodal, extra-regional nodal, or bone) on next-generation imaging, ECOG 0-1. Median age **70** (IQR 65-75). Stratified by doubling time (≤3 vs >3 mo), node vs bone, and PET vs MRI."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**30 Gy in 3 fractions** every other day to all oligometastatic sites, or equivalent regimens by site. Stated **EQD2 98.6 Gy** (α/β 1.5 Gy) and **BED >100 Gy**, an ablative prescription rather than a symptomatic one, which is the dose the control-arm result belongs to."
+              },
+              {
+                "label": "Regimen",
+                "body": "**6 months of ADT** with an LHRH analogue in the combination arm, begun **within 1 week before** SBRT; no ADT in the control arm. The RT backbone is fixed across arms, so the randomised variable is the short systemic course alone."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary: clinical progression-free survival**, assessed in **51 pts per group**. No overall survival, ADT-free survival, or castration-resistance readout is reported in source."
+              },
+              {
+                "label": "Safety",
+                "body": "Radiation contributed **one G1 GI** event; the only **G3** was a left ureter stenosis in the combination arm, with **no late toxicity** in either group. The **22 G1** events were ADT-attributed and had resolved by last follow-up, so the harm ledger sits with the systemic course, not the RT."
+              },
+              {
+                "label": "vs leading data",
+                "body": "STOMP and ORIOLE established MDT against observation in metachronous oligorecurrence, partly on the strength of keeping men off systemic therapy. EXTEND tested the mirror-image addition, MDT layered onto hormone therapy. This is the **first randomised trial in this setting** to report improved cPFS for the combination."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents metachronous oligorecurrent hormone-sensitive prostate cancer, ≤3 nodal or bone lesions after radical local treatment, ECOG 0-1, treated at a single high-volume centre. Does not represent synchronous or de novo oligometastatic disease, more than three lesions, or castration-resistant recurrence."
+              },
+              {
+                "label": "Limitations",
+                "body": "Progression was assessed unmasked, and PSA suppression from the randomised ADT gates the restaging that defines the event. Median follow-up sits below the combination arm's median cPFS of 32.2 mo, so the tail after testosterone recovery is thin. No biomarker separates the pts who would do well on SBRT alone."
+              },
+              {
+                "label": "Discussion",
+                "body": "Local and systemic therapy read as additive here rather than redundant, but the trade is priced in cPFS only. Whether 6 months is the right duration, and for whom SBRT alone suffices, is exactly what the investigators leave to future biomarker work."
+              }
+            ],
+            "interpretation": "The trade this trial proposes is months of castration for months of progression-free time, and the value of the result depends almost entirely on how a reader prices that trade. Metastasis-directed therapy earned its place in metachronous oligorecurrence partly because it kept men off systemic therapy; RADIOSA hands six months of that back and gets an HR of 0.43 on clinical PFS in return. EXTEND approached the same intersection from the opposite side, adding MDT to hormone therapy rather than hormone therapy to MDT, and it points the same direction: local and systemic treatment look additive in this disease state rather than redundant. What none of this settles is the exchange rate itself.\n\nThe endpoint is where confidence should move most. Clinical PFS in an unmasked trial where one arm receives six months of LHRH suppression is partly a measurement of that suppression. PSA is what triggers restaging in this population, castration lowers PSA, and the imaging event that defines progression is therefore gated in part by the randomised intervention. That is not a flaw peculiar to this trial, but it means the hazard ratio describes time to a detected event rather than a demonstrated change in disease trajectory. With no overall survival or castration-resistance readout in the source, whether the delay is durable or merely deferred detection stays open.\n\nFollow-up compounds it. The median of 31 months sits below the combination arm's median cPFS of 32.2 months, whose upper confidence bound was not reached. The separation is being read close to the point where the combination arm's events begin to accrue, and the segment of the curve after testosterone recovery is thin. A temporary systemic therapy layered on a fixed local backbone will separate early almost by construction; whether the gap survives washout is the part this dataset cannot yet show.\n\nFor a radiation oncologist the transferability question concerns the control arm, not the experimental one. Thirty gray in three fractions with a stated BED above 100 Gy is an ablative prescription, and the 15.1-month SBRT-alone result belongs to that prescription. Anyone treating nodal recurrence more softly is not running this control arm and should not assume the same benchmark. Toxicity settles the other half: one G3 event across 105 pts and no late events means the marginal harm attributable to RT was close to nothing, which puts the whole cost of the decision on six months of castration and the 22 low-grade events that came with it.\n\nThe claim the trial supports is narrow but real: in one centre, in pts selected down to three or fewer lesions, adding a short ADT course to ablative MDT delays clinical progression. It does not establish six months as the correct duration, and the investigators concede that carefully selected pts might still do well with SBRT alone without naming who those pts are. That missing selection rule, more than the effect size, is what stands between this result and a general recommendation.",
+            "relevant_specialties": [
+              "radonc",
+              "medonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The RT side of the decision is nearly free: one G3 event (left ureter stenosis) and no late toxicity at a stated BED >100 Gy. The 15.1-mo SBRT-alone cPFS is the benchmark that ablative prescription buys, so a softer nodal dose is not this control arm.",
+              "medonc": "The systemic question is duration, not agent: 6 months of LHRH started within a week of SBRT, 22 G1 events, all resolved. cPFS 32.2 vs 15.1 mo (HR 0.43) with no OS or castration-resistance readout leaves open whether this modifies disease or defers detection."
+            },
+            "open_questions": [
+              "Optimal ADT duration alongside metastasis-directed SBRT",
+              "Biomarkers identifying pts who do well with SBRT alone",
+              "Whether cPFS benefit translates to OS or delayed castration resistance"
+            ],
+            "consort": {
+              "enrolled": 218,
+              "excluded": 113,
+              "randomized": 105,
+              "arms": [
+                {
+                  "label": "SBRT + 6mo ADT",
+                  "allocated": 53,
+                  "analyzed": 51,
+                  "outcome": "median cPFS 32.2 mo"
+                },
+                {
+                  "label": "SBRT alone",
+                  "allocated": 52,
+                  "analyzed": 51,
+                  "outcome": "median cPFS 15.1 mo"
+                }
+              ]
+            },
+            "modality": "combined",
+            "intent": null,
+            "methodology": "phase-2-trial",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05053152",
+                "brief_title": "Testing the Addition of the Drug Relugolix to the Usual Radiation Therapy for Advanced-Stage Prostate Cancer, The NRG Promethean Study",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 194,
+                "primary_completion_date": "2029-02",
+                "brief_summary": "This phase II trial compares the usual treatment of radiation therapy alone to using the study drug, relugolix, plus the usual radiation therapy in patients with castration-sensitive prostate cancer that has spread to limited other parts of the body (oligometastatic). Relugolix is in a class of medications called gonadotropin-releasing hormone (GnRH) receptor antagonists. It works by decreasing the amount of testosterone (a male hormone) produced by the body. It may stop the growth of cancer…",
+                "conditions": [
+                  "Oligometastatic Prostate Carcinoma",
+                  "Prostate Adenocarcinoma",
+                  "Prostate Ductal Adenocarcinoma",
+                  "Prostate Intraductal Carcinoma",
+                  "Stage IVB Prostate Cancer AJCC v8"
+                ],
+                "interventions": [
+                  {
+                    "name": "Biospecimen Collection",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Bone Scan",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Computed Tomography",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Fluciclovine F18",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Magnetic Resonance Imaging",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Placebo Administration",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Positron Emission Tomography",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "PSMA PET Scan",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Relugolix",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Stereotactic Body Radiation Therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically (histologically or cytologically) proven diagnosis of prostate adenocarcinoma at any anatomical location (for example, prostate, metastatic site), including intraductal or ductal carcinoma, at any time before registration\n* Age \\>= 18 years\n* Eastern…",
+                "answers_question": "Optimal ADT duration alongside metastasis-directed SBRT",
+                "relevance_phrase": "SBRT +/- relugolix vs placebo in oligomet CSPC"
+              },
+              {
+                "nct": "NCT06654336",
+                "brief_title": "Study of Recurrence-directed Therapy (RDT) With or Without Androgen-Deprivation Therapy (ADT) In Patients With Radio-recurrent Oligo-metastatic Hormone/Castrate Sensitive Prostate Cancer (romCSPC)",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 162,
+                "primary_completion_date": "2031-04",
+                "brief_summary": "The goal of this study is to determine whether the addition of Androgen Deprivation Therapy (ADT) utilizing the study drug ELIGARD® to Recurrence- Directed Therapy (RDT) improves progression-free survival (PFS) compared to RDT alone in patients with early radio-recurrent oligo-metastatic castrate / hormone sensitive prostate cancer (romCSPC). Participants will be assessed at standard of care clinic visits every 3 months. The follow-up period is 36 months.",
+                "conditions": [
+                  "Prostate Adenocarcinoma",
+                  "Castration Sensitive Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Recurrence-directed therapy (RDT)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "ELIGARD 22.5mg",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Previous biopsy-proven localized prostate adenocarcinoma (without predominant features of sarcomatoid, small cell or neuroendocrine carcinoma) treated with definitive or salvage radiotherapy ≥ 2 years or more before enrollment.\n2. Recurrent Oligo-metastatic CSPC, M0 on…",
+                "answers_question": "Optimal ADT duration alongside metastasis-directed SBRT",
+                "relevance_phrase": "randomises RDT +/- ADT in radiorecurrent oligomet CSPC"
+              },
+              {
+                "nct": "NCT04624828",
+                "brief_title": "Immune Response Evaluation in Oligorecurrent and Oligoprogressive Prostate Cancer Patients Treated With SBRT",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 40,
+                "primary_completion_date": "2026-07",
+                "brief_summary": "At the moment there is a lack of data in the setting of oligometastatic PC in particular regarding the interaction between ablative SBRT, ADT and patient's immune system response.\n\nThe hypothesis underlying this project consists in the idea that the patient's immunological context, RT and ADT may interact in the context of metastatic PC. Indeed the immune landscape of patients may interfere with the efficacy of SBRT and on the other side RT may modulate the immune response by driving…",
+                "conditions": [
+                  "Oligorecurrent and Oligoprogressive Prostate Cancer Patients"
+                ],
+                "interventions": [
+                  {
+                    "name": "Radiotherapy",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "androgen deprivation therapy (ADT)",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "immune evaluation",
+                    "type": "BIOLOGICAL"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18years\n* Written informed consent according to ICH/GCP regulations before registration and prior to any trial specific procedures\n* Adenocarcinoma of the prostate treated with radical prostatectomy or radical RT\n* Diagnosis of 1 to 3 metachronous metastases to bone or…",
+                "answers_question": "Biomarkers identifying pts who do well with SBRT alone",
+                "relevance_phrase": "immune profiling of SBRT + ADT in oligorecurrence"
+              },
+              {
+                "nct": "NCT04115007",
+                "brief_title": "Prostate-cancer Treatment Using Stereotactic Radiotherapy for Oligometastases Ablation in Hormone-sensitive Patients",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 550,
+                "primary_completion_date": "2026-06",
+                "brief_summary": "INDICATION: Oligometastatic hormone-sensitive prostate cancer patients. METHODOLOGY: Open label, double arm, randomized 1:1, multicenter phase III study.\n\nPRIMARY OBJECTIVE: To assess the efficacy of ablative radiotherapy (SBRT applied to all oligometastases) administered to all gross tumor sites (metastases and prostate if applicable), in oligometastatic hormone-sensitive prostate cancer patients.",
+                "conditions": [
+                  "Oligometastatic Hormone Sensitive Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic Body Radiotherapy (SBRT) + Standard of care",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Standard of care",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "DIAGNOSIS AND INCLUSION CRITERIA:\n\n1. Histologically proven adenocarcinoma of the prostate (any T stage, Gleason score, or prostate specific antigen (PSA) level);\n2. Defined as M1 based on the presence of at least one bone metastasis;\n3. Diagnostic workup including functional imaging (F or…",
+                "answers_question": "Whether cPFS benefit translates to OS or delayed castration resistance",
+                "relevance_phrase": "phase 3, n=550, SBRT + SOC in oligomet HSPC"
+              },
+              {
+                "nct": "NCT04983095",
+                "brief_title": "Metastasis Directed Stereotactic Body Radiotherapy for Oligo Metastatic Hormone Sensitive Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 118,
+                "primary_completion_date": "2031-12",
+                "brief_summary": "The study is an open label, multi-centre, randomized phase III study. The patients will be randomised in a 1:1 ratio to treatment consisting of\n\n* Arm A: MD-SBRT in addition to standard treatment\n* Arm B: Standard treatment\n\nStudy population: Patients with hormone sensitive prostate cancer (HSPC) with oligometastatic disease detected by PSMA-PET/DT. This includes patients with de novo oligometastatic HSPC and recurrent HSPC after primary RT or prostatectomy.\n\nPrimary endpoint: Failure free…",
+                "conditions": [
+                  "Prostate Cancer Metastatic",
+                  "Radiation Therapy",
+                  "Positron-Emission Tomography"
+                ],
+                "interventions": [
+                  {
+                    "name": "stereotactic body radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "androgen deprivation therapy",
+                    "type": "COMBINATION_PRODUCT"
+                  },
+                  {
+                    "name": "Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically confirmed prostate cancer (ICD-O-3 C61)\n2. WHO/ECOG performance status 0-1\n3. 1-3 skeletal or extra pelvic lymph node metastases detected by PSMA-PET/CT in de novo prostate cancer or PSA-relapse after definitive RT or prostatectomy\n4. Willing and able to…",
+                "answers_question": "Whether cPFS benefit translates to OS or delayed castration resistance",
+                "relevance_phrase": "phase 3 MD-SBRT vs standard tx, failure-free survival"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "androgen deprivation oligometastatic prostate",
+                "biomarker oligometastatic prostate SBRT",
+                "metastasis-directed therapy hormone-sensitive prostate"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 39,
+              "fetched_at": "2026-08-11T01:08:12.788Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 33
+              }
+            ]
           }
         ],
         "open_questions": null

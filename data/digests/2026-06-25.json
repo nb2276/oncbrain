@@ -1,10 +1,10 @@
 {
   "date": "2026-06-25",
   "conference": null,
-  "generated_at": 1784427354507,
+  "generated_at": 1786409716266,
   "digest": {
-    "top_line": "ENZARAD: enza added to definitive RT+ADT missed 1° MFS (8yr 74 vs 72%, HR 0.88, p=0.34); benefit isolated to cN1/pelvic-RT subgroup (MFS HR 0.47).",
-    "tldr": "Prostate carried the day. Adding enzalutamide to a definitive RT+ADT backbone was overall null (MFS HR 0.88), but the cN1/pelvic-RT subgroup saw MFS HR 0.47 (0.29-0.76). Lower baseline risk vs STAMPEDE (11% vs 39% cN1) explains the muted overall effect; hypothesis-generating for node-positive pelvic-RT candidates.",
+    "top_line": "ENZARAD: 8yr MFS 74% vs 72%, HR 0.88 (0.67-1.15), p=0.34 — enzalutamide adds nothing to 2yr ADT + definitive RT in high-risk localised prostate.",
+    "tldr": "Prostate carried the day, and it was a negative one for intensification: adding enza to protocol-grade RT (78Gy or 46Gy + brachy boost) plus 2yr ADT missed MFS, with PFS positive only on an unadjusted p=0.044. The signal that survives is subgroup and confounded: cN1 (MFS HR 0.43) and planned pelvic RT (0.47, OS 0.53), both enriched for worse disease.",
     "sites": [
       {
         "disease_site": "prostate",
@@ -12,41 +12,13 @@
         "studies": [
           {
             "name": "ENZARAD (ANZUP 1303)",
-            "tldr": "MFS 8yr 74% vs 72%, HR 0.88 (0.67-1.15) p=0.34; enza on an RT+ADT backbone missed 1° endpoint, benefit isolated to cN1/pelvic-RT.",
+            "tldr": "8yr MFS 74% vs 72%, HR 0.88 (0.67-1.15), p=0.34: enzalutamide added to 2yr ADT + RT missed its primary endpoint.",
             "details": [
+              "📊 1° EP MFS negative: 8yr 74% vs 72%, HR 0.88 (0.67-1.15), p=0.34",
+              "📐 PFS positive: 8yr 67% vs 62%, HR 0.78 (0.61-0.99), p=0.044",
+              "📐 OS no difference: 8yr 83% vs 80%, HR 0.87 (0.63-1.20), p=0.40",
               {
-                "text": "📊 Efficacy (8-yr rates, enza vs conventional NSAA)",
-                "table": {
-                  "columns": [
-                    "Endpoint",
-                    "Enza",
-                    "Control",
-                    "HR (95% CI), p"
-                  ],
-                  "rows": [
-                    [
-                      "MFS (1°)",
-                      "74%",
-                      "72%",
-                      "0.88 (0.67-1.15), p=0.34"
-                    ],
-                    [
-                      "PFS",
-                      "67%",
-                      "62%",
-                      "0.78 (0.61-0.99), p=0.044"
-                    ],
-                    [
-                      "OS",
-                      "83%",
-                      "80%",
-                      "0.87 (0.63-1.20), p=0.40"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📊 Enzalutamide benefit by prespecified subgroup (MFS / OS HRs) — the RT-actionable read",
+                "text": "📊 Prespecified subgroups where enza signal concentrates (MFS and OS)",
                 "table": {
                   "columns": [
                     "Subgroup",
@@ -55,69 +27,31 @@
                   ],
                   "rows": [
                     [
-                      "cN1 nodal",
+                      "cN1 (regional nodes)",
                       "0.43 (0.20-0.92)",
                       "0.46 (0.17-1.26)"
                     ],
                     [
-                      "Pelvic RT planned",
+                      "Pelvic field RT planned",
                       "0.47 (0.29-0.76)",
                       "0.53 (0.30-0.95)"
                     ],
                     [
-                      "Very high-risk",
+                      "'Very high-risk'",
                       "0.85 (0.64-1.13)",
                       "0.81 (0.57-1.13)"
                     ]
                   ]
                 }
               },
-              "🔍 Phase III RCT, N=802, 8 countries (2014-2018), median f/u 8yr; enza 160mg×24mo vs active NSAA×6mo on identical 2yr-LHRH + EBRT backbone",
-              {
-                "text": "🔍 RT technique + QA (identical both arms)",
-                "subdetails": [
-                  "Prostate 78Gy, or 46Gy + brachytherapy boost (8% got brachy)",
-                  "Pelvic nodes 46Gy elective + boost to gross nodes",
-                  "Pelvic RT required for cN1; optional cN0, declared pre-randomization (40% planned)",
-                  "QA: credentialing, real-time review first 5 plans/site, 20% sampled after"
-                ]
-              },
-              "🔍 Baseline: 90% Gleason 8-10, 36% PSA >20, 12% cN1 by conventional imaging",
-              {
-                "text": "🔗 vs STAMPEDE (abiraterone): lower baseline risk explains ENZARAD's weaker overall effect",
-                "table": {
-                  "columns": [
-                    "",
-                    "STAMPEDE",
-                    "ENZARAD"
-                  ],
-                  "rows": [
-                    [
-                      "cN1",
-                      "39%",
-                      "11%"
-                    ],
-                    [
-                      "Median PSA",
-                      "35 ng/ml",
-                      "14 ng/ml"
-                    ],
-                    [
-                      "cT3-4",
-                      "92%",
-                      "47%"
-                    ],
-                    [
-                      "Overall MFS HR",
-                      "0.53",
-                      "0.88"
-                    ]
-                  ]
-                }
-              },
-              "⚠️ Control arm was active NSAA (6mo), not placebo; enza's edge measured vs a real antiandrogen",
-              "⚠️ Subgroup benefit prespecified but hypothesis-generating; pelvic-RT arm enriched for N1 (28% vs 0%), Gleason 9-10 (62% vs 49%)",
-              "⚠️ OS was original 1° endpoint, switched to MFS mid-trial for fewer-than-expected deaths"
+              "🔍 Control arm was an active NSAA x6mo + LHRH x24mo, not ADT alone",
+              "🔍 RT was protocol-grade: 78Gy, or 46Gy + brachy boost; cN1 required 46Gy elective nodes + gross nodal boost",
+              "🔍 Pelvic RT optional for cN0 but had to be declared before randomization, so the subgroup is allocation-time, not post-hoc selection",
+              "🔍 N=802, 8 countries, accrual Mar 2014 to Jun 2018, median f/u 8 yrs; 90% Gleason 8-10, 12% cN1, 36% PSA >20",
+              "⚠️ Pelvic-RT subgroup is confounded by risk: 28% N1 and 62% Gleason 9/10 vs 0% N1 and 49% Gleason 9/10 without pelvic RT",
+              "⚠️ Five subgroups prespecified, all p-values nominal without multiplicity adjustment; positive PFS at p=0.044 sits on an unadjusted alpha",
+              "⚠️ 1° EP was switched from OS to MFS mid-trial due to fewer deaths than anticipated",
+              "🔗 vs STAMPEDE abiraterone: all-comer MFS HR 0.88 here vs 0.53 there, with a lighter-risk population (cN1 11% vs 39%, median PSA 14 vs 35, cT3-4 47% vs 92%)"
             ],
             "figures": [],
             "nct": null,
@@ -127,69 +61,87 @@
             "slug": "enzarad",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Phase 3, prespecified MFS primary, 8yr f/u, active-NSAA control; negative overall reinforces restrained intensification, cN1/pelvic-RT benefit mirrors STAMPEDE. Subgroups prespecified, not practice-defining alone.",
-              "audience": "High-risk clinically-localized/locally-advanced prostate, EBRT + 2yr ADT"
+              "rationale": "Adequately powered phase 3 missed its primary MFS endpoint against an active NSAA control; benefit rests on two prespecified subgroups with overlapping risk composition.",
+              "audience": "High-risk localized/locally-advanced prostate, EBRT candidates, 2yr ADT"
             },
-            "significance": "The intensification benefit tracks the pelvic-RT-planned subgroup (MFS HR 0.47, OS HR 0.53), but that arm was enriched for cN1 (28% vs 0%), so nodal burden, not the RT field itself, likely drives it. Planning whole-pelvis RT for cN1 disease is where adding enzalutamide over 6mo NSAA earns its place; cN0 pts gained nothing.",
-            "monday_clinic": "In high-risk localized prostate with cN1 disease or planned pelvic-nodal RT, the data support enzalutamide intensification over 6mo NSAA; it does not extend to cN0 pts, who showed no MFS benefit.",
+            "significance": "The signal tracks the pelvic field, not the drug: MFS HR 0.47 (0.29-0.76) with pelvic RT planned and 0.43 (0.20-0.92) in cN1, both declared before randomization. RT was 78Gy or 46Gy plus brachy boost with 46Gy elective nodes for cN1, so this transfers directly. It moves the intensification decision toward pts you were already covering nodally.",
+            "monday_clinic": "In cN1 or node-covered high-risk localized prostate going to 2yr ADT plus definitive EBRT, this supports adding enzalutamide; in cN0 prostate-only fields, including 'very high-risk' by Gleason and PSA, it does not.",
             "primary_endpoint": {
               "name": "Metastasis-free survival",
               "klass": "surrogate",
-              "stat_value": "8yr 74% vs 72%, HR 0.88",
-              "stat_detail": "95% CI 0.67-1.15, p=0.34; 1° endpoint not met"
+              "stat_value": "HR 0.88",
+              "stat_detail": "95% CI 0.67-1.15, p=0.34; 8yr 74% vs 72%, did not meet 1° EP"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Phase 3 open-label RCT, N=802 across 8 countries (2014-2018), median follow-up 8 years. **Primary: metastasis-free survival** (switched from OS mid-trial for fewer-than-expected deaths). Enzalutamide 160mg × 24mo vs conventional NSAA × 6mo, both on 24mo LHRH agonist + EBRT."
+                "body": "International investigator-initiated **phase 3**, N=**802** from 8 countries, accrued March 2014 to June 2018, median follow-up **8 years**. Powered at 80% for an **HR 0.67**. **Primary was changed from OS to MFS** during the trial because deaths ran below projection."
               },
               {
                 "label": "Population & inclusion",
-                "body": "High-risk clinically-localized or locally-advanced prostate, EBRT-suitable. **90% Gleason 8-10, 36% PSA >20, 12% cN1** by conventional imaging. 40% planned pelvic RT, 8% brachytherapy boost."
+                "body": "High-risk clinically localized or locally-advanced disease suitable for EBRT: **90% Gleason 8-10**, **36% PSA >20 ng/ml**, **12% cN1** by conventional imaging. **40% planned for pelvic RT** and 8% for a brachytherapy boost."
+              },
+              {
+                "label": "Regimen",
+                "body": "Experimental: **enzalutamide 160 mg daily x 24 months** plus LHRH agonist x24 months. Control: **conventional NSAA x6 months** plus LHRH agonist x24 months. The control is an active antiandrogen, not ADT alone."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Prostate to **78Gy, or 46Gy + brachy boost**. Pelvic nodal RT 46Gy elective + boost to gross nodes, **required for cN1**, optional (pre-declared) for cN0. Intensive QA: credentialing, real-time review of first 5 plans per site, 20% sampling thereafter."
+                "body": "Prostate to **78Gy**, or **46Gy plus brachytherapy boost**, starting 16 weeks after hormonal therapy. Pelvic nodal RT **required for cN1** (46Gy elective nodes plus boost to gross nodes) and **optional for cN0 but declared before randomization**. QA was unusually tight: credentialing, benchmarking, real-time review of the first 5 plans per site, then 20% random sampling."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary: MFS.** Secondary: OS, CSS, PSA PFS, clinical PFS, castration resistance, HRQoL, adverse events, cost-effectiveness. Main effects by unstratified log-rank at alpha=0.05, Cox HRs, **all p-values nominal without multiplicity adjustment**, five prespecified subgroups tested by interaction."
               },
               {
                 "label": "Results",
-                "body": "Primary MFS **not met**; PFS positive, OS neutral; benefit isolated to the cN1 and pelvic-RT-planned subgroups (see tables)."
+                "body": "Primary MFS **not met**. PFS favored enzalutamide at a nominal p=0.044 and OS was flat; the subgroup detail sits in the table above."
               },
               {
                 "label": "vs leading data",
-                "body": "The cN1 MFS benefit mirrors STAMPEDE abiraterone; the **weaker overall effect** reflects ENZARAD's more favorable baseline risk (lower cN1 fraction, lower PSA, less cT3-4)."
+                "body": "STAMPEDE's abiraterone-based intensification in non-metastatic high-risk disease produced an MFS **HR 0.53** against ENZARAD's **0.88**, and the ENZARAD cN1 subgroup HR mirrors the STAMPEDE result. The gap plausibly reflects population, not drug: **cN1 11% vs 39%**, median **PSA 14 vs 35 ng/ml**, **cT3-4 47% vs 92%**."
               },
               {
                 "label": "Applies to",
-                "body": "Represents high-risk localized or locally-advanced prostate treated with definitive EBRT plus 2yr ADT, node-positive pts benefiting most. Does not represent cN0 low-nodal-burden or very-high-risk disease, where enzalutamide added no MFS benefit."
+                "body": "Represents high-risk clinically localized or locally-advanced prostate cancer treated with high-dose EBRT and 2 years of LHRH agonist, mostly Gleason 8-10 and node-negative. Does not represent metastatic disease, pts managed with radical prostatectomy, or ADT-alone comparisons without an active antiandrogen control."
               },
               {
                 "label": "Limitations",
-                "body": "Active NSAA control (not placebo) narrows the measured enzalutamide effect. Subgroup benefits are prespecified but hypothesis-generating, and the pelvic-RT arm is confounded by nodal enrichment. Primary endpoint switched from OS to MFS mid-trial."
+                "body": "The pelvic-RT subgroup is not a clean randomized comparison of pelvic coverage: it carried **28% N1 and 62% Gleason 9/10** against **0% N1 and 49% Gleason 9/10** in the no-pelvic-RT group, so risk enrichment and biological interaction are entangled. The presenter named both explanations and could separate neither."
+              },
+              {
+                "label": "Discussion",
+                "body": "Two prespecified subgroups moving together on MFS and OS, with OS HRs tracking MFS HRs as ICECaP surrogacy predicts, is more internally consistent than a lone subgroup blip. It still does not establish that enzalutamide works only when the pelvis is treated."
               }
             ],
+            "interpretation": "A negative primary endpoint here is less surprising than it first reads, because the control arm was not ADT alone. Both arms received two years of LHRH agonist and the comparator carried six months of a conventional non-steroidal antiandrogen, so the question ENZARAD asked was whether swapping a modern ARSI for an older antiandrogen buys anything on top of an already-intensified backbone with high-quality radiation. Against that comparator, an all-comer MFS HR of 0.88 with a confidence interval crossing 1 is a fair answer: for most men with high-risk localized disease treated to 78Gy with two years of ADT, enzalutamide is not adding a detectable amount.\n\nThe more interesting question is why the STAMPEDE platform's non-metastatic high-risk result sits so far from this one, at an MFS HR of 0.53. Population is the obvious candidate and the numbers support it. ENZARAD enrolled 11% cN1 against 39%, a median PSA of 14 against 35 ng/ml, and cT3-4 in 47% against 92%. A trial that enrolls closer to the boundary of high risk has fewer events to prevent and a smaller absolute reservoir of occult micrometastatic disease for systemic intensification to act on. Eight-year MFS of 72% in the control arm is the tell: this population does well on radiation and two years of ADT, which compresses the room any additional agent has to work in.\n\nThe two subgroups that moved deserve more weight than a typical subgroup finding, without being mistaken for a randomized result. Both cN1 and planned pelvic RT were prespecified among five, and the pelvic-RT declaration was made before randomization rather than reconstructed afterward, which removes the worst version of the selection problem. The MFS and OS hazard ratios move together in both, which is what ICECaP surrogacy would predict if the effect were real rather than noise. Against that, five subgroups tested with nominal unadjusted p-values will occasionally produce a pair like this by chance, and the pelvic-RT and cN1 groups overlap substantially, so they are not two independent confirmations.\n\nThe confounding is the part that should temper confidence most. Pts selected for pelvic RT were 28% node-positive with 62% Gleason 9/10, against 0% node-positive and 49% Gleason 9/10 in those treated to the prostate alone. That is a materially higher-risk group, and higher-risk pts are precisely where an ARSI would be expected to show benefit regardless of what field was treated. The alternative reading, that sterilizing pelvic nodes with radiation is a precondition for enzalutamide to prevent distant metastases, is biologically coherent but no more supported by these data than the simpler risk-enrichment explanation. Both may hold. Neither is testable within this trial.\n\nWhat this changes: for a node-negative man with Gleason 9 disease and a normal-appearing pelvis being treated prostate-only, ENZARAD is reassurance that skipping the ARSI is defensible, and the null result in the 'very high-risk' subgroup (HR 0.85) blunts the argument that Gleason and PSA alone should trigger intensification. For cN1 disease going to elective nodal coverage, it points the other way. The honest position is that ENZARAD relocates the intensification question from 'which high-risk pts' to 'which nodal-risk pts', and a pooled analysis across the ARSI trials in this setting is what would settle it.",
             "relevant_specialties": [
               "radonc",
               "medonc"
             ],
+            "significance_by_specialty": {
+              "radonc": "The benefit tracks the field, not the risk label: MFS HR 0.47 (0.29-0.76) where pelvic RT was planned, versus 0.85 (0.64-1.13) in 'very high-risk' disease. RT was 78Gy or 46Gy plus brachy boost, with 46Gy elective nodes plus gross nodal boost for cN1, so it maps onto standard practice. It ties the intensification call to your nodal coverage decision.",
+              "medonc": "Enzalutamide x24mo was tested against an active NSAA x6mo, not ADT alone, so the flat all-comer MFS HR 0.88 argues against routine ARSI substitution rather than against intensification in general. The cN1 MFS HR 0.43 (0.20-0.92) is where the drug earns its place. Sequencing and biomarker selection remain open."
+            },
             "open_questions": [
               "Which pelvic-RT subgroups drive the enzalutamide benefit",
-              "Biomarkers to identify who needs treatment intensification",
-              "Does nodal RT sterilization enable enzalutamide's distant-metastasis benefit"
+              "Biomarkers identifying who needs ARSI intensification",
+              "Whether pooled ARPI trial data confirms the nodal signal"
             ],
             "consort": null,
-            "modality": "systemic",
+            "modality": "combined",
             "intent": "curative",
             "methodology": "phase-3-rct",
             "significance_perspective": "Radiation oncology",
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "prostate radiotherapy biomarker intensification"
+                "pelvic nodal radiotherapy enzalutamide prostate",
+                "genomic classifier prostate radiotherapy intensification"
               ],
               "queries_failed": [],
-              "candidates_returned": 1,
-              "fetched_at": "2026-07-19T02:15:10.459Z",
+              "candidates_returned": 3,
+              "fetched_at": "2026-08-11T00:54:58.547Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [

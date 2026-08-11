@@ -1,91 +1,54 @@
 {
   "date": "2026-07-13",
   "conference": null,
-  "generated_at": 1786334169889,
+  "generated_at": 1786408752292,
   "digest": {
-    "top_line": "EANO radiation necrosis consensus: 53/57 statements ≥80% agreement, perfusion MRI + amino acid PET to call RN, bev when steroid-dependent >4wk on dex ≥8 mg/day.",
-    "tldr": "CNS carries the day alone, and it's a document not a trial: no Level 1 evidence anywhere, so treat symptoms not images. Practical for RT planning are the dose-volume thresholds (SRS V12Gy ~10 cm³ → 5-10% symptomatic RN; cumulative re-irradiation EQD2 >130 Gy → up to 25%) and the higher-risk flag for SRS with dual checkpoint blockade or ADCs.",
+    "top_line": "EANO radiation necrosis consensus: 53/57 statements ≥80% agreement, perfusion MRI + amino acid PET first-line, bevacizumab for steroid-refractory RN.",
+    "tldr": "Only CNS carried today, and it's a document rather than a result: EANO's Delphi panel converts scattered RN practice into named dose/volume thresholds (V12Gy ~10 cm³ → 5-10% symptomatic necrosis; re-irradiation <10% at cumulative EQD2 ~100-110 Gy, up to 25% above 130 Gy). No Level 1 evidence anywhere in it, so treat every statement as opinion voted on opinion.",
     "sites": [
       {
         "disease_site": "cns",
-        "intro": "One consensus document, no efficacy endpoint: its value to an RT reader is the constraint table and the diagnostic algorithm, not a result.",
+        "intro": "Expert consensus, not trial data: useful for SRS/re-irradiation planning constraints and for the imaging workup of a growing post-RT lesion, but no outcome endpoint behind any recommendation.",
         "studies": [
           {
             "name": "EANO Consensus Statement on Radiation Necrosis",
-            "tldr": "Delphi consensus, 53/57 statements ≥80% agreement: perfusion MRI + amino acid PET to call RN, bevacizumab for steroid-refractory.",
+            "tldr": "Delphi consensus: 53/57 statements reached ≥80% agreement across 20 experts; perfusion MRI + amino acid PET preferred, bevacizumab for steroid-refractory RN.",
             "details": [
-              "🔍 Three-round Delphi, 20 experts (15 initial + 5 added in round 1), consensus threshold ≥80% on 5-point Likert",
-              "🔍 Panel included 3 radiation/clinical oncologists, 4 neuro-oncologists, 4 med oncs, 2 neurosurgeons, neuropathologist, neuroradiologist, nuclear medicine",
+              "🔍 Three-round Delphi, 20 experts (incl. 3 rad onc/clinical onc), 57 statements, consensus ≥80% on 5-point Likert",
               {
-                "text": "📊 57 statements formulated across epidemiology-pathophysiology (n=8), causes (n=10), imaging (n=10), histopathology (n=9), management (n=20); 53 reached consensus",
+                "text": "📊 RN incidence 4-30% overall; most series report symptomatic RN up to 10%; onset typically 6-24 mo post-RT, occasionally years later",
                 "source_tier": "figure"
               },
               {
-                "text": "📐 Dose-volume thresholds for RN risk, verbatim from the causes section",
-                "table": {
-                  "columns": [
-                    "Setting",
-                    "Constraint",
-                    "Reported RN risk"
-                  ],
-                  "rows": [
-                    [
-                      "Normal brain, any RT",
-                      "EQD2 (α/β 2 Gy) below ~40 Gy",
-                      "RN uncommon"
-                    ],
-                    [
-                      "Single-session SRS",
-                      "V12Gy ~10 cm³",
-                      "5-10% symptomatic necrosis"
-                    ],
-                    [
-                      "Hypofx SRT, 3 fx",
-                      "brain+target V20Gy <20 cm³",
-                      "<10% any necrosis/edema, <4% RN needing resection"
-                    ],
-                    [
-                      "Hypofx SRT, 5 fx",
-                      "brain+target V24Gy <20 cm³",
-                      "<10% any necrosis/edema, <4% RN needing resection"
-                    ],
-                    [
-                      "Re-irradiation, recurrent GBM",
-                      "cumulative EQD2 ~100-110 Gy",
-                      "generally <10%"
-                    ],
-                    [
-                      "Re-irradiation, recurrent GBM",
-                      "cumulative EQD2 >130 Gy",
-                      "up to 25%"
-                    ],
-                    [
-                      "Repeat SRS after prior SRS or WBRT",
-                      "diameter >2.0-3.0 cm higher risk",
-                      "7-16% symptomatic RN"
-                    ]
-                  ]
-                },
+                "text": "📐 Dose/volume thresholds named for RN risk (verbatim from text)",
+                "subdetails": [
+                  "RN uncommon below EQD2 ~40 Gy (α/β 2 Gy for normal brain)",
+                  "Single-fraction SRS: V12Gy ~10 cm³ → 5-10% risk of symptomatic necrosis",
+                  "Hypofractionated SRT: brain+target V20Gy (3fx) or V24Gy (5fx) <20 cm³ → <10% any necrosis/edema, <4% RN needing resection",
+                  "Re-irradiation: <10% RN at cumulative EQD2 ~100-110 Gy, up to 25% above 130 Gy",
+                  "Repeat SRS after prior SRS or WBRT: symptomatic RN ~7-16%, higher for mean diameter >2.0-3.0 cm"
+                ],
                 "source_tier": "figure"
               },
+              "🔍 Panel places advanced MRI (perfusion ± spectroscopy) first line, with amino acid PET (FET/F-DOPA/MET) added for highest combined accuracy",
               {
-                "text": "📊 Diagnostic performance by modality (pooled, from the imaging section)",
+                "text": "📊 Diagnostic performance cited by the panel, by modality and tumor type",
                 "table": {
                   "columns": [
                     "Modality",
-                    "Population",
+                    "Setting",
                     "Sensitivity",
                     "Specificity"
                   ],
                   "rows": [
                     [
-                      "T1 CE MRI alone",
+                      "T1 contrast-enhanced MRI alone",
                       "WHO grade 3-4 glioma",
                       "68%",
                       "77%"
                     ],
                     [
-                      "T1 CE MRI alone",
+                      "T1 contrast-enhanced MRI alone",
                       "Brain metastases",
                       "79%",
                       "76%"
@@ -98,43 +61,34 @@
                     ],
                     [
                       "DSC rCBV",
-                      "Brain mets (418 lesions, 12 studies)",
+                      "Brain metastases (418 lesions)",
                       "83%",
                       "78%"
                     ],
                     [
-                      "MRS Cho/NAA",
+                      "MR spectroscopy Cho/NAA",
                       "Glioma (455 pts)",
                       "88%",
                       "86%"
                     ],
                     [
-                      "MRS Cho/NAA",
-                      "WHO grade 3-4 glioma (n=203)",
-                      "91%",
-                      "95%"
-                    ],
-                    [
                       "Amino acid PET",
-                      "Brain mets relapse (~400 pts)",
+                      "Brain metastases (~400 pts)",
                       "82%",
                       "84%"
                     ]
                   ]
                 }
               },
+              "💊 Bevacizumab recommended when symptoms stay steroid-dependent >4 weeks or need dexamethasone ≥8 mg/day; no best dosing scheme established",
               {
-                "text": "📊 RN incidence 4-30% overall, most series reporting symptomatic RN up to 10%; 4-30% in irradiated gliomas, 5-24% in brain mets",
+                "text": "💊 Panel lists 5 mg/kg q2w, 7.5 mg/kg q3w, fixed 400 mg q2w, fixed 600 mg q3w; a potential regimen is 4 three-weekly infusions of 5-10 mg/kg",
                 "source_tier": "figure"
               },
-              "🔍 Timing: 6-24 months post-RT typically, with delayed cases years later; lesion then plateaus 12-24 months on conventional MRI",
-              "💊 Steroid-to-bevacizumab trigger: steroid-dependent symptoms >4 weeks needing dexamethasone ≥8 mg/day (87.5% agreement)",
-              "💊 No preferred bevacizumab schedule: 5 mg/kg q2w, 7.5 mg/kg q3w, 400 mg fixed q2w, 600 mg fixed q3w all in use, no comparative evidence (87.5% agreement)",
-              "🔗 No prospective data show a difference in RN incidence for protons vs photons; end-of-range uncertainty and conformality remain the counterweight to reduced integral dose",
-              "⚠️ Increased RN risk flagged when SRS is combined with dual checkpoint blockade (CTLA-4 + PD-1) or antibody-drug conjugates",
-              "⚠️ Surgery statement cleared the bar by the narrowest margin in the management table (80.0% agreement); LITT reached 100% but only in round 3",
-              "⚠️ No Level 1 evidence anywhere in the document, and only symptom-driven treatment is endorsed: radiological findings alone do not justify treating",
-              "⚠️ No definition of radiological response after RN treatment (88.9% agreement), so response assessment in future RN trials has no agreed endpoint"
+              "🔍 Surgery for accessible lesions gives diagnosis plus definitive treatment (80.0% agreement, the lowest-scoring accepted management statement); LITT for treatment-resistant RN not suitable for resection (100%, round 3)",
+              "⚠️ No Level 1 evidence anywhere in the document; every recommendation is expert opinion voted on opinion, not an outcome",
+              "⚠️ Proton therapy has no prospective data showing lower RN than photons, despite the integral-dose rationale",
+              "⚠️ Treat symptoms, not images: panel explicitly says radiological findings alone do not justify treatment or steroid tapering decisions"
             ],
             "figures": [],
             "nct": null,
@@ -144,60 +98,57 @@
             "slug": "eano-radiation-necrosis-consensus",
             "verdict": {
               "soc_implication": "consensus",
-              "rationale": "Three-round Delphi expert opinion, no efficacy endpoint; authors state Level 1 evidence is absent. Codifies existing practice and names the dose thresholds and treatment triggers.",
-              "audience": "Post-cranial-RT pts with a new/enlarging contrast-enhancing lesion, glioma or…"
+              "rationale": "Delphi expert-opinion document, no efficacy endpoint. Agreement measured against opinion, not outcomes; authors state absence of Level 1 evidence and call for randomised trials.",
+              "audience": "Post-cranial-RT pts with a new enhancing lesion, glioma or brain metastases"
             },
-            "significance": "The RT-actionable content is the dose-volume section, not the algorithm: EQD2 below ~40 Gy makes RN uncommon, single-fraction V12Gy ~10 cm³ carries 5-10% symptomatic necrosis, and re-irradiation stays under 10% to cumulative EQD2 100-110 Gy but reaches 25% above 130 Gy. Those numbers gate the fractionate-vs-single-fraction and re-irradiate-vs-not decisions.",
-            "monday_clinic": "For a post-SRS patient with a new enhancing lesion, this supports adding perfusion MRI and amino acid PET before calling recurrence, and supports bevacizumab once dexamethasone dependence passes 4 weeks at ≥8 mg; it says nothing about treating asymptomatic radiological RN.",
+            "significance": "The dose-volume numbers are the transferable part: V12Gy ~10 cm³ carrying 5-10% symptomatic necrosis in single-fraction SRS, and hypofractionated brain+target V20Gy (3fx) or V24Gy (5fx) <20 cm³ holding RN needing resection under 4%. That is a planning constraint, and it gates the single-session vs hypofractionated choice for larger or eloquent-region metastases.",
+            "monday_clinic": "For a patient 6-24 months out from SRS or cranial RT with a new enhancing lesion, this supports going to perfusion MRI plus amino acid PET before calling progression; it does not settle mixed lesions, where the panel still points to tissue.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Three-round **Delphi** consensus under EANO. 57 statements drafted after literature review, voted on a 5-point Likert scale, consensus prespecified at **≥80% agreement**. **53 of 57** statements reached consensus, with statement adaptation between rounds."
+                "body": "Three-round Delphi. **57 statements** drafted after literature review across epidemiology-pathophysiology (n=8), causes (n=10), imaging (n=10), histopathology (n=9), management (n=20), plus an exploratory research set of 8. Consensus prespecified at **≥80% agreement** on a 5-point Likert scale."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Panel of **20 experts**: 15 volunteers (2 radiation/clinical oncologists, 4 neuro-oncologists, 4 medical oncologists, 2 neurosurgeons, 1 neuropathologist, 1 neuroradiologist, 1 nuclear medicine physician) plus 5 invited to vote from round 1. Clinical scope is cerebral RN after RT for **primary glial or metastatic brain tumors**."
+                "body": "The voting panel, not patients: 15 volunteers (2 radiation/clinical oncologists, 4 neuro-oncologists, 4 medical oncologists, 2 neurosurgeons, 1 neuropathologist, 1 neuroradiologist, 1 nuclear medicine physician), expanded by **5 more in round 1** (4 neuro-oncologists, 1 radiation/clinical oncologist) to **20 total**. Clinically the scope is RN after RT for primary glial or metastatic brain tumors."
               },
               {
                 "label": "Radiotherapy",
-                "body": "RN is **uncommon below EQD2 ~40 Gy** (α/β 2 Gy for normal brain); above that, risk scales with dose per fraction, total dose, and irradiated volume. Single-session SRS **V12Gy ~10 cm³** maps to a **5-10%** symptomatic necrosis risk; hypofractionated SRT with brain+target **V20Gy (3 fx) or V24Gy (5 fx) <20 cm³** gives **<10%** any necrosis/edema and **<4%** RN needing resection. Re-irradiation: **<10%** to cumulative EQD2 100-110 Gy, **up to 25%** above 130 Gy."
+                "body": "RN is called uncommon below **EQD2 ~40 Gy** (α/β 2 Gy), rising with dose per fraction, total dose and irradiated volume. **V12Gy ~10 cm³** carries a 5-10% symptomatic necrosis risk after single-session SRS; for hypofractionated SRT, brain-plus-target **V20Gy (3fx) or V24Gy (5fx) <20 cm³** associates with <10% any necrosis and <4% RN requiring resection. Re-irradiation risk stays under 10% at cumulative EQD2 100-110 Gy and reaches **up to 25% above 130 Gy**."
               },
               {
                 "label": "Results",
-                "body": "Diagnostic consensus is that **T1 CE MRI alone is insufficient** (100% agreement) and that advanced MRI plus amino acid PET gives the highest accuracy (94.4%). **TBRmean over TBRmax** took until round 3 to reach 100%. Management consensus centres on symptom-triggered treatment, minimum effective dexamethasone, and bevacizumab escalation."
-              },
-              {
-                "label": "Safety",
-                "body": "Bevacizumab at RN doses is described as **usually well tolerated**, with wound healing problems and arterial hypertension as the main issues, plus increased DVT and pulmonary embolism risk and a small increase in cerebral hemorrhage or infarction (94.1% agreement)."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents patients with a new or enlarging contrast-enhancing lesion after cranial RT for glioma or brain metastases. Does not represent pseudoprogression in the first months after chemoradiation, or the late enlarging cysts after SRT that the panel considers pathogenetically separate from RN."
-              },
-              {
-                "label": "Limitations",
-                "body": "Statement-level agreement percentages are published, but the management and imaging tables arrive with row labels and values on separate lines in the source, so several agreement figures cannot be tied to a specific statement with confidence. Panel composition is systemic-heavy relative to the dosimetric content: 8 medical/neuro-oncologists to 3 radiation oncologists."
+                "body": "Consensus reached on **53 of 57** statements after three rounds. Diagnostic and management statements are tabulated separately in the details; the four that failed to reach 80% are not identified in the available text."
               },
               {
                 "label": "Discussion",
-                "body": "The document names what is unknown as clearly as what is agreed: no best bevacizumab dose or duration, no defined radiological response criterion, unknown recurrence rate after bevacizumab, undetermined predictors of response. It also flags an ESTRO terminology paper proposing **TRIA** (treatment-related imaging abnormality) as the preferred term, so nomenclature is still moving."
+                "body": "The document's practical contribution is a decision sequence rather than a new treatment: advanced MRI first, amino acid PET to add confidence, tissue when doubt persists, and treatment triggered only by symptoms of **>7 days with increasing severity**. Its most consequential position is moving bevacizumab from rescue to an expected next step at a defined steroid threshold (**dependence >4 weeks or dexamethasone 8 mg/day**), which is a lower bar than many centres apply."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents symptomatic cerebral RN after RT for glioma or brain metastases, in centres with perfusion MRI and amino acid PET access. Does not represent spinal or head-and-neck RN, pseudoprogression within the first months after chemoradiation, or the late enlarging cysts after SRT that the panel says are pathogenetically separate."
+              },
+              {
+                "label": "Limitations",
+                "body": "Agreement percentages measure how a self-selected 20-person European panel voted, and the panel skews neuro-oncology (8 of 20) over radiation oncology (3 of 20) for a complication defined by dose and volume. FET and F-DOPA availability is largely European, so the imaging algorithm's top tier is not reproducible in most centres worldwide. The 4 non-consensus statements are not enumerated in the accessible text, so the reader cannot see where the panel actually split."
               }
             ],
+            "interpretation": "The value of this document is not that it settles anything about radiation necrosis, because it cannot: the panel says plainly there is no Level 1 evidence and closes by asking for prospective randomised trials in symptomatic RN. What it does is fix a defensible default at each of the three decision points where practice currently diverges most, and it is worth reading for where those defaults sit relative to what many centres actually do.\n\nThe first is diagnostic. Placing perfusion MRI and amino acid PET in sequence rather than in competition is well supported by the numbers the panel assembles: contrast-enhanced T1 alone reaches only 68% sensitivity and 77% specificity in grade 3-4 glioma, while DSC rCBV reaches 87-90% and 86-88% in the same setting. The honest caveat is that these are pooled figures from retrospective and imaging-focused series, where the reference standard is often follow-up rather than tissue, and where lesions too ambiguous to classify tend not to enter the denominator. A statement that combined advanced MRI plus PET has the highest accuracy carries 94.4% panel agreement but rests on very little head-to-head data. The recommendation is still the right default; a reader should just not expect the 90% figures to hold on the ambiguous mixed lesion sitting in front of them, which is precisely the case where imaging is being asked to do the most work.\n\nThe second is the steroid-to-bevacizumab threshold, and this is where the document is most likely to change behaviour. Defining escalation at steroid dependence beyond 4 weeks, or a requirement for dexamethasone 8 mg daily, converts a judgment call into a trigger. That threshold earned 87.5% agreement, on the lower end of this panel's range, which is a fair reflection of the evidence underneath it: the panel simultaneously concedes that duration, interval and optimal dose are unknown, that no dosing scheme has evidence of superiority (four are listed, from 5 mg/kg q2w to fixed 600 mg q3w), that predictors of response are undetermined, and that the recurrence rate after treatment is unknown. So the trigger is specified and everything downstream of it is not. For a radiation oncologist the practical read is that reaching for bevacizumab earlier is now defensible, while what happens after four infusions remains entirely local practice.\n\nThe third is the dosimetric section, which is the part that transfers directly into planning. Framing RN as uncommon below EQD2 40 Gy, naming V12Gy near 10 cm³ as the single-fraction inflection at 5-10% symptomatic risk, and giving hypofractionated constraints of V20Gy in 3 fractions or V24Gy in 5 fractions under 20 cm³, restates the pooled 51-study analysis rather than adding to it. Its usefulness is that it is now written into a consensus document that a tumor board will accept. The re-irradiation figures matter more, because the jump from under 10% at cumulative EQD2 100-110 Gy to as much as 25% above 130 Gy is steep enough to be a genuine constraint on repeat SRS, and the panel pairs it with the observation that mean diameter above 2.0-3.0 cm carries higher risk. The four ongoing randomised trials of single-session SRS versus hypofractionated SRT that the paper cites are what will actually answer this; until they read out, the constraints here are the best available and should be treated as descriptive of risk, not as validated limits.",
             "relevant_specialties": [
               "radonc",
               "medonc",
               "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The dose-volume constraints are the transferable part: EQD2 ~40 Gy as the threshold below which RN is uncommon, single-fraction V12Gy ~10 cm³ at 5-10% symptomatic necrosis, and re-irradiation risk climbing from <10% at cumulative EQD2 100-110 Gy to 25% above 130 Gy. These gate hypofractionation and re-irradiation decisions directly.",
-              "medonc": "Bevacizumab is the endorsed escalation once dexamethasone dependence exceeds 4 weeks at ≥8 mg/day, with four dosing schedules in use and no evidence favoring one. Added caution when SRS is combined with dual checkpoint blockade or antibody-drug conjugates, where RN risk may rise.",
-              "surgonc": "Resection carries a consensus recommendation whenever feasible without compromising safety, giving both diagnosis and definitive treatment, though it cleared the 80% bar by the narrowest margin of any management statement. LITT is positioned narrowly: treatment-resistant RN that is not surgically resectable."
+              "radonc": "The planning-relevant numbers: V12Gy ~10 cm³ carries 5-10% symptomatic necrosis after single-fraction SRS, while hypofractionated brain+target V20Gy (3fx) or V24Gy (5fx) <20 cm³ keeps RN requiring resection under 4%. Re-irradiation risk climbs to 25% above cumulative EQD2 130 Gy, which constrains repeat SRS for lesions over 2.0-3.0 cm.",
+              "medonc": "Bevacizumab moves from rescue to a triggered step at steroid dependence >4 weeks or dexamethasone 8 mg/day, with four accepted dosing schemes and no evidence favouring one. The panel also flags added RN risk when SRS is combined with dual checkpoint blockade or antibody-drug conjugates, which bears on sequencing brain RT against systemic therapy.",
+              "surgonc": "Resection carries the lowest accepted agreement in the management table (80.0%) yet is positioned as giving diagnosis and definitive treatment in one step for accessible lesions. LITT reached 100% agreement as the option for treatment-resistant RN unsuitable for resection, which gives a documented pathway for the steroid-dependent or bevacizumab-cycling patient."
             },
             "open_questions": [
               "Optimal bevacizumab dose, interval and duration for symptomatic RN",
-              "Randomized bevacizumab vs dexamethasone first-line for symptomatic RN",
-              "Single-fraction SRS vs hypofractionated SRT for RN risk"
+              "Single-session SRS vs hypofractionated SRT for RN risk",
+              "Predictors of bevacizumab response and recurrence rate after treatment"
             ],
             "consort": null,
             "modality": "radiation",
@@ -235,8 +186,102 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\nInclusion all patients (both HGG and BM):\n\n1. Age ≥ 18 years old\n2. First episode of sCRN ≥ 3 months after completion of focal (re-)irradiation, as determined by the local Multidisciplinary Neuro-Oncology Board. A clear working diagnosis of CRN without evidence of a combination…",
-                "answers_question": "Randomized bevacizumab vs dexamethasone first-line for symptomatic RN",
-                "relevance_phrase": "phase 3 bevacizumab vs dexamethasone first-line in sCRN"
+                "answers_question": "Optimal bevacizumab dose, interval and duration for symptomatic RN",
+                "relevance_phrase": "phase 3 bevacizumab vs dexamethasone, 1L sCRN"
+              },
+              {
+                "nct": "NCT06471465",
+                "brief_title": "Corticodependent or Corticoresistant Brain Radionecrosis After Radiotherapy for Brain Metastases",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 84,
+                "primary_completion_date": "2028-08",
+                "brief_summary": "Brain metastases (BM) afflict a significant portion of cancer patients, ranging from 10% to 50%, leading to debilitating symptoms and diminished quality of life, thereby impacting overall survival. Treatment options typically include surgery, stereotactic radiosurgery (SRS), and whole brain radiotherapy (WBRT). SRS has emerged as the preferred focal treatment due to its efficacy, delivering ablative doses with notable overall survival benefits, especially for single BM or postoperative cases,…",
+                "conditions": [
+                  "Radionecrosis of Brain",
+                  "Brain Metastases"
+                ],
+                "interventions": [
+                  {
+                    "name": "Bevacizumab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Placebo",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Prednisolone",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patient with a diagnosis of radionecrosis based on a clinical onset of symptoms and radiological findings of RN following radiotherapy, with or without pathological confirmation:\n\nMRI evidence to support the diagnosis of RN (transient increase in irradiated lesion volume…",
+                "answers_question": "Optimal bevacizumab dose, interval and duration for symptomatic RN",
+                "relevance_phrase": "randomised bev vs placebo in steroid-refractory RN"
+              },
+              {
+                "nct": "NCT05703269",
+                "brief_title": "Comparing Single vs Multiple Dose Radiation for Cancer Patients With Brain Metastasis and Receiving Immunotherapy",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 58,
+                "primary_completion_date": "2028-03",
+                "brief_summary": "This study is designed to see if we can lower the chance of side effects from radiation in patients with breast, kidney, small cell lung cancer, non-small cell lung cancer or melanoma that has spread to the brain and who are also being treated with immunotherapy, specifically immune checkpoint inhibitor (ICI) therapy. This study will compare the usual care treatment of single fraction stereotactic radiosurgery (SSRS) given on one day versus fractionated stereotactic radiosurgery (FSRS), which…",
+                "conditions": [
+                  "NSCLC",
+                  "Renal Cell Carcinoma",
+                  "Breast Carcinoma",
+                  "Melanoma",
+                  "Brain Metastases, Adult",
+                  "Non-small Cell Lung Cancer",
+                  "SCLC",
+                  "Small-cell Lung Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "single fraction stereotactic radiosurgery (SSRS)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "fractionated stereotactic radiosurgery (FSRS)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* At least one intact brain metastasis or resection cavity ≥ 2 cm in diameter or ≥ 4 cc volume.\n\n  * Patients at initial diagnosis of brain metastases and patients with known brain metastasis treated with systemic therapy alone are eligible.\n  * Patients who have previously…",
+                "answers_question": "Single-session SRS vs hypofractionated SRT for RN risk",
+                "relevance_phrase": "single vs fractionated SRS toxicity on ICI"
+              },
+              {
+                "nct": "NCT07227610",
+                "brief_title": "Brain Metastases in Greater Size - Hypofractionated Options Trial (BIGSHOT)",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 54,
+                "primary_completion_date": "2029-02",
+                "brief_summary": "This is a randomized, phase II trial comparing staged stereotactic radiosurgery (SSRS) versus fractionated stereotactic radiotherapy (FSRT) in patients with large brain metastases (≥2 cm and ≤5 cm). The study aims to evaluate efficacy, safety, and tumor response between these two standard-of-care radiation approaches.",
+                "conditions": [
+                  "Brain Metastases",
+                  "Cancer (With CNS Involvement)"
+                ],
+                "interventions": [
+                  {
+                    "name": "Staged Stereotactic Radiosurgery (SSRS)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Fractionated Stereotactic Radiotherapy (FSRT)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. The patient or a legally authorized representative must be able and willing to provide study-specific informed consent prior to study entry.\n2. Patient must be willing to comply with all study procedures and available for the duration of the study\n3. Male or female, aged ≥…",
+                "answers_question": "Single-session SRS vs hypofractionated SRT for RN risk",
+                "relevance_phrase": "staged SRS vs FSRT, 2-5 cm mets, safety endpoint"
               },
               {
                 "nct": "NCT05102747",
@@ -263,19 +308,18 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Patients aged ≥ 18 years\n* WHO performance status 0 or 1;\n* Patient eligible for SRT after a multidisciplinary committee decision; Patient with BMs from radioresistant cancer (renal cell carcinoma, sarcoma, melanoma) is eligible\n* Patient having up to 5 BM of solid tumours…",
-                "answers_question": "Single-fraction SRS vs hypofractionated SRT for RN risk",
-                "relevance_phrase": "randomised 3x10 Gy SRT vs 1x20-25 Gy single-dose SRS"
+                "answers_question": "Single-session SRS vs hypofractionated SRT for RN risk",
+                "relevance_phrase": "phase 3 3x10 Gy SRT vs 1x20-25 Gy SRS"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "bevacizumab radiation necrosis",
-                "bevacizumab dexamethasone radiation necrosis",
-                "hypofractionated stereotactic brain metastases radionecrosis"
+                "bevacizumab radiation necrosis brain",
+                "hypofractionated stereotactic radiotherapy brain metastases"
               ],
               "queries_failed": [],
-              "candidates_returned": 14,
-              "fetched_at": "2026-08-10T03:55:34.326Z",
+              "candidates_returned": 23,
+              "fetched_at": "2026-08-11T00:38:49.583Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
