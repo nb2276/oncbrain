@@ -2,6 +2,53 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.48.1] - 2026-08-10
+
+Rebuilds 21 more dates onto v0.48, plus the two defects that batch surfaced.
+
+### Content
+- **21 dates rebuilt** (2026-05-27 through 2026-07-26). 24 of 41 dates now carry
+  `interpretation`. **18 per-arm CONSORT outcomes** landed across 9 studies.
+- Audited: **18/18 arm outcomes grounded in their source, 18/18 attributed to
+  the correct arm.** RADIOSA is the case that justifies the v0.48 design — its
+  source states the CONTROL arm first ("15.1 months ... for the SBRT group
+  versus 32.2 months ... for the SBRT with ADT group") while its CONSORT lists
+  the experimental arm first, so positional inference would have printed the ADT
+  benefit under SBRT-alone.
+
+### Fixed
+- **The content publish-boundary guard false-positived on standard
+  terminology.** It flagged "Eastern Cooperative Oncology Group (ECOG)
+  performance status score" from paper 67 as leaked full text. It was not: the
+  phrase reached dist on the pages of `arto`, `rtog9804` and `radiosa` — three
+  studies that do NOT cite paper 67 — and paper 67's own study page never
+  contained it. The model wrote a standard scale name.
+
+  The guard now scopes each probe to the pages of studies that actually CITE
+  that paper, which is where a quote could physically come from (Phase 2 runs
+  per-study and sees only that study's sources), and additionally ignores lines
+  appearing in more than one paper's local-only text (189 of 5839 probes: CC
+  license blocks, scale names, and our own injected
+  `[row association uncertain: ...]` markers, which are not source text at all).
+  A sentence unique to one paper appearing on that paper's own study page still
+  fails the guard, which is the case it exists for.
+
+- **A catch-all endpoint family was being given a shared ruler.** `corpusDomains`
+  bucketed `other::HR` like a real family, so unrelated endpoints pooled onto one
+  axis and narrowed it. An HR of 5.34 against the resulting 0.33-3 window goes
+  off-scale, and `markGeometry` then reports `pointOffScale` so `EffectMark`
+  refuses to draw — the mark silently vanishes rather than lying, but it
+  vanishes. `other` is the ABSENCE of a family, not a family, so those data now
+  fall through to a per-datum domain that always contains their estimate.
+  Affects 1 of 36 current corpus marks; the value is in what it stops.
+
+### Notes
+- The middle dot also occurs HTML-entity-encoded (`15&#xb7;1`) in stored
+  abstracts, which `normalizeNumericText` does not decode. No production
+  grounding path compares against entity-encoded text today (figure grounding
+  uses OCR, self-consistency uses rendered card text), so this is recorded
+  rather than fixed — it cost two false positives in a manual audit.
+
 ## [0.48.0] - 2026-08-10
 
 ### Added

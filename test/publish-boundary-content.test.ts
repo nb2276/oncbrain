@@ -37,6 +37,7 @@ const LOCAL_ONLY = ['fulltext_excerpt_md', 'figure_ocr_md', 'figure_structured_m
 
 const norm = (s: string | null | undefined) => (s ?? '').replace(/\s+/g, ' ').trim();
 
+/** Every published byte, for guards that are not paper-scoped. */
 function readPublished(): string {
   const parts: string[] = [];
   const walk = (dir: string) => {
@@ -48,6 +49,51 @@ function readPublished(): string {
   };
   walk(DIST);
   return parts.join(' ');
+}
+
+/**
+ * Published text per STUDY PAGE, keyed by its `<date>-<slug>` param.
+ *
+ * Scoped rather than one big blob, because a paper's text can only be quoted
+ * onto the page of a study that HAS that paper as a source — Phase 2 runs
+ * per-study and is handed only that study's sources. A probe from paper 67
+ * turning up under `arto`, `rtog9804` and `radiosa` (three studies that do not
+ * cite it) is therefore proof of standard terminology, not of a quote, and that
+ * is exactly what the ECOG false positive was.
+ *
+ * The study page carries the whole card, so any card field that leaked is here.
+ */
+function readStudyPages(): Map<string, string> {
+  const out = new Map<string, string>();
+  const dir = join(DIST, 'study');
+  if (!existsSync(dir)) return out;
+  for (const e of readdirSync(dir)) {
+    const f = join(dir, e, 'index.html');
+    if (existsSync(f)) out.set(e, norm(readFileSync(f, 'utf-8')));
+  }
+  return out;
+}
+
+/** paper id -> the study-page params whose studies cite that paper. */
+function papersToStudyParams(): Map<number, Set<string>> {
+  const out = new Map<number, Set<string>>();
+  const dir = resolve(process.cwd(), 'data', 'digests');
+  if (!existsSync(dir)) return out;
+  for (const f of readdirSync(dir).filter((x) => x.endsWith('.json'))) {
+    const art = JSON.parse(readFileSync(join(dir, f), 'utf-8'));
+    const date = art.date as string;
+    for (const site of art.digest?.sites ?? []) {
+      for (const study of site.studies ?? []) {
+        const param = `${date}-${study.slug}`;
+        for (const r of study.source_ids ?? []) {
+          if (r?.type !== 'paper' || typeof r.id !== 'number') continue;
+          if (!out.has(r.id)) out.set(r.id, new Set());
+          out.get(r.id)!.add(param);
+        }
+      }
+    }
+  }
+  return out;
 }
 
 /** Content-bearing lines only: skip headings, table rows, image markup. */
@@ -74,7 +120,8 @@ describe.skipIf(!hasInputs)('publish boundary — content, not just field names'
   it('no local-only sentence reaches dist/ unless it is ordinary public metadata', () => {
     const db = new Database(DB_PATH, { readonly: true });
     try {
-      const published = readPublished();
+      const studyPages = readStudyPages();
+      const citedBy = papersToStudyParams();
 
       const publicParts: string[] = [];
       for (const r of db.prepare('SELECT title, abstract, authors_json FROM papers').all() as Record<string, string | null>[]) {
@@ -86,6 +133,34 @@ describe.skipIf(!hasInputs)('publish boundary — content, not just field names'
       }
       const publicText = publicParts.join(' ');
 
+      // A line that appears in MORE THAN ONE paper's local-only text is not that
+      // paper's expression — it is boilerplate. Measured over the corpus, 189 of
+      // 5839 probe lines are shared: CC-license blocks, standard scale names
+      // ("Eastern Cooperative Oncology Group (ECOG) performance status score",
+      // in papers 7 and 67), and our OWN injected
+      // "[row association uncertain: ...]" markers, which are not source text at
+      // all. Those must not count, and excluding them is the copyright-correct
+      // rule rather than a convenience: copyright protects a work's particular
+      // expression, not terminology the whole literature shares. A sentence
+      // unique to ONE paper still trips this, which is the case that matters.
+      //
+      // The ECOG line was a real false positive: it reached dist/ on the pages of
+      // arto, rtog9804 and radiosa — three studies that are NOT paper 67 — which
+      // is by itself proof the model wrote a standard term rather than quoting.
+      const paperCount = new Map<string, Set<number>>();
+      for (const field of LOCAL_ONLY) {
+        const rows = db
+          .prepare(`SELECT id, ${field} AS v FROM papers WHERE ${field} IS NOT NULL`)
+          .all() as { id: number; v: string }[];
+        for (const { id, v } of rows) {
+          for (const probe of distinctiveLines(v)) {
+            if (!paperCount.has(probe)) paperCount.set(probe, new Set());
+            paperCount.get(probe)!.add(id);
+          }
+        }
+      }
+      const shared = (probe: string) => (paperCount.get(probe)?.size ?? 0) > 1;
+
       const leaks: string[] = [];
       let probes = 0;
       for (const field of LOCAL_ONLY) {
@@ -93,9 +168,14 @@ describe.skipIf(!hasInputs)('publish boundary — content, not just field names'
           .prepare(`SELECT id, ${field} AS v FROM papers WHERE ${field} IS NOT NULL`)
           .all() as { id: number; v: string }[];
         for (const { id, v } of rows) {
-          for (const probe of distinctiveLines(v).slice(0, 6)) {
+          // Only the pages of studies that actually cite this paper.
+          const targets = [...(citedBy.get(id) ?? [])]
+            .map((param) => studyPages.get(param))
+            .filter((t): t is string => Boolean(t));
+          if (targets.length === 0) continue;
+          for (const probe of distinctiveLines(v).filter((l) => !shared(l)).slice(0, 6)) {
             probes++;
-            if (published.includes(probe) && !publicText.includes(probe)) {
+            if (targets.some((t) => t.includes(probe)) && !publicText.includes(probe)) {
               leaks.push(`${field} paper=${id}: ${probe.slice(0, 90)}`);
             }
           }

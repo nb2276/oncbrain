@@ -582,6 +582,16 @@ export function axisBucket(d: RatioDatum, endpointName?: string | null): string 
 export function corpusDomains(data: RatioDatum[]): Map<string, AxisDomain> {
   const byBucket = new Map<string, RatioDatum[]>();
   for (const d of data) {
+    // The `other` family is the ABSENCE of a family, not a family. Sharing one
+    // ruler across it pools endpoints with nothing in common, which is the exact
+    // opposite of the "mutually comparable marks" the shared ruler exists for —
+    // and it silently narrows the axis for whatever lands there next. A real HR
+    // of 5.34 against an `other::HR` domain of 0.33-3 goes off-scale, and
+    // markGeometry then reports pointOffScale so EffectMark refuses to draw:
+    // the mark just vanishes. Each unfamilied datum gets its own datum-derived
+    // domain instead (via domainForMark's fallback), which always contains its
+    // estimate.
+    if (endpointFamily(d.endpointName) === 'other') continue;
     const key = axisBucket(d);
     const bucket = byBucket.get(key);
     if (bucket) bucket.push(d);

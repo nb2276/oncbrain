@@ -1,44 +1,80 @@
 {
   "date": "2026-07-15",
   "conference": null,
-  "generated_at": 1786334912029,
+  "generated_at": 1786407910401,
   "slug_aliases": [
     "stampede-abi-enza-nonmet",
     "stampede-abi-enza-nonmet-hr",
     "stampede-nonmet-abi-enza"
   ],
   "digest": {
-    "top_line": "STAMPEDE meta-analysis: 2yr abiraterone + ADT/RT in high-risk M0 cuts metastasis risk near half (MFS HR 0.53, OS HR 0.60); enza adds toxicity only.",
-    "tldr": "Prostate carries the day, and it lands squarely on the RT clinic: 85% of the 1974 pts had RT planned (74Gy/37fx or hypofx equivalent), so this is an intensification question layered on definitive local therapy, not a systemic-only one. 6yr MFS 82% vs 69%, OS 86% vs 77%. Enza on top: interaction HR 1.02, G3+ 58% vs 37%.",
+    "top_line": "STAMPEDE: 2yr abiraterone on top of ADT+RT cuts metastasis risk nearly in half (MFS HR 0·53), 6-yr MFS 82% vs 69%; enzalutamide adds toxicity, not benefit.",
+    "tldr": "Prostate carried the day. In high-risk non-metastatic disease treated with ADT + 74 Gy/37 fx (85% planned for RT), 2yr abiraterone improves MFS HR 0·53 and OS HR 0·60, with no interaction by planned RT (p=0·67) or nodal status (p=0·22). Adding enzalutamide doubles G3+ toxicity (58% vs 37%) for no efficacy gain.",
     "sites": [
       {
         "disease_site": "prostate",
-        "intro": "High-risk M0 disease treated with definitive RT + ADT: the open question is which agent to add, and at what toxicity cost.",
+        "intro": "Intensifying the systemic arm around definitive RT, with the enzalutamide question answered in the negative.",
         "studies": [
           {
             "name": "STAMPEDE (abiraterone ± enzalutamide, high-risk non-metastatic)",
-            "tldr": "MFS HR 0.53 (0.44-0.64) and OS HR 0.60 adding 2yr abiraterone to ADT+RT in high-risk M0; enzalutamide adds nothing.",
+            "tldr": "MFS HR 0·53 (0·44–0·64), 6-yr MFS 82% vs 69%, adding 2yr abiraterone to ADT+RT; enzalutamide adds nothing.",
             "details": [
-              "🔍 Two open-label phase 3 STAMPEDE trials, non-overlapping controls, IPD meta-analysis; N=1974, 113 UK/Swiss sites, median f/u 72mo",
-              "🔍 RT mandated for N0, encouraged for N+: 74Gy/37fx to prostate + SV or hypofractionated equivalent",
-              "📊 RT planned in 1684 (85%) of 1974; 99% of newly diagnosed N0, 71% of N+, 7% of previously treated",
-              "📐 6yr MFS 82% (79-85) combination vs 69% (66-72) control; 6yr OS 86% vs 77%",
-              "📊 Secondary endpoints, combination vs control (all p<0.0001)",
-              "📊 MFS by prespecified stratification subgroup (forest, Fig 3)",
-              "📐 Enza adds nothing: interaction HR 1.02 (0.70-1.50), p=0.91; between-trial heterogeneity I² p=0.90",
+              "🔍 Two phase 3 trials in the STAMPEDE platform, 113 UK/Swiss sites, N=1974 non-metastatic, no overlapping controls, IPD meta-analysed",
+              "🔍 RT mandated for N0, encouraged for N+: 74 Gy/37 fx to prostate + SV or hypofractionated equivalent",
+              "🔍 1684 (85%) of 1974 planned for local RT; 99% of node-negative, 71% of node-positive newly diagnosed pts",
+              "📊 6-yr OS 86% combination vs 77% control; OS HR 0·60 (0·48–0·73), p<0·0001",
               {
-                "text": "⚠️ Enza costs toxicity without efficacy (G3+ within 24mo, combination vs control)",
+                "text": "📊 Secondary endpoints, combination vs ADT alone (HR, 95% CI)",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "HR",
+                    "95% CI",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "Overall survival",
+                      "0·60",
+                      "0·48–0·73",
+                      "<0·0001"
+                    ],
+                    [
+                      "Prostate cancer-specific survival",
+                      "0·49",
+                      "0·37–0·65",
+                      "<0·0001"
+                    ],
+                    [
+                      "Biochemical failure-free survival",
+                      "0·39",
+                      "0·33–0·47",
+                      "<0·0001"
+                    ],
+                    [
+                      "Progression-free survival",
+                      "0·44",
+                      "0·36–0·54",
+                      "<0·0001"
+                    ]
+                  ]
+                }
+              },
+              "📐 MFS by planned RT: RT yes HR 0·54 (0·44–0·67), RT no HR 0·51 (0·34–0·76), p-interaction 0·67",
+              "📐 MFS by nodal status: N0 HR 0·60 (0·46–0·78), N+ HR 0·49 (0·38–0·64), p-interaction 0·22",
+              "💊 Adding enzalutamide gave no extra efficacy: interaction HR 1·02 (0·70–1·50), p=0·91, I² p=0·90",
+              {
+                "text": "⚠️ Enzalutamide added toxicity without benefit (abi trial vs abi+enza trial, G3+)",
                 "subdetails": [
-                  "Abi trial: 169/451 (37%) vs 130/455 (29%)",
-                  "Abi+enza trial: 298/513 (58%) vs 172/533 (32%)",
-                  "Hypertension: 23 (5%) abi vs 73 (14%) abi+enza",
-                  "ALT rise: 25 (6%) abi vs 69 (13%) abi+enza",
-                  "Grade 5: 3 in abi group, 4 in abi+enza group, none in controls"
+                  "Any G3+ over 24 mo: 169/451 (37%) vs 298/513 (58%)",
+                  "Hypertension: 23 (5%) vs 73 (14%)",
+                  "Fatigue: 10 (2%) vs 49 (10%)",
+                  "Aminotransferase rise: 25 (5%) vs 69 (13%)"
                 ]
               },
-              "⚠️ Open label; toxicity reported only during first 2yrs of treatment; subsequent-therapy data called unreliable by authors",
-              "⚠️ Relapsing-after-local-therapy pts under-represented; authors flag benefit uncertain in that group",
-              "⚠️ PS 1-2 and NSAID/aspirin heterogeneity (p=0.0052) has no biological explanation; authors say it should not change management"
+              "⚠️ Open label, and control pts could access 2nd-gen hormones in nmCRPC trials or, since 2019, as SOC",
+              "⚠️ Toxicity reported only for the first 24 months of treatment; late effects not captured",
+              "⚠️ MFS heterogeneity by WHO PS (p=0·00656) and NSAID/aspirin use (p=0·0052); authors call the latter biologically unexplained"
             ],
             "figures": [],
             "nct": "NCT00268476",
@@ -48,70 +84,76 @@
             "slug": "stampede-abi-enza",
             "verdict": {
               "soc_implication": "practice-changing",
-              "rationale": "Two prospectively randomised phase 3 trials, prespecified pooled MFS primary hit, 72mo f/u, applicable population. Authors' own conclusion: new standard alongside ADT and RT.",
-              "audience": "High-risk non-metastatic prostate: N+ or N0 with 2 of T3-4/Gleason 8-10/PSA ≥40"
+              "rationale": "Two prespecified randomised phase 3 trials, primary MFS endpoint hit with 72-mo median follow-up, OS concordant, in a population where RT plus ADT was the ceiling.",
+              "audience": "High-risk non-metastatic prostate (N+ or 2 of T3-4/GS 8-10/PSA ≥40), or high-risk relapse"
             },
-            "significance": "This is an RT-population trial: 85% were planned for 74Gy/37fx or hypofractionated equivalent, and benefit was identical whether RT was planned (HR 0.54, 0.44-0.67) or not (0.51, 0.34-0.76). So the 2yr abiraterone layers onto 3yr ADT plus definitive RT without an RT-related interaction, and N+ pts (39% of cohort) did at least as well (HR 0.49) as N0.",
-            "monday_clinic": "In high-risk M0 disease heading for definitive RT with long-course ADT (N+, or N0 with two of T3-4 / Gleason 8-10 / PSA ≥40), this supports intensifying the hormonal backbone with 2yr abiraterone rather than adding enzalutamide; it does not extend to post-prostatectomy pts or to relapse after prior local therapy, both under-represented.",
-            "primary_endpoint": null,
+            "significance": "The RT-relevant read is that 85% of pts were planned for radiotherapy (74 Gy/37 fx to prostate and SV, or hypofractionated equivalent), so this benefit sits on top of definitive local treatment, not instead of it. MFS gain held whether RT was planned or not (HR 0·54 vs 0·51, p-interaction 0·67), which moves the systemic intensification decision at the RT consult.",
+            "monday_clinic": "In high-risk node-positive or multi-feature node-negative disease starting long-course ADT with definitive prostate RT, this supports 2 years of abiraterone and prednisolone alongside; it does not extend to post-prostatectomy pts or the under-represented group relapsing after prior local therapy.",
+            "primary_endpoint": {
+              "name": "Metastasis-free survival",
+              "klass": "surrogate",
+              "stat_value": "HR 0·53",
+              "stat_detail": "95% CI 0·44–0·64, p<0·0001; 6-yr MFS 82% vs 69%"
+            },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Two **open-label phase 3** randomised trials inside the STAMPEDE MAMS platform with the same eligibility and **no overlapping controls**, pooled by IPD meta-analysis. 113 UK and Swiss sites, recruitment Nov 15 2011 to March 31 2016, median follow-up **72 months** (IQR 63-73). Primary outcome was switched from OS to MFS for the non-metastatic population before any efficacy inspection, approved by the independent trial steering committee Dec 2 2019."
+                "body": "Two open-label randomised phase 3 trials within the **STAMPEDE** MAMS platform, 113 UK and Swiss sites, same eligibility, **no overlapping controls**, pooled by IPD meta-analysis. Recruitment Nov 15, 2011 to March 31, 2016; median follow-up **72 months** (85 mo abiraterone trial, 60 mo abiraterone plus enzalutamide trial). Primary outcome was switched from OS to **metastasis-free survival** before any efficacy inspection, ratified by the independent trial steering committee."
               },
               {
                 "label": "Population & inclusion",
-                "body": "High-risk non-metastatic prostate cancer: **node positive**, or node negative with at least **two of T3-T4, Gleason 8-10, PSA ≥40 ng/mL**, or relapsing with high-risk features. WHO PS 0-2, no age limit, clinically significant cardiovascular disease excluded. N=1974; median age 68, median PSA 34 ng/mL, **774 (39%) node positive**, 1563 (79%) of 1968 Gleason 8-10."
+                "body": "**N=1974** non-metastatic pts: node positive, or node negative with **at least two of** T3-4, Gleason 8-10, PSA ≥40 ng/mL, or relapsing with high-risk features. Median age 68 (IQR 63-73), median PSA 34 ng/ml, **774 (39%) node positive**, 1563 (79%) of 1968 Gleason 8-10. WHO PS 0-2; clinically significant cardiovascular disease excluded."
               },
               {
                 "label": "Regimen",
-                "body": "**ADT for 3 years** in all arms. Combination arms added oral **abiraterone acetate 1000 mg + prednisolone 5 mg daily for 2 years**, and in the second trial **enzalutamide 160 mg daily** as well. Median time on abiraterone was 23.7 months alone vs 20.7 months with enzalutamide; 266 (59%) of 451 vs 222 (43%) of 513 stopped for planned completion."
+                "body": "ADT for **3 years** in all arms; abiraterone acetate 1000 mg with prednisolone 5 mg daily for **2 years**, plus enzalutamide 160 mg daily in the second trial. Median time to permanently stopping abiraterone was 23·7 months alone but **20·7 months in combination** with enzalutamide, and 23·2 months to stopping enzalutamide."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Local RT **74 Gy in 37 fractions to prostate and seminal vesicles** (or hypofractionated equivalent) was **mandated for node-negative** and encouraged for node-positive disease. Planned RT rate was **1684 (85%) of 1974**: 99% of newly diagnosed N0, 71% of N+, 7% of previously treated. Where RT was omitted, combination therapy could run until progression instead of stopping at 2 years."
+                "body": "Local RT **mandated for node-negative** disease unless contraindicated and **encouraged for node-positive**, delivered per local guidelines at **74 Gy in 37 fractions** to prostate and seminal vesicles or a hypofractionated equivalent. Planned RT use was **1684 (85%) of 1974**, 99% of newly diagnosed node-negative pts, 71% of node-positive, and 7% of previously treated pts. Where RT was omitted, combination therapy could continue until progression rather than stopping at 2 years."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary: metastasis-free survival.** Secondary: overall survival, prostate cancer-specific survival, biochemical failure-free survival, progression-free survival, toxicity. Powered at 90% (one-sided alpha 1.25%) to detect **HR 0.75**, requiring roughly 315 control-group MFS events."
+                "body": "**Primary: metastasis-free survival.** Secondary: overall survival, prostate cancer-specific survival, biochemical failure-free survival, progression-free survival, toxicity. Powered at 90% with one-sided alpha 1·25% for a target MFS HR of 0·75, needing about 315 control-group events; 306 were observed in the control groups against 180 in the combination groups."
               },
               {
                 "label": "Results",
-                "body": "180 MFS events in combination arms vs 306 in controls, **HR 0.53**. Effect held separately in each trial (abiraterone 0.54, abiraterone plus enzalutamide 0.53) with **no added benefit from enzalutamide** (interaction HR 1.02, p=0.91). Proportional hazards held for MFS (p=0.46) and OS (p=0.10)."
+                "body": "Effect was consistent across the two trials, MFS HR **0·54 (0·43-0·68)** in the abiraterone trial and **0·53 (0·39-0·71)** with enzalutamide added, with no between-trial heterogeneity. Proportional hazards held for MFS (p=0·46) and OS (p=0·10)."
               },
               {
                 "label": "Safety",
-                "body": "Adding enzalutamide roughly doubled the G3+ burden: **58% vs 32%** in the abiraterone plus enzalutamide trial against **37% vs 29%** in the abiraterone trial. Hypertension, fatigue and transaminase rise drove the difference. Seven grade 5 events, none in controls."
+                "body": "G3+ events in the first 24 months: **169 (37%) of 451 vs 130 (29%) of 455** in the abiraterone trial, and **298 (58%) of 513 vs 172 (32%) of 533** with enzalutamide added. Hypertension and transaminitis drove the excess. Seven grade 5 events, **none in the control groups**: three on abiraterone plus prednisolone, four on the enzalutamide combination (two septic shock, two sudden death)."
               },
               {
                 "label": "vs leading data",
-                "body": "Prior abiraterone plus enzalutamide or apalutamide combinations in mCRPC showed only modest rPFS gains with no OS benefit, which the investigators cite as the prespecified reason they expected no separation between the two trials here. The indirect comparison cannot exclude a small enzalutamide effect, but **the added toxicity and cost are not justified**."
+                "body": "The abiraterone-in-metastatic STAMPEDE comparison and LATITUDE established second-generation hormone benefit in M1 disease; this extends it below the metastatic threshold, where **ADT plus RT alone** was the ceiling. The enzalutamide-added arm mirrors the mCRPC combination studies the authors cite, which showed **modest rPFS gain and no OS gain**, and reproduces that null here."
               },
               {
                 "label": "Applies to",
-                "body": "Represents high-risk M0 prostate cancer starting at least 3 years of ADT, mostly node positive or T3-T4 Gleason 8-10, with definitive prostate RT planned in 85%. Does not represent pts relapsing after prior local therapy (under-represented) or men treated with prostatectomy plus combination therapy, which the protocol did not test."
+                "body": "Represents newly diagnosed high-risk non-metastatic prostate cancer staged by conventional imaging and treated with 3 years of ADT plus definitive prostate RT. Does not represent post-prostatectomy pts or pts relapsing after previous local therapy, both under-represented, and says nothing about an AR antagonist alone added to ADT and RT."
               },
               {
                 "label": "Limitations",
-                "body": "Open-label design means control pts could access second-generation hormone therapy for M0 CRPC in trials or, since 2019, as SOC, which would bias OS toward the null rather than away. Toxicity was captured only for the first 24 months, so late cardiovascular and metabolic effects of 2yr abiraterone are not characterised. Subsequent-therapy data are described by the authors as unreliable."
+                "body": "Staging was by **conventional imaging** (bone scan, CT or MRI), so a PSMA-PET era cohort would migrate some of these pts to M1 and dilute the measured benefit. Data on subsequent therapy after castration resistance were judged unreliable, and the 2-year treatment duration was pragmatic, anchored to the ADT-with-RT requirement rather than tested."
               },
               {
                 "label": "Discussion",
-                "body": "The **2 year** duration was pragmatic, chosen to match the ADT duration required with RT, not optimised; shorter could suffice and longer might do more. An androgen receptor antagonist alone added to ADT plus RT was never tested here, leaving that cheaper intensification unanswered."
+                "body": "The **enzalutamide result is the actionable negative**: an indirect comparison cannot exclude a small gain, but the doubled G3+ rate and the cost make it unjustified in this population. The NSAID/aspirin heterogeneity (p=0·0052) has no biological explanation and the authors state it should not affect management."
               }
             ],
+            "interpretation": "The value of this report is not that hormone intensification works in prostate cancer, which was already established in the metastatic setting, but that it works on top of a genuinely modern local backbone. Eighty-five percent of these pts were planned for radiotherapy at 74 Gy in 37 fractions or a hypofractionated equivalent, with three years of ADT, which was the ceiling of care for high-risk non-metastatic disease at the time. An intervention that halves metastasis-free survival events against that comparator is doing more than an intervention that improves on ADT alone, and the OS HR of 0·60 with 6-year survival 86% versus 77% says the MFS gain is not a pure surrogate artefact. That concordance matters, because MFS became the primary endpoint by a mid-trial change; the change was made and independently ratified before any efficacy data were inspected, and the OS result independently supports the same conclusion, so the substitution is defensible rather than opportunistic.\n\nThe two-trial structure is the strongest design feature here and is easy to undersell. These were not one trial split post hoc. They were separately randomised with separately accrued, non-overlapping control groups in different calendar periods, and they reproduced each other almost exactly, 0·54 versus 0·53 for MFS. A single trial of this size gives you one estimate with one set of era-specific confounders; two give you an internal replication, which is why the pooled estimate should carry more weight than its sample size alone suggests.\n\nFor a radiation oncologist the question is whether the benefit is additive to RT or partly substitutes for it, and the trial cannot fully answer that because RT was not randomised. What it does give is a prespecified subgroup by planned RT, and the estimates are indistinguishable, 0·54 with planned RT and 0·51 without, interaction p=0·67. The RT-free stratum is small (145 per group) and the protocol allowed combination therapy to run past two years when RT was omitted, so the two subgroups are not treated identically and the comparison should not be pushed hard. The honest read is that nothing here suggests the systemic benefit is contingent on local treatment or vice versa, and the practical implication is that a pt being consented for definitive prostate RT with long-course ADT should also be having the abiraterone conversation.\n\nThe enzalutamide comparison is the cleanly negative half and is arguably the more immediately useful result. It is an indirect comparison across trials rather than a head-to-head, so it cannot exclude a small increment, but the interaction HR of 1·02 with a confidence interval spanning 0·70 to 1·50 sits over a doubling of grade 3 or worse events, 58% against 37%, and four of the seven grade 5 events on trial. The authors anticipated this null from the mCRPC combination data before unblinding, which makes it a confirmed prediction rather than a surprise, and the conclusion that the added cost and toxicity are unjustified is well supported.\n\nWhat would make this estimate wrong, or at least smaller, in 2026 practice is staging. Eligibility rested on conventional imaging, so a fraction of this population would be reclassified as metastatic on PSMA-PET today, and those pts plausibly contributed disproportionately to the events prevented. Applying the HR unchanged to a PET-staged, genuinely node-negative high-risk cohort risks overestimating absolute benefit. The other real boundary is the post-prostatectomy pt and the pt relapsing after prior local therapy, both explicitly under-represented and left unresolved by the authors.",
             "relevant_specialties": [
               "radonc",
               "medonc"
             ],
             "significance_by_specialty": {
-              "radonc": "85% of this cohort was planned for 74Gy/37fx (or hypofractionated equivalent) with 3yr ADT, so this is your patient. Benefit was flat across the RT-planned (HR 0.54, 0.44-0.67) and RT-omitted (0.51, 0.34-0.76) strata, and N+ pts, who got RT only 71% of the time, still reached HR 0.49. Nothing here changes dose or target volume, it changes the systemic backbone you prescribe alongside.",
-              "medonc": "Two years of abiraterone plus prednisolone on top of 3yr ADT is the intensification that works in M0; layering enzalutamide gave interaction HR 1.02 (0.70-1.50) while doubling G3+ events to 58%. PCSS HR 0.49 and bFFS HR 0.39 argue the effect is real disease control, not lead-time. WHO PS 1-2 pts showed attenuated MFS benefit (HR 0.86, 0.58-1.28)."
+              "radonc": "85% of pts were planned for RT (74 Gy/37 fx to prostate and SV, or hypofractionated equivalent), so the benefit is additive to definitive local treatment rather than a substitute. MFS gain held with and without planned RT (HR 0·54 vs 0·51, p-interaction 0·67), so raise abiraterone at the RT consult alongside 3 years of ADT.",
+              "medonc": "The enzalutamide arm is the decision: adding it to abiraterone gave interaction HR 1·02 (0·70–1·50) for MFS while G3+ events went from 37% to 58%, so doublet AR blockade is not justified here. Two years of abiraterone with prednisolone on 3 years of ADT is the regimen that carries the OS HR 0·60."
             },
             "open_questions": [
-              "Optimal duration of abiraterone shorter or longer than 2 years",
+              "Optimal duration of abiraterone; 2 years was pragmatic, not tested",
               "Benefit in pts relapsing after prior local therapy",
-              "Efficacy of combination therapy after prostatectomy"
+              "Efficacy of combination therapy in men undergoing prostatectomy"
             ],
             "consort": {
               "enrolled": null,
@@ -146,41 +188,6 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT06952803",
-                "brief_title": "A Study of Metastases Free Survival With Saruparib vs Placebo Added to a Standard RT/ADT in Men With High-risk Prostate Cancer With a BRCA Mutation",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 700,
-                "primary_completion_date": "2033-03",
-                "brief_summary": "The purpose of the study is to demonstrate superiority of Saruparib (AZD5305) relative to placebo added to a standard radiation therapy (RT) + androgen deprivation therapy (ADT) regimen by assessment of metastases-free survival in participants with high-risk and very high-risk localised/locally advanced prostate cancer with a breast cancer gene mutation (BRCAm).",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Saruparib",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Placebo",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Abiraterone + Prednisolone/Prednisone",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Androgen Deprivation Therapy (ADT)",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Male participants with a histologically documented diagnosis of prostate adenocarcinoma.\n* Newly diagnosed high-risk and very high-risk (localised/locally advanced) prostate cancer or a high-risk biochemical recurrence (BCR) following radical prostatectomy.\n* Provision of a…",
-                "answers_question": "Optimal duration of abiraterone shorter or longer than 2 years",
-                "relevance_phrase": "MFS with abi on RT+ADT backbone, BRCAm high-risk M0"
-              },
-              {
                 "nct": "NCT07483658",
                 "brief_title": "Non-inferiority Study Comparing Salvage Pelvic Radiotherapy in 25 Fractions (62.5 Gy/25) Versus 20 Fractions (52.5 Gy/20) for Recurrent Prostate Cancer After Surgery.",
                 "overall_status": "RECRUITING",
@@ -214,7 +221,7 @@
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed prostate adenocarcinoma.\n* Prior radical prostatectomy with detectable PSA (≥0.2 ng/mL).\n* No evidence of distant metastasis (confirmed via bone scan and CT/MRI or TEP-PSMA if PSA is above 0.5 ng /ml).\n* Patient with Nodal recurrence within the pelvis…",
                 "answers_question": "Benefit in pts relapsing after prior local therapy",
-                "relevance_phrase": "salvage pelvic RT fractionation in post-RP PSA relapse"
+                "relevance_phrase": "salvage pelvic RT fractionation, post-RP detectable PSA"
               },
               {
                 "nct": "NCT04423211",
@@ -308,72 +315,38 @@
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* STEP 0: REGISTRATION ELIGIBILITY CRITERIA\n* Patient must be male and \\>= 18 years of age.\n* Patient must have had a radical prostatectomy (RP) as definitive therapy for histopathologically-proven prostatic adenocarcinoma\n* Patient must have biochemical recurrence (BCR) after…",
                 "answers_question": "Benefit in pts relapsing after prior local therapy",
-                "relevance_phrase": "phase 3 apalutamide+abi added to salvage RT+ADT in BCR"
+                "relevance_phrase": "phase 3 abi+apa added to salvage RT+ADT post-RP BCR"
               },
               {
-                "nct": "NCT04423211",
-                "brief_title": "Treating Prostate Cancer That Has Come Back After Surgery With Apalutamide and Targeted Radiation Based on PET Imaging",
-                "overall_status": "RECRUITING",
+                "nct": "NCT02949284",
+                "brief_title": "Androgen Receptor Antagonist ARN-509 With or Without Abiraterone Acetate, Gonadotropin-Releasing Hormone Analog, and Prednisone in Treating Patients With High-Risk Prostate Cancer Undergoing Surgery",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
-                  "PHASE3"
+                  "PHASE2"
                 ],
-                "enrollment_count": 804,
-                "primary_completion_date": "2032-12",
-                "brief_summary": "This phase III trial tests two questions by two separate comparisons of therapies. The first question is whether enhanced therapy (apalutamide in combination with abiraterone + prednisone) added to standard of care (prostate radiation therapy and short term androgen deprivation) is more effective compared to standard of care alone in patients with prostate cancer who experience biochemical recurrence (a rise in the blood level of prostate specific antigen \\[PSA\\] after surgical removal of the…",
+                "enrollment_count": 90,
+                "primary_completion_date": "2026-09",
+                "brief_summary": "This randomized phase II trial studies how well androgen receptor antagonist ARN-509 works with or without abiraterone acetate, gonadotropin-releasing hormone agonist, and prednisone in treating patients with high-risk prostate cancer undergoing surgery. Androgen can cause the growth of prostate cancer cells. Hormone therapy using androgen receptor antagonist ARN-509, abiraterone acetate, and gonadotropin-releasing hormone analog (GnRH agonist) may fight prostate cancer by lowering the levels…",
                 "conditions": [
-                  "Biochemically Recurrent Prostate Carcinoma",
-                  "Metastatic Prostate Carcinoma",
-                  "Prostate Adenocarcinoma",
-                  "Stage IVB Prostate Cancer AJCC v8"
+                  "Stage II Prostate Adenocarcinoma",
+                  "Stage III Prostate Adenocarcinoma"
                 ],
                 "interventions": [
                   {
-                    "name": "3-Dimensional Conformal Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Apalutamide",
+                    "name": "Abiraterone Acetate",
                     "type": "DRUG"
                   },
                   {
-                    "name": "Computed Tomography",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Degarelix",
+                    "name": "Androgen Receptor Antagonist ARN-509",
                     "type": "DRUG"
                   },
                   {
-                    "name": "External Beam Radiation Therapy",
-                    "type": "RADIATION"
+                    "name": "Gonadotropin-releasing Hormone Analog",
+                    "type": "BIOLOGICAL"
                   },
                   {
-                    "name": "Fluciclovine F18",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Goserelin Acetate",
+                    "name": "Prednisone",
                     "type": "DRUG"
-                  },
-                  {
-                    "name": "Intensity-Modulated Proton Therapy",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Intensity-Modulated Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Leuprolide Acetate",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Magnetic Resonance Imaging",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Positron Emission Tomography",
-                    "type": "PROCEDURE"
                   },
                   {
                     "name": "Quality-of-Life Assessment",
@@ -384,36 +357,126 @@
                     "type": "OTHER"
                   },
                   {
-                    "name": "Relugolix",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Stereotactic Body Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Triptorelin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Volume Modulated Arc Therapy",
-                    "type": "RADIATION"
+                    "name": "Radical Prostatectomy",
+                    "type": "PROCEDURE"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* STEP 0: REGISTRATION ELIGIBILITY CRITERIA\n* Patient must be male and \\>= 18 years of age.\n* Patient must have had a radical prostatectomy (RP) as definitive therapy for histopathologically-proven prostatic adenocarcinoma\n* Patient must have biochemical recurrence (BCR) after…",
-                "answers_question": "Efficacy of combination therapy after prostatectomy",
-                "relevance_phrase": "randomised abi+apalutamide on post-RP salvage RT"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically proven adenocarcinoma of the prostate and: Gleason \\> 8 OR prostatic specific antigen (PSA) \\> 20 and more than 1 positive core\n* Patients with Eastern Cooperative Oncology Group performance scale (ECOG PS) 0 or 1\n* Clinical stage T3 or less as demonstrated by…",
+                "answers_question": "Efficacy of combination therapy in men undergoing prostatectomy",
+                "relevance_phrase": "randomised apalutamide ± abiraterone before RP"
+              },
+              {
+                "nct": "NCT05406999",
+                "brief_title": "Neoadjuvant Intense Endocrine Therapy for High Risk and Locally Advanced Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 900,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "This is a prospective, multicenter, multi-arm, non-randomized, open-label clinical trial to evaluate the efficacy and safety of neoadjuvant intense endocrine therapy for high-risk or locally advanced prostate cancer.",
+                "conditions": [
+                  "Neoadjuvant Therapy",
+                  "High Risk Prostate Cancer",
+                  "Locally Advanced Prostate Cancer",
+                  "Intense Endocrine Therapy"
+                ],
+                "interventions": [
+                  {
+                    "name": "ADT",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Abiraterone Acetate",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Prednisolone tablets",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Enzalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Apalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Darotamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Rezvilutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "PARP inhibitor",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Robot-assisted radical prostatectomy",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. All patients must have been histologically diagnosed of prostate cancer and must be eligible for radical prostatectomy.\n2. All patients must undergo thorough tumor staging and meet one of the following criteria: a) multi-parameter MRI or PSMA PET/CT shows clinical staging of…",
+                "answers_question": "Efficacy of combination therapy in men undergoing prostatectomy",
+                "relevance_phrase": "neoadjuvant ADT+abiraterone arms, all pts RP-eligible"
+              },
+              {
+                "nct": "NCT06384222",
+                "brief_title": "Hyperpolarized (HP) 13C Pyruvate Magnetic Resonance Imaging (MRI) for Response Monitoring to Neoadjuvant Abiraterone",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 32,
+                "primary_completion_date": "2027-09",
+                "brief_summary": "This study will evaluate the use of hyperpolarized 13C MRI (HP 13C MRI) and the HP-derived 13C pyruvate-to-lactate conversion rate constant (kPL) as an early response biomarker in men with treatment-naïve, high-risk, localized or locally advanced prostate cancer receiving neoadjuvant therapy.",
+                "conditions": [
+                  "High Risk Prostate Carcinoma",
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Abiraterone acetate",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Prednisone",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Hyperpolarized [1-13C] pyruvate (HP 13C)",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Magnetic Resonance Imaging (MRI)",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Non-investigational radical prostatectomy (RP)",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Prostate-Specific Membrane Antigen (PSMA) Positron Emission Tomography (PET) PET/Computerized tomography (CT)",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Greater than or equal to 18 years of age\n2. Histologically confirmed adenocarcinoma of the prostate with archival biopsy tissue (collected within 12 months of cycle 1 day 1 of treatment) available for genomic profiling.\n\n   a. Tumor tissue does not need to be retrieved but…",
+                "answers_question": "Efficacy of combination therapy in men undergoing prostatectomy",
+                "relevance_phrase": "neoadjuvant abiraterone response readout at RP"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "abiraterone duration high-risk localized prostate",
-                "abiraterone biochemical relapse prostate salvage",
-                "abiraterone prostatectomy adjuvant prostate"
+                "abiraterone duration high-risk prostate",
+                "abiraterone biochemical recurrence prostate salvage",
+                "abiraterone prostatectomy high-risk"
               ],
               "queries_failed": [],
-              "candidates_returned": 12,
-              "fetched_at": "2026-08-10T04:08:13.311Z",
+              "candidates_returned": 29,
+              "fetched_at": "2026-08-10T22:21:11.819Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
