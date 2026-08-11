@@ -2,6 +2,35 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.48.2] - 2026-08-11
+
+Rebuilds 23 more dates. 39 of 41 dates are now current.
+
+### Content
+- **23 dates rebuilt.** Every date except 2026-05-17 and 2026-05-18 (the two
+  largest, 18 and 10 studies) is now on v0.48.
+- **42 per-arm CONSORT outcomes** across 21 studies, all audited: **42/42
+  grounded in their own source, and every attribution spot-checked against the
+  source sentence.** Sources state arms in whatever order they like — "82% S vs
+  80% AS", "61.0% (Experimental) vs 28.6% (Control)", "64.5% and 62.3% in TNT
+  and CRT groups, respectively" — and the model followed the wording each time.
+- **3 studies correctly ABSTAINED** (STAMPEDE abi-enza, RAVES QoL, NCT04273893):
+  their sources report a combined effect size with no per-arm figures, which is
+  exactly the case the v0.48 rules say to emit nothing for.
+- **Slug persistence held 19 published slugs across these two batches with zero
+  retirements**, including on the oldest dates — the ones that had accumulated
+  the most historical churn (2026-05-18 alone has 39 retired slugs on record).
+
+### Notes
+- No code changes. The three "ungrounded number" classes reported during
+  verification were all defects in the ad-hoc audit script, not in the data:
+  it read `image_ocr_text` (the column is `image_ocr_texts`), it did not decode
+  the HTML-entity middle dot, and it keyed `source_ids` on `bookmark` when the
+  artifact writes `tweet`. That last one blanked the source text entirely for
+  tweet-sourced studies and produced 14 false "ungrounded" verdicts. Recorded
+  because the same three traps will bite the next person who audits this corpus
+  by hand.
+
 ## [0.48.1] - 2026-08-10
 
 Rebuilds 21 more dates onto v0.48, plus the two defects that batch surfaced.

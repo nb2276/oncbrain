@@ -1,56 +1,36 @@
 {
   "date": "2026-05-26",
   "conference": null,
-  "generated_at": 1784477145542,
+  "generated_at": 1786429607564,
   "slug_aliases": [
     "s1914-sbrt-atezo-nsclc",
     "swog-nrg-s1914",
     "swog-s1914"
   ],
   "digest": {
-    "top_line": "SWOG/NRG S1914: OS HR 1.15 (p=0.63), adding atezolizumab to SBRT fails in early-stage inoperable NSCLC, with excess G≥3 tox and more local failures.",
-    "tldr": "Thoracic carried the day. S1914 futility-stopped: atezo+SBRT no better than SBRT alone (2yr OS 80% vs 82%) and worse on local control (13% vs 7% failures) plus G≥3 tox (12% vs 2%). SBRT monotherapy stays the standard for inoperable early-stage NSCLC; exploratory harm signal in never/former smokers.",
+    "top_line": "SWOG/NRG S1914: adding atezolizumab to SBRT in early-stage NSCLC missed on OS (HR 1.15, p=0.63) and doubled local failure (13% vs 7%).",
+    "tldr": "Thoracic carried the day, and the signal is negative for RT-IO combination: S1914 closed early for futility with worse PFS, more G≥3 toxicity (12% vs 2%), and local failure running the wrong way against the radiosensitization hypothesis. SBRT alone stays the standard for inoperable early-stage NSCLC.",
     "sites": [
       {
         "disease_site": "thoracic",
-        "intro": "First randomized test of adding IO to SBRT in inoperable early-stage NSCLC; the addition failed on both efficacy and safety.",
+        "intro": "Phase III data against adding IO to SBRT in medically inoperable early-stage NSCLC, contradicting the earlier randomized phase II signal.",
         "studies": [
           {
             "name": "SWOG/NRG S1914",
-            "tldr": "OS HR 1.15 (0.65-2.01), p=0.63: adding atezolizumab to SBRT did not improve survival in early-stage inoperable NSCLC; futility-stopped, excess toxicity.",
+            "tldr": "OS HR 1.15 (0.65-2.01), p=0.63: atezolizumab added to SBRT failed, with more local failures (13% vs 7%) and G≥3 AEs (12% vs 2%).",
             "details": [
+              "📊 1° EP OS: HR 1.15 (0.65-2.01), p=0.63; 2yr OS 82% S vs 80% AS, 49 deaths",
+              "📊 PFS numerically worse with IO: HR 1.35 (0.89-2.06), p=0.16; 2yr PFS 71% S vs 60% AS",
+              "🔍 Phase III, N=417 randomized / 403 eligible (201 S, 202 AS), closed early at first interim for futility on OS and PFS",
+              "🔍 SBRT was 3-8 fractions, BED ≥100 Gy; atezolizumab 1200 mg IV Q3W × 8 cycles with SBRT starting at cycle 3",
+              "🔍 T1-3N0M0 ≤7cm, medically inoperable or declined surgery, ≥1 risk factor (size ≥2 cm, SUV ≥6.2, moderately/poorly/undifferentiated histology)",
               {
-                "text": "📊 Efficacy, atezo+SBRT (AS) vs SBRT (S)",
+                "text": "📊 Failure patterns by site (S vs AS)",
                 "table": {
                   "columns": [
-                    "Endpoint",
-                    "S",
-                    "AS",
-                    "HR (95% CI), p"
-                  ],
-                  "rows": [
-                    [
-                      "2yr OS",
-                      "82%",
-                      "80%",
-                      "1.15 (0.65-2.01), p=0.63"
-                    ],
-                    [
-                      "2yr PFS",
-                      "71%",
-                      "60%",
-                      "1.35 (0.89-2.06), p=0.16"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📊 Failure patterns: more local failures with IO",
-                "table": {
-                  "columns": [
-                    "Failure",
-                    "S",
-                    "AS"
+                    "Failure site",
+                    "SBRT alone",
+                    "Atezo + SBRT"
                   ],
                   "rows": [
                     [
@@ -71,29 +51,12 @@
                   ]
                 }
               },
-              "🔍 SBRT both arms (SoC backbone): 3-8 fractions, BED ≥100 Gy",
-              "⚠️ G≥3 AEs 12% AS vs 2% S, incl 1 G5 respiratory-failure death",
-              {
-                "text": "⚠️ Exploratory harm in former/never-smokers with AS (hypothesis-generating)",
-                "table": {
-                  "columns": [
-                    "Endpoint (never/former smokers)",
-                    "HR (95% CI), p"
-                  ],
-                  "rows": [
-                    [
-                      "OS",
-                      "2.50 (1.11-5.59), p=0.03"
-                    ],
-                    [
-                      "PFS",
-                      "2.16 (1.15-4.04), p=0.01"
-                    ]
-                  ]
-                }
-              },
-              "🔗 Prior randomized phase 2 (PMID 37478883, I-SABR, nivolumab+SBRT) suggested IO benefit; S1914 with atezolizumab does not confirm",
-              "⚠️ Closed at first interim for OS/PFS futility; median f/u only 12mo, 49 deaths"
+              "⚠️ Local failure was HIGHER in the IO arm (13% vs 7%), the opposite of the radiosensitization hypothesis; central review of local recurrence events still ongoing",
+              "⚠️ Former (53%) / never (3%) smokers did WORSE with AS: OS HR 2.50 (1.11-5.59), p=0.03; PFS HR 2.16 (1.15-4.04), p=0.01",
+              "⚠️ G≥3 AEs 12% AS (21 G3, 1 G4, 1 G5 respiratory failure) vs 2% S (3 G3, 1 G4)",
+              "⚠️ Median f/u only 12 mo (range 0.03-49) in pts still alive; OS immature, but futility boundary crossed on both OS and PFS",
+              "🔗 Contradicts the prior randomized phase II signal (PMID 37478883) that suggested benefit from adding IO to SBRT",
+              "⚠️ Smoker subgroup harm is unadjusted for multiplicity and hypothesis-generating; PD-L1 status and QoL analyses still pending"
             ],
             "figures": [],
             "nct": "NCT04214262",
@@ -103,63 +66,76 @@
             "slug": "s1914",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Phase 3 stopped for futility; adding IO to SBRT gave no OS/PFS benefit and excess toxicity, reaffirming SBRT-alone SOC and not confirming the prior phase 2 signal.",
-              "audience": "Early-stage inoperable/surgery-declined NSCLC (T1-3N0M0 ≤7cm), ≥1 risk factor"
+              "rationale": "Phase III, primary OS endpoint not met, closed at interim for futility. Reaffirms SBRT alone as SoC and refutes the earlier phase II IO signal.",
+              "audience": "T1-3N0M0 NSCLC ≤7cm, medically inoperable or declined surgery, ≥1 risk factor"
             },
-            "significance": "Local control got worse with IO, not better: local failures 13% vs 7% adding atezolizumab, alongside null OS/PFS and a former/never-smoker harm signal (OS HR 2.50). SBRT alone stays standard for inoperable early-stage NSCLC, closing the add-IO-to-SBRT question negatively.",
-            "monday_clinic": "In medically inoperable or surgery-declined early-stage (T1-3N0) NSCLC treated with definitive SBRT, this argues against adding atezolizumab, and does not extend to node-positive or locally advanced disease.",
+            "significance": "The RT read is that adding IO did not just fail to help, it tracked with MORE local failure (13% vs 7%), inside a BED ≥100 Gy 3-8 fraction regimen that is already delivering >90% in-field control. Central review of those events is pending, so treat the local signal as unconfirmed. This closes the question of routinely sequencing atezolizumab around definitive SBRT off-protocol.",
+            "monday_clinic": "In medically inoperable T1-3N0M0 NSCLC with high-risk features (size ≥2 cm, SUV ≥6.2, or poorly differentiated histology), this supports SBRT alone at BED ≥100 Gy without added checkpoint blockade; it does not address IO for node-positive or operable early-stage disease.",
             "primary_endpoint": {
               "name": "Overall survival",
               "klass": "overall-survival",
               "stat_value": "HR 1.15",
-              "stat_detail": "95% CI 0.65-2.01, p=0.63; did not meet primary"
+              "stat_detail": "95% CI 0.65-2.01, p=0.63; primary endpoint not met"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**Phase 3** open-label RCT, 1:1, SWOG/NRG; N=**403 eligible** (201 S / 202 AS). **Stopped at first interim for futility** on OS and PFS. Median follow-up **12 mo** (0.03-49)."
+                "body": "Randomized **phase III** SWOG/NRG cooperative-group trial, accrual 8/13/20 to 9/6/24, **417 randomized / 403 eligible** (201 SBRT alone, 202 atezolizumab + SBRT) against an accrual goal of 432. **Closed at the first interim analysis for futility** on both OS and PFS. Median follow-up in living pts was **12 months** (range 0.03-49)."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**T1-3N0M0 NSCLC ≤7cm**, medically inoperable or declined surgery, **≥1 recurrence risk factor** (diameter ≥2cm, SUV ≥6.2, moderate/poor/undifferentiated). Median age 73, median tumor 2.3cm, 89% ECOG 0-1."
+                "body": "**T1-3N0M0 NSCLC ≤7 cm**, medically inoperable or declined surgery, with **≥1 recurrence risk factor**: tumor diameter ≥2 cm, ≥6.2 (SUV), or moderately/poorly/undifferentiated histology. Median age **73** (41-91), 89% ECOG 0-1, median tumor diameter **2.3 cm**. Stratified by location (central vs peripheral), size (<4 vs ≥4 cm) and PS."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**SBRT both arms** (SoC backbone): **3-8 fractions, BED ≥100 Gy**. Stratified by central vs peripheral, <4 vs ≥4cm, PS 0-1 vs 2."
+                "body": "SBRT in **3-8 fractions to a BED ≥100 Gy** in both arms, i.e. standard definitive dosing rather than a de-escalated backbone. In the experimental arm SBRT began with **cycle 3**, so radiation was delivered after two neoadjuvant atezolizumab cycles and concurrently with the third."
               },
               {
                 "label": "Regimen",
-                "body": "**Atezolizumab 1200mg IV Q3wk ×8** (neoadjuvant, concurrent, adjuvant); **SBRT initiated at cycle 3**."
+                "body": "**Atezolizumab 1200 mg IV Q3W for 8 cycles**, given neoadjuvantly, concurrently and adjuvantly around SBRT. No protocol treatment was received by 6 pts on S and 8 on AS."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary: overall survival.** Secondary: PFS, failure patterns, toxicity, QoL. 1-sided stratified log-rank at 2.5%."
+                "body": "**Primary: overall survival**, compared by 1-sided stratified log-rank at the 2.5% level. Secondary: PFS, failure patterns, toxicity, QoL."
+              },
+              {
+                "label": "Results",
+                "body": "**Neither OS nor PFS favored the IO arm**, and local failure ran higher with atezolizumab. See the failure-pattern table and primary endpoint above."
               },
               {
                 "label": "Safety",
-                "body": "**G≥3 AEs 12% AS** (21 G3, 1 G4, 1 G5 respiratory-failure death) **vs 2% S**. Excess toxicity with **no efficacy gain**."
+                "body": "G≥3 AEs **12% on AS vs 2% on S** (21 G3, 1 G4, and **1 G5 respiratory failure** with atezolizumab; 3 G3 and 1 G4 with SBRT alone). A six-fold excess of high-grade toxicity with no efficacy return is the safety read."
               },
               {
                 "label": "vs leading data",
-                "body": "Prior randomized phase 2 (**PMID 37478883**, I-SABR, nivolumab+SBRT) suggested benefit adding IO; S1914 with atezolizumab **does not confirm** and shows harm signals."
+                "body": "The prior randomized phase II (PMID 37478883) suggested benefit from adding immunotherapy to SBRT; this larger phase III does not reproduce it. It also sits against PACIFIC-era logic, where consolidation IO helps after chemoRT for stage III, and shows that result does not port down to node-negative disease treated with ablative SBRT."
               },
               {
                 "label": "Applies to",
-                "body": "Represents early-stage (T1-3N0) medically inoperable or surgery-declined NSCLC with recurrence risk factors, treated with definitive SBRT. Does not represent operable, node-positive, or locally advanced NSCLC."
+                "body": "Represents medically inoperable or surgery-declining T1-3N0M0 NSCLC ≤7 cm with high-risk features treated to BED ≥100 Gy. Does not represent node-positive, operable, or post-operative early-stage pts, nor other checkpoint inhibitors or SBRT sequencing schedules."
               },
               {
                 "label": "Limitations",
-                "body": "**Open-label**; stopped early at interim (median f/u 12mo, only 49 deaths). Former/never-smoker harm is an **exploratory subgroup**; central review of local recurrence ongoing."
+                "body": "Follow-up is short (median 12 mo alive) and central review of local recurrence events is not complete, so the local-failure imbalance is provisional. The smoker subgroup harm signal was not multiplicity-controlled, and PD-L1 status, QoL and correlative blood/tissue analyses are all still pending."
+              },
+              {
+                "label": "Discussion",
+                "body": "A negative primary endpoint with a directionally worse PFS, worse local control and six-fold more high-grade toxicity is stronger than a null result: it argues against the abscopal/radiosensitization rationale in this setting. It does not exclude benefit in a biomarker-selected subset, which the pending PD-L1 analysis will test."
               }
             ],
+            "interpretation": "The value of this trial lies less in its negative primary endpoint than in the direction of everything around it. A truly null result would show overlapping curves and matched failure patterns. Instead OS, PFS, and local control all point the same way, against the experimental arm, with an OS HR of 1.15 and a PFS HR of 1.35, and with local failure at 13% on atezolizumab versus 7% on SBRT alone. None of those individual comparisons is statistically convincing on its own, and the confidence intervals are wide enough to include real benefit. But the consistency of direction across independent endpoints, combined with a futility stop that the design triggered on both OS and PFS, is what should move a reader's confidence, and it should move it toward believing there is no benefit here rather than toward believing the trial was merely underpowered.\n\nThe local-failure imbalance deserves the most scrutiny, because it is the one finding that contradicts a mechanistic prior rather than merely failing to confirm one. The rationale for combining checkpoint blockade with ablative radiation rests on the idea that RT-induced antigen release plus PD-L1 blockade improves both in-field durability and out-of-field control. This trial found the opposite on the in-field endpoint and nothing at all on the out-of-field ones: regional failures were 2% versus 3% and distant failures 4% versus 5%, essentially superimposable. Central review of the local recurrence events is still running, and that matters, because immunotherapy-associated pneumonitis and post-SBRT radiographic change are both easy to mistake for local progression on imaging, and both were more likely in the atezolizumab arm. If central review reclassifies a meaningful share of those events, the local-control signal softens considerably. Until it reports, this should be read as an unexplained imbalance, not an established harm.\n\nThe result also has to be reconciled with the earlier randomized phase II that motivated it, and with the broader stage III experience where consolidation immunotherapy after chemoradiation is established practice. The most parsimonious reading is that the setting, not the drug, is what changed. Early-stage node-negative disease treated to a BED of at least 100 Gy already achieves in-field control above 90%, so the ceiling on any local benefit is low, and the residual failure risk is largely distant and biologically different from bulky nodal disease. A therapy that adds value when the local problem is unsolved need not add value when it is mostly solved. That framing also predicts that the smoker subgroup finding, where former and never smokers did worse on the combination with OS HR 2.50 and PFS HR 2.16, is more likely noise from an unadjusted subgroup analysis in a small event pool than a real biological interaction, though it is uncomfortable enough that the pending PD-L1 correlative work is worth waiting for.\n\nWhat would have to be true for this conclusion to be wrong is a specific and testable set of conditions: that the OS comparison is simply immature at a median 12 months of follow-up in living pts and that late immunologic benefit emerges, or that a PD-L1-defined subgroup carries a real effect diluted by an unselected population. Both are plausible. Neither justifies giving checkpoint blockade around definitive SBRT off-protocol, particularly against a G≥3 AE rate of 12% versus 2% and a treatment-related death.",
             "relevant_specialties": [
               "radonc",
               "medonc"
             ],
+            "significance_by_specialty": {
+              "radonc": "SBRT alone at BED ≥100 Gy in 3-8 fractions remains the standard, and adding atezolizumab tracked with MORE local failure (13% vs 7%) rather than better in-field durability. Central review of those events is pending. Regional (2% vs 3%) and distant (4% vs 5%) failure were unchanged, so the out-of-field rationale also went unrewarded.",
+              "medonc": "Neoadjuvant/concurrent/adjuvant atezolizumab 1200 mg Q3W × 8 cycles bought no OS or PFS benefit and cost a six-fold rise in G≥3 AEs (12% vs 2%) including a G5 respiratory failure. This argues against porting PACIFIC-style consolidation logic into node-negative early-stage disease pending the PD-L1 analysis."
+            },
             "open_questions": [
-              "Biomarker/PD-L1 subset that benefits from adding IO to SBRT",
-              "Whether excess local failures with IO hold on central review",
-              "Reconciling harm signal with prior phase 2 IO+SBRT benefit"
+              "Does a PD-L1-defined subset benefit from IO added to SBRT?",
+              "Will central review confirm the excess local failures with atezolizumab?",
+              "Is the worse outcome in former/never smokers real or chance?"
             ],
             "consort": {
               "enrolled": null,
@@ -169,12 +145,14 @@
                 {
                   "label": "SBRT alone (S)",
                   "allocated": 201,
-                  "analyzed": null
+                  "analyzed": null,
+                  "outcome": "2yr OS 82%"
                 },
                 {
                   "label": "Atezolizumab + SBRT (AS)",
                   "allocated": 202,
-                  "analyzed": null
+                  "analyzed": null,
+                  "outcome": "2yr OS 80%"
                 }
               ]
             },
@@ -185,11 +163,11 @@
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "immunotherapy stereotactic NSCLC"
+                "PD-L1 immunotherapy stereotactic early-stage NSCLC"
               ],
               "queries_failed": [],
-              "candidates_returned": 19,
-              "fetched_at": "2026-07-19T16:04:50.597Z",
+              "candidates_returned": 1,
+              "fetched_at": "2026-08-11T06:26:31.528Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [

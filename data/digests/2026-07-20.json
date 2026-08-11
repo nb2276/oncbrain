@@ -1,72 +1,57 @@
 {
   "date": "2026-07-20",
   "conference": null,
-  "generated_at": 1786400298211,
+  "generated_at": 1786455937124,
   "digest": {
-    "top_line": "RTOG 0848: adjuvant chemoRT missed OS overall (HR 0.96, P=.38) but N0 pts saw 5-yr OS 48.1% vs 28.6% (interaction P=.0063).",
-    "tldr": "Upper GI carried the day, and the RT read is entirely in the subgroup: modern QA'd 50.4 Gy/28 fx IMRT added nothing to gem-based chemo overall, but the treatment-by-nodal-status interaction (OS P=.0063, DFS P=.014) puts resected N0 pancreas back in play as the population worth testing. Grade 3 tox 38% vs 19%; hypothesis-generating, n=91.",
+    "top_line": "RTOG 0848: adjuvant chemoRT after gemcitabine misses OS (HR 0.96), but node-negative pts gained OS (interaction P=.0063).",
+    "tldr": "Hepatobiliary carried the day's only signal: RTOG 0848 puts 50.4 Gy/28 fx with modern IMRT + central QA on trial and finds no OS benefit overall, but a node-status interaction (OS P=.0063, DFS P=.014) favoring CXRT in N0. Hypothesis-generating in 91 pts, not a mandate.",
     "sites": [
       {
-        "disease_site": "upper-gi",
-        "intro": "Post-resection pancreas: the first adjuvant CXRT trial with mandatory pre-treatment RT credentialing, and its only positive signal is a nodal-status interaction on a failed primary.",
+        "disease_site": "hepatobiliary",
+        "intro": "First contemporary-technique test of adjuvant pancreatic CXRT since ESPAC-1; the RT question narrows to N0 disease.",
         "studies": [
           {
             "name": "RTOG 0848",
-            "tldr": "OS primary missed (HR 0.96, 90% CI 0.79-1.18, P=.38 1-sided), but treatment-by-nodal-status interaction favored CXRT in N0 (P=.0063).",
+            "tldr": "OS HR 0.96 (90% CI 0.79-1.18), 1° EP not met; node-negative subgroup gained OS (interaction P=.0063).",
             "details": [
-              "🔍 Phase IIR/III two-step: step 2 randomized 354 pts post-resection, no progression after 5 cycles gem-based chemo, ±CXRT after cycle 6",
-              "📊 1° EP OS not met: median 2.6 vs 2.3 yr; 5-yr 23.1% vs 27.9% (CXRT)",
-              "📐 DFS trend favors CXRT: HR 0.82 (95% CI 0.65-1.03), P=.089",
-              "📐 Nodal-status interaction: OS P=.0063, DFS P=.014; forest-plot N-stage subgroup P-interaction .022",
+              "📊 1° EP OS not met: HR 0.96 (90% CI, 0.79 to 1.18), one-sided P=.38, two-sided P=.77",
+              "📐 DFS trend only: HR 0.82 (95% CI, 0.65 to 1.03), P=.089",
+              "📊 Treatment × nodal status interaction: OS P=.0063, DFS P=.014, favoring CXRT in N0",
               {
-                "text": "📊 Node-negative subgroup (n=91), CXRT vs chemo alone",
+                "text": "📊 Node-negative subgroup (Fig 4), n=91 (42 chemo / 49 chemo+CXRT)",
                 "table": {
                   "columns": [
                     "Endpoint",
-                    "Chemo (n=42)",
-                    "Chemo+CXRT (n=49)",
-                    "5-yr OS (95% CI)"
+                    "Chemo",
+                    "Chemo+CXRT"
                   ],
                   "rows": [
                     [
                       "Median OS",
-                      "3.0 yr (2.2-4.0)",
-                      "3.9 yr (2.5 to NR)",
-                      "28.6 (14.9-42.2) vs 48.1 (33.3-62.9)"
+                      "3.0 yr (2.2 to 4.0)",
+                      "3.9 yr (2.5 to Not reached)"
                     ],
                     [
                       "Median DFS",
-                      "1.5 yr (0.8-2.7)",
-                      "2.3 yr (1.4 to NR)",
-                      "n/a"
+                      "1.5 yr (0.8 to 2.7)",
+                      "2.3 yr (1.4 to Not reached)"
                     ],
                     [
-                      "OS events",
-                      "32 failed / 10 censored",
-                      "23 failed / 26 censored",
-                      "n/a"
+                      "5-yr OS (forest)",
+                      "28.6% (14.9 to 42.2)",
+                      "48.1% (33.3 to 62.9)"
                     ]
                   ]
                 }
               },
-              "🔍 RT was tightly QA'd: 50.4 Gy/28 fx to tumor bed, pancreatojejunostomy, regional nodes; real-time central review before start",
-              "🔍 81% IMRT, 19% 3D conformal; 88% got ≥50 Gy; 79% no interruptions; per-protocol/acceptable in 92% of treated pts",
-              "⚠️ 14% randomized to CXRT never received it (18 refusals); as-treated sensitivity HR 0.98 (90% CI 0.80-1.20), unchanged",
-              {
-                "text": "⚠️ Grade 3 toxicity higher with CXRT, grade 4/5 not",
-                "subdetails": [
-                  "Any grade 3: 38% vs 19%, P<.001",
-                  "Grade 4/5: 6% vs 5%, P=.68",
-                  "Grade 3 nonheme: 22% vs 11%, P=.004",
-                  "GI disorders grade 3-5: 11% vs 2%; diarrhea 6% vs 1%",
-                  "Lymphocyte count decreased grade 3-5: 10% vs 2%"
-                ]
-              },
-              "⚠️ No pt received FOLFIRINOX/mFOLFIRINOX; backbone was gemcitabine ± erlotinib, now superseded",
-              "🔗 vs ESPAC-1: CXRT was detrimental there (1994-2000, split-course low-dose 2D, no QA); 0848 modernized dose, IMRT, and credentialing",
-              "🔗 vs RTOG 9704: post-hoc showed RT protocol deviation tracked with worse survival; 0848 pre-empted that with mandatory pre-treatment review",
-              "⚠️ Nodal subgroup is a treatment-by-covariate interaction in a trial whose 1° EP failed; n=91 N0 pts, 55 events",
-              "⚠️ Accrual took ~9 yr; final analysis triggered at 5-yr follow-up with 270 (not 316) OS events, power 72%"
+              "🔍 Step 2 randomization only after 5 cycles chemo without progression, enriching out early systemic failure",
+              "🔍 RT: 50.4 Gy/28 fx to tumor bed, pancreatojejunostomy, regional nodes; 81% IMRT, real-time central QA review",
+              "💊 Sensitization capecitabine 83%, infusional 5-FU 15%; step 1 was gemcitabine ± erlotinib, zero FOLFIRINOX",
+              "📊 G3 AEs 38% v 19% (P<.001), mainly GI/diarrhea and lymphopenia; G4/5 unchanged (6% v 5%, P=.68)",
+              "⚠️ 14% assigned to CXRT never got it (18 refusals); as-treated sensitivity HR 0.98 (90% CI, 0.80 to 1.20)",
+              "⚠️ Node-negative signal is a subgroup of 91 pts with wide CIs; N0 forest interaction P=.022 while global claim rests on multivariable interaction",
+              "⚠️ Accrual took ~9 years; final analysis triggered at 270 OS events (power 72%), not the planned 316",
+              "🔗 vs ESPAC-1, where CXRT was detrimental: that trial used split-course, lower-dose 2D RT (1994-2000) with no QA and no postop imaging to exclude early mets"
             ],
             "figures": [],
             "nct": "NCT01013649",
@@ -75,75 +60,73 @@
             ],
             "slug": "rtog-0848",
             "verdict": {
-              "soc_implication": "methodologically-limited",
-              "rationale": "Primary OS endpoint missed; the positive read rests on a treatment-by-nodal-status interaction in 91 N0 pts, on a gemcitabine backbone no longer standard.",
-              "audience": "Resected pancreatic head adenocarcinoma, R0/R1, no progression after 5 cycles adjuvant chemo"
+              "soc_implication": "challenges-soc",
+              "rationale": "Randomized phase III, prespecified OS primary not met, so adjuvant CXRT is not supported broadly; the N0 benefit rests on a subgroup interaction, not a powered comparison.",
+              "audience": "Resected pancreatic head adenocarcinoma, R0/R1, post 5 cycles gemcitabine-based adjuvant chemo"
             },
-            "significance": "The RT-relevant read is the nodal interaction: N0 pts (n=91) had median OS 3.9 vs 3.0 yr and 5-yr OS 48.1% vs 28.6% with CXRT, at 50.4 Gy/28 fx to bed plus regional nodes with mandatory pre-treatment central review. That combination of dose, target and QA is deliverable today, and it moves the adjuvant RT question from whether to whom.",
-            "monday_clinic": "In a resected pancreatic head adenocarcinoma pt who is node-negative and progression-free after adjuvant chemo, this supports discussing adjuvant chemoradiation; it does not extend to node-positive pts, where no treatment effect was seen, nor to margin-positive disease.",
+            "significance": "The RT read is the nodal interaction: in N0 pts (n=91), median OS 3.9 vs 3.0 yr and 5-yr OS 48.1% vs 28.6% with CXRT, delivered as 50.4 Gy/28 fx to bed, pancreatojejunostomy and regional nodes with real-time central QA. That is the population and the technique worth carrying into a trial, not into routine adjuvant practice.",
+            "monday_clinic": "In resected pancreatic head adenocarcinoma with pathologically negative nodes who completed adjuvant chemo without progression, this supplies the strongest randomized signal yet for adding CXRT, though as a subgroup finding; it does not extend to node-positive pts, where no treatment effect was seen.",
             "primary_endpoint": {
               "name": "Overall survival",
               "klass": "overall-survival",
               "stat_value": "HR 0.96",
-              "stat_detail": "90% CI 0.79-1.18, one-sided P=.38; primary endpoint not met"
+              "stat_detail": "90% CI 0.79-1.18, one-sided P=.38; primary end point not met"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Multicenter randomized phase IIR/III, two-step. Step 1 was gemcitabine versus gemcitabine + erlotinib (reported previously); **step 2 randomly assigned 354 pts 1:1** after five cycles without progression to a sixth chemotherapy cycle **± CXRT**. Opened Nov 2009, step 2 closed Oct 2018, analyzed Dec 2023; median follow-up 2.2 yr overall and 7.4 yr among survivors."
+                "body": "Multicenter randomized **phase IIR/III**, two-step. Step 1 gemcitabine ± erlotinib (reported previously); **step 2** randomized 1:1 to a sixth chemo cycle ± CXRT among pts without progression after five cycles. Opened 2009, step 2 closed 2018, analyzed December 2023; median follow-up 2.2 yr overall, **7.4 yr in survivors**."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Curative-intent resection of **pancreatic head** adenocarcinoma with operative note confirming gross total resection and documented microscopic margin status; body/tail excluded on the basis of RTOG 9704. Median age 63, 55% male, Zubrod 1 in 56%, pT3 in 81%. **74% node-positive**, 17% margin-positive, CA19-9 ≤90 in 96%."
-              },
-              {
-                "label": "Regimen",
-                "body": "Adjuvant backbone was gemcitabine (67%) or **gemcitabine + erlotinib** (28%), with 5% non-oxaliplatin gemcitabine combinations. **No patient received FOLFIRINOX or mFOLFIRINOX.** Radiosensitization was capecitabine in 83% and infusional 5-FU in 15%."
+                "body": "Curative-intent resection of **pancreatic head** adenocarcinoma with gross total resection on the operative note and documented microscopic margin status; body/tail excluded on the basis of RTOG 9704. N=354 (174 chemo, 180 chemo+CXRT), median age 63, **74% node-positive**, 81% pT3, 17% margin-positive, 96% postop CA19-9 ≤90."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**50.4 Gy in 28 fractions** beginning within 21 days of cycle 6, targeting the postoperative tumor bed, pancreatojejunostomy and **regional nodes**. 81% IMRT, 19% 3D conformal; median delivered dose 50.4 Gy over 38 days, 88% received ≥50 Gy, 79% had no interruption. Planning underwent **real-time central review** before start at IROC-credentialed centers; overall per-protocol/acceptable in 92% of treated pts."
+                "body": "**50.4 Gy/28 fx** starting within 21 days of cycle 6, covering tumor bed, pancreatojejunostomy and regional nodes; 81% IMRT, 19% 3D conformal, centers IROC-credentialed with **real-time central review** before start. Median delivered dose 50.4 Gy over 38 days, 88% received ≥50 Gy, 79% had no interruptions; overall QA per protocol/acceptable in 92% of treated pts."
               },
               {
-                "label": "Endpoints",
-                "body": "**Primary: overall survival** from second-step random assignment, powered for HR 0.76 at 80% with 316 events. Secondary: disease-free survival and CTCAE v4.0 adverse events."
+                "label": "Regimen",
+                "body": "Sensitization was **capecitabine in 83%** and infusional 5-FU in 15%, two pts received none. Discontinuation for toxicity was 5% with capecitabine and 17% with 5-FU. Adjuvant systemic therapy was gemcitabine (67%) or gemcitabine + erlotinib (28%); **no pt received FOLFIRINOX**."
+              },
+              {
+                "label": "Results",
+                "body": "OS **HR 0.96** with median 2.6 vs 2.3 yr and 5-yr 23.1% vs 27.9%; DFS **HR 0.82** (P=.089), median 1.0 vs 1.3 yr. Multivariable analysis showed **treatment by nodal status interaction** for OS (P=.0063) and DFS (P=.014), with benefit confined to N0."
               },
               {
                 "label": "Safety",
-                "body": "**No excess grade 4/5 AEs** (6% v 5%, P=.68), but grade 3 rose to **38% v 19% (P<.001)**, driven by GI events (grade 3-5 GI 11% v 2%; diarrhea 6% v 1%) and lymphopenia (10% v 2%). One grade 5 event per arm (hepatic failure; sepsis). Discontinuation for toxicity was 5% on capecitabine and 17% on infusional 5-FU."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents resected pancreatic head adenocarcinoma progression-free through five cycles of gemcitabine-based adjuvant chemotherapy. Does not represent body/tail primaries, FOLFIRINOX-treated pts, or the neoadjuvant setting where nodal status after chemotherapy is harder to interpret."
+                "body": "No excess grade 4/5 (**6% v 5%, P=.68**), one grade 5 per arm (hepatic failure, sepsis). Grade 3 rose to **38% v 19%** (P<.001), driven by GI toxicity (any G3-5 GI 11% v 2%; diarrhea 6% v 1%) and lymphocyte count decreased (10% v 2%). Nonhematologic G3 22% v 11% (P=.004)."
               },
               {
                 "label": "vs leading data",
-                "body": "ESPAC-1 turned the field away from adjuvant chemoradiation, but it accrued 1994-2000 with split-course lower-dose 2D planning, no QA and no postoperative imaging to exclude early metastases. RTOG 9704's post-hoc analysis linked RT protocol deviations to worse survival; 0848 answered both with credentialed centers and mandatory pre-treatment review, and the chemotherapy-alone arm's outcomes track prior single-agent gemcitabine adjuvant trials."
+                "body": "ESPAC-1 found adjuvant chemoradiation detrimental and effectively ended its routine use outside the US, but used split-course lower-dose 2D RT accrued 1994-2000 without QA or postoperative imaging to exclude early metastatic disease. RTOG 9704's post hoc analysis linked deviation from protocol RT planning to worse survival, which is the specific failure mode 0848's mandatory pre-treatment central review was built to remove."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents resected pancreatic head adenocarcinoma completing gemcitabine-based adjuvant chemotherapy without progression. Does not represent body/tail primaries, FOLFIRINOX-treated pts, or the neoadjuvant setting where nodal status after systemic therapy carries a different meaning."
               },
               {
                 "label": "Limitations",
-                "body": "The nodal finding is an interaction test, not a randomized comparison within N0, and rests on 91 pts with 55 OS events. Margin-positive disease cannot be addressed at all: **only 10 pts (5 per arm) were node-negative and margin-positive**. Accrual took nearly 9 years, and the analysis trigger changed to 5-year follow-up rather than 316 events, leaving 270 events and 72% power."
+                "body": "The comparator backbone is obsolete: gemcitabine ± erlotinib, with **zero FOLFIRINOX**, so whether local therapy still adds anything on a more effective systemic regimen is untested. Only 10 pts total were both node-negative and margin-positive, so the margin question cannot be addressed at all, and the N0 arms carry 42 and 49 pts with medians whose upper CI is not reached."
               },
               {
                 "label": "Discussion",
-                "body": "Codominant locoregional and systemic failure persists after resection, and the trial's own read is that a locoregional modality pays off only where the competing risk of distant failure is lower, which is what N0 status marks. The safety data are the least ambiguous result: modern CXRT costs grade 3 GI toxicity and lymphopenia, not grade 4/5 events."
+                "body": "The trial's own explanation for the interaction is competing risk: node positivity marks pts who will fail distantly, where better local control cannot show up in OS. That is biologically coherent and consistent with the codominant locoregional/systemic failure pattern, but it is a hypothesis this trial generated rather than tested."
               }
             ],
-            "interpretation": "The honest headline is a negative trial: with 270 deaths, adding fluoropyrimidine-sensitized radiotherapy to a sixth cycle of gemcitabine-based adjuvant chemotherapy produced HR 0.96 for overall survival, and the as-treated sensitivity analysis moved it to 0.98. Nothing in the primary comparison supports routine adjuvant chemoradiation, and the investigators do not argue otherwise. What makes the trial worth reading anyway is that it was built to answer a question ESPAC-1 arguably never asked cleanly, and its most defensible contribution is not the survival curve but the demonstration that the modality can be delivered at scale without the harm the field assumed.\n\nThe ESPAC-1 comparison matters because that trial has functioned as the reason not to irradiate for two decades. Its radiotherapy was split-course, lower dose, 2D-planned, delivered without central quality assurance, in patients accrued before postoperative imaging routinely excluded incomplete resections and early metastatic disease. RTOG 9704 then supplied a mechanism for how such a trial could underperform: deviation from specified planning tracked with worse survival. RTOG 0848 removed those confounders deliberately, with credentialed centers, mandatory pre-treatment plan review, and 92% per-protocol or acceptable-variation delivery in treated patients. The result is that a negative OS result here carries more information than a negative result in ESPAC-1 did, because it is much harder to blame on technique. It also means the safety claim is the trial's most transferable finding: 6% versus 5% grade 4/5 events, with the excess confined to grade 3 gastrointestinal toxicity and lymphopenia, retires the argument that adjuvant chemoradiation in this setting is dangerous.\n\nThe node-negative signal deserves the caution its statistics demand and the attention its biology earns. It is an interaction test, not a randomized comparison within a prespecified stratum with its own alpha, and it rests on 91 patients and 55 events, with 5-year OS 48.1% versus 28.6%. Interactions of that kind are the single most common way a negative trial gets rescued into practice and then fails replication. But the mechanistic story is unusually coherent: local failure after resection runs in the 30% to 40% range, failure is codominantly locoregional and systemic, and a locoregional modality can only convert to survival where distant failure is not already the dominant competing risk. Node positivity marks exactly that competing risk, and 74% of this trial was node-positive. On that reading the overall null is what a diluted true effect looks like, not evidence of no effect anywhere.\n\nThe harder problem is generalization. Every patient received gemcitabine-based therapy and none received FOLFIRINOX, so the trial tests local therapy against a systemic backbone the field has moved past. That cuts both ways. A more effective systemic regimen reduces distant failure and could enlarge the population in whom local control translates into survival, which is the argument for a modern randomized test; or it could improve outcomes enough that the marginal contribution of radiotherapy shrinks. The trial cannot distinguish these, and it says so. Practically, the finding also does not survive transplantation into the neoadjuvant era intact, because post-chemotherapy nodal status is not the same variable as upfront nodal status. And margin-positive disease is untouched: with 10 node-negative, margin-positive patients total, the question that most often prompts a radiation referral is the one this trial cannot answer.",
+            "interpretation": "The honest headline is that a randomized phase III asked whether adjuvant chemoradiation adds survival after resection of pancreatic head cancer and answered no, with an HR of 0.96 that sits almost exactly on unity. The authors argue the reduced power (72% at 270 events rather than the planned 316) does not hide a true benefit, and on this point they are right: the observed estimate is nowhere near the hypothesized 0.76, and a wider confidence interval around 0.96 does not rescue a signal that is absent. So the primary reading is settled. Adjuvant CXRT delivered to an unselected resected population does not extend survival.\n\nWhat makes the trial worth an RT reader's time is the nodal interaction, and how much weight it deserves depends on how one treats a subgroup claim. The usual reasons to discount one apply only partly here. Nodal status was a stratification factor at randomization, not something dredged after the fact, and the interaction was tested in the prespecified multivariable model rather than found by scanning the forest plot. Against that, the node-negative stratum holds 91 pts, the OS interaction P of .0063 in the multivariable analysis is considerably stronger than the .022 the univariable forest reports for the same variable, and the CXRT arm's median OS upper bound is not reached. A 5-year OS of 48.1% versus 28.6% is a very large absolute separation to attribute to 91 pts, and effects estimated in small strata are systematically inflated. The direction is credible; the magnitude almost certainly is not.\n\nThe mechanistic argument for the interaction is the strongest thing in the paper. If node positivity marks a population whose dominant risk is distant failure, then improving locoregional control there cannot move OS regardless of how good the radiation is, and any benefit will concentrate where the competing risk is lowest. That prediction was made in advance and matches what the data show. It also explains why the DFS signal for the whole cohort (HR 0.82) points in the right direction while OS does not, and it fits the codominant failure pattern reported in autopsy series. But this reasoning is a hypothesis the trial generated, not one it tested, and it should be treated accordingly.\n\nThe more serious problem for transferring any of this is the backbone. Not a single patient received FOLFIRINOX, and by the design's own logic more effective systemic therapy raises rather than lowers the value of local control, since it shifts the competing risk. That cuts both ways: it may mean the node-negative benefit understates what modern sequencing would show, or it may mean the population that stays free of distant disease long enough to benefit looks entirely different. Neither can be resolved here. Similarly, the trial's suggestion that node-negative pts after neoadjuvant chemotherapy are the natural population for the next study collides with the fact that post-neoadjuvant nodal status carries different information than it does after upfront resection.\n\nWhat the trial does settle, cleanly, is safety. With centrally reviewed, credentialed, mostly IMRT delivery, adding CXRT produced no excess grade 4 or 5 toxicity and a grade 3 increase driven by diarrhea and lymphopenia. Whatever remains of the post-ESPAC-1 concern that adjuvant radiation actively harms these pts does not survive this dataset. The open question is now efficacy on a modern regimen, not tolerability.",
             "relevant_specialties": [
               "radonc",
-              "medonc",
-              "surgonc"
+              "medonc"
             ],
             "significance_by_specialty": {
-              "radonc": "50.4 Gy/28 fx to bed, pancreatojejunostomy and regional nodes, with mandatory pre-treatment central review, produced no excess grade 4/5 toxicity (6% v 5%) and 5-yr OS 48.1% v 28.6% in the N0 subgroup. The technique is reproducible today, so the adjuvant RT question becomes patient selection, not feasibility.",
-              "medonc": "The backbone was gemcitabine ± erlotinib with zero FOLFIRINOX exposure, so the null OS result cannot be read as radiotherapy failing alongside current systemic therapy. Grade 3 AEs rose to 38% v 19%, mostly GI and lymphopenia, which is the cost to weigh when sequencing a sixth cycle plus CXRT.",
-              "surgonc": "Eligibility required gross total resection of a pancreatic head primary with documented microscopic margin status; body and tail were excluded. Node-negative pathology, not margin status, identified who benefited, and with only 10 node-negative margin-positive pts the trial says nothing about R1 resections."
+              "radonc": "The nodal interaction is the RT-relevant result: in N0 pts, median OS 3.9 vs 3.0 yr and 5-yr OS 48.1% vs 28.6%. Technique transfers directly, 50.4 Gy/28 fx to bed, pancreatojejunostomy and regional nodes, 81% IMRT under real-time central review, with no excess G4/5.",
+              "medonc": "The systemic backbone was gemcitabine ± erlotinib with zero FOLFIRINOX, so this does not test whether local therapy adds anything to a modern regimen. For sequencing decisions, the practical read is that CXRT costs G3 toxicity (38% v 19%) without an OS return outside the node-negative stratum."
             },
             "open_questions": [
-              "Does CXRT benefit node-negative pts on FOLFIRINOX backbones",
-              "Can SBRT substitute for conventional CXRT in this setting",
-              "Role of CXRT after margin-positive resection"
+              "Does CXRT still add benefit on a FOLFIRINOX backbone",
+              "Role of CXRT for margin-positive resection after neoadjuvant chemotherapy",
+              "Can SBRT substitute for conventional CXRT in this setting"
             ],
             "consort": {
               "enrolled": null,
@@ -153,12 +136,14 @@
                 {
                   "label": "Chemo",
                   "allocated": 174,
-                  "analyzed": 174
+                  "analyzed": 174,
+                  "outcome": "mOS 2.6 yr"
                 },
                 {
                   "label": "Chemo+CXRT",
                   "allocated": 180,
-                  "analyzed": 180
+                  "analyzed": 180,
+                  "outcome": "mOS 2.3 yr"
                 }
               ]
             },
@@ -167,66 +152,6 @@
             "methodology": "phase-3-rct",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
-              {
-                "nct": "NCT03704662",
-                "brief_title": "Preoperative Fractionated Radiation Therapy Versus Stereotactic Body Radiation Therapy for Resectable or Borderline Resectable, or Locally Advanced Type A Pancreatic Adenocarcinoma",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 102,
-                "primary_completion_date": "2026-03",
-                "brief_summary": "Patients are randomized into two arms. Arm A patients will receive Stereotactic Body Radiation Therapy (SBRT) and Arm B patients with receive conventional concurrent chemotherapy and radiation therapy.",
-                "conditions": [
-                  "Pancreatic Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Stereotactic Body Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Preoperative Fractionated Radiation Therapy and Chemotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Pathologically confirmed (histologic or cytological), resectable, borderline resectable, or locally advanced type A adenocarcinoma of the pancreas; patients must have resectable, borderline resectable, or locally advanced type A disease, based on institutional standardized…",
-                "answers_question": "Can SBRT substitute for conventional CXRT in this setting",
-                "relevance_phrase": "randomised SBRT vs conventional CXRT, preop"
-              },
-              {
-                "nct": "NCT05083247",
-                "brief_title": "Preoperative mFOLFIRINOX (or Gem-Nab-P) +/- Isotoxic High-dose SBRT for Borderline Resectable Pancreatic Adenocarcinoma",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 256,
-                "primary_completion_date": "2027-12",
-                "brief_summary": "Surgical resection is the only potentially curative treatment for patients with pancreatic cancer with the aim of curative R0 resection and related improvement of survival. As a standard, surgery is usually followed by adjuvant therapy that improves survival but neoadjuvant therapy (NAT) is a rapidly emerging concept that needs to be explored and validated in terms of therapeutic options in borderline resectable pancreatic tumors. In this setting, preoperative FFX seems to be feasible and can…",
-                "conditions": [
-                  "Pancreatic Neoplasm",
-                  "Pancreatic Adenocarcinoma",
-                  "Borderline Resectable Pancreatic Adenocarcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "mFOLFIRINOX or Gemcitabine nab-paclitaxel",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Isotoxic High-Dose (iHD)-SBRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Surgery",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion criteria:\n\n* Cytologic or histologic proof of adenocarcinoma of the pancreatic head or uncinated process or body or tail. Diagnosis should be verified by local pathologist\n* cTNM stage: T1-4N0-2M0\n* Confirmation of clinical and radiographic stage as borderline resectable (CT scan and/or…",
-                "answers_question": "Can SBRT substitute for conventional CXRT in this setting",
-                "relevance_phrase": "mFOLFIRINOX +/- iHD-SBRT, randomised, BR disease"
-              },
               {
                 "nct": "NCT05043857",
                 "brief_title": "Stereotactic PAncreatic RadioTherapy Adjuvant Therapy",
@@ -247,19 +172,19 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Surgically treated T1-T4 adenocarcinoma with or without prior chemotherapy AND close (\\<2.5mm)/positive resection margin AND/OR N1 staging at lymphadenectomy\n* ECOG performance status \\<2\n* Age \\> 18\n* Estimated life expectancy \\> 6 months\n* Ability to provide written…",
-                "answers_question": "Role of CXRT after margin-positive resection",
-                "relevance_phrase": "adjuvant SBRT for R1/close margin or N1 post-op"
+                "answers_question": "Can SBRT substitute for conventional CXRT in this setting",
+                "relevance_phrase": "adjuvant SBRT for R1 or node-positive resection"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
                 "FOLFIRINOX chemoradiation resected pancreatic",
-                "stereotactic body radiotherapy resected pancreatic adenocarcinoma",
-                "adjuvant radiotherapy positive margin pancreatic"
+                "neoadjuvant chemoradiation pancreatic margin",
+                "stereotactic body radiotherapy pancreatic adjuvant"
               ],
               "queries_failed": [],
-              "candidates_returned": 22,
-              "fetched_at": "2026-08-10T22:18:01.486Z",
+              "candidates_returned": 10,
+              "fetched_at": "2026-08-11T13:45:23.083Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
