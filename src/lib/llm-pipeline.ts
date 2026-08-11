@@ -543,6 +543,21 @@ export type ConsortArm = {
   label: string; // arm name, e.g. "PPN-SBRT"
   allocated: number; // randomized/allocated to this arm
   analyzed?: number | null; // analyzed for the primary outcome, if reported
+  // v0.48: this arm's primary-endpoint result, e.g. "3yr DFS 64.5%", so the
+  // diagram carries the OUTCOME as its last link instead of stopping at
+  // allocation.
+  //
+  // EMITTED BY THE MODEL, ATTACHED TO THE ARM — never inferred here from the
+  // order of `primary_endpoint.stat_value`. That inference was measured and
+  // rejected: of the 36 studies carrying a consort object, 15 have two
+  // parseable endpoint values but ZERO carry arm labels, ZERO have a table that
+  // passes `armColumns`, and the ordering convention is not stable (DBCG-HYPO
+  // states its CONTROL arm first, "24.7% vs 19.5%" against arms
+  // [50 Gy/25 fr, 40 Gy/15 fr], while bladder-adjuvant-rt states the
+  // experimental arm first). Positional matching would eventually print the
+  // experimental result under the control arm, which is a clinical error, not a
+  // layout bug. Phase 2 is reading the paper and can attribute it correctly.
+  outcome?: string | null;
 };
 
 // CONSORT participant flow. Every number must come from the source — the study
@@ -1936,7 +1951,16 @@ export function parseConsort(raw: unknown): ConsortDiagram | null {
     // bad count, keep the (design-consistent) allocated figure.
     let analyzed = posInt(ao.analyzed);
     if (analyzed !== null && analyzed > allocated) analyzed = null;
-    arms.push({ label, allocated, analyzed });
+    // v0.48: short free text, capped. A long one means the model wrote prose
+    // instead of a result and would break the node layout, so it is dropped
+    // rather than truncated mid-number.
+    const outcomeRaw = typeof ao.outcome === 'string' ? ao.outcome.replace(/\s+/g, ' ').trim() : '';
+    const outcome = outcomeRaw.length > 0 && outcomeRaw.length <= 48 ? outcomeRaw : null;
+    // OMITTED when absent, not written as null, matching how `content_type`
+    // omits its default: 74 of 76 arms in the committed corpus have no outcome,
+    // and emitting a null on each would rewrite every consort object in every
+    // artifact for no gain.
+    arms.push(outcome ? { label, allocated, analyzed, outcome } : { label, allocated, analyzed });
   }
   if (arms.length < 2) return null;
 

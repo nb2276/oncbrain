@@ -247,6 +247,9 @@ export type ConsortArm = {
   label: string;
   allocated: number;
   analyzed?: number | null;
+  // v0.48: this arm's primary-endpoint result. Model-attributed, never inferred
+  // from value order. Mirrored from llm-pipeline.ts — keep in lockstep.
+  outcome?: string | null;
 };
 
 export type ConsortDiagram = {
