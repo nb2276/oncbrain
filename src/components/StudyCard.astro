@@ -264,7 +264,27 @@ function contentOverlap(a: string, b: string): number {
   return inter / Math.min(sa.size, sb.size);
 }
 const rationaleText = typeof study.verdict?.rationale === 'string' ? study.verdict.rationale : '';
-const foldedClinic =
+// v0.52: the clinic line rests on the card instead of folding into the depth.
+//
+// Measured over the built corpus, 105 of 117 cards buried it — the ONE sentence
+// naming which patient in front of you tomorrow this study moves, and which it
+// does not, hidden behind a disclosure while ~59 words of "why it matters" sat
+// in the open. For a reader scanning at 90 seconds that is the wrong sentence
+// to hide.
+//
+// Showing both is not redundant: significance and monday_clinic have
+// essentially ZERO textual overlap (median Jaccard 0.000 over the corpus,
+// p90 0.04), because the Phase 2 rules force them onto different angles —
+// significance is what is ADDITIVE to the literature, monday_clinic is WHICH
+// PATIENT. The v0.26 rule that only one long-form surface may rest was written
+// when significance was the only such field; it costs ~39 words to keep both,
+// against a fold that now runs past 1000.
+//
+// Still exactly one render: when significance is ABSENT the clinic line already
+// occupies the resting slot via `restingProse`, so this block requires
+// significance to be present. The overlap guard against the verdict rationale
+// stays — a clinic line that just restates the rationale earns nothing.
+const restingClinic =
   significanceText && mondayClinicText && contentOverlap(mondayClinicText, rationaleText) < 0.6
     ? mondayClinicText
     : null;
@@ -552,6 +572,12 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
         )}
       </div>
       <p class="significance-text" set:html={linkifyCitations(restingProse.text)} />
+    </section>
+  )}
+  {restingClinic && (
+    <section class="clinic-block" aria-label="Monday clinic decision">
+      <div class="clinic-label">Monday clinic</div>
+      <p class="clinic-resting-text" set:html={linkifyCitations(restingClinic)} />
     </section>
   )}
   {/* v0.51: the long-form read is on /study/<slug>/ and NOTHING advertised it.
@@ -850,12 +876,6 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
           (Methods → Results → Critique), so the conclusion follows the data
           instead of preceding it. It led the fold pre-v0.30, which read as a
           conclusion before its own results. Content unchanged; order only. */}
-      {foldedClinic && (
-        <section class="depth-section clinic-section" aria-label="Monday clinic decision">
-          <div class="section-label">Monday clinic</div>
-          <p class="clinic-text" set:html={linkifyCitations(foldedClinic)} />
-        </section>
-      )}
       {hasOpenQuestions && (
         <div class="open-questions study-open-questions">
           <div class="section-label">Open questions</div>
@@ -1555,6 +1575,30 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     line-height: 1.3;
   }
   /* TL;DR sheds its hero box when the endpoint block already leads the card. */
+  /* The clinic line rests, but reads as a DIFFERENT kind of statement from the
+     "why it matters" block above it: that one is analysis, this one is a
+     decision. A left rule and a sans-serif kicker separate them without adding
+     another tinted box to a card that already has several. */
+  .clinic-block {
+    margin: 0 0 0.7rem;
+    padding: 0.1rem 0 0.1rem 0.7rem;
+    border-left: 2px solid var(--rule);
+  }
+  .clinic-label {
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 0.15rem;
+  }
+  .clinic-resting-text {
+    margin: 0;
+    font-size: 0.93rem;
+    line-height: 1.5;
+    color: var(--fg);
+  }
   /* Quiet by design: it is an offer, not a call to action, and it sits inside
      the 90-second scan the card exists to protect. Sans-serif + muted keeps it
      legible as an affordance without competing with the result above it. */

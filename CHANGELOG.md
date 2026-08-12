@@ -2,6 +2,33 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.52.0] - 2026-08-11
+
+### Changed
+- **The Monday-clinic line now rests on the card instead of folding into the
+  depth.** Measured over the built corpus, **105 of 117 cards buried it** — the
+  one sentence naming which patient in front of you tomorrow the study moves,
+  and which it does NOT — behind a disclosure, while ~59 words of "why it
+  matters" sat in the open. For a reader scanning at 90 seconds that is the
+  wrong sentence to hide.
+
+  Showing both is not redundant. `significance` and `monday_clinic` have
+  essentially ZERO textual overlap (median Jaccard **0.000** across the corpus,
+  p90 0.04) because the Phase 2 rules force them onto different angles:
+  significance is what is ADDITIVE to the literature, monday_clinic is WHICH
+  PATIENT. The v0.26 rule that only one long-form surface may rest was written
+  when significance was the only such field; keeping both costs **+37 words**
+  at rest against a fold that now runs past 1000.
+
+  Still exactly one render. When significance is absent the clinic line already
+  occupies the resting slot, so the new block requires significance to be
+  present, and the guard against a clinic line that merely restates the verdict
+  rationale is unchanged. Verified 111 of 111 studies with a clinic line render
+  it, none twice.
+
+  Styled as a decision rather than more analysis: a left rule and a small
+  sans-serif kicker, not another tinted box on a card that already has several.
+
 ## [0.51.0] - 2026-08-11
 
 ### Added
