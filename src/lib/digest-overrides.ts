@@ -15,6 +15,7 @@ import type {
 import { RELATED_TRIAL_STATUSES } from './digest-data.ts';
 import { deriveSlug } from './slug.ts';
 import { assignSlugsForDate } from './slug-resolve.ts';
+import { studyDedupKey } from './study-dedup.ts';
 import {
   isValidModality,
   isValidIntent,
@@ -90,11 +91,24 @@ export type DigestOverrides = {
   edits?: Record<string, StudyEdit>;
   // v0.13: per-study related-trials overrides, keyed by study slug.
   related_trials?: Record<string, RelatedTrialsOverride>;
+  // v0.50: what the targeted study WAS, so an override survives a rename.
+  //
+  // Every other key here is a slug, and a slug is derived from the name Phase 1
+  // writes — so a rebuild renames studies and the override silently stops
+  // matching. That happened twice in one release cycle: an edit no-op'd
+  // (v0.45.1) and three suppressions republished hidden duplicates (v0.49.0).
+  // Recorded by the CLI when the override is written; absent on older sidecars,
+  // which keep working by slug alone.
+  identity?: Record<string, { nct?: string | null; name?: string }>;
 };
 
 export type OverrideSummary = {
   suppressed: string[]; // slugs actually dropped
   suppressMissing: string[]; // requested suppress slugs that matched no study
+  // v0.50: overrides whose slug no longer exists but whose recorded identity
+  // matched a renamed study, as "old->new". Surfaced so a rename is visible in
+  // the build log rather than silently absorbed.
+  resolvedRenames: string[];
   edited: string[]; // slugs actually edited
   editMissing: string[]; // requested edit slugs that matched no study
   digestFields: string[]; // digest-level fields overridden
@@ -424,6 +438,7 @@ export function applyOverrides(
   const summary: OverrideSummary = {
     suppressed: [],
     suppressMissing: [],
+    resolvedRenames: [],
     edited: [],
     editMissing: [],
     digestFields: [],
@@ -433,6 +448,53 @@ export function applyOverrides(
     relatedTrialsMissing: [],
     relatedTrialsWarnings: [],
   };
+
+  // v0.50: an override targets a slug, and a rebuild can rename the study out
+  // from under it. Re-point each stale key at the study its recorded identity
+  // names, so the curator's decision survives the rename.
+  //
+  // NCT first, because a registration is an exact identifier. The acronym key
+  // (studyDedupKey, shared with the cross-date duplicate finder) is the second
+  // pass for the many studies that carry no NCT.
+  //
+  // A match must be UNIQUE. Two studies answering to one identity means the
+  // override is ambiguous, and guessing would either drop a card the curator
+  // wants or keep one they hid — both silent, both worse than reporting the
+  // key as missing and letting the build refuse.
+  function reindex<T>(
+    table: Record<string, T>,
+    live: Set<string>,
+    identity: NonNullable<DigestOverrides['identity']>,
+    studies: DigestStudy[],
+    slugOf: (st: DigestStudy) => string,
+    onRename: (from: string, to: string) => void,
+  ): Record<string, T> {
+    const out: Record<string, T> = {};
+    for (const [key, value] of Object.entries(table)) {
+      if (live.has(key)) {
+        out[key] = value;
+        continue;
+      }
+      const id = identity[key];
+      const wantNct = typeof id?.nct === 'string' ? id.nct.trim().toUpperCase() : '';
+      const wantKey = id?.name ? studyDedupKey(id.name) : null;
+      let hits: DigestStudy[] = [];
+      if (/^NCT\d{8}$/.test(wantNct)) {
+        hits = studies.filter((st) => (st.nct ?? '').trim().toUpperCase() === wantNct);
+      }
+      if (hits.length !== 1 && wantKey) {
+        hits = studies.filter((st) => studyDedupKey(st.name) === wantKey);
+      }
+      if (hits.length === 1) {
+        const to = slugOf(hits[0]);
+        out[to] = value;
+        onRename(key, to);
+      } else {
+        out[key] = value; // unmatched: reported as missing downstream
+      }
+    }
+    return out;
+  }
 
   const seenSlugs = new Set<string>();
   const droppedStudies: Array<{ slug: string; name: string; reason: string }> = [];
@@ -450,13 +512,28 @@ export function applyOverrides(
   allStudies.forEach((st, i) => slugByStudy.set(st, resolvedSlugList[i] ?? studySlug(st)));
   const slugFor = (study: DigestStudy): string => slugByStudy.get(study) ?? studySlug(study);
 
+  // Re-point stale override keys at renamed studies (v0.50). Runs before any
+  // table is consulted, so suppress/edit/related-trials all see live slugs.
+  const liveSlugs = new Set(allStudies.map(slugFor));
+  const identity = overrides.identity ?? {};
+  const renamed = new Set<string>();
+  const noteRename = (from: string, to: string) => renamed.add(`${from} → ${to}`);
+  const suppressTable = reindex(
+    Object.fromEntries([...suppress].map((k) => [k, true as const])),
+    liveSlugs, identity, allStudies, slugFor, noteRename,
+  );
+  const suppressKeys = new Set(Object.keys(suppressTable));
+  const editsTable = reindex(edits, liveSlugs, identity, allStudies, slugFor, noteRename);
+  const relatedTable = reindex(relatedTrials, liveSlugs, identity, allStudies, slugFor, noteRename);
+  summary.resolvedRenames.push(...renamed);
+
   const sites = digest.sites
     .map((site) => {
       const studies = site.studies
         .filter((study) => {
           const slug = slugFor(study);
           seenSlugs.add(slug);
-          if (suppress.has(slug)) {
+          if (suppressKeys.has(slug)) {
             summary.suppressed.push(slug);
             droppedStudies.push({ slug, name: study.name, reason: 'suppressed via override' });
             return false;
@@ -466,7 +543,7 @@ export function applyOverrides(
         .map((study) => {
           const slug = slugFor(study);
           let next = study;
-          const edit = edits[slug];
+          const edit = editsTable[slug];
           if (edit) {
             summary.edited.push(slug);
             const { picked, warnings } = pickEditable(edit, slug);
@@ -477,7 +554,7 @@ export function applyOverrides(
           // a curator can simultaneously edit open_questions AND pin a
           // trial set in the same override file (the set's answers_question
           // membership check runs against the post-edit open_questions).
-          const rtOverride = relatedTrials[slug];
+          const rtOverride = relatedTable[slug];
           if (rtOverride) {
             next = applyRelatedTrialsOverride(next, rtOverride, summary, slug, fetchedAtForPin);
           }
@@ -489,9 +566,9 @@ export function applyOverrides(
 
   // Requested slugs that didn't match any study so a typo'd slug doesn't
   // silently no-op.
-  for (const slug of suppress) if (!seenSlugs.has(slug)) summary.suppressMissing.push(slug);
-  for (const slug of Object.keys(edits)) if (!seenSlugs.has(slug)) summary.editMissing.push(slug);
-  for (const slug of Object.keys(relatedTrials)) {
+  for (const slug of suppressKeys) if (!seenSlugs.has(slug)) summary.suppressMissing.push(slug);
+  for (const slug of Object.keys(editsTable)) if (!seenSlugs.has(slug)) summary.editMissing.push(slug);
+  for (const slug of Object.keys(relatedTable)) {
     if (!seenSlugs.has(slug)) summary.relatedTrialsMissing.push(slug);
   }
 
@@ -535,6 +612,7 @@ export function formatOverrideSummary(s: OverrideSummary): string {
   }
   if (s.tagWarnings.length) warns.push(...s.tagWarnings);
   if (s.relatedTrialsWarnings.length) warns.push(...s.relatedTrialsWarnings);
+  if (s.resolvedRenames.length) parts.push(`re-pointed ${s.resolvedRenames.join(', ')}`);
   let out = parts.length ? parts.join('; ') : 'no-op';
   if (warns.length) out += `; WARN ${warns.join('; ')}`;
   return out;

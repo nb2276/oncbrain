@@ -2,6 +2,38 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.50.0] - 2026-08-11
+
+### Fixed
+- **Overrides now survive the study being renamed.** Every override key is a
+  slug, and a slug is derived from the name Phase 1 writes — so a rebuild
+  renames studies and the override silently stops matching. This failed TWICE in
+  one cycle: an edit no-op'd (v0.45.1) and three suppressions republished hidden
+  duplicates (v0.49.0), putting RADIOSA, EXTEND and PEACE-2 on the live site
+  twice each. v0.49.0 made the suppress case fatal, which stops the silent
+  republication but still leaves the curator to repair it by hand every time.
+
+  The sidecar now records an `identity` for each target — the study's `nct` and
+  `name` — written by the CLI when the override is created. When a key no longer
+  matches, `applyOverrides` re-points it: NCT first, because a registration is
+  exact, then the acronym key (`studyDedupKey`, shared with the cross-date
+  duplicate finder) for the many studies with no NCT. The build log names the
+  move, e.g. `re-pointed peace2-old-name → peace-2`, so a rename is visible
+  rather than absorbed.
+
+  **A match must be UNIQUE.** Two studies answering to one identity leaves the
+  key unresolved and the suppress fatal, because guessing would either delete a
+  card the curator wants or republish one they hid — both silent. An exact slug
+  match always wins over an identity match, so a live key is never re-pointed.
+
+  Identity is also read from `digest.meta.dropped` when the target is ALREADY
+  suppressed and therefore absent from `sites` — without that, re-adding a
+  suppression for a hidden study recorded nothing and stayed as fragile as
+  before.
+
+  Backfilled into the 5 existing override sidecars (7 identities). Legacy
+  sidecars with no identity block keep working by slug exactly as before.
+
 ## [0.49.0] - 2026-08-11
 
 The back catalogue is current: **0 of 41 dates stale**, 110 of 118 studies carry

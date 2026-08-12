@@ -688,6 +688,7 @@ describe('formatOverrideSummary', () => {
   it('summarizes applied changes', () => {
     const s = formatOverrideSummary({
       suppressed: ['x'],
+      resolvedRenames: [],
       suppressMissing: [],
       edited: ['y'],
       editMissing: [],
@@ -706,6 +707,7 @@ describe('formatOverrideSummary', () => {
   it('flags missing slugs as warnings', () => {
     const s = formatOverrideSummary({
       suppressed: [],
+      resolvedRenames: [],
       suppressMissing: ['z'],
       edited: [],
       editMissing: [],
