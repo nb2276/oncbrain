@@ -2,6 +2,30 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.51.0] - 2026-08-11
+
+### Added
+- **The card now offers "The longer read →".** The long-form `interpretation`
+  shipped in v0.45 and NOTHING advertised it: 109 study pages carried a ~550
+  word analysis while the DATE page — the primary daily surface — had no `href`
+  to a study page at all, only a share URL. The analysis was generated,
+  grounded, deployed, and invisible. It now reaches **236 pages**.
+
+  Placed directly after the at-rest prose, which is where a reader who wants
+  more has just run out of card. Styled quiet on purpose: sans-serif, muted,
+  hairline rule. It is an offer, not a call to action, and it sits inside the
+  90-second scan the card exists to protect.
+
+  Rendered only when an interpretation actually exists, so it never promises a
+  page that merely repeats the card, and suppressed on `/study/<slug>/` itself
+  via a `standalone` prop — `shareUrl` is set on every surface INCLUDING the
+  study page, so it could not be used to detect "already here".
+
+### Notes
+- The regression test reads `dist/` and asserts the anchor specifically, not the
+  share URL that was present all along. This was a wiring bug of the kind a
+  component unit test cannot catch: every piece worked, nothing connected them.
+
 ## [0.50.1] - 2026-08-11
 
 ### Content
