@@ -68,6 +68,47 @@ function writeOverrides(path: string, ov: DigestOverrides): void {
   writeFileSync(path, JSON.stringify(ov, null, 2) + '\n');
 }
 
+// v0.50: record WHAT the targeted study is, not just the slug it currently has.
+//
+// Every override key is a slug, and a slug comes from the name Phase 1 wrote, so
+// a rebuild renames studies and the override silently stops matching. That cost
+// three republished duplicates in v0.49.0. Capturing the NCT and name here gives
+// applyOverrides something durable to re-point with.
+//
+// Best-effort: a date with no built digest yet (or a slug that matches nothing)
+// simply records nothing, and the override still works by slug as before.
+function captureIdentity(ov: DigestOverrides, date: string, slug: string): void {
+  const digestPath = resolve('data/digests', `${date}.json`);
+  if (!existsSync(digestPath)) return;
+  try {
+    const art = JSON.parse(readFileSync(digestPath, 'utf8')) as {
+      digest: {
+        sites: Array<{ studies: Array<{ name: string; slug?: string; nct?: string | null }> }>;
+        meta?: { dropped?: Array<{ slug: string; name: string }> };
+      };
+    };
+    const study = art.digest.sites
+      .flatMap((x) => x.studies)
+      .find((st) => st.slug === slug);
+    if (study) {
+      ov.identity = { ...(ov.identity ?? {}), [slug]: { nct: study.nct ?? null, name: study.name } };
+      console.log(`  identity recorded: ${study.name}${study.nct ? ` (${study.nct})` : ''}`);
+      return;
+    }
+    // Already suppressed, so it is gone from `sites` — but the build records
+    // what it dropped, which still carries the name. Without this, re-adding a
+    // suppression for an already-hidden study records no identity and the
+    // override stays as fragile as before.
+    const dropped = (art.digest.meta?.dropped ?? []).find((d) => d.slug === slug);
+    if (dropped) {
+      ov.identity = { ...(ov.identity ?? {}), [slug]: { nct: null, name: dropped.name } };
+      console.log(`  identity recorded from meta.dropped: ${dropped.name}`);
+    }
+  } catch {
+    /* a malformed artifact must not block writing the override */
+  }
+}
+
 function printStudySlugs(date: string): void {
   const digestPath = resolve('data/digests', `${date}.json`);
   if (!existsSync(digestPath)) {
@@ -124,6 +165,7 @@ function main(): void {
     const set = new Set(ov.suppress ?? []);
     set.add(args.suppress);
     ov.suppress = [...set];
+    captureIdentity(ov, date, args.suppress);
     changed = true;
     console.log(`+ suppress ${args.suppress}`);
   }
@@ -131,12 +173,18 @@ function main(): void {
   if (typeof args.unsuppress === 'string') {
     ov.suppress = (ov.suppress ?? []).filter((s) => s !== args.unsuppress);
     if (ov.suppress.length === 0) delete ov.suppress;
+    // Drop the identity too, unless another override still targets that slug.
+    if (ov.identity && !ov.edits?.[args.unsuppress] && !ov.related_trials?.[args.unsuppress]) {
+      delete ov.identity[args.unsuppress];
+      if (Object.keys(ov.identity).length === 0) delete ov.identity;
+    }
     changed = true;
     console.log(`- suppress ${args.unsuppress}`);
   }
 
   if (typeof args.edit === 'string') {
     const slug = args.edit;
+    captureIdentity(ov, date, slug);
     const edit: StudyEdit = { ...(ov.edits?.[slug] ?? {}) };
     if (typeof args.tldr === 'string') edit.tldr = args.tldr;
     if (typeof args.name === 'string') edit.name = args.name;
