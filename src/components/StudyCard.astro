@@ -56,6 +56,10 @@ interface Props {
   // og:title + og:image. Absent → share button is not rendered. Absolutized at
   // click time in share-script.ts.
   shareUrl?: string;
+  // v0.51: true when THIS page IS /study/<slug>/, which already renders the
+  // long-form read below the card. Suppresses the "longer read" link so the
+  // card never points at the page it is already on.
+  standalone?: boolean;
   // v0.10: pre-resolved cross-cutting tag chips. Caller passes via
   // studyTagChips() so the label resolution happens where conference
   // context lives (meeting labels need digest.conference.name, which the
@@ -91,6 +95,7 @@ const {
   anchorId,
   authors = [],
   shareUrl,
+  standalone = false,
   tagChips = [],
   siblings = [],
   trialHistory = [],
@@ -548,6 +553,18 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       </div>
       <p class="significance-text" set:html={linkifyCitations(restingProse.text)} />
     </section>
+  )}
+  {/* v0.51: the long-form read is on /study/<slug>/ and NOTHING advertised it.
+      109 study pages carried a ~550-word interpretation while the date page —
+      the primary daily surface — had no href to a study page at all, only a
+      share URL. Generating that analysis and never surfacing it is the whole
+      cost with none of the benefit.
+
+      Placed directly after the at-rest prose, which is where a reader who wants
+      more has just run out of card, and rendered only when an interpretation
+      actually exists so it never promises a page that just repeats this one. */}
+  {!standalone && shareUrl && typeof study.interpretation === 'string' && study.interpretation.trim() && (
+    <a class="longform-link" href={shareUrl}>The longer read<span aria-hidden="true"> →</span></a>
   )}
   {/* v0.32: hidden per-specialty variants; the SpecialtyBar reveals the one the
       reader picks and hides the default. Server-rendered so each keeps citation
@@ -1538,6 +1555,21 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     line-height: 1.3;
   }
   /* TL;DR sheds its hero box when the endpoint block already leads the card. */
+  /* Quiet by design: it is an offer, not a call to action, and it sits inside
+     the 90-second scan the card exists to protect. Sans-serif + muted keeps it
+     legible as an affordance without competing with the result above it. */
+  .longform-link {
+    display: inline-block;
+    margin: 0 0 0.7rem;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+    color: var(--fg-muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1px;
+  }
+  .longform-link:hover { color: var(--accent); border-bottom-color: var(--accent); }
   .study-tldr--plain {
     background: transparent;
     border: none;
