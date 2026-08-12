@@ -2,6 +2,35 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.50.1] - 2026-08-11
+
+### Content
+- **Unpublished 2026-07-20**, a duplicate of 2026-06-10. Both dates carried a
+  single study — RTOG 0848 — built from the SAME JCO paper (same pub date
+  2026-06-09), ingested twice as two paper rows. Removed the later one, because
+  2026-06-10 is the paper's natural home; `find:dups` had suggested the
+  opposite on a plain later-date-wins rule.
+
+  Removed as a whole date rather than suppressed: the study was that date's
+  only content, and suppressing a day's only study leaves an orphaned headline.
+  Verified no dangling internal links (0 date links, 0 study links in `dist`);
+  the only other mention of the string was an unrelated `pub_date` field.
+
+- **Two of the three flagged "duplicates" were kept, deliberately.** Acting on
+  `find:dups` output unreviewed would have deleted real content:
+  - **SUPREMO** 07-07 is the trial result (10yr OS 81.4% vs 81.9%, PMRT omission
+    safe); 07-09 is an editorial CRITIQUE of it (chest-wall-only RT cut CW
+    recurrence 1.1% vs 2.5%, RNI prohibited). Different cards, different verdicts.
+  - **ARTO** 06-12 is the primary biochemical-response readout (92% vs 68.3%);
+    07-07 is the OS update (median NR vs 50 mo, HR 0.55) — exactly the case the
+    tool's own header warns is intentional.
+
+### Notes
+- Audited the 8 studies carrying no `interpretation`: every one is a tweet-only
+  source (179-4284 chars, no full text) and three are `review` content type.
+  That is precisely what the Phase 2 rules say to abstain on, so no action was
+  taken. The abstention rule is working as specified.
+
 ## [0.50.0] - 2026-08-11
 
 ### Fixed
