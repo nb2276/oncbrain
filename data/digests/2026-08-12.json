@@ -1,0 +1,479 @@
+{
+  "date": "2026-08-12",
+  "conference": null,
+  "generated_at": 1786608301638,
+  "digest": {
+    "top_line": "NSABP B-35 margin analysis: 10yr IBTR 5.6% vs 4.0% at 1mm (abs diff 1.6%), the largest randomised-trial dataset yet aimed at the 2mm DCIS threshold.",
+    "tldr": "Breast carried both: a margin-width read that puts the 2mm DCIS consensus in play (absolute IBTR gap only ~1.5% either side of the cutoff, all pts got WBI), and a heart-sparing-era dosimetry signal that shifts the cardiac constraint from mean heart dose (null, P=.99) to max LAD (≥12 Gy EQD2, sHR 1.81). Both are non-randomised secondary analyses.",
+    "sites": [
+      {
+        "disease_site": "breast",
+        "intro": "Two RT-planning questions: how much margin matters when every pt gets whole-breast irradiation, and which cardiac dose metric to constrain to now that mean heart dose is uniformly low.",
+        "studies": [
+          {
+            "name": "NSABP B-35 margin-width analysis",
+            "tldr": "10yr IBTR 5.6% vs 4.0% at 1mm cutoff (abs diff 1.6%), 5.3% vs 3.8% at 2mm (abs diff 1.5%).",
+            "details": [
+              "🔍 Secondary margin-width analysis of NSABP B-35, a double-blind RCT of tamoxifen vs anastrozole; N=3,104 postmenopausal HR+ DCIS enrolled 2003-2006",
+              "🔍 All pts had lumpectomy + whole-breast irradiation (boost optional) + 5yr endocrine therapy; margin data collected prospectively by participating pathologists",
+              "🔍 Two overlapping cohorts analyzed: 1mm cutoff (n=2,707) and closest-margin-measurement 2mm cutoff (n=2,546)",
+              {
+                "text": "📊 10yr cumulative incidence of IBTR by margin cutoff",
+                "table": {
+                  "columns": [
+                    "Cutoff",
+                    "Narrow margin",
+                    "Wider margin",
+                    "Absolute difference"
+                  ],
+                  "rows": [
+                    [
+                      "1 mm",
+                      "5.6% (n=502)",
+                      "4.0% (n=2,205)",
+                      "1.6%"
+                    ],
+                    [
+                      "2 mm",
+                      "5.3% (n=879)",
+                      "3.8% (n=1,667)",
+                      "1.5%"
+                    ]
+                  ]
+                }
+              },
+              "📐 The 1mm-cutoff difference was statistically significant per the authors; no HR or CI reported in source",
+              "📊 All-breast-cancer-events analyses (including contralateral) showed no statistically significant difference by margin width at either cutoff",
+              "⚠️ Endocrine arms pooled on the grounds that local recurrence did not differ between tamoxifen and anastrozole; margin comparison is non-randomised within the trial",
+              "⚠️ Narrow-margin groups are small relative to wide (502 vs 2,205 at 1mm), and re-excised pts carry their final margin, so the narrow group is enriched for those who could not be cleared",
+              "⚠️ Conference abstract (ASBrS 2025) reported via trade press; no peer-reviewed manuscript, no multivariable adjustment or per-cohort event counts in source",
+              "🔗 Current SSO/ASTRO/ASCO consensus sets 2mm as the DCIS threshold after BCS + WBI; this dataset is the largest randomised-trial population yet used to interrogate that number"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000078
+            ],
+            "slug": "nsabp-b35-margins",
+            "verdict": {
+              "soc_implication": "challenges-soc",
+              "rationale": "Prospectively collected margin data from a large RCT population directly contests the 2mm re-excision threshold, but the margin comparison itself is non-randomised and abstract-only.",
+              "audience": "Postmenopausal HR+ DCIS after lumpectomy, WBI and 5yr endocrine therapy"
+            },
+            "significance": "The RT-relevant read is that every patient here got whole-breast irradiation plus 5 years of endocrine therapy, so the 1.5% to 1.6% margin penalty is the residual after full adjuvant treatment. That gates transfer: it says nothing about a close margin when RT is omitted or refused, which is where the margin question actually bites.",
+            "monday_clinic": "In a postmenopausal woman with HR+ DCIS whose lumpectomy margin is under 2mm and who will complete whole-breast RT plus 5yr endocrine therapy, this argues re-excision buys little; it does not extend to premenopausal, HR-negative, or RT-omitted pts.",
+            "primary_endpoint": {
+              "name": "Cumulative incidence of ipsilateral breast tumor recurrence at 10 years",
+              "klass": "local-control",
+              "stat_value": "5.6% vs 4.0%",
+              "stat_detail": "1mm cutoff, absolute difference 1.6%; 2mm cutoff 5.3% vs 3.8%"
+            },
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Secondary margin-width analysis of **NRG Oncology/NSABP B-35**, a double-blind randomised trial of tamoxifen vs anastrozole that enrolled **3,104** postmenopausal women 2003-2006. Because local recurrence did not differ between the two endocrine arms, the arms were pooled and margin width analysed across the whole population. Margin data were collected **prospectively** by participating pathologists."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Postmenopausal women with **hormone receptor-positive DCIS** treated with lumpectomy. Two overlapping analysis cohorts: **n=2,707** with margins classifiable as <1mm (close/indefinite) vs ≥1mm, and **n=2,546** with the closest margin measured, permitting a **<2mm vs ≥2mm** cutoff."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "All patients received **whole-breast irradiation** with an **optional boost**. Dose, fractionation and boost uptake are not reported in the source, so the RT exposure behind these recurrence rates cannot be characterised beyond \"whole breast, boost optional\"."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary endpoint of interest: cumulative incidence of ipsilateral breast tumor recurrence** at 10 years, analysed at both the 1mm and 2mm cutoffs. A secondary analysis of **all breast cancer events**, including contralateral disease, was also performed."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The prevailing **2mm** threshold rests largely on the **SSO/ASTRO/ASCO** DCIS consensus, whose meta-analytic base drew heavily on series with variable and often absent adjuvant therapy. This analysis puts the same question to a uniformly irradiated, uniformly endocrine-treated randomised trial population, which is why the residual margin effect looks so much smaller."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents postmenopausal women with ER+/PR+ DCIS treated with lumpectomy, whole-breast irradiation and 5 years of adjuvant endocrine therapy. Does not represent premenopausal women, hormone receptor-negative DCIS, or anyone who will not receive both RT and endocrine therapy."
+              },
+              {
+                "label": "Limitations",
+                "body": "Margin width was **not randomised**, and patients re-excised on trial carry their final margin, so the narrow-margin group is enriched for disease that could not be cleared. Source reports no **hazard ratios, confidence intervals or event counts**, and no multivariable adjustment for grade, size, age or boost use."
+              },
+              {
+                "label": "Discussion",
+                "body": "The claim is that a **1.5% to 1.6%** absolute 10-year difference does not justify routine reoperation, which is a value judgment about the trade against anxiety, cosmesis and cost rather than a statistical one. The difference was **statistically significant** at the 1mm cutoff, so the argument turns on clinical meaningfulness, and a patient who weighs local recurrence heavily could reasonably read the same number differently."
+              }
+            ],
+            "interpretation": "The interesting thing about this analysis is not the effect size but the population it was measured in. The 2mm margin threshold for DCIS entered guidelines through a consensus process built on pooled series in which adjuvant treatment was heterogeneous: some patients irradiated, many not, endocrine therapy inconsistently given and inconsistently recorded. In that setting margin status is doing a lot of work, because it is one of the few levers acting on residual disease. B-35 is the opposite situation. Every woman received whole-breast irradiation, every woman was assigned 5 years of an endocrine agent, and the endocrine question was itself randomised. What the margin analysis therefore measures is the residual contribution of surgical clearance after two other effective local and systemic treatments have already been applied. A 1.6% absolute difference at 10 years is what is left over, and the honest reading is that it is small because the other two modalities absorbed most of the risk, not because margins are irrelevant.\n\nThat framing also sets the boundary of the result. A close margin in a woman who declines radiotherapy, or who is not a candidate for endocrine therapy, is a different question, and this dataset cannot speak to it. The commentary accompanying the presentation makes exactly this point, and it deserves more weight than it usually gets: in practice a meaningful fraction of DCIS lumpectomy patients do not complete both adjuvant treatments, and for them the pre-existing threshold logic still applies. The generalisation risk here runs in one direction, toward under-treating the patient who was never going to receive the full trilogy of therapy that makes the narrow margin safe.\n\nMethodologically the comparison is observational inside a randomised trial, which is a real limitation rather than a formality. Margin width was not assigned; it emerged from tumour biology, extent of disease and surgical judgment. Patients re-excised during the trial are counted at their final margin, so the group that remained under 1mm is enriched for disease that could not be cleared, which is plausibly a marker of extent rather than a simple measurement artefact. That biases toward showing a worse outcome in the narrow group, and the observed difference is still only 1.6%. The direction of the bias therefore strengthens rather than weakens the authors' conclusion. What is missing is the other half of the picture: no hazard ratios, no confidence intervals, no event counts, and no adjustment for grade, lesion size, age or whether a boost was delivered. Boost use in particular is worth knowing, because a surgeon confronting a close margin and a radiation oncologist adding a boost are two responses to the same problem, and if boost was preferentially given to the narrow-margin group then part of what is being measured is compensation rather than tolerance.\n\nThe difference at the 1mm cutoff was statistically significant, so the argument is explicitly about clinical meaningfulness rather than about whether an effect exists. That is a legitimate argument, and one that trades a real 1.5% to 1.6% against reoperation, poorer cosmesis, delay and cost. Different patients will price that trade differently, and this analysis is better understood as licensing a genuine conversation than as retiring the 2mm rule. Peer-reviewed publication with adjusted estimates, event counts and boost data would settle how much of the residual difference survives.",
+            "relevant_specialties": [
+              "radonc",
+              "surgonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Every patient here received whole-breast irradiation with an optional boost plus 5yr endocrine therapy, so 1.5% to 1.6% is the residual margin effect after full adjuvant treatment. Boost use by margin group is not reported in source, which matters: it determines whether a close margin was tolerated or quietly compensated.",
+              "surgonc": "A margin under 2mm carried a 10yr IBTR of 5.3% vs 3.8% for ≥2mm, an absolute 1.5% penalty, in the largest randomised-trial population yet examined. That directly gates the return-to-theatre decision, though margin width was not randomised and the narrow group is enriched for disease that could not be cleared."
+            },
+            "open_questions": [
+              "Does the finding hold when whole-breast RT is omitted?",
+              "Boost use and dose by margin group",
+              "Applicability to premenopausal or HR-negative DCIS"
+            ],
+            "consort": null,
+            "modality": "surgery",
+            "intent": "curative",
+            "methodology": "phase-3-rct",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT07554573",
+                "brief_title": "Assessment of Biosignature Classification of DCIS for RadioTherapy Benefit Post Lumpectomy (ABCD RT)",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 5270,
+                "primary_completion_date": "2039-07",
+                "brief_summary": "NRG-CC016 is being done to determine if omission of radiation therapy (RT) for patients with biosignature Low Risk (DCISionRT score less than 2.8) DCIS yields no clinically meaningful increase ipsilateral breast recurrence (IBR) compared to those treated with RT (Cohort A).",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Standard of Care Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "No Intervention",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* The patient or a legally authorized representative must provide study-specific informed consent prior to Step 1/Registration and, for patients treated in the U.S., authorization permitting release of personal health information.\n\nBreast and Disease Assessment\n\n* The patient…",
+                "answers_question": "Does the finding hold when whole-breast RT is omitted?",
+                "relevance_phrase": "randomises RT omission in biosignature-low DCIS"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "DCIS radiotherapy omission endocrine therapy",
+                "DCIS lumpectomy tumor bed boost",
+                "DCIS margin width premenopausal"
+              ],
+              "queries_failed": [
+                {
+                  "term": "DCIS margin width premenopausal",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 5,
+              "fetched_at": "2026-08-13T08:02:24.787Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 78
+              }
+            ]
+          },
+          {
+            "name": "Cardiac Risk After Heart-Sparing Breast Radiotherapy",
+            "tldr": "Max LAD ≥12 Gy EQD2: sHR 1.81 (1.04-3.16) for cardiac events; mean heart dose ≥2 Gy null (P=.99), 2223 left-sided pts.",
+            "details": [
+              "📊 10-yr cumulative incidence of cardiac event or CAD 5.0% (95% CI 4.1-6.0)",
+              {
+                "text": "📊 LAD vs whole-heart metrics, left-sided pts",
+                "table": {
+                  "columns": [
+                    "Metric",
+                    "Max LAD dose",
+                    "Mean heart dose"
+                  ],
+                  "rows": [
+                    [
+                      "Discrimination (C index)",
+                      "0.58 (95% CI 0.52-0.64)",
+                      "0.53 (95% CI 0.47-0.60)"
+                    ],
+                    [
+                      "Adjusted association",
+                      "≥12 Gy EQD2: sHR 1.81 (1.04-3.16), P=.04",
+                      "≥2 Gy: not associated, P=.99"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📐 12 Gy EQD2 max LAD threshold expressed as physical dose",
+                "table": {
+                  "columns": [
+                    "Schedule",
+                    "Physical max LAD dose"
+                  ],
+                  "rows": [
+                    [
+                      "42.5 Gy / 16 fx",
+                      "approx 10.5 Gy"
+                    ],
+                    [
+                      "26 Gy / 5 fx",
+                      "approx 7 Gy"
+                    ]
+                  ]
+                }
+              },
+              "🔍 Cross-sectional cohort, 4908 pts (2223 left-sided), 3D-CRT or IMRT 2008-2018, single Canadian tertiary center",
+              "🔍 Median f/u 10.8 yrs (IQR 8.4-13.1); Fine-Gray competing risks, adjusted for CV risk factors",
+              "⚠️ 12 Gy EQD2 cut point was data-driven within this same cohort; no external validation",
+              "⚠️ Mean heart dose null may reflect restricted range in a heart-sparing era, not absence of effect",
+              "⚠️ Endpoint folds angiography and revascularization into events, so ascertainment and access contribute",
+              "⚠️ Max point dose to a small, mobile, auto-segmented vessel is contouring- and motion-sensitive"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000077
+            ],
+            "slug": "lad-dose-cardiac-risk",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Cross-sectional single-center cohort with a cut point derived in the same data; C index 0.58 barely above chance and its interval overlaps mean heart dose's.",
+              "audience": "Left-sided breast cancer, 3D-CRT or IMRT, 2008-2018"
+            },
+            "significance": "The number that reaches the planning system is the physical-dose translation: 12 Gy EQD2 max LAD is about 10.5 Gy at 42.5 Gy/16 fx and 7 Gy at 26 Gy/5 fx. Discrimination was weak for both metrics (C index 0.58 vs 0.53), so this argues for adding an LAD max objective and motion management, not for retiring mean heart dose.",
+            "monday_clinic": "In left-sided breast cancer planned with 3D-CRT or IMRT, this supports carrying an LAD max objective alongside the usual heart constraint; it does not extend to right-sided disease, which sat outside the primary analysis.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**Cross-sectional cohort** of 4908 breast cancer pts treated with 3D-CRT or IMRT from 2008 to 2018 at one Canadian tertiary center, **2223 left-sided** in the primary analysis. Median follow-up **10.8 years** (IQR 8.4-13.1). Dosimetry auto-segmented from planning CT, converted to **EQD2**; competing-risks (Fine and Gray) regression adjusted for cardiovascular risk factors."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Breast cancer treated with 3-dimensional conformal or intensity-modulated RT, 2008 to 2018, with the primary analysis restricted to **left-sided** disease. Systemic cardiotoxic exposure (anthracycline, trastuzumab) is not reported in source."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "3D-CRT or IMRT across the heart-sparing era; LAD and heart **automatically segmented** and dose converted to EQD2. The threshold is a **max point dose** to the LAD, not a mean, and the reference schedules are moderate hypofractionation (42.5 Gy in 16 fx) and ultrahypofractionation (26 Gy in 5 fx)."
+              },
+              {
+                "label": "Endpoints",
+                "body": "Adverse cardiac events: MI, or admission / ED visit for unstable angina, arrhythmia, heart failure, pericarditis, myocarditis. Coronary angiography and revascularization captured separately as **CAD**. Discrimination compared by ROC **C index**, adjusted association by competing-risks regression."
+              },
+              {
+                "label": "Results",
+                "body": "10-year cumulative incidence of cardiac event or CAD was **5.0%** (95% CI 4.1-6.0). Metric-by-metric comparison is in the table above."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Current whole-heart constraints descend from population dose-response work on cohorts irradiated when incidental cardiac exposure was far higher (Darby, NEJM 2013), the era in which mean heart dose had usable spread. This is the modern counterpart of those series, and the reversal it reports is what you would expect if heart-sparing planning compressed mean heart dose below its discriminating range. The referenced schedules, 42.5 Gy in 16 fractions and 26 Gy in 5 fractions (FAST-Forward), are current practice, so the dosimetric translation transfers."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents left-sided breast cancer treated with 3D-CRT or IMRT in the heart-sparing era, with over a decade of follow-up. Does not represent right-sided disease (outside the primary analysis), proton or partial-breast cohorts, or pts planned before the dose ranges these metrics reflect."
+              },
+              {
+                "label": "Limitations",
+                "body": "The mean heart dose null is hard to separate from restricted range: a 2 Gy dichotomy inside a heart-sparing cohort may not span enough exposure for a gradient to show. The endpoint counts coronary angiography and revascularization, which track ascertainment and access as well as biology. Systemic cardiotoxic exposure is not reported in source, leaving an obvious confounder unaddressed."
+              },
+              {
+                "label": "Discussion",
+                "body": "The asymmetry that matters is cost: an LAD max objective plus breath-hold usually costs optimization time, not target coverage, so a weak association is enough to justify it, while it would not justify trading away chest wall or nodal coverage. The measurement problem cuts the other way, since a max point dose to a small mobile auto-segmented vessel is among the least reproducible quantities to write into a protocol. Motion management carries the least methodological baggage of the two recommendations: it lowers LAD dose and heart dose together."
+              }
+            ],
+            "interpretation": "The claim worth arguing about is not that LAD dose predicted events, it is that mean heart dose did not, in a cohort planned the way people plan now. The dose-response work anchoring current whole-heart constraints was built on women treated when incidental cardiac exposure was much higher and much more variable, and a metric's discriminating power depends on the spread of exposure in the sample where it is measured. Dichotomizing mean heart dose at 2 Gy inside a heart-sparing cohort leaves little room for a gradient to appear, so P=.99 is at least as consistent with compressed range as with the metric being biologically uninformative. The defensible conclusion is that whole-heart mean dose has run out of dynamic range in modern planning, not that whole-heart dose stopped mattering.\n\nThe discrimination numbers should temper the other direction just as hard. A C index of 0.58 (0.52-0.64) sits close to chance, and its interval overlaps the mean heart dose estimate (0.53, 0.47-0.60) across most of its width, so 'LAD discriminates better' is a direction rather than a demonstrated separation. The 12 Gy EQD2 threshold was found by cut point search in the same data that then produced the hazard estimate attached to it, which inflates both the apparent knee and the sHR of 1.81 whose lower bound is 1.04. Read as a hypothesis about where a threshold might sit, it is useful. Read as a constraint, it is untested outside one center.\n\nWhat makes it reasonable to act on anyway is the asymmetry of cost. The physical-dose translation the authors supply, near 10.5 Gy at 42.5 Gy in 16 fractions and 7 Gy at 26 Gy in 5 fractions, is usable at the workstation without further arithmetic, and in most left-sided plans holding LAD max beneath those values costs a breath-hold and some optimization time rather than target coverage. A weak association is enough to justify a nearly free intervention. It would not justify one that traded away chest wall or internal mammary coverage, and that boundary is where an LAD objective should stop.\n\nThe real counterweight is measurement. A maximum point dose to a small, mobile, automatically segmented vessel is close to the least reproducible quantity a planning protocol can specify: it is sensitive to contour propagation error, to cardiac and respiratory motion during delivery, and to whether the planning CT caught the vessel in a representative position. Mean heart dose earned its place partly by being insensitive to all of that. Writing an LAD max constraint into practice without first standardizing delineation risks importing that noise into QA, which is why the motion-management half of the recommendation rests on firmer ground than the constraint half: it lowers LAD dose and heart dose together.\n\nTwo things would make this wrong. If higher LAD dose tracks unfavorable chest wall and cardiac anatomy, and that anatomy also tracks baseline cardiovascular risk, residual confounding survives adjustment for recorded risk factors. And nothing here is randomized, so whether lowering LAD dose lowers events remains an extrapolation, not a finding.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The actionable number is the physical-dose translation: 12 Gy EQD2 max LAD is about 10.5 Gy at 42.5 Gy/16 fx and 7 Gy at 26 Gy/5 fx, both checkable at the workstation. Discrimination was weak for both metrics (C index 0.58 vs 0.53), so this adds an LAD max objective and breath-hold rather than retiring the heart constraint."
+            },
+            "open_questions": [
+              "External validation of the 12 Gy EQD2 LAD cut point",
+              "Whether LAD-directed planning prospectively lowers cardiac events",
+              "Generalizability to regional nodal irradiation and 5-fraction schedules"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "retrospective",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT07299812",
+                "brief_title": "BRAVE-HEART: Breast Cancer Radiotherapy Using Active Breathing Coordinator to aVoid Exposure of HEART",
+                "overall_status": "RECRUITING",
+                "phase": null,
+                "enrollment_count": 400,
+                "primary_completion_date": "2026-04",
+                "brief_summary": "The BRAVE-HEART trial is an ambispective, observational, non-randomized study conducted at Fondazione IRCCS (Istituto di Ricovero e Cura a Carattere Scientifico) Policlinico San Matteo (Pavia, Italy). It aims to document and quantify the cardiac dose reduction achievable with breast radiotherapy performed in Deep Inspiration Breath Hold (DIBH) using the Active Breathing Coordinator (ABC) system. Dosimetric parameters from DIBH treatments are evaluated, with free-breathing treatment plans and…",
+                "conditions": [
+                  "Breast Cancer",
+                  "Radiotherapy"
+                ],
+                "interventions": [
+                  {
+                    "name": "Breast Radiotherapy with or without Deep Inspiration Breath Hold (DIBH)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Diagnosis of stage I-III breast carcinoma with an indication for radiotherapy\n* Invasive carcinoma or ductal carcinoma in situ (DCIS)\n* Radiotherapy delivered using three-dimensional conformal radiotherapy (3D-CRT) or intensity-modulated/volumetric modulated arc therapy…",
+                "answers_question": "Whether LAD-directed planning prospectively lowers cardiac events",
+                "relevance_phrase": "DIBH vs free-breathing cardiac dose, paired plans"
+              },
+              {
+                "nct": "NCT07537712",
+                "brief_title": "Proton vs Photon IMRT Toxicity in Breast Cancer",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": null,
+                "enrollment_count": 750,
+                "primary_completion_date": "2027-12",
+                "brief_summary": "This study aims to compare the differences in acute and long-term toxicities between intensity-modulated proton therapy (IMPT) and intensity-modulated photon radiotherapy (IMRT/VMAT) in postoperative breast cancer patients, with a focus on evaluating their impact on critical organs, including the heart, lungs, skin, esophagus, thyroid, and lymphatic tissues. Eligible patients will be followed for at least one year to assess the incidence and severity of both acute and late toxicities, as well…",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Intensity-modulated photon radiotherapy (IMRT/VMAT)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Intensity-modulated proton therapy (IMPT)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Female patients aged ≥18 years.\n2. Pathological diagnosis of invasive breast cancer or ductal carcinoma in situ.\n3. Undergone breast-conserving surgery or total mastectomy, with or without stage I breast reconstruction.\n4. For invasive carcinoma, sentinel lymph node biopsy,…",
+                "answers_question": "Whether LAD-directed planning prospectively lowers cardiac events",
+                "relevance_phrase": "IMPT vs IMRT/VMAT, cardiac toxicity endpoint"
+              },
+              {
+                "nct": "NCT04320979",
+                "brief_title": "Postmastecomy Internal Mammary Nodal Irradiation for High-risk Breast Cancer Patients",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 2400,
+                "primary_completion_date": "2025-11",
+                "brief_summary": "The purpose of this study is to evaluate the impact of internal mammary nodal irradiation on disease-free survival in high-risk breast cancer patients treated with mastectomy or breast-conserving surgery.",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "internal mammary nodal irradiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "no internal mammary nodal irradiation",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Eastern Cooperative Oncology Group Performance Status Scale 0-2\n* Histologically confirmed invasive breast cancer\n* Underwent total mastectomy/breast-conserving surgery and axillary dissection(10 or more axillary lymph nodes detected) and negative margins\n* Patients who had…",
+                "answers_question": "Generalizability to regional nodal irradiation and 5-fraction schedules",
+                "relevance_phrase": "phase 3 IMN irradiation vs none, n=2400"
+              },
+              {
+                "nct": "NCT06559540",
+                "brief_title": "Ultra-Hypofractionated vs. Hypofractionated Radiation for Node-Positive Breast Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 220,
+                "primary_completion_date": "2034-04",
+                "brief_summary": "In breast cancer patients with nodal involvement, numerous studies have demonstrated that adjuvant radiation therapy reduces the risk of local recurrence, regional recurrence, and distant metastases, in addition to improving survival. The dose and fractionation for adjuvant breast radiation therapy has evolved over time, as novel schedules have been compared to the current standard of care. Hypofractionated radiation therapy (266 cGy per fraction x 15-16 fractions over 3 weeks) has been shown…",
+                "conditions": [
+                  "Node-positive Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Hypofractionated radiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Ultra-hypofractionated breast/chest wall and regional nodal radiation",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed invasive carcinoma of the breast. Metaplastic breast cancer is allowed.\n* AJCC 8th Edition Stage: cT1-3 primary tumor. cN1-2 or pN1-2.\n* Biopsy-proven involved axillary node(s) (either at baseline and/or at time of surgery).\n* Undergone either partial…",
+                "answers_question": "Generalizability to regional nodal irradiation and 5-fraction schedules",
+                "relevance_phrase": "randomised ultra-hypofx vs hypofx with nodal RT"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "LAD dose breast radiotherapy",
+                "cardiac sparing breast radiotherapy",
+                "regional nodal irradiation cardiac"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 19,
+              "fetched_at": "2026-08-13T08:04:42.557Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 77
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      }
+    ],
+    "meta": {
+      "clusters_total": 2,
+      "studies_analyzed": 2,
+      "dropped": [],
+      "ocr_available": true
+    }
+  },
+  "bookmarks": [],
+  "papers": [
+    {
+      "id": 78,
+      "pmid": null,
+      "doi": null,
+      "pmc_id": null,
+      "title": "Revisiting Margin Width Guidelines for Ductal Carcinoma In Situ and the Role of Routine Reexcision",
+      "authors": [],
+      "journal": "The ASCO Post",
+      "pub_date": null,
+      "abstract": "For postmenopausal women with HR-positive ductal carcinoma in situ (DCIS) treated with breast-conserving surgery, whole-breast irradiation, and adjuvant endocrine therapy, reexcision to achieve wider ...",
+      "pdf_path": null,
+      "source_url": "https://ascopost.com/issues/june-10-2025/revisiting-margin-width-guidelines-for-dcis-and-the-role-of-routine-reexcision/",
+      "note": "https://ascopost.com/issues/june-10-2025/revisiting-margin-width-guidelines-for-dcis-and-the-role-of-routine-reexcision/",
+      "resolved_from_review": false
+    },
+    {
+      "id": 77,
+      "pmid": "42390858",
+      "doi": "10.1001/jamaoncol.2026.2066",
+      "pmc_id": "PMC13329741",
+      "title": "Cardiac Risk After Heart-Sparing Breast Radiotherapy.",
+      "authors": [
+        "Quirk",
+        "Atkins",
+        "Logie",
+        "Miller",
+        "Guthier",
+        "Mak",
+        "Warren",
+        "Ramin",
+        "Al-Rashdan",
+        "Wright",
+        "Roumeliotis"
+      ],
+      "journal": "JAMA oncology",
+      "pub_date": "2026-07-02",
+      "abstract": "IMPORTANCE: Radiotherapy for breast cancer exposes the heart to incidental radiation, and historical data have shown a dose-dependent increase in associated cardiac events. Although whole-heart dose metrics are commonly used for risk assessment, emerging evidence suggests that dose to the left anterior descending coronary artery (LAD) may better capture risk.\n\nOBJECTIVE: To compare the ability of heart and LAD radiation dose metrics to predict cardiac risk after breast radiotherapy.\n\nDESIGN, SETTING, AND PARTICIPANTS: This was a cross-sectional study of patients with breast cancer who were treated with either 3-dimensional conformal or intensity-modulated radiotherapy from 2008 to 2018 at a tertiary care center in Canada. The primary analysis included patients with left-sided breast cancer. Cardiac events were assessed using longitudinal follow-up data. Dosimetry was derived from computed tomography plans using automated segmentation and converted to equivalent dose in 2-Gy fractions (EQD2). Data were analyzed from September 2024 to April 2026.\n\nMAIN OUTCOMES AND MEASURES: Adverse cardiac events defined as myocardial infarction or hospital admission or emergency department visit for unstable angina (ie, acute coronary syndrome), arrhythmia, heart failure, pericarditis, or myocarditis. The incidence of coronary angiography and coronary revascularization was also captured as coronary artery disease (CAD). Discrimination for dose metrics was performed with receiver operator characteristic curves and competing-risks regression (Fine and Gray), adjusted for cardiovascular risk factors.\n\nRESULTS: The analysis included 4908 patients with breast cancer of whom 2223 had left-sided breast cancer. During a median (IQR) follow-up period of 10.8 (8.4-13.1) years, cumulative incidence of cardiac event or CAD was 5.0 (95% CI, 4.1-6.0) at 10 years. A data-driven cut point analysis identified 12 Gy EQD2 as the maximum LAD dose that best stratified risk. Among patients with left-sided breast cancer, maximum LAD dose (concordance [C] index, 0.58; 95% CI, 0.52-0.64) discriminated better than mean heart dose (C index, 0.53; 95% CI, 0.47-0.60). In multivariable analysis, maximum LAD of 12 Gy or greater was independently associated with higher cardiac risk (subdistribution hazard ratio = 1.81; 95% CI, 1.04-3.16; P = .04), whereas mean heart dose of 2 Gy or greater was not associated (P = .99). For clinical context, the 12-Gy EQD2 for maximum LAD dose corresponds to a physical dose of approximately 10.5 Gy for 42.5 Gy in 16 fractions and 7 Gy for 26 Gy in 5 fractions.\n\nCONCLUSIONS AND RELEVANCE: In this cross-sectional study of heart-sparing breast radiotherapy, LAD dose was associated with cardiac events, whereas whole-heart metrics was not. These findings support LAD-based planning and respiratory motion management to reduce long-term cardiovascular risk in patients with breast cancer undergoing radiotherapy.",
+      "pdf_path": null,
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    }
+  ]
+}
