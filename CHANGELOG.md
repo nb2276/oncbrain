@@ -2,6 +2,104 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.53.0] - 2026-08-16
+
+### Added
+- **A trial that comes back is now classified, not just flagged.** The pipeline
+  had exactly one response to a trial the digest already covered — a "previously
+  covered" DM offering to drop one card — which collapsed three different
+  situations into one. The build now tells them apart:
+
+  - **update** — the same objective, matured. An ASTRO abstract becomes a JAMA
+    paper; follow-up doubles; the estimate moves. The newer reading publishes
+    today with a `supersedes` line back to the earlier one.
+  - **new card** — a different objective. NRG-GU005 published its quality-of-life
+    results and its co-primary efficacy results as two papers. Those are two
+    findings a subspecialist reads differently, and folding them into one card
+    splices two headline numbers together. Phase 1 now splits them.
+  - **duplicate** — the same reading again, nothing new.
+
+  An LLM extracts a closed enum (`report_facet`, `maturity`, `followup_months`,
+  the trial's own acronyms) at enrichment; every branch downstream is plain code,
+  so the verdict is testable and a model returning nonsense abstains rather than
+  acting. Same split as the figure grounding gate.
+
+- **Auto-suppression is DEFAULT OFF** (`TRIAL_LINEAGE_AUTOSUPPRESS=on` enables).
+  Lineage detects, links and asks; a human authorizes removal. Evidence and
+  permission are separate: `gateAuthorized` says the evidence sufficed,
+  `autoSuppress` says whether the build may act. A flag grants permission, never
+  evidence — an evidence refusal stays refused with the flag on.
+
+  Off by default because five adversarial review rounds each found a new route to
+  a wrongful unpublish, and the guards that closed them (shared registration,
+  named and equal endpoints, known and non-regressing maturity AND follow-up, one
+  substantive source per card, full facet classification) leave the path so
+  narrow it rarely fires anyway. Better a stated policy than "safe because six
+  preconditions rarely align."
+
+- **The curator DM names anything that was removed or proposed for removal**, and
+  offers a one-reply `drop` ONLY where a human can legitimately authorize it: an
+  identity gap they can resolve by reading both cards, or a policy hold where the
+  evidence already passed. Never for an evidence refusal.
+
+### Fixed
+- **A source could enrich successfully and never publish.** The rebuild queue
+  fired only when a collision merged content into an ALREADY-PUBLISHED date, and
+  the real failure misses on both counts: a paper whose enrichment finally
+  succeeds days after ingestion keeps its original `bookmark_date`, so it is
+  created fresh on a date the two-day build window has passed. The organs-at-risk
+  dose-constraints paper survived three submissions this way — sent 08-09 (the
+  URL 403'd), re-sent 08-10 as a PDF whose enrichment failed twice and only
+  landed on 08-13, by which point no build would target 2026-08-10 again.
+  Enrichment now queues any source landing outside the build window, on all three
+  paths (papers, slides, and tweets, which had no queueing at all). Publishing
+  2026-08-10 recovered two stranded studies.
+
+- **`savePaper` reported no date for a row it had just inserted**, silently
+  disabling that queue guard for exactly the newly-created papers it was for.
+
+- **The drain could delete a rebuild request it should have honoured.** The cron
+  builds yesterday, then today — and today's lineage pass can queue yesterday
+  AFTER yesterday was built. `--skip` treated that as "already rebuilt".
+
+- **A hand-edited override could abort the nightly build.** `'source_ids' in id`
+  throws a TypeError on a primitive, so `identity: { slug: "corrupt" }` killed
+  `build:day` outright. Malformed identity now fails closed instead.
+
+- **A `drop` reply skipped every guard.** Suppression grew an elaborate gate and
+  all of it sat upstream of `executeDedupDrop`, which wrote the override
+  directly. Manual drops now refuse to empty a date (counting cards a previous
+  override already hid) and record the target's identity, so the override
+  survives the rename that suppressing causes. The evidence gate deliberately
+  does NOT apply — a curator sees what the classifier cannot.
+
+- **An override could hide the wrong card.** Suppressing removes it from the
+  artifact, so the next rebuild renames the survivors and a vacated slug can be
+  inherited by a sibling. Overrides now record source rows, and provenance
+  filters every match rather than breaking ties — a live slug is not proof of
+  identity. Slides are excluded from the comparison, so a late conference photo
+  cannot invalidate an override and fail the publish.
+
+- **A suppression could orphan the day's headline.** Phase 3 writes `top_line`
+  over every study Phase 2 produced and overrides apply afterwards by design, so
+  dropping a card can leave the day led by a number no surviving card carries.
+  The build now warns and names the orphaned figures.
+
+### Notes
+- Every destructive path consults one function, `suppressionBlockers()`, which
+  reports ALL failing preconditions rather than the first. Short-circuiting meant
+  a pair that also failed on maturity was labelled an identity gap — and that is
+  the label the DM treats as human-resolvable, so mislabelling one blocker as
+  another was a hole through the whole gate.
+- The endpoint is compared before maturity or follow-up can call something an
+  update. An overall-survival hazard ratio is not an update of a
+  progression-free-survival one, and no amount of added maturity makes it one.
+- Unknown is never treated as equal: an unnamed endpoint, an unknown maturity or
+  an unknown follow-up each block a removal on their own.
+- Phase 1 splits a trial's separate REPORTS, not details within one report. A
+  subgroup discussed inside a single report stays with its parent card; the
+  eval's clustering axis holds at 9.0.
+
 ## [0.52.0] - 2026-08-11
 
 ### Changed

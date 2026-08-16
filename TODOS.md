@@ -88,6 +88,31 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 - **Review consistency on secondary surfaces (v0.16 ship review — red-team + adversarial).** **Priority: P3.** A `content_type:review` reads as a 🗞️ press round-up on the date / site / tag pages (shared `railEmojiForStudy`) but four other study surfaces don't yet distinguish it: (1) the home `RecentFeed` shows the disease-site emoji (it deliberately flags only practice-changing with 🚀 — decide whether a review warrants its own marker there); (2) the Telegram channel post (`channel-post.ts`) renders a neutral bullet; (3) the OG / share-image (`share-image.ts`, `og/study/[date]/[slug].png.ts`) shows no review marker; (4) the Obsidian vault twin (`renderObsidian`) omits the `discussed_trials` list + review framing, so a review note is a bare verdict-less study. All are **design/scope judgments, not bugs** — the web milestone is intentionally first. Decide per-surface whether to mirror the review treatment (consider exporting `REVIEW_GLYPH` everywhere) or document it as web-only.
 - **Harden v0.16 trade-press classification + extraction (ship adversarial + codex structured review).** **Priority: P3.** Three non-blocking robustness items surfaced at ship: (a) **Ground `discussed_trials` against the source text** (codex review P2 #2) — currently the cap/length/charset filter accepts any 2–40-char alphanumeric token, so a hallucinated acronym renders verbatim; add a word-boundary case-insensitive check that each retained acronym appears in the cluster's source text + image OCR before persisting (must include OCR-only sources + handle `STOMP/ORIOLE` slash-joined spellings so it doesn't drop legit names — needs its own real-build verify). (b) **Make `content_type` curator-overridable** (codex adversarial) — `content_type`/`discussed_trials` are not in `EDITABLE_STUDY_KEYS` (`digest-overrides.ts`), so a Phase-1 misclassification can't be durably corrected and `stripReviewVerdicts` re-strips the verdict every rebuild; add a durable override path (and skip the strip when a curator pins `content_type:study_report`). (c) **Warn on an invalid (non-empty) `content_type`** from a live Phase-1 response so a model typo that silently falls open to `study_report` is observable rather than silent. **Context:** eng plan `docs/plans/trade-press-format.md`; the conservative `study_report` default is deliberate (back-compat), so (a)/(c) tighten without changing the default.
 
+## Trial lineage (v0.53 follow-ups)
+
+- **Gate the enrich-time prior-coverage DM.** **Priority: P1.** `notifyPriorCoverage`
+  (v0.26) offers a `drop <date>/<slug>` reply on ANY raw NCT/acronym prior-coverage
+  hit, with no facet, endpoint or maturity check — it predates lineage and knows
+  nothing about it. The handler is now safe (empty-day guard + identity recording
+  apply to every drop), so this is about not PROPOSING a removal the evidence gate
+  would refuse. The build-time DM already does this correctly via the structured
+  `droppable` flag; this one should reuse it. (v0.53 codex round 5)
+- **Only count a paper's OWN registration as corroborating.** **Priority: P2.**
+  `corroborated` harvests NCTs from source title+abstract, so a comparator
+  registration printed in an abstract could in principle authorize a suppression.
+  Needs distinguishing a paper's own trial registration from ones it cites.
+  Much less reachable with auto-suppress default-off. (v0.53 codex rounds 2-5)
+- **Make the suppression + successor artifact write transactional.** **Priority: P2.**
+  Overrides and the rebuild queue entry are written BEFORE the successor artifact.
+  If that write fails, the predecessor can come down while the replacement never
+  publishes. Also `auto_dropped` means "suppression queued", not "completed" — a
+  failed queued rebuild leaves the predecessor live while the successor says
+  otherwise. (v0.53 codex rounds 3-4)
+- **Re-run the destructive path through review before enabling the flag.**
+  **Priority: P1 (gate).** `TRIAL_LINEAGE_AUTOSUPPRESS=on` should not be set until
+  the two items above are closed and a clean adversarial round is on record.
+  (v0.53)
+
 ## Known limitations (informational — not on a roadmap)
 
 - **Three traps when auditing the corpus by hand against the DB.** (1) `source_ids[].type` is `tweet`, NOT `bookmark`, so keying on the wrong string silently yields EMPTY source text and every number reads as ungrounded. (2) The bookmarks OCR column is `image_ocr_texts` (plural). (3) Stored abstracts encode the middle dot as `&#xb7;`, which `normalizeNumericText` does not decode. All three produced false "ungrounded" verdicts while verifying v0.48 arm outcomes.
