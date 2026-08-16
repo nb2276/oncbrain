@@ -97,3 +97,77 @@ describe('executeDedupDrop', () => {
     expect(ov.suppress.filter((s: string) => s === 'radiosa')).toHaveLength(1);
   });
 });
+
+// The OTHER door. Trial lineage grew an evidence gate for automatic
+// suppression, and every guard sat upstream of executeDedupDrop — which wrote
+// the override directly, so a `drop` reply reached the same destructive end with
+// none of them applied. The two STRUCTURAL invariants now apply here too. (The
+// evidence gate deliberately does not: a curator can see what the classifier
+// cannot, and the machine's job is to make an honest offer, not to overrule.)
+describe('executeDedupDrop enforces the structural guards', () => {
+  let db: ReturnType<typeof openDb>;
+  let dir: string;
+  beforeEach(() => {
+    db = openDb(':memory:');
+    dir = mkdtempSync(join(tmpdir(), 'oncbrain-drop-'));
+  });
+  afterEach(() => rmSync(dir, { recursive: true, force: true }));
+
+  const study = (slug: string, name: string, ids: number[], nct: string | null = null) => ({
+    slug,
+    name,
+    nct,
+    source_ids: ids.map((id) => ({ type: 'paper', id })),
+  });
+  const artifact = (...studies: ReturnType<typeof study>[]) => ({ digest: { sites: [{ studies }] } });
+
+  it('REFUSES to remove a date’s last published card', () => {
+    // An empty day leaves a headline describing studies the page no longer
+    // renders. That is not a preference to override by replying to a DM.
+    const r = executeDedupDrop(db, { date: '2026-07-08', slug: 'only' }, {
+      lookupDigest: () => artifact(study('only', 'Only Card', [1])),
+      overridesDir: dir,
+    });
+    expect(r.ok).toBe(false);
+    expect(r.message).toMatch(/last card still published/);
+    expect(existsSync(join(dir, '2026-07-08.json'))).toBe(false);
+    expect(listRebuildQueue(db)).toHaveLength(0);
+  });
+
+  it('counts cards a previous override already hid', () => {
+    writeFileSync(join(dir, '2026-07-08.json'), JSON.stringify({ suppress: ['b'] }));
+    const r = executeDedupDrop(db, { date: '2026-07-08', slug: 'a' }, {
+      lookupDigest: () => artifact(study('a', 'Card A', [1]), study('b', 'Card B', [2])),
+      overridesDir: dir,
+    });
+    expect(r.ok).toBe(false);
+    expect(r.message).toMatch(/last card still published/);
+  });
+
+  it('records the target’s identity so the override survives the rename it causes', () => {
+    // Suppressing removes the card from the artifact, so the next rebuild cannot
+    // hold its slug — and a vacated slug can be inherited by a sibling card, at
+    // which point a slug-only override hides the wrong study.
+    const r = executeDedupDrop(db, { date: '2026-07-09', slug: 'a' }, {
+      lookupDigest: () => artifact(study('a', 'Card A', [44], 'NCT12345678'), study('b', 'Card B', [43])),
+      overridesDir: dir,
+    });
+    expect(r.ok).toBe(true);
+    const ov = JSON.parse(readFileSync(join(dir, '2026-07-09.json'), 'utf8'));
+    expect(ov.suppress).toEqual(['a']);
+    expect(ov.identity.a).toEqual({
+      nct: 'NCT12345678',
+      name: 'Card A',
+      source_ids: [{ type: 'paper', id: 44 }],
+    });
+  });
+
+  it('still drops normally when the date keeps other cards', () => {
+    const r = executeDedupDrop(db, { date: '2026-07-09', slug: 'a' }, {
+      lookupDigest: () => artifact(study('a', 'Card A', [1]), study('b', 'Card B', [2])),
+      overridesDir: dir,
+    });
+    expect(r.ok).toBe(true);
+    expect(listRebuildQueue(db)).toHaveLength(1);
+  });
+});
