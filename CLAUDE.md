@@ -314,6 +314,20 @@ TODOS.md                   deferred work tracker (seeded from CHANGELOG "Not yet
 
 ## Operational notes
 
+- **Trial lineage auto-suppress is DEFAULT OFF** (`TRIAL_LINEAGE_AUTOSUPPRESS=on` enables;
+  `TRIAL_LINEAGE=off` disables the whole pass). When a trial the digest already covered comes
+  back, the build classifies it `update` / `new-card` / `duplicate`, stamps a `supersedes` link
+  on the new card, and DMs the curator — but it does **not** unpublish the earlier card unless
+  the flag is on. The evidence gate (`suppressionBlocker` in `src/lib/trial-lineage.ts`) and the
+  permission to act on it are separate: `gateAuthorized` says the evidence sufficed,
+  `autoSuppress` says whether the build may act. That split is load-bearing — the curator DM
+  offers a one-reply `drop <date>/<slug>` **only** for an identity gap or a policy hold, never
+  for an evidence refusal, because `executeDedupDrop` suppresses without consulting the gate.
+  Default-off is deliberate: four adversarial review rounds each found a new route to a wrongful
+  unpublish, and the guards that closed them (shared NCT, named + equal endpoints, non-regressing
+  and known maturity AND follow-up, one substantive source per card, full facet classification)
+  leave the path so narrow it rarely fires anyway — `followup_months` alone is absent from most
+  sources. Better a stated policy than "safe because six preconditions rarely align."
 - **Working dir is in Dropbox** (`/Users/nboehling/Library/CloudStorage/Dropbox/dev/oncbrain`). `node_modules` and `dist` are `xattr com.dropbox.ignored` to avoid sync churn. Reapply if reinstalling. If this directory is renamed, re-run `npm run cron:install` — the launchd plist bakes the absolute path, so a rename without reinstall silently breaks the 1am cron.
 - **Local DB** (`oncbrain.db`) is gitignored. Phone-bookmarking is via Telegram bot, NOT remote DB — admin runs locally only.
 - **Cron** at 1am Pacific via launchd (early enough that its claude-cli usage clears the rolling 5-hour subscription window before the morning). If Mac is asleep, pmset wake at 00:55 is required.

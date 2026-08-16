@@ -99,7 +99,20 @@ export type DigestOverrides = {
   // (v0.45.1) and three suppressions republished hidden duplicates (v0.49.0).
   // Recorded by the CLI when the override is written; absent on older sidecars,
   // which keep working by slug alone.
-  identity?: Record<string, { nct?: string | null; name?: string }>;
+  // `source_ids` is the strongest of the three and the reason the other two are
+  // not enough. Trial lineage suppresses a superseded card automatically, and
+  // the moment it does, that card leaves the published artifact — so the NEXT
+  // rebuild cannot hold its slug and renames it, and the override goes stale.
+  // Name matching cannot save it either once one trial has two cards: splitting
+  // NRG-GU005 into a disease-free-survival card and a quality-of-life card gave
+  // both the same studyDedupKey, so the acronym pass matched two studies, and an
+  // ambiguous match is correctly refused. Provenance is what actually identifies
+  // a card — the same source rows are the same card — which is the identity
+  // slug persistence already uses.
+  identity?: Record<
+    string,
+    { nct?: string | null; name?: string; source_ids?: { type: string; id: number }[] }
+  >;
 };
 
 export type OverrideSummary = {
@@ -132,6 +145,12 @@ export type OverrideSummary = {
   relatedTrialsMissing: string[];
   relatedTrialsWarnings: string[];
 };
+
+// Prefix for an override key whose recorded identity did not resolve. Contains a
+// NUL, so it can never collide with a slug.
+const UNRESOLVED = '\u0000unresolved:';
+export const stripUnresolved = (k: string): string =>
+  k.startsWith(UNRESOLVED) ? k.slice(UNRESOLVED.length) : k;
 
 export function overridesPath(date: string, dir = 'data/overrides'): string {
   return resolve(dir, `${date}.json`);
@@ -471,13 +490,85 @@ export function applyOverrides(
   ): Record<string, T> {
     const out: Record<string, T> = {};
     for (const [key, value] of Object.entries(table)) {
-      if (live.has(key)) {
-        out[key] = value;
-        continue;
-      }
       const id = identity[key];
-      const wantNct = typeof id?.nct === 'string' ? id.nct.trim().toUpperCase() : '';
-      const wantKey = id?.name ? studyDedupKey(id.name) : null;
+      // Malformed sidecar JSON must never throw inside build:day — an override
+      // file is hand-editable, and a bad entry has to degrade to "unmatched",
+      // which the caller already reports, not to a failed nightly publish.
+      // Malformed identity fails CLOSED: an entry missing a string type or an
+      // integer id is dropped, and `{type:'paper', id:'44'}` must not match
+      // numeric source 44 through string interpolation.
+      // Distinguish ABSENT legacy provenance from PRESENT-BUT-INVALID. A
+      // non-array value (`"corrupt"`, an object, a number) used to collapse to
+      // [] and read as "no provenance recorded", which then took the live-slug
+      // shortcut and suppressed whoever holds that slug now.
+      // `in` throws a TypeError on a primitive, and an override sidecar is
+      // hand-editable — `identity: { key: "corrupt" }` aborted the whole nightly
+      // build:day. Narrow to an object first. A non-object entry, or an explicit
+      // null source_ids, is PRESENT-BUT-INVALID, which must fail closed rather
+      // than read as "legacy, no provenance recorded" and take the live-slug
+      // shortcut.
+      const idIsObject = typeof id === 'object' && id !== null;
+      const entryMalformed = id !== undefined && !idIsObject;
+      const provenancePresent =
+        entryMalformed || (idIsObject && 'source_ids' in id && id.source_ids !== undefined);
+      const rawSources = idIsObject && Array.isArray(id.source_ids) ? id.source_ids : [];
+      const wantSources = rawSources.filter(
+        (s): s is { type: string; id: number } =>
+          !!s &&
+          typeof s === 'object' &&
+          typeof (s as { type?: unknown }).type === 'string' &&
+          Number.isInteger((s as { id?: unknown }).id),
+      );
+      // A recorded entry we could not parse means the identity is incomplete, so
+      // refuse to act on it rather than match on the surviving subset.
+      const identityCorrupt =
+        entryMalformed ||
+        rawSources.length !== wantSources.length ||
+        (provenancePresent && !Array.isArray(idIsObject ? id.source_ids : undefined));
+      const want = new Set(wantSources.map((s) => `${s.type}:${s.id}`));
+      // EQUALITY, not overlap. `.some()` let a regenerated card built from
+      // [paper:44, paper:43] match an override recorded for [paper:44] alone —
+      // so a Phase 1 merge could hand the suppression a card carrying an
+      // unrelated second objective, and take that finding down with it. The card
+      // the override was written against is the card with exactly those sources.
+      // Slides are excluded from the comparison on BOTH sides. A conference
+      // slide can arrive for a past date long after the card was built, turning
+      // [paper:44] into [paper:44, slide:7]; under whole-set equality that
+      // silently invalidated the override, and an unmatched suppress is FATAL to
+      // build:day — so one late photo could fail the nightly publish. Lineage
+      // already treats a slide as non-substantive, and this agrees with it.
+      const substantive = (refs: { type: string; id: number }[]): Set<string> =>
+        new Set(refs.filter((r) => r.type !== 'slide').map((r) => `${r.type}:${r.id}`));
+      const wantSubstantive = substantive(wantSources);
+      const provenanceHit = (st: DigestStudy): boolean => {
+        const have = substantive(st.source_ids ?? []);
+        return (
+          have.size === wantSubstantive.size && [...wantSubstantive].every((k) => have.has(k))
+        );
+      };
+
+      // A LIVE slug is not proof of identity when provenance says otherwise.
+      //
+      // This used to short-circuit on `live.has(key)` alone, and that is unsafe
+      // precisely because lineage now creates two cards per trial: suppressing a
+      // card removes it from the artifact, the next rebuild renames the survivor,
+      // and the vacated slug can be REUSED by the sibling card. The override then
+      // hid whichever study happened to hold the old slug — the quality-of-life
+      // card instead of the disease-free-survival one. When provenance is
+      // recorded it must agree; when it disagrees, fall through and re-resolve.
+      // Corrupt identity is NOT a licence to trust the slug. It used to short
+      // through here, which is backwards: an override whose recorded identity we
+      // cannot parse is exactly the one we cannot verify points at the right
+      // card, and the slug it names may since have been inherited by a sibling.
+      if (live.has(key) && !identityCorrupt) {
+        const holder = studies.find((st) => slugOf(st) === key);
+        if (wantSubstantive.size === 0 || !holder || provenanceHit(holder)) {
+          out[key] = value;
+          continue;
+        }
+      }
+      const wantNct = idIsObject && typeof id.nct === 'string' ? id.nct.trim().toUpperCase() : '';
+      const wantKey = idIsObject && typeof id.name === 'string' ? studyDedupKey(id.name) : null;
       let hits: DigestStudy[] = [];
       if (/^NCT\d{8}$/.test(wantNct)) {
         hits = studies.filter((st) => (st.nct ?? '').trim().toUpperCase() === wantNct);
@@ -485,12 +576,30 @@ export function applyOverrides(
       if (hits.length !== 1 && wantKey) {
         hits = studies.filter((st) => studyDedupKey(st.name) === wantKey);
       }
+      // Provenance is the most specific signal — a card IS its source rows — and
+      // it is the only one that can separate two cards of ONE trial, which share
+      // an acronym key and often carry no NCT. So it does not merely break ties:
+      // whenever it is recorded, it FILTERS whatever the weaker passes proposed,
+      // and it stands alone if they proposed nothing. A unique NCT or name hit
+      // that provenance contradicts is the wrong card.
+      if (identityCorrupt) {
+        hits = []; // unparseable provenance → refuse to re-point at all
+      } else if (wantSources.length > 0) {
+        hits = (hits.length > 0 ? hits : studies).filter(provenanceHit);
+      }
       if (hits.length === 1) {
         const to = slugOf(hits[0]);
         out[to] = value;
         onRename(key, to);
+      } else if (identityCorrupt || wantSubstantive.size > 0) {
+        // Identity WAS recorded and did not resolve. Writing the key back would
+        // apply the override to whatever study holds that slug today — the
+        // sibling-card reuse this whole mechanism exists to prevent. Park it
+        // under a sentinel that can never equal a slug so it is reported
+        // missing (fatal for a suppress) instead of hitting the wrong card.
+        out[`${UNRESOLVED}${key}`] = value;
       } else {
-        out[key] = value; // unmatched: reported as missing downstream
+        out[key] = value; // no identity recorded: legacy slug-only behaviour
       }
     }
     return out;
@@ -566,7 +675,8 @@ export function applyOverrides(
 
   // Requested slugs that didn't match any study so a typo'd slug doesn't
   // silently no-op.
-  for (const slug of suppressKeys) if (!seenSlugs.has(slug)) summary.suppressMissing.push(slug);
+  for (const slug of suppressKeys)
+    if (!seenSlugs.has(slug)) summary.suppressMissing.push(stripUnresolved(slug));
   for (const slug of Object.keys(editsTable)) if (!seenSlugs.has(slug)) summary.editMissing.push(slug);
   for (const slug of Object.keys(relatedTable)) {
     if (!seenSlugs.has(slug)) summary.relatedTrialsMissing.push(slug);

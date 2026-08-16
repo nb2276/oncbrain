@@ -32,6 +32,18 @@ Pure-commentary tweets (e.g., "Big PRESTIGE result, will change practice") attac
 
 Hints are SOFT. STRONG hints (shared NCT id) are very likely correct — cluster together unless the content explicitly contradicts. Medium hints (shared trial acronym) are useful but can over-merge — verify the content discusses the same trial before grouping. The model has final say on clustering.
 
+SAME TRIAL, SEPARATE REPORTS = SEPARATE CLUSTERS. A shared NCT or acronym means the items are the same TRIAL, not necessarily the same REPORT. Split into separate studies ONLY when the items are distinct reports of that trial, each with its own primary objective and its own headline result:
+- primary/co-primary efficacy (OS, DFS, PFS, biochemical failure, local control)
+- quality of life / patient-reported outcomes (EPIC-26, EORTC QLQ-C30, FACT)
+- an extended-follow-up report of a previously reported outcome
+Merging two such reports produces one card whose headline number splices two unrelated results together, and the reader cannot tell which finding the number belongs to. NRG-GU005 published its quality-of-life results and its co-primary efficacy results as two separate papers; those are two cards.
+
+DEFAULT IS ONE CLUSTER. Do NOT split when the items are all covering ONE report:
+- a subgroup, sensitivity, biomarker or safety detail discussed WITHIN one report is part of that report's cluster, not a card of its own
+- several tweets about one presentation are one study, even when individual tweets highlight different numbers from it
+- a tweet, a slide and the paper covering one result are one study
+When in doubt, cluster together. Over-splitting is the more damaging error: it fragments one result across cards, strands its citation, and shows the reader two partial cards where the trial reported one finding.
+
 ═══ DISEASE-SITE ENUM ═══
 
 {{SITE_SLUGS}}

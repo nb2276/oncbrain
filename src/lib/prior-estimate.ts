@@ -23,6 +23,7 @@ import {
   type PrimaryEndpointLike,
 } from './effect-size.ts';
 import { studyDedupKey } from './study-dedup.ts';
+import { sameTrialIdentity, normalizeEndpoint } from './trial-lineage.ts';
 
 /** What the card and the curator DM show: the earlier reading, verbatim. */
 export type PriorEstimate = {
@@ -62,11 +63,10 @@ type Indexed = {
   stat_detail: string | null;
 };
 
-// "Overall survival" / "overall-survival" collapse; "investigator-assessed PFS"
-// and "CNS PFS by BICR" stay distinct, which is the point.
-function normalizeEndpoint(name: string | null | undefined): string {
-  return (name ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+// normalizeEndpoint is shared with trial-lineage.ts: the two modules must agree
+// on when two endpoint names describe the same measurement, since one decides
+// whether to show "updated from" and the other whether to unpublish the card
+// that number came from.
 
 /**
  * Index every published study that carries a parseable RATIO. Paired values are
@@ -129,27 +129,23 @@ export function studiesFromArtifacts(
 }
 
 /**
- * Same trial? NCT equality or dedup-key equality, with BOTH conflict guards.
+ * Same trial? Delegated to the single definition in trial-lineage.ts, so the
+ * "updated from" line this module attaches and the lineage verdict that
+ * suppresses the superseded card can never disagree about trial identity.
  *
- * The guards matter more than the matches. A trial can misprint its own
- * registration: RADIOSA publishes ORIOLE's NCT02680587, so an NCT-only rule
- * would confidently attribute one trial's estimate to the other. Equally, two
- * arms of one program can share an acronym while registering separately. So a
- * DISAGREEMENT on either identifier vetoes the match even when the other agrees.
+ * The guards live there and matter more than the matches: a DISAGREEMENT on
+ * either NCT or acronym vetoes the match even when the other agrees, because a
+ * trial can misprint its own registration (RADIOSA publishes ORIOLE's
+ * NCT02680587). A single nct maps to the singleton set, so behaviour here is
+ * unchanged.
  */
 function sameTrial(a: Indexed, b: Indexed): boolean {
-  const nctConflict = a.nct !== null && b.nct !== null && a.nct !== b.nct;
-  const keyConflict = a.key !== null && b.key !== null && a.key !== b.key;
-  if (nctConflict || keyConflict) return false;
-  const nctMatch = a.nct !== null && b.nct !== null && a.nct === b.nct;
-  if (nctMatch) return true; // a registration number is definitive, even across
-  // disease sites (the site is an LLM classification; the NCT is not)
-  const keyMatch = a.key !== null && b.key !== null && a.key === b.key;
-  // An acronym ALONE is not an identifier. Trial acronyms are reused freely
-  // across tumour types, so a bare "PRIME" in breast and a bare "PRIME" in
-  // prostate are two trials. Require the same disease site to accept one.
-  if (!keyMatch) return false;
-  return a.site !== null && b.site !== null && a.site === b.site;
+  const id = (x: Indexed) => ({
+    ncts: x.nct ? new Set([x.nct.toUpperCase()]) : new Set<string>(),
+    keys: x.key ? new Set([x.key]) : new Set<string>(),
+    site: x.site,
+  });
+  return sameTrialIdentity(id(a), id(b));
 }
 
 /** Did the reported magnitude actually move? A tightened interval counts: a CI

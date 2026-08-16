@@ -527,6 +527,29 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       )}
     </div>
   )}
+  {/* Trial lineage: this card supersedes an earlier reading of the same
+      objective (a conference abstract that has become the full publication).
+      Sits outside .study-endpoint so it still renders on a card with no primary
+      endpoint.
+
+      Linked ONLY when the earlier card is still published. Once lineage has
+      QUEUED it for removal the link is unsafe either way: it may already be gone
+      (this site serves catchall_document: index.html, so a dead study URL
+      returns 200 with the home page rather than 404ing, which is worse than no
+      link) or the queued rebuild may not have run yet. Both resolve to "name the
+      date, do not link it". */}
+  {study.supersedes && (
+    <p class="endpoint-prior study-supersedes">
+      supersedes the{' '}
+      {study.supersedes.auto_dropped === false ? (
+        <a href={`/study/${study.supersedes.date}-${study.supersedes.slug}/`}>{study.supersedes.date}</a>
+      ) : (
+        study.supersedes.date
+      )}{' '}
+      read
+      {study.supersedes.stat_value && <span class="prior-detail"> ({study.supersedes.stat_value})</span>}
+    </p>
+  )}
   <p class:list={['study-tldr', study.primary_endpoint?.stat_value && 'study-tldr--plain']}><span class="tldr-label">TL;DR</span><span set:html={emphasizeStats(linkifyCitations(stripStudyNamePrefix(study.tldr, study.name)), study.primary_endpoint?.stat_value)} /></p>
   </div>{/* /.glance */}
   {provenanceOutlet && (
@@ -1567,6 +1590,9 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   }
   .endpoint-prior strong { font-weight: 600; color: var(--fg); }
   .endpoint-prior a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  /* Outside .study-endpoint, so it needs its own top gap from whatever precedes
+     it (an endpoint block, a verdict pill, or the name). */
+  .study-supersedes { margin-top: 0.5rem; }
   .endpoint-sub {
     margin: 3px 0 0;
     font-size: 0.75rem;

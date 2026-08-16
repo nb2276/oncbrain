@@ -33,9 +33,12 @@
 // Run by the daily cron (after enrich + the today/yesterday builds) and
 // available manually: `npm run rebuild:queued`.
 import { spawnSync } from 'node:child_process';
+import { realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { openSync, closeSync, unlinkSync, statSync, writeSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { queuedAfterBuild } from '../src/lib/rebuild-window.ts';
 import {
   openDb,
   listRebuildQueue,
@@ -136,11 +139,22 @@ function main(): void {
       // A date the caller already rebuilt this run (cron: today+yesterday). Its
       // fresh build incorporated the merged data, so drop it rather than re-run
       // a wasted, nondeterministic build. Compare-and-delete on queued_at.
-      if (skip.has(q.bookmark_date)) {
+      //
+      // UNLESS the entry is NEWER than that build. "Already rebuilt this run" is
+      // only true if the rebuild happened AFTER the queue entry appeared, and
+      // the cron's own ordering breaks that assumption: it builds yesterday,
+      // then today — and today's lineage pass can suppress a card on yesterday,
+      // writing the override and queueing yesterday AFTER yesterday was built.
+      // Blind-skipping there deletes the request, and the superseded card stays
+      // live forever. Compare against the artifact's own generated_at.
+      if (skip.has(q.bookmark_date) && !queuedAfterBuild(q.bookmark_date, q.queued_at)) {
         console.log(`\n⤼ skip ${q.bookmark_date} (already rebuilt this run)`);
         dequeueRebuild(db, q.bookmark_date, q.queued_at);
         skipped += 1;
         continue;
+      }
+      if (skip.has(q.bookmark_date)) {
+        console.log(`\n▶ ${q.bookmark_date} was rebuilt this run, but re-queued AFTER that build — rebuilding again`);
       }
 
       console.log(`\n▶ rebuild ${q.bookmark_date} (${q.reason ?? 'no reason recorded'})`);
@@ -193,4 +207,18 @@ function main(): void {
   if (failed > 0 || deadLettered > 0) process.exitCode = 1;
 }
 
-main();
+// Importing this module must never drain the queue or spawn a build. The repo
+// has been burned by exactly this once already: v0.39 left notify-channel
+// running main() on import, which POSTS TO THE PUBLIC CHANNEL. Same guard, same
+// realpath handling — the project lives under a Dropbox symlink, so argv[1] and
+// import.meta.url disagree unless both sides are resolved.
+function isInvokedAsScript(): boolean {
+  const arg = process.argv[1];
+  if (!arg) return false;
+  try {
+    return realpathSync(arg) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+if (isInvokedAsScript()) main();

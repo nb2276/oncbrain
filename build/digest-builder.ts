@@ -19,6 +19,7 @@
 import 'dotenv/config';
 import {
   openDb,
+  queueRebuild,
   listBookmarks,
   listBookmarkDates,
   listAllSourceDates,
@@ -48,7 +49,18 @@ import {
 } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { markFigureSourcedDetails } from '../src/lib/source-tier.ts';
-import { loadOverrides, applyOverrides, formatOverrideSummary } from '../src/lib/digest-overrides.ts';
+import {
+  loadOverrides,
+  applyOverrides,
+  formatOverrideSummary,
+  saveOverrides,
+} from '../src/lib/digest-overrides.ts';
+import {
+  planLineage,
+  findMergedPriors,
+  supersedesFrom,
+  type LineageArtifact,
+} from '../src/lib/lineage-pass.ts';
 import { persistSlugs } from '../src/lib/slug-persistence.ts';
 import { buildPriorIndex, findPriorEstimate, studiesFromArtifacts } from '../src/lib/prior-estimate.ts';
 import { clampPreprintVerdict } from '../src/lib/preprint.ts';
@@ -56,6 +68,7 @@ import { stripReviewVerdicts, coerceConsensusVerdicts } from '../src/lib/content
 import {
   auditDigestSelfConsistency,
   formatUntraceableHeadlines,
+  headlineNumbersMissingFromCards,
 } from '../src/lib/self-consistency.ts';
 import { ingestApprovedResolutions, crossDateResolvedPapers } from '../src/lib/review-trial-ingest.ts';
 import { fetchPubMedPaper, type PubMedPaper } from '../src/lib/pubmed-client.ts';
@@ -792,6 +805,29 @@ export async function buildOneDate(
           `    npm run override -- --date=${date} --unsuppress=<old> --suppress=<new>`,
       );
     }
+
+    // A suppression can strand the DAY'S HEADLINE. Phase 3 synthesises
+    // top_line / tldr over every study Phase 2 produced, and overrides are
+    // applied afterwards by design (they must survive a rebuild that
+    // regenerates the digest from scratch) — so dropping a card can leave the
+    // day led by a number no surviving card carries.
+    //
+    // Latent while suppression was a rare manual act; trial lineage now
+    // suppresses automatically, which makes it routine. Rebuilding 2026-07-08
+    // after the NRG-GU005 DFS card was superseded left the headline reading
+    // "crosses the DFS futility bound (5-yr 89% vs 92%, HR 1.38)" while the
+    // only GU005 card left on the page was the quality-of-life one.
+    //
+    // Reported, not repaired: re-synthesising would spend another LLM call and
+    // rewrite a headline the curator may have already edited, and the fix is
+    // one --top-line override.
+    const orphaned = headlineNumbersMissingFromCards(digest);
+    if (applied.summary.suppressed.length > 0 && orphaned.length > 0) {
+      console.warn(
+        `  WARN headline cites ${orphaned.join(', ')} — no surviving card on ${date} carries ${orphaned.length > 1 ? 'those numbers' : 'that number'} after suppressing ${applied.summary.suppressed.join(', ')}.\n` +
+          `    Repoint it:  npm run override -- --date=${date} --top-line="..."`,
+      );
+    }
   }
 
   // v0.14.5 (E5): re-assert the preprint verdict cap AFTER overrides. A curator
@@ -837,6 +873,13 @@ export async function buildOneDate(
   }
   if (priorHits.length === 0) console.log('  magnitude moved: none');
 
+  // Trial lineage: a trial the digest already covered has come back. Decide
+  // whether this is the same objective matured (update — supersede the earlier
+  // card), a different objective (new-card — both publish), or the same reading
+  // again (duplicate). Runs after prior-estimate so both passes see the same
+  // post-override set of studies.
+  applyLineage(db, date, digest, args);
+
   // Any alias pointing at a slug the date now carries again is stale — drop it
   // so a live study can never be shadowed by a redirect to itself.
   const liveSlugs = new Set(digest.sites.flatMap((site) => site.studies.map((x) => x.slug)));
@@ -845,6 +888,172 @@ export async function buildOneDate(
   const paths = writeArtifact(args, artifact);
   console.log(`  wrote ${paths.json}`);
   console.log(`  wrote ${paths.obsidian}`);
+}
+
+// Trial lineage: apply the update/new-card/duplicate verdict for every study on
+// this date whose trial the digest already covered.
+//
+// The three verdicts get three different actions:
+//   update    → stamp `supersedes` on the new card, suppress the earlier one,
+//               and queue its date for rebuild so it republishes without it.
+//               The reader sees the matured reading at the top of the feed with
+//               a link back, not two cards to reconcile.
+//   new-card  → nothing. Both publish. A trial's QoL paper and its efficacy
+//               paper are two findings.
+//   duplicate → suppress the earlier card ONLY when identity is registered
+//               (shared NCT) and nothing moved. Otherwise log it and leave the
+//               existing curator nudge to ask.
+//
+// WHOLE-PASS GUARD. Lineage is a curation nicety layered on a digest that is
+// already correct without it; it must never be the reason a day fails to
+// publish. Same rule the prior-estimate pass and the OG-card mark follow.
+function applyLineage(
+  db: ReturnType<typeof openDb>,
+  date: string,
+  digest: { sites: { disease_site?: string | null; studies: DigestStudy[] }[] },
+  args: Args,
+): void {
+  if (process.env.TRIAL_LINEAGE === 'off') {
+    console.log('  lineage: off (TRIAL_LINEAGE=off)');
+    return;
+  }
+  try {
+    const artifacts: LineageArtifact[] = [];
+    let names: string[] = [];
+    try {
+      names = readdirSync(args.outDir).filter((f: string) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f));
+    } catch {
+      return;
+    }
+    for (const f of names) {
+      if (f.slice(0, 10) >= date) continue; // strictly earlier; also skips a rebuild of this date
+      try {
+        artifacts.push(JSON.parse(readFileSync(resolve(args.outDir, f), 'utf-8')));
+      } catch {
+        continue;
+      }
+    }
+
+    // A prior card built from sources reporting DIFFERENT objectives has no
+    // single objective of its own, so lineage cannot act on it — suppressing it
+    // would take an unrelated finding down with it. Report it: the merged card
+    // is a live defect AND the reason a real supersession was withheld.
+    for (const m of findMergedPriors(db, date, digest, artifacts)) {
+      console.log(
+        `  lineage: ${m.date}/${m.slug} merges ${m.facets.join(' + ')} — cannot supersede a card with two objectives; split it to enable lineage`,
+      );
+    }
+
+    // What each prior date ALREADY hides. Without this the empty-day guard only
+    // sees the current run's decisions, so two runs can together empty a date
+    // that neither would have emptied alone.
+    const suppressedByDate = new Map<string, readonly string[]>();
+    for (const a of artifacts) {
+      const ov = loadOverrides(a.date, args.overridesDir);
+      if (ov?.suppress?.length) suppressedByDate.set(a.date, ov.suppress);
+    }
+
+    // Default OFF. See planLineage's autoSuppress parameter for why.
+    const autoSuppress = process.env.TRIAL_LINEAGE_AUTOSUPPRESS === 'on';
+    const actions = planLineage(db, date, digest, artifacts, suppressedByDate, autoSuppress);
+    if (!autoSuppress && actions.some((a) => a.gateAuthorized)) {
+      console.log(
+        '  lineage: auto-suppress is OFF — nothing will be unpublished; the curator DM carries the drop token',
+      );
+    }
+    if (actions.length === 0) {
+      console.log('  lineage: no prior coverage matched');
+      return;
+    }
+
+    // Group suppressions by the date they land on, so one date gets one
+    // override write and one rebuild enqueue however many of its cards are
+    // superseded.
+    const byPriorDate = new Map<
+      string,
+      { slug: string; name: string; nct: string | null; source_ids: { type: string; id: number }[] }[]
+    >();
+
+    for (const a of actions) {
+      const v = a.verdict;
+      if (v.kind === 'unrelated') continue;
+      const tag =
+        v.kind === 'duplicate' ? `duplicate${v.certain ? ' (certain)' : ' (uncertain)'}` : v.kind;
+      console.log(`  lineage: ${a.slug} — ${tag} of ${v.prior.date}/${v.prior.slug} · ${v.reason}`);
+
+      if (v.kind === 'update') {
+        const sup = supersedesFrom(v, a.suppress !== null, a.declined, a.gateAuthorized || a.identityOnly);
+        for (const site of digest.sites) {
+          for (const st of site.studies) {
+            if (st.slug !== a.slug) continue;
+            st.supersedes = sup;
+            // prior_estimate renders a LINK to the earlier card. When lineage is
+            // about to suppress that very card the link goes nowhere — and this
+            // site sets catchall_document: index.html, so a dead study URL
+            // returns 200 with the home page rather than a 404. A silent wrong
+            // page is worse than no link, so the number-level note yields to the
+            // card-level one, which names the date without linking to it.
+            if (
+              a.suppress &&
+              st.prior_estimate &&
+              st.prior_estimate.date === a.suppress.date &&
+              st.prior_estimate.slug === a.suppress.slug
+            ) {
+              st.prior_estimate = null;
+            }
+          }
+        }
+      }
+      if (a.declined) {
+        console.log(`  lineage: kept ${v.prior.date}/${v.prior.slug} — ${a.declined}`);
+      }
+      if (a.suppress) {
+        const list = byPriorDate.get(a.suppress.date) ?? [];
+        list.push({
+          slug: a.suppress.slug,
+          name: a.suppress.name,
+          nct: a.suppress.nct,
+          source_ids: a.suppress.source_ids,
+        });
+        byPriorDate.set(a.suppress.date, list);
+      }
+    }
+
+    if (args.dryRun) {
+      for (const [d, list] of byPriorDate) {
+        console.log(`  lineage: [dry-run] would suppress ${list.map((x) => `${d}/${x.slug}`).join(', ')}`);
+      }
+      return;
+    }
+
+    for (const [priorDate, list] of byPriorDate) {
+      const ov = loadOverrides(priorDate, args.overridesDir) ?? {};
+      const suppress = new Set(ov.suppress ?? []);
+      const identity = { ...(ov.identity ?? {}) };
+      const added: string[] = [];
+      for (const x of list) {
+        if (suppress.has(x.slug)) continue;
+        suppress.add(x.slug);
+        // v0.50: record what the card WAS, so the suppression survives a rebuild
+        // that renames the study. Without this the override silently stops
+        // matching and the superseded card republishes.
+        // Provenance is the load-bearing field. Suppressing removes the card
+        // from the published artifact, so the NEXT rebuild cannot hold its slug
+        // and renames it — and once one trial has two cards (a DFS card and a
+        // QoL card) they share an acronym key, so name alone matches both and
+        // the override is correctly refused as ambiguous. The source rows are
+        // what actually identify the card.
+        identity[x.slug] = { nct: x.nct, name: x.name, source_ids: x.source_ids };
+        added.push(x.slug);
+      }
+      if (added.length === 0) continue;
+      saveOverrides(priorDate, { ...ov, suppress: [...suppress], identity }, args.overridesDir);
+      queueRebuild(db, priorDate, `superseded by ${date}: ${added.join(', ')}`);
+      console.log(`  lineage: suppressed ${added.map((s) => `${priorDate}/${s}`).join(', ')} + queued rebuild`);
+    }
+  } catch (err) {
+    console.warn(`  lineage pass skipped: ${err instanceof Error ? err.message : String(err)}`);
+  }
 }
 
 // v0.37 (E5): attach `prior_estimate` to every study whose trial the digest has

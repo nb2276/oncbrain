@@ -9,6 +9,7 @@ import {
   findUntraceableHeadline,
   auditDigestSelfConsistency,
   formatUntraceableHeadlines,
+  headlineNumbersMissingFromCards,
 } from '../src/lib/self-consistency.ts';
 
 const table = (rows: string[][]) => ({
@@ -151,5 +152,47 @@ describe('typographic normalisation', () => {
       details: [{ text: 'x', table: { columns: ['Endpoint', 'HR'], rows: [['DFS', '0·62']] } }],
     };
     expect(findUntraceableHeadline(study)?.values).toEqual(['0.70']);
+  });
+});
+
+// A suppression can strand the DAY'S headline. Phase 3 synthesises top_line over
+// every study Phase 2 produced; durable overrides are applied afterwards by
+// design, so dropping a card can leave the day led by a number no surviving card
+// carries. Latent while suppression was manual and rare; trial lineage
+// suppresses automatically, which makes it routine.
+describe('headlineNumbersMissingFromCards', () => {
+  const card = (tldr: string) => ({ slug: 's', name: 'S', tldr, details: [] });
+
+  it('flags a headline number no surviving card carries', () => {
+    // The real case: 2026-07-08 kept the GU005 quality-of-life card and lost the
+    // DFS card, but the day still led with the DFS hazard ratio.
+    const orphans = headlineNumbersMissingFromCards({
+      top_line: 'NRG-GU005: SBRT crosses the DFS futility bound (HR 1.38).',
+      sites: [{ studies: [card('MCID bowel decline 33% vs 46% at 1yr (p=0.002).')] }],
+    });
+    expect(orphans).toContain('1.38');
+  });
+
+  it('stays quiet when the headline is traceable to a card', () => {
+    expect(
+      headlineNumbersMissingFromCards({
+        top_line: 'MCID bowel decline 33% vs 46% at 1yr.',
+        sites: [{ studies: [card('MCID bowel decline 33% vs 46% at 1yr (p=0.002).')] }],
+      }),
+    ).toEqual([]);
+  });
+
+  it('stays quiet on a headline with no numbers at all', () => {
+    expect(
+      headlineNumbersMissingFromCards({
+        top_line: 'Two consensus documents fill the guideline gaps.',
+        sites: [{ studies: [card('First consensus guideline for post-op CTV delineation.')] }],
+      }),
+    ).toEqual([]);
+  });
+
+  it('handles an empty day without throwing', () => {
+    expect(headlineNumbersMissingFromCards({ top_line: 'HR 1.38', sites: [] })).toEqual(['1.38']);
+    expect(headlineNumbersMissingFromCards({ sites: [] })).toEqual([]);
   });
 });

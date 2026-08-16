@@ -434,6 +434,29 @@ export type DigestStudy = {
     lo: number | null;
     hi: number | null;
   } | null;
+  // Trial lineage: the EARLIER card this one supersedes — the same trial's same
+  // objective at a lower maturity or shorter follow-up (an ASTRO abstract that
+  // has become a JAMA paper). Build-stamped by lineage-pass.ts, never
+  // LLM-generated. Distinct from prior_estimate, which reports that a NUMBER
+  // moved; this reports that a whole earlier CARD has been retired in favour of
+  // this one, and the earlier date is suppressed + rebuilt to match. Mirrored in
+  // src/lib/digest-data.ts — keep the shape in lockstep.
+  supersedes?: {
+    date: string;
+    slug: string;
+    stat_value: string | null;
+    stat_detail: string | null;
+    /** Was the predecessor actually unpublished? False when identity was
+     *  acronym-only (no shared registration) — the link shows, the curator is
+     *  asked before anything comes down. */
+    auto_dropped?: boolean;
+    /** Why the drop was withheld, when it was. Drives whether the curator DM
+     *  offers the `drop` reply token at all. */
+    declined_reason?: string | null;
+    /** May the curator DM offer a one-reply drop for this? Structured, so the
+     *  offer never depends on parsing the decline wording. */
+    droppable?: boolean;
+  } | null;
   // v0.30: structured fold sections (Design / Population & inclusion / Regimen /
   // Radiotherapy / Endpoints / Results / Safety / Applies to / Limitations /
   // Discussion). When present, the fold renders these labeled "spec sheet" rows

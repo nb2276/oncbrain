@@ -120,6 +120,34 @@ export function auditDigestSelfConsistency(digest: {
   );
 }
 
+/**
+ * Numbers the DAY'S headline states that no card on the page carries.
+ *
+ * Phase 3 synthesises top_line/tldr over every study Phase 2 produced, and
+ * durable overrides are applied afterwards by design — so suppressing a card can
+ * leave the day led by a number the reader cannot find anywhere on it. Latent
+ * while suppression was a rare manual act; trial lineage suppresses
+ * automatically, which makes it routine.
+ *
+ * Only `top_line` is checked. The cross-site `tldr` legitimately summarises the
+ * day in prose that may aggregate or round, whereas the top line is a promise
+ * about one specific result.
+ */
+export function headlineNumbersMissingFromCards(digest: {
+  top_line?: string | null;
+  sites: Array<{ studies: StudyLike[] }>;
+}): string[] {
+  const headline = extractValues(digest.top_line ?? '');
+  if (headline.size === 0) return [];
+  const onPage = new Set<string>();
+  for (const site of digest.sites) {
+    for (const study of site.studies) {
+      for (const v of extractValues(`${study.tldr ?? ''} ${cardBody(study)}`)) onPage.add(v);
+    }
+  }
+  return [...headline].filter((v) => !onPage.has(v));
+}
+
 export function formatUntraceableHeadlines(items: UntraceableHeadline[]): string {
   if (items.length === 0) return "self-consistency: every card's headline number is traceable";
   return [
