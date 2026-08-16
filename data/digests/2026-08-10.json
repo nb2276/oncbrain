@@ -1,0 +1,327 @@
+{
+  "date": "2026-08-10",
+  "conference": {
+    "slug": "ascogu-2022",
+    "name": "ASCO Genitourinary Cancers Symposium 2022"
+  },
+  "generated_at": 1786768696854,
+  "digest": {
+    "top_line": "SFRO RecoRad 2025 OAR constraint update: normo, moderate hypofx and ablative tables across 6 sites, now with LAD and left ventricle as named cardiac substructures.",
+    "tldr": "A planning day, not a results day. The SFRO OAR update is the practical item: fractionation-stratified constraint tables anchored to START B and FAST-FORWARD for breast and the ASTRO guideline for liver, with reirradiation handled by principle and buried in the appendix. HERO's prostate signal is testosterone recovery kinetics (53.9% vs 3.2% at 90d), not an oncologic endpoint.",
+    "sites": [
+      {
+        "disease_site": "safety",
+        "intro": "Constraint framework, not evidence grading: most numbers derive from 3D conformal retrospective data, so IMRT/SBRT extrapolation carries the authors' own caveat.",
+        "studies": [
+          {
+            "name": "Organs at Risk Radiation Dose Constraints: 2025 Update",
+            "tldr": "SFRO 2025 OAR dose-constraint update: normofractionated, moderate hypofractionated and ablative tables across skull base, H&N, lung, breast, oesophagus, liver.",
+            "details": [
+              "🔍 SFRO (Société française de radiothérapie oncologique) consensus, RecoRad 4th edition; adult pts only",
+              "🔍 Constraints compiled from international consensus guidelines + trial data, validated by national reference experts",
+              "📐 Tables are organized by tumour location: skull/skull base, head and neck, lung, breast, oesophagus, liver",
+              "📐 Each site table splits by fractionation regimen: normofractionation, moderate hypofractionation, ablative (1/3/4/5/8 fractions)",
+              {
+                "text": "📐 Constraint conventions used throughout",
+                "subdetails": [
+                  "Normofractionation: Dmax approximated by D2 %",
+                  "Stereotactic: D0.035 cm3 preferred as Dmax surrogate",
+                  "Several hypofractionated entries expressed as EQD2",
+                  "Constraints tiered as optimal vs mandatory, or ALARA where no number is set"
+                ]
+              },
+              "💊 Breast tables are anchored to named trial schedules: START B (40 Gy/15) and FAST-FORWARD (26 Gy/5)",
+              "💊 Liver tables are anchored to the ASTRO clinical practice guideline across 3-, 5- and ≥ 20-fraction regimens",
+              "🔗 New structures added vs prior editions: cardiac substructures (LAD, left ventricle), correlated with late toxicity",
+              "🔗 Dorsal vagal complex proposed as a candidate brain OAR for radiation-induced nausea and vomiting",
+              "⚠️ Authors state most constraints derive from 3D conformal data, so extrapolation to IMRT/SBRT needs caution",
+              "⚠️ Most underlying data are retrospective and from heterogeneous populations; toxicity scoring (RTOG/EORTC/CTCAE) is subjective",
+              "⚠️ Authors explicitly do not validate the clinical significance of each constraint; this is a planning framework, not evidence grading",
+              "⚠️ Reirradiation is handled by principle, not table: ALARA for serial structures (cord, brainstem, chiasm), radiobiological modelling elsewhere",
+              "⚠️ Appendix (Tables S1–S12 EQD2/BED at α/β 2 and 3 Gy; S13–S16 reirradiation doses) is where the reirradiation numbers actually live"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000076
+            ],
+            "slug": "oar-dose-constraints-2025",
+            "significance": "The practical shift is coverage of ablative regimens per fraction number (1, 3, 4, 5, 8) alongside normofractionation, plus cardiac substructures (LAD, left ventricle) and a proposed dorsal vagal complex OAR. Numbers are tiered optimal vs mandatory, so a plan that exceeds an optimal value is a documented conversation, not a violation.",
+            "monday_clinic": null,
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**SFRO consensus update**, part of the RecoRad 4th edition, covering adult external beam radiotherapy and brachytherapy practice. Constraints were compiled from international consensus guidelines and clinical trial data, then **validated by national reference experts** rather than derived from a new dataset."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Tables are indexed by tumour site and by fractionation: **normofractionation**, **moderate hypofractionation**, accelerated hyperfractionation (lung), and **ablative regimens split by fraction number** (1, 3, 4, 5, 8). Dmax is approximated by **D2 %** in normofractionation and **D0.035 cm3** in stereotactic plans; several hypofractionated entries are given as **EQD2**."
+              },
+              {
+                "label": "Endpoints",
+                "body": "No clinical endpoint. The deliverable is a set of dose-volume objectives intended for **direct implementation into treatment planning systems** as standardized clinical objectives."
+              },
+              {
+                "label": "Safety",
+                "body": "Constraints are tiered as **optimal** versus **mandatory**, with **ALARA** used where no numeric threshold is offered (parotid in the brain table, lacrymal gland under moderate hypofractionation). The authors require that **pts be informed of the risk** when a constraint is exceeded."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Breast constraints are anchored to the schedules of **START B** (40 Gy in 15) and **FAST-FORWARD** (26 Gy in 5); liver constraints are built on the **ASTRO clinical practice guideline** across 3, 5 and ≥ 20 fractions. This is a national harmonization layer over those sources, not a competing evidence synthesis."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents adult pts planned with IMRT or stereotactic technique at the listed sites and fraction schedules. Does not represent paediatric pts, and reirradiation is covered by principle and appendix tables rather than the main site tables."
+              },
+              {
+                "label": "Limitations",
+                "body": "The authors state most constraints still rest on **3D conformal-era data**, which sits awkwardly with IMRT's larger low-dose bath and with ablative dose gradients. Biological modifiers of risk (individual radiosensitivity, genomic profile, concurrent immunotherapy) are **not accounted for**, and dose to immune organs at risk is named as unresolved."
+              },
+              {
+                "label": "Discussion",
+                "body": "The value here is harmonization, not novelty: the stated problem is the multiplicity of circulating constraint sets and the absence of a single reference. The **optimal/mandatory tiering** is the part that changes daily behaviour, because it tells a planner which values are negotiable against target coverage and which are not."
+              }
+            ],
+            "interpretation": "The honest way to read this document is as an act of standardization rather than of evidence generation, and that is its main claim on a reader's attention. Anyone planning an ablative case has watched constraint tables proliferate: one number from the trial protocol, another from AAPM TG-101, another from the local physics group, another remembered from residency. The SFRO's answer is a single indexed grid, site by site and fraction number by fraction number, that a physics team can load into the planning system as clinical objectives. That is a real contribution even though it settles no clinical question, and it should be judged on internal consistency and usability rather than on whether any individual threshold is correct.\n\nThe authors themselves supply the most important caveat, and it deserves more weight than a reader skimming the tables will give it. Most constraints trace back to three-dimensional conformal data. IMRT redistributes dose rather than removing it, trading high-dose exposure to a small volume for low-dose exposure to a larger one, and a constraint calibrated in the conformal era encodes a dose distribution that no longer exists. The problem compounds in stereotactic regimens, where the gradient is steeper still and where the linear-quadratic model that underwrites the EQD2 conversions is on its least secure footing. The document uses EQD2 freely for the hypofractionated columns, which is standard practice and also the step where the most uncertainty is silently absorbed.\n\nTwo structural choices are worth flagging because they change how the tables should be used. The optimal versus mandatory tiering is the more consequential one. A brainstem Dmax of 54 Gy labelled optimal against a surface Dmax of 60 Gy labelled mandatory tells a planner precisely where the negotiation with target coverage happens, which is the information a bare threshold withholds. The second is the appearance of cardiac substructures, the left anterior descending artery and the left ventricle, as constrained organs in their own right. That reflects a genuine shift in the breast and oesophageal literature toward substructure dosimetry, and it moves the contouring workload before it moves any outcome. The proposed dorsal vagal complex sits a tier below this, offered as a hypothesis about radiation-induced nausea rather than a validated constraint.\n\nWhat the document does not attempt is any grading of the evidence behind individual numbers, and the authors say so explicitly. A constraint drawn from a randomized trial's protocol and one drawn from a single retrospective series appear in the same cell format with the same authority. For a reader who wants to know how hard to fight for a particular value, that flattening is the central limitation, and it is why this belongs on the planning workstation rather than in a debate about whether a specific threshold is right. The related gap is biological: individual radiosensitivity, genomic profile and concurrent systemic therapy all modify risk, and none of them enter a dose-volume histogram. The authors name dose to immune organs at risk as the open question that combined radiotherapy and immunotherapy will force, which is a fair read of where the next round of constraints has to come from.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Practical shift is the per-fraction-number ablative columns (1, 3, 4, 5, 8) sitting alongside normofractionation in one grid, plus cardiac substructures (LAD, left ventricle) as constrained organs. The optimal versus mandatory tiering is what changes planning behaviour: it names which values are negotiable against target coverage."
+            },
+            "open_questions": [
+              "Validity of 3D conformal-derived constraints under IMRT and SBRT",
+              "Dose thresholds for immune organs at risk with concurrent immunotherapy",
+              "Dorsal vagal complex as an OAR for radiation-induced nausea"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "consensus-guideline",
+            "content_type": "review",
+            "discussed_trials": [
+              "START B",
+              "FAST-FORWARD",
+              "RTCMIENDOMETRE"
+            ],
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "immune organs at risk radiotherapy immunotherapy",
+                "dorsal vagal complex radiation nausea"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 21,
+              "fetched_at": "2026-08-15T04:37:53.123Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 76
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "prostate",
+        "intro": "Relevant to ADT choice around RT, where recovery timing gates re-treatment and salvage planning, though this is a non-randomised 184-pt subset.",
+        "studies": [
+          {
+            "name": "HERO",
+            "tldr": "90-day testosterone recovery to ≥280 ng/dL 53.9% with relugolix vs 3.2% with leuprolide after 48wk ADT.",
+            "details": [
+              "📊 90-day cumulative incidence of T recovery ≥280 ng/dL: 53.9% relugolix vs 3.2% leuprolide, p=0.0017",
+              "🔍 Subset analysis of 184/934 HERO pts who completed 48wk of treatment and had no planned alternative ADT within 12wk (24wk after last leuprolide depot)",
+              "🔍 Parent trial randomized 2:1, relugolix 120mg PO daily after 360mg load vs leuprolide q12wk x 48wk",
+              {
+                "text": "📊 Recovery detail by arm (verbatim from source)",
+                "table": {
+                  "columns": [
+                    "Metric",
+                    "Relugolix",
+                    "Leuprolide"
+                  ],
+                  "rows": [
+                    [
+                      "n in recovery subset",
+                      "137",
+                      "47"
+                    ],
+                    [
+                      "Baseline T entering recovery (mean±SD)",
+                      "427±142 ng/dL",
+                      "404±127 ng/dL"
+                    ],
+                    [
+                      "Recovered T",
+                      "74",
+                      "2"
+                    ],
+                    [
+                      "Median time to recovery",
+                      "86.0 d (95% CI 65.0, 92.0)",
+                      "112.0 d (95% CI 112.0, NE)"
+                    ],
+                    [
+                      "Median PSA at day 90",
+                      "0.39 ng/mL (0 to 233.1)",
+                      "0.06 ng/mL (0 to 14.0)"
+                    ]
+                  ]
+                }
+              },
+              "📐 Median recovery time in the leuprolide arm rests on only 2 events, upper CI bound not estimable",
+              "🔗 Parent HERO endpoint was sustained castration to wk48: 96.7% vs 88.8%, difference 7.9% (95% CI 4.1 to 11.8), P<0.001",
+              "⚠️ Non-randomised subset, and entry required no planned ongoing ADT, so selection favors pts whose clinicians already judged recovery likely",
+              "⚠️ Arms unbalanced 137 vs 47 and leuprolide pharmacology means depot coverage extends past the 90-day window; the comparison is partly a timing artifact",
+              "⚠️ Higher median PSA on relugolix at day 90 is the flip side of faster recovery, not reported with an oncologic endpoint"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000075
+            ],
+            "slug": "hero-testosterone-recovery",
+            "verdict": {
+              "soc_implication": "confirmatory",
+              "rationale": "Post-hoc subset of a phase 3 trial, non-randomised entry criterion, 137 vs 47 arms; recovery kinetics are a pharmacologic expectation, not a new clinical outcome.",
+              "audience": "Advanced prostate cancer, completing 48wk ADT, no ongoing ADT planned"
+            },
+            "significance": "For intermediate-risk prostate cancer treated with RT plus short-course ADT, the recovery kinetic is the deliverable: median 86.0 days to normal T on relugolix vs 2 of 47 recovering on leuprolide by day 90. That gates the choice of agent when ADT is a fixed 4 to 6 month adjunct to RT and the goal is off-treatment hypogonadism time, not depth of suppression.",
+            "monday_clinic": "In men finishing a defined short-course ADT with RT and no plan for ongoing suppression, this informs agent choice on recovery speed; it does not apply to men continuing ADT indefinitely or to those where prolonged suppression is the therapeutic aim.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Subset analysis of the phase 3 HERO trial, which randomized **934** men with advanced prostate cancer **2:1** to relugolix or leuprolide for **48 weeks**. This report covers a **90-day recovery period** after treatment discontinuation."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**184** men who completed 48 weeks of assigned therapy **and** had no plan to start alternative ADT within the next 12 weeks (24 weeks after a last leuprolide 3-month depot). **137** had received relugolix, **47** leuprolide."
+              },
+              {
+                "label": "Regimen",
+                "body": "Relugolix **120 mg orally once daily** after a single **360 mg** loading dose on Day 1, versus **leuprolide injections every 12 weeks**, each for 48 weeks."
+              },
+              {
+                "label": "Endpoints",
+                "body": "Time to testosterone recovery to **≥280 ng/dL** by Kaplan-Meier, PSA during the recovery phase, and adverse events during recovery. No oncologic efficacy endpoint in this analysis."
+              },
+              {
+                "label": "Safety",
+                "body": "During recovery, **96%** of men had at least one adverse event and **15%** had a grade ≥3 event, similar in both groups."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents men completing a defined 48-week course of ADT for advanced prostate cancer with no ongoing suppression planned. Does not represent men on continuous or indefinite ADT, nor men whose ADT is intended to run concurrently with or beyond radiotherapy."
+              },
+              {
+                "label": "Limitations",
+                "body": "The 90-day window sits inside the pharmacologic tail of a 3-month leuprolide depot, so part of the 53.9% vs 3.2% gap is measurement timing rather than a durable biologic difference. The leuprolide median of 112.0 days derives from **2 recovery events**."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Consistent in direction with the parent HERO result, where relugolix gave deeper sustained castration (**96.7% vs 88.8%**, difference **7.9%**, 95% CI 4.1 to 11.8, P<0.001). The trade the two readings define is depth of suppression on-treatment against speed of recovery off-treatment, both favoring the oral antagonist."
+              },
+              {
+                "label": "Discussion",
+                "body": "This settles a kinetic question, not a clinical one: no recurrence, quality-of-life, or cardiometabolic endpoint is tied to the faster recovery here. Whether restoring normal testosterone months earlier translates into measurable benefit, or into a PSA that reflects recovering physiology rather than disease, remains untested."
+              }
+            ],
+            "interpretation": "The value of this analysis is not the 53.9% versus 3.2% figure, which is close to what the pharmacology predicts, but what it does and does not license a clinician to conclude. Relugolix is an oral non-peptide GnRH antagonist with a short half-life; leuprolide is a depot agonist dosed every twelve weeks. A recovery window opened at the moment of last dose is therefore not a symmetric comparison, because a man in the leuprolide arm may still be within the release profile of his final injection for much of the ninety days being measured. The eligibility rule acknowledges this by requiring that leuprolide patients have no planned alternative ADT for twenty-four weeks rather than twelve, but the recovery assessment itself still stops at day 90. That two of forty-seven leuprolide patients recovered, with a median of 112.0 days and an upper confidence bound that is not estimable, is a statement about where the observation window ended as much as about the drug.\n\nWhat survives that objection is the relugolix number itself, which does not depend on the comparator. A median of 86.0 days to testosterone above 280 ng/dL, with a confidence interval of 65.0 to 92.0, is a usable planning figure. For a radiation oncologist prescribing a fixed short course of androgen suppression alongside definitive treatment, the relevant question is rarely which agent suppresses more deeply; the HERO parent result already answered that, and the margin there was 96.7 percent against 88.8 percent, a difference of 7.9 percent. The question is how long the patient carries the metabolic, sexual, and musculoskeletal cost after the course ends. This analysis puts a number on that for one agent and leaves the other unquantified within the window studied.\n\nThe methodological weakness that should move confidence most is not the post-hoc framing but the entry criterion. Inclusion required that a patient had completed forty-eight weeks and that no further suppression was planned. That is a clinical judgment made by treating physicians with knowledge of each patient's disease trajectory, applied after randomization, and it selects differently across arms in ways the reported baseline testosterone values cannot rule out. The arms entered recovery at 427 and 404 ng/dL respectively, which is reassuring for comparability of the starting point but says nothing about why these particular 184 of 934 men were the ones whose clinicians were willing to stop.\n\nThe PSA finding deserves more skepticism than the write-up gives it. Median PSA at day 90 was higher on relugolix, 0.39 against 0.06 ng/mL, with a relugolix range extending to 233.1. That upper value cannot be explained by testosterone recovery alone in every patient, and no analysis separates PSA rise attributable to returning androgen physiology from PSA rise attributable to disease. Framing faster recovery as a benefit while reporting a higher PSA without that separation is the part of this presentation a skeptic would push on hardest, and it is the part a future analysis would need to resolve before recovery speed can be treated as an unqualified advantage rather than a trade.",
+            "relevant_specialties": [
+              "radonc",
+              "medonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "When ADT is a defined 4 to 6 month adjunct to definitive RT, agent choice can be made on recovery speed rather than suppression depth. Median 86.0 days to normal testosterone (95% CI 65.0, 92.0) on relugolix is a concrete planning figure for counselling on off-treatment hypogonadism.",
+              "medonc": "Relevant only where ADT is time-limited by design. The parent trial's depth advantage (96.7% vs 88.8% sustained castration) and this recovery signal point the same way, but neither is tied to an oncologic endpoint, so sequencing and continuous-suppression decisions are untouched."
+            },
+            "open_questions": [
+              "Does faster testosterone recovery change QoL or cardiometabolic outcomes",
+              "Is higher day-90 PSA on relugolix physiologic or disease-driven",
+              "Recovery kinetics after short-course ADT with definitive radiotherapy"
+            ],
+            "consort": null,
+            "modality": "systemic",
+            "intent": null,
+            "methodology": "phase-3-rct",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "relugolix quality of life prostate",
+                "relugolix radiotherapy prostate"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 26,
+              "fetched_at": "2026-08-15T04:37:52.628Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 75
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      }
+    ],
+    "meta": {
+      "clusters_total": 2,
+      "studies_analyzed": 2,
+      "dropped": [],
+      "ocr_available": true
+    }
+  },
+  "bookmarks": [],
+  "papers": [
+    {
+      "id": 76,
+      "pmid": null,
+      "doi": "10.1016/j.canrad.2026.104833",
+      "pmc_id": null,
+      "title": "Organs at risk radiation dose constraints: 2025 update",
+      "authors": [
+        "Noël, Georges",
+        "Ailloud, Antoine",
+        "Vendrely, Véronique",
+        "Chargari, Cyrus",
+        "Khalifa, Jonathan",
+        "Pointreau, Yoann",
+        "Antoni, Delphine",
+        "Lekhal, Amina",
+        "Latorzeff, Igor"
+      ],
+      "journal": "Cancer/Radiothérapie",
+      "pub_date": "2026-05",
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/safety/organs-at-risk-radiation-dose-constraints-2025-update.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    },
+    {
+      "id": 75,
+      "pmid": null,
+      "doi": null,
+      "pmc_id": null,
+      "title": "ASCO GU 2022: Testosterone Recovery for Relugolix Versus Leuprolide in Men With Advanced Prostate Cancer: Results From the Phase 3 HERO Study.",
+      "authors": [],
+      "journal": "UroToday",
+      "pub_date": null,
+      "abstract": "ASCO GU 2022 HERO study men who did not continue androgen deprivation therapy on an ongoing basis, HERO study oral GnRH receptor antagonist relugolix, relugolix had faster and more complete recovery of testosterone to normal levels after treatment discontinuation as compared with leuprolide in phase 3 HERO study",
+      "pdf_path": null,
+      "source_url": "https://www.urotoday.com/conference-highlights/asco-gu-2022/asco-gu-2022-prostate-cancer/135368-asco-gu-2022-testosterone-recovery-for-relugolix-versus-leuprolide-in-men-with-advanced-prostate-cancer-results-from-the-phase-3-hero-study.html",
+      "note": "https://www.urotoday.com/conference-highlights/asco-gu-2022/asco-gu-2022-prostate-cancer/135368-asco-gu-2022-testosterone-recovery-for-relugolix-versus-leuprolide-in-men-with-advanced-prostate-cancer-results-from-the-phase-3-hero-study.html",
+      "resolved_from_review": false
+    }
+  ]
+}

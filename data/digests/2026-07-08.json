@@ -4,7 +4,7 @@
     "slug": "astro-2025",
     "name": "ASTRO Annual Meeting 2025"
   },
-  "generated_at": 1786409290258,
+  "generated_at": 1786769846382,
   "slug_aliases": [
     "estro-oral-cavity-ctv-guidelines",
     "estro-oral-cavity-post-op-ctv-guidelines",
@@ -13,542 +13,328 @@
     "prostate-sbrt-10yr-meier"
   ],
   "digest": {
-    "top_line": "NRG-GU005: 5-fx SBRT beats MH-IMRT on 2yr bowel MCID decline (35% vs 44%, p=0.034) but DFS superiority stopped for futility (HR 1.38).",
-    "tldr": "Prostate carried the day, and the read is fractionation, not efficacy: NRG-GU005 buys toxicity with SBRT while 3yr biochemical failure runs 8% vs 4% (p=0.037), and a 10-yr 40 Gy/5 fx cohort shows 90% RFS with two-thirds of relapses after year 5. Head/neck gets its first post-op OCSCC CTV atlas, consensus-only.",
+    "top_line": "NRG-GU005 quality of life: 5-fx SBRT cuts MCID bowel decline to 33% vs 46% at 1yr (p=0.002), with urinary incontinence 26% vs 35% at 2yr.",
+    "tldr": "Prostate SBRT dominates: GU005 kills the superiority case on disease control while handing SBRT the toxicity argument (G3+ GU 0.6% vs 2.5%), and Meier's 10-yr 40 Gy/5 fx series shows two-thirds of relapses land after year 5, so 5-yr SBRT reads understate failure. ARS AUC and the ESTRO OCSCC volumes fill the delineation and salvage gaps.",
     "sites": [
       {
-        "disease_site": "prostate",
-        "intro": "Two ultrahypofractionation datasets plus an ARS consensus on salvaging the irradiated gland.",
+        "disease_site": "head-neck",
+        "intro": "First ESTRO post-op CTV consensus for oral cavity SCC, volumes and EQD2 by risk tier, no outcome data behind it.",
         "studies": [
           {
-            "name": "SBRT for Prostate Cancer: 10-yr Nonrandomized Cohort (Meier et al.)",
-            "tldr": "10-yr RFS 90% overall (94% LR, 86% IR) after 40 Gy/5 fx SBRT, late Gr3 GU 1.4-1.5%, no Gr4-5.",
+            "name": "ESTRO OCSCC Post-op CTV Delineation Guidelines",
+            "tldr": "First ESTRO guideline for post-op CTV delineation in oral cavity SCC: GTV-P pre-op + 10 mm composited with surgical defect/flap + 5 mm.",
             "details": [
-              "📊 10-yr OS 84% (95% CI 76-91); LR 91% (85-97) vs IR 78% (67-89), p=0.22",
-              "📊 10-yr freedom from biochemical/clinical relapse 92% (87-96) whole group",
-              "📊 10-yr freedom from local failure 96% (93-99); LR 98% (95-100), IR 94% (89-99), p=0.12",
+              "🔍 ESTRO multi-disciplinary expert group; no consensus PORT delineation guideline previously existed for mucosal HNSCC",
               {
-                "text": "📊 10-yr RFS by risk stratum (Fig 2)",
+                "text": "📐 CTV-P = (GTV-P pre-op + 10 mm) ∪ (surgical defect/flap + 5 mm), edited for bone, fascia, air, teeth, intra-oral prosthesis",
+                "source_tier": "figure"
+              },
+              {
+                "text": "🔍 10 mm around GTV-P pre-op mirrors the 5+5 mm definitive-setting expansion; surgical series show microscopic infiltration within 5 mm of GTV-P edge in >95 % of resected OCSCC",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 Recommended EQD2 dose by target volume",
                 "table": {
                   "columns": [
-                    "Subgroup",
-                    "10-yr RFS",
-                    "95% CI",
-                    "p"
+                    "Volume",
+                    "Indication",
+                    "EQD2 dose"
                   ],
                   "rows": [
                     [
-                      "Low risk",
-                      "94%",
-                      "89-99",
-                      "0.19 (LR vs IR)"
+                      "CTV-P post-op",
+                      "PTV associated with post-op primary CTV",
+                      "60 Gy"
                     ],
                     [
-                      "Intermediate risk",
-                      "86%",
-                      "77-94",
-                      "0.19 (LR vs IR)"
+                      "CTV-P high-risk",
+                      "Positive (<1 mm) margin, whole CTV-P or localised strip",
+                      "over 60 Gy, e.g. 64-66 Gy"
                     ],
                     [
-                      "Favorable IR",
-                      "92%",
-                      "90-100",
-                      "0.002 (fav vs unfav)"
+                      "CTV-N1",
+                      "Involved nodal levels",
+                      "60 Gy"
                     ],
                     [
-                      "Unfavorable IR",
-                      "77%",
-                      "60-93",
-                      "0.002 (fav vs unfav)"
-                    ]
-                  ]
-                }
-              },
-              "🔍 Dose 40 Gy/5 fx (8 Gy x5, ~100 Gy EQD2 at a/b=2) on a noncoplanar robotic platform",
-              "🔍 Fiducial tracking with translational + rotational intrafractional correction mandatory",
-              "🔍 Phase 2 nonrandomized, 21 community/regional/academic sites, N=310 evaluable, median f/u 9 yr",
-              "🔍 Eligibility: LR T1b-T2a GS6 PSA<=10, or IR T1b-T2b GS7 or PSA 10-20; ADT not allowed; prostate volume up to 100 cc",
-              "📊 10-yr Gr2+ toxicity 2.1% GI and 14% GU; 4 pts had 5 Gr3 events, all GU; none after year 5",
-              "🔗 IR result compares favorably to the 74-78% 10-yr RFS with dose-escalated EBRT in RTOG 0126 (authors' comparison)",
-              "🔗 Toxicity similar to Fuller's CyberKnife SBRT trial; higher in PACE-B SBRT arm and PATRIOT, both largely conventional-linac delivered",
-              "⚠️ Grade group 3 was the only unfavorable risk factor independently predicting 10-yr biochemical/clinical failure on multivariate analysis",
-              "⚠️ Two-thirds of relapses occurred between 5-10 yr, so 5-yr series systematically understate failure",
-              "⚠️ Nonrandomized, sponsor-funded (Accuray), physician-reported CTCAE v3 toxicity only, no patient-reported outcomes in source"
-            ],
-            "figures": [],
-            "nct": null,
-            "tweet_ids": [
-              1000000041
-            ],
-            "slug": "prostate-sbrt-10yr-outcomes",
-            "verdict": {
-              "soc_implication": "confirmatory",
-              "rationale": "Nonrandomized phase 2, single-platform, no comparator arm; extends 5-yr data the field already acts on rather than testing SBRT against EBRT.",
-              "audience": "Localized low- or intermediate-risk prostate CA, no ADT, prostate volume <=100 cc"
-            },
-            "significance": "Two-thirds of relapses fell between 5 and 10 yr, so every 5-yr SBRT series (including PACE-B) is reading an immature curve. The unfavorable IR subgroup separated at 77% vs 92% (p=0.002) with ADT prohibited, which is where the trial actually moves a decision: whether to add ADT rather than whether to use 40 Gy/5 fx.",
-            "monday_clinic": "In unfavorable intermediate-risk disease, particularly grade group 3, this argues the ADT question stays open at 10 yr; in low-risk and favorable IR pts it supports 40 Gy in 5 fractions as monotherapy without hormone therapy.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Investigator-initiated **phase 2 nonrandomized** trial across **21 sites** (community, regional, academic), accrual January 2008 to April 2010. **N=310 evaluable** (172 LR, 138 IR), median age 68, **median follow-up 9 yr**. Kaplan-Meier estimates with log-rank comparison of LR vs IR."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "**LR:** T1b-T2a, Gleason 6, PSA <=10 ng/ml. **IR:** T1b-T2b, Gleason 7 with PSA <=10, or Gleason 6 with PSA >10 to 20. Central pathology review; IR split favorable vs unfavorable by MSK classification. Prostate volume up to 100 cc allowed; prior TURP and baseline AUA score were **not** exclusions."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "**40 Gy in five fractions** (8 Gy x 5, equivalent to 100 Gy at 2 Gy/fx assuming a/b=2) on a **noncoplanar robotic platform** with real-time motion management. Fiducial tracking plus **translational and rotational** intrafractional correction were mandatory. **Androgen suppression was not allowed**, so the entire result is RT monotherapy."
-              },
-              {
-                "label": "Endpoints",
-                "body": "Relapse-free survival (biochemical or clinical failure, or any salvage/antiandrogen/systemic therapy), overall survival, freedom from local failure, and late toxicity (>90 d) by **CTCAE v3**. Biochemical failure defined as **nadir+2**, unless followed by a new nadir."
-              },
-              {
-                "label": "Results",
-                "body": "10-yr OS **84%** (76-91); RFS **92%** (87-96) whole group; freedom from local failure **96%** (93-99). The only statistically separated comparison was favorable vs unfavorable IR (**92% vs 77%, p=0.002**); LR vs IR did not reach significance for RFS (p=0.19), OS (p=0.22), or local failure (p=0.12)."
-              },
-              {
-                "label": "Safety",
-                "body": "Four pts had five grade 3 toxicities, **all GU**, and **none after year 5**. 10-yr cumulative grade 3 rates **1.4%** (0-3.4) LR and **1.5%** (0-3.7) IR, far under the prespecified 10% threshold. **No grade 4-5 events.** 10-yr grade 2+ was **2.1% GI** and **14% GU**."
-              },
-              {
-                "label": "vs leading data",
-                "body": "PACE-B established SBRT as noninferior to conventionally fractionated EBRT at 5 yr but stops there; this extends the curve to 10. The authors read their IR RFS against the **74-78%** 10-yr RFS of dose-escalated EBRT in **RTOG 0126**, and note toxicity ran higher in the PACE-B SBRT arm and **PATRIOT**, both predominantly conventional-linac. **MIRAGE** is invoked as independent support that intrafractional motion management lowers toxicity."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents organ-confined low-risk and intermediate-risk prostate cancer treated with robotic SBRT and no ADT. Does not represent high-risk disease, node-positive disease, prostate volumes above 100 cc, or delivery without fiducial-based intrafractional tracking."
-              },
-              {
-                "label": "Limitations",
-                "body": "The platform is not incidental: the authors attribute their low toxicity to mandatory fiducial tracking with rotational correction, so the 1.5% grade 3 rate is a claim about robotic delivery, not about 40 Gy/5 fx generally. The trial was funded by the device manufacturer and one author consults for it. Toxicity is physician-reported CTCAE v3 only, which systematically underreads GU and GI symptoms relative to patient-reported instruments."
-              },
-              {
-                "label": "Discussion",
-                "body": "The durable finding is the **timing** of failure: two-thirds of relapses occurred between 5 and 10 yr, so the 5-yr endpoints that currently anchor SBRT practice are immature. **Grade group 3** was the only independent predictor of 10-yr failure on multivariate analysis, which the authors read as an argument for considering ADT in that subset rather than as a reason to change dose."
-              }
-            ],
-            "interpretation": "The value of this report is not that SBRT works, which PACE-B settled at 5 yr, but that it shows how much of the failure curve the 5-yr literature has been missing. Two-thirds of relapses in this cohort occurred between years 5 and 10. That single observation reframes every SBRT series a radiation oncologist currently quotes to a patient in clinic, including PACE-B's own 5-yr relapse data, as an estimate taken before most of the events have happened. It is also the reason a 10-yr nonrandomized cohort earns attention it would not otherwise get: no randomized SBRT trial has follow-up long enough to answer the question, so the comparison available is this cohort against historical dose-escalated EBRT.\n\nThat comparison should be read with the usual discount. The authors set their 86% 10-yr intermediate-risk RFS against the 74-78% reported with dose-escalated EBRT in RTOG 0126 and note it looks more favorable. RTOG 0126 accrued a different era, a different staging workup, and a different definition of intermediate risk, and this trial required central pathologic review while excluding anyone who needed androgen suppression. A cohort assembled that way is selected toward better outcomes independent of the radiation delivered. The honest read is that the SBRT curve is at least not worse over a decade, which given the fractionation convenience is the practically relevant conclusion, not that ultrahypofractionation has beaten dose-escalated EBRT.\n\nThe toxicity result carries a more specific and more transferable caveat, and it is a technical one. Grade 3 late toxicity was 1.4% and 1.5%, all GU, with nothing new after year 5, and no grade 4-5 events at all. The authors do not attribute this to the dose; they attribute it to delivery, noting that fiducial tracking with both translational and rotational intrafractional correction was mandatory, that PACE-B and PATRIOT reported higher toxicity with predominantly conventional-linac delivery, and that PACE-B's own subset treated on CyberKnife did better than its linac subset. MIRAGE, which randomized margin reduction under MRI guidance, points the same direction. So the number a reader should carry out of this paper is conditional: 40 Gy in five fractions with real-time intrafractional motion management produced these rates. A department delivering the same prescription with pretreatment imaging and standard margins has not been shown to reproduce them. Working against the toxicity figures generally is that they are physician-reported CTCAE v3, which reads GU and GI symptoms less sensitively than patient-reported instruments, and that the sponsor manufactures the platform being credited.\n\nWhere this changes a decision is the unfavorable intermediate-risk subgroup. RFS was 92% for favorable and 77% for unfavorable IR, the only comparison in the trial to separate statistically (p=0.002), and grade group 3 was the only factor independently predicting 10-yr failure on multivariate analysis. Because androgen suppression was prohibited, this is a clean look at what SBRT alone delivers in that group, and 77% at 10 yr is the number to weigh against the toxicity and quality-of-life cost of adding ADT. The trial cannot answer whether ADT would close that gap; it establishes the size of the gap that a trial would have to close. For the low-risk and favorable IR patient, meanwhile, the argument for monotherapy is now supported by durable rather than interim data, and the residual uncertainty is mostly about whether the delivery platform travels.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Two-thirds of relapses fell between 5 and 10 yr, so 5-yr SBRT series read an immature curve. The 1.4-1.5% grade 3 rate is conditional on mandatory fiducial tracking with rotational intrafractional correction, not on 40 Gy/5 fx alone, which gates whether it transfers to a linac-based practice."
-            },
-            "open_questions": [
-              "Does ADT close the 77% vs 92% unfavorable IR relapse gap",
-              "Do non-robotic SBRT platforms reproduce the 1.5% late grade 3 rate",
-              "10-yr relapse outcomes from randomized SBRT trials"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": "curative",
-            "methodology": "phase-2-trial",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT05557604",
-                "brief_title": "Sbrt±sTad for Unfavorable iNtermediate rIsk/High Risk Prostate caNcer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 146,
-                "primary_completion_date": "2024-02",
-                "brief_summary": "This is a prospective, open, randomized phase II trial.",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Decapeptyl",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically proven prostate adenocarcinoma\n* IR or HR in the NCCN definition\n* N0M0 at staging with choline or (preferably) PSMA PET-CT;\n* ECOG performance status between 0 and 2;\n\nExclusion Criteria:\n\n* Previous local treatment of the prostate with surgery (radical…",
-                "answers_question": "Does ADT close the 77% vs 92% unfavorable IR relapse gap",
-                "relevance_phrase": "randomised SBRT +/- short-term ADT, IR/HR"
-              },
-              {
-                "nct": "NCT06111781",
-                "brief_title": "The SUGAR Study; SBRT and Relugolix) for Prostate Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 60,
-                "primary_completion_date": "2028-02",
-                "brief_summary": "The goal of this clinical trial is to measure the toxicity and effectiveness of the following treatments for cFIR/cgUIR prostate cancer patients.\n\nStereotactic body radiotherapy (SBRT) alone or Stereotactic body radiotherapy (SBRT) combined with Ultrashort GNRH Antagonist called Relugolix (an oral drug). Treatments will be randomly assigned to study patients.\n\nThe main questions it aims to answer are the following:\n\n1. Whether the proportion of men who undergo SUGAR have superior rate of…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Relugolix 120 MG [Orgovyx]",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "SBRT standard of care radiotherapy treatment",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Provision of signed and dated informed consent form\n2. Stated willingness to comply with all study procedures and availability for the duration of the study\n3. Has histologically or cytologically confirmed diagnosis of adenocarcinoma of the prostate\n4. Born assigned to Male…",
-                "answers_question": "Does ADT close the 77% vs 92% unfavorable IR relapse gap",
-                "relevance_phrase": "randomised SBRT +/- relugolix in cFIR/cgUIR"
-              },
-              {
-                "nct": "NCT06397703",
-                "brief_title": "ADT and SBRT vs SBRT Alone for Unfavorable Intermediate Risk Prostate Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 392,
-                "primary_completion_date": "2030-04",
-                "brief_summary": "For this study, unfavorable intermediate risk prostate cancer patients will select whether they are to be treated with the standard of care (SOC) 6 months of Androgen Deprivation Therapy (ADT) in conjunction with stereotactic body radiation therapy/radiosurgery (SBRT) directed to the prostate versus SBRT alone. The patient population will include those with National Comprehensive Cancer Network (NCCN)-defined unfavorable intermediate risk disease. All patients will be followed every 6 months…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Leuprolide, Degarelix or Relugolix",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Stereotactic body radiation therapy/radiosurgery (SBRT)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Biopsy proven unfavorable intermediate risk prostate cancer, which includes patients with any one of the following variables: Gleason 4+3 disease; Percent positive cores \\> 50% of Gleason 7 disease; 2-3 intermediate risk factors (Gleason 7; PSA 10-20 ng/mL; or T2b-T2c)\n*…",
-                "answers_question": "Does ADT close the 77% vs 92% unfavorable IR relapse gap",
-                "relevance_phrase": "ADT+SBRT vs SBRT alone, unfavorable IR only"
-              },
-              {
-                "nct": "NCT03830788",
-                "brief_title": "Erectile Dysfunction in Good Prognosis Prostate Cancer : Comparison Between Brachytherapy and Stereotactic Body Radiotherapy",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 240,
-                "primary_completion_date": "2030-04",
-                "brief_summary": "The TEMPOS-GEniToUrinary Group (GETUG) study is a multicenter, medico-economic study comparing brachytherapy to SBRT in low and intermediate risk prostate cancer, particularly focused on the issue of erectile dysfunction. A total of 240 potent patients are randomized in two arms. The experimental arm consists of SBRT delivering 7.25 Gy per fraction, in five fractions, corresponding to a total dose of 36.25 Gy to the prostate. The control arm consists of brachytherapy by Iodine 125 delivering…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Radiation by brachytherapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Radiation by SBRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Main inclusion criteria\n\n* Biopsy proven prostate adenocarcinoma,\n* Low risk prostate cancer according to d'Amico (T1-T2a and PSA \\<10 ng/ml, and Gleason score 6) or intermediate risk prostate cancer according d'Amico but excluding tumor with Gleason score 7 (4 + 3),\n* Indication of a curative…",
-                "answers_question": "10-yr relapse outcomes from randomized SBRT trials",
-                "relevance_phrase": "randomised 36.25 Gy/5 fx SBRT vs I-125 brachy"
-              },
-              {
-                "nct": "NCT06235697",
-                "brief_title": "Androgen Suppression Combined With Nodal Irradiation and Dose Escalated Prostate Treatment",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 710,
-                "primary_completion_date": "2032-10",
-                "brief_summary": "This study is being done to answer the following question: Is the strategy to give higher doses of radiotherapy treatment over a shorter period of time using special equipment and fewer treatments (also known as Stereotactic Body Radiation Therapy or SBRT) as effective as usual external radiation therapy given with a brachytherapy boost (which involves radiation sources inserted directly into the prostate)?",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Radiation",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Radiation SBRT only",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "ADT",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed adenocarcinoma of the prostate diagnosed within the last 9 months\n* Participants with unfavourable risk prostate cancer are eligible according to the following NCCN classification guidelines (Version 4.2022 - May 10, 2022):\n\n  •…",
-                "answers_question": "10-yr relapse outcomes from randomized SBRT trials",
-                "relevance_phrase": "phase 3 SBRT vs EBRT+brachy boost, n=710"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "androgen deprivation prostate SBRT intermediate risk",
-                "prostate SBRT intrafractional motion management",
-                "randomized stereotactic prostate radiotherapy long-term"
-              ],
-              "queries_failed": [
-                {
-                  "term": "prostate SBRT intrafractional motion management",
-                  "reason": "empty"
-                }
-              ],
-              "candidates_returned": 26,
-              "fetched_at": "2026-08-11T00:44:44.102Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 41
-              }
-            ]
-          },
-          {
-            "name": "American Radium Society AUC: Local Intraprostatic Recurrence",
-            "tldr": "Consensus AUC: PSMA PET + mpMRI, mandatory targeted AND systematic biopsy, then reirradiation over RP for isolated intraprostatic radiorecurrence.",
-            "details": [
-              {
-                "text": "📊 Panel recommendations by topic (modified Delphi, 12 voting members)",
-                "table": {
-                  "columns": [
-                    "Topic",
-                    "Panel position"
-                  ],
-                  "rows": [
-                    [
-                      "Staging",
-                      "PSMA PET + mpMRI to exclude metastatic disease and map local extent"
+                      "CTV-N2",
+                      "Undissected at-risk levels",
+                      "50 Gy"
                     ],
                     [
-                      "Biopsy",
-                      "Required before salvage; both targeted AND systematic"
+                      "CTV-N2, dissected at-risk levels",
+                      "Optimal dose unknown",
+                      "50 Gy to 60 Gy, clinician discretion"
                     ],
                     [
-                      "Local salvage",
-                      "Reirradiation usually appropriate; cryo/HIFU may be appropriate"
-                    ],
-                    [
-                      "ADT alone",
-                      "Not recommended for confirmed local recurrence, any agent or duration"
-                    ],
-                    [
-                      "ADT with RT salvage",
-                      "Short 4-6 mo LHRH agonist appropriate; novel agents not endorsed"
-                    ],
-                    [
-                      "Target volume",
-                      "Focal if mpMRI + systematic biopsy concordant; whole-gland if discordant"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📐 Reirradiation dose schemas the panel considers acceptable",
-                "subdetails": [
-                  "SBRT 34-40 Gy in 5 fx (34 Gy/5 whole-gland Fuller series; 40 Gy/5 focal MTD)",
-                  "EBRT 36 Gy in 6 fx (GETUG-AFU 31)",
-                  "HDR 27 Gy in 2 fx, 32 Gy in 4 fx, or 36 Gy in 6 fx over 2 implants",
-                  "LDR minimum target dose 140 Gy (I-125) or 120 Gy (Pd-103), per RTOG 0526"
-                ]
-              },
-              {
-                "text": "📊 MASTER meta-analysis toxicity, RP as reference (adjusted rates)",
-                "table": {
-                  "columns": [
-                    "Modality",
-                    "Severe GU",
-                    "Severe GI"
-                  ],
-                  "rows": [
-                    [
-                      "Radical prostatectomy",
-                      "20%",
-                      "1.8%"
-                    ],
-                    [
-                      "SBRT",
-                      "5.6%",
-                      "not reported in source"
-                    ],
-                    [
-                      "HDR brachytherapy",
-                      "9.6%",
-                      "0.0% (p < 0.01 vs RP)"
-                    ],
-                    [
-                      "LDR brachytherapy",
-                      "9.1%",
-                      "not reported in source"
-                    ]
-                  ]
-                }
-              },
-              "📊 MASTER pooled 150 studies, 11 322 pts; adjusted 5-yr RFS 50-60%, no survival difference between any modality and RP",
-              "🔍 Biopsy mandate is driven by radiographic false positives: PSMA PET false-positive rate 8% in Fendler (n=635), post-RT change the usual culprit",
-              "🔍 Systematic biopsy cannot be dropped: FORECAST secondary analysis found up to 59% of true radiorecurrences would be occult with MRI-targeted cores alone",
-              "📐 mpMRI alone is a poor gate: sensitivity 94% (88-98%) but specificity 18% (7-35%) vs systematic biopsy reference (FORECAST, n=155)",
-              "🔗 RTOG 0526 (LDR salvage, n=92) reported DFS 61% at 5 yr and 33% at 10 yr with 10-yr local failure 5%, published after MASTER closed",
-              "⚠️ Evidence base predates PSMA PET, so the very patients this guideline defines (local-only) could not be identified in the trials it cites",
-              "⚠️ Evidence limited to prior conventionally fractionated EBRT; prior brachytherapy pts were excluded and moderate/ultrahypofractionated first courses are unstudied for salvage",
-              "⚠️ No consensus on second salvage (variant 4), on castrate-resistant local recurrence (variant 3), or on modality after prior grade 3 toxicity (variant 5)"
-            ],
-            "figures": [],
-            "nct": null,
-            "tweet_ids": [
-              1000000040
-            ],
-            "slug": "ars-auc-intraprostatic-recurrence",
-            "verdict": {
-              "soc_implication": "consensus",
-              "rationale": "ARS appropriate use criteria, modified Delphi across 12 panelists. Output is recommendation strength per variant, not an efficacy result; most underlying evidence retrospective.",
-              "audience": "Biopsy-confirmed local-only intraprostatic recurrence after definitive EBRT"
-            },
-            "significance": "The volumetric rule is the operational content: focal salvage when mpMRI and systematic biopsy agree on location, whole-gland when they disagree or the lesion sits away from the index lesion. Panel puts SBRT and HDR ahead of RP on therapeutic ratio (severe GU 5.6% and 9.6% vs 20%), with a short 4-6 mo LHRH agonist for radiosensitization.",
-            "monday_clinic": "In a man with rising PSA after definitive EBRT and PSMA PET showing prostate-only avidity, this supports biopsying (targeted plus systematic) before committing to salvage and favors reirradiation over prostatectomy or ADT alone; it does not cover prior brachytherapy or prior hypofractionated courses.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "ARS Genitourinary AUC, **12 voting panelists** across radiation oncology, urology and medical oncology. PRISMA literature search of PubMed and Embase run **28 June 2022**, four separate searches for four topics, then **two rounds of modified Delphi voting** with RAND disagreement methodology."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Scope is deliberately narrow: **tier A failure**, isolated intraprostatic radiorecurrence after definitive RT, in patients who want curative-intent local salvage. Tier B (nodal) and tier C (distant) are out of scope, and **prior brachytherapy patients were excluded** from the evidence synthesis."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Acceptable reirradiation schemas: **36 Gy/6 fx** EBRT (GETUG-AFU 31), **SBRT 34-40 Gy/5 fx**, **HDR 27 Gy/2 fx**, LDR **140 Gy I-125 or 120 Gy Pd-103** (RTOG 0526). GETUG-AFU 31 defines GTV by mpMRI plus choline PET with a **5-7 mm CTV margin bound by the capsule**. F-SHARP is testing 1-2 fraction HDR up to 30 Gy."
-              },
-              {
-                "label": "Endpoints",
-                "body": "No efficacy endpoint. The output is an **appropriateness rating per clinical variant** within each of four topics (staging, salvage modality, hormonal therapy, target volume), with disagreement classified by RAND criteria rather than measured against an outcome."
-              },
-              {
-                "label": "Results",
-                "body": "Panel converged strongly on staging and biopsy, and on reirradiation as the salvage with the best therapeutic ratio. **Disagreement persisted** on short-PSA-doubling-time recurrence, castrate-resistant local recurrence, second salvage, and salvage after prior grade 3 toxicity."
-              },
-              {
-                "label": "vs leading data",
-                "body": "The salvage-modality position rests on the **MASTER meta-analysis** (150 studies, 11 322 pts), where adjusted 5-yr RFS was 50-60% with **no survival difference** between modalities but severe GU toxicity of 20% after RP vs 5.6-9.6% after RT salvage. RTOG 0526 reported after MASTER closed and adds prospective phase 2 support for LDR: **5-yr DFS 61%, 10-yr local failure 5%**."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents men with biopsy-confirmed local-only intraprostatic recurrence after conventionally fractionated definitive EBRT who want curative-intent salvage. Does not represent prior brachytherapy, prior moderate or ultrahypofractionated RT, nodal or distant failure, or men not seeking local salvage."
-              },
-              {
-                "label": "Limitations",
-                "body": "The workup the guideline mandates (PSMA PET) postdates nearly all the evidence it cites, so the trials could not isolate the local-only population the recommendations govern. No high-quality study met inclusion for topics 3 or 4, meaning the hormonal and volumetric recommendations are **expert opinion, not evidence synthesis**. Search date was June 2022, with an acknowledged lag to publication."
-              },
-              {
-                "label": "Discussion",
-                "body": "The document's practical value is that it puts reirradiation ahead of prostatectomy on toxicity grounds while conceding that no modality separates on survival. It also draws a firm line against ADT-alone for confirmed local recurrence, which pushes the decision toward either salvage or surveillance rather than hormonal drift."
-              }
-            ],
-            "interpretation": "This is a positional document, and the position worth arguing about is the demotion of salvage prostatectomy. The panel does not claim reirradiation controls disease better; MASTER found adjusted 5-yr recurrence-free survival of 50% to 60% with no significant survival difference between any modality and RP. The whole case rests on toxicity, where the separation is wide: severe genitourinary toxicity of 20% after RP versus 5.6% after SBRT, 9.6% after HDR and 9.1% after LDR. When efficacy is a wash across modalities, therapeutic ratio is a legitimate tiebreaker, and a radiation oncologist can defend offering reirradiation first on that basis. The caution is that MASTER pooled 150 retrospective series with acknowledged asymmetry of follow-up between older and newer modalities, and salvage RP series skew toward an earlier surgical era. Some of that 20% is technique vintage, not an intrinsic property of the operation, and the comparison cannot separate the two.\n\nThe deeper problem is one the panel names itself: the evidence base predates PSMA PET, and PSMA PET is what defines the population these recommendations govern. Liu's cohort of 79 men with exclusively radiorecurrent disease found conventional and PET staging concordant in only 56%, with 34% upstaged. If a third of men previously called local-only actually harbor disease outside the gland, then every historical salvage series is contaminated with patients who were never going to be cured locally, and the reported 50% to 60% recurrence-free survival is a floor rather than an estimate of what modern selection would achieve. That cuts in favor of local salvage, but it also means the panel is recommending an intervention for a population no included study actually enrolled.\n\nThe biopsy mandate is the most defensible element and the one most likely to be skipped in practice. mpMRI sensitivity of 94% with specificity of 18% is not a test that can stand alone, and Fendler's 8% false-positive rate on PSMA PET, driven largely by post-treatment change, means imaging concordance is not histologic confirmation. The FORECAST secondary analysis is the sharper point: up to 59% of true radiorecurrences would have been missed had only MRI-targeted cores been taken. Targeted biopsy alone is not a shortcut here, and the panel's discouragement of combined biopsy-and-ablate procedures follows logically from that, even though it costs the patient a second procedure.\n\nWhere the guideline is weakest is topics 3 and 4, and it says so. No study met inclusion criteria for either the hormonal question or the focal-versus-whole-gland question, so the 4 to 6 month LHRH agonist recommendation is extrapolated from de novo intermediate-risk data into a setting whose defining feature is that the tumor already survived radiation. The focal-if-concordant rule is a reasonable heuristic rather than a finding. Notably the panel found whole-gland salvage toxicity acceptable in the Fuller series, which weakens the argument for focal treatment on safety grounds and leaves the volumetric choice resting mostly on confidence in localization.\n\nWhat would have to change for this to be wrong: if prospective PSMA-selected series show reirradiation control rates well above the historical 50% to 60%, the salvage-versus-surveillance calculus shifts materially. If they do not, the panel's stance against ADT-alone becomes harder to hold for men with short doubling times, the exact variant where the panel itself could not reach agreement. The applicability gap also matters practically, since hypofractionation is now standard first-line and no salvage evidence exists after it.",
-            "relevant_specialties": [
-              "radonc",
-              "medonc",
-              "surgonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Operationally this is a reirradiation guideline: 36 Gy/6 fx, SBRT 34-40 Gy/5 fx, HDR 27 Gy/2 fx, LDR 140 Gy I-125 or 120 Gy Pd-103, with the focal-vs-whole-gland call decided by whether mpMRI and systematic biopsy agree on lesion location. GETUG-AFU 31's 5-7 mm capsule-bound CTV margin is the cited focal template.",
-              "medonc": "ADT alone is not recommended for confirmed local recurrence regardless of agent or duration; when reirradiation is given, only a short 4-6 mo LHRH agonist is endorsed. Relugolix reached no agreement in this setting, the panel citing HERO's cardiac benefit as an unplanned secondary analysis and PRONOUNCE's failure to replicate it.",
-              "surgonc": "Salvage prostatectomy is not excluded but is displaced on therapeutic ratio: severe GU toxicity 20% after RP vs 5.6-9.6% after RT salvage in MASTER, with no survival difference between modalities. The panel also discourages combined biopsy-plus-ablation approaches, since histologic confirmation must precede any salvage."
-            },
-            "open_questions": [
-              "Salvage outcomes after prior hypofractionated or ultrahypofractionated RT",
-              "Focal vs whole-gland salvage reirradiation in a randomized comparison",
-              "Optimal management of castrate-resistant local intraprostatic recurrence"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": "curative",
-            "methodology": "consensus-guideline",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "salvage reirradiation radiorecurrent prostate",
-                "focal salvage prostate brachytherapy recurrence"
-              ],
-              "queries_failed": [
-                {
-                  "term": "salvage reirradiation radiorecurrent prostate",
-                  "reason": "empty"
-                }
-              ],
-              "candidates_returned": 11,
-              "fetched_at": "2026-08-11T00:44:50.546Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 40
-              }
-            ]
-          },
-          {
-            "name": "NRG-GU005",
-            "tldr": "2yr bowel MCID decline 35% vs 44% (p=0.034) favoring 5-fraction SBRT, but DFS superiority crossed interim futility (HR 1.38).",
-            "details": [
-              {
-                "text": "📊 Co-primary and efficacy endpoints, SBRT vs MH-IMRT",
-                "table": {
-                  "columns": [
-                    "Endpoint",
-                    "SBRT",
-                    "MH-IMRT",
-                    "Stat"
-                  ],
-                  "rows": [
-                    [
-                      "2yr bowel MCID decline",
-                      "35%",
-                      "44%",
-                      "p=0.034"
-                    ],
-                    [
-                      "2yr urinary irritative/obstructive MCID decline",
-                      "35%",
-                      "34%",
-                      "p=0.68"
-                    ],
-                    [
-                      "5yr DFS",
-                      "89% (85-92)",
-                      "92% (89-95)",
-                      "HR 1.38 (0.91-2.09), p=0.13"
-                    ],
-                    [
-                      "3yr cumulative biochemical failure",
-                      "8% (5.2-11.0)",
-                      "4% (2.3-7.0)",
-                      "p=0.037"
-                    ],
-                    [
-                      "5yr OS",
-                      "91% (85-95)",
-                      "94% (90-97)",
-                      "p=0.66"
+                      "CTV-N high-risk",
+                      "Pathological extranodal extension",
+                      "over 60 Gy, e.g. 64-66 Gy"
                     ]
                   ]
                 },
                 "source_tier": "figure"
               },
               {
-                "text": "🔍 Randomised non-blinded phase 3, N=698 (SBRT 353 / MH-IMRT 345), designed for superiority",
+                "text": "🔍 Nodal margin is pENE-dependent: GTV-N pre-op + 5 mm without pENE, + 10 mm with pENE to create CTV-N high-risk",
                 "source_tier": "figure"
               },
-              "📐 SBRT 36.25 Gy/5 fx at 7.25 Gy, 2-3 fx/wk vs 70 Gy/28 fx or 60 Gy/20 fx",
-              "🔍 Fiducials, MRI fusion for planning and daily advanced IGRT mandated in both arms",
+              "🔍 Neck omission gate: pN0 after adequate (≥18 node) dissection generally needs no nodal PORT; pN1 may not either",
               {
-                "text": "📊 Secondary EPIC-26 MCID declines, SBRT vs MH-IMRT",
+                "text": "🔍 pN1 with a single node >10 mm but ≤30 mm is treated as intermediate risk, an indication for selective neck irradiation to involved plus adjacent levels and Ib-III",
+                "source_tier": "figure"
+              },
+              "🔍 Where nodes cannot be re-created on pre-op imaging or co-registration fails, whole involved level(s) plus seroma/clips go into CTV-N1 (or CTV-N high-risk if pENE)",
+              "🔗 Builds on the 2018 definitive-setting HNSCC CTV guidelines and cites GORTEC 2020 flap delineation as an adjunct",
+              "⚠️ Consensus document: expert discussion plus international reviewer feedback, no stated Delphi round, voting record or agreement metric in source",
+              "⚠️ No outcome data. The authors call for prospective audits of practice and outcomes to establish these volumes as standard of care",
+              "⚠️ Flap dose de-escalation is explicitly unsettled: a 'flap avoidance structure' is offered for standardisation, not endorsed, for lack of data"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000045
+            ],
+            "slug": "estro-ocscc-ctv-guidelines",
+            "verdict": {
+              "soc_implication": "consensus",
+              "rationale": "ESTRO expert guideline, no efficacy endpoint. Fills a documented gap (no prior post-op HNSCC CTV consensus); authors themselves position prospective audit as the validation step.",
+              "audience": "Resected oral cavity SCC proceeding to post-operative radiotherapy"
+            },
+            "significance": "The margin recipe is asymmetric and that is the operative detail: 10 mm around the re-created pre-op GTV-P but only 5 mm around the surgical defect or flap, composited rather than either alone. Fig 3.1/3.2 shows why, the re-created GTV-P extended superiorly beyond the defect into infratemporal fossa, a geographical miss if you contour the defect alone.",
+            "monday_clinic": "In resected OCSCC going to PORT, this supports re-creating the pre-op GTV-P from diagnostic MRI alongside the defect or flap rather than contouring the operative bed alone; it does not extend to R2 resections or other head and neck subsites.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "ESTRO-convened multi-disciplinary expert group developing delineation guidelines through **discussion and review of current evidence and international practice**. Drafts were reviewed by HNSCC experts from countries outside the authorship (Japan, Hong Kong, Australia, Brazil, Mexico, Canada, Denmark, France, Spain, Poland, Ireland, UK) and modified on their feedback. **No efficacy endpoint**, no patient cohort."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Patients with **oral cavity squamous cell carcinoma requiring post-operative radiotherapy**, regardless of margin status and other histological risk factors. **R2 resection (macroscopic residual disease) is explicitly out of scope.** Companion background manuscript from the same group covers indications for PORT."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Planning CT **2.0 mm slices (range 1-3 mm)**, skull base to below sterno-clavicular joint, IV contrast mandatory, rigid co-registration with pre-op contrast-enhanced CT and/or MRI matched to **C1-C3 vertebral bodies** or nearby bone, not to soft tissue. CTV-P is the composite of **GTV-P pre-op + 10 mm** and **surgical defect/flap + 5 mm**, edited for bone, fascia, air, teeth and any intra-oral prosthesis. Nodal margin is **5 mm on GTV-N pre-op without pENE, 10 mm with pENE**."
+              },
+              {
+                "label": "Endpoints",
+                "body": "None. The stated aim is **consistency of delineation** to enable multi-institutional audit, clinical trials and RTQA. Authors position **prospective audits of practice and outcomes** as the route to establishing these volumes as standard of care."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents resected oral cavity SCC receiving post-operative radiotherapy, including flap and non-flap reconstruction. Does not represent R2 resections, definitive (non-surgical) treatment, or non-oral-cavity head and neck subsites, which the authors flag as future work."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Extends the **2018 international CTV-P consensus for definitive HNSCC RT**, whose 5+5 mm geometric expansion supplies the 10 mm used here around GTV-P pre-op. Cites the DAHANCA finding that geometric expansion is more conformal than anatomical margins, a **post-hoc De-ESCALaTE analysis** correlating the anatomical-to-geometric protocol change with lower late dysphagia, and non-randomised Dutch series where reducing the high-risk margin **10 mm to 6 mm** cut salivary and constrictor dose. GORTEC's 2020 flap delineation guidance is named as an adjunct."
+              },
+              {
+                "label": "Limitations",
+                "body": "The 5 mm and 10 mm margins are imported from definitive-setting geometry and one surgical pathology series (**>95 % of microscopic infiltration within 5 mm of GTV-P edge**), not from post-operative recurrence mapping. The dose to **dissected but uninvolved** levels rests on a **1993 MD Anderson** observation never tested prospectively, and is left to clinician discretion (**EQD2 50-60 Gy**). The whole method assumes accurate pre-op to planning CT co-registration, and the fallback where it fails is to treat the entire involved level, a larger volume."
+              },
+              {
+                "label": "Discussion",
+                "body": "The novel move is refusing to pick between the two available surrogates for a resected tumour: re-created pre-op GTV and operative bed are contoured independently and unioned, because each fails in a different direction. Fig 3.1 shows a GTV-P pre-op extending superiorly past the defect toward the infratemporal fossa, and Fig 8.1 a pectoralis major pedicled flap whose composite volume extends outside the oral cavity and is trimmed back. What is left unsettled is dose de-escalation to central flap tissue, where the guideline offers a **flap avoidance structure** for standardisation while stating there is a lack of data and consequently a lack of consensus."
+              }
+            ],
+            "interpretation": "The interesting choice here is the refusal to choose. Faced with a resected primary and no GTV, a contouring guideline has two obvious surrogates available, the re-created pre-operative tumour volume and the operative bed (surgical defect or reconstruction flap), and the path of least resistance would have been to nominate one and write the rules around it. This document contours both independently, gives them different margins, and takes the union. The justification sits in the example cases rather than in any outcome data: Fig 3.1 and 3.2 show a buccal mucosa case where the re-created pre-op GTV extends superiorly past the surgical defect toward the infratemporal fossa, and the authors state plainly that relying on the defect alone would have produced a geographical miss there. Fig 6 runs the argument the other way, an ill-defined buccal fat pad reconstruction that can only be outlined with significant uncertainty, where the pre-op GTV does the load-bearing work. Two surrogates that fail in different directions, so use both.\n\nThe margins themselves are inherited rather than derived. The 10 mm around GTV-P pre-op is explicitly the same 5+5 mm geometric expansion the 2018 definitive-setting consensus advocated, and the supporting biology is a surgical pathology observation that microscopic infiltration is seen within 5 mm of the GTV-P edge in over 95 % of resected OCSCC. The 5 mm added to the defect or flap is asserted as sufficient short of R2 resection. Neither number comes from post-operative recurrence mapping, which is the study that does not exist and would be the real evidentiary basis. A reader should hold these as reasonable geometric conventions with a plausible pathological rationale, not as validated thresholds, and note that the field has been moving in the opposite direction in the definitive setting, where the Dutch series cited here reduced the high-risk margin from 10 mm to 6 mm and reported lower salivary and constrictor dose with lower toxicity. That tension is unresolved in the post-op setting and the guideline does not pretend otherwise.\n\nThe nodal half is where the practice change is sharpest, because the recommendation is margin-by-biology rather than level-by-atlas. Recreating GTV-N pre-op and expanding 5 mm without pENE, 10 mm with, is defended in Fig 11.2 and 12.2 by showing standard level-based contours failing: a level II node abutting digastric, and a level Ib node sitting near the caudal border of the level, where atlas boundaries would leave inadequate soft tissue margin below the resected node. This is a genuine argument that nodal level atlases, designed for elective coverage of undissected necks, are the wrong tool for a specific resected node with a disrupted capsule. It also has a dosimetric payoff the guideline names: a targeted CTV-N high-risk around the surrogate can be smaller than escalating an entire level to 64-66 Gy.\n\nWhat should temper confidence is the co-registration dependency. The whole surrogate method presumes a pre-operative MRI or CT that can be rigidly matched to the planning scan; where it cannot, the stated fallback is to contour the entire involved level, and with pENE to escalate that whole level to high dose. So the guideline's benefit accrues disproportionately to centres with good pre-op imaging and fusion workflow, and the failure mode is systematically larger volumes for everyone else. Similarly the dose to dissected but uninvolved levels rests on a 1993 MD Anderson observation about perturbed tissue, never tested prospectively, and is left at clinician discretion across EQD2 50 to 60 Gy, which is an honest admission that a common daily decision has no evidence behind it. The authors are explicit that prospective audit is what would establish this as standard of care. Read it as a well-reasoned standardisation of a previously unstandardised task, valuable most immediately for trial QA and multi-institutional audit, and as a testable hypothesis about where recurrences actually occur.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The margin recipe is asymmetric: 10 mm around the re-created pre-op GTV-P but 5 mm around the surgical defect or flap, composited rather than either alone. Nodal margin is pENE-gated at 5 mm versus 10 mm on GTV-N pre-op. Fig 3.1/3.2 shows the pre-op GTV extending past the defect into infratemporal fossa, a geographical miss if you contour the bed alone."
+            },
+            "open_questions": [
+              "Optimal dose to dissected but uninvolved nodal levels",
+              "Whether flap dose de-escalation is safe",
+              "Whether 10 mm post-op primary margin can be reduced as in definitive setting"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "consensus-guideline",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT03997643",
+                "brief_title": "Preservation of Swallowing in Respected Oral Cavity Squamous Cell Carcinoma: Examining Radiation Volume Effects (PRESERVE): A Randomized Trial",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 90,
+                "primary_completion_date": "2026-09",
+                "brief_summary": "The goal of this randomized treatment study is to formally compare quality of life in patients with at least one pN0 hemi-neck after resection of a squamous cell carcinoma of the oral cavity treated with a primary radiation therapy versus a secondary targeted radiation therapy approach, to provide a high level of evidence to guide the selection of treatment options.",
+                "conditions": [
+                  "Head and Neck Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Radiotherapy to all dissected areas",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Omit radiation to pN0 neck",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Willing to provide informed consent\n* ECOG performance status 0-2\n* Histologically confirmed, resected oral cavity squamous cell carcinoma with at least ipsilateral selective neck disection\n* Patient has pathological features that are indications for PORT: positive or close…",
+                "answers_question": "Optimal dose to dissected but uninvolved nodal levels",
+                "relevance_phrase": "OCSCC RCT: omit RT to dissected pN0 hemi-neck"
+              },
+              {
+                "nct": "NCT07058805",
+                "brief_title": "Compartmentalized Postoperative Radiotherapy in Head and Neck Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 50,
+                "primary_completion_date": "2029-01",
+                "brief_summary": "COMPORT is a multicenter phase II clinical trial evaluating a personalized approach to postoperative radiotherapy in patients with head and neck squamous cell carcinoma (HNSCC). The study investigates whether a risk-adapted, compartmentalized radiotherapy strategy can safely reduce the treatment volume, and thus the side effects, without increasing the risk of tumor recurrence. Eligible patients are those with surgically treated cancers of the oral cavity, oropharynx, larynx, or hypopharynx who…",
+                "conditions": [
+                  "Head and Neck Cancer",
+                  "Head and Neck Squamous Cell Carcinoma",
+                  "Oral Cavity Squamous Cell Carcinoma",
+                  "Oropharyngeal Squamous Cell Carcinoma",
+                  "Laryngeal Squamous Cell Carcinoma",
+                  "Hypopharyngeal Squamous Cell Carcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Compartmentalized Postoperative Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion criteria\n\n1. ECOG performance status 0-2 at the time of registration\n2. ≥18 years of age\n3. Baseline assessments and documentation of toxicity using CTCAE v.5 and QoL using EORTC C30 and HN43 questionnaires.\n4. Histopathologically confirmed, surgically treated squamous cell carcinoma of…",
+                "answers_question": "Optimal dose to dissected but uninvolved nodal levels",
+                "relevance_phrase": "compartment-based post-op volume reduction in HNSCC"
+              },
+              {
+                "nct": "NCT06030440",
+                "brief_title": "De-Intensification of Postoperative Radiotherapy in Patients With Squamous Cell Carcinoma of the Head and Neck",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2",
+                  "PHASE3"
+                ],
+                "enrollment_count": 508,
+                "primary_completion_date": "2031-12",
+                "brief_summary": "This randomized, prospective, multicenter phase II/III trial will study the reduction of radiation volume by eliminating radiotherapy (RT) to the elective neck using strictly defined surgical and radio-oncological standards to reduce radiotherapy-related long-term side effects without affecting locoregional control.",
+                "conditions": [
+                  "Squamous Cell Carcinoma of the Oral Cavity",
+                  "Squamous Cell Carcinoma of the Larynx",
+                  "Squamous Cell Carcinoma of the Hypopharynx",
+                  "Squamous Cell Carcinoma of the Oropharynx"
+                ],
+                "interventions": [
+                  {
+                    "name": "Eliminating RT to the elective neck",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "RT standard of care",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically proven squamous cell carcinoma of the oral cavity/larynx/oro-or hypopharynx (except glottis cancer (pT1/2pN0))\n2. Surgery of primary tumor and neck dissection performed according to predefined surgical standard\n3. Indication for postoperative…",
+                "answers_question": "Optimal dose to dissected but uninvolved nodal levels",
+                "relevance_phrase": "omits elective neck RT after neck dissection"
+              },
+              {
+                "nct": "NCT06806189",
+                "brief_title": "Lipiodal Injection Technique for Free Flap Sparing Adjuvant RT Planning in HNC",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "EARLY_PHASE1"
+                ],
+                "enrollment_count": 10,
+                "primary_completion_date": "2026-03",
+                "brief_summary": "Patients with advanced mouth/throat cancers require surgery to remove the cancer followed by reconstruction with transplanted skin/muscle/bone from another location in their body to restore function. This is called a free-flap (skin/muscle/bone used from another part of the body to reconstruct the cancer site). Post-operative radiation therapy is often recommended to reduce the risk of cancer coming back. Unfortunately, radiation can exacerbate issues with swallowing and speech and lead to…",
+                "conditions": [
+                  "Head and Neck Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Lipiodal",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Adult patients (18 years and older) seen at the head and neck clinic at London Health Sciences Centre (LHSC)\n* Locally advanced T2-4N0-3M0 mucosal or cutaneous squamous cell carcinoma involving the oral cavity requiring composite resection and free flap…",
+                "answers_question": "Whether flap dose de-escalation is safe",
+                "relevance_phrase": "lipiodol marks flap borders for sparing plans"
+              },
+              {
+                "nct": "NCT06798922",
+                "brief_title": "Flap Sparing in Postoperative Radiotherapy of Oral Cavity Cancers",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 348,
+                "primary_completion_date": "2031-03",
+                "brief_summary": "Patients with oral cavity cancer treated by reconstructive surgery with a flap.\n\nPatients will be treated in the study for :\n\n* Experimental arm: Post-operative radiotherapy with flap sparing\n* Control arm: Standard post-operative radiotherapy without flap sparing (current practice) Radiotherapy by IMRT using photons or proton therapy (IMPT)",
+                "conditions": [
+                  "Oral Cavity Carcinoma",
+                  "Flap",
+                  "Radiotherapy, Adjuvant",
+                  "Reconstruction Surgery"
+                ],
+                "interventions": [
+                  {
+                    "name": "Standard post-operative radiotherapy without flap sparing (current practice)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Post-operative radiotherapy with flap sparing",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patient aged 18 years or older\n* Performance Status 0-2\n* Patient with oral cavity cancer (soft tissue or soft tissue-bone flap), treated by reconstructive surgery with a flap. Oropharynx cancer whose flap extends significantly into the oral cavity may be included in the…",
+                "answers_question": "Whether flap dose de-escalation is safe",
+                "relevance_phrase": "phase 3 RCT: flap-sparing vs standard post-op RT"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "postoperative radiotherapy oral cavity target volume",
+                "flap sparing radiotherapy head neck",
+                "reduced margin CTV head neck radiotherapy"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 21,
+              "fetched_at": "2026-08-15T04:40:48.569Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 45
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "prostate",
+        "intro": "Two GU005 readouts, a 10-yr single-arm SBRT series and an ARS salvage AUC: the fractionation question settles on QoL, not cure rates.",
+        "studies": [
+          {
+            "name": "NRG-GU005 (quality of life)",
+            "tldr": "Fewer MCID declines with SBRT at 1yr bowel (33% vs 46%, p=0.002) and sexual (34% vs 44%, p=0.026).",
+            "details": [
+              {
+                "text": "🔍 Phase III randomized non-blinded, N=698 (SBRT 353, MH-IMRT 345); QoL is a secondary/PRO analysis",
+                "source_tier": "figure"
+              },
+              "📐 SBRT 36.25 Gy/5 fx, 2-3 fx per week; PTV expansion 5mm except 3mm posteriorly and anteriorly",
+              "📐 MH-IMRT 70 Gy/28 fx or 60 Gy/20 fx; PTV expansion 8mm except 5mm posteriorly",
+              "🔍 CTV = prostate ± 1cm proximal SV; SBRT PTV max capped at 38.78 Gy without urethral contouring (acceptable variation 43.5 Gy)",
+              {
+                "text": "📊 EPIC-26 MCID decline rates, SBRT vs MH-IMRT",
                 "table": {
                   "columns": [
                     "Domain / timepoint",
@@ -558,19 +344,19 @@
                   ],
                   "rows": [
                     [
-                      "Bowel, 1yr",
+                      "Bowel, 1 yr",
                       "33%",
                       "46%",
                       "0.002"
                     ],
                     [
-                      "Sexual, 1yr",
+                      "Sexual, 1 yr",
                       "34%",
                       "44%",
                       "0.026"
                     ],
                     [
-                      "Urinary incontinence, 2yr",
+                      "Urinary incontinence, 2 yr",
                       "26%",
                       "35%",
                       "0.023"
@@ -579,6 +365,7 @@
                 },
                 "source_tier": "figure"
               },
+              "📊 Longitudinal urinary incontinence favored SBRT, LS mean difference 2.91 (95% CI 0.85-4.97, p=0.0058)",
               {
                 "text": "📊 Investigator-reported toxicity, SBRT vs MH-IMRT",
                 "table": {
@@ -610,83 +397,90 @@
                   ]
                 }
               },
-              "⚠️ Stopped for DFS futility, not harm; no non-inferiority margin was prespecified",
-              "📐 Spacer use improved EPIC bowel scores (LS mean -2.81, 95% CI -4.49 to -1.13, p=0.0011)",
-              "🔗 vs PACE-B: both show lower urinary incontinence decline with SBRT, MCID definitions differ"
+              "🔗 vs PACE-B: both trials show lower urinary incontinence decline with SBRT, though MCID definitions differ",
+              "⚠️ Non-blinded trial with patient-reported endpoints; SBRT's 5-fraction convenience can color EPIC responses",
+              {
+                "text": "⚠️ Rectal manipulation used in ~59% overall (SpaceOAR 55%), so bowel results reflect a spacer-heavy population",
+                "source_tier": "figure"
+              },
+              {
+                "text": "⚠️ EPIC completion 82.0% yr1 and 83.9% yr2, with more IMRT-arm early withdrawal (6.4% vs 1.1%)",
+                "source_tier": "figure"
+              },
+              "⚠️ No significant treatment effect in sexual or hormonal domains on longitudinal analysis, despite the 1yr sexual MCID difference"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
-              1000000044,
               1000000043
             ],
-            "slug": "nrg-gu005",
+            "slug": "nrg-gu005-qol",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Randomised phase 3, but the superiority design stopped for DFS futility, so equivalence stays unproven; the QoL co-primary was met and matches PACE-B on continence.",
-              "audience": "Localised intermediate-risk prostate, definitive RT, median age 68"
+              "rationale": "Prespecified PRO secondary analysis of a phase III trial, non-blinded with patient-reported endpoints; aligns with PACE-B rather than establishing a new position. Oncologic primary endpoint not reported here.",
+              "audience": "Localized intermediate-risk prostate cancer, median age 68, no ADT specified"
             },
-            "significance": "The efficacy caution sits in the secondary data: 3yr cumulative biochemical failure was 8% (5.2-11.0) with SBRT vs 4% (2.3-7.0) with IMRT, p=0.037, under a QoL-positive headline. The bowel benefit came with mandated fiducials, MRI fusion, daily IGRT, 5 mm/3 mm PTV margins and a spacer in 56%, which is the setup a department has to reproduce.",
-            "monday_clinic": "In a man with localised intermediate-risk disease weighing 5 fractions against 20 to 28, this supports SBRT on bowel and continence grounds while flagging the higher 3yr biochemical failure rate; it does not extend to high-risk, node-positive, or post-prostatectomy settings.",
+            "significance": "The QoL separation is domain-specific, not global: bowel and sexual at 1yr, urinary incontinence at 2yr, with no longitudinal effect in sexual or hormonal. Rectal manipulation (SpaceOAR 55%) and the 38.78 Gy PTV max cap gate transfer, since the bowel and GU signals came from a spacer-heavy, urethra-constrained delivery.",
+            "monday_clinic": "In localized intermediate-risk prostate cancer choosing between 5-fraction SBRT and moderate hypofractionation, this supports SBRT on patient-reported bowel, sexual, and continence grounds; it does not speak to high-risk disease, nodal coverage, or oncologic non-inferiority, which the trial's primary endpoint carries.",
             "primary_endpoint": {
-              "name": "EPIC-26 bowel MCID decline at 24 months (co-primary)",
+              "name": "EPIC-26 MCID decline, bowel and urinary irritative/obstructive at 2 yr (PRO analysis)",
               "klass": "safety",
-              "stat_value": "35% vs 44%",
-              "stat_detail": "SBRT vs MH-IMRT, p=0.034; DFS co-primary crossed futility, HR 1.38"
+              "stat_value": "Bowel 33% vs 46% at 1 yr",
+              "stat_detail": "p=0.002; 2yr bowel/UIO primary PRO endpoint not reported in source"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Randomised, non-blinded phase 3, 1:1, **N=698** (SBRT 353, MH-IMRT 345), stratified by Gleason score, PSA and rectal manipulation, with one interim futility analysis per endpoint. The DFS analysis was sized at **178 events from 590 evaluable pts** for 89% power; target accrual was 691."
+                "body": "Randomized, **non-blinded phase III**, 1:1, N=698 (MH-IMRT 345, SBRT 353), stratified by Gleason score, PSA, and rectal manipulation. The trial's oncologic primary endpoint sits elsewhere; **this analysis reports the patient-reported secondary endpoints**."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Localised **intermediate-risk** prostate cancer, median age 68 (IMRT) and 69 (SBRT). Baseline EPIC domains were balanced (bowel 96.3 vs 96.0, p=0.69; urinary irritation 89.4 vs 89.7, p=0.78). **Rectal spacer in 56% SBRT vs 55% IMRT.**"
+                "body": "Localized **intermediate-risk** prostate cancer, median age 68 (IMRT) and 69 (SBRT). Two patients were ineligible (one high-risk, one PSA out of window). Baseline EPIC domains were balanced across arms, all p≥0.093."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**SBRT 36.25 Gy in 5 fractions** of 7.25 Gy, 2 to 3 fractions per week, PTV expansion 5 mm radially and 3 mm posteriorly and anteriorly, max PTV dose 38.8 Gy. **MH-IMRT 70 Gy/28 fx or 60 Gy/20 fx**, expansion 8 mm except 5 mm posteriorly. CTV was prostate ±1 cm proximal seminal vesicles in both arms."
+                "body": "**SBRT 36.25 Gy in 5 fractions** delivered 2-3 per week, PTV expansion 5mm except 3mm posteriorly and anteriorly, **PTV max capped at 38.78 Gy** unless the urethra was visualized and contoured (acceptable variation 43.5 Gy). **MH-IMRT 70 Gy/28 fx or 60 Gy/20 fx**, PTV expansion 8mm except 5mm posteriorly. CTV was prostate ± 1cm proximal seminal vesicles. Rectal manipulation was common: SpaceOAR in 55% overall."
               },
               {
                 "label": "Endpoints",
-                "body": "**Co-primary:** EPIC-26 bowel and urinary irritative/obstructive MCID at 24 months (thresholds ≥4 and ≥5 points), and **disease-free survival** (Phoenix biochemical failure, local, regional, distant failure, or death). HRQOL was powered for 10% and 8% absolute reductions in MCID frequency; DFS assumed HR 0.62."
+                "body": "EPIC-26 at baseline, 12 and 24 months. **MCID thresholds:** >5 points urinary irritative/obstructive, >6 urinary incontinence, >10 sexual, >4 bowel and hormonal. Individual MCID rather than group mean scores was the analytic unit, with an exploratory longitudinal linear model adjusted for baseline score, arm, stratification factors, T-stage, age, and race."
               },
               {
                 "label": "Results",
-                "body": "**Bowel co-primary met**, urinary irritative co-primary flat, DFS co-primary crossed its interim futility bound (see endpoint table). Longitudinal modelling favored SBRT for bowel (LS mean 2.68, 95% CI 1.02-4.34, p=0.0016) and urinary incontinence (2.91, 95% CI 0.85-4.97, p=0.0058); sexual and hormonal domains showed no treatment effect."
+                "body": "The arm-level MCID and toxicity comparisons are tabulated above. Longitudinal modeling of urinary incontinence gave a **least square mean difference of 2.91 (95% CI 0.85-4.97, p=0.0058)** favoring SBRT, while sexual and hormonal domains showed **no significant treatment effect**."
               },
               {
                 "label": "Safety",
-                "body": "Investigator-graded toxicity ran in SBRT's favor across grade ≥3 GU, any-grade rectal hemorrhage and any-grade fatigue (see table). Reporting in the source is cross-sectional, with **no late-effect breakdown** beyond rectal hemorrhage."
+                "body": "Investigator-reported toxicity favored SBRT across the board: **grade ≥3 GU 0.6% vs 2.5% (p=0.04)**, any-grade rectal hemorrhage 10.5% vs 17.3% (p=0.01), any-grade fatigue 39.2% vs 50.8% (p=0.0025). The GU finding is the one that most often runs the other way in ultrahypofractionation series, so it is worth reading as the trial's own answer to the pre-trial toxicity concern."
               },
               {
                 "label": "vs leading data",
-                "body": "PACE-B is the other large randomised comparison of SBRT with MH-IMRT, and the **urinary incontinence advantage reproduces there** despite differing MCID definitions. MH-IMRT's standing rests on RTOG 0415 and its long-term update, so the comparator arm is the schedule with the longest track record, not a straw man."
+                "body": "PACE-B is the other large randomized SBRT vs moderate hypofractionation comparison, and both trials show lower urinary incontinence decline with SBRT despite differing MCID definitions. Prior patient-level meta-analysis had suggested less clinically meaningful bowel and urinary irritative/obstructive decline at two years with SBRT, and the 1-year bowel result here is directionally consistent."
               },
               {
                 "label": "Applies to",
-                "body": "Represents localised intermediate-risk prostate cancer treated with definitive prostate-only RT under mandated fiducials, MRI-based planning and daily IGRT. Does not represent high-risk or node-positive disease, elective pelvic coverage, or post-prostatectomy salvage."
+                "body": "Represents localized intermediate-risk prostate cancer treated to the prostate and proximal seminal vesicles, largely with a rectal spacer. Does not represent high-risk or node-positive disease, whole-pelvis fields, or post-prostatectomy salvage."
               },
               {
                 "label": "Limitations",
-                "body": "Non-blinded with patient-reported co-primaries, so assignment to a 5-visit course can bias reporting toward SBRT. Pre-treatment attrition was asymmetric (**22 IMRT pts vs 1 SBRT pt never received assigned RT**), and 2yr EPIC completion was 82.5% vs 85.1%. Biochemical control is read off an interim analysis and stays immature."
+                "body": "Differential attrition ran against the IMRT arm: 22 IMRT patients (6.4%) died or withdrew before year 1 versus 4 SBRT patients (1.1%), and 22 IMRT patients never received the assigned RT after withdrawal versus 1 in the SBRT arm. Completion was 79.9% (IMRT) and 84.0% (SBRT) at year 1. The domain-by-timepoint pattern (bowel and sexual at 1yr, incontinence at 2yr) is the kind of scattered significance that multiplicity should temper."
               },
               {
                 "label": "Discussion",
-                "body": "Local and distant failures were few in both arms, so the disease-control separation rests on **early biochemical events**, an endpoint prone to reclassification with longer follow-up in intermediate-risk disease. The trial makes SBRT defensible on the HRQOL grounds it was adopted for, without settling whether the two schedules are equivalent for cure."
+                "body": "The trial was designed when the open question was whether five fractions cost the patient something. The PRO answer is that it does not, and the investigator-reported toxicity answer is that it may cost less. What the QoL data cannot do is settle whether SBRT is oncologically non-inferior, which is the primary endpoint and is not reported in this source."
               }
             ],
-            "interpretation": "This trial answers a question the field had already half-answered by adoption. Five-fraction SBRT spread on the strength of single-arm series and patient-level pooled analyses of patient-reported outcomes; NRG-GU005 set out to prove it superior on both toxicity and disease control, and it returns a split result that should be read as two separate findings rather than one.\n\nOn the patient-reported side the result is internally consistent. Fewer men on SBRT crossed the bowel MCID threshold at one and two years, urinary incontinence declines were less frequent at two years, and investigator-graded grade 3 or higher GU events and any-grade rectal hemorrhage both ran higher with IMRT. The urinary incontinence signal is the one that also appears in PACE-B, the only other large randomised comparison of these two schedules, though the two trials defined MCID slightly differently. That concordance carries the argument, because the obvious threat to a patient-reported endpoint in an unblinded trial is expectation: men randomised to five treatments over two weeks know they drew the shorter course, and that bias pushes in exactly the direction the result went. Agreement with investigator-graded toxicity is what makes the bowel finding believable, more than the p-value does.\n\nThe efficacy side deserves more caution than the take-home slide suggests. Disease-free survival crossed a futility bound with a hazard ratio pointing away from SBRT, and cumulative biochemical failure at three years was 8% with SBRT against 4% with IMRT. Neither observation establishes inferiority: the trial was built to detect a 38% relative improvement, it stopped for futility rather than harm, and the interval around the hazard ratio is compatible with no difference. But a superiority trial that stops early leaves the non-inferiority question formally unasked, and a reader who has been treating the two schedules as interchangeable has been assuming an answer this trial did not supply. Three-year biochemical failure in intermediate-risk disease is an early read on a slow endpoint, and whether the curves converge, separate further, or partly reflect PSA behaviour after 7.25 Gy per fraction will not be settled without longer follow-up.\n\nTransferability is the other thing to hold onto. This was not permissive SBRT. Fiducials, MRI fusion for planning and daily image guidance were mandated, PTV expansions were 5 mm radially and 3 mm anteriorly and posteriorly, and a rectal spacer was used in 56% of the SBRT arm, with spacer use itself associated with better bowel scores. A department delivering 36.25 Gy in five fractions without that infrastructure is not delivering the intervention that produced these numbers, and the bowel advantage is the part most likely to erode first.\n\nWhat changes in clinic is narrow and real: for a man with intermediate-risk disease who weighs bowel and continence outcomes and five visits heavily, the choice now rests on randomised evidence rather than pooled series. What does not change is the standing of moderate hypofractionation, which is the arm with the numerically better biochemical control here and the schedule with the longer track record from RTOG 0415 onward.",
+            "interpretation": "The framing that makes this analysis useful is the one Dr. Yu opened with: at the time NRG-GU005 was designed, moderate hypofractionation was the settled standard after RTOG 0415 and the concern about five fractions was toxicity, not efficacy. The trial was therefore built to answer a question that has partly answered itself in the interim, since PACE-B reported first and much of the field has already moved. What this dataset adds is a second independent, randomized, North-American-cooperative-group answer to the same toxicity worry, which matters more than a confirmatory analysis usually does because the pre-trial prior ran the other way.\n\nThe direction of the result is the striking part. Ultrahypofractionation was expected, if anything, to cost urinary function, and the acute GU signal in earlier SBRT series was the specific reason for caution. Here the GU comparison runs in SBRT's favor on both the patient-reported and the investigator-reported channel: fewer incontinence MCID declines at two years, a positive longitudinal treatment effect on that domain, and a lower rate of treatment-related grade 3 or higher GU events. Convergence between two different measurement systems is the strongest internal evidence in the analysis, because they fail in different ways. A non-blinded PRO endpoint is vulnerable to a patient who knows they finished in two weeks feeling better about their outcome; investigator-graded rectal hemorrhage and grade 3 GU events are not vulnerable in the same way.\n\nThat non-blinding is still the reason to hold the domain-level results loosely rather than the overall read. Significance lands on bowel and sexual at one year and on incontinence at two, and it does not land on sexual or hormonal in the longitudinal model. A scattered pattern across five domains and two timepoints is what multiplicity produces when a real but modest effect is measured many ways, and the honest reading is that the direction is consistent rather than that any single domain-timepoint cell is established. The incontinence result is the exception, because it is the one supported by both the MCID analysis and the longitudinal model, and it is also the one PACE-B independently reproduced.\n\nTwo delivery details decide whether this transfers. Rectal manipulation was used in roughly three in five patients, dominated by SpaceOAR at 55%, so the bowel comparison is a spacer-heavy one and a practice that does not routinely place a spacer should not assume the same bowel separation. The SBRT protocol also capped PTV maximum dose at 38.78 Gy unless the urethra was visualized and contoured, which is a real constraint rather than a formality, and it is plausible that the favorable GU profile is partly a product of that constraint rather than of five fractions as such. A center delivering SBRT without urethral awareness is not delivering the arm that produced this result.\n\nThe attrition asymmetry is worth naming without overreading. Twenty-two IMRT patients withdrew before receiving radiotherapy against one in the SBRT arm, and early death or withdrawal before the year-1 assessment was 6.4% versus 1.1%. Patients who decline a 28-fraction course after randomization are unlikely to be a random sample, and the direction of that bias is not obvious. Finally, none of this speaks to the oncologic question. The QoL analysis is a secondary endpoint of a trial whose primary endpoint is disease control, and a favorable PRO profile is only actionable once the efficacy comparison holds.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Fractionation, not coverage, is what moved: CTV was prostate ±1 cm proximal seminal vesicles in both arms, so differing elective volumes cannot explain the 8% vs 4% 3yr biochemical failure gap. Five fractions buys bowel and continence, delivered with 5 mm/3 mm margins, daily IGRT and a spacer in 56%."
+              "radonc": "Domain-specific, not global: bowel and sexual at 1yr, incontinence at 2yr, with no longitudinal sexual or hormonal effect. The 38.78 Gy PTV max cap and 55% SpaceOAR use gate transfer, since the favorable GU and bowel profile came from a urethra-constrained, spacer-heavy delivery, not from five fractions alone."
             },
             "open_questions": [
-              "Whether the 3yr biochemical failure gap persists with longer follow-up",
-              "Which intermediate-risk subgroups drive the biochemical failure difference",
-              "Whether the SBRT bowel benefit holds without a rectal spacer"
+              "Oncologic non-inferiority of SBRT vs MH-IMRT in this trial",
+              "Whether bowel benefit holds without rectal spacer",
+              "Durability of QoL separation beyond 2 years"
             ],
             "consort": {
               "enrolled": null,
@@ -694,16 +488,14 @@
               "randomized": 698,
               "arms": [
                 {
-                  "label": "SBRT",
-                  "allocated": 353,
-                  "analyzed": 291,
-                  "outcome": "2yr bowel MCID decline 35%"
-                },
-                {
                   "label": "MH-IMRT",
                   "allocated": 345,
-                  "analyzed": 260,
-                  "outcome": "2yr bowel MCID decline 44%"
+                  "analyzed": 258
+                },
+                {
+                  "label": "SBRT",
+                  "allocated": 353,
+                  "analyzed": 293
                 }
               ]
             },
@@ -711,33 +503,186 @@
             "intent": "curative",
             "methodology": "phase-3-rct",
             "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "stereotactic prostate hypofractionated randomized",
+                "rectal spacer prostate radiotherapy",
+                "prostate SBRT quality of life"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 48,
+              "fetched_at": "2026-08-15T04:40:44.728Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 43
+              }
+            ]
+          },
+          {
+            "name": "10-yr SBRT Survival/Toxicity (Meier et al.)",
+            "tldr": "10-yr RFS 90% overall (94% LR, 86% IR) with 40 Gy/5 fx; grade 3 late toxicity 1.4-1.5%, no grade 4-5.",
+            "details": [
+              "🔍 Investigator-initiated phase 2 nonrandomized trial, N=310 evaluable (172 LR, 138 IR), 21 community/regional/academic sites, treated Jan 2008 to Apr 2010",
+              "🔍 Dose 40 Gy in 5 fractions (8 Gy x 5, ~100 Gy EQD2 at a/b=2), noncoplanar robotic platform, fiducial tracking with translational + rotational intrafractional correction mandatory",
+              "🔍 Androgen suppression not allowed; prostate volumes up to 100 cc eligible; no TURP or AUA-score exclusion; central pathologic review",
+              "📊 10-yr OS 84% (95% CI 76-91); LR 91% (85-97) vs IR 78% (67-89), p=0.22",
+              {
+                "text": "📊 10-yr freedom from biochemical/clinical relapse by risk group",
+                "table": {
+                  "columns": [
+                    "Group",
+                    "10-yr RFS (95% CI)",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "Whole group",
+                      "92% (87-96)",
+                      "n/a"
+                    ],
+                    [
+                      "Low risk",
+                      "94% (89-99)",
+                      "0.19 (LR vs IR)"
+                    ],
+                    [
+                      "Intermediate risk",
+                      "86% (77-94)",
+                      "0.19 (LR vs IR)"
+                    ],
+                    [
+                      "MSK favorable IR",
+                      "92% (90-100)",
+                      "0.002 (fav vs unfav)"
+                    ],
+                    [
+                      "MSK unfavorable IR",
+                      "77% (60-93)",
+                      "0.002 (fav vs unfav)"
+                    ]
+                  ]
+                }
+              },
+              "📊 Freedom from local failure 96% (93-99) whole group; 98% (95-100) LR, 94% (89-99) IR, p=0.12",
+              {
+                "text": "📊 10-yr late toxicity (CTCAE v3, physician-reported)",
+                "subdetails": [
+                  "Grade 3 GI or GU: 1.4% (0-3.4) LR, 1.5% (0-3.7) IR; no grade 4-5",
+                  "All five grade 3 events in four pts were GU",
+                  "Grade 2+ GI 2.1%, grade 2+ GU 14%",
+                  "No new treatment-related late grade 3+ events after year 5"
+                ]
+              },
+              "🔍 Grade group 3 was the only unfavorable risk factor independently predicting 10-yr biochemical/clinical failure, per the cited multivariate analysis",
+              "🔗 IR RFS compares favorably with the 74-78% 10-yr RFS reported with dose-escalated EBRT in RTOG 0126; toxicity similar to Fuller's CyberKnife SBRT trial, lower than PACE-B SBRT arm and PATRIOT",
+              "⚠️ Nonrandomized single-arm; the authors state a randomized trial is required for meaningful comparison with EBRT",
+              "⚠️ Sponsor-funded (Accuray) with a coauthor consulting for Accuray, and the platform-specific tracking argument favors the sponsor's device",
+              "⚠️ Two-thirds of relapses occurred between 5-10 yr, so 5-yr series (including PACE-B) systematically understate late failure"
+            ],
+            "figures": [],
+            "nct": null,
+            "tweet_ids": [
+              1000000041
+            ],
+            "slug": "prostate-sbrt-10yr-outcomes",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Single-arm nonrandomized phase 2, no concurrent comparator; sponsor-funded with device-specific delivery. Extends existing 5-yr SBRT data rather than testing a new question.",
+              "audience": "Localised low- or intermediate-risk prostate, no ADT, prostate volume up to 100 cc"
+            },
+            "significance": "Two-thirds of relapses fell between 5 and 10 yr, so the reassurance PACE-B gives at 5 yr is provisional. The unfavorable IR subgroup sits at 77% (60-93) vs 92% for favorable IR (p=0.002), which is where the ADT-with-SBRT question actually lives, not in the pooled 86% IR number.",
+            "monday_clinic": "In unfavorable intermediate-risk prostate considered for 40 Gy/5 fx monotherapy, the 77% 10-yr RFS (vs 92% favorable IR) is the number that informs an ADT discussion; the favorable IR and low-risk data do not carry that concern.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Investigator-initiated **phase 2 nonrandomized** trial across **21 centers** (community, regional, academic), enrolling Jan 2008 to Apr 2010. **310 evaluable pts**, median age 68, **median follow-up 9 yr**. Kaplan-Meier estimation with log-rank comparison of LR vs IR."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**172 low-risk** (T1b-T2a, Gleason 6, PSA under 10) and **138 intermediate-risk** (T1b-T2b, Gleason 7 or Gleason 6 with PSA 10-20), all confirmed by **central pathologic review**. IR pts subclassified favorable vs unfavorable by MSK criteria. Prostate volume up to 100 cc allowed; prior TURP and baseline AUA score were **not** exclusions."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**40 Gy in 5 fractions** (8 Gy x 5, equivalent to ~100 Gy at 2 Gy/fx assuming a/b = 2) on a **noncoplanar robotic platform**. **Fiducial tracking with translational and rotational intrafractional motion correction was mandatory**. **Androgen suppression was not allowed**, so the outcomes are RT-attributable."
+              },
+              {
+                "label": "Endpoints",
+                "body": "Relapse defined as biochemical failure (**nadir + 2**), clinical failure, or administration of any salvage, antiandrogen, or systemic therapy. Late toxicity was physician-reported, **CTCAE v3**, events beyond 3 mo. Day 0 was the last day of treatment."
+              },
+              {
+                "label": "Results",
+                "body": "**10-yr OS 84%** (76-91). Freedom from local failure **96%** (93-99) overall. The separation that matters is within IR: **favorable 92%** vs **unfavorable 77%**, **p = 0.002**, whereas LR vs IR overall was not significant (p = 0.19)."
+              },
+              {
+                "label": "Safety",
+                "body": "Four pts had five grade 3 events, **all GU**, and **no grade 4-5** events occurred. Cumulative 10-yr grade 3 rates were **1.4%** LR and **1.5%** IR, far below the 10% rate the trial deemed acceptable. Grade 2+ **GU 14%** exceeds grade 2+ **GI 2.1%** by roughly sevenfold; **no new late grade 3+ events after year 5**."
+              },
+              {
+                "label": "vs leading data",
+                "body": "IR relapse-free survival (86%) sits above the **74-78% 10-yr RFS of dose-escalated EBRT in RTOG 0126**, and the authors note an updated **HYPO-RT-PC** now shows superior 10-yr RFS in the 6.1 Gy x 7 arm. Toxicity matched Fuller's CyberKnife trial but was **lower than the PACE-B SBRT arm and PATRIOT**, both of which treated substantial fractions on a conventional linac."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents low- and favorable intermediate-risk organ-confined prostate cancer treated with robotic SBRT and tracking, without ADT. Does not represent unfavorable IR pts seeking equivalence with favorable IR, high-risk disease, node-positive disease, or delivery without intrafractional tracking."
+              },
+              {
+                "label": "Limitations",
+                "body": "The toxicity advantage over PACE-B and PATRIOT is **confounded by platform**, and the sponsor makes that platform, so the comparison cannot separate tracking from delivery-era and case-mix differences. Toxicity is **physician-reported CTCAE only**, with no patient-reported instrument, which understates GU bother relative to the EPIC-based comparators. Comparator EBRT series (RTOG 0126) predate modern IGRT."
+              },
+              {
+                "label": "Discussion",
+                "body": "The durability question, not the toxicity question, is what 10 yr answers here: **two-thirds of relapses occurred between 5 and 10 yr**, in this trial and in Fuller's. That timing means a 5-yr non-inferiority readout is structurally optimistic for both arms, and it reframes what PACE-B's 5-yr result can and cannot settle."
+              }
+            ],
+            "interpretation": "The value of this report is not that SBRT works for low-risk prostate cancer, which 5-yr data settled some time ago, but that it puts a number on when failures actually arrive. Two-thirds of the relapses in this cohort occurred between years 5 and 10, and the authors report the same pattern in Fuller's CyberKnife series. That single observation does more to shape how a reader should hold the ultrahypofractionation literature than any of the survival estimates here. PACE-B's 5-yr non-inferiority result, which is the evidence most clinicians are actually leaning on, is measured at a point where a minority of the eventual events have occurred. It is not wrong, but it is provisional in a way that a 5-yr readout in a faster-failing disease would not be. The authors say as much when they write that they await longer PACE-B follow-up to determine whether SBRT improves long-term relapse rates.\n\nThe risk-group results argue against treating intermediate-risk as one population. Pooled IR relapse-free survival of 86% reads as a success, and against the 74-78% reported with dose-escalated EBRT in RTOG 0126 it looks like more than that. But the MSK favorable and unfavorable subgroups separate at 92% and 77% with p = 0.002, which is the only comparison in the paper that reaches significance, while low-risk versus intermediate-risk does not (p = 0.19). The conventional risk trichotomy is doing less work here than the favorable/unfavorable split within IR. The authors' finding that grade group 3 independently predicted 10-yr failure points the same direction, and their inference, that unfavorable IR patients merit consideration of androgen deprivation, is the practical read. It is a hypothesis this trial cannot test, since androgen suppression was prohibited by protocol. That prohibition is what makes the efficacy numbers cleanly RT-attributable and simultaneously what prevents the trial from answering the question its own subgroup analysis raises.\n\nThe toxicity comparison deserves more scepticism than the efficacy comparison. Grade 3 rates of 1.4% and 1.5% with no grade 4-5 events are genuinely low, and the absence of new late grade 3+ events after year 5 is worth knowing, since the fear with ultrahypofractionation has always been that late GU injury accrues on a long clock. But the argument the discussion builds, that intrafractional tracking explains why toxicity here is lower than in the PACE-B SBRT arm and PATRIOT, is a between-trial comparison of physician-reported CTCAE across different eras, different case mixes, and different platforms, funded by the manufacturer of the platform that comes out ahead. The MIRAGE result gives that argument real support from a randomised design, so the mechanism is plausible. The attribution of this particular toxicity gap to that mechanism is not established by these data. A reader should also note that the outcome is physician-graded, which reliably reads lower than patient-reported instruments; grade 2+ GU of 14% against grade 2+ GI of 2.1% is the more informative pairing, and it says the bladder, not the rectum, is where the residual burden of five-fraction treatment sits.\n\nWhat would have to be true for this to mislead? Chiefly that a 2008-2010 cohort selected across 21 sites willing to adopt robotic SBRT early differs from a contemporary population in ways that flatter the result. Central pathology review argues against gross stage migration, but there is no way to exclude selection. The honest conclusion is the authors' own: these results support the durability of SBRT in low-risk and favorable intermediate-risk disease, and a randomised comparison remains required before the cross-trial toxicity claims carry weight.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Two-thirds of relapses fell between 5 and 10 yr, so PACE-B's 5-yr reassurance is provisional. Within IR, unfavorable pts sat at 77% (60-93) vs 92% favorable (p=0.002) with 40 Gy/5 fx and no ADT, which is where the ADT-addition question lives, not in the pooled 86%."
+            },
+            "open_questions": [
+              "Whether ADT improves outcomes for unfavorable intermediate-risk pts receiving SBRT",
+              "Whether intrafractional tracking, not platform, drives the toxicity difference",
+              "10-yr PACE-B relapse rates vs conventional fractionation"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "phase-2-trial",
+            "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT01794403",
-                "brief_title": "Radiation Hypofractionation Via Extended Versus Accelerated Therapy (HEAT) For Prostate Cancer",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "nct": "NCT05019846",
+                "brief_title": "SRT Versus SRT+ADT in Prostate Cancer",
+                "overall_status": "RECRUITING",
                 "phase": [
-                  "NA"
+                  "PHASE3"
                 ],
-                "enrollment_count": 161,
-                "primary_completion_date": "2027-02",
-                "brief_summary": "Accelerated Hypofractionation Radiotherapy for prostate cancer of 36.25 Gy delivered in 5 fractions will not be inferior to the standard treatment of 70.2 Gy given in 26 fractions with respect to four-year biochemical failure (PSA failure) by Phoenix definition post-treatment completion.",
+                "enrollment_count": 310,
+                "primary_completion_date": "2025-12",
+                "brief_summary": "To clarify the role of short-term Androgen deprivation therapy (ADT) in the context of intermediate unfavorable and a subclass of high-risk patients treated with prostate Stereotactic radiotherapy (SRT).\n\nIn intermediate unfavorable risk group, when choosing standard external beam radiotherapy, short term ADT is superior in terms of biochemical disease free survival (bDFS) to EBRT alone. In high risk disease, results of the combination therapy are even more clear. Prostate SRT has been endorsed…",
                 "conditions": [
                   "Prostate Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "Extended Hypofractionation Radiotherapy",
-                    "type": "RADIATION"
+                    "name": "Triptorelin Embonate",
+                    "type": "DRUG"
                   },
                   {
-                    "name": "Accelerated Hypofractionation Radiotherapy",
-                    "type": "RADIATION"
+                    "name": "Bicalutamide 50 mg",
+                    "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically proven prostate adenocarcinoma.\n\n   * Gleason score 2-7 (reviewed by reference lab at UM).\n   * Biopsy within one year of date of enrollment.\n2. Clinical stage ≤ T2 based on DRE and/or ≤ T3a based on MRI (if done); N0-Nx; M0-Mx (AJCC 7th Edition)\n\n   * T-stage…",
-                "answers_question": "Whether the 3yr biochemical failure gap persists with longer follow-up",
-                "relevance_phrase": "5fx vs 26fx, 4yr Phoenix biochemical failure EP"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histological confirmation of prostate acinar adenocarcinoma with a minimum of 10 biopsy cores taken\n* Prostate protocol MRI for local staging\n* Patients belonging to intermediate unfavorable group according to the D'Amico/NCCN risk group classification:\n\n  * -Grade group 3…",
+                "answers_question": "Whether ADT improves outcomes for unfavorable intermediate-risk pts receiving SBRT",
+                "relevance_phrase": "phase 3 prostate SRT +/- short-term ADT, bDFS"
               },
               {
                 "nct": "NCT05169970",
@@ -763,8 +708,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically proven diagnosis of prostate adenocarcinoma within 12 months of enrollment\n* Unfavorable intermediate risk prostate cancer by NCCN 2021 risk stratification guidelines, including any of the following clinicopathologic features:\n* Gleason Score 4+3\n* ≥ 50% biopsy…",
-                "answers_question": "Which intermediate-risk subgroups drive the biochemical failure difference",
-                "relevance_phrase": "SBRT sans ADT, Decipher-gated UIR selection"
+                "answers_question": "Whether ADT improves outcomes for unfavorable intermediate-risk pts receiving SBRT",
+                "relevance_phrase": "SBRT without ADT in UIR, Decipher-gated"
               },
               {
                 "nct": "NCT06397703",
@@ -790,255 +735,367 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Biopsy proven unfavorable intermediate risk prostate cancer, which includes patients with any one of the following variables: Gleason 4+3 disease; Percent positive cores \\> 50% of Gleason 7 disease; 2-3 intermediate risk factors (Gleason 7; PSA 10-20 ng/mL; or T2b-T2c)\n*…",
-                "answers_question": "Which intermediate-risk subgroups drive the biochemical failure difference",
-                "relevance_phrase": "n=392 UIR: SBRT ± 6mo ADT by IR factor count"
+                "answers_question": "Whether ADT improves outcomes for unfavorable intermediate-risk pts receiving SBRT",
+                "relevance_phrase": "SBRT + 6-mo ADT vs SBRT alone, NCCN UIR cohort"
               },
               {
-                "nct": "NCT04905069",
-                "brief_title": "Effectiveness of the SpaceOAR Vue System in Subjects With Prostate Cancer",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 500,
-                "primary_completion_date": "2027-12",
-                "brief_summary": "To demonstrate the effectiveness of the SpaceOAR Vue System in reducing late gastrointestinal (GI) toxicity in subjects undergoing Stereotactic Body Radiotherapy (SBRT) to treat prostate cancer.",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "SpaceOAR Vue System",
-                    "type": "DEVICE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years old.\n* Subjects must have pathologically confirmed (by routine hematoxylin and eosin (H\\&E) staining) invasive adenocarcinoma of the prostate and been planning to undergo SBRT.\n* Subjects must have intermediate risk prostate cancer as defined by the presence of…",
-                "answers_question": "Whether the SBRT bowel benefit holds without a rectal spacer",
-                "relevance_phrase": "n=500 SpaceOAR Vue, late GI toxicity under SBRT"
-              },
-              {
-                "nct": "NCT06835725",
-                "brief_title": "Phase II Randomized Trial of 2 Versus 5 Fraction Prostate Stereotactic Ablative Radiotherapy for Intermediate Risk Prostate Cancer",
+                "nct": "NCT06825091",
+                "brief_title": "Is Adaptive SBRT for Prostate vs Image-guided Radiotherapy a True Evolution (ASPIRE)",
                 "overall_status": "RECRUITING",
                 "phase": [
-                  "PHASE2"
+                  "PHASE3"
                 ],
-                "enrollment_count": 100,
-                "primary_completion_date": "2032-04",
-                "brief_summary": "Prostate cancer is a common cancer, and a significant cause of cancer death in men. There are many potentially curative treatment options for prostate cancers that have not spread. A relatively recent option is called prostate stereotactic ablative radiotherapy (SABR). SABR is a form of external beam radiotherapy, where patients receive a small number (5-7) of treatments (also called fractions) of radiation delivered in a highly accurate and precise fashion. Standard prostate SABR is generally…",
+                "enrollment_count": 320,
+                "primary_completion_date": "2030-02",
+                "brief_summary": "The ASPIRE study is a Phase III randomized, single-center study designed to evaluate whether adaptive stereotactic body radiotherapy (SBRT) offers superior clinical benefits compared to standard image-guided SBRT for patients with localized prostate cancer. It aims to explore whether adaptive SBRT can improve urinary outcomes while maintaining effective cancer control.\n\nThis interventional study is randomized, single-institution, and includes 320 participants with localized prostate cancer.…",
                 "conditions": [
-                  "Prostate CA"
+                  "Localized Prostate Cancer",
+                  "Stereotactic Body Radiotherapy"
                 ],
                 "interventions": [
                   {
-                    "name": "Stereotactic Body Radiation Therapy (SBRT)",
+                    "name": "SBRT",
                     "type": "RADIATION"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* • Age 18 or older.\n\n  * Able to provide informed consent.\n  * ECOG performance status 0 - 2.\n  * Fit for all protocol treatment and follow-up.\n  * Life Expectancy \\> 5 years.\n  * Histologically confirmed adenocarcinoma of the prostate, NCCN low or intermediate risk, with…",
-                "answers_question": "Whether the SBRT bowel benefit holds without a rectal spacer",
-                "relevance_phrase": "randomised 2 vs 5 fx SABR, IR, no spacer required"
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Age \\>18 years\n2. Histologic diagnosis of prostate adenocarcinoma\n3. Localized prostate cancer\n4. Low risk, intermediate risk, or high risk allowed\n5. Patient planned for prostate SBRT\n\nExclusion Criteria:\n\n1. Planned for elective nodal irradiation\n2. Contraindications to…",
+                "answers_question": "Whether intrafractional tracking, not platform, drives the toxicity difference",
+                "relevance_phrase": "adaptive vs image-guided SBRT, urinary endpoint"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "SBRT intermediate-risk prostate",
-                "unfavorable intermediate-risk prostate radiotherapy",
-                "rectal spacer prostate SBRT"
+                "androgen deprivation stereotactic prostate intermediate risk",
+                "MRI guided prostate SBRT toxicity"
               ],
               "queries_failed": [],
-              "candidates_returned": 43,
-              "fetched_at": "2026-08-11T00:47:47.597Z",
+              "candidates_returned": 36,
+              "fetched_at": "2026-08-15T04:40:45.473Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {
                 "type": "paper",
-                "id": 44
-              },
-              {
-                "type": "paper",
-                "id": 43
+                "id": 41
               }
             ]
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "head-neck",
-        "intro": "ESTRO fills the post-op CTV gap with geometry, not outcome data.",
-        "studies": [
+          },
           {
-            "name": "ESTRO CTV Delineation Guidelines (Post-op OCSCC)",
-            "tldr": "First consensus post-op CTV atlas for oral cavity SCC: CTV-P = GTV-P pre-op + 10 mm composited with surgical defect/flap + 5 mm.",
+            "name": "American Radium Society AUC: Local Intraprostatic Recurrence",
+            "tldr": "Severe GU toxicity 20% after salvage RP vs 5.6% SBRT, 9.6% HDR: panel prefers biopsy-confirmed reirradiation.",
             "details": [
-              "🔍 ESTRO multidisciplinary expert group; no consensus guideline previously existed for post-op CTV delineation in mucosal HNSCC",
+              "🔍 12-member ARS GU panel (radonc, urology, medonc); modified Delphi, two voting rounds, RAND disagreement methodology",
               {
-                "text": "📐 Primary CTV construction (Table 1, three steps)",
-                "subdetails": [
-                  "Step 1a: re-create GTV-P pre-op on diagnostic MRI/CT, edit on planning CT",
-                  "Step 1b: delineate surgical defect (no reconstruction) or flap body (reconstructed)",
-                  "Step 2a: GTV-P pre-op + 10 mm isotropic",
-                  "Step 2b: surgical defect/flap + 5 mm isotropic, added independently",
-                  "Step 2c: CTV-P = union of both, edited for bone, fascia, air, intra-oral prosthesis"
-                ],
-                "source_tier": "figure"
-              },
-              {
-                "text": "📐 10 mm justified from surgical series: microscopic infiltration within 5 mm of GTV-P edge in >95% of resected OCSCC",
-                "source_tier": "figure"
-              },
-              {
-                "text": "📊 Dose prescription by volume (EQD2)",
+                "text": "📊 Panel position on local salvage modality, by clinical variant (Topic 2)",
                 "table": {
                   "columns": [
-                    "Volume",
-                    "EQD2 dose"
+                    "Variant",
+                    "Panel position"
                   ],
                   "rows": [
                     [
-                      "CTV-P post-op (PTV)",
-                      "60 Gy"
+                      "Variant 1: isolated intraprostatic recurrence",
+                      "Reirradiation usually appropriate; cryotherapy or HIFU may be appropriate; ADT alone not recommended"
                     ],
                     [
-                      "CTV-P high-risk (positive <1mm margin)",
-                      "over 60 Gy, e.g. 64-66 Gy"
+                      "Variant 2: short PSA doubling time, short interval to failure",
+                      "HIFU may be appropriate, but disagreement across all interventions; ADT alone not recommended"
                     ],
                     [
-                      "CTV-N1 (involved levels)",
-                      "60 Gy"
+                      "Variant 3: castrate-resistant local recurrence",
+                      "Disagreement on intervention; androgen suppression uniformly not recommended"
                     ],
                     [
-                      "CTV-N2 (undissected at-risk levels)",
-                      "50 Gy"
+                      "Variant 4: second local salvage",
+                      "Disagreement on which modality to select"
                     ],
                     [
-                      "CTV-N2 (dissected at-risk levels)",
-                      "unknown optimum, 50-60 Gy typical"
-                    ],
-                    [
-                      "CTV-N high-risk (pENE)",
-                      "over 60 Gy, e.g. 64-66 Gy"
+                      "Variant 5: prior grade ≥3 toxicity",
+                      "Disagreement; active surveillance may be appropriate; ADT can be considered"
                     ]
                   ]
-                },
-                "source_tier": "figure"
+                }
               },
               {
-                "text": "🔍 Nodal margin depends on pENE status, not level anatomy alone",
-                "subdetails": [
-                  "No pENE: GTV-N pre-op + 5 mm, composited with involved level(s) and post-op change → CTV-N1",
-                  "pENE: GTV-N pre-op + 10 mm → CTV-N high-risk",
-                  "Nodes not identifiable pre-op or poor co-registration: outline whole involved level(s) + seroma/clips instead"
-                ],
-                "source_tier": "figure"
+                "text": "📊 MASTER meta-analysis: adjusted severe toxicity by salvage modality, salvage RP as reference",
+                "table": {
+                  "columns": [
+                    "Modality",
+                    "Severe GU",
+                    "Severe GI"
+                  ],
+                  "rows": [
+                    [
+                      "Salvage RP (reference)",
+                      "20%",
+                      "1.8%"
+                    ],
+                    [
+                      "SBRT",
+                      "5.6%",
+                      "not reported in source"
+                    ],
+                    [
+                      "HDR brachytherapy",
+                      "9.6%",
+                      "0.0%, p < 0.01 vs RP"
+                    ],
+                    [
+                      "LDR brachytherapy",
+                      "9.1%",
+                      "not reported in source"
+                    ]
+                  ]
+                }
               },
               {
-                "text": "🔍 When PORT to the neck can be omitted (adequate ≥18 node dissection)",
+                "text": "📊 Reirradiation schemas the panel considers acceptable",
                 "subdetails": [
-                  "pN0 after adequate dissection: neck PORT generally not required",
-                  "pN1 after adequate dissection: may not be required; single node >10 mm but ≤30 mm is an indication",
-                  "Single node ≤10 mm: adjuvant RT not routinely recommended",
-                  "PORT indicated in neck but not primary: still treat both, to cover T-N tract and lingual nodes"
-                ],
-                "source_tier": "figure"
+                  "SBRT whole-gland: 34 Gy in 5 fractions, heterogeneously dosed to mimic HDR (Fuller series, 50 pts)",
+                  "SBRT focal: 40 Gy in 5 fractions, the MTD from a small NCI dose-finding study",
+                  "EBRT: 36 Gy in 6 fractions, from the prospective phase 2 GETUG-AFU 31 study",
+                  "LDR: minimum target dose 140 Gy (I-125) or 120 Gy (Pd-103), per RTOG 0526",
+                  "HDR: 36 Gy in 6 fractions over two implants, 32 Gy in four fractions, or 27 Gy in 2 fractions",
+                  "F-SHARP: one to two fraction HDR with escalation up to 30 Gy, accrual complete"
+                ]
               },
-              "🔗 Extends the 2018 definitive-setting HNSCC CTV guideline's 5 + 5 mm geometric expansion into the post-op setting",
-              "🔗 GORTEC 2020 flap delineation guidance cited as a useful adjunct for standardising flap outlining",
-              "⚠️ Consensus + expert opinion, no outcome data: no recurrence, toxicity or dosimetric endpoint tests these margins",
-              "⚠️ Whether central flap body can be dose-de-escalated is explicitly unresolved; a flap avoidance structure is offered without supporting data",
-              "⚠️ Dose to dissected uninvolved levels left to clinician discretion, resting on a 1993 MD Anderson observation never tested prospectively"
+              {
+                "text": "📊 Focal vs whole-gland salvage by imaging and biopsy concordance (Topic 4)",
+                "table": {
+                  "columns": [
+                    "Scenario",
+                    "Target volume"
+                  ],
+                  "rows": [
+                    [
+                      "mpMRI and systematic biopsy agree on lesion location",
+                      "Focal favored"
+                    ],
+                    [
+                      "History of grade ≥3 toxicity from initial RT course",
+                      "Focal favored"
+                    ],
+                    [
+                      "Lesion occult on mpMRI, localised by PET plus systematic biopsy",
+                      "Focal or whole-gland both appropriate"
+                    ],
+                    [
+                      "mpMRI and systematic biopsy disagree on lesion location",
+                      "Whole-gland preferred"
+                    ],
+                    [
+                      "Recurrent lesion in a different location to the index lesion",
+                      "Whole-gland preferred, focal appropriate in selected cases"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "🔍 Biopsy required before salvage: radiographic false positives are common",
+                "subdetails": [
+                  "FORECAST mpMRI sensitivity 94% (95% CI 88-98%), specificity 18% (95% CI 7-35%), n=155",
+                  "PSMA PET false-positive rate 8% against histopathology in 635 pts with BCR (Fendler)",
+                  "Up to 59% of true radiorecurrences would be occult with MRI-targeted biopsy alone",
+                  "Both systematic and targeted biopsies recommended; combined biopsy-plus-ablation approaches discouraged"
+                ]
+              },
+              "💊 Short 4-6 mo LHRH agonist has moderate consensus as radiosensitizer with salvage SBRT, no cardiac history",
+              "⚠️ No agreement on relugolix: HERO's cardiac benefit was an unplanned secondary analysis, PRONOUNCE did not replicate it",
+              "⚠️ Evidence base predates PSMA PET; prior brachytherapy pts excluded; initial RT was conventionally fractionated EBRT"
             ],
             "figures": [],
             "nct": null,
             "tweet_ids": [
-              1000000045
+              1000000040
             ],
-            "slug": "estro-ocscc-ctv-guidelines",
+            "slug": "ars-auc-intraprostatic-recurrence",
             "verdict": {
               "soc_implication": "consensus",
-              "rationale": "ESTRO expert guideline with international external review; output is a delineation method and dose allocation, no efficacy endpoint. First post-op CTV consensus in mucosal HNSCC.",
-              "audience": "Resected oral cavity SCC receiving post-operative RT"
+              "rationale": "Appropriate use criteria from a 12-member Delphi panel; the output is a recommendation grid, not an efficacy result. No trial endpoint, so efficacy verdicts do not apply.",
+              "audience": "Isolated intraprostatic recurrence after definitive prostate RT"
             },
-            "significance": "The load-bearing recommendation is asymmetric: 10 mm around a re-created pre-op GTV, only 5 mm around the surgical defect or flap, unioned rather than nested. Fig 3.1/3.2 show why the GTV-P step is not optional, the pre-op tumour extended superiorly beyond the defect into the infratemporal fossa, a geographical miss if the defect alone had been used.",
-            "monday_clinic": "For a resected OCSCC patient going to PORT, this supports carrying the pre-operative MRI-defined tumour onto the planning CT as a target-defining volume rather than contouring the surgical bed alone; it does not address whether that patient needs PORT, or extend to R2 resections or other head and neck subsites.",
+            "significance": "The modality recommendation is a toxicity argument, not an efficacy one: MASTER found adjusted 5-yr recurrence-free survival of 50% to 60% across modalities with no survival difference vs RP, so reirradiation wins on severe GU toxicity (5.6% SBRT, 9.6% HDR vs 20% RP). Target volume then follows concordance, focal when mpMRI and systematic biopsy agree, whole-gland when they do not.",
+            "monday_clinic": "In a man with rising PSA after conventionally fractionated definitive prostate EBRT whose PSMA PET and mpMRI show isolated intraprostatic recurrence, this supports biopsy confirmation before reirradiation rather than ADT alone; it does not extend to recurrence after primary brachytherapy or to nodal or distant failure.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "ESTRO-convened multidisciplinary expert group (radiation oncology, surgery, pathology, radiology). Guidelines developed by discussion and review of current evidence and international practice, then externally reviewed by HNSCC experts from countries outside the authorship (Japan, Hong Kong, Australia, Brazil, Mexico, Canada, Denmark, France, Spain, Poland, Ireland, UK) and modified on their feedback. **No formal Delphi round or quantified agreement statistic is reported.**"
+                "body": "**PRISMA** systematic review of PubMed and Embase (searched **28 June 2022**) across four topics, excluding conference abstracts, non-English publications and series of fewer than five patients. A **12-member** multidisciplinary panel of radiation oncologists, urologists and medical oncologists voted in **two rounds** by modified **Delphi**, with RAND methodology defining disagreement."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Patients with **oral cavity squamous cell carcinoma** requiring post-operative radiotherapy. Applies **regardless of margin status and other histological risk factors**. **R2 resection (macroscopic residual disease) is explicitly out of scope.**"
+                "body": "Scope is **tier A** disease, local-only intraprostatic radiorecurrence after definitive RT, with BCR defined as PSA **2.0 ng/ml above nadir**. Evidence was restricted to men whose primary treatment was **conventionally fractionated EBRT**, and prior brachytherapy patients were excluded from the synthesis. Every variant presumes the patient wants curative-intent local salvage."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Supine, neutral neck, custom immobilisation; **2.0 mm (range 1-3 mm) CT slices** skull base to below the sterno-clavicular joint with **mandatory IV contrast**. Rigid co-registration of pre-operative contrast CT and/or MRI, matched to **C1-C3 vertebrae or nearby bone (mandible, hard palate)**, never to soft tissue, which surgery has moved. CTV-P = **(GTV-P pre-op + 10 mm) + (defect or flap + 5 mm)**, edited for bone, fascia, air, prosthesis; nodal margin is **5 mm without pENE, 10 mm with pENE**."
+                "body": "All accepted salvage schemas fit in **six or fewer fractions**. For focal salvage, **GETUG-AFU 31** defines GTV by mpMRI plus choline PET with a **5-7 mm** margin bound by the prostatic capsule; whole-gland salvage SBRT has prospective support from the Fuller series. Dose constraints and IGRT method are out of scope."
               },
               {
-                "label": "Endpoints",
-                "body": "None. The deliverable is a delineation method plus a nodal-level allocation table, not a measured outcome. Stated aim is consistency across institutions, enabling **multi-institutional audit, clinical trials and RTQA**."
+                "label": "Regimen",
+                "body": "Long hormone courses are recommended against across all salvage scenarios. A short **4-6 mo LHRH agonist** carries moderate consensus as a radiosensitizer with salvage SBRT in patients without cardiac history, weaker consensus with cardiac comorbidity, and **classic ADT is preferred over novel hormonal agents**."
               },
               {
-                "label": "Applies to",
-                "body": "Represents resected OCSCC of any subsite going to PORT, including flap-reconstructed necks and pENE. Does not represent R2 resections, non-oral-cavity HNSCC subsites, or the re-irradiation setting."
+                "label": "Safety",
+                "body": "The toxicity read that drives the reirradiation preference comes from pooled retrospective data that could not evaluate **sexual toxicity** and included no PSMA PET selection. Approaches that combine biopsy and ablation in one procedure are discouraged, since histologic confirmation must precede salvage."
               },
               {
                 "label": "vs leading data",
-                "body": "Directly extends the 2018 international definitive-setting CTV guideline, whose **5 + 5 mm geometric expansion** becomes the 10 mm here. Supporting evidence for geometric over anatomical margins is indirect: DAHANCA showed geometric expansion gives more conformal CTVs, and an **unplanned post-hoc analysis of De-ESCALaTE** correlated the anatomical-to-geometric protocol change with lower late dysphagia. Dutch non-randomised series reducing the high-risk margin from **10 mm to 6 mm** reported lower salivary and constrictor dose and lower toxicity versus historical controls, so the 10 mm chosen here is not the only defensible number in the definitive setting."
+                "body": "No prior consensus guideline addressed intraprostatic radiorecurrence exclusively. The hormone-only comparators being displaced (**Crook** intermittent vs continuous ADT, **TOAD** immediate vs delayed, **EMBARK** enzalutamide MFS benefit) all enrolled before PET-based selection and none isolated a biopsy-confirmed, local-only cohort. **RTOG 0526** reported after MASTER closed, adding prospective LDR support."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents men with biopsy-confirmable, PSMA PET and mpMRI-localised isolated intraprostatic recurrence after conventionally fractionated definitive EBRT. Does not represent recurrence after primary brachytherapy or after moderate or ultrahypofractionated RT, nor nodal or distant failure (tiers B and C)."
               },
               {
                 "label": "Limitations",
-                "body": "The margins are anchored to a single surgical-pathology observation (**microscopic infiltration within 5 mm in >95% of resected cases**) applied to a post-operative bed whose geometry has already been altered by resection and flap inset. Re-creating GTV-P pre-op depends on co-registration quality; where that fails the guideline falls back to examination notes, photographs and operative findings, which is exactly the unquantified inter-observer variability these guidelines exist to reduce."
+                "body": "The search closed **28 June 2022** with an acknowledged lag to publication. **MASTER** carries between-study heterogeneity and follow-up asymmetry favoring older modalities, so its flat efficacy comparison is not a randomised one. The hormone recommendation rests on **no qualifying study** and is extrapolated from de novo intermediate-risk data."
               },
               {
                 "label": "Discussion",
-                "body": "The genuinely new claim is that the pre-operative tumour, not the surgical bed, carries information the bed has lost. Two worked cases make it concrete: a buccal mucosa tumour extending superiorly past the defect into the infratemporal fossa, and an ill-defined buccal fat pad reconstruction the fibrotic bed cannot delineate. Whether this reduces marginal recurrence, or merely enlarges volumes, is untested."
+                "body": "Settled: image, biopsy with both systematic and targeted cores, then prefer reirradiation over hormones alone. Not settled: the modality for a second salvage, for castrate-resistant local recurrence, for short PSA doubling time, or after prior grade 3 toxicity, all of which drew panel disagreement."
               }
             ],
-            "interpretation": "The argument this guideline actually makes is narrower and more interesting than \"here are some margins.\" It is that the post-operative bed is an unreliable surrogate for the tissue at risk, and that a re-created pre-operative GTV should be carried forward into the planning scan as a second, independent surrogate. Everything else follows from that: the two expansions are generated separately and unioned, not nested, precisely because neither volume alone reliably contains the other. The worked cases are the evidence offered, and they are chosen to make the failure mode visible rather than to quantify it. A right upper buccal mucosa tumour extended superiorly beyond its surgical defect toward the infratemporal fossa; a buccal fat pad reconstruction was too ill-defined on planning CT to outline with confidence. In both, defect-only or flap-only contouring produces a geographical miss that no margin recipe applied to the wrong starting volume would recover.\n\nThe numeric choices are inherited rather than derived. The 10 mm around GTV-P pre-op is the 5 + 5 mm expansion from the 2018 definitive-setting guideline, itself justified by the surgical observation that microscopic infiltration lies within 5 mm of the GTV edge in more than 95% of resected OCSCC. Importing it into the post-operative setting requires an assumption the document does not test: that a bed already resected with a margin, then reconstructed, has the same microscopic risk geometry as an intact tumour. The 5 mm around the defect or flap is the softer number, presented as sufficient rather than validated. It is worth noting the definitive setting is itself in motion here. Dutch non-randomised work cited in the introduction reduced the high-risk margin from 10 mm to 6 mm and reported lower salivary and constrictor doses with lower acute and late toxicity against historical controls. A guideline whose parent margin is under active de-escalation elsewhere is inheriting a number that may not stay fixed.\n\nWhat should move a reader's confidence upward is the process and the failure-mode reasoning; what should move it down is the complete absence of an outcome endpoint. There is no recurrence rate, no dosimetric comparison against current practice, no inter-observer variability statistic before and after. The supporting evidence for geometric over anatomical margins is real but indirect: DAHANCA conformality data, and a post-hoc analysis of De-ESCALaTE correlating a protocol change with lower late dysphagia. That is a reasonable basis for standardising a method. It is not a basis for asserting the standardised method improves control.\n\nThe honest read is that this changes contouring practice and leaves treatment decisions untouched. Indications for PORT come from the companion background manuscript, not here, and the nodal table largely codifies existing practice around adequate dissection and pENE. Where the document does something quietly consequential is dose allocation at the boundary: dissected but uninvolved levels are left to clinician discretion at 50 to 60 Gy, resting on a 1993 MD Anderson rationale about perturbed, potentially hypoxic tissue that has never been tested prospectively. That is a candid admission, and it marks the place where standardisation stops. For the reader who adopts this, the practical consequence is that volumes will likely grow, particularly in flap-reconstructed cases where the composite extends beyond the oral cavity and must be trimmed by clinical judgement rather than rule. Whether that trade lands as fewer marginal misses or more xerostomia is exactly what the prospective audits the authors call for would have to answer.",
+            "interpretation": "The document's real contribution is to treat isolated intraprostatic radiorecurrence as a distinct, potentially curable disease state at exactly the moment PSMA PET is manufacturing the diagnosis faster than the evidence can absorb it. That timing is also the central weakness, and the panel says so plainly: the studies it synthesised were done in men worked up before PSMA PET, whose primary treatment was conventionally fractionated external beam RT, with prior brachytherapy patients excluded outright. Moderate and ultrahypofractionated primary RT is now standard, so the men a reader will be re-treating five years from now are not the men in this evidence base.\n\nThe biopsy mandate is the most defensible recommendation, and it rests on a specificity problem rather than a sensitivity one. FORECAST put mpMRI sensitivity at 94% (95% CI 88-98%) against a specificity of 18% (95% CI 7-35%), and Fendler reported an 8% false-positive rate against histopathology, largely in men with post-treatment change. When the intervention on the other side of the imaging finding is a second course of prostate radiation, the false positive is the expensive error. The insistence on both systematic and targeted sampling follows from the FORECAST secondary analysis showing up to 59% of true radiorecurrences would be missed by targeted biopsy alone.\n\nThe modality recommendation deserves a more skeptical read. It rests almost entirely on MASTER, a pooled synthesis of 150 largely retrospective studies with acknowledged follow-up asymmetry between older and newer salvage techniques. On efficacy MASTER was flat: adjusted 5-yr recurrence-free survival of 50% to 60%, with no survival difference between any modality and salvage prostatectomy. The preference for reirradiation is therefore a toxicity argument, not a disease-control argument, and readers should carry it that way. The numbers driving it (severe GU 20% after RP against 5.6% after SBRT, 9.6% after HDR and 9.1% after LDR brachytherapy) are adjusted rates from pooled retrospective series with no PSMA PET selection and no assessment of sexual toxicity, which is not a trivial omission in this population.\n\nWhere the panel failed to agree is more informative than where it agreed. Short PSA doubling time with early failure, castrate-resistant local recurrence, a second salvage attempt, and prior grade 3 or worse toxicity all produced disagreement. Those are not exotic scenarios; they are a large share of who actually presents. Read honestly, the disagreement argues for trial enrolment or continued imaging surveillance rather than for picking a modality by preference.\n\nThe hormonal recommendation is the weakest link and the text is candid about it: no study met the inclusion bar, and the 4 to 6 month LHRH agonist course is extrapolated from de novo intermediate-risk data. The comparator being displaced, hormones alone, was defined by Crook, TOAD and EMBARK, all of which enrolled before PET-based selection and none of which isolated a biopsy-confirmed local-only cohort.\n\nWhat would have to be true for the framework to be wrong is that PET-detected isolated intraprostatic recurrence usually travels with occult distant disease, in which case local salvage buys toxicity and little else. RTOG 0526 is the shape of that worry in prospective data: a 10-yr local failure rate of 5% alongside disease-free survival of 61% at 5 yr falling to 33% at 10 yr. Local control was not the problem.",
             "relevant_specialties": [
               "radonc",
+              "medonc",
               "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The asymmetric margins are the operational content: 10 mm around a re-created GTV-P pre-op, 5 mm around the defect or flap, unioned not nested. Fig 3.1/3.2 show a case where the pre-op tumour extended superiorly past the defect into the infratemporal fossa, so skipping the GTV-P step is a geographical miss, not a simplification.",
-              "surgonc": "The guideline makes the operative record part of the radiotherapy target: pan-endoscopy findings, clinical photographs, intra-operative findings and the localisation of a positive margin all feed delineation, and surgeon input is requested in complex cases. Marking a <1mm margin with a surgical clip lets that area alone take EQD2 64-66 Gy rather than the whole CTV-P."
+              "radonc": "Every accepted schema fits in six or fewer fractions (34 Gy or 40 Gy in 5 fractions, 36 Gy in 6 fractions per GETUG-AFU 31, HDR 27 Gy in 2 fractions), and focal CTV is mpMRI plus choline PET GTV with a 5-7 mm margin bound by the capsule. None of it was validated after hypofractionated primary RT.",
+              "medonc": "ADT alone is recommended against for confirmed local recurrence. Only a short 4-6 mo LHRH agonist is endorsed, as a radiosensitizer with salvage SBRT, and the panel reached no agreement on relugolix (HERO's cardiac benefit was an unplanned secondary, PRONOUNCE did not replicate). Classic ADT is preferred over novel hormonal agents.",
+              "surgonc": "Salvage RP holds equivalent adjusted 5-yr recurrence-free survival in MASTER (50% to 60% across modalities, no survival difference vs RP), so the case against it is toxicity: severe GU 20% vs 5.6% after SBRT. Biopsy and ablation should not be combined in one procedure, since histologic confirmation must precede salvage."
             },
             "open_questions": [
-              "Does dose de-escalation to the central flap body compromise control?",
-              "Optimal dose to dissected but uninvolved nodal levels",
-              "Do these margins reduce marginal recurrence or only enlarge volumes?"
+              "Salvage outcomes after primary hypofractionated RT or prior brachytherapy",
+              "Whether short ADT adds oncologic benefit to salvage reirradiation",
+              "Optimal modality for castrate-resistant or second local salvage"
             ],
             "consort": null,
             "modality": "radiation",
             "intent": "curative",
             "methodology": "consensus-guideline",
             "significance_perspective": "Radiation oncology",
-            "related_trials": null,
+            "related_trials": [
+              {
+                "nct": "NCT05614700",
+                "brief_title": "Prostate Reirradiation Toxicity Outcomes Feasibility Study",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 60,
+                "primary_completion_date": "2024-11",
+                "brief_summary": "The RO-PIP trial aims to determine the feasibility of recruitment to a trial randomising patients to salvage ultra-hypofractionated external beam radiotherapy or high dose rate brachytherapy and provide prospective data on patient recorded toxicity outcomes that will inform a future phase III trial.",
+                "conditions": [
+                  "Prostate Cancer",
+                  "Radiotherapy Side Effect"
+                ],
+                "interventions": [
+                  {
+                    "name": "Brachytherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Sterotactic Body Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Male individuals aged over 18 years\n* Histologically confirmed locally recurrent prostate cancer (following previous radiotherapy no less than 2 years ago)\n* No metastatic disease\n* Able and willing to provide an informed consent to participate\n* World Health Organisation…",
+                "answers_question": "Salvage outcomes after primary hypofractionated RT or prior brachytherapy",
+                "relevance_phrase": "RO-PIP: salvage ultra-hypofx EBRT vs HDR, pt-reported tox"
+              },
+              {
+                "nct": "NCT06201078",
+                "brief_title": "Stereotactic Re-irradiation of Local Recurrences of Prostate Cancer After Radiotherapy",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 55,
+                "primary_completion_date": "2029-12",
+                "brief_summary": "The goal of this clinical study is to evaluate the toxicity and efficacy of re-irradiation using focal stereotactic body radiotherapy (SBRT) in patients with local recurrence of prostate cancer after definitive or post-operative radiotherapy.\n\nThe main question is the tolerance of such treatment, concerning the incidence of Grade ≥ 2 and Grade ≥ 3 GU and GI toxicity. Also the efficacy of SBRT will be measured in terms of Biochemical Control with other secondary endpoints which include:…",
+                "conditions": [
+                  "Local Recurrence of Malignant Tumor of Prostate",
+                  "Radiotherapy"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic Body Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Local recurrence of prostate cancer after definitive radiotherapy\n\n   1. biopsy proven or/and\n   2. Consistent MRI and PET-PSMA results and PSA growth dynamics\n2. Time since primary radiotherapy - at least 2 years\n3. Good performance status (ZUBROD 0-1)\n\n   * If the results…",
+                "answers_question": "Salvage outcomes after primary hypofractionated RT or prior brachytherapy",
+                "relevance_phrase": "focal SBRT reRT, G2/G3 GU-GI tox 1° EP"
+              },
+              {
+                "nct": "NCT03246802",
+                "brief_title": "Partial Prostate Salvage High Dose Rate Brachytherapy",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 30,
+                "primary_completion_date": "2032-01",
+                "brief_summary": "A dose-response relationship for radiation in the management of prostate cancer is well established. Local recurrence of prostate cancer after external beam radiotherapy occurs in at least 40% of patients treated because of inability to deliver sufficient dose through external beam techniques. These patients respond well to re-irradiation using brachytherapy with about 50% of selected patients remaining free of recurrence 5 years after salvage. Advanced imaging using multiparametric Magnetic…",
+                "conditions": [
+                  "Recurrent Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "HDR partial prostate brachytherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age \\>45 and Life expectancy \\>10 years\n* Previous External Beam Radiotherapy (EBRT) or LDR brachytherapy w\n* \\> 3 year interval since EBRT or LDR Brachytherapy\n* No late toxicity from prior EBRT ≥ grade 2\n* PSA \\> nadir + 2 ng/ml and \\< 10 ng/ml\n* PSA Doubling time \\> 6…",
+                "answers_question": "Salvage outcomes after primary hypofractionated RT or prior brachytherapy",
+                "relevance_phrase": "salvage HDR after prior EBRT or LDR brachytherapy"
+              },
+              {
+                "nct": "NCT04231006",
+                "brief_title": "Salvage HDR for Locally Recurrent Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 50,
+                "primary_completion_date": "2025-03",
+                "brief_summary": "The study offers focal salvage brachytherapy for prostate cancer patients with a local recurrence after primary defintive radiotherapy",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "High dose rate brachytherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Man ≥ 18 years, who had definitive EBRT or BT for prostate cancer T1-3b, N0-1, M0\n* ≥ 2 years since the end of primary radiotherapy\n* PSA recurrence Phoenix criteria (nadir + 2)\n* No evidence of regional lymph nodes or distant metastases on PSMA PET/CT\n* MRI guided…",
+                "answers_question": "Optimal modality for castrate-resistant or second local salvage",
+                "relevance_phrase": "focal salvage HDR, biopsy/MRI-guided local recurrence"
+              }
+            ],
             "related_trials_provenance": {
               "queries_fired": [
-                "flap dose reduction oral cavity radiotherapy",
-                "flap reduction oral cavity radiotherapy",
-                "postoperative neck irradiation dose oral cavity",
-                "target volume delineation oral cavity postoperative"
+                "prostate salvage reirradiation",
+                "prostate reirradiation androgen deprivation",
+                "castration-resistant prostate local salvage"
               ],
               "queries_failed": [
                 {
-                  "term": "flap dose reduction oral cavity radiotherapy",
+                  "term": "prostate reirradiation androgen deprivation",
                   "reason": "empty"
                 }
               ],
-              "candidates_returned": 24,
-              "fetched_at": "2026-08-11T00:44:48.960Z",
-              "rerank_outcome": "abstained"
+              "candidates_returned": 18,
+              "fetched_at": "2026-08-15T04:45:21.916Z",
+              "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {
                 "type": "paper",
-                "id": 45
+                "id": 40
               }
             ]
           }
@@ -1047,9 +1104,15 @@
       }
     ],
     "meta": {
-      "clusters_total": 4,
+      "clusters_total": 5,
       "studies_analyzed": 4,
-      "dropped": [],
+      "dropped": [
+        {
+          "slug": "nrg-gu005-dfs",
+          "name": "NRG-GU005 (disease-free survival)",
+          "reason": "suppressed via override"
+        }
+      ],
       "ocr_available": true
     }
   },
