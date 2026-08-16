@@ -22,10 +22,13 @@ import {
   upsertConference,
   queueRebuild,
   paperHasFigures,
+  saveSourceFacet,
+  todayIso,
   PAPER_CONTENT_FIELDS,
   type InboxItem,
   type SavePaperResult,
 } from './db.ts';
+import { extractSourceFacet } from './source-facet.ts';
 import { detectConferenceFromTexts } from './conference-detect.ts';
 import { fetchTweet, TweetFetchError } from './twitter-fetch.ts';
 import { extractCuratorNote, sendMessage } from './telegram-ingest.ts';
@@ -237,7 +240,16 @@ async function enrichSlideItem(
         source_batch_key: null, // batched in pull-telegram; this column is set there
         inbox_item_id: item.id,
       });
-      if (listDigests().some((d) => d.date === item.bookmark_date)) {
+      // Same stranding rule as papers: a slide whose date is already published
+      // needs the card rebuilt, and one whose date has fallen outside the build
+      // window will never be built at all unless it is queued here.
+      if (
+        needsRebuildQueue(
+          item.bookmark_date,
+          todayIso(),
+          listDigests().some((d) => d.date === item.bookmark_date),
+        )
+      ) {
         queueRebuild(db, item.bookmark_date, 'conference slide added');
       }
       return saved2;
@@ -391,14 +403,55 @@ function describeMerge(mergedFields: string[]): string | null {
   return `${bits.slice(0, -1).join(', ')} and ${bits[bits.length - 1]}`;
 }
 
+// The nightly cron builds TODAY and YESTERDAY, then drains rebuild_queue with
+// `--skip=today,yesterday` (scripts/daily-build.sh). So a source dated inside
+// that window is published by the normal stages, and a source dated OUTSIDE it
+// reaches a digest ONLY if something queues its date here.
+//
+// Exported for tests: the window is the whole reason the queue exists, and it is
+// stated in exactly two places (there and here).
+export function isOutsideBuildWindow(bookmarkDate: string, today: string): boolean {
+  const d = new Date(`${today}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return bookmarkDate < d.toISOString().slice(0, 10);
+}
+
+/**
+ * Does a source landing on `date` need its date queued for rebuild?
+ *
+ * Two independent reasons, and the second one is the bug this fixes:
+ *   · the date is ALREADY PUBLISHED — the richer data has to reach a card that
+ *     already shipped (the v0.23 upgrade case);
+ *   · the date is OUTSIDE the build window — no build will ever target it
+ *     again, so without a queue entry the source is stranded in the DB forever.
+ *
+ * A date that is unpublished but still inside the window needs nothing: the
+ * cron's own build:day stage covers it, and queueing it would buy a wasted
+ * second LLM build (#A6).
+ */
+export function needsRebuildQueue(
+  bookmarkDate: string,
+  today: string,
+  alreadyPublished: boolean,
+): boolean {
+  return alreadyPublished || isOutsideBuildWindow(bookmarkDate, today);
+}
+
 // v0.23: save a paper AND, in the SAME transaction, queue a rebuild when the
-// collision UPGRADED published content on an ALREADY-PUBLISHED past date. One
-// transaction so a crash can't persist the merge yet lose the rebuild (codex
-// #C2): a retry after a partial would see mergedFields empty (data already
-// merged) and never re-queue. Only an already-published date is queued (mirrors
-// the slide guard): today's digest isn't built yet at enrich time so it's
-// excluded here, and the cron's today/yesterday build stages plus the drain's
-// --skip cover the recent dates without a wasted double build (#A6).
+// result needs one. One transaction so a crash can't persist the merge yet lose
+// the rebuild (codex #C2): a retry after a partial would see mergedFields empty
+// (data already merged) and never re-queue.
+//
+// FIXED: this used to require `!r.created` AND an already-published date, and
+// the real stranding case fails BOTH tests. A paper whose enrichment finally
+// succeeds days after ingestion keeps its original bookmark_date, so it is
+// created fresh (not a merge) on a date the build window has long since passed
+// — and because that date was never built, `alreadyPublished` is false too. The
+// v0.15 OAR-constraints paper sat enriched and invisible through three separate
+// submissions for exactly this reason: sent 08-09 (URL 403'd), re-sent 08-10 as
+// a PDF whose enrichment failed twice and only landed on 08-13, by which point
+// no build would ever target 2026-08-10 again; the 08-13 re-send then deduped
+// on DOI straight back into that same stranded row.
 function savePaperAndQueueRebuild(
   db: Database.Database,
   input: NewPaper,
@@ -406,13 +459,20 @@ function savePaperAndQueueRebuild(
   return db.transaction(() => {
     const r = savePaper(db, input);
     let queuedDate: string | null = null;
-    if (!r.created && r.bookmarkDate) {
+    if (r.bookmarkDate) {
       const contentFields = r.mergedFields.filter((f) =>
         (PAPER_CONTENT_FIELDS as readonly string[]).includes(f),
       );
+      // Something must actually have changed: a fresh row, or a collision that
+      // merged real content. A repeat submission adding nothing gets no rebuild.
+      const changed = r.created || contentFields.length > 0;
       const alreadyPublished = listDigests().some((d) => d.date === r.bookmarkDate);
-      if (contentFields.length > 0 && alreadyPublished) {
-        queueRebuild(db, r.bookmarkDate, `paper upgrade (${contentFields.join(',')})`);
+      if (changed && needsRebuildQueue(r.bookmarkDate, todayIso(), alreadyPublished)) {
+        queueRebuild(
+          db,
+          r.bookmarkDate,
+          r.created ? 'paper added' : `paper upgrade (${contentFields.join(',')})`,
+        );
         queuedDate = r.bookmarkDate;
       }
     }
@@ -1112,16 +1172,30 @@ export function contentDepthNote(p: { abstract?: string | null; fulltext_excerpt
   return 'no abstract or full text';
 }
 
-// The SUBJECT text of an enriched row, for ACRONYM matching: a paper's title
-// (the trial it's ABOUT) + the curator's note, or a tweet/slide's short body.
-// Deliberately narrower than getEnrichedText so a comparator trial named deep in
-// a paper's discussion doesn't trigger a spurious duplicate nudge.
+// The SUBJECT text of an enriched row, for ACRONYM matching: a paper's title +
+// abstract (the trial it's ABOUT) + the curator's note, or a tweet/slide's short
+// body. Deliberately narrower than getEnrichedText so a comparator trial named
+// deep in a paper's discussion doesn't trigger a spurious duplicate nudge.
+//
+// The abstract is included because a trial's PRIMARY PUBLICATION often does not
+// name itself in its title. The full NRG-GU005 report is titled "Stereotactic
+// Body Radiotherapy vs Moderately Hypofractionated IMRT for Localized
+// Intermediate-Risk Prostate Cancer" — no acronym anywhere in it — while its
+// abstract names NRG-GU005 outright. On a title-only read that paper matched
+// NOTHING against the digest's own earlier GU005 card, whose sources carried the
+// acronym but no NCT, so neither identity channel fired and a full JAMA
+// publication looked like a brand-new trial.
+//
+// The discussion section stays excluded: that is where comparator acronyms live.
+// An abstract names the trial it reports.
 function getSubjectText(db: Database.Database, type: InboxItem['type'], rowId: number): string {
   if (type === 'paper') {
-    const r = db.prepare('SELECT title, curator_note FROM papers WHERE id = ?').get(rowId) as
-      | { title: string | null; curator_note: string | null }
+    const r = db
+      .prepare('SELECT title, abstract, curator_note FROM papers WHERE id = ?')
+      .get(rowId) as
+      | { title: string | null; abstract: string | null; curator_note: string | null }
       | undefined;
-    return [r?.title, r?.curator_note].filter(Boolean).join(' ');
+    return [r?.title, r?.abstract, r?.curator_note].filter(Boolean).join(' ');
   }
   // Tweets and slides are already short and subject-focused.
   return getEnrichedText(db, type, rowId);
@@ -1151,6 +1225,39 @@ function getEnrichedText(
     | { ocr_text: string | null; curator_note: string | null }
     | undefined;
   return [r?.ocr_text, r?.curator_note].filter(Boolean).join(' ');
+}
+
+// Trial lineage: classify WHAT this source reports about its trial (facet +
+// maturity + follow-up), so the build can tell a matured re-reading of one
+// objective from a genuinely different objective and act differently on each.
+//
+// Best-effort by design. A failed or unparseable classification leaves the
+// columns null, and a null facet makes the build's classifier abstain — which
+// degrades to exactly the pre-lineage behaviour (the curator nudge below).
+// Enrichment must never fail because a courtesy classification did.
+//
+// Reads getSubjectText, not the full excerpt: the facet and the trial's own
+// acronyms live in the title/abstract, while a paper's DISCUSSION is where
+// comparator trials get named — and a comparator acronym harvested into
+// trial_acronyms would be a false identity, the one error this whole subsystem
+// exists to avoid.
+async function classifySourceFacet(
+  db: Database.Database,
+  item: InboxItem,
+  rowId: number,
+): Promise<void> {
+  if (process.env.SOURCE_FACET === 'off') return;
+  try {
+    const subject = getSubjectText(db, item.type, rowId);
+    if (!subject.trim()) return;
+    const facet = await extractSourceFacet(subject);
+    if (!facet.facet && !facet.maturity && facet.followup_months === null && facet.trial_acronyms.length === 0) {
+      return; // nothing learned; leave the columns null
+    }
+    saveSourceFacet(db, item.type, rowId, facet);
+  } catch {
+    // a courtesy classification must never fail enrichment
+  }
 }
 
 // E6 (+ v0.26 acronym): if the just-enriched source matches a trial a prior
@@ -1298,6 +1405,25 @@ async function enrichTweetItem(
     // it only if the curator's message didn't already tag the bookmark.
     const tweetConference = detectAndEnsureConference(db, [tweet.text], item.bookmark_date);
     if (tweetConference) setBookmarkConferenceIfEmpty(db, bookmarkId, tweetConference);
+
+    // Queue the rebuild HERE, not at insert. A tweet whose oEmbed has not
+    // succeeded yet has no text, so a rebuild triggered for it finds no usable
+    // items — and build:day treats an empty date as SUCCESS, which dequeues the
+    // entry and strands the tweet permanently once its date leaves the build
+    // window. Queue only what a rebuild can actually publish.
+    //
+    // Deliberately NOT gated on `r.created`: the bookmark reservation is
+    // idempotent, so a row inserted on an earlier run that only enriches now
+    // comes back created=false, and that is exactly the late-enrichment case.
+    if (
+      needsRebuildQueue(
+        item.bookmark_date,
+        todayIso(),
+        listDigests().some((d) => d.date === item.bookmark_date),
+      )
+    ) {
+      queueRebuild(db, item.bookmark_date, 'tweet enriched');
+    }
   } catch (err) {
     if (err instanceof TweetFetchError) {
       // Soft failure: bookmark stays 'pending'. Caller marks inbox enriched
@@ -1354,6 +1480,7 @@ export async function runEnrichmentLoop(
         markInboxEnriched(db, item.id, result.enrichedRowId);
         enriched++;
         if (result.bookmarkCreated) bookmarksCreated++;
+        await classifySourceFacet(db, item, result.enrichedRowId);
         await notifyPriorCoverage(db, item, result.enrichedRowId, coverageIndex, acronymCoverageIndex);
         break;
       case 'failed':

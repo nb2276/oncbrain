@@ -199,6 +199,10 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   image_urls TEXT,
   image_ocr_texts TEXT,
   notes TEXT,
+  report_facet TEXT,
+  maturity TEXT,
+  followup_months REAL,
+  trial_acronyms_json TEXT,
   fetched_via TEXT NOT NULL DEFAULT 'pending',
   created_at INTEGER NOT NULL
 );
@@ -244,6 +248,13 @@ CREATE TABLE IF NOT EXISTS papers (
   figure_ocr_md TEXT,
   figure_structured_md TEXT,
   mesh_terms_json TEXT,
+  -- trial lineage (source-facet.ts): what this source REPORTS about its trial,
+  -- so the build can tell a matured re-reading from a different objective.
+  -- Nullable throughout; null means "unclassified" and the classifier abstains.
+  report_facet TEXT,
+  maturity TEXT,
+  followup_months REAL,
+  trial_acronyms_json TEXT,
   bookmark_date TEXT NOT NULL,
   conference_slug TEXT,
   curator_note TEXT,
@@ -361,6 +372,7 @@ export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): D
   migratePapersAddPdfColumns(db, path);
   migratePapersAddFigureOcr(db);
   migratePapersAddFigureStructured(db);
+  migrateAddSourceFacetColumns(db);
   // content_hash column is guaranteed to exist now (fresh SCHEMA or migration);
   // create its partial unique index here rather than in SCHEMA so an old-shape
   // DB doesn't error on the missing column before the migration runs.
@@ -590,6 +602,28 @@ function migratePapersAddFigureStructured(db: Database.Database): void {
   const cols = db.prepare('PRAGMA table_info(papers)').all() as { name: string }[];
   if (cols.length > 0 && !cols.some((c) => c.name === 'figure_structured_md')) {
     db.exec('ALTER TABLE papers ADD COLUMN figure_structured_md TEXT');
+  }
+}
+
+// Trial lineage: what a source REPORTS about its trial, so the build can tell a
+// matured re-reading of one objective from a genuinely different objective.
+// Additive and nullable on both source tables — every existing row reads back
+// null, which the classifier treats as "abstain", so a DB that predates this
+// migration keeps exactly its old behaviour.
+function migrateAddSourceFacetColumns(db: Database.Database): void {
+  for (const table of ['papers', 'bookmarks'] as const) {
+    const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+    if (cols.length === 0) continue;
+    for (const [col, type] of [
+      ['report_facet', 'TEXT'],
+      ['maturity', 'TEXT'],
+      ['followup_months', 'REAL'],
+      ['trial_acronyms_json', 'TEXT'],
+    ] as const) {
+      if (!cols.some((c) => c.name === col)) {
+        db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`);
+      }
+    }
   }
 }
 
@@ -1127,13 +1161,62 @@ export function savePaper(db: Database.Database, p: NewPaper): SavePaperResult {
       p.fetched_via ?? 'pending',
       Date.now(),
     );
-  return { id: result.lastInsertRowid as number, created: true, mergedFields: [], bookmarkDate: null };
+  // bookmarkDate is the date of the row that WON, and on the insert path that is
+  // the row we just wrote. It used to return null here, which silently disabled
+  // every caller that keys off it: the stranded-source rebuild queue guards on
+  // `if (r.bookmarkDate)`, so a NEWLY CREATED paper — the exact case where a
+  // late-enriching source lands on a date no future build will target — never
+  // queued anything. The merge path set it, so the bug only bit fresh rows.
+  return {
+    id: result.lastInsertRowid as number,
+    created: true,
+    mergedFields: [],
+    bookmarkDate: p.bookmark_date,
+  };
 }
 
 // v0.23: rebuild queue helpers. Enrichment queues a date when a source gains
 // richer data after that date's digest was published; `npm run rebuild:queued`
 // drains it. queueRebuild coalesces per date: a re-queue bumps queued_at and
 // RESETS attempts to 0 (the newer richer merge deserves a fresh set of tries).
+// Trial lineage: persist what a source reports about its trial. Written as a
+// post-save UPDATE rather than threaded through savePaper because savePaper's
+// merge path (a richer re-send folding into an existing row) has its own
+// field-by-field precedence rules, and a facet is not a content field competing
+// for that precedence — it is a classification of whichever row won.
+//
+// The table name is chosen from a closed union, never interpolated from caller
+// input, so this cannot become an injection point.
+export type SourceFacetRow = {
+  facet: string | null;
+  maturity: string | null;
+  followup_months: number | null;
+  trial_acronyms: string[];
+};
+
+export function saveSourceFacet(
+  db: Database.Database,
+  type: 'tweet' | 'paper' | 'slide',
+  rowId: number,
+  f: SourceFacetRow,
+): void {
+  // Slides carry no abstract and no trial identity worth classifying; they are
+  // photographs attached to a study another source already establishes.
+  const table = type === 'paper' ? 'papers' : type === 'tweet' ? 'bookmarks' : null;
+  if (!table) return;
+  db.prepare(
+    `UPDATE ${table}
+        SET report_facet = ?, maturity = ?, followup_months = ?, trial_acronyms_json = ?
+      WHERE id = ?`,
+  ).run(
+    f.facet,
+    f.maturity,
+    f.followup_months,
+    f.trial_acronyms.length > 0 ? JSON.stringify(f.trial_acronyms) : null,
+    rowId,
+  );
+}
+
 export function queueRebuild(db: Database.Database, bookmarkDate: string, reason: string): void {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(bookmarkDate)) {
     throw new Error(`queueRebuild bookmark_date must be YYYY-MM-DD, got: ${bookmarkDate}`);
