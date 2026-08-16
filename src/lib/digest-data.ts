@@ -116,6 +116,25 @@ export type DigestStudy = {
     lo: number | null;
     hi: number | null;
   } | null;
+  // Trial lineage: the EARLIER card this one supersedes (same trial, same
+  // objective, matured). Build-stamped by lineage-pass.ts, never LLM-generated.
+  // Mirrored in llm-pipeline.ts — keep the shape in lockstep.
+  supersedes?: {
+    date: string;
+    slug: string;
+    stat_value: string | null;
+    stat_detail: string | null;
+    /** Was the predecessor actually unpublished? False when identity was
+     *  acronym-only (no shared registration) — the link shows, the curator is
+     *  asked before anything comes down. */
+    auto_dropped?: boolean;
+    /** Why the drop was withheld, when it was. Drives whether the curator DM
+     *  offers the `drop` reply token at all. */
+    declined_reason?: string | null;
+    /** May the curator DM offer a one-reply drop for this? Structured, so the
+     *  offer never depends on parsing the decline wording. */
+    droppable?: boolean;
+  } | null;
   // v0.30: structured fold sections (Design / Population / Regimen / … ). When
   // present the fold renders these labeled rows; absent → the emoji-IMRD buckets.
   // Mirrored in llm-pipeline.ts — keep the shape in lockstep.

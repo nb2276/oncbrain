@@ -45,6 +45,9 @@ type DigestArtifact = {
         // the digest last covered it.
         primary_endpoint?: { stat_value?: string | null } | null;
         prior_estimate?: { date: string; stat_value: string } | null;
+        // Trial lineage: set by the build when this card SUPERSEDED an earlier
+        // one, which also unpublished that earlier card.
+        supersedes?: { date: string; slug: string; auto_dropped?: boolean; declined_reason?: string | null; droppable?: boolean } | null;
       }>;
     }>;
   };
@@ -72,7 +75,54 @@ export function formatMessage(artifact: DigestArtifact, siteUrl: string): string
     .map((st) => `↻ ${st.name}: ${st.prior_estimate!.stat_value} → ${st.primary_endpoint?.stat_value ?? '?'} (was ${st.prior_estimate!.date})`);
   const movedBlock = moved.length ? `\n${moved.join('\n')}` : '';
 
-  return `${header}${movedBlock}\n${breakdown}\n${url}`;
+  // Trial lineage. A supersession is the only thing a build does that REMOVES
+  // something already published, so it is the one line that must never be left
+  // to the build log: the curator has to learn from the DM that an older card
+  // came down, and which one, without going and reading the cron output.
+  // Two shapes, because only one of them removed anything. An auto-drop is a
+  // notification; a pending drop is a REQUEST, and it carries the exact reply
+  // token dedup-command.ts parses, so acting on it is one message.
+  const superseded = sites
+    .flatMap((s) => s.studies)
+    .filter((st) => st.supersedes)
+    .map((st) => {
+      const s2 = st.supersedes!;
+      const ref = `${s2.date}/${s2.slug}`;
+      // "Queued", not "unpublished". Writing the override and enqueueing the
+      // rebuild is all this build did; the predecessor comes down when that
+      // rebuild runs, and a failed rebuild does not block this publish. Saying
+      // "now unpublished" would be a claim the build cannot make.
+      if (s2.auto_dropped) {
+        return `⤴ ${st.name} supersedes ${ref} — that card is queued for removal on ${s2.date}'s next rebuild`;
+      }
+      const reason = s2.declined_reason ?? 'not auto-dropped';
+      // OFFER `drop` ONLY FOR AN IDENTITY GAP.
+      //
+      // executeDedupDrop suppresses without consulting suppressionBlocker, so
+      // every `drop` we offer is a hole straight through the gate. An identity
+      // gap is the one refusal a human can genuinely resolve — they can read
+      // both cards and say "yes, same trial". The others are not questions:
+      // a maturity regression, an unnamed endpoint, an unknown follow-up or a
+      // merged multi-source card are evidence the two readings are not the same
+      // result, and no reply from anyone makes them so. The empty-day refusal is
+      // likewise not a drop decision — removing a date's last card wants the
+      // artifact removed, which this DM must not shortcut.
+      // Offer the drop for an identity gap (a question a human can answer from
+      // the cards) OR for a policy hold (the gate already vouched for it and
+      // only the default-off policy withheld the action). Never for an evidence
+      // refusal — executeDedupDrop does not consult the gate, so every offer we
+      // make is a hole straight through it.
+      // Structured, not a regex over prose. Matching on wording is how a
+      // maturity regression got offered as "just confirm the identity": the
+      // blocker list short-circuited on identity, and the DM believed it.
+      const identityGap = s2.droppable === true;
+      return identityGap
+        ? `⤴ ${st.name} supersedes ${ref} — NOT dropped (${reason}). If they are the same trial, reply: drop ${ref}`
+        : `⤴ ${st.name} supersedes ${ref} — NOT dropped (${reason}). Review both cards before removing anything.`;
+    });
+  const supersededBlock = superseded.length ? `\n${superseded.join('\n')}` : '';
+
+  return `${header}${movedBlock}${supersededBlock}\n${breakdown}\n${url}`;
 }
 
 async function main(): Promise<void> {
