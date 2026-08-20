@@ -2,6 +2,50 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.54.0] - 2026-08-20
+
+### Fixed
+- **The digest invented comparator trials and gave them effect sizes.** The eval
+  judge found cards citing "VISION (NEJM 2021): Lu-PSMA-617 monotherapy rPFS
+  HR 0.40 vs SOC in post-taxane mCRPC" and characterising DESTINY-Breast04 as
+  established prior art — a trial, a publication, a setting and a hazard ratio
+  that appear in no input. On a digest whose whole premise is that every number
+  traces to a source, that is the failure mode the product rules out.
+
+  The prompt was asking for it. `vs leading data` is defined as "how this result
+  sits against the trials that currently define practice (name them)" and marked
+  EXPECTED, not optional — and the trials that define practice are, by
+  construction, not in the day's sources. So the model was being told to reach
+  into training memory. The prompt now permits NAMING a prior trial as context
+  and forbids attaching any figure to it (N, HR, median, %, p, year, journal)
+  unless a source states that figure.
+
+  A build-time gate enforces it, because a prompt is a request and a gate is a
+  guarantee — the same posture as the figure grounding gate. Any sentence that
+  attaches a number to a trial the card's own sources never mention is WITHHELD,
+  at the finest unit that contains the claim: the offending bullet, not the
+  bullet list; the offending section, not the fold. Every long-form surface is
+  audited, not only the comparative one.
+
+  Eval on the recorded fixture: **factual accuracy 4.0 → 8.0**, citation
+  correctness 6.0 → 8.0, overall 5.0 → 6.5, and the hallucinations block is
+  empty. The judge's read is now "Grounded and cleanly clustered with no
+  fabricated numbers."
+
+### Notes
+- The gate's scope was MEASURED against the published corpus, not assumed.
+  Requiring every named trial to be sourced withheld 105 of 124 cards (85%) —
+  naming prior trials as context is what the comparative sections are for, and
+  CLAUDE.md asks for it. Narrowing to a number ATTACHED to an unsourced trial
+  brings that to 4 cards (3%), all four of which assert a named trial's statistic
+  that no source contains: POP-RT, SABR-COMET, TALAPRO-2, SWOG S8814.
+- Every false positive removed was measured, not guessed: staging descriptors
+  (N0M0), trial phases (III), modalities (SRS), dosing schedules (BID), journals
+  (NEJM) and bolded English (BEFORE) were each read as trial names first.
+- Still open, and now the eval's cap: the top line can pick the less urgent story
+  of the day, a population qualifier can be dropped in summarisation, and a
+  source DOI can go unrecorded. Editorial problems, not fabricated ones.
+
 ## [0.53.2] - 2026-08-20
 
 ### Fixed
