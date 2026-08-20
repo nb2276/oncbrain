@@ -101,6 +101,22 @@ function toCiHit(m: RegExpMatchArray | null): CiHit | null {
   return { a, b, level: Number.isFinite(level) ? level : null };
 }
 
+// An UNLABELLED parenthetical interval: "HR 1.40 (0.91-2.13)".
+//
+// Journals write the interval both ways and the label is not always carried
+// through into a card's stat_detail. NRG-GU005 publishes "adjusted HR 1.40
+// (0.91-2.13), P=.12", which parsed to a bare point with no interval — a dot
+// with no error bar, on the one card where the interval crossing 1.0 IS the
+// finding (SBRT not superior).
+//
+// Accepted ONLY in the adjacent position, never as a sole-CI fallback. Without
+// the "95% CI" token this pattern is just "two numbers in brackets", which also
+// matches a dose range, an IQR, a date span or an n-at-risk pair. Immediately
+// after a ratio and containing it (checked by the caller) it is unambiguous;
+// anywhere else it is a guess, and this module abstains rather than guess.
+const BARE_CI_RE =
+  /^[\s,;:]*\(\s*(\d+(?:\.\d+)?)\s*(?:-|to|–)\s*(\d+(?:\.\d+)?)\s*\)/i;
+
 // How far after a ratio a CI may start and still count as "attached to it".
 // "HR 0.750 (95% CI ...)" is ~2 chars; allow a little slack for "HR 0.75, 95% CI".
 const CI_ADJACENCY_CHARS = 12;
@@ -108,8 +124,18 @@ const CI_ADJACENCY_CHARS = 12;
 function findAdjacentCi(text: string, fromIndex: number): CiHit | null {
   const tail = text.slice(fromIndex, fromIndex + CI_ADJACENCY_CHARS + 40);
   const m = CI_RE.exec(tail);
-  if (!m || (m.index ?? 0) > CI_ADJACENCY_CHARS) return null;
-  return toCiHit(m);
+  if (m && (m.index ?? 0) <= CI_ADJACENCY_CHARS) return toCiHit(m);
+
+  // Fall back to the unlabelled form, anchored at the ratio so only a bracket
+  // that DIRECTLY follows it can match. ciLevel stays null: the source did not
+  // state the level, and inventing "95%" would be asserting something it never
+  // said.
+  const bare = BARE_CI_RE.exec(tail);
+  if (!bare) return null;
+  const a = Number(bare[1]);
+  const b = Number(bare[2]);
+  if (!Number.isFinite(a) || !Number.isFinite(b) || a <= 0 || b <= 0) return null;
+  return { a, b, level: null };
 }
 
 /** A CI, only when the text contains exactly one — otherwise association is a guess. */
@@ -184,13 +210,24 @@ export function parseEffectSize(pe: PrimaryEndpointLike): RatioDatum | null {
   let ciLevel: number | null = null;
   if (ci) {
     const { a, b, level } = ci;
-    if (b < a) return null; // reversed bounds: corrupt, do not guess
-    // Containment stays as a second guard: it still catches corrupt data and a
-    // CI that passed association but cannot belong to this estimate.
-    if (point < a || point > b) return null;
-    lo = a;
-    hi = b;
-    ciLevel = level;
+    // A LABELLED interval that fails these checks is corrupt or mis-paired data,
+    // and the whole mark abstains — drawing an estimate whose stated CI makes no
+    // sense is worse than drawing nothing.
+    //
+    // An UNLABELLED bracket that fails them is a different fact: it was never a
+    // confidence interval. "HR 1.40 for RT (60-70 Gy)" is a dose range that
+    // happens to sit near a ratio. Treat it as absent and draw the point alone,
+    // rather than letting a misread bracket delete a mark whose estimate is
+    // perfectly good.
+    const labelled = level !== null;
+    const usable = b >= a && point >= a && point <= b;
+    if (!usable) {
+      if (labelled) return null;
+    } else {
+      lo = a;
+      hi = b;
+      ciLevel = level;
+    }
   }
 
   return { form: 'ratio', kind, point, lo, hi, ciLevel, klass: pe.klass ?? null, endpointName: pe.name ?? null };
@@ -771,9 +808,17 @@ export function describeEffect(d: EffectDatum): string {
     const b = d.b.label ? `${d.b.label} ` : '';
     return `${a}${d.a.value}${u} versus ${b}${d.b.value}${u}`;
   }
+  // Name the confidence level ONLY when the source stated it. `?? 95` was
+  // harmless while every parsed interval carried a label, and became a
+  // fabrication the moment unlabelled brackets were readable: NRG-GU005 writes
+  // "HR 1.40 (0.91-2.13)" and never says 95%, so announcing "95% CI" to a screen
+  // reader asserts a number the paper does not contain. An interval with no
+  // stated level is still an interval — describe it as one.
   const ci =
     d.lo != null && d.hi != null
-      ? `, ${d.ciLevel ?? 95}% CI ${d.lo} to ${d.hi}`
+      ? d.ciLevel != null
+        ? `, ${d.ciLevel}% CI ${d.lo} to ${d.hi}`
+        : `, interval ${d.lo} to ${d.hi}`
       : '';
   return `${d.kind} ${d.point}${ci}`;
 }

@@ -991,3 +991,105 @@ describe('a study renders identically on every surface', () => {
     for (const kinds of byRuler.values()) expect(kinds.size).toBe(1);
   });
 });
+
+// An interval is written both ways, and the "95% CI" label is not always carried
+// into a card's stat_detail. NRG-GU005 publishes "adjusted HR 1.40 (0.91-2.13),
+// P=.12", which drew a dot with NO error bar — on the one card where the
+// interval crossing 1.0 is the finding (SBRT not superior).
+describe('unlabelled parenthetical interval', () => {
+  const pe = (stat_value: string, stat_detail: string) => ({
+    name: 'Disease-free survival at 3 years',
+    klass: 'surrogate' as const,
+    stat_value,
+    stat_detail,
+  });
+
+  it('reads the bare bracket that directly follows a ratio', () => {
+    const d = parseEffectSize(
+      pe('88.6% vs 92.1%', 'SBRT not superior; adjusted HR 1.40 (0.91-2.13), P=.12'),
+    );
+    expect(d).toMatchObject({ form: 'ratio', kind: 'HR', point: 1.4, lo: 0.91, hi: 2.13 });
+  });
+
+  it('leaves ciLevel null — the source never stated one', () => {
+    // Inventing "95%" would assert something the paper did not say.
+    expect(parseEffectSize(pe('', 'HR 1.40 (0.91-2.13)'))!.ciLevel).toBeNull();
+  });
+
+  it('accepts an en-dash range', () => {
+    expect(parseEffectSize(pe('', 'HR 1.40 (0.91–2.13)'))).toMatchObject({ lo: 0.91, hi: 2.13 });
+  });
+
+  it('does not change a labelled interval', () => {
+    const d = parseEffectSize(pe('HR 0.54', '95% CI 0.41-0.72'));
+    expect(d).toMatchObject({ point: 0.54, lo: 0.41, hi: 0.72, ciLevel: 95 });
+  });
+
+  describe('only in the ADJACENT position', () => {
+    // Without the "95% CI" token this is just "two numbers in brackets", which
+    // also matches a dose range, an IQR or a date span. Directly after a ratio
+    // and containing it, it is unambiguous; anywhere else it is a guess.
+    it('ignores a bracket that does not directly follow the ratio', () => {
+      const d = parseEffectSize(pe('', 'HR 0.70; 12-mo PFS 0.70 (0.60-0.80)'));
+      expect(d).toMatchObject({ point: 0.7, lo: null, hi: null });
+    });
+
+    it('ignores a dose range sitting near a ratio', () => {
+      const d = parseEffectSize(pe('', 'HR 1.40 for RT (60-70 Gy)'));
+      expect(d).toMatchObject({ point: 1.4, lo: null, hi: null });
+    });
+
+    it('ignores a parenthetical that is not a numeric range', () => {
+      const d = parseEffectSize(pe('', 'HR 1.40 (P=0.12)'));
+      expect(d).toMatchObject({ point: 1.4, lo: null, hi: null });
+    });
+  });
+
+  describe('a failed check means different things labelled vs not', () => {
+    it('ABSTAINS entirely when a LABELLED CI cannot contain the estimate', () => {
+      // Corrupt or mis-paired data. An estimate whose stated CI makes no sense
+      // is worse to draw than nothing.
+      expect(parseEffectSize(pe('', 'HR 1.40 (95% CI 2.10-3.20)'))).toBeNull();
+      expect(parseEffectSize(pe('', 'HR 1.40 (95% CI 2.13-0.91)'))).toBeNull();
+    });
+
+    it('draws the POINT when an unlabelled bracket cannot contain the estimate', () => {
+      // That is evidence the bracket was never a confidence interval — not
+      // evidence the estimate is bad. A misread bracket must not delete a mark.
+      expect(parseEffectSize(pe('', 'HR 1.40 (2.10-3.20)'))).toMatchObject({
+        point: 1.4,
+        lo: null,
+        hi: null,
+      });
+    });
+  });
+});
+
+// describeEffect is the mark's accessible label. It used to default an unstated
+// confidence level to 95%, which was harmless while every parsed interval
+// carried a label — and became a fabrication the moment unlabelled brackets
+// became readable. On a site whose premise is that every number is grounded,
+// announcing "95% CI" for a paper that never said 95% is the exact failure mode.
+describe('describeEffect never invents a confidence level', () => {
+  const base = { form: 'ratio' as const, kind: 'HR' as const, klass: null, endpointName: null };
+
+  it('names the level when the source stated it', () => {
+    expect(describeEffect({ ...base, point: 0.54, lo: 0.41, hi: 0.72, ciLevel: 95 }))
+      .toBe('HR 0.54, 95% CI 0.41 to 0.72');
+  });
+
+  it('carries a non-95 level through rather than normalising it', () => {
+    expect(describeEffect({ ...base, point: 1.2, lo: 0.84, hi: 2.04, ciLevel: 90 }))
+      .toBe('HR 1.2, 90% CI 0.84 to 2.04');
+  });
+
+  it('says "interval" when the source stated no level', () => {
+    expect(describeEffect({ ...base, point: 1.4, lo: 0.91, hi: 2.13, ciLevel: null }))
+      .toBe('HR 1.4, interval 0.91 to 2.13');
+  });
+
+  it('omits the interval entirely on a point-only estimate', () => {
+    expect(describeEffect({ ...base, point: 1.4, lo: null, hi: null, ciLevel: null }))
+      .toBe('HR 1.4');
+  });
+});

@@ -2,6 +2,31 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.53.1] - 2026-08-16
+
+### Fixed
+- **The effect-size mark drew no error bar when the interval was written without
+  a "95% CI" label.** `HR 1.40 (0.91-2.13)` parsed to a bare point: the estimate
+  rendered, the interval did not. It surfaced on NRG-GU005, where the interval
+  crossing 1.0 IS the finding — SBRT was not superior, and the mark showed a dot
+  with nothing around it.
+
+  An unlabelled bracket is now read, but ONLY where it directly follows the ratio
+  and contains it. Elsewhere it stays ignored: without the "CI" token this is
+  just two numbers in brackets, which equally matches a dose range, an IQR or a
+  date span. A dose range beside a ratio still draws a point alone.
+
+  A failed check now means different things depending on the label. A LABELLED
+  interval that cannot contain its estimate is corrupt or mis-paired data and the
+  whole mark still abstains. An UNLABELLED one is simply evidence the bracket was
+  never an interval, so the point is drawn rather than the mark deleted.
+
+- **The mark's accessible label announced "95% CI" for intervals whose source
+  never stated a level.** `describeEffect` defaulted a missing level to 95 —
+  harmless while every parsed interval carried a label, a fabrication as soon as
+  unlabelled ones were readable. It now says "interval 0.91 to 2.13" when the
+  level is unknown, and carries a stated 90% through as 90%.
+
 ## [0.53.0] - 2026-08-16
 
 ### Added
