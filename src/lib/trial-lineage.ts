@@ -61,6 +61,28 @@ export const parseGuard = {
   maturity: (v: unknown): Maturity | null => (isMaturity(v) ? v : null),
 };
 
+/**
+ * Do two readings report the same objective, or a legitimate maturing of it?
+ *
+ * Used where the FULL gate cannot run. At enrichment time a source has no
+ * primary_endpoint yet — Phase 2 produces that at build time — so the endpoint
+ * and estimate preconditions are structurally unavailable, and `facet` is the
+ * strongest signal on hand.
+ *
+ * Unknown is not compatible. A null facet on either side means we cannot tell a
+ * different objective from a matured one, which is the whole question.
+ */
+export function facetsCompatible(
+  current: ReportFacet | null,
+  prior: ReportFacet | null,
+): boolean {
+  if (current === null || prior === null) return false;
+  if (current === prior) return true;
+  // The one legitimate transition, forward only: a long-term report matures the
+  // primary efficacy reading it extends, and nothing else.
+  return current === 'long-term-followup' && prior === 'primary-efficacy';
+}
+
 /** One reading of one trial — either a published card or the study being built. */
 export type TrialReport = {
   date: string; // YYYY-MM-DD

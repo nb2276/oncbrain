@@ -243,6 +243,32 @@ export function substantiveCount(st: { source_ids?: { type: string }[] }): numbe
   return (st.source_ids ?? []).filter((r) => r.type !== 'slide').length;
 }
 
+/**
+ * The objective an ALREADY-PUBLISHED card reports, read back from its sources.
+ *
+ * The coverage indexes the enrich-time nudge uses carry only date/name/slug, so
+ * the prior's facet has to be recovered from the artifact. Returns null when the
+ * card cannot be found or its sources disagree — both of which mean "unknown",
+ * which callers must treat as incompatible rather than as a match.
+ */
+export function publishedFacet(
+  db: Database.Database,
+  artifacts: LineageArtifact[],
+  date: string,
+  slug: string,
+): string | null {
+  for (const a of artifacts) {
+    if (!a || a.date !== date) continue;
+    for (const site of a.digest?.sites ?? []) {
+      for (const st of site?.studies ?? []) {
+        if (st?.slug !== slug) continue;
+        return sourceFacts(db, st.source_ids ?? []).facet;
+      }
+    }
+  }
+  return null;
+}
+
 /** The source rows behind one published card — the identity a suppress override
  *  needs in order to survive the rename that suppression itself causes. */
 export function sourceIdsOf(
