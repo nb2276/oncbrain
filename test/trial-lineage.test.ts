@@ -11,6 +11,7 @@ import {
   suppressionBlockers,
   primaryBlocker,
   isIdentityOnly,
+  facetsCompatible,
   type TrialReport,
 } from '../src/lib/trial-lineage.ts';
 
@@ -560,5 +561,32 @@ describe('suppressionBlockers reports every refusal', () => {
     const ok = rep({ date: '2026-08-14', ncts: ['NCT1'], maturity: 'full-publication' });
     const prior = rep({ date: '2026-07-08', ncts: ['NCT1'], maturity: 'conference-abstract' });
     expect(suppressionBlockers(ok, prior, true)).toEqual([]);
+  });
+});
+
+// Used where the FULL gate cannot run. At enrichment a source has no
+// primary_endpoint — Phase 2 makes that at build time — so the endpoint and
+// estimate preconditions are structurally unavailable and the facet is the
+// strongest signal on hand.
+describe('facetsCompatible', () => {
+  it('accepts the same objective', () => {
+    expect(facetsCompatible('primary-efficacy', 'primary-efficacy')).toBe(true);
+  });
+
+  it('accepts long-term follow-up maturing primary efficacy, forward only', () => {
+    expect(facetsCompatible('long-term-followup', 'primary-efficacy')).toBe(true);
+    expect(facetsCompatible('primary-efficacy', 'long-term-followup')).toBe(false);
+  });
+
+  it('rejects a different objective — dropping either would delete a finding', () => {
+    expect(facetsCompatible('quality-of-life', 'primary-efficacy')).toBe(false);
+    expect(facetsCompatible('long-term-followup', 'quality-of-life')).toBe(false);
+    expect(facetsCompatible('safety-toxicity', 'primary-efficacy')).toBe(false);
+  });
+
+  it('treats unknown as incompatible on either side', () => {
+    expect(facetsCompatible(null, 'primary-efficacy')).toBe(false);
+    expect(facetsCompatible('primary-efficacy', null)).toBe(false);
+    expect(facetsCompatible(null, null)).toBe(false);
   });
 });

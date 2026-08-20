@@ -2,6 +2,36 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.53.2] - 2026-08-20
+
+### Fixed
+- **The enrich-time "previously covered" DM offered to delete a card it had no
+  evidence to delete.** Since v0.26 that nudge has attached a one-reply
+  `drop <date>/<slug>` to EVERY raw NCT or acronym match, with no check on what
+  the two sources actually report. It predates trial lineage and knew nothing
+  about it, so it was the ungated twin of the build-time DM: `executeDedupDrop`
+  applies the structural guards (never empty a date, record the target's
+  identity) but deliberately NOT the evidence gate, which means a removal the
+  message PROPOSES is a removal the curator can act on. Offering one for a
+  trial's quality-of-life paper against its efficacy card invites deleting a
+  finding the new source never reported.
+
+  The offer is now opt-in per prior, cleared only when the two readings report
+  the same objective — or a long-term report maturing the primary-efficacy
+  reading it extends, forward only. A prior that does not clear still gets the
+  heads-up, with the mismatch named, and no token.
+
+  The header is gated on the same decision. Gating only the per-prior lines left
+  the invitation standing: each line prints its own date and slug, so a curator
+  reading "Both will publish unless you drop one" could hand-write the command
+  from the line itself. The whole message is now composed in one pure function,
+  because the header is part of the offer.
+
+  The FULL evidence gate deliberately does not run here and cannot: a source has
+  no `primary_endpoint` until Phase 2, so the endpoint, estimate and
+  maturity-regression preconditions are unavailable at enrichment time. This is a
+  narrowing of what gets proposed, not a claim of completeness.
+
 ## [0.53.1] - 2026-08-16
 
 ### Fixed

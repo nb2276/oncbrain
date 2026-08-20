@@ -29,6 +29,22 @@ import {
   type SavePaperResult,
 } from './db.ts';
 import { extractSourceFacet } from './source-facet.ts';
+import { facetsCompatible, parseGuard } from './trial-lineage.ts';
+import { publishedFacet, type LineageArtifact } from './lineage-pass.ts';
+
+// The facet the classifier assigned to a just-enriched source.
+function readSourceFacet(db: Database.Database, type: InboxItem['type'], rowId: number): string | null {
+  const table = type === 'paper' ? 'papers' : type === 'tweet' ? 'bookmarks' : null;
+  if (!table) return null;
+  try {
+    const r = db.prepare(`SELECT report_facet FROM ${table} WHERE id = ?`).get(rowId) as
+      | { report_facet: string | null }
+      | undefined;
+    return r?.report_facet ?? null;
+  } catch {
+    return null; // a DB predating the facet migration reads as unclassified
+  }
+}
 import { detectConferenceFromTexts } from './conference-detect.ts';
 import { fetchTweet, TweetFetchError } from './twitter-fetch.ts';
 import { extractCuratorNote, sendMessage } from './telegram-ingest.ts';
@@ -1271,6 +1287,7 @@ async function notifyPriorCoverage(
   rowId: number,
   index: NctCoverageIndex,
   acronymIndex: AcronymCoverageIndex,
+  coverageArtifacts: LineageArtifact[] = [],
 ): Promise<void> {
   if (index.size === 0 && acronymIndex.size === 0) return;
   try {
@@ -1295,26 +1312,60 @@ async function notifyPriorCoverage(
       item.bookmark_date,
     );
 
-    const lines = buildPriorCoverageLines(nctPrior, acronymPrior);
-    if (lines.length === 0) return;
-    await replyToCurator(
-      item,
-      `Heads up — the source you just sent matches ${lines.length > 1 ? 'trials' : 'a trial'} already covered. ` +
-        `Both will publish unless you drop one:\n${lines.join('\n')}`,
-    );
+    // Decide, per prior, whether to OFFER a drop. The full evidence gate cannot
+    // run here: a source has no primary_endpoint until Phase 2, so the endpoint
+    // and estimate preconditions are structurally unavailable at enrichment. The
+    // facet IS available — classifySourceFacet ran immediately before this — and
+    // it is the check that matters, because a facet mismatch means the two are
+    // different findings and dropping either would delete a real result.
+    const currentFacet = parseGuard.facet(readSourceFacet(db, item.type, rowId));
+    const decisions = new Map<string, PriorDropDecision>();
+    for (const p of [...nctPrior, ...acronymPrior]) {
+      if (!p.slug) continue;
+      const priorFacet = parseGuard.facet(publishedFacet(db, coverageArtifacts, p.date, p.slug));
+      if (facetsCompatible(currentFacet, priorFacet)) {
+        decisions.set(`${p.date}/${p.slug}`, { droppable: true });
+      } else if (currentFacet && priorFacet) {
+        decisions.set(`${p.date}/${p.slug}`, {
+          droppable: false,
+          reason: `different objectives (${priorFacet} vs ${currentFacet})`,
+        });
+      } else {
+        decisions.set(`${p.date}/${p.slug}`, {
+          droppable: false,
+          reason: 'objective not established on both',
+        });
+      }
+    }
+
+    const message = buildPriorCoverageMessage(nctPrior, acronymPrior, decisions);
+    if (!message) return;
+    await replyToCurator(item, message);
   } catch {
     // a courtesy nudge must never fail enrichment
   }
 }
+
+/** Why a prior may or may not be offered for a one-reply drop. */
+export type PriorDropDecision = { droppable: boolean; reason?: string };
 
 // Build the curator-facing "previously covered" lines from prior-coverage hits.
 // Pure + exported for tests. Dedups an acronym hit whose trial already surfaced
 // via NCT — keyed on the discriminating acronym (studyDedupKey), NOT the display
 // name, so an earlier "ENZARAD (ANZUP 1303)" (NCT) and "ENZARAD" (acronym) card
 // collapse to one line instead of naming the same trial twice.
+//
+// THE DROP OFFER IS OPT-IN, keyed `${date}/${slug}`. It used to be attached to
+// every hit unconditionally, which made this the ungated twin of the build-time
+// DM: `executeDedupDrop` applies the structural guards but deliberately not the
+// evidence gate, so a removal we PROPOSE is a removal the curator can act on.
+// Proposing one the gate would refuse — a trial's quality-of-life paper against
+// its efficacy card, say — invites exactly the wrong action. A prior absent from
+// the map gets the heads-up and no token.
 export function buildPriorCoverageLines(
   nctPrior: Array<{ nct: string; date: string; name: string; slug: string }>,
   acronymPrior: Array<{ key: string; date: string; name: string; slug: string }>,
+  decisions: ReadonlyMap<string, PriorDropDecision> = new Map(),
 ): string[] {
   const nctKeys = new Set(
     nctPrior.map((p) => studyDedupKey(p.name)).filter((k): k is string => !!k),
@@ -1329,10 +1380,41 @@ export function buildPriorCoverageLines(
     const head = `• ${p.name} — covered ${p.date}${p.tag ? ` (${p.tag})` : ''}`;
     // A slug is required to form a drop token; older artifacts without one just
     // get the informational line.
-    return p.slug
-      ? `${head}\n   reply "drop ${p.date}/${p.slug}" to suppress that earlier card`
-      : head;
+    if (!p.slug) return head;
+    const d = decisions.get(`${p.date}/${p.slug}`);
+    if (d?.droppable) {
+      return `${head}\n   reply "drop ${p.date}/${p.slug}" to suppress that earlier card`;
+    }
+    const why = d?.reason ?? 'objective not established yet';
+    return `${head}\n   both will publish — ${why}`;
   });
+}
+
+/**
+ * The whole "previously covered" DM, or null when there is nothing to say.
+ *
+ * THE HEADER IS PART OF THE OFFER, which is why it is composed here rather than
+ * at the call site. Gating only the per-prior lines left the invitation standing:
+ * every line prints its own date and slug, so a curator reading "Both will
+ * publish unless you drop one" can hand-write `drop 2026-07-08/foo` from the
+ * line itself — and executeDedupDrop honours any well-formed command, applying
+ * the structural guards but deliberately not the evidence gate. A message that
+ * proposes a removal is a removal that can happen.
+ */
+export function buildPriorCoverageMessage(
+  nctPrior: Array<{ nct: string; date: string; name: string; slug: string }>,
+  acronymPrior: Array<{ key: string; date: string; name: string; slug: string }>,
+  decisions: ReadonlyMap<string, PriorDropDecision> = new Map(),
+): string | null {
+  const lines = buildPriorCoverageLines(nctPrior, acronymPrior, decisions);
+  if (lines.length === 0) return null;
+  const subject = lines.length > 1 ? 'trials' : 'a trial';
+  const opener = `Heads up — the source you just sent matches ${subject} already covered.`;
+  const anyDroppable = [...decisions.values()].some((d) => d.droppable);
+  const header = anyDroppable
+    ? `${opener} Both will publish unless you drop one:`
+    : `${opener} Both will publish; nothing here looks like a duplicate to drop:`;
+  return `${header}\n${lines.join('\n')}`;
 }
 
 // Best-effort E2/E3 reply to the curator's Telegram chat. Never throws — a
@@ -1465,8 +1547,12 @@ export async function runEnrichmentLoop(
   // tweet-preview→full-paper duplicate that shares no NCT.
   let coverageIndex: NctCoverageIndex = new Map();
   let acronymCoverageIndex: AcronymCoverageIndex = new Map();
+  // Kept alongside the indexes: the nudge needs each prior card's SOURCES to
+  // recover the objective it reports, and the indexes carry only date/name/slug.
+  let coverageArtifacts: LineageArtifact[] = [];
   try {
     const artifacts = listDigests();
+    coverageArtifacts = artifacts as unknown as LineageArtifact[];
     coverageIndex = buildNctCoverageIndex(artifacts);
     acronymCoverageIndex = buildAcronymCoverageIndex(artifacts);
   } catch {
@@ -1481,7 +1567,14 @@ export async function runEnrichmentLoop(
         enriched++;
         if (result.bookmarkCreated) bookmarksCreated++;
         await classifySourceFacet(db, item, result.enrichedRowId);
-        await notifyPriorCoverage(db, item, result.enrichedRowId, coverageIndex, acronymCoverageIndex);
+        await notifyPriorCoverage(
+          db,
+          item,
+          result.enrichedRowId,
+          coverageIndex,
+          acronymCoverageIndex,
+          coverageArtifacts,
+        );
         break;
       case 'failed':
         if (result.permanent) {
