@@ -27,6 +27,13 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
+import { normalizeDoi } from './doi.ts';
+import { soleDoiIn } from './extract.ts';
+import {
+  withholdUngroundedComparators,
+  droppedDiseaseStates,
+  type GroundingWithhold,
+} from './comparator-grounding.ts';
 import {
   createLlmClient,
   type LlmClient,
@@ -306,6 +313,11 @@ export type DigestStudy = {
   // the figure has 2+ rows × 2+ columns of comparable data.
   key_figure_caption?: string | DigestTable | null;
   nct: string | null;
+  // The study's own publication DOI, when a source carries one. Parallel to
+  // `nct` and populated the same two ways: Phase 2 may emit it, and a build-time
+  // regex backstop attaches it when the sources state exactly one and the model
+  // missed it — the same belt-and-braces pdf-meta.ts uses for identifiers.
+  doi?: string | null;
   // Back-compat: synthetic ids the pipeline uses internally. Renderers MAY
   // use this directly (v0.4 path), or prefer source_ids for typed refs.
   tweet_ids: number[];
@@ -1185,6 +1197,59 @@ export async function buildDigest(
     studies: site.studies.map(attachSourceIds),
   }));
 
+  // Grounding runs HERE, not in the builder CLI.
+  //
+  // It lived in build/digest-builder.ts for one release, which meant `npm run
+  // eval` — the quality gate — never exercised it, because the eval calls
+  // buildDigest directly. So the eval was scoring an artifact that production
+  // does not ship, and the factual-accuracy movement it reported came from the
+  // prompt alone while the gate sat untested. A protection the quality
+  // measurement cannot see is a protection you cannot claim.
+  //
+  // Every caller now gets both: the eval, build:day, and the rebuild drain.
+  const groundingText = new Map<number, string>();
+  for (const it of items) {
+    const id = it.id;
+    if (it.source_type === 'paper') {
+      groundingText.set(
+        id,
+        [it.title, it.abstract ?? '', it.fulltext_excerpt_md ?? '', it.figure_ocr_md ?? '']
+          .filter(Boolean)
+          .join('\n'),
+      );
+    } else if (it.source_type === 'slide') {
+      groundingText.set(id, it.ocr_text ?? '');
+    } else {
+      groundingText.set(id, [it.text, ...(it.image_ocr_texts ?? [])].filter(Boolean).join('\n'));
+    }
+  }
+  const withheld: GroundingWithhold[] = [];
+  for (const site of sitesWithSourceIds) {
+    for (const study of site.studies) {
+      const src = study.tweet_ids
+        .map((tid) => groundingText.get(syntheticIdToSourceRef(tid).id) ?? '')
+        .filter(Boolean)
+        .join('\n');
+      if (!src.trim()) continue;
+      withheld.push(...withholdUngroundedComparators(study, src));
+      const dropped = droppedDiseaseStates(study, src);
+      if (dropped.length > 0) {
+        console.warn(
+          `  [grounding] WARN ${study.slug ?? study.name}: source states ${dropped.join(', ')} — the card never does`,
+        );
+      }
+      // Recover a citation the summariser dropped: exactly one DOI in the
+      // sources, and none on the study, means the identifier is unambiguous.
+      if (!study.doi && study.content_type !== 'review') {
+        const recovered = soleDoiIn(src);
+        if (recovered) study.doi = recovered;
+      }
+    }
+  }
+  for (const w of withheld) {
+    console.log(`  [grounding] ${w.slug} · ${w.surface}: withheld — ${w.trials.join(', ')} not in source`);
+  }
+
   return {
     top_line: synthesis.top_line,
     tldr: synthesis.tldr,
@@ -1797,6 +1862,9 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
       : nctRaw && /^\d{8}$/.test(nctRaw)
         ? `NCT${nctRaw}`
         : null;
+  // normalizeDoi is the single canonicalisation in the codebase (strips a
+  // doi: prefix or a doi.org URL, lowercases); anything it rejects is null.
+  const doi = typeof root.doi === 'string' ? normalizeDoi(root.doi) : null;
   // v0.10: a `figures` array, each {url, caption}. v0.4 back-compat: a model
   // that still emits the single key_figure_url/caption pair is wrapped into a
   // one-element array. URLs are deduped (a model may cite the same image twice)
@@ -1834,6 +1902,9 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     // content_type but parses `nct` ungated, so force it null for reviews here —
     // the same enforcement posture as stripReviewVerdicts at build time.
     nct: content_type === 'review' ? null : nct,
+    // A review surveys many trials and owns none of their identifiers — the same
+    // reason its `nct` is forced null (v0.audit).
+    doi: content_type === 'review' ? null : doi,
     tweet_ids: cluster.tweet_ids,
     slug: cluster.slug,
     verdict: parseVerdict(root.verdict),

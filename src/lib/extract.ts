@@ -1,3 +1,4 @@
+import { normalizeDoi } from './doi.ts';
 // Extract NCT trial numbers and PubMed citations from free text.
 //
 // Strictness matters — false positives turn into dead links in the digest,
@@ -118,4 +119,39 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+/**
+ * The ONE DOI a body of source text states, or null.
+ *
+ * A citation the summariser dropped is a link the reader cannot follow: the eval
+ * judge caught a card losing "doi:10.1056/NEJMoa2406909" that its own source
+ * tweet supplied. `nct` survives summarisation because the prompt asks for it by
+ * name; a DOI arriving in tweet text had nowhere to go.
+ *
+ * EXACTLY ONE, or nothing. Source text carrying two DOIs describes a study whose
+ * own publication cannot be picked without guessing, and a wrong DOI points the
+ * reader at someone else's paper. Same rule as the identifier backstop in
+ * pdf-meta.ts: a regex is a safety net under the model, never a second opinion
+ * to be averaged with it.
+ *
+ * NORMALISE TO COMPARE, RETURN WHAT THE SOURCE WROTE. normalizeDoi lowercases,
+ * which is correct for identity — DOIs resolve case-insensitively, and dedup
+ * needs one canonical key — and wrong for a citation the reader will read:
+ * "10.1056/NEJMoa2406909" is how the journal writes it, and silently returning
+ * "10.1056/nejmoa2406909" alters a quoted identifier. Uniqueness is judged on
+ * the normalised form; the verbatim form is what comes back.
+ */
+export function soleDoiIn(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const byKey = new Map<string, string>();
+  for (const c of extractCitations(text)) {
+    if (c.kind !== 'doi') continue;
+    const key = normalizeDoi(c.id);
+    if (!key) continue;
+    // First spelling wins, so a later lowercase mention cannot rewrite the
+    // canonical one the source led with.
+    if (!byKey.has(key)) byKey.set(key, c.id);
+  }
+  return byKey.size === 1 ? [...byKey.values()][0]! : null;
 }

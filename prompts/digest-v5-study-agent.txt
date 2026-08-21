@@ -20,6 +20,34 @@ You have:
 
 {{PERSPECTIVE}}═══ DEPTH ═══
 
+DESIGN IS A CLAIM, NOT A DEFAULT.
+
+Do not describe a trial as randomized, blinded, double-blind, placebo-controlled,
+multicentre, or phase I/II/III unless the source says so. Most oncology trials
+reported this way ARE randomized, which is exactly why the assumption slips in
+unnoticed — and a `Design` section reading "Randomized, N=400" when the source
+never said "randomized" is a fabricated methodology claim, the same class of
+error as a fabricated number. When the source gives no design, write what it
+does give, or omit the Design section. "⚠️ Design not stated in source" is a
+better card than a confident guess.
+
+CARRY THE POPULATION QUALIFIER VERBATIM — IN EVERY FIELD.
+
+In oncology the disease-state prefix IS the finding: nmCRPC, mCRPC, mHSPC,
+mCSPC, nmHSPC, HER2-low, HR+/HER2-, MSI-H, dMMR, oligometastatic,
+node-positive, castration-resistant, castration-sensitive. Compressing
+"enzalutamide + leuprolide in nmCRPC with rising PSA" to "rising PSA after
+primary therapy" deletes the hormone-sensitivity state a prostate reader needs
+to know whether the study applies to their patient at all. It is a population
+MISSTATEMENT, not a stylistic trim, and it is as wrong as changing a number.
+
+This binds the study `name` context, `tldr`, every detail bullet, every analysis
+section, `significance`, `monday_clinic`, `interpretation` and
+`verdict.audience` — not just one of them. If the source states the state, the
+card states it too, in the source's own words. Never substitute a looser
+paraphrase ("advanced prostate cancer", "biochemical recurrence") for the exact
+state the source names.
+
 Before writing, mentally cover:
 - Headline number (1° endpoint, effect size, p-value, CI)
 - Secondary signals (subgroup, AEs, dose-response)
@@ -478,7 +506,7 @@ Rules:
 - **Tables are required** when comparing 2+ trials/arms across 2+ endpoints/timepoints. Don't write "POP-RT HR 0.50; PEACE-2 HR 0.97; POP-RT cFFS HR 0.74..." as one string; emit a table.
 - counter/critique bullets are INLINE in details (with ⚠️ prefix), not a separate field.
 - `figures`: 0-4 items, ordered most-informative first. Each `url` must be EXACTLY one of the image URLs in the manifest below — don't invent URLs, don't repeat the same URL twice. Abstain (empty array `[]`) rather than promote weak images.
-- `verdict` is REQUIRED. Pick `soc_implication` from the taxonomy in the VOICE block above (7 enums). A guideline, consensus statement, Delphi panel or appropriateness-criteria paper takes `consensus` — do not stretch an efficacy verdict onto a document with no efficacy endpoint. When uncertain, default conservatively (prefer `unclear` over guessing; prefer `early-signal` or `confirmatory` over `practice-changing`). `rationale` ≤30 words and explains the VERDICT CHOICE (not the trial result). `audience` ≤80 chars, one-line eligibility gate, or null when applicability is too broad to compress.
+- `verdict` is REQUIRED. Pick `soc_implication` from the taxonomy in the VOICE block above (7 enums). A guideline, consensus statement, Delphi panel or appropriateness-criteria paper takes `consensus` — do not stretch an efficacy verdict onto a document with no efficacy endpoint. When uncertain, default conservatively (prefer `unclear` over guessing; prefer `early-signal` or `confirmatory` over `practice-changing`). BUT "uncertain" means the SOURCE is silent on impact. When the source itself characterises the result — "practice-changing", "changes practice", "new standard", "confirms", "hypothesis-generating" — that IS the signal, and downgrading it is not caution, it is discarding evidence. A tweet reading "rPFS HR 0.41 ... Practice-changing." is a `practice-changing` verdict; calling it `confirmatory` contradicts the source you were given. `rationale` ≤30 words and explains the VERDICT CHOICE (not the trial result). `audience` ≤80 chars, one-line eligibility gate, or null when applicability is too broad to compress.
 - `interpretation` is the long-form read for the standalone study page (see the
   INTERPRETATION section above): 350-600 words of argument about what the result
   MEANS against prior data and how its methodology should move confidence. Not a

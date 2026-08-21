@@ -88,17 +88,17 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 - **Review consistency on secondary surfaces (v0.16 ship review — red-team + adversarial).** **Priority: P3.** A `content_type:review` reads as a 🗞️ press round-up on the date / site / tag pages (shared `railEmojiForStudy`) but four other study surfaces don't yet distinguish it: (1) the home `RecentFeed` shows the disease-site emoji (it deliberately flags only practice-changing with 🚀 — decide whether a review warrants its own marker there); (2) the Telegram channel post (`channel-post.ts`) renders a neutral bullet; (3) the OG / share-image (`share-image.ts`, `og/study/[date]/[slug].png.ts`) shows no review marker; (4) the Obsidian vault twin (`renderObsidian`) omits the `discussed_trials` list + review framing, so a review note is a bare verdict-less study. All are **design/scope judgments, not bugs** — the web milestone is intentionally first. Decide per-surface whether to mirror the review treatment (consider exporting `REVIEW_GLYPH` everywhere) or document it as web-only.
 - **Harden v0.16 trade-press classification + extraction (ship adversarial + codex structured review).** **Priority: P3.** Three non-blocking robustness items surfaced at ship: (a) **Ground `discussed_trials` against the source text** (codex review P2 #2) — currently the cap/length/charset filter accepts any 2–40-char alphanumeric token, so a hallucinated acronym renders verbatim; add a word-boundary case-insensitive check that each retained acronym appears in the cluster's source text + image OCR before persisting (must include OCR-only sources + handle `STOMP/ORIOLE` slash-joined spellings so it doesn't drop legit names — needs its own real-build verify). (b) **Make `content_type` curator-overridable** (codex adversarial) — `content_type`/`discussed_trials` are not in `EDITABLE_STUDY_KEYS` (`digest-overrides.ts`), so a Phase-1 misclassification can't be durably corrected and `stripReviewVerdicts` re-strips the verdict every rebuild; add a durable override path (and skip the strip when a curator pins `content_type:study_report`). (c) **Warn on an invalid (non-empty) `content_type`** from a live Phase-1 response so a model typo that silently falls open to `study_report` is observable rather than silent. **Context:** eng plan `docs/plans/trade-press-format.md`; the conservative `study_report` default is deliberate (back-compat), so (a)/(c) tighten without changing the default.
 
-## Grounding (v0.53 eval gate — comparator fabrication closed in v0.54)
+## Digest quality (eval now PASSES at 8.5 — v0.55)
 
-- **Editorial quality now caps the eval, not fabrication.** **Priority: P2.**
-  With the comparator gate in (v0.54) the judge scores factual accuracy 8.0 and
-  reports no fabricated numbers; the remaining 6.5 comes from three editorial
-  misses: the top line can lead with the less clinically urgent story of the day
-  (EMBARK's confirmatory OS update over PRESTIGE-PSMA's practice-changing HR
-  0.41), a population qualifier can be dropped in summarisation ("nmCRPC" →
-  "rising PSA", a real specificity loss for a prostate audience), and a source
-  DOI can go unrecorded on the study it belongs to. Distinct from grounding and
-  wants its own pass. (v0.54 eval)
+- **Related-trials picks can miss the question they claim to answer.**
+  **Priority: P2.** The only gap left in an otherwise passing eval: a trial
+  surfaced under an open question whose population does not match it. The v0.13
+  rerank subsystem, not grounding. (v0.55 eval)
+- **The eval is ONE fixture and the hallucination cap makes it bimodal.**
+  **Priority: P3.** Observed 5.0 / 6.5 / 7.5 / 5.0 / 5.0 / 8.5 across runs while
+  fixing genuinely different defects each time — any single unsupported claim
+  caps the score at 5.0 regardless of the other axes. A second and third fixture
+  would separate "we regressed" from "the model rolled badly". (v0.55)
 
 ## Trial lineage (v0.53 follow-ups)
 

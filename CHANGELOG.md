@@ -2,6 +2,63 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.55.0] - 2026-08-20
+
+### Fixed
+- **The eval passes for the first time: 5.0 → 8.5 against a threshold of 8.**
+  Factual accuracy 4.0 → 9.0, citation correctness → 10.0, clinical relevance
+  → 9.0. The judge's read: "Ship-quality digest — accurate, well-cited, cleanly
+  clustered."
+
+- **The day's headline led with the wrong study.** A confirmatory OS update
+  outranked a practice-changing readout sitting beside it. The cause was not
+  Phase 3's story selection: EVERY study came back `confirmatory`, because the
+  Phase 2 prompt says "prefer `early-signal` or `confirmatory` over
+  `practice-changing`" — and the source tweet said "Practice-changing." in so
+  many words. Conservatism is right when the source is silent on impact; it was
+  overriding explicit evidence. The prompt now treats the source's own
+  characterisation as the signal it is, and Phase 3 orders the top line by
+  verdict rather than by recency.
+
+- **A population qualifier could be genericised away.** "enzalutamide +
+  leuprolide in nmCRPC with rising PSA" became "biochemical recurrence with
+  rising PSA after primary therapy" — the hormone-sensitivity state deleted from
+  every surface. In oncology the disease-state prefix IS the finding, and a
+  prostate reader cannot tell from the generic phrasing whether the study applies
+  to their patient. The rule now binds every field in BOTH phases: the study
+  name, tldr, bullets, sections, significance, monday_clinic, interpretation,
+  verdict.audience, and the cross-site tldr Phase 3 writes.
+
+- **A DOI the source supplied was dropped.** `DigestStudy` had no `doi` field at
+  all, so a DOI arriving in tweet text had nowhere to go — `nct` survived only
+  because the prompt asks for it by name. Studies now carry `doi`, with a regex
+  backstop under the model (exactly one DOI in the sources, or nothing) mirroring
+  pdf-meta.ts. Returned verbatim, not normalised: normalizeDoi lowercases, which
+  is right for identity and wrong for a quoted citation.
+
+- **Trial design could be asserted without a source.** A `Design` section reading
+  "Randomized, N=400" when no source said "randomized" is a fabricated
+  methodology claim, the same class as a fabricated number — and it slips in
+  precisely because most trials reported that way are randomised.
+
+### Notes
+- **The comparator grounding gate was never running in the eval.** It shipped in
+  v0.54 inside build/digest-builder.ts, and the eval calls buildDigest from
+  llm-pipeline.ts directly — so the quality gate was scoring an artifact
+  production does not ship, and v0.54's factual-accuracy movement came from the
+  prompt alone while the gate sat untested. Both the gate and the DOI backstop
+  now live in buildDigest, so the eval, build:day and the rebuild drain all
+  exercise them. A protection the measurement cannot see is a protection you
+  cannot claim.
+- A new warning names any disease state the sources state that the card never
+  carries. It WARNS, never repairs: the fix is a rewrite of clinical prose, which
+  no deterministic pass can do safely.
+- Disease-state matching is token-aware. Plain substring search inverts the
+  meaning: "nmCRPC" contains "mCRPC", so a source naming only the non-metastatic
+  state would have reported the metastatic one as dropped.
+- Remaining eval gap at 8.5: one related-trials pick whose population does not
+  match the open question it claims to answer. A different subsystem (v0.13).
+
 ## [0.54.0] - 2026-08-20
 
 ### Fixed

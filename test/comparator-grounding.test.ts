@@ -10,6 +10,7 @@ import {
   ungroundedComparatorClaims,
   withholdUngroundedComparators,
   formatGroundingWithholds,
+  droppedDiseaseStates,
 } from '../src/lib/comparator-grounding.ts';
 
 describe('namedTrialsIn', () => {
@@ -172,5 +173,67 @@ describe('formatGroundingWithholds', () => {
     ]);
     expect(out).toContain('withheld 1 surface');
     expect(out).toContain('talapro-3 · details[5]: withheld — TALAPRO-2 not in source');
+  });
+});
+
+// The mirror question. Grounding asks "did the card claim something the source
+// didn't say"; this asks "did the card DROP something the source did say, where
+// dropping it changes the medicine". The judge caught EMBARK genericised to
+// "biochemical recurrence with rising PSA" with the source's "nmCRPC" absent
+// from every surface, and called it "a clinically material population
+// misstatement, not a stylistic trim".
+describe('droppedDiseaseStates', () => {
+  const SRC = 'EMBARK final OS: enzalutamide + leuprolide in nmCRPC with rising PSA. OS HR 0.76.';
+
+  it('flags a state the source names and the card never repeats', () => {
+    const study = {
+      name: 'EMBARK',
+      tldr: 'Final OS HR 0.76 in biochemical recurrence with rising PSA after primary therapy.',
+      details: ['Survival benefit confirmed'],
+    };
+    expect(droppedDiseaseStates(study, SRC)).toEqual(['nmCRPC']);
+  });
+
+  it('is quiet when ANY surface carries the state', () => {
+    // A card that uses the state anywhere has not lost it.
+    const study = { name: 'EMBARK', tldr: 'OS HR 0.76.', details: ['Enzalutamide in nmCRPC'] };
+    expect(droppedDiseaseStates(study, SRC)).toEqual([]);
+  });
+
+  it('checks verdict.audience, which is where a population gate belongs', () => {
+    const withAudience = {
+      name: 'EMBARK',
+      tldr: 'OS HR 0.76.',
+      verdict: { audience: 'nmCRPC with rising PSA on ADT' },
+    };
+    expect(droppedDiseaseStates(withAudience, SRC)).toEqual([]);
+  });
+
+  it('accepts a MORE specific state as covering the looser one', () => {
+    // A card saying "nmCRPC" has not dropped "mCRPC".
+    const src = 'Enzalutamide in mCRPC and specifically nmCRPC.';
+    const study = { name: 'E', tldr: 'Studied in nmCRPC.', details: [] };
+    expect(droppedDiseaseStates(study, src)).toEqual([]);
+  });
+
+  it('says nothing when the source names no disease state', () => {
+    expect(droppedDiseaseStates({ name: 'X', tldr: 'HR 0.62.', details: [] }, 'PFS 13.2 vs 8.1mo.'))
+      .toEqual([]);
+  });
+});
+
+// Plain substring search inverts the meaning here: "nmCRPC" CONTAINS "mCRPC",
+// so a source saying only non-metastatic castration-resistant would report
+// METASTATIC as dropped — reporting a population the source never named.
+describe('disease-state matching is token-aware', () => {
+  it('does not read nmCRPC as also naming mCRPC', () => {
+    const study = { name: 'E', tldr: 'Rising PSA after primary therapy.', details: [] };
+    expect(droppedDiseaseStates(study, 'enzalutamide in nmCRPC with rising PSA')).toEqual(['nmCRPC']);
+  });
+
+  it('does not read HER2-low as also naming HER2-positive', () => {
+    const study = { name: 'D', tldr: 'T-DXd after endocrine therapy.', details: [] };
+    expect(droppedDiseaseStates(study, 'T-DXd in HER2-low metastatic breast cancer'))
+      .toEqual(['HER2-low']);
   });
 });
