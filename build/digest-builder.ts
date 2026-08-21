@@ -50,11 +50,6 @@ import {
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { markFigureSourcedDetails } from '../src/lib/source-tier.ts';
 import {
-  withholdUngroundedComparators,
-  formatGroundingWithholds,
-  type GroundingWithhold,
-} from '../src/lib/comparator-grounding.ts';
-import {
   loadOverrides,
   applyOverrides,
   formatOverrideSummary,
@@ -110,40 +105,6 @@ export function markFigureSourcedStudies(digest: DigestOutput, papers: Paper[]):
       });
     }
   }
-}
-
-// Audit every study's prose against the text its own sources carry. The source
-// text is assembled the same way markFigureSourcedStudies assembles it — from
-// the study's OWN source rows, not the whole day — because a comparator
-// mentioned on some other card is still a comparator this card was not given.
-export function auditComparatorGrounding(
-  digest: DigestOutput,
-  papers: Paper[],
-  bookmarks: Bookmark[],
-): GroundingWithhold[] {
-  const paperById = new Map(papers.map((p) => [p.id, p] as const));
-  const bookmarkById = new Map(bookmarks.map((b) => [b.id, b] as const));
-  const out: GroundingWithhold[] = [];
-  for (const site of digest.sites) {
-    for (const study of site.studies) {
-      const parts: string[] = [];
-      for (const ref of study.source_ids ?? []) {
-        if (ref.type === 'paper') {
-          const p = paperById.get(ref.id);
-          if (p) parts.push(p.title ?? '', p.abstract ?? '', p.fulltext_excerpt_md ?? '', p.figure_ocr_md ?? '', p.figure_structured_md ?? '');
-        } else if (ref.type === 'tweet') {
-          const b = bookmarkById.get(ref.id);
-          if (b) parts.push(b.tweet_text ?? '', b.image_ocr_texts ?? '');
-        }
-      }
-      const sourceText = parts.filter(Boolean).join('\n');
-      // No resolvable source text means we cannot judge; abstain rather than
-      // withhold everything a card says.
-      if (!sourceText.trim()) continue;
-      out.push(...withholdUngroundedComparators(study, sourceText));
-    }
-  }
-  return out;
 }
 
 // the study whose paper source is that PMID. No-op when nothing was resolved.
@@ -897,17 +858,8 @@ export async function buildOneDate(
     console.log(`  set ${coercedConsensus} consensus-guideline verdict(s) to 'consensus'`);
   }
 
-  // P0 grounding: withhold any prose that attaches a figure to a trial the
-  // sources never mention. Phase 2 is ASKED for comparative context, so it
-  // reaches for the trials that define practice — which are by construction not
-  // in the day's sources — and the eval judge caught it inventing "VISION (NEJM
-  // 2021) ... rPFS HR 0.40". The prompt now forbids it; this enforces it, because
-  // a prompt is a request and a gate is a guarantee.
-  //
-  // Runs BEFORE overrides so a curator edit is never second-guessed by the gate,
-  // and before the artifact is written so nothing ungrounded reaches disk.
-  const groundingWithholds = auditComparatorGrounding(digest, allPapers, bookmarks);
-  console.log(`  ${formatGroundingWithholds(groundingWithholds)}`);
+  // Comparator grounding and the DOI backstop run inside buildDigest (see the
+  // note there) so the eval exercises them too. Nothing to do here.
 
   // v0.17 (T6): link each review's discussed-trial acronyms to the same-date
   // study auto-resolved from it (via the approved manifest), so the rendered

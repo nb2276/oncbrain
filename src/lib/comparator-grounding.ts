@@ -299,3 +299,100 @@ export function formatGroundingWithholds(items: GroundingWithhold[]): string {
     ...lines,
   ].join('\n');
 }
+
+// ── the inverse check: a qualifier the SOURCE made that the card dropped ──────
+//
+// Grounding above asks "did the card claim something the source didn't say".
+// This asks the mirror question: "did the card drop something the source DID
+// say, where dropping it changes the medicine". Both are fidelity to source.
+//
+// In oncology the disease-state prefix IS the finding. The eval judge caught
+// EMBARK genericised to "biochemical recurrence with rising PSA after primary
+// therapy" with the source's "nmCRPC" absent from every surface — and called it
+// "a clinically material population misstatement, not a stylistic trim". A
+// prostate reader cannot tell from the generic phrasing whether the study
+// applies to their patient at all.
+//
+// WARN, NEVER REPAIR. The fix is a rewrite of clinical prose, which no
+// deterministic pass can do safely — so this surfaces the drop in the build log
+// for the curator, exactly like the orphaned-headline guard. Withholding the
+// card would be worse than publishing it with a flagged imprecision.
+const DISEASE_STATES = [
+  'nmCRPC', 'mCRPC', 'nmHSPC', 'mHSPC', 'nmCSPC', 'mCSPC',
+  'castration-resistant', 'castration-sensitive', 'hormone-sensitive',
+  'HER2-low', 'HER2-positive', 'HER2-negative', 'triple-negative',
+  'MSI-H', 'dMMR', 'pMMR', 'oligometastatic', 'oligoprogressive',
+  'node-positive', 'node-negative', 'muscle-invasive', 'non-muscle-invasive',
+];
+
+export type DroppedQualifier = { slug: string; states: string[] };
+
+/**
+ * Whole-token containment, lowercase.
+ *
+ * Plain substring search is wrong here in a way that inverts the meaning:
+ * "nmCRPC" CONTAINS "mCRPC", so a source saying only non-metastatic
+ * castration-resistant would report metastatic as dropped too — reporting a
+ * population the source never named. The neighbours of a match have to be
+ * non-alphanumeric for it to be that token rather than the tail of another.
+ */
+function mentionsToken(haystack: string, needle: string): boolean {
+  const alnum = /[a-z0-9]/;
+  let from = 0;
+  for (;;) {
+    const i = haystack.indexOf(needle, from);
+    if (i < 0) return false;
+    const before = i === 0 ? '' : haystack[i - 1]!;
+    const after = haystack[i + needle.length] ?? '';
+    if (!alnum.test(before) && !alnum.test(after)) return true;
+    from = i + 1;
+  }
+}
+
+/**
+ * Disease states the sources name that the card's prose never carries.
+ *
+ * Only fires when the source states one and NO surface repeats it — a card that
+ * uses the state anywhere has not lost it.
+ */
+export function droppedDiseaseStates(
+  study: AuditStudy & { tldr?: string; verdict?: { audience?: string | null } | null },
+  sourceText: string,
+): string[] {
+  const src = sourceText.toLowerCase();
+  const card = [
+    study.name,
+    study.tldr ?? '',
+    ...(study.details ?? []).map(detailText),
+    ...(study.analysis_sections ?? []).map((x) => x?.body ?? ''),
+    study.significance ?? '',
+    study.monday_clinic ?? '',
+    study.interpretation ?? '',
+    study.verdict?.audience ?? '',
+    ...Object.values(study.significance_by_specialty ?? {}),
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  return DISEASE_STATES.filter((state) => {
+    const s = state.toLowerCase();
+    if (!mentionsToken(src, s)) return false;
+    if (mentionsToken(card, s)) return false;
+    // A more specific state on the card covers the looser one: a card saying
+    // "nmCRPC" has not dropped "mCRPC" when the source named both.
+    return !DISEASE_STATES.some(
+      (other) =>
+        other !== state &&
+        other.toLowerCase().endsWith(s) &&
+        mentionsToken(card, other.toLowerCase()),
+    );
+  });
+}
+
+export function formatDroppedQualifiers(items: DroppedQualifier[]): string {
+  if (items.length === 0) return 'population qualifiers: every source disease-state is carried';
+  return [
+    `WARN population qualifier dropped on ${items.length} card(s) — the source states it, the card never does:`,
+    ...items.map((d) => `    ${d.slug}: ${d.states.join(', ')}`),
+  ].join('\n');
+}

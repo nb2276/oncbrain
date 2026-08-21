@@ -58,6 +58,11 @@ export type DigestStudy = {
   key_figure_url?: string | null;
   key_figure_caption?: string | DigestTable | null;
   nct: string | null;
+  // The study's own publication DOI, when a source carries one. Parallel to
+  // `nct` and populated the same two ways: Phase 2 may emit it, and a build-time
+  // regex backstop attaches it when the sources state exactly one and the model
+  // missed it — the same belt-and-braces pdf-meta.ts uses for identifiers.
+  doi?: string | null;
   // v0.4: synthetic ids. v0.5+ prefers source_ids for typed refs.
   tweet_ids: number[];
   source_ids?: DigestSourceRef[];
