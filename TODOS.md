@@ -90,10 +90,13 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 ## Digest quality (eval now PASSES at 8.5 — v0.55)
 
-- **Related-trials picks can miss the question they claim to answer.**
-  **Priority: P2.** The only gap left in an otherwise passing eval: a trial
-  surfaced under an open question whose population does not match it. The v0.13
-  rerank subsystem, not grounding. (v0.55 eval)
+- **Decide whether sibling-population watches are wanted.** **Priority: P3.**
+  v0.55.1 drops a watched trial whose clinical state contradicts the study's,
+  which removes talapro-3's entire related-trials block (TALAPRO-2 in mCRPC
+  watched from TALAPRO-3 in mCSPC). Defensible either way: the trial is the
+  direct sibling with a mature OS readout, but it answers for a different
+  patient. Relaxing means allowing ONE axis (hormone sensitivity) while keeping
+  the rest. (v0.55.1)
 - **The eval is ONE fixture and the hallucination cap makes it bimodal.**
   **Priority: P3.** Observed 5.0 / 6.5 / 7.5 / 5.0 / 5.0 / 8.5 across runs while
   fixing genuinely different defects each time — any single unsupported claim

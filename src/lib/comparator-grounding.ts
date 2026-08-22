@@ -396,3 +396,61 @@ export function formatDroppedQualifiers(items: DroppedQualifier[]): string {
     ...items.map((d) => `    ${d.slug}: ${d.states.join(', ')}`),
   ].join('\n');
 }
+
+// ── mutually exclusive clinical states ───────────────────────────────────────
+//
+// Within a group, two different members describe DIFFERENT patients. Used by the
+// related-trials rerank to drop a watched trial whose population contradicts the
+// study's: mCRPC and mHSPC are not the same disease state, and a reader clicking
+// a watched trial expects it to resolve the question for the patient the study
+// was about.
+// Each entry is one clinical AXIS; each inner array is one value on that axis,
+// listed with its synonyms. Two DIFFERENT values on the same axis describe
+// different patients; two spellings of the SAME value do not.
+//
+// The synonym layer is load-bearing. A flat exclusive list treated mHSPC and
+// mCSPC as opposites and would have dropped a legitimate watch — hormone-
+// sensitive and castration-sensitive are the same state, written two ways by
+// two literatures.
+const STATE_AXES: string[][][] = [
+  // metastatic burden, within castration-resistant disease
+  [['mCRPC'], ['nmCRPC']],
+  // metastatic burden, within castration-sensitive disease
+  [['mHSPC', 'mCSPC'], ['nmHSPC', 'nmCSPC']],
+  // hormone sensitivity itself
+  [
+    ['mCRPC', 'nmCRPC', 'castration-resistant'],
+    ['mHSPC', 'mCSPC', 'nmHSPC', 'nmCSPC', 'castration-sensitive', 'hormone-sensitive'],
+  ],
+  [['HER2-low'], ['HER2-positive'], ['HER2-negative'], ['triple-negative']],
+  [['dMMR'], ['pMMR']],
+  [['node-positive'], ['node-negative']],
+  [['muscle-invasive'], ['non-muscle-invasive']],
+];
+
+/**
+ * A clinical state the candidate asserts that CONTRADICTS the study's own.
+ *
+ * Returns the conflicting pair as "study-state vs candidate-state", or null.
+ * Fires only when both sides name a state from the same exclusive group AND the
+ * candidate never also names the study's state — a trial enrolling both mCRPC
+ * and mHSPC cohorts contradicts neither.
+ */
+export function conflictingState(studyText: string, candidateText: string): string | null {
+  const a = studyText.toLowerCase();
+  const b = candidateText.toLowerCase();
+  const saysAny = (hay: string, values: string[]): string | null =>
+    values.find((v) => mentionsToken(hay, v.toLowerCase())) ?? null;
+
+  for (const axis of STATE_AXES) {
+    const studyValues = axis.filter((syn) => saysAny(a, syn) !== null);
+    const candValues = axis.filter((syn) => saysAny(b, syn) !== null);
+    if (studyValues.length === 0 || candValues.length === 0) continue;
+    // The candidate covering the study's value is not a conflict, whatever else
+    // it also enrols — a trial with both an mCRPC and an mHSPC cohort
+    // contradicts neither.
+    if (candValues.some((c) => studyValues.includes(c))) continue;
+    return `${saysAny(a, studyValues[0]!)} vs ${saysAny(b, candValues[0]!)}`;
+  }
+  return null;
+}
