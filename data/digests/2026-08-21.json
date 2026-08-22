@@ -1,0 +1,350 @@
+{
+  "date": "2026-08-21",
+  "conference": null,
+  "generated_at": 1787385724559,
+  "digest": {
+    "top_line": "SEER-Medicare focal ablation vs IMRT: GI toxicity 11.0% vs 21.5% (OR 0.45) at 24mo, but GU 41.7% vs 29.3% (OR 1.69) — the trade runs both ways.",
+    "tldr": "One prostate readout, and it is a claims-based trade-off, not a winner: focal ablation buys lower GI toxicity at the cost of substantially more GU morbidity (incontinence therapy 17.4% vs 7.5%, ED 18.2% vs 13.1%). The GI signal rests on a single diagnosis-claim subcategory and vanishes on procedure codes, so treat it as hypothesis-generating pending a randomised FT vs IMRT comparison that does not exist.",
+    "sites": [
+      {
+        "disease_site": "prostate",
+        "intro": "Focal ablation vs IMRT has no randomised comparison; this matched SEER-Medicare cohort is the current substitute, with all the confounding-by-indication that implies.",
+        "studies": [
+          {
+            "name": "Focal Ablation vs IMRT Toxicity (SEER-Medicare)",
+            "tldr": "GI toxicity favored focal therapy at 24mo (11.0% vs 21.5%, OR 0.45) but GU toxicity favored IMRT (41.7% vs 29.3%, OR 1.69).",
+            "details": [
+              "🔍 SEER-Medicare claims cohort, localized PCa dx 2010-2017, fee-for-service Medicare only",
+              "🔍 797 focal therapy pts Mahalanobis matched 2:1 to 1,594 IMRT pts; all matched variables standardized difference <10%",
+              "🔍 Focal therapy = cryotherapy (592), laser ablation (81), TURP+cryo (48), TURP+laser (79). No HIFU (n=26) or RFA (n=11): too few to analyze",
+              "🔍 IMRT arm required ≥20 IMRT fractions + a planning code; SBRT, protons and rectal hydrogel pts excluded",
+              {
+                "text": "📊 Claims-based toxicity, focal therapy vs IMRT",
+                "table": {
+                  "columns": [
+                    "Toxicity / window",
+                    "FT",
+                    "IMRT",
+                    "OR (95% CI)"
+                  ],
+                  "rows": [
+                    [
+                      "GI 0-6 mo",
+                      "3.6%",
+                      "3.5%",
+                      "1.06 (0.67-1.67), P=.81"
+                    ],
+                    [
+                      "GI 0-12 mo",
+                      "6.2%",
+                      "9.5%",
+                      "0.63 (0.45-0.88)"
+                    ],
+                    [
+                      "GI 0-24 mo",
+                      "11.0%",
+                      "21.5%",
+                      "0.45 (0.35-0.58)"
+                    ],
+                    [
+                      "GU 0-12 mo",
+                      "34.6%",
+                      "15.8%",
+                      "2.69 (2.21-3.28)"
+                    ],
+                    [
+                      "GU 0-24 mo",
+                      "41.7%",
+                      "29.3%",
+                      "1.69 (1.42-2.01)"
+                    ]
+                  ]
+                }
+              },
+              "📊 GU excess with FT driven by incontinence therapy (17.4% vs 7.5%, P<.01) and erectile dysfunction (18.2% vs 13.1%, P<.01)",
+              "📊 GI signal is a single subcategory: \"other GI inflammation or unspecified\" 10.4% FT vs 21.1% IMRT, P<.01, mostly bleeding and colitis",
+              "⚠️ Procedure-code-only analysis showed too few GI events to report and no significant difference: the GI gap is diagnosis claims, not intervention",
+              "⚠️ Unmatched baseline imbalances were large (rural 6.4% FT vs 1.9% IMRT; lowest 2 income quintiles 51.5% vs 38.7%), so access patterns differ by arm",
+              "⚠️ Exclusion of pts who died within 24mo of treatment plus a claims-only endpoint leaves residual confounding by indication unaddressed",
+              "🔗 No randomised FT vs IMRT comparison exists; the authors state this is the absence the study addresses"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              1000000082
+            ],
+            "slug": "ft-vs-imrt-toxicity-seer",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Claims-based retrospective matching, not randomised; toxicity defined by diagnosis codes, and the GI difference vanished when restricted to procedure codes. No PROs, no baseline function.",
+              "audience": "Localized prostate cancer, fee-for-service Medicare, mean age ~73"
+            },
+            "significance": "The GI advantage rests on diagnosis claims alone: procedure-code-only GI events were too few to report and not significantly different, while the GU excess with FT was concrete (incontinence therapy 17.4% vs 7.5%). For an RT reader counseling an older man weighing ablation, that asymmetry is the point.",
+            "monday_clinic": "In an older man with localized prostate cancer choosing between focal ablation and IMRT, this supports counseling that the tradeoff runs GU-for-GI rather than uniformly lower toxicity with ablation; it does not extend to SBRT or proton patients, who were excluded.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Retrospective **SEER-Medicare** claims analysis of localized prostate cancer diagnosed **2010-2017**. **797 focal therapy** patients Mahalanobis matched **2:1** to **1,594 IMRT** patients on demographics, Medicaid eligibility, comorbidity, flu vaccination, primary care access, year, cancer characteristics and ADT. Logistic regression at 6, 12 and 24 months."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Fee-for-service Medicare beneficiaries with localized PCa as first and only cancer, continuously enrolled parts A and B from 12 months pre-diagnosis through 24 months post-treatment. New York, Idaho and Massachusetts registries excluded for missing AJCC staging. Patients who **died within 24 months of treatment were excluded**."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "IMRT defined as external beam with **no surgery plus ≥20 IMRT fractions** and an IMRT planning code; a gap of ≥30 days between radiation dates counted as a separate course. **SBRT and proton patients were excluded**, as were patients with **rectal hydrogel spacer**, so the IMRT arm is conventional fractionation without a rectal spacer."
+              },
+              {
+                "label": "Endpoints",
+                "body": "Presence of claims indicative of a GI or GU complication within 6, 12 and 24 months of treatment, assessed both as **combined diagnosis and procedure codes** and as **procedure codes only**. No patient-reported outcomes and no graded toxicity scale."
+              },
+              {
+                "label": "Results",
+                "body": "Direction reversed by organ system: GI favored focal therapy from 12 months onward, GU favored IMRT at every window measured. The 0-6 month GI comparison was null (**OR 1.06, P=.81**)."
+              },
+              {
+                "label": "Safety",
+                "body": "GU excess with focal therapy was driven by **incontinence therapy (17.4% vs 7.5%)** and **erectile dysfunction (18.2% vs 13.1%)**, both P<.01. GI events with IMRT were predominantly rectal bleeding and colitis; the authors note related procedures were **rare and not significantly different**."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents older fee-for-service Medicare men with localized prostate cancer treated with conventionally fractionated IMRT or with cryotherapy or laser ablation. Does not represent men treated with SBRT, protons, a rectal hydrogel spacer, HIFU or RFA, nor younger or Medicare Advantage populations."
+              },
+              {
+                "label": "Limitations",
+                "body": "Focal therapy patients were disproportionately rural (**6.4% vs 1.9%**) and lower-income (**51.5% vs 38.7%** in the lowest two quintiles) before matching, so claim-generating behavior may differ by arm independent of toxicity. Baseline continence and erectile function were unmeasured, which matters most for the two endpoints driving the GU result."
+              },
+              {
+                "label": "Discussion",
+                "body": "The GI result is fragile in a specific way the abstract does not foreground: it collapses to one diagnosis subcategory and disappears in the procedure-only analysis. The GU result is the more robust half, and it runs against the premise that ablation is the lower-toxicity option."
+              }
+            ],
+            "interpretation": "The framing this paper answers, that focal ablation exists to deliver prostate cancer treatment with less toxicity than radiation, does not survive contact with its own data. The toxicity did not go down; it moved. Focal therapy patients generated fewer GI claims from 12 months onward and substantially more GU claims at every window, and the GU signal is not a diffuse claims artifact: it concentrates in incontinence therapy (17.4% vs 7.5%) and erectile dysfunction (18.2% vs 13.1%). Those are the two outcomes an older man is usually weighing when he is offered ablation instead of radiation, which makes this the most decision-relevant finding on the page.\n\nThe two halves of the result deserve unequal confidence, and reading them as symmetric is the main way to misuse this paper. The GI advantage for focal therapy rests entirely on diagnosis codes. When the authors restricted to procedure codes, GI events were too few to report and the difference was not statistically significant, and the entire GI signal traces to a single subcategory, \"other gastrointestinal inflammation or unspecified,\" at 10.4% versus 21.1%. A diagnosis code for rectal bleeding in a man known to have had pelvic radiation is exactly the kind of claim that gets generated because the clinician is looking for it. The GU result has firmer footing because incontinence therapy is an act, not an impression.\n\nMethodologically the matching is careful, and standardized differences below 10% across every matched variable is a real achievement, but matching can only balance what is coded. The pre-match distributions show focal therapy patients were three times more likely to be rural and considerably more likely to be in the lowest income quintiles, and none of the matched covariates capture baseline continence, erectile function, or prostate size, the three variables that most plausibly drive both treatment selection and the GU endpoints. The exclusion of anyone who died within 24 months of treatment is a defensible way to guarantee complete follow-up, but it selects toward healthier patients in both arms and limits how far the estimates travel.\n\nFor a radiation oncologist the practical caveat is what the IMRT arm is. Patients required at least twenty fractions, and SBRT, protons, and rectal hydrogel spacers were all excluded by design. That is a deliberately clean comparator, but it is also a 2010-2017 conventional-fractionation cohort without a spacer, which is not what most departments deliver today. The GI toxicity attributed to IMRT here is measured against a technique whose rectal dose profile has since changed, so the modest GI gap that survives is likely the ceiling of the advantage, not the current estimate. The GU comparison is less vulnerable to that drift, since the FT-side mechanism is periurethral and does not depend on which radiation era the control arm belongs to.\n\nWhat this settles is narrow and worth stating plainly: in older Medicare men, ablation is not a lower-toxicity option in aggregate, and any consent conversation presenting it that way is unsupported. What it leaves open is whether the tradeoff looks the same against modern hypofractionated or SBRT delivery with a spacer, and whether patient-reported function tracks the claims signal in either direction.",
+            "relevant_specialties": [
+              "radonc",
+              "surgonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The IMRT comparator is a 2010-2017, ≥20-fraction cohort with SBRT, protons and rectal hydrogel excluded, so the GI toxicity attributed to radiation predates spacer-era rectal sparing. That caps how much of this GI gap should carry into a current consent conversation, while the GU result (incontinence therapy 17.4% vs 7.5% favoring IMRT) transfers intact.",
+              "surgonc": "For ablation, the toxicity cost is concrete and periurethral: incontinence therapy 17.4% vs 7.5% and erectile dysfunction 18.2% vs 13.1%, both P<.01. The offsetting GI advantage collapsed in the procedure-only analysis, so the low-morbidity premise for cryotherapy and laser ablation in older men is weaker than the headline suggests."
+            },
+            "open_questions": [
+              "Does the tradeoff hold vs SBRT or spacer-era IMRT?",
+              "Do patient-reported outcomes track the claims-based GU signal?",
+              "Do HIFU and RFA carry the same GU profile as cryo/laser?"
+            ],
+            "consort": null,
+            "modality": null,
+            "intent": "curative",
+            "methodology": "real-world-evidence",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05513443",
+                "brief_title": "Prostate Cancer IRE Study (PRIS)",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 184,
+                "primary_completion_date": "2027-06",
+                "brief_summary": "The aim of this study is to evaluate the feasibility to treat localized prostate cancer diagnosed with MRI and targeted/systematic biopsies, with IRE in comparison with conventional radical treatments with the primary objective to locally control the tumour with a minimum of side effects.",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Irreversible electroporation, IRE",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Radical prostatectomy",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Radiation therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age at inclusion ≥ 40 years\n* MRI-visible lesion\n\n  * EPE 3\\* \\<1.5 cubic cm3 lesion volume\n* Gleason score 3 + 4 or 4 + 3 from a single MRI-visible lesion without any Gleason grade 4 in systematic biopsies outside of the target\n* PSA level ≤ 20 ng/ml\n* Clinical stage ≤ T2c…",
+                "answers_question": "Does the tradeoff hold vs SBRT or spacer-era IMRT?",
+                "relevance_phrase": "IRE vs prostatectomy or RT, side-effect endpoint"
+              },
+              {
+                "nct": "NCT06223295",
+                "brief_title": "Effectiveness of Focal Therapy in Men With Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 356,
+                "primary_completion_date": "2029-08",
+                "brief_summary": "In the Netherlands, most men with prostate cancer (PCa) are treated with radical whole-gland treatment, i.e. prostatectomy or radiotherapy. The burden of complications such as incontinence and erectile dysfunction associated with radical treatment is considerable. A recent systematic review by our group has shown that focal therapy of PCa seems to reduce the burden of treatment side-effects in men with intermediate-risk disease, maintaining their quality of life without compromising oncological…",
+                "conditions": [
+                  "Prostate Cancer",
+                  "Prostate Neoplasm"
+                ],
+                "interventions": [
+                  {
+                    "name": "Focal therapy",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Usual care",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Gleason score of 7 (3 + 4 or 4 + 3; ISUP grade 2/3)\n* PSA level of ≤ 20 ng/ml\n* Clinical stage ≤ T2b disease\n* Life expectancy of ≥ 10 years\n* Men with a prostate size ≤ 5 cm in sagittal length and ≤ 6 cm in axial length\n* Fit, eligible, and normally destined for radical…",
+                "answers_question": "Does the tradeoff hold vs SBRT or spacer-era IMRT?",
+                "relevance_phrase": "focal therapy vs usual care RCT, ISUP 2/3"
+              },
+              {
+                "nct": "NCT07203482",
+                "brief_title": "Clinical Outcomes in Prostate Cancer Patients Undergoing HIFU Ablation",
+                "overall_status": "RECRUITING",
+                "phase": null,
+                "enrollment_count": 300,
+                "primary_completion_date": "2030-12",
+                "brief_summary": "Many reports of clinical outcomes following treatment of localized prostate cancer suffer from lack of prospective long-term data using objective and validated outcome instruments. The purpose of this research database is to prospectively collect data to assess treatment related complications, oncologic outcomes and urinary/sexual function, and identify predictors of complications, oncological control and functional outcomes after Hhigh-intensity focused ultrasound (HIFU) ablation of prostate…",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Males, ages 40-95\n* Evidence of focal prostate cancer confined to the prostate based on MRI imaging and prostate biopsy\n* Patients with clinically localized prostate cancer (no evidence for or concern for metastatic spread of cancer outside of the prostate) that select focal…",
+                "answers_question": "Do patient-reported outcomes track the claims-based GU signal?",
+                "relevance_phrase": "prospective validated urinary/sexual PROs after HIFU"
+              },
+              {
+                "nct": "NCT03492424",
+                "brief_title": "Ablative Therapy in the Management of Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": null,
+                "enrollment_count": 200,
+                "primary_completion_date": "2032-03",
+                "brief_summary": "The purpose of this study is collect observational data regarding patterns of care and outcomes of focal therapies for prostate cancer, including but not limited to: high-intensity focused ultrasound (HIFU), cryotherapy, focal laser ablation, irreversible electroporation, photodynamic therapy, and brachytherapy.",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "cryotherapy",
+                    "type": "DEVICE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* \\>18 years of age\n* Undergoing focal therapy for primary or salvage treatment of prostate cancer, or\n* Have received prior focal therapy\n\nExclusion Criteria:\n\n* Clinically-evident metastatic disease\n* Unable to fill out an English-language questionnaire",
+                "answers_question": "Do patient-reported outcomes track the claims-based GU signal?",
+                "relevance_phrase": "questionnaire outcomes across HIFU, cryo, laser, IRE"
+              },
+              {
+                "nct": "NCT01194648",
+                "brief_title": "Focal Therapy for Prostate Cancer Using HIFU",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 354,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "RATIONALE: Prospective trials using hemi-ablation with high intensity focused ultrasound (HIFU) (Sonablate 500) have demonstrated feasibility, safety, and encouraging functional outcomes and early cancer control with 90% of men achieving trifecta status (no erectile dysfunction, leak-free pad-free continence, cancer control). However, these trials have involved small numbers of patients with men selected for good baseline function. A multi-centre prospective trial within a larger cohort of men…",
+                "conditions": [
+                  "Male Erectile Disorder",
+                  "Prostate Cancer",
+                  "Therapy-related Toxicity",
+                  "Urinary Incontinence"
+                ],
+                "interventions": [
+                  {
+                    "name": "questionnaire administration",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "assessment of therapy complications",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "high-intensity focused ultrasound ablation",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "multiparametric magnetic resonance imaging",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "quality-of-life assessment",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "transperineal prostate biopsy",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "transrectal prostate biopsy",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "1. Histologically proven prostate cancer on trans-rectal or transperineal template prostate biopsies.\n2. Prostate biopsy (either TRUS or MRI Targeted or Template):\n\n   * TRUS biopsy: up to burden bilateral disease with maximum 3mm one biopsy on non-dominant side is allowable.\n   * MRI targeted…",
+                "answers_question": "Do HIFU and RFA carry the same GU profile as cryo/laser?",
+                "relevance_phrase": "HIFU hemi-ablation, continence + toxicity endpoints"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "focal therapy versus radiotherapy prostate",
+                "patient reported outcomes prostate focal ablation",
+                "HIFU prostate ablation toxicity"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 31,
+              "fetched_at": "2026-08-22T08:01:39.860Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 82
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      }
+    ],
+    "meta": {
+      "clusters_total": 1,
+      "studies_analyzed": 1,
+      "dropped": [],
+      "ocr_available": true
+    }
+  },
+  "bookmarks": [],
+  "papers": [
+    {
+      "id": 82,
+      "pmid": "40998272",
+      "doi": "10.1016/j.ijrobp.2025.09.020",
+      "pmc_id": "PMC13104316",
+      "title": "The Comparative Toxicity of Focal Ablation Versus Intensity Modulated Radiation Therapy for Prostate Cancer.",
+      "authors": [
+        "Yu",
+        "DeStephano",
+        "Jeffers",
+        "Tward",
+        "Spina",
+        "Horowitz",
+        "Wang",
+        "Kachnic",
+        "Soulos",
+        "Gross",
+        "Cheng"
+      ],
+      "journal": "International journal of radiation oncology, biology, physics",
+      "pub_date": "2026-03-15",
+      "abstract": "PURPOSE: Focal ablative therapy (FT) aims to treat prostate cancer (PCa) with reduced toxicity compared with standard radiation therapy. There is an absence of studies comparing FT and intensity modulated radiation therapy (IMRT) for PCa.\n\nMETHODS AND MATERIALS: Using the SEER-Medicare database, we identified fee-for-service Medicare beneficiaries with PCa diagnosed from 2010 to 2017. Patients who underwent IMRT were Mahalanobis matched 2:1 to FT patients based on demographics, Medicaid eligibility, comorbidity, flu vaccination, primary care access, year, cancer characteristics, and androgen-deprivation therapy. We used logistic regression models to assess the relation between treatment modality and the presence of claims indicative of a gastrointestinal or genitourinary complication within 6, 12, and 24 months of treatment.\n\nRESULTS: We identified 9928 IMRT and 800 FT patients. After matching, patients treated with FT were less likely to have gastrointestinal toxicity (6.2%) within 12 months compared with IMRT patients (9.5%, odds ratio [OR]; 0.63 [95% CI, 0.45-0.88]); results were similar at 24 months (11.0% FT vs 21.5% for IMRT; OR, 0.45 [95% CI, 0.35-0.58]). Most gastrointestinal toxicity was because of diagnoses of rectal bleeding and colitis. In contrast, there were more claims indicative of genitourinary toxicity for FT compared with IMRT during the 0 to 12 (34.6% vs 15.8%; OR, 2.69 [95% CI, 2.21-3.28]) and 0 to 24 (41.7% vs 29.3%; OR, 1.69 [95% CI, 1.42-2.01]) month periods. The largest difference was in incontinence therapy (17.4% vs 7.5%, P < .01) and erectile dysfunction (18.2% vs 13.1%, P < .01), favoring IMRT.\n\nCONCLUSIONS: Among older patients with PCa, FT was associated with a higher risk of incontinence and impotence, than IMRT. There was more colitis and rectal bleeding with IMRT versus FT, but related procedures were rare and not significantly different.",
+      "pdf_path": null,
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13104316/",
+      "note": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13104316/",
+      "resolved_from_review": false
+    }
+  ]
+}
