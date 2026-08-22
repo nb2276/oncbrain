@@ -2,6 +2,47 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.55.1] - 2026-08-21
+
+### Fixed
+- **A watched trial could answer a question for a different patient.** The eval
+  judge found a pick "whose population doesn't match the open question it claims
+  to answer": a phase 1 docetaxel + Lu-PSMA COMBINATION trial in 1L mCRPC
+  surfaced under PRESTIGE-PSMA's "sequencing vs docetaxel and triplet therapy".
+  A reader clicks a watched trial expecting it to resolve the question for the
+  patient the study was about, and an adjacent-population trial quietly wastes
+  the click.
+
+  The rerank prompt already required a matching disease SITE and exact drug
+  IDENTITY. Two finer rules now sit beside them: the pick must match the
+  QUESTION's population — line of therapy, imaging state and hormone-sensitivity
+  state each define a different patient, so "mCRPC" on both sides is not enough —
+  and the trial's DESIGN must be able to answer the question's shape. A
+  sequencing question needs a trial that sequences; a combination trial giving
+  both drugs together does not answer it however well the drugs match, and a
+  phase 1 dose-finding study cannot settle where a practice-changing result fits.
+
+  A third deterministic invariant enforces the part that can be enforced, beside
+  the two already in `parseRelatedTrials` (nct in the candidate pool, question
+  byte-identical): a pick whose clinical state CONTRADICTS the study's is
+  dropped. Measured against the published corpus, 3 of 293 picks (1%).
+
+### Notes
+- The state check is axis-and-synonym based, not a flat exclusive list. The first
+  version treated mHSPC and mCSPC as opposites and would have dropped a
+  legitimate A-DREAM watch — hormone-sensitive and castration-sensitive are the
+  same state, written two ways by two literatures. It now distinguishes a
+  different VALUE on an axis (mCSPC vs mCRPC) from a different SPELLING of one.
+- This buys precision with recall. On the eval fixture the rerank now ABSTAINS
+  where it previously made a weak pick, which raises the score and also trips the
+  low-population warning. All 3 corpus drops fall on one card (talapro-3), which
+  loses its whole related-trials block: TALAPRO-2 in mCRPC is a defensible watch
+  from TALAPRO-3 in mCSPC. If sibling-population watches are wanted, the hormone
+  -sensitivity axis is the one entry to relax.
+- Eval: 8.5 -> 9.2 on the run that motivated this, 8.4 on a re-run of identical
+  code. Both PASS; the spread is the single-fixture variance already filed as P3,
+  and neither number should be read as precise.
+
 ## [0.55.0] - 2026-08-20
 
 ### Fixed

@@ -32,6 +32,7 @@ import { soleDoiIn } from './extract.ts';
 import {
   withholdUngroundedComparators,
   droppedDiseaseStates,
+  conflictingState,
   type GroundingWithhold,
 } from './comparator-grounding.ts';
 import {
@@ -2322,6 +2323,9 @@ export function parseRelatedTrials(
   raw: unknown,
   candidatesByNct: Map<string, CandidateTrial>,
   studyOpenQuestions: string[],
+  /** The study's own text (name + tldr), for INVARIANT 3. Optional so existing
+   *  callers and tests keep working; the check simply does not fire without it. */
+  studyText = '',
 ): RelatedTrial[] | null {
   if (!isPlainObject(raw)) return null;
   const picksRaw = (raw as { picks?: unknown }).picks;
@@ -2360,6 +2364,19 @@ export function parseRelatedTrials(
     // artifact field stays byte-identical to study.open_questions.
     const aq = canonicalByNormalized.get(normalizeQuestionForMatch(aqRaw));
     if (!aq) continue;
+
+    // INVARIANT 3: the candidate must not contradict the study's clinical state.
+    // The prompt asks for a population match and the model mostly complies, but
+    // mCRPC vs mHSPC is a different disease entirely, and a reader clicking a
+    // watched trial expects it to resolve the question for the patient the study
+    // was about. Deterministic, so it holds when the prompt does not.
+    const conflict = conflictingState(
+      studyText,
+      [candidate.brief_title, candidate.brief_summary, candidate.eligibility_brief, (candidate.conditions ?? []).join(' ')]
+        .filter(Boolean)
+        .join(' '),
+    );
+    if (conflict) continue;
 
     const tupleKey = `${nct}|${aq}`;
     if (seenTuples.has(tupleKey)) continue;
@@ -2703,7 +2720,12 @@ export async function enrichStudyWithRelatedTrials(
       };
     }
 
-    const trials = parseRelatedTrials(parsed, candidatesByNct, openQuestions);
+    const trials = parseRelatedTrials(
+      parsed,
+      candidatesByNct,
+      openQuestions,
+      `${study.name} ${study.tldr}`,
+    );
     if (!trials) {
       emit(`[v0.13] rerank_abstained: ${slug}`);
       provenance.rerank_outcome = 'abstained';

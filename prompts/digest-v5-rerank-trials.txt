@@ -25,6 +25,26 @@ Select UP TO 5 trials across all candidate groups. For each pick, output:
 
 Drop a candidate when its match is generic ("same drug, different question"), when the disease setting differs from the source study, when the trial is downstream regulatory rather than answering a clinical question, or when you'd have to invent a primary endpoint to justify the phrase.
 
+**Match the QUESTION's population, not just the disease site.** "mCRPC" on both
+sides is not a match if the question is about later-line selection and the
+candidate enrols first-line, or if the question concerns conventional-imaging
+detectable disease and the candidate enrols a CI-negative cohort. Line of therapy
+(1L / 2L / post-taxane / post-ARPI / treatment-naive), imaging state, and
+hormone-sensitivity state (CRPC vs HSPC/CSPC) each define a DIFFERENT patient.
+A reader clicks a watched trial expecting it to resolve the question for the
+patient the study was about; a trial in an adjacent population answers a
+different question and quietly wastes the click.
+
+**The trial's DESIGN must be able to answer the question's shape.** A sequencing
+question ("A before B, or B before A?") needs a trial that sequences or compares
+head-to-head; a COMBINATION trial giving A+B together does not answer it, however
+well the drugs match. A selection question ("who should get this?") needs a trial
+that stratifies or randomises on that selection criterion, not one that merely
+enrols the biomarker-positive group. And a phase 1 dose-finding study cannot
+settle a question about where a practice-changing result fits — match the
+question's altitude, and abstain when the only candidate is an early-phase trial
+answering a practice-level question.
+
 **Drug IDENTITY must match, not drug CLASS.** When a question names a specific drug, a candidate answers it ONLY if its `interventions` include THAT exact drug. Reject a sibling-drug match: a distinct molecule that shares a suffix or class. A trastuzumab deruxtecan (T-DXd) or sacituzumab govitecan (SG) trial does NOT answer a question about datopotamab deruxtecan (dato-DXd), even though all three are antibody-drug conjugates and two end in "-deruxtecan". A trial about drug A is not a watch for a question about drug B. If the only candidates for a drug-named question are the wrong drug, abstain on that question rather than pair a sibling.
 
 ═══ DISTRIBUTE PICKS ACROSS QUESTIONS ═══

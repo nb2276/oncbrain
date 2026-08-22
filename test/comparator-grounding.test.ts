@@ -11,6 +11,7 @@ import {
   withholdUngroundedComparators,
   formatGroundingWithholds,
   droppedDiseaseStates,
+  conflictingState,
 } from '../src/lib/comparator-grounding.ts';
 
 describe('namedTrialsIn', () => {
@@ -235,5 +236,60 @@ describe('disease-state matching is token-aware', () => {
     const study = { name: 'D', tldr: 'T-DXd after endocrine therapy.', details: [] };
     expect(droppedDiseaseStates(study, 'T-DXd in HER2-low metastatic breast cancer'))
       .toEqual(['HER2-low']);
+  });
+});
+
+// A watched trial whose population contradicts the study's. The reader clicks it
+// expecting an answer for the patient the study was about; mCRPC and mHSPC are
+// different diseases, and an adjacent-population trial quietly wastes the click.
+describe('conflictingState', () => {
+  it('flags a hormone-sensitivity contradiction', () => {
+    expect(conflictingState('PRESTIGE-PSMA in PSMA-PET+ mCRPC', 'enrolling mHSPC patients'))
+      .toBe('mCRPC vs mHSPC');
+  });
+
+  it('flags a HER2-status contradiction', () => {
+    expect(conflictingState('T-DXd in HER2-low mBC', 'HER2-positive advanced breast cancer'))
+      .toBe('HER2-low vs HER2-positive');
+  });
+
+  it('flags a metastatic-state contradiction', () => {
+    expect(conflictingState('enzalutamide in nmCRPC', 'patients with mCRPC')).toBeTruthy();
+  });
+
+  it('passes a matching state', () => {
+    expect(conflictingState('PRESTIGE-PSMA in mCRPC', 'docetaxel + Lu-PSMA in mCRPC')).toBeNull();
+  });
+
+  it('passes a trial enrolling BOTH states', () => {
+    // Covering the study's population is not a contradiction, whatever else the
+    // trial also enrols.
+    expect(conflictingState('study in mCRPC', 'cohorts in mHSPC and mCRPC')).toBeNull();
+  });
+
+  it('is silent when neither side names a state', () => {
+    expect(conflictingState('a study of radiotherapy', 'a trial of radiotherapy')).toBeNull();
+  });
+});
+
+// Synonyms are not opposites. A flat exclusive list treated mHSPC and mCSPC as
+// contradictory and would have dropped a legitimate watch: hormone-sensitive and
+// castration-sensitive are the same state, written two ways by two literatures.
+describe('conflictingState knows synonyms from opposites', () => {
+  it('does NOT flag mHSPC against mCSPC', () => {
+    expect(conflictingState('A-DREAM in mHSPC', 'intermittent ADT in mCSPC')).toBeNull();
+  });
+
+  it('does NOT flag hormone-sensitive against castration-sensitive', () => {
+    expect(conflictingState('study in hormone-sensitive disease', 'castration-sensitive cohort'))
+      .toBeNull();
+  });
+
+  it('still flags castration-SENSITIVE against castration-RESISTANT', () => {
+    expect(conflictingState('TALAPRO-3 in mCSPC', 'TALAPRO-2 in mCRPC')).toBe('mCSPC vs mCRPC');
+  });
+
+  it('still flags metastatic against non-metastatic within one sensitivity', () => {
+    expect(conflictingState('study in mCRPC', 'trial in nmCRPC')).toBe('mCRPC vs nmCRPC');
   });
 });
