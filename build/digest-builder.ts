@@ -891,7 +891,7 @@ export async function buildOneDate(
   // card), a different objective (new-card — both publish), or the same reading
   // again (duplicate). Runs after prior-estimate so both passes see the same
   // post-override set of studies.
-  applyLineage(db, date, digest, args);
+  const pendingSuppressions = applyLineage(db, date, digest, args);
 
   // Any alias pointing at a slug the date now carries again is stale — drop it
   // so a live study can never be shadowed by a redirect to itself.
@@ -899,6 +899,10 @@ export async function buildOneDate(
   const aliases = retiredSlugs.filter((x) => !liveSlugs.has(x));
   const artifact = buildArtifact(date, confMeta, bookmarks, allPapers, slidesForDate, digest, crossDateIds, aliases);
   const paths = writeArtifact(args, artifact);
+
+  // The successor is durable. Only now may the predecessor come down — see
+  // commitLineageSuppressions for why the order is load-bearing.
+  commitLineageSuppressions(db, date, pendingSuppressions, args);
   console.log(`  wrote ${paths.json}`);
   console.log(`  wrote ${paths.obsidian}`);
 }
@@ -920,15 +924,21 @@ export async function buildOneDate(
 // WHOLE-PASS GUARD. Lineage is a curation nicety layered on a digest that is
 // already correct without it; it must never be the reason a day fails to
 // publish. Same rule the prior-estimate pass and the OG-card mark follow.
+export type PendingSuppression = {
+  priorDate: string;
+  entries: { slug: string; name: string; nct: string | null; source_ids: { type: string; id: number }[] }[];
+  stillPublished: Set<string>;
+};
+
 function applyLineage(
   db: ReturnType<typeof openDb>,
   date: string,
   digest: { sites: { disease_site?: string | null; studies: DigestStudy[] }[] },
   args: Args,
-): void {
+): PendingSuppression[] {
   if (process.env.TRIAL_LINEAGE === 'off') {
     console.log('  lineage: off (TRIAL_LINEAGE=off)');
-    return;
+    return [];
   }
   try {
     const artifacts: LineageArtifact[] = [];
@@ -936,7 +946,7 @@ function applyLineage(
     try {
       names = readdirSync(args.outDir).filter((f: string) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f));
     } catch {
-      return;
+      return [];
     }
     for (const f of names) {
       if (f.slice(0, 10) >= date) continue; // strictly earlier; also skips a rebuild of this date
@@ -976,7 +986,7 @@ function applyLineage(
     }
     if (actions.length === 0) {
       console.log('  lineage: no prior coverage matched');
-      return;
+      return [];
     }
 
     // Group suppressions by the date they land on, so one date gets one
@@ -1036,36 +1046,107 @@ function applyLineage(
       for (const [d, list] of byPriorDate) {
         console.log(`  lineage: [dry-run] would suppress ${list.map((x) => `${d}/${x.slug}`).join(', ')}`);
       }
-      return;
+      return [];
     }
 
-    for (const [priorDate, list] of byPriorDate) {
+    // STAGED, NOT WRITTEN. The caller commits these only after the successor
+    // artifact is durably on disk — see commitLineageSuppressions.
+    return [...byPriorDate].map(([priorDate, entries]) => ({
+      priorDate,
+      entries,
+      // Which of these the prior date STILL publishes, captured now while the
+      // artifact is in hand. Drives the self-heal in the commit step.
+      stillPublished: new Set(
+        entries
+          .filter((e) => {
+            const art = artifacts.find((a) => a.date === priorDate);
+            return (art?.digest?.sites ?? []).some((site) =>
+              (site?.studies ?? []).some((st) => st?.slug === e.slug),
+            );
+          })
+          .map((e) => e.slug),
+      ),
+    }));
+  } catch (err) {
+    console.warn(`  lineage pass skipped: ${err instanceof Error ? err.message : String(err)}`);
+    return [];
+  }
+}
+
+/**
+ * Commit the suppressions lineage staged, AFTER the successor artifact is on
+ * disk.
+ *
+ * ORDER IS THE WHOLE POINT. Writing the override first meant a failed artifact
+ * write left the predecessor suppressed and the successor unpublished — both
+ * cards gone, which is the one outcome worse than either alone. Written this way
+ * the worst case is a successor whose `supersedes` line claims a drop that has
+ * not happened yet: mildly stale, nothing lost.
+ *
+ * Within the commit, queueRebuild runs BEFORE saveOverrides for the same reason.
+ * A queued rebuild with no override is a wasted build; an override with no
+ * queued rebuild is a card that stays live until something else happens to
+ * rebuild that date.
+ *
+ * Never throws. A lineage bookkeeping failure must not fail a publish that has
+ * already succeeded.
+ */
+export function commitLineageSuppressions(
+  db: ReturnType<typeof openDb>,
+  date: string,
+  pending: PendingSuppression[],
+  args: Args,
+): void {
+  for (const { priorDate, entries, stillPublished } of pending) {
+    try {
       const ov = loadOverrides(priorDate, args.overridesDir) ?? {};
       const suppress = new Set(ov.suppress ?? []);
       const identity = { ...(ov.identity ?? {}) };
       const added: string[] = [];
-      for (const x of list) {
-        if (suppress.has(x.slug)) continue;
+      const alreadyPending: string[] = [];
+
+      for (const x of entries) {
+        if (suppress.has(x.slug)) {
+          // SELF-HEAL. An earlier run wrote the override and then failed to
+          // queue the rebuild, so the card is still live with nothing scheduled
+          // to remove it — and skipping here on "already suppressed" is what
+          // made that permanent. If the prior date still publishes the slug, the
+          // suppression has not taken effect and the rebuild is still owed.
+          if (stillPublished.has(x.slug)) alreadyPending.push(x.slug);
+          continue;
+        }
         suppress.add(x.slug);
-        // v0.50: record what the card WAS, so the suppression survives a rebuild
-        // that renames the study. Without this the override silently stops
-        // matching and the superseded card republishes.
-        // Provenance is the load-bearing field. Suppressing removes the card
-        // from the published artifact, so the NEXT rebuild cannot hold its slug
-        // and renames it — and once one trial has two cards (a DFS card and a
-        // QoL card) they share an acronym key, so name alone matches both and
-        // the override is correctly refused as ambiguous. The source rows are
-        // what actually identify the card.
+        // Record what the card WAS, so the suppression survives the rename that
+        // suppressing it causes. Provenance is the load-bearing field: once one
+        // trial has two cards they share an acronym key, so name alone matches
+        // both and the override is correctly refused as ambiguous.
         identity[x.slug] = { nct: x.nct, name: x.name, source_ids: x.source_ids };
         added.push(x.slug);
       }
-      if (added.length === 0) continue;
-      saveOverrides(priorDate, { ...ov, suppress: [...suppress], identity }, args.overridesDir);
-      queueRebuild(db, priorDate, `superseded by ${date}: ${added.join(', ')}`);
-      console.log(`  lineage: suppressed ${added.map((s) => `${priorDate}/${s}`).join(', ')} + queued rebuild`);
+
+      if (added.length === 0 && alreadyPending.length === 0) continue;
+
+      queueRebuild(
+        db,
+        priorDate,
+        `superseded by ${date}: ${[...added, ...alreadyPending].join(', ')}`,
+      );
+      if (added.length > 0) {
+        saveOverrides(priorDate, { ...ov, suppress: [...suppress], identity }, args.overridesDir);
+        console.log(
+          `  lineage: suppressed ${added.map((x) => `${priorDate}/${x}`).join(', ')} + queued rebuild`,
+        );
+      }
+      if (alreadyPending.length > 0) {
+        console.log(
+          `  lineage: re-queued ${priorDate} — ${alreadyPending.join(', ')} already suppressed but still published`,
+        );
+      }
+    } catch (err) {
+      console.warn(
+        `  lineage: commit for ${priorDate} failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
-  } catch (err) {
-    console.warn(`  lineage pass skipped: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
 
