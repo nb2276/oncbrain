@@ -2,7 +2,7 @@
 // the detector half's only push surface — if it is silent the curator never
 // learns the number changed, because the digest publishes either way.
 import { describe, it, expect } from 'vitest';
-import { formatMessage } from '../build/notify-curator.ts';
+import { formatMessage, summarizeDropReason } from '../build/notify-curator.ts';
 
 const artifact = (studies: unknown[]) => ({
   date: '2026-06-01',
@@ -118,5 +118,85 @@ describe('notify:curator offers drop only when droppable', () => {
     expect(msg).not.toMatch(/drop 2026-07-08/);
     expect(msg).toContain('maturity regressed');
     expect(msg).toContain('Review both cards');
+  });
+});
+
+// A study that did not make it. The pipeline records these in meta.dropped
+// rather than omitting them silently, and the artifact has carried them for
+// releases — but this DM reported only a COUNT, so the curator read "4 studies"
+// and never learned WHICH one vanished. Observed live: a Phase 2 response that
+// opened with prose instead of JSON dropped the day's only practice-changing
+// readout, and nothing said so.
+describe('notify:curator names a dropped study', () => {
+  const withDropped = (dropped: { slug: string; name: string; reason: string }[]) =>
+    ({
+      date: '2026-08-14',
+      digest: { sites: [{ disease_site: 'prostate', studies: [{ name: 'ARANOTE' }] }], meta: { dropped } },
+    }) as never;
+
+  it('names the study and gives the re-run command', () => {
+    const msg = formatMessage(
+      withDropped([
+        {
+          slug: 'prestige-psma',
+          name: 'PRESTIGE-PSMA',
+          reason: "phase2:prestige-psma failed after 2 attempts: Phase 2 not valid JSON: Unexpected token 'C'",
+        },
+      ]),
+      'https://example.com',
+    );
+    expect(msg).toContain('⚠️ DROPPED PRESTIGE-PSMA');
+    expect(msg).toContain('Phase 2 returned unparseable output');
+    // The failure is usually transient, so the re-run IS the message.
+    expect(msg).toContain('npm run build:day -- --date=2026-08-14');
+  });
+
+  it('puts the drop FIRST — it is what the build failed to do', () => {
+    const msg = formatMessage(
+      withDropped([{ slug: 'a', name: 'TRIALA', reason: 'no matching tweets' }]),
+      'https://example.com',
+    );
+    expect(msg.indexOf('DROPPED')).toBeLessThan(msg.indexOf('🌰'));
+    expect(msg.indexOf('DROPPED')).toBeLessThan(msg.indexOf('https://example.com'));
+  });
+
+  it('names every dropped study, not just the first', () => {
+    const msg = formatMessage(
+      withDropped([
+        { slug: 'a', name: 'TRIALA', reason: 'no matching tweets' },
+        { slug: 'b', name: 'TRIALB', reason: 'phase2:b failed: request timed out' },
+      ]),
+      'https://example.com',
+    );
+    expect(msg).toContain('TRIALA');
+    expect(msg).toContain('TRIALB');
+    expect(msg).toContain('the model call timed out');
+  });
+
+  it('stays silent on an ordinary build', () => {
+    const msg = formatMessage(withDropped([]), 'https://example.com');
+    expect(msg).not.toContain('DROPPED');
+    expect(msg).not.toContain('Re-run');
+  });
+
+  it('survives an older artifact with no meta at all', () => {
+    const legacy = { date: '2026-08-14', digest: { sites: [{ disease_site: 'prostate', studies: [{ name: 'A' }] }] } } as never;
+    expect(() => formatMessage(legacy, 'https://example.com')).not.toThrow();
+  });
+});
+
+describe('summarizeDropReason', () => {
+  it('turns an internal diagnostic into something a curator can act on', () => {
+    expect(summarizeDropReason("phase2:x failed after 2 attempts: Phase 2 not valid JSON: Unexpected token 'C'"))
+      .toBe('Phase 2 returned unparseable output');
+    expect(summarizeDropReason('no matching tweets')).toBe('no sources matched the cluster');
+    expect(summarizeDropReason('phase2:y failed: request timed out')).toBe('the model call timed out');
+    expect(summarizeDropReason('phase2:z failed: 429 rate limit exceeded')).toBe('rate limited');
+  });
+
+  it('falls back to a bounded first clause on an unrecognised reason', () => {
+    const out = summarizeDropReason('phase2:q something unexpected happened: with detail');
+    expect(out.length).toBeLessThanOrEqual(80);
+    expect(out).not.toContain('phase2:');
   });
 });

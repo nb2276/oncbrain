@@ -90,15 +90,6 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 ## Digest quality (eval now PASSES at 8.5 — v0.55)
 
-- **A dropped study is invisible to the curator.** **Priority: P2.** When Phase 2
-  fails on a study after its retries, the pipeline records it in `meta.dropped`
-  and publishes the day without it — correct, and not silent in the artifact. But
-  `notify:curator` reports only a study COUNT, so the curator gets "4 studies"
-  and never learns which one vanished. Observed live: a Phase 2 response that
-  opened with prose instead of JSON dropped PRESTIGE-PSMA, the day's only
-  tweet-flagged practice-changing readout, and the DM said nothing. The DM
-  already names superseded cards; it should name dropped ones the same way.
-  (v0.55.2 eval run)
 - **The eval is ONE fixture and the hallucination cap makes it bimodal.**
   **Priority: P3.** Observed 5.0 / 6.5 / 7.5 / 5.0 / 5.0 / 8.5 across runs while
   fixing genuinely different defects each time — any single unsupported claim

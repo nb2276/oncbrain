@@ -50,8 +50,25 @@ type DigestArtifact = {
         supersedes?: { date: string; slug: string; auto_dropped?: boolean; declined_reason?: string | null; droppable?: boolean } | null;
       }>;
     }>;
+    // Studies Phase 2 could not produce. The pipeline records them here rather
+    // than omitting them silently; this DM is what carries that to a human.
+    meta?: { dropped?: Array<{ slug: string; name: string; reason: string }> };
   };
 };
+
+// A drop reason is an internal diagnostic ("phase2:prestige-psma failed after 2
+// attempts: Phase 2 not valid JSON: Unexpected token 'C', \"Confirmed \"...").
+// Keep the part that tells the curator whether a re-run will help, drop the
+// stack-trace tail.
+export function summarizeDropReason(reason: string): string {
+  const r = reason.replace(/^phase\d+:[^\s]+\s+/i, '').trim();
+  if (/not valid JSON|parse/i.test(r)) return 'Phase 2 returned unparseable output';
+  if (/no matching tweets/i.test(r)) return 'no sources matched the cluster';
+  if (/timed? ?out|ETIMEDOUT|ECONNRESET/i.test(r)) return 'the model call timed out';
+  if (/rate.?limit|429|usage limit/i.test(r)) return 'rate limited';
+  const firstClause = r.split(':')[0]!.trim();
+  return firstClause.length > 0 && firstClause.length <= 80 ? firstClause : 'Phase 2 failed';
+}
 
 export function formatMessage(artifact: DigestArtifact, siteUrl: string): string {
   const sites = artifact.digest.sites.filter((s) => s.studies.length > 0);
@@ -64,6 +81,23 @@ export function formatMessage(artifact: DigestArtifact, siteUrl: string): string
     .join(' · ');
   const url = `${siteUrl.replace(/\/$/, '')}/${artifact.date}/`;
   const header = `✓ ${artifact.date} built — ${totalStudies} ${totalStudies === 1 ? 'study' : 'studies'} across ${sites.length} ${sites.length === 1 ? 'site' : 'sites'}`;
+
+  // A STUDY THAT DID NOT MAKE IT. The pipeline records these in meta.dropped
+  // rather than omitting them silently, and the artifact has carried them for
+  // releases — but this DM reported only a COUNT, so the curator read
+  // "4 studies" and never learned WHICH one vanished. Observed live: a Phase 2
+  // response that opened with prose instead of JSON dropped the day's only
+  // practice-changing readout, and nothing said so.
+  //
+  // FIRST, above everything else. A moved magnitude and a supersession are
+  // things the build DID; a dropped study is something it FAILED to do, and it
+  // is usually transient — the re-run command is the point of the message.
+  const dropped = artifact.digest.meta?.dropped ?? [];
+  const droppedBlock = dropped.length
+    ? `\n${dropped
+        .map((d) => `⚠️ DROPPED ${d.name} — ${summarizeDropReason(d.reason)}`)
+        .join('\n')}\nRe-run: npm run build:day -- --date=${artifact.date}`
+    : '';
 
   // v0.37 (E5), the detector half. A trial the digest already covered has come
   // back reporting a DIFFERENT number. That is the one thing in a routine build
@@ -122,7 +156,7 @@ export function formatMessage(artifact: DigestArtifact, siteUrl: string): string
     });
   const supersededBlock = superseded.length ? `\n${superseded.join('\n')}` : '';
 
-  return `${header}${movedBlock}${supersededBlock}\n${breakdown}\n${url}`;
+  return `${header}${droppedBlock}${movedBlock}${supersededBlock}\n${breakdown}\n${url}`;
 }
 
 async function main(): Promise<void> {

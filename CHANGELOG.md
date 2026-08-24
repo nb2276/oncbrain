@@ -2,6 +2,37 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.55.3] - 2026-08-23
+
+### Fixed
+- **A study that failed to build was invisible to the curator.** When Phase 2
+  cannot produce a study after its retries, the pipeline records it in
+  `meta.dropped` and publishes the day without it — correct, and the artifact has
+  carried that list for releases. But `notify:curator` reported only a study
+  COUNT, so the DM read "4 studies" and never said WHICH one was missing.
+
+  Observed live: a Phase 2 response opened with prose instead of JSON, dropped
+  PRESTIGE-PSMA after two attempts — the day's only tweet-flagged
+  practice-changing readout — and the curator would have had no way to know from
+  the message.
+
+  The DM now names every dropped study FIRST, above the moved-magnitude and
+  supersession lines: those are things the build DID, a drop is something it
+  FAILED to do. The internal diagnostic is translated into something actionable
+  ("Phase 2 returned unparseable output", "the model call timed out", "rate
+  limited") and followed by the re-run command, because this class of failure is
+  usually transient and the re-run IS the message.
+
+  The end-of-build summary repeats it too. The pipeline already warned once
+  mid-Phase-2, which is one line inside a very long cron log; it now appears in
+  the summary block beside "magnitude moved" and "self-consistency", where a
+  skim will catch it.
+
+### Notes
+- The reader-facing channel post deliberately says nothing about a dropped study.
+  A build failure is a curator concern, and "we failed to produce a study" is
+  noise to a subspecialist reading the digest.
+
 ## [0.55.2] - 2026-08-23
 
 ### Changed
