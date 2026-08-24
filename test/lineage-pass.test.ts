@@ -821,3 +821,48 @@ describe('auto-suppress is default OFF', () => {
     expect(actions[0]!.declined).toMatch(/maturity regressed/);
   });
 });
+
+// The identity a card accretes from its sources decides whether a suppression is
+// authorised. A comparator's registration cited in an abstract must never join
+// it: otherwise a later paper about that comparator shares an NCT with this
+// card, and a shared NCT is the one thing that authorises an automatic unpublish.
+describe('sourceFacts takes only a source’s OWN registration', () => {
+  let db7: ReturnType<typeof openDb>;
+  beforeEach(() => {
+    db7 = openDb(':memory:');
+  });
+
+  it('ignores a comparator NCT cited beside the paper’s own', () => {
+    const r = savePaper(db7, {
+      doi: '10.1000/own',
+      title: 'PRESTIGE-PSMA primary results',
+      abstract:
+        'Compared with VISION (NCT03511664), we randomised 400 patients. ' +
+        'Trial registration: ClinicalTrials.gov NCT03367702.',
+      bookmark_date: '2026-08-14',
+    });
+    const facts = sourceFacts(db7, [{ type: 'paper', id: r.id }]);
+    expect(facts.ncts).toEqual(['NCT03367702']);
+    expect(facts.ncts).not.toContain('NCT03511664');
+  });
+
+  it('abstains entirely when two are cited and neither is claimed', () => {
+    const r = savePaper(db7, {
+      doi: '10.1000/ambig',
+      title: 'A comparison',
+      abstract: 'We contrast NCT03511664 with NCT04567890 informally.',
+      bookmark_date: '2026-08-14',
+    });
+    expect(sourceFacts(db7, [{ type: 'paper', id: r.id }]).ncts).toEqual([]);
+  });
+
+  it('still takes a lone registration, which is the corpus norm', () => {
+    const r = savePaper(db7, {
+      doi: '10.1000/lone',
+      title: 'NRG-GU005',
+      abstract: 'Randomised trial. NCT03367702.',
+      bookmark_date: '2026-08-14',
+    });
+    expect(sourceFacts(db7, [{ type: 'paper', id: r.id }]).ncts).toEqual(['NCT03367702']);
+  });
+});

@@ -15,7 +15,7 @@
 // trial they report.
 
 import type Database from 'better-sqlite3';
-import { extractCitations } from './extract.ts';
+import { ownRegistrations } from './extract.ts';
 import {
   classifyAgainstPrior,
   isMaturity,
@@ -129,9 +129,12 @@ export function sourceFacts(
         // malformed sidecar JSON — ignore, identity just stays narrower
       }
     }
-    if (row.text) {
-      for (const c of extractCitations(row.text)) if (c.kind === 'nct') ncts.add(c.id.toUpperCase());
-    }
+    // Only the registrations this source claims as ITS OWN. A shared NCT
+    // authorises an automatic unpublish where an acronym never can, so a
+    // comparator's number cited in an abstract must not join this card's
+    // identity — otherwise a later paper about that comparator could supersede
+    // this study.
+    if (row.text) for (const id of ownRegistrations(row.text)) ncts.add(id);
   }
 
   // A card with sources reporting DIFFERENT facets is exactly the case Phase 1

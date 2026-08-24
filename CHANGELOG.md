@@ -2,6 +2,36 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.55.5] - 2026-08-24
+
+### Fixed
+- **A comparator's trial number could become part of a card's identity.** Trial
+  identity is the strongest signal lineage has — a shared NCT authorises an
+  automatic unpublish where a matching acronym never can — and it was harvested
+  from every NCT appearing in a source's title and abstract. An abstract that
+  cites a comparator's registration therefore put that trial's identity onto this
+  card, and a later paper about the comparator would have shared an NCT with it.
+
+  A source's registrations are now only the ones it claims as its OWN: a lone NCT
+  (nothing to confuse it with), or the ones introduced by a registration cue
+  ("Trial registration", "ClinicalTrials.gov", "identifier", "registered"). When
+  several are cited and none is claimed, it abstains — guessing which belongs to
+  the subject is how a comparator's identity gets adopted, and identity is
+  precisely what this must not get wrong.
+
+### Notes
+- Measured before writing: of 80 papers, 65 state no NCT, 15 state exactly one,
+  and NONE states more than one. The failure was real but had not yet occurred,
+  and 0 of 80 papers change identity under the new rule. This is insurance, and
+  the last of the two P2s standing between `TRIAL_LINEAGE_AUTOSUPPRESS` and a
+  defensible switch-on.
+- The registration cues were taken from the corpus, not guessed:
+  "ClinicalTrials.gov" (12 occurrences), "identifier" (7), "registered" (4),
+  "number" (1).
+- A structured source would be better still — PubMed publishes the registration
+  in a DataBank field — but it would cover only PubMed-sourced papers, leaving
+  tweets, PDFs and trade press on the text path anyway.
+
 ## [0.55.4] - 2026-08-24
 
 ### Fixed

@@ -98,15 +98,13 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 ## Trial lineage (v0.53 follow-ups)
 
-- **Only count a paper's OWN registration as corroborating.** **Priority: P2.**
-  `corroborated` harvests NCTs from source title+abstract, so a comparator
-  registration printed in an abstract could in principle authorize a suppression.
-  Needs distinguishing a paper's own trial registration from ones it cites.
-  Much less reachable with auto-suppress default-off. (v0.53 codex rounds 2-5)
 - **Re-run the destructive path through review before enabling the flag.**
-  **Priority: P1 (gate).** `TRIAL_LINEAGE_AUTOSUPPRESS=on` should not be set until
-  the two items above are closed and a clean adversarial round is on record.
-  (v0.53)
+  **Priority: P1 (gate).** Both blocking items are now closed — transactional
+  suppression (v0.55.4) and own-registration corroboration (v0.55.5). What remains
+  before `TRIAL_LINEAGE_AUTOSUPPRESS=on` is a clean adversarial round over the
+  destructive path AS IT NOW STANDS. Five rounds were run against earlier
+  versions; none has seen the staged-commit ordering or the identity narrowing.
+  (v0.53, updated v0.55.5)
 
   Closed in v0.53.2: gating the enrich-time prior-coverage DM. The offer is now
   opt-in per prior and cleared only on facet compatibility — the full evidence
