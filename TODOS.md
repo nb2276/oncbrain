@@ -103,12 +103,6 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
   registration printed in an abstract could in principle authorize a suppression.
   Needs distinguishing a paper's own trial registration from ones it cites.
   Much less reachable with auto-suppress default-off. (v0.53 codex rounds 2-5)
-- **Make the suppression + successor artifact write transactional.** **Priority: P2.**
-  Overrides and the rebuild queue entry are written BEFORE the successor artifact.
-  If that write fails, the predecessor can come down while the replacement never
-  publishes. Also `auto_dropped` means "suppression queued", not "completed" — a
-  failed queued rebuild leaves the predecessor live while the successor says
-  otherwise. (v0.53 codex rounds 3-4)
 - **Re-run the destructive path through review before enabling the flag.**
   **Priority: P1 (gate).** `TRIAL_LINEAGE_AUTOSUPPRESS=on` should not be set until
   the two items above are closed and a clean adversarial round is on record.

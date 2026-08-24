@@ -2,6 +2,37 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.55.4] - 2026-08-24
+
+### Fixed
+- **A failed publish could take the predecessor down with it.** Trial lineage
+  wrote the suppress override and queued the rebuild BEFORE the successor
+  artifact reached disk. If that write threw, the earlier card was suppressed and
+  the replacement never published: both cards gone, which is the one outcome
+  worse than either alone.
+
+  The pass now STAGES its destructive work and the caller commits it only after
+  `writeArtifact` returns. The worst case becomes a successor whose `supersedes`
+  line claims a drop that has not happened yet — stale, but nothing is lost.
+
+- **An override could be written with no rebuild to enforce it.** Inside the
+  commit, `queueRebuild` now runs BEFORE `saveOverrides`. A queued rebuild with no
+  override is a wasted build; an override with no queued rebuild is a card that
+  stays live until something else happens to rebuild that date.
+
+- **And that state was permanent.** The commit skipped any slug already present
+  in `suppress`, so a run that wrote the override and then failed to queue would
+  be skipped forever after — the card live, nothing scheduled to remove it. The
+  commit now self-heals: if the prior date STILL publishes a slug its override
+  already suppresses, the rebuild is still owed and is re-queued.
+
+### Notes
+- `commitLineageSuppressions` never throws. It runs after a publish that has
+  already succeeded, and a lineage bookkeeping failure must not fail it.
+- This is bookkeeping ordering, not a new guard. `TRIAL_LINEAGE_AUTOSUPPRESS`
+  stays OFF; one P2 (count only a paper's OWN registration as corroborating)
+  remains before the destructive path is worth enabling.
+
 ## [0.55.3] - 2026-08-23
 
 ### Fixed
