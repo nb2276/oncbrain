@@ -417,11 +417,19 @@ const STATE_AXES: string[][][] = [
   [['mCRPC'], ['nmCRPC']],
   // metastatic burden, within castration-sensitive disease
   [['mHSPC', 'mCSPC'], ['nmHSPC', 'nmCSPC']],
-  // hormone sensitivity itself
-  [
-    ['mCRPC', 'nmCRPC', 'castration-resistant'],
-    ['mHSPC', 'mCSPC', 'nmHSPC', 'nmCSPC', 'castration-sensitive', 'hormone-sensitive'],
-  ],
+  // HORMONE SENSITIVITY IS DELIBERATELY NOT AN AXIS HERE.
+  //
+  // Castration-resistant and castration-sensitive ARE different patients, and an
+  // earlier version treated them as conflicting. That dropped TALAPRO-2 (mCRPC)
+  // from TALAPRO-3 (mCSPC) — the direct sibling trial of the same drug
+  // combination, carrying the mature OS readout the newer study has not reached.
+  // A curator watching a trial across the hormone-sensitivity boundary is doing
+  // something deliberate: the sibling is where that combination's long-term
+  // evidence lives. Losing that is a worse failure than the imprecision it
+  // prevents, and the prompt already asks for a question-population match.
+  //
+  // The remaining axes stay because their crossings are not sibling readouts:
+  // a HER2-positive trial is not the long-term arm of a HER2-low study.
   [['HER2-low'], ['HER2-positive'], ['HER2-negative'], ['triple-negative']],
   [['dMMR'], ['pMMR']],
   [['node-positive'], ['node-negative']],

@@ -2,6 +2,37 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.55.2] - 2026-08-23
+
+### Changed
+- **A trial may be watched across the hormone-sensitivity boundary again.**
+  v0.55.1 treated castration-resistant and castration-sensitive as contradictory
+  populations and dropped the pick. They ARE different patients, but crossing
+  that boundary is what a sibling watch is: TALAPRO-2 (mCRPC) is the direct
+  sibling of TALAPRO-3 (mCSPC) on the same drug combination, carrying the mature
+  OS readout the newer study has not reached, and dropping it took TALAPRO-3's
+  entire related-trials block with it. Losing the sibling is a worse failure than
+  the imprecision it prevented.
+
+  The other axes stay, because their crossings are not sibling readouts: a
+  HER2-positive trial is not the long-term arm of a HER2-low study, and an nmCRPC
+  trial is not the mature reading of an mCRPC one. Metastatic burden, HER2
+  status, MMR status, nodal status and muscle invasion still block a pick.
+
+### Notes
+- The deterministic state check now drops 0 of 298 published picks (was 3). It
+  is insurance for classes that have not occurred in the corpus yet; the
+  question-population and design-shape rules in the rerank prompt are what caught
+  the pick that motivated v0.55.1.
+- `npm rebuild better-sqlite3` was needed after a Node upgrade to 26.7
+  (NODE_MODULE_VERSION 141 → 147). 180 tests failed on the native module, not on
+  any code change. Worth knowing the next time a full suite fails at once.
+- Eval across four runs of near-identical code: 9.2, 8.4, 5.0, 8.2. The 5.0 was a
+  Phase 2 response that opened with prose instead of JSON, dropping PRESTIGE-PSMA
+  after its retries — an LLM flake the pipeline recorded correctly in
+  `meta.dropped`. It is the sharpest evidence yet for the single-fixture variance
+  already filed as P3.
+
 ## [0.55.1] - 2026-08-21
 
 ### Fixed

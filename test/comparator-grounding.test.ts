@@ -243,9 +243,12 @@ describe('disease-state matching is token-aware', () => {
 // expecting an answer for the patient the study was about; mCRPC and mHSPC are
 // different diseases, and an adjacent-population trial quietly wastes the click.
 describe('conflictingState', () => {
-  it('flags a hormone-sensitivity contradiction', () => {
+  it('ALLOWS a watch across the hormone-sensitivity boundary', () => {
+    // Deliberately not an axis. Crossing it is what a sibling watch IS: the
+    // castration-resistant trial is where the same combination's long-term
+    // evidence lives, and losing that is worse than the imprecision it prevents.
     expect(conflictingState('PRESTIGE-PSMA in PSMA-PET+ mCRPC', 'enrolling mHSPC patients'))
-      .toBe('mCRPC vs mHSPC');
+      .toBeNull();
   });
 
   it('flags a HER2-status contradiction', () => {
@@ -253,7 +256,9 @@ describe('conflictingState', () => {
       .toBe('HER2-low vs HER2-positive');
   });
 
-  it('flags a metastatic-state contradiction', () => {
+  it('flags a metastatic-burden contradiction', () => {
+    // Metastatic vs non-metastatic stays an axis: a trial in nmCRPC is not the
+    // long-term arm of an mCRPC study, it is a different disease burden.
     expect(conflictingState('enzalutamide in nmCRPC', 'patients with mCRPC')).toBeTruthy();
   });
 
@@ -285,8 +290,11 @@ describe('conflictingState knows synonyms from opposites', () => {
       .toBeNull();
   });
 
-  it('still flags castration-SENSITIVE against castration-RESISTANT', () => {
-    expect(conflictingState('TALAPRO-3 in mCSPC', 'TALAPRO-2 in mCRPC')).toBe('mCSPC vs mCRPC');
+  it('ALLOWS the sibling trial across castration sensitivity', () => {
+    // The exact case that motivated relaxing the axis: TALAPRO-2 is the direct
+    // sibling of TALAPRO-3 on the same combination, carrying the mature OS
+    // readout the newer study has not reached.
+    expect(conflictingState('TALAPRO-3 in mCSPC', 'TALAPRO-2 in mCRPC')).toBeNull();
   });
 
   it('still flags metastatic against non-metastatic within one sensitivity', () => {
