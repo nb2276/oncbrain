@@ -876,6 +876,16 @@ export async function buildOneDate(
   }
   if (priorHits.length === 0) console.log('  magnitude moved: none');
 
+  // A dropped study warns once mid-Phase-2, which is one line inside a very long
+  // cron log. Repeat it in the end-of-build summary where the other one-line
+  // verdicts live, so "which study is missing" survives a skim.
+  const droppedStudies = digest.meta?.dropped ?? [];
+  if (droppedStudies.length > 0) {
+    console.warn(
+      `  DROPPED ${droppedStudies.length} study(ies): ${droppedStudies.map((d) => d.name).join(', ')} — re-run to retry`,
+    );
+  }
+
   // Trial lineage: a trial the digest already covered has come back. Decide
   // whether this is the same objective matured (update — supersede the earlier
   // card), a different objective (new-card — both publish), or the same reading
