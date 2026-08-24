@@ -155,3 +155,54 @@ export function soleDoiIn(text: string | null | undefined): string | null {
   }
   return byKey.size === 1 ? [...byKey.values()][0]! : null;
 }
+
+// Registration cues: the words a paper uses when stating its OWN trial number,
+// as opposed to citing someone else's. Measured across the corpus, these are
+// what actually precede an NCT: "ClinicalTrials.gov" (12), "identifier" (7),
+// "registered" (4), "number" (1).
+const REGISTRATION_CUE =
+  /(?:trial\s+registration|registered|registration|clinicaltrials\.gov|ct\.gov|identifier|registry|nct\s*(?:number|no\.?|id))/i;
+
+// How far before an NCT a cue still governs it. Covers "Trial registration:
+// ClinicalTrials.gov NCT03367702" and "registered at ClinicalTrials.gov (NCT...)".
+const CUE_WINDOW = 60;
+
+/**
+ * The trial registrations a source claims as ITS OWN.
+ *
+ * Trial identity is the strongest signal lineage has — a shared NCT authorises
+ * an automatic unpublish where an acronym never can — so an NCT that is merely
+ * CITED must not join it. An abstract naming a comparator's registration would
+ * otherwise put that trial's identity onto this card and let a later paper about
+ * the comparator supersede it.
+ *
+ * Three cases, in order:
+ *   1. Exactly one distinct NCT — nothing to confuse it with. This is every one
+ *      of the 15 NCT-bearing papers in the corpus today, so the stricter rules
+ *      below cost nothing now and exist for the day a source cites two.
+ *   2. Several, some with a registration cue — take the cued ones.
+ *   3. Several, none cued — ABSTAIN. Guessing which is the subject's own is how
+ *      a comparator's identity gets adopted, and identity is exactly the thing
+ *      this must not get wrong.
+ */
+export function ownRegistrations(text: string | null | undefined): string[] {
+  if (!text) return [];
+  const hits = extractCitations(text).filter((c) => c.kind === 'nct');
+  const distinct = [...new Set(hits.map((h) => h.id.toUpperCase()))];
+  if (distinct.length <= 1) return distinct;
+
+  const cued = new Set<string>();
+  for (const id of distinct) {
+    let from = 0;
+    for (;;) {
+      const i = text.toUpperCase().indexOf(id, from);
+      if (i < 0) break;
+      if (REGISTRATION_CUE.test(text.slice(Math.max(0, i - CUE_WINDOW), i))) {
+        cued.add(id);
+        break;
+      }
+      from = i + 1;
+    }
+  }
+  return [...cued];
+}

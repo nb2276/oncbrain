@@ -4,7 +4,7 @@
 // prompt asks for it by name; a DOI arriving in tweet text had nowhere to go
 // until the study schema gained a `doi` field and this backstop under it.
 import { describe, it, expect } from 'vitest';
-import { soleDoiIn } from '../src/lib/extract.ts';
+import { soleDoiIn, ownRegistrations } from '../src/lib/extract.ts';
 
 describe('soleDoiIn', () => {
   it('recovers the DOI a source tweet states', () => {
@@ -36,5 +36,46 @@ describe('soleDoiIn', () => {
     expect(soleDoiIn('ARANOTE: HR 0.55. NCT04146091.')).toBeNull();
     expect(soleDoiIn('')).toBeNull();
     expect(soleDoiIn(null)).toBeNull();
+  });
+});
+
+// Trial identity is the strongest signal lineage has: a shared NCT authorises an
+// automatic unpublish where an acronym never can. So an NCT that is merely CITED
+// must not join it — an abstract naming a comparator's registration would
+// otherwise put that trial's identity onto this card, and let a later paper
+// about the comparator supersede it.
+describe('ownRegistrations', () => {
+  it('takes a lone NCT as the source’s own', () => {
+    // Every one of the 15 NCT-bearing papers in the corpus is this shape, so the
+    // stricter rules below cost nothing today.
+    expect(ownRegistrations('PRESTIGE-PSMA randomised 400 pts. NCT04567890.')).toEqual(['NCT04567890']);
+  });
+
+  it('picks the CUED registration when a comparator is also cited', () => {
+    expect(
+      ownRegistrations(
+        'Compared with VISION (NCT03511664), our trial. Registration: ClinicalTrials.gov NCT03367702.',
+      ),
+    ).toEqual(['NCT03367702']);
+  });
+
+  it('recognises the common registration phrasings', () => {
+    expect(ownRegistrations('cite NCT01111111. Trial registration: NCT02222222')).toEqual(['NCT02222222']);
+    expect(ownRegistrations('vs NCT01111111. Registered at ClinicalTrials.gov, NCT02222222'))
+      .toEqual(['NCT02222222']);
+    expect(ownRegistrations('vs NCT01111111. ClinicalTrials.gov identifier NCT02222222'))
+      .toEqual(['NCT02222222']);
+  });
+
+  it('ABSTAINS when several are cited and none is claimed', () => {
+    // Guessing which is the subject's own is how a comparator's identity gets
+    // adopted, and identity is exactly the thing this must not get wrong.
+    expect(ownRegistrations('We compare NCT03511664 against NCT04567890 informally.')).toEqual([]);
+  });
+
+  it('returns nothing when no registration is stated', () => {
+    expect(ownRegistrations('No registration stated.')).toEqual([]);
+    expect(ownRegistrations('')).toEqual([]);
+    expect(ownRegistrations(null)).toEqual([]);
   });
 });
