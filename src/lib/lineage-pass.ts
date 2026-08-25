@@ -174,8 +174,21 @@ export function toTrialReport(
 ): TrialReport | null {
   if (!study.slug) return null; // a card we cannot link to or suppress by slug
   const facts = sourceFacts(db, study.source_ids ?? []);
+  // IDENTITY COMES FROM THE SOURCES, NOT FROM PHASE 2.
+  //
+  // `study.nct` is whatever the model put in the card's nct field. The parser
+  // checks its SHAPE and nothing else — not that the trial it names is the one
+  // the card reports. A paper that discusses a comparator can easily have that
+  // comparator's number extracted, and unioning it here handed the card a second
+  // identity that no source claims. Worse, it defeats the conflict guard: the
+  // NCT-conflict check looks for disagreement, and a union that contains BOTH
+  // trials' numbers agrees with everyone.
+  //
+  // sourceFacts already applies ownRegistrations, which is the corroborated,
+  // cue-checked answer. An uncorroborated card NCT adds no evidence, so it is
+  // not evidence. It still drives the card's clinicaltrials.gov link; it just
+  // does not get a vote on what may be unpublished.
   const ncts = new Set(facts.ncts);
-  if (study.nct) ncts.add(study.nct.toUpperCase());
   return {
     date,
     slug: study.slug,

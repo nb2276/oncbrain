@@ -178,14 +178,18 @@ async function main() {
       //
       // No reply on refusal: acknowledging the command confirms to an unknown
       // sender that the bot understood it. The curator sees the log line.
-      if (!isDestructiveCommandAuthorized(chatId, allowedChatIds)) {
+      const senderId = msg.from?.id ?? null;
+      if (!isDestructiveCommandAuthorized(chatId, allowedChatIds, senderId)) {
         refusedDrops++;
         console.warn(
-          `  ⚠ REFUSED drop ${dropCmd.date}/${dropCmd.slug} from chat ${chatId ?? 'unknown'} — ` +
-            (allowedChatIds
-              ? 'chat is not in TELEGRAM_ALLOWED_CHAT_IDS'
-              : 'TELEGRAM_ALLOWED_CHAT_IDS is unset, so destructive commands are disabled. ' +
-                'Set it (comma-separated numeric chat ids) in .env to enable `drop`.'),
+          `  ⚠ REFUSED drop ${dropCmd.date}/${dropCmd.slug} from chat ${chatId ?? 'unknown'}` +
+            ` sender ${senderId ?? 'none'} — ` +
+            (!allowedChatIds
+              ? 'TELEGRAM_ALLOWED_CHAT_IDS is unset, so destructive commands are disabled. ' +
+                'Set it (comma-separated numeric chat ids) in .env to enable `drop`.'
+              : senderId == null
+                ? 'no sender id (channel post) — a removal needs a named actor'
+                : 'chat or sender is not in TELEGRAM_ALLOWED_CHAT_IDS'),
         );
         continue;
       }

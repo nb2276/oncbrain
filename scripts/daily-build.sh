@@ -263,6 +263,24 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
             done
         git -C "$PUBLISH_WT" add data 2>/dev/null || true
 
+        # NEVER PUSH A DELETION TO MAIN.
+        #
+        # Everything above copies THIS checkout's artifacts over main's. When the
+        # cron runs on a feature branch, that checkout's baseline can be older
+        # than main: a card main published after the branch was cut is absent
+        # from the branch's artifact AND from the rebuild, so nothing upstream
+        # notices, and the copy silently removes it. The same push carries a
+        # Phase 1 merge (two cards collapsed into one, no casualty recorded) and
+        # a rename whose dedup key is null — three mechanisms, one symptom.
+        #
+        # So ask the question here, where both versions exist and the mechanism
+        # does not matter: does this artifact remove a study main already has?
+        # A withheld date is restored to main's copy; the rest of the run
+        # publishes normally.
+        if ! npx tsx build/verify-publish.ts --worktree="$PUBLISH_WT"; then
+          echo "  ⚠ publish verification errored — continuing (it withholds, it does not gate)"
+        fi
+
         STAGED_DATES="$(staged_digest_dates "$PUBLISH_WT")"
         # Same backlog rule as the on-main path. The worktree checked out main and
         # only fast-forwarded it, so any commit an earlier run stranded on main is

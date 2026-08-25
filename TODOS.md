@@ -105,7 +105,11 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
   own fix (a lone comparator NCT satisfying registered identity). The lesson worth
   keeping: two of the four were regressions introduced by the previous round's
   fixes, so each round needs its own round.
-- **Seven open findings from the THIRD gate round.** **Priority: P0/P1.** It again
+- **Third gate round — ALL NINE FIXED** (two in v0.56.1, seven in v0.57.0). Kept
+  as history; see the CHANGELOG. A FOURTH round has not been run against v0.57.0,
+  and each of the three so far found regressions introduced by the previous one.
+  **Priority: run round four before enabling the flag.**
+- Round three detail, for reference. **Priority: none.** It again
   answered both gate questions "yes". Two of its nine were defects in v0.56.0's own
   new guards and are fixed in v0.56.1; the rest, by its numbering:
   #1 a cron running on a FEATURE BRANCH compares the rebuild against that branch's

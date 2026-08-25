@@ -2,6 +2,89 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.57.0] - 2026-08-25
+
+The seven findings round three left open, plus the root cause of the failure that
+motivated the whole guard.
+
+### Fixed
+- **A publish can no longer remove a card main already has.** Three of round
+  three's findings were three mechanisms with one symptom, and none of them goes
+  through `meta.dropped`, so the in-builder guard could not see any of them: a
+  cron running on a FEATURE BRANCH rebuilds against that branch's stale artifact
+  and copies the result over main; Phase 1 MERGES two published cards into one
+  cluster, which partition validation accepts and which records no casualty; a
+  Phase 1 rename plus a Phase 2 failure where both names yield a null dedup key
+  matches neither slug nor key.
+
+  So the question is now also asked at the publish boundary, where it is
+  answerable without knowing how the loss happened — compare the artifact about
+  to reach main against the one main has (`publish-diff.ts`, run by
+  `build/verify-publish.ts` from `daily-build.sh`). Mechanism-independent by
+  construction, which also covers the fourth route nobody has found yet. A
+  withheld date is restored to main's copy and reported; the rest of the run
+  publishes, because the common case is one past date going wrong while today's
+  digest is fine.
+
+- **Destructive Telegram authorization identifies the sender, not just the
+  chat.** A chat is a room. The allowlist can legitimately hold a private group
+  the curator forwards sources into, and every other member of that room had
+  inherited the power to unpublish any card. A channel post carries no `from` at
+  all, so there is no actor to hold responsible, and that no longer authorises a
+  removal either. In a 1:1 DM Telegram gives `chat.id === from.id`, so the
+  curator's existing single allowlist entry keeps working unchanged.
+
+- **Auto-suppress now requires a locked-down ingest path.** With
+  `TELEGRAM_ALLOWED_CHAT_IDS` unset, `pull:telegram` accepts a source from any
+  Telegram user and the 1am cron runs pull → enrich → build with no human between
+  inboxing and lineage. A forged source claiming a published card's NCT, with a
+  registration cue and the same facet and endpoint, would satisfy an evidence
+  gate that reads only what the source says about itself. The gate's inputs are
+  attacker-controlled exactly when ingestion is open, so the two settings are one
+  decision; `TRIAL_LINEAGE_AUTOSUPPRESS=on` is now ignored, loudly, without the
+  allowlist.
+
+- **Trial identity comes from the sources, not from Phase 2.** `study.nct` is
+  whatever the model wrote in the card's nct field; the parser checks its shape
+  and not that the trial it names is the one the card reports. Unioning it into
+  the identity set handed the card a second identity no source claims, and that
+  defeats the guard it appears to strengthen: the NCT-conflict check looks for
+  disagreement, and a set containing both trials' numbers agrees with everyone.
+  Identity is now `ownRegistrations` over the sources alone. The card's nct still
+  drives its clinicaltrials.gov link; it no longer gets a vote on what may be
+  unpublished.
+
+- **A shared registration is not a shared result.** One NCT covers many cohorts —
+  a basket trial registers once and reports breast and lung separately, a
+  platform trial does the same per arm. `TrialReport` records no cohort, so to
+  every other check those two readings were the same trial, same endpoint, longer
+  follow-up: an `update`, and the lung result would have removed the perfectly
+  valid breast one. Different disease sites are now a suppression blocker.
+  Deliberately a blocker and not an identity rule, so the pair is still detected,
+  still linked and still reaches the curator DM; and deliberately not an identity
+  gap, so the DM does not offer a one-reply drop for it.
+
+### Fixed — the root cause, not just the blast radius
+- **Phase 2 answered the tweets instead of summarising them.** The flake behind
+  finding #1 turned out to be reproducible, not random: it hit the same cluster
+  four times out of four. That cluster contains a tweet posing a genuine clinical
+  question ("Discussion: where does this fit relative to docetaxel and triplet
+  therapy? Sequencing questions remain open"), and the model answered it —
+  responses opening "Good call " and "This looks" — which is not JSON, so the
+  parse failed, the retry failed the same way, and the card was dropped. Each
+  time it removed the day's practice-changing trial, silently.
+
+  The prompt already had a trust boundary, but it only anticipated hostile input
+  ("ignore previous instructions"). The failure was benign: a colleague's
+  question, captured as data. The boundary now says so, names the cost, and the
+  final instruction pins the first character of the response. Eval went 5.0 → 9.0
+  with all five studies produced.
+
+### Notes
+- `TRIAL_LINEAGE_AUTOSUPPRESS` remains OFF. Three rounds have each answered both
+  gate questions "yes"; it should stay off until one comes back clean.
+- Eval 9.0 PASS. Tests: 2458 across 123 files.
+
 ## [0.56.1] - 2026-08-24
 
 The six findings still open from the FIRST gate round, plus two defects that
