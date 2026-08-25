@@ -2,6 +2,47 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.57.3] - 2026-08-25
+
+Working round four's question list by hand, since that round still cannot run.
+
+### Fixed
+- **The keyless-casualty rule re-created the bug it replaced.** v0.56.1 made the
+  legacy re-point refusal per-identity instead of date-global, then fell back to
+  "any casualty without a dedup key blocks everything". Measured:
+  `studyDedupKey` returns null for **48 of 126** published studies — "APBI-IMRT
+  Florence", "NRG/RTOG 1005", "Tumour bed boost after BCS+WBRT (Dutch cohort)" —
+  so that fallback fires on more than a third of drops, which is the date-global
+  behaviour wearing a different hat, and its failure mode is a fatal build.
+
+  Names discriminate where keys do not: across all **1128 pairs** of distinct
+  keyless published names, zero resemble each other. The refusal now consults the
+  recorded name, and blanket-refuses only when there is nothing comparable on
+  either side. The residual gap — a target both renamed AND failed, whose new
+  name matches neither — is stated in the code rather than papered over; closing
+  it wants provenance on `meta.dropped`.
+
+- **Three more writers of override sidecars and digest artifacts were not
+  atomic.** v0.56.1 fixed `saveOverrides` and the builder and left
+  `npm run override` (the curator's primary way to suppress a card) plus both
+  digest backfills on a plain `writeFileSync`. Sixth instance of securing a
+  mechanism and leaving another caller open, so this one gets an invariant test
+  over all five modules rather than three separate fixes.
+
+### Checked and deliberately NOT changed
+- `nct-coverage` builds the cross-day index from the published card's `study.nct`
+  rather than re-deriving it from sources, which looked like the same
+  uncorroborated-identity defect fixed in v0.57.0. Measuring says otherwise: of
+  126 published cards, 33 carry an NCT and exactly **one** disagrees with its
+  sources — RADIOSA, where the card is right and the paper misprints ORIOLE's
+  registration. Re-deriving from sources there would make it worse. Verified
+  separately that the acronym-conflict veto still keeps RADIOSA and ORIOLE apart
+  after v0.57.0 stopped unioning `study.nct` into identity.
+
+### Notes
+- Gate round four still cannot run — the codex usage limit resets 2026-08-30.
+- `TRIAL_LINEAGE_AUTOSUPPRESS` stays OFF. Tests: 2476 across 123 files.
+
 ## [0.57.2] - 2026-08-25
 
 ### Fixed

@@ -17,7 +17,8 @@
 //   npx tsx build/backfill-source-url.ts --date=2026-06-12
 
 import 'dotenv/config';
-import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { writeFileAtomic } from '../src/lib/atomic-write.ts';
 import { resolve } from 'node:path';
 import { openDb } from '../src/lib/db.ts';
 import { toPublicArticleUrl } from '../src/lib/paper-url.ts';
@@ -84,7 +85,8 @@ function main(): void {
 
     if (changed) {
       filesChanged++;
-      if (!dryRun) writeFileSync(path, JSON.stringify(artifact, null, 2) + '\n');
+      // Atomic: a torn artifact is a published date that no longer parses.
+      if (!dryRun) writeFileAtomic(path, JSON.stringify(artifact, null, 2) + '\n');
     }
   }
 

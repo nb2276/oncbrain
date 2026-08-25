@@ -55,3 +55,41 @@ describe('writeFileAtomic', () => {
     expect(existsSync(p)).toBe(true);
   });
 });
+
+// EVERY writer of these two file classes, not just the one that got the fix.
+//
+// v0.56.1 made saveOverrides and the builder's artifact write atomic and left
+// three other writers of the SAME two file classes on a plain writeFileSync:
+// `npm run override` (the curator's primary way to suppress a card) and both
+// digest backfills. That is the sixth instance of securing a mechanism and
+// leaving another caller open, so it gets an invariant rather than three fixes.
+describe('no module writes an override sidecar or digest artifact non-atomically', () => {
+  const FILES = [
+    'src/lib/digest-overrides.ts',
+    'build/digest-builder.ts',
+    'build/manage-overrides.ts',
+    'build/backfill-pdf-abstracts.ts',
+    'build/backfill-source-url.ts',
+  ];
+
+  it('uses writeFileAtomic in every module that persists one', () => {
+    for (const f of FILES) {
+      const src = readFileSync(join(process.cwd(), f), 'utf8');
+      expect(src, `${f} should import writeFileAtomic`).toContain('atomic-write.ts');
+      // A bare writeFileSync in one of these modules is the regression.
+      const bare = src.split('\n').filter((l) => /\bwriteFileSync\s*\(/.test(l));
+      expect(bare, `${f} still writes with plain writeFileSync: ${bare.join(' | ')}`).toEqual([]);
+    }
+  });
+
+  it('leaves no module importing writeFileSync without using it', () => {
+    // The dead import that hid a missing writeFileAtomic import behind a
+    // still-compiling file.
+    for (const f of FILES) {
+      const src = readFileSync(join(process.cwd(), f), 'utf8');
+      if (/import \{[^}]*\bwriteFileSync\b/.test(src)) {
+        expect(/\bwriteFileSync\s*\(/.test(src), `${f} imports writeFileSync but never calls it`).toBe(true);
+      }
+    }
+  });
+});

@@ -435,15 +435,82 @@ describe('an unrelated Phase 2 casualty does not block a legacy rename', () => {
     expect(r.summary.suppressMissing).toEqual(['trialx']);
   });
 
-  it('refuses when a casualty cannot be identified at all', () => {
-    // No usable dedup key on the casualty means we cannot rule out that it WAS
-    // the target, and the destructive direction is the one to avoid.
+  // NARROWED. This originally asserted that ANY casualty without a dedup key
+  // blocks the re-point. Measuring the corpus showed why that was too blunt:
+  // studyDedupKey returns null for 48 of 126 published studies, so the rule
+  // fired on more than a third of drops and re-created the date-global refusal
+  // it had just replaced. A keyless casualty whose NAME plainly differs from the
+  // target is not a reason to fail the nightly build.
+  it('allows the re-point when a keyless casualty is plainly a different study', () => {
     const d = digest(study('trialx-renamed', 'Trial X', 'NCT01234567'), study('keep', 'Else'));
     const r = applyOverrides(
       d,
       { suppress: ['trialx'], identity: { trialx: { nct: 'NCT01234567', name: 'Trial X' } } },
       { droppedStudies: [{ slug: 'x', name: 'a long descriptive title with no acronym' }] },
     );
+    expect(r.summary.suppressed).toEqual(['trialx-renamed']);
+  });
+});
+
+// studyDedupKey returns null for 48 of the 126 published studies — "APBI-IMRT
+// Florence", "NRG/RTOG 1005", "Tumour bed boost after BCS+WBRT (Dutch cohort)".
+// So "a keyless casualty blocks everything" fires on more than a third of drops,
+// which is the date-global rule this replaced wearing a different hat. Names
+// discriminate where keys do not: across all 1128 pairs of distinct keyless
+// published names, none resemble each other.
+describe('a keyless casualty is judged by name, not by blanket refusal', () => {
+  const renamed = () =>
+    digest(study('trialx-renamed', 'Trial X', 'NCT01234567'), study('keep', 'Something Else'));
+  const ov = {
+    suppress: ['trialx'],
+    identity: { trialx: { nct: 'NCT01234567', name: 'Trial X' } },
+  };
+
+  it('allows the re-point when the keyless casualty is plainly a different study', () => {
+    const r = applyOverrides(renamed(), ov, {
+      droppedStudies: [{ slug: 'apbi', name: 'APBI-IMRT Florence' }],
+    });
+    expect(r.summary.suppressed).toEqual(['trialx-renamed']);
+  });
+
+  it('still refuses when the keyless casualty’s NAME matches the target', () => {
+    const r = applyOverrides(renamed(), ov, {
+      droppedStudies: [{ slug: 'whatever', name: 'Trial X' }],
+    });
     expect(r.summary.suppressed).toEqual([]);
+    expect(r.summary.suppressMissing).toEqual(['trialx']);
+  });
+
+  it('refuses on a name that CONTAINS the target’s', () => {
+    const r = applyOverrides(renamed(), ov, {
+      droppedStudies: [{ slug: 'w', name: 'Trial X long-term outcomes (Dutch cohort)' }],
+    });
+    expect(r.summary.suppressed).toEqual([]);
+  });
+
+  it('refuses when there is nothing comparable on either side', () => {
+    // No key and no recorded name: it genuinely cannot be ruled out.
+    const d = digest(study('renamed', 'Some Study', 'NCT01234567'), study('keep', 'Else'));
+    const r = applyOverrides(
+      d,
+      { suppress: ['s'], identity: { s: { nct: 'NCT01234567', name: '' } } },
+      { droppedStudies: [{ slug: 'x', name: 'a descriptive title with no acronym' }] },
+    );
+    expect(r.summary.suppressed).toEqual([]);
+  });
+
+  it('a real corpus name does not block an unrelated legacy rename', () => {
+    // The concrete regression: before this, ANY of the 48 keyless names would
+    // have failed the nightly build for a date carrying a legacy suppression.
+    for (const name of [
+      'APBI-IMRT Florence',
+      'NRG/RTOG 1005',
+      'Tumour bed boost after BCS+WBRT (Dutch cohort)',
+      'Multinational HCC EBRT IPD Cohort',
+      'ePLND vs PSMA-PET staging (AUA2026 round-up)',
+    ]) {
+      const r = applyOverrides(renamed(), ov, { droppedStudies: [{ slug: 'x', name }] });
+      expect(r.summary.suppressed, name).toEqual(['trialx-renamed']);
+    }
   });
 });
