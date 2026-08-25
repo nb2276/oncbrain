@@ -43,6 +43,7 @@ describe('verify-publish CLI', () => {
     git('config', 'user.name', 'T');
     mkdirSync(join(repo, 'data/digests'), { recursive: true });
     mkdirSync(join(repo, 'data/overrides'), { recursive: true });
+    mkdirSync(join(repo, 'data/obsidian'), { recursive: true });
   });
   afterEach(() => rmSync(repo, { recursive: true, force: true }));
 
@@ -102,5 +103,85 @@ describe('verify-publish CLI', () => {
     writeFileSync(digestPath('2026-08-24'), artifact([['new', 'NEW']]));
     git('add', '-A');
     expect(run()).not.toContain('WITHHELD');
+  });
+});
+
+// A DATE PUBLISHES AS A SET. The artifact and its Obsidian twin are committed in
+// the same push, so reverting only the JSON would ship main's studies next to the
+// rejected build's prose — a twin describing cards the artifact does not contain,
+// which is worse than either version alone.
+describe('verify-publish reverts a withheld date as a unit', () => {
+  let repo: string;
+  const git = (...args: string[]) => execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' });
+  const run = () =>
+    execSync(`npx tsx ${JSON.stringify(CLI)} --worktree=${JSON.stringify(repo)} 2>&1`, {
+      encoding: 'utf8',
+    });
+
+  beforeEach(() => {
+    repo = mkdtempSync(join(tmpdir(), 'oncbrain-unit-'));
+    git('init', '-q');
+    git('config', 'user.email', 't@t.t');
+    git('config', 'user.name', 'T');
+    mkdirSync(join(repo, 'data/digests'), { recursive: true });
+    mkdirSync(join(repo, 'data/obsidian'), { recursive: true });
+  });
+  afterEach(() => rmSync(repo, { recursive: true, force: true }));
+
+  it('restores the Obsidian twin alongside the artifact', () => {
+    writeFileSync(join(repo, 'data/digests/2026-07-08.json'), artifact([['alpha', 'ALPHA'], ['charlie', 'CHARLIE']]));
+    writeFileSync(join(repo, 'data/obsidian/2026-07-08.md'), '# published: ALPHA + CHARLIE');
+    git('add', '-A');
+    git('commit', '-q', '-m', 'baseline');
+
+    // The bad rebuild drops CHARLIE from both files.
+    writeFileSync(join(repo, 'data/digests/2026-07-08.json'), artifact([['alpha', 'ALPHA']]));
+    writeFileSync(join(repo, 'data/obsidian/2026-07-08.md'), '# rebuilt: ALPHA only');
+    git('add', '-A');
+
+    expect(run()).toContain('WITHHELD 2026-07-08');
+    expect(readFileSync(join(repo, 'data/obsidian/2026-07-08.md'), 'utf8')).toContain('ALPHA + CHARLIE');
+    // Nothing about this date is left staged for the commit.
+    expect(git('diff', '--cached', '--name-only').trim()).toBe('');
+  });
+
+  it('restores a conference-suffixed twin too', () => {
+    writeFileSync(join(repo, 'data/digests/2026-05-17.json'), artifact([['a', 'A'], ['b', 'B']]));
+    writeFileSync(join(repo, 'data/obsidian/2026-05-17-estro-2026.md'), '# published: A + B');
+    git('add', '-A');
+    git('commit', '-q', '-m', 'baseline');
+
+    writeFileSync(join(repo, 'data/digests/2026-05-17.json'), artifact([['a', 'A']]));
+    writeFileSync(join(repo, 'data/obsidian/2026-05-17-estro-2026.md'), '# rebuilt: A only');
+    git('add', '-A');
+
+    run();
+    expect(readFileSync(join(repo, 'data/obsidian/2026-05-17-estro-2026.md'), 'utf8')).toContain('A + B');
+  });
+
+  it('unstages a companion HEAD never had, rather than shipping it alone', () => {
+    writeFileSync(join(repo, 'data/digests/2026-07-08.json'), artifact([['alpha', 'ALPHA'], ['charlie', 'CHARLIE']]));
+    git('add', '-A');
+    git('commit', '-q', '-m', 'baseline');
+
+    writeFileSync(join(repo, 'data/digests/2026-07-08.json'), artifact([['alpha', 'ALPHA']]));
+    writeFileSync(join(repo, 'data/obsidian/2026-07-08.md'), '# brand new twin for a rejected build');
+    git('add', '-A');
+
+    run();
+    expect(git('diff', '--cached', '--name-only').trim()).toBe('');
+  });
+
+  it('leaves another date’s twin alone', () => {
+    writeFileSync(join(repo, 'data/digests/2026-07-08.json'), artifact([['a', 'A'], ['c', 'C']]));
+    git('add', '-A');
+    git('commit', '-q', '-m', 'baseline');
+
+    writeFileSync(join(repo, 'data/digests/2026-07-08.json'), artifact([['a', 'A']]));
+    writeFileSync(join(repo, 'data/obsidian/2026-08-24.md'), '# today, fine');
+    git('add', '-A');
+
+    run();
+    expect(git('diff', '--cached', '--name-only').trim()).toBe('data/obsidian/2026-08-24.md');
   });
 });
