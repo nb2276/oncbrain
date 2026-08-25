@@ -109,6 +109,12 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
   as history; see the CHANGELOG. A FOURTH round has not been run against v0.57.0,
   and each of the three so far found regressions introduced by the previous one.
   **Priority: run round four before enabling the flag.**
+  BLOCKED as of 2026-08-25: the codex usage limit is exhausted until 2026-08-30
+  8:13 PM. Round four's prompt is written and ready to re-run — it lists the nine
+  v0.56.0-v0.57.0 changes to read adversarially, which is where the last three
+  rounds each found their regressions. One finding was already recovered from that
+  list by inspection (the half-reverted withheld date, fixed in v0.57.1), which is
+  evidence the list is pointed at the right code.
 - Round three detail, for reference. **Priority: none.** It again
   answered both gate questions "yes". Two of its nine were defects in v0.56.0's own
   new guards and are fixed in v0.56.1; the rest, by its numbering:

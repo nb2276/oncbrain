@@ -2,6 +2,27 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.57.1] - 2026-08-25
+
+### Fixed
+- **A withheld date shipped main's artifact next to the rejected build's prose.**
+  v0.57.0's publish guard restores the digest JSON when a publish would remove a
+  live card, but a date publishes as a SET: the artifact and its Obsidian twin
+  (`<date>.md`, or `<date>-<conference>.md`) are committed in the same push.
+  Reverting only the JSON left the twin from the build that was just rejected —
+  prose describing cards the artifact does not contain, which is a worse state
+  than either version alone. A withheld date is now reverted as a unit, with a
+  companion HEAD never had unstaged rather than shipped on its own. The companion
+  sweep is derived from the staged set rather than a hardcoded list, so a future
+  per-date committed file is caught by it instead of quietly half-shipping.
+
+### Notes
+- Found by inspection, not by review: gate round four could NOT be run — the codex
+  usage limit is exhausted until 2026-08-30. Three rounds have each answered both
+  gate questions "yes", so `TRIAL_LINEAGE_AUTOSUPPRESS` stays OFF and round four
+  remains owed against v0.57.x.
+- Tests: 2462 across 123 files.
+
 ## [0.57.0] - 2026-08-25
 
 The seven findings round three left open, plus the root cause of the failure that
