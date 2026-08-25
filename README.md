@@ -2,7 +2,7 @@
 
 Curated, AI-summarized digest of oncology meeting research and published studies. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets), alongside newly published journal papers. One oncologist curates the sources; an AI pipeline summarizes each study with comparative-literature context and a standard-of-care verdict.
 
-**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.35.0
+**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.55.5
 
 ## Architecture
 
@@ -22,6 +22,11 @@ admin form @ 3001 ┘                       ▼                          │    
                          build:day ─▶ 3-phase LLM (group →           │
                            per-study agent → synthesis) +            │
                            SOC verdict + literature comparison       │
+                                          │                          │
+                           grounding gate: withhold a number         │
+                             attached to an unsourced trial          │
+                           trial lineage: update / new card /        │
+                             duplicate (auto-suppress OFF)           │
                                           │                          │
                          data/digests/<date>.json     (committed)    │
                          data/obsidian/<date>.md       (committed)   │
@@ -128,6 +133,18 @@ Organized by **disease site** (22-slug enum, see `DESIGN.md`), newest date first
 
 Disease-site emoji anchors live in `DESIGN.md`; the per-study bullet + verdict emoji vocabulary and voice rules live in `VOICE.md`.
 
+## When a trial comes back
+
+The same trial often arrives twice: a conference abstract in May, the full paper in August. Rather than silently publishing both or silently dropping one, the build classifies the second arrival:
+
+- **update** — same objective, matured. The newer card carries a "supersedes the {date} read" line back to the earlier one.
+- **new card** — a different objective. A trial's quality-of-life paper and its efficacy paper are two findings, and both publish.
+- **duplicate** — the same reading again.
+
+**Removing an already-published card is off by default.** Set `TRIAL_LINEAGE_AUTOSUPPRESS=on` to let the build act on an `update`; without it the classification still happens, the link is still stamped, and the curator gets a Telegram message with a one-reply `drop <date>/<slug>` when — and only when — the sole thing blocking the removal is something a human can resolve by reading both cards.
+
+Evidence and permission are separate on purpose: the flag grants permission, never evidence, so a removal the evidence gate refuses stays refused with the flag on. `TRIAL_LINEAGE=off` disables the pass entirely.
+
 ## Autopilot (optional)
 
 Run the full chain every day at 01:00 local without touching anything (early so the
@@ -200,7 +217,7 @@ npm run test:watch # watch mode
 npx astro check    # type check (0 errors expected)
 ```
 
-1989 tests across 97 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, reader-selectable specialty relevance plus its per-specialty "why it matters", and the v0.33-v0.36 effect-size marks (parser, geometry, corpus ruler, and the satori share-card renderer).
+2373 tests across 117 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, reader-selectable specialty relevance plus its per-specialty "why it matters", the v0.33-v0.36 effect-size marks (parser, geometry, corpus ruler, and the satori share-card renderer), and the v0.53-v0.55 trial-lineage and grounding work (the update/new-card/duplicate decision table, its authorization gate, comparator grounding, and the identity rules that decide when one card may replace another).
 
 A vitest `globalSetup` builds `dist/` once before collection when it's missing, so a cold checkout passes. After switching branches, run `rm -rf dist && npm run build` first — the dist-reading tests reuse an existing build, and a stale one fails like a code regression.
 
@@ -215,6 +232,8 @@ npm run eval -- --compare-baseline # diff this run vs baseline
 ```
 
 The judge scores on factual accuracy, clinical relevance, citation correctness, clustering quality, and hallucinations (any hallucination caps overall at 5/10).
+
+Two things worth knowing before you read a score. The cap means a single unsupported claim pins the run at 5.0 regardless of the other four axes, so the metric is close to bimodal. And there is currently ONE fixture, so run-to-run spread is wide: 5.0 / 6.5 / 7.5 / 8.2 / 8.4 / 9.2 were all observed while fixing genuinely different defects, and one 5.0 was a transient Phase 2 response that returned prose instead of JSON. Treat "passes" as the signal and the decimal as noise until more fixtures exist.
 
 ## Conferences (optional)
 
