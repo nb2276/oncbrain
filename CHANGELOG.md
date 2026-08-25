@@ -2,6 +2,28 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.57.4] - 2026-08-25
+
+### Added
+- **A population blocker, one level below the cohort blocker.** v0.57.0 stopped a
+  basket trial's lung cohort from superseding its breast cohort by blocking on
+  differing `disease_site`. That does not catch two cohorts of the SAME site that
+  differ by biomarker or stage — HER2-positive vs HER2-low, node-positive vs
+  node-negative, muscle-invasive vs not. Those are exactly the axes
+  `conflictingState` already encodes, so lineage now asks it about the two
+  readings themselves.
+
+  Evidence stated plainly: the corpus holds exactly **one** cross-date same-NCT
+  pair, so it cannot show this guard is NEEDED. What it can show is what the
+  guard COSTS — it fires on none of the published pairs — and that is the basis
+  for adding it, rather than a story about basket trials. It inherits the
+  deliberate hormone-sensitivity exception (mCRPC vs mCSPC is not an axis, so
+  TALAPRO-2 survives as TALAPRO-3's sibling), pinned by its own test.
+
+### Notes
+- Gate round four still cannot run — the codex usage limit resets 2026-08-30.
+- `TRIAL_LINEAGE_AUTOSUPPRESS` stays OFF. Tests: 2481 across 123 files.
+
 ## [0.57.3] - 2026-08-25
 
 Working round four's question list by hand, since that round still cannot run.

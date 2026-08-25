@@ -26,6 +26,7 @@
 // which degrades to the pre-existing nudge. Suppressing a real card because a
 // classifier guessed is worse than leaving a duplicate for the curator.
 
+import { conflictingState } from './comparator-grounding.ts';
 import { studyDedupKey } from './study-dedup.ts';
 
 /** What a source REPORTS about its trial. Two sources with different facets are
@@ -270,7 +271,7 @@ const MATURITY_RANK: Record<Maturity, number> = {
  *  decides whether the curator DM may offer a one-reply drop, and deciding it by
  *  regex over prose was how a maturity regression got labelled an identity gap. */
 export type SuppressionBlocker = {
-  code: 'identity' | 'endpoint' | 'followup' | 'maturity' | 'symmetry' | 'cohort';
+  code: 'identity' | 'endpoint' | 'followup' | 'maturity' | 'symmetry' | 'cohort' | 'population';
   message: string;
 };
 
@@ -340,7 +341,30 @@ export function suppressionBlockers(
       message: `different disease site (${prior.disease_site} → ${current.disease_site}) — same registration, different cohort`,
     });
   }
+  // The same split within ONE site. Disease site catches a basket trial's breast
+  // and lung cohorts; it does not catch two cohorts of one site that differ by
+  // biomarker or stage — HER2-positive vs HER2-low, node-positive vs
+  // node-negative, muscle-invasive vs not. Those are the axes conflictingState
+  // already knows, so ask it about the two readings themselves.
+  //
+  // Honest about the evidence: the corpus contains exactly ONE cross-date
+  // same-NCT pair, so it cannot show this guard is NEEDED. What it can show is
+  // what the guard COSTS, and that is measured at zero — it fires on none of the
+  // published pairs. Added on that basis, not on a story about basket trials.
+  const populationConflict = conflictingState(reportText(current), reportText(prior));
+  if (populationConflict) {
+    out.push({
+      code: 'population',
+      message: `contradictory clinical state (${populationConflict}) — same registration, different population`,
+    });
+  }
   return out;
+}
+
+/** The text a reading offers about its own population. Name first: a cohort
+ *  split is usually named ("BASKET-1 HER2-low cohort"). */
+function reportText(r: TrialReport): string {
+  return [r.name, r.endpoint, r.stat_detail].filter(Boolean).join(' ');
 }
 
 /** The single most substantive blocker, for display. Identity is reported LAST
