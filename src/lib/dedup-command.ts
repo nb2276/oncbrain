@@ -134,8 +134,18 @@ export function executeDedupDrop(
       source_ids: (study as { source_ids?: { type: string; id: number }[] }).source_ids ?? [],
     };
     ov.identity = identity;
-    saveOverrides(cmd.date, ov, overridesDir);
+    // QUEUE FIRST, THEN WRITE — the same order commitLineageSuppressions uses,
+    // and for the same reason. These two writes are not atomic, so one of them
+    // has to be the one that can fail harmlessly. An orphaned queue entry is
+    // harmless: the rebuild runs and changes nothing. An orphaned override is
+    // not: the card is marked suppressed with no rebuild scheduled, so it stays
+    // live until some unrelated rebuild of that date fires and removes it
+    // silently, long after the reply that promised it.
+    //
+    // This path had the order backwards while lineage had it right — the guard
+    // was put on one caller and not the other.
     queueRebuild(db, cmd.date, `curator dropped duplicate ${cmd.slug}`);
+    saveOverrides(cmd.date, ov, overridesDir);
 
     return {
       ok: true,

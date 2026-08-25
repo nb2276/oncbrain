@@ -421,6 +421,66 @@ describe('deterministicDegradedFallback', () => {
   it('returns empty array when no question has candidates', () => {
     expect(deterministicDegradedFallback(new Map(), QUESTIONS)).toEqual([]);
   });
+
+  // INVARIANT 3 APPLIES ON THE DEGRADED PATH TOO.
+  //
+  // parseRelatedTrials enforces the clinical-state check on the LLM's picks, and
+  // this function runs on exactly the paths where that parse never happened — a
+  // rerank throw, unparseable output. The check was therefore strongest when the
+  // model worked and absent when it failed, which is backwards.
+  it('skips a candidate whose clinical state contradicts the study', () => {
+    const grouped = new Map<string, CandidateTrial[]>();
+    grouped.set(QUESTIONS[0]!, [
+      makeCandidate({
+        nct: 'NCT01',
+        primary_completion_date: '2026-01',
+        brief_title: 'Trial in HER2-positive breast cancer',
+        conditions: ['HER2-positive'],
+      }),
+      makeCandidate({
+        nct: 'NCT02',
+        primary_completion_date: '2028-01',
+        brief_title: 'Trial in HER2-low breast cancer',
+        conditions: ['HER2-low'],
+      }),
+    ]);
+    // The study is HER2-low; the earliest-completing candidate is HER2-positive,
+    // which is a different disease and not a sibling readout. Without the check
+    // the completion-date sort alone would pick NCT01.
+    const out = deterministicDegradedFallback(grouped, QUESTIONS, 'DESTINY-Breast06 in HER2-low disease');
+    expect(out).toHaveLength(1);
+    expect(out[0]!.nct).toBe('NCT02');
+  });
+
+  it('emits nothing for a question where every candidate conflicts', () => {
+    const grouped = new Map<string, CandidateTrial[]>();
+    grouped.set(QUESTIONS[0]!, [
+      makeCandidate({ nct: 'NCT01', brief_title: 'HER2-positive trial', conditions: ['HER2-positive'] }),
+    ]);
+    expect(deterministicDegradedFallback(grouped, QUESTIONS, 'DESTINY-Breast06 in HER2-low disease')).toEqual([]);
+  });
+
+  it('does NOT treat hormone sensitivity as a conflict, so sibling watches survive', () => {
+    // Deliberate: TALAPRO-2 (mCRPC) is the sibling of TALAPRO-3 (mCSPC) and
+    // carries the mature OS readout. Dropping it would be a worse failure than
+    // the imprecision it prevents. Pinned here because this path now runs the
+    // same check and must inherit the same exception.
+    const grouped = new Map<string, CandidateTrial[]>();
+    grouped.set(QUESTIONS[0]!, [
+      makeCandidate({ nct: 'NCT01', brief_title: 'TALAPRO-3 in mCSPC', conditions: ['mCSPC'] }),
+    ]);
+    expect(deterministicDegradedFallback(grouped, QUESTIONS, 'TALAPRO-2 in mCRPC')).toHaveLength(1);
+  });
+
+  it('is unchanged when no study text is supplied', () => {
+    // Back-compat: the check simply does not fire, so existing callers behave
+    // exactly as before.
+    const grouped = new Map<string, CandidateTrial[]>();
+    grouped.set(QUESTIONS[0]!, [
+      makeCandidate({ nct: 'NCT01', brief_title: 'HER2-positive trial', conditions: ['HER2-positive'] }),
+    ]);
+    expect(deterministicDegradedFallback(grouped, QUESTIONS)).toHaveLength(1);
+  });
 });
 
 describe('broadenTrialQuery', () => {

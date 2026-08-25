@@ -75,7 +75,7 @@ import {
 } from './slide-photo-storage.ts';
 import { ocrFile, isOcrAvailable } from './vision-ocr.ts';
 import { listDigests } from './digest-data.ts';
-import { extractCitations } from './extract.ts';
+import { extractCitations, ownRegistrations } from './extract.ts';
 import { extractDois } from './doi.ts';
 import {
   buildNctCoverageIndex,
@@ -1291,13 +1291,21 @@ async function notifyPriorCoverage(
 ): Promise<void> {
   if (index.size === 0 && acronymIndex.size === 0) return;
   try {
-    // NCT match: extract from the FULL enriched text — a paper registers its own
-    // NCT in the body, and comparator NCTs are rarely printed inline.
+    // NCT match: from the FULL enriched text, because a paper registers its own
+    // NCT in the body rather than the title.
+    //
+    // ONLY THE SOURCE'S OWN REGISTRATIONS. This used to take every NCT in the
+    // text, on the reasoning that "comparator NCTs are rarely printed inline".
+    // Measuring the corpus disproved that: of 30 single-NCT sources, 10 cite
+    // someone else's registration and nothing else — an ASTRO SBRT abstract
+    // naming RTOG 9408 (NCT00002597), a hormone-duration paper naming NRG GU006
+    // (NCT03371719), two papers whose only NCT sits in a disclosures block. Each
+    // would match the comparator's earlier card and offer a `drop` token for it,
+    // and executeDedupDrop honours a well-formed token without consulting the
+    // evidence gate. Same rule as lineage: an NCT merely CITED is not identity.
     const fullText = getEnrichedText(db, item.type, rowId);
     if (!fullText) return;
-    const ncts = extractCitations(fullText)
-      .filter((c) => c.kind === 'nct')
-      .map((c) => c.id);
+    const ncts = ownRegistrations(fullText);
     const nctPrior = ncts.length ? findPriorCoverage(index, ncts, item.bookmark_date) : [];
 
     // Acronym match: extract from the SUBJECT text only (a paper's title, a
@@ -1383,12 +1391,16 @@ export function buildPriorCoverageLines(
     if (!p.slug) return head;
     const d = decisions.get(`${p.date}/${p.slug}`);
     if (d?.droppable) {
-      return `${head}\n   reply "drop ${p.date}/${p.slug}" to suppress that earlier card`;
+      return `${head}\n   ${DROP_OFFER}${p.date}/${p.slug}" to suppress that earlier card`;
     }
     const why = d?.reason ?? 'objective not established yet';
     return `${head}\n   both will publish — ${why}`;
   });
 }
+
+// The exact prefix of an authorized drop offer. Shared so the header and the
+// per-prior lines cannot disagree about whether one was made — they did.
+const DROP_OFFER = 'reply "drop ';
 
 /**
  * The whole "previously covered" DM, or null when there is nothing to say.
@@ -1410,7 +1422,17 @@ export function buildPriorCoverageMessage(
   if (lines.length === 0) return null;
   const subject = lines.length > 1 ? 'trials' : 'a trial';
   const opener = `Heads up — the source you just sent matches ${subject} already covered.`;
-  const anyDroppable = [...decisions.values()].some((d) => d.droppable);
+  // DERIVED FROM THE RENDERED LINES, NOT FROM `decisions`.
+  //
+  // The two disagreed. `decisions` is keyed over every prior found, including
+  // acronym priors that buildPriorCoverageLines then DEDUPES AWAY against an NCT
+  // match on the same trial. So a droppable prior could be removed from the body
+  // while still setting the header, leaving "Both will publish unless you drop
+  // one:" above a list where no line carries a drop token — an invitation with
+  // nothing to accept, which invites the curator to hand-write one instead. The
+  // header is part of the offer, so it has to be computed from what the offer
+  // actually says.
+  const anyDroppable = lines.some((l) => l.includes(DROP_OFFER));
   const header = anyDroppable
     ? `${opener} Both will publish unless you drop one:`
     : `${opener} Both will publish; nothing here looks like a duplicate to drop:`;

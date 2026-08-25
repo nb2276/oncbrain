@@ -47,28 +47,46 @@ export type PublishedStudy = { slug?: string | null; name: string };
 export function lostPublishedStudies(opts: {
   published: readonly PublishedStudy[];
   dropped: readonly DroppedStudy[];
+  /**
+   * What this build DID produce. Without it the name-key fallback cannot tell a
+   * removal from a sibling: one trial's efficacy and quality-of-life cards share
+   * an acronym key, so a brand-new QoL cluster failing Phase 2 looked exactly
+   * like the loss of the efficacy card that was sitting there unharmed. That is
+   * a false alarm on a guard whose only action is to abort the publish.
+   */
+  surviving?: readonly PublishedStudy[];
   intentionallyRemoved?: ReadonlySet<string>;
 }): DroppedStudy[] {
   const { published, dropped } = opts;
   const intentional = opts.intentionallyRemoved ?? new Set<string>();
   if (published.length === 0 || dropped.length === 0) return [];
 
-  const publishedSlugs = new Set(
-    published.map((s) => (s.slug ?? '').trim()).filter((s) => s.length > 0),
-  );
-  const publishedKeys = new Set(
-    published.map((s) => studyDedupKey(s.name)).filter((k): k is string => !!k),
-  );
+  const slugOf = (s: PublishedStudy) => (s.slug ?? '').trim();
+  const publishedSlugs = new Set(published.map(slugOf).filter((s) => s.length > 0));
+  const survivingSlugs = new Set((opts.surviving ?? []).map(slugOf).filter((s) => s.length > 0));
 
   const lost: DroppedStudy[] = [];
   for (const d of dropped) {
     if (intentional.has(d.slug)) continue;
+
+    // Exact slug: this card was published and is now a casualty.
     if (publishedSlugs.has(d.slug)) {
-      lost.push(d);
+      if (!survivingSlugs.has(d.slug)) lost.push(d);
       continue;
     }
+
+    // Name key: catches a Phase 1 rename, where the slug moved but the study is
+    // the same one. Only when it resolves to a SINGLE published card — two cards
+    // of one trial share a key, and guessing between them is what produced the
+    // false alarm above.
     const key = studyDedupKey(d.name);
-    if (key && publishedKeys.has(key)) lost.push(d);
+    if (!key) continue;
+    const matches = published.filter((s) => studyDedupKey(s.name) === key);
+    if (matches.length !== 1) continue;
+    const match = matches[0]!;
+    // Still standing under its own slug → nothing was lost.
+    if (survivingSlugs.has(slugOf(match))) continue;
+    lost.push(d);
   }
   return lost;
 }

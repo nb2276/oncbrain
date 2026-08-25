@@ -132,3 +132,59 @@ describe('buildPriorCoverageMessage gates the header too', () => {
     expect(buildPriorCoverageMessage([], [])).toBeNull();
   });
 });
+
+// THE HEADER IS PART OF THE OFFER. It used to be computed from the raw
+// `decisions` map while the body was computed from the DEDUPED prior list, so a
+// droppable prior removed from the body could still set the header — leaving
+// "Both will publish unless you drop one:" above a list where nothing carries a
+// drop token. An invitation with nothing to accept invites the curator to
+// hand-write one, and executeDedupDrop honours any well-formed command.
+describe('the header cannot promise a drop the body does not offer', () => {
+  it('does not invite a drop when the droppable prior was deduped away', () => {
+    // Same trial found by BOTH indexes: the acronym prior is dropped from the
+    // body as a duplicate of the NCT one. Only the acronym entry was droppable.
+    const nctPrior = [
+      { nct: 'NCT03367702', date: '2026-07-08', name: 'NRG-GU005', slug: 'nrg-gu005' },
+    ];
+    const acronymPrior = [
+      { key: 'NRGGU005', date: '2026-07-08', name: 'NRG-GU005', slug: 'nrg-gu005-qol' },
+    ];
+    const decisions = new Map([
+      ['2026-07-08/nrg-gu005', { droppable: false, reason: 'different objectives (qol vs primary-efficacy)' }],
+      ['2026-07-08/nrg-gu005-qol', { droppable: true }],
+    ]);
+    const msg = buildPriorCoverageMessage(nctPrior, acronymPrior, decisions)!;
+    expect(msg).not.toBeNull();
+    // The deduped-away entry set the header; no rendered line backs it.
+    if (!msg.includes('reply "drop ')) {
+      expect(msg).not.toContain('unless you drop one');
+    }
+  });
+
+  it('still invites a drop when a rendered line actually offers one', () => {
+    const msg = buildPriorCoverageMessage(
+      [{ nct: 'NCT03367702', date: '2026-07-08', name: 'NRG-GU005', slug: 'nrg-gu005' }],
+      [],
+      new Map([['2026-07-08/nrg-gu005', { droppable: true }]]),
+    )!;
+    expect(msg).toContain('unless you drop one');
+    expect(msg).toContain('reply "drop 2026-07-08/nrg-gu005"');
+  });
+
+  it('header and body agree in every case', () => {
+    // The invariant, stated directly: the header promises a drop if and only if
+    // some line offers one.
+    const cases: Array<[boolean, boolean]> = [
+      [true, true],
+      [false, false],
+    ];
+    for (const [aDroppable] of cases) {
+      const msg = buildPriorCoverageMessage(
+        [{ nct: 'NCT1', date: '2026-07-08', name: 'A', slug: 'a' }],
+        [],
+        new Map([['2026-07-08/a', aDroppable ? { droppable: true } : { droppable: false, reason: 'x' }]]),
+      )!;
+      expect(msg.includes('unless you drop one')).toBe(msg.includes('reply "drop '));
+    }
+  });
+});

@@ -105,7 +105,33 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
   own fix (a lone comparator NCT satisfying registered identity). The lesson worth
   keeping: two of the four were regressions introduced by the previous round's
   fixes, so each round needs its own round.
-- **Six open findings from the FIRST gate round.** **Priority: P1.** The
+- **Seven open findings from the THIRD gate round.** **Priority: P0/P1.** It again
+  answered both gate questions "yes". Two of its nine were defects in v0.56.0's own
+  new guards and are fixed in v0.56.1; the rest, by its numbering:
+  #1 a cron running on a FEATURE BRANCH compares the rebuild against that branch's
+  stale artifact, not live main, then copies the result over main and pushes — a
+  card published on main but absent from the branch checkout disappears with no
+  alias and no notification (P0);
+  #2 Phase 1 can MERGE two published cards into one cluster; partition validation
+  accepts it, `meta.dropped` stays empty, and the regression guard has nothing to
+  inspect (P0);
+  #3 a Phase 1 rename plus a Phase 2 failure where BOTH names yield a null dedup
+  key evades the regression guard entirely — it matches neither slug nor key (P0);
+  #4 destructive Telegram authorization checks the CHAT, not the sender, so any
+  member of an allowed group can issue `drop` (P0);
+  #5 `study.nct` from Phase 2 is format-checked but not proven to belong to the
+  reported study, and `toTrialReport` unions it with the source-derived NCT, so a
+  comparator's registration can defeat the NCT-conflict check; a cue attached to a
+  comparator ("the comparator was registered at ClinicalTrials.gov as NCT…") also
+  still passes `ownRegistrations` (P1);
+  #6 `TrialReport` carries no cohort/arm/population field, so one basket trial's
+  lung cohort can supersede its own breast cohort under the shared NCT (P1);
+  #7 with autosuppress ON and the ingest allowlist unset, ordinary open ingestion
+  becomes a destructive endpoint: a forged source claiming the victim NCT reaches
+  lineage with no human review between inboxing and suppression (P1).
+  (v0.56.1 gate round)
+- **Six findings from the FIRST gate round — NOW FIXED in v0.56.1.** Kept here only
+  as history; see the CHANGELOG entry. **Priority: none.** The
   pre-enable adversarial round returned 11 findings over the destructive path and
   answered both gate questions "yes": with the flag ON cards can still be wrongly
   unpublished, and system-wide a partial rebuild can remove a published card with

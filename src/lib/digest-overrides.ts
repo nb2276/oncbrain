@@ -4,7 +4,8 @@
 // build time and applied as the final step before the artifact is written, so
 // curator edits and removals are durable: suppress studies, override study text
 // (tldr / name / bullets / verdict), or override the cross-site top_line/tldr.
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync } from 'node:fs';
+import { writeFileAtomic } from './atomic-write.ts';
 import { resolve, dirname } from 'node:path';
 import type {
   DigestOutput,
@@ -166,7 +167,10 @@ export function loadOverrides(date: string, dir = 'data/overrides'): DigestOverr
 export function saveOverrides(date: string, ov: DigestOverrides, dir = 'data/overrides'): string {
   const p = overridesPath(date, dir);
   if (!existsSync(dirname(p))) mkdirSync(dirname(p), { recursive: true });
-  writeFileSync(p, JSON.stringify(ov, null, 2) + '\n');
+  // Atomic: a torn sidecar fails JSON.parse, and loadOverrides reads that as
+  // "no overrides" — so every suppression on the date stops applying and hidden
+  // cards republish.
+  writeFileAtomic(p, JSON.stringify(ov, null, 2) + '\n');
   return p;
 }
 
@@ -437,6 +441,32 @@ function applyRelatedTrialsOverride(
   };
 }
 
+/**
+ * Could one of this run's Phase 2 casualties BE the card this override targets?
+ *
+ * Asked per identity. A legacy identity carries no provenance, so the only
+ * comparisons available are the recorded slug and the dedup key of the recorded
+ * name — the same weak signals the re-point itself would use. When none matches
+ * a casualty, the missing slug is a rename and re-pointing is correct.
+ *
+ * Errs toward "yes" for a casualty with no usable key: an unidentifiable
+ * casualty is exactly the case where we cannot rule out that it was the target.
+ * meta.dropped carries slug + name only, so the recorded NCT cannot help here.
+ */
+function droppedCouldBe(
+  dropped: readonly { slug: string; name: string }[] | undefined,
+  overrideKey: string,
+  wantKey: string | null,
+): boolean {
+  if (!dropped || dropped.length === 0) return false;
+  return dropped.some((d) => {
+    if (d.slug === overrideKey) return true;
+    const dKey = studyDedupKey(d.name);
+    if (!dKey) return true; // unidentifiable casualty — cannot rule it out
+    return wantKey !== null && dKey === wantKey;
+  });
+}
+
 // Pure: apply overrides to a digest, returning a new digest plus a summary of
 // what changed. Does not mutate the input.
 //
@@ -446,14 +476,18 @@ function applyRelatedTrialsOverride(
 // the date; tests and callers that don't care about determinism may omit
 // it (and get an ISO wall-clock value).
 //
-// `opts.studyDropped` says a Phase 2 call FAILED this run, so a card the date
-// normally carries is absent for a reason that has nothing to do with the
-// curator. It narrows how far a legacy (provenance-free) identity is trusted —
-// see the re-point rules in reindex.
+// `opts.droppedStudies` are the cards Phase 2 failed to produce this run. A
+// missing slug is a rename when nothing died and a CASUALTY when something did,
+// and those want opposite handling — see the re-point rules in reindex. Passing
+// the LIST rather than a boolean keeps the question per-identity: a casualty
+// elsewhere on the date says nothing about THIS override's target.
 export function applyOverrides(
   digest: DigestOutput,
   overrides: DigestOverrides,
-  opts: { digestDate?: string; studyDropped?: boolean } = {},
+  opts: {
+    digestDate?: string;
+    droppedStudies?: readonly { slug: string; name: string }[];
+  } = {},
 ): { digest: DigestOutput; summary: OverrideSummary } {
   const suppress = new Set(overrides.suppress ?? []);
   const edits = overrides.edits ?? {};
@@ -591,7 +625,7 @@ export function applyOverrides(
         hits = []; // unparseable provenance → refuse to re-point at all
       } else if (wantSources.length > 0) {
         hits = (hits.length > 0 ? hits : studies).filter(provenanceHit);
-      } else if (opts.studyDropped) {
+      } else if (droppedCouldBe(opts.droppedStudies, key, wantKey)) {
         // LEGACY IDENTITY (nct/name, no source_ids) MAY NOT RE-POINT ACROSS A
         // PHASE 2 FAILURE.
         //
@@ -608,9 +642,12 @@ export function applyOverrides(
         //              surviving sibling and suppress that instead — the curator
         //              retires the efficacy card and the QoL card comes down.
         //
-        // `studyDropped` is what tells them apart, and it is the only signal
-        // available: a rename leaves no casualty, a failure records one in
-        // meta.dropped. Five committed sidecars are legacy-shaped today
+        // A Phase 2 casualty is what tells them apart, and it is the only
+        // signal available: a rename leaves no casualty, a failure records one
+        // in meta.dropped. Asked PER IDENTITY, not per date — a casualty
+        // elsewhere on the date is not evidence about THIS override's target,
+        // and treating it as such refused legitimate renames whenever any
+        // unrelated cluster happened to fail. Five sidecars are legacy-shaped
         // (2026-05-17 extend-trial / radiosa-mfs-posthoc / rapchem, 2026-05-18
         // peace-2, 2026-05-31 enzarad), all suppressions, so this is live data.
         //

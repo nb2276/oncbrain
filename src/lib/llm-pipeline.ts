@@ -2414,10 +2414,12 @@ export function parseRelatedTrials(
     if (!aq) continue;
 
     // INVARIANT 3: the candidate must not contradict the study's clinical state.
-    // The prompt asks for a population match and the model mostly complies, but
-    // mCRPC vs mHSPC is a different disease entirely, and a reader clicking a
+    // The prompt asks for a population match and the model mostly complies; this
+    // is deterministic, so it holds when the prompt does not. A reader clicking a
     // watched trial expects it to resolve the question for the patient the study
-    // was about. Deterministic, so it holds when the prompt does not.
+    // was about. Note that hormone sensitivity is deliberately NOT one of the
+    // axes — see STATE_AXES in comparator-grounding.ts for why a sibling readout
+    // across that boundary is worth keeping.
     const conflict = conflictingState(
       studyText,
       [candidate.brief_title, candidate.brief_summary, candidate.eligibility_brief, (candidate.conditions ?? []).join(' ')]
@@ -2726,7 +2728,11 @@ export async function enrichStudyWithRelatedTrials(
     const rerankClient = deps.rerankClient;
     if (!rerankClient) {
       emit(`[v0.13] rerank_no_client_fallback_used: ${slug}`);
-      const fallback = deterministicDegradedFallback(groupedByQuestion, openQuestions);
+      const fallback = deterministicDegradedFallback(
+        groupedByQuestion,
+        openQuestions,
+        `${study.name} ${study.tldr}`,
+      );
       provenance.rerank_outcome = fallback.length > 0 ? 'fallback' : 'abstained';
       return {
         related_trials: fallback.length > 0 ? fallback : null,
@@ -2745,7 +2751,11 @@ export async function enrichStudyWithRelatedTrials(
       );
     } catch (err) {
       emit(`[v0.13] rerank_failed_fallback_used: ${slug} · ${(err as Error).message}`);
-      const fallback = deterministicDegradedFallback(groupedByQuestion, openQuestions);
+      const fallback = deterministicDegradedFallback(
+        groupedByQuestion,
+        openQuestions,
+        `${study.name} ${study.tldr}`,
+      );
       provenance.rerank_outcome = fallback.length > 0 ? 'fallback' : 'failed';
       return {
         related_trials: fallback.length > 0 ? fallback : null,
@@ -2760,7 +2770,11 @@ export async function enrichStudyWithRelatedTrials(
       parsed = JSON.parse(cleaned);
     } catch {
       emit(`[v0.13] rerank_parse_failed_fallback_used: ${slug}`);
-      const fallback = deterministicDegradedFallback(groupedByQuestion, openQuestions);
+      const fallback = deterministicDegradedFallback(
+        groupedByQuestion,
+        openQuestions,
+        `${study.name} ${study.tldr}`,
+      );
       provenance.rerank_outcome = fallback.length > 0 ? 'fallback' : 'failed';
       return {
         related_trials: fallback.length > 0 ? fallback : null,
@@ -2802,6 +2816,9 @@ export async function enrichStudyWithRelatedTrials(
 export function deterministicDegradedFallback(
   groupedByQuestion: Map<string, CandidateTrial[]>,
   studyOpenQuestions: string[],
+  /** The study's own text (name + tldr). INVARIANT 3 applies here too; without
+   *  it the check simply does not fire, so existing callers keep working. */
+  studyText = '',
 ): RelatedTrial[] {
   const out: RelatedTrial[] = [];
   for (const question of studyOpenQuestions) {
@@ -2811,7 +2828,24 @@ export function deterministicDegradedFallback(
     const sorted = [...candidates].sort((a, b) =>
       compareCompletionDates(a.primary_completion_date, b.primary_completion_date),
     );
-    const best = sorted[0];
+    // INVARIANT 3 HOLDS ON THE DEGRADED PATH TOO.
+    //
+    // parseRelatedTrials enforces the clinical-state check on the LLM's picks,
+    // and this function runs on exactly the paths where that parse never
+    // happened — a rerank throw, unparseable output. Leaving it off here meant
+    // the state check was strongest when the model worked and absent when it
+    // failed, which is backwards: a degraded path should be MORE conservative,
+    // not less. mCRPC vs mHSPC is a different disease, and a reader clicking a
+    // watched trial expects it to be about their patient.
+    const best = sorted.find(
+      (c) =>
+        !conflictingState(
+          studyText,
+          [c.brief_title, c.brief_summary, c.eligibility_brief, (c.conditions ?? []).join(' ')]
+            .filter(Boolean)
+            .join(' '),
+        ),
+    );
     if (!best) continue;
     out.push({
       ...best,

@@ -2,6 +2,63 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.56.1] - 2026-08-24
+
+The six findings still open from the FIRST gate round, plus two defects that
+round three found in the guards v0.56.0 itself added.
+
+### Fixed
+- **The prior-coverage nudge took any NCT in the text, not the source's own.**
+  Same defect the lineage path fixed in v0.56.0, on the other caller: an ASTRO
+  abstract naming RTOG 9408 would match that trial's earlier card and offer a
+  `drop` token for it, and `executeDedupDrop` honours a well-formed token without
+  consulting the evidence gate. Now uses `ownRegistrations`.
+- **The DM header could promise a drop the body never offered.** `anyDroppable`
+  was computed from the raw `decisions` map while the lines were computed from
+  the DEDUPED prior list, so a droppable prior removed as a duplicate still set
+  the header — leaving "Both will publish unless you drop one:" above a list
+  where nothing carried a token, which invites the curator to hand-write one.
+  Both sides now derive from the same rendered text.
+- **The empty-date guard is re-checked at commit time.** Plan time runs it
+  against a snapshot taken before Phase 2 and before every other suppression the
+  build planned; a curator `drop` landing mid-build, a concurrent build, or the
+  build's own earlier iterations can each independently see a survivor and
+  together take the last one.
+- **`executeDedupDrop` wrote the override before queueing the rebuild.**
+  `commitLineageSuppressions` had already been fixed to the opposite order and
+  this caller was left as it was. An orphaned queue entry is harmless; an
+  orphaned override leaves the card marked suppressed with nothing scheduled to
+  remove it, so it comes down silently on some unrelated later rebuild.
+- **`conflictingState` did not run on the degraded rerank paths.** The
+  clinical-state check was enforced on the LLM's picks and absent from the three
+  fallbacks that run when the LLM throws or returns unparseable output — so it
+  was strongest when the model worked and gone when it failed. The deliberate
+  hormone-sensitivity exception is pinned by a test so it cannot be reinstated
+  by accident.
+- **Artifact and override writes are atomic.** A torn sidecar fails JSON.parse,
+  and `loadOverrides` reads that as "no overrides" — every suppression on the
+  date stops applying and hidden cards republish. A torn artifact reads as "no
+  prior coverage", which is the input state that makes lineage treat a returning
+  trial as brand new. Write to a sibling temp file, fsync, rename.
+
+### Fixed — in v0.56.0's own new guards
+- **The publish-regression guard cried wolf on a sibling.** A brand-new
+  quality-of-life cluster failing Phase 2 shares an acronym key with the
+  already-published efficacy card, so the key fallback reported that card as
+  removed while it sat untouched in the output — aborting a healthy publish. The
+  guard now also receives what the build DID produce, and abstains when the key
+  is ambiguous across two published cards.
+- **The legacy re-point refusal was date-global.** Any unrelated cluster failing
+  Phase 2 refused every legacy identity re-point on that date, turning a routine
+  rename into a fatal unmatched suppress. The question is now asked per identity:
+  could one of these casualties BE this override's target.
+
+### Notes
+- Round three answered both gate questions "yes" and returned nine findings; the
+  seven not fixed here are filed in TODOS.md. `TRIAL_LINEAGE_AUTOSUPPRESS` stays
+  OFF.
+- Eval 8.8 PASS. Tests: 2428 across 120 files.
+
 ## [0.56.0] - 2026-08-24
 
 A second adversarial gate round over the destructive path, run because the first

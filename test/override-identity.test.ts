@@ -355,7 +355,7 @@ describe('a legacy identity must not migrate onto a sibling card', () => {
         suppress: ['trialx-efficacy'],
         identity: { 'trialx-efficacy': { nct: 'NCT01234567', name: 'Trial X' } },
       },
-      { studyDropped: true },
+      { droppedStudies: [{ slug: 'trialx-efficacy', name: 'Trial X' }] },
     );
     expect(r.summary.suppressed).toEqual([]);
     expect(r.summary.suppressMissing).toEqual(['trialx-efficacy']);
@@ -380,7 +380,7 @@ describe('a legacy identity must not migrate onto a sibling card', () => {
     const r = applyOverrides(
       siblings(),
       { suppress: ['trialx-qol'], identity: { 'trialx-qol': { nct: 'NCT01234567', name: 'Trial X' } } },
-      { studyDropped: true },
+      { droppedStudies: [{ slug: 'trialx-efficacy', name: 'Trial X' }] },
     );
     expect(r.summary.suppressed).toEqual(['trialx-qol']);
   });
@@ -402,9 +402,48 @@ describe('a legacy identity must not migrate onto a sibling card', () => {
           trialx: { nct: 'NCT01234567', name: 'Trial X', source_ids: [{ type: 'paper', id: 44 }] },
         },
       },
-      { studyDropped: true },
+      { droppedStudies: [{ slug: 'trialx-efficacy', name: 'Trial X' }] },
     );
     expect(r.summary.suppressed).toEqual(['trialx-renamed']);
     expect(r.digest.sites[0].studies.map((s) => s.slug)).toEqual(['trialx-qol']);
+  });
+});
+
+// The casualty question is PER IDENTITY. Asking it per date meant any unrelated
+// cluster failing Phase 2 refused every legacy re-point on that date, turning a
+// routine rename into a fatal unmatched suppress.
+describe('an unrelated Phase 2 casualty does not block a legacy rename', () => {
+  it('re-points when the casualty is a different trial', () => {
+    const d = digest(study('trialx-renamed', 'Trial X', 'NCT01234567'), study('keep', 'Something Else'));
+    const r = applyOverrides(
+      d,
+      { suppress: ['trialx'], identity: { trialx: { nct: 'NCT01234567', name: 'Trial X' } } },
+      { droppedStudies: [{ slug: 'unrelated-trial', name: 'PEACE-2 pelvic radiotherapy' }] },
+    );
+    expect(r.summary.suppressed).toEqual(['trialx-renamed']);
+    expect(r.summary.resolvedRenames).toEqual(['trialx → trialx-renamed']);
+  });
+
+  it('still refuses when the casualty shares the target’s trial key', () => {
+    const d = digest(study('trialx-qol', 'Trial X quality of life', 'NCT01234567'), study('keep', 'Else'));
+    const r = applyOverrides(
+      d,
+      { suppress: ['trialx'], identity: { trialx: { nct: 'NCT01234567', name: 'Trial X' } } },
+      { droppedStudies: [{ slug: 'trialx-efficacy', name: 'Trial X efficacy' }] },
+    );
+    expect(r.summary.suppressed).toEqual([]);
+    expect(r.summary.suppressMissing).toEqual(['trialx']);
+  });
+
+  it('refuses when a casualty cannot be identified at all', () => {
+    // No usable dedup key on the casualty means we cannot rule out that it WAS
+    // the target, and the destructive direction is the one to avoid.
+    const d = digest(study('trialx-renamed', 'Trial X', 'NCT01234567'), study('keep', 'Else'));
+    const r = applyOverrides(
+      d,
+      { suppress: ['trialx'], identity: { trialx: { nct: 'NCT01234567', name: 'Trial X' } } },
+      { droppedStudies: [{ slug: 'x', name: 'a long descriptive title with no acronym' }] },
+    );
+    expect(r.summary.suppressed).toEqual([]);
   });
 });
