@@ -18,7 +18,8 @@
 //   npx tsx build/backfill-pdf-abstracts.ts             # apply (DB + digests)
 
 import 'dotenv/config';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { writeFileAtomic } from '../src/lib/atomic-write.ts';
 import { resolve } from 'node:path';
 import { openDb } from '../src/lib/db.ts';
 import { fetchCrossrefPaper } from '../src/lib/crossref-client.ts';
@@ -86,7 +87,8 @@ async function main() {
     if (changed) {
       console.log(`  ${DRY ? 'would patch' : 'patch'} data/digests/${f}`);
       filesPatched++;
-      if (!DRY) writeFileSync(path, JSON.stringify(artifact, null, 2) + '\n');
+      // Atomic: a torn artifact is a published date that no longer parses.
+      if (!DRY) writeFileAtomic(path, JSON.stringify(artifact, null, 2) + '\n');
     }
   }
   console.log(`${DRY ? '[dry-run] would patch' : 'patched'} ${filesPatched} digest file(s)`);

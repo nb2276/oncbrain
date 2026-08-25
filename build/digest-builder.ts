@@ -164,7 +164,7 @@ import {
   isOcrEntryFresh,
   type OcrEntry,
 } from '../src/lib/vision-ocr.ts';
-import { writeFileSync, mkdirSync, existsSync, realpathSync, readdirSync, readFileSync } from 'node:fs';
+import { mkdirSync, existsSync, realpathSync, readdirSync, readFileSync } from 'node:fs';
 import { writeFileAtomic } from '../src/lib/atomic-write.ts';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';

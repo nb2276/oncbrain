@@ -453,17 +453,39 @@ function applyRelatedTrialsOverride(
  * casualty is exactly the case where we cannot rule out that it was the target.
  * meta.dropped carries slug + name only, so the recorded NCT cannot help here.
  */
+/** Loose name comparison for studies whose names yield no acronym key. */
+function namesResemble(a: string | null | undefined, b: string | null | undefined): boolean {
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const x = norm(a ?? '');
+  const y = norm(b ?? '');
+  if (!x || !y) return false;
+  return x === y || x.includes(y) || y.includes(x);
+}
+
 function droppedCouldBe(
   dropped: readonly { slug: string; name: string }[] | undefined,
   overrideKey: string,
   wantKey: string | null,
+  wantName: string | null,
 ): boolean {
   if (!dropped || dropped.length === 0) return false;
   return dropped.some((d) => {
     if (d.slug === overrideKey) return true;
     const dKey = studyDedupKey(d.name);
-    if (!dKey) return true; // unidentifiable casualty — cannot rule it out
-    return wantKey !== null && dKey === wantKey;
+    if (wantKey !== null && dKey === wantKey) return true;
+    // NAME, when the acronym key is unavailable. `studyDedupKey` returns null
+    // for 48 of the 126 published studies — "APBI-IMRT Florence", "NRG/RTOG
+    // 1005", "Tumour bed boost after BCS+WBRT (Dutch cohort)" — so a bare
+    // "keyless casualty blocks everything" rule fires on more than a third of
+    // drops, which is the date-global behaviour this function replaced, wearing
+    // a different hat.
+    //
+    // Names discriminate well where keys do not: over all 1128 pairs of distinct
+    // keyless published names, ZERO resemble each other under this comparison.
+    if (namesResemble(d.name, wantName)) return true;
+    // Nothing comparable on either side. Then it genuinely cannot be ruled out,
+    // and the destructive direction is the one to avoid.
+    return !dKey && !wantName;
   });
 }
 
@@ -625,7 +647,14 @@ export function applyOverrides(
         hits = []; // unparseable provenance → refuse to re-point at all
       } else if (wantSources.length > 0) {
         hits = (hits.length > 0 ? hits : studies).filter(provenanceHit);
-      } else if (droppedCouldBe(opts.droppedStudies, key, wantKey)) {
+      } else if (
+        droppedCouldBe(
+          opts.droppedStudies,
+          key,
+          wantKey,
+          idIsObject && typeof id.name === 'string' ? id.name : null,
+        )
+      ) {
         // LEGACY IDENTITY (nct/name, no source_ids) MAY NOT RE-POINT ACROSS A
         // PHASE 2 FAILURE.
         //
@@ -654,6 +683,13 @@ export function applyOverrides(
         // Refusing leaves the suppress unmatched, which build:day already
         // treats as fatal — loud and recoverable, versus silently deleting the
         // wrong card.
+        //
+        // Residual gap, stated rather than papered over: a target that was BOTH
+        // renamed and failed records its NEW name in meta.dropped, so neither
+        // the key nor the name matches what the override recorded, and the
+        // re-point is allowed. That needs a legacy identity, a keyless name, a
+        // rename, a Phase 2 failure and a same-NCT sibling all at once. Closing
+        // it wants provenance on meta.dropped, not a looser match here.
         hits = [];
       }
       if (hits.length === 1) {

@@ -36,7 +36,8 @@
 // For complex edits (bullets, tables, verdict), hand-edit the JSON file: each
 // key under "edits" is a study slug; provided fields replace the generated ones.
 // After any change: npm run build:day -- --date=<date> && npm run build
-import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import { writeFileAtomic } from '../src/lib/atomic-write.ts';
 import { resolve, dirname } from 'node:path';
 import {
   overridesPath,
@@ -65,7 +66,12 @@ function readOverrides(path: string): DigestOverrides {
 
 function writeOverrides(path: string, ov: DigestOverrides): void {
   if (!existsSync(dirname(path))) mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, JSON.stringify(ov, null, 2) + '\n');
+  // Atomic, for the same reason saveOverrides is: a torn sidecar fails
+  // JSON.parse, loadOverrides reads that as "no overrides", and every
+  // suppression on the date silently stops applying. This CLI is the curator's
+  // primary way to suppress a card, so it is the last writer that should have
+  // been left on a plain write.
+  writeFileAtomic(path, JSON.stringify(ov, null, 2) + '\n');
 }
 
 // v0.50: record WHAT the targeted study is, not just the slug it currently has.
