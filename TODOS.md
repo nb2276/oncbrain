@@ -109,6 +109,36 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
   as history; see the CHANGELOG. A FOURTH round has not been run against v0.57.0,
   and each of the three so far found regressions introduced by the previous one.
   **Priority: run round four before enabling the flag.**
+  WORKED BY HAND while blocked (v0.57.1-v0.57.4). All nine items on round four's
+  own question list were examined; findings shipped, clean verdicts recorded:
+    1. publish guard — FOUND 2: a withheld date reverted only its JSON, leaving
+       the rejected build's Obsidian twin staged (v0.57.1); a Phase 1 merge masked
+       by a new card passed both checks, since counts balance and the retired slug
+       looks like a rename — provenance now separates merge from rename (v0.57.2).
+    2. publish-regression `surviving` — CLEAN. It abstains on an ambiguous acronym
+       key by design; verified the publish boundary still catches that exact loss,
+       so the two layers cover each other.
+    3. `droppedCouldBe` — FOUND: the keyless fallback fired on 38% of drops
+       (48/126 published names yield no dedup key), re-creating the date-global
+       rule it replaced. Now name-discriminated (0 collisions across 1128 pairs).
+    4. destructive Telegram auth — CLEAN beyond v0.57.0's sender check; every
+       caller of executeDedupDrop is behind it, and `from.id` is server-set.
+    5. other unauthenticated gate inputs — CLEAN. The admin server binds
+       explicitly to 127.0.0.1.
+    6. other uncorroborated-NCT paths — CLEAN, and my instinct was WRONG here.
+       nct-coverage uses the card's curated `study.nct`; of 33 cards carrying an
+       NCT exactly one disagrees with its sources (RADIOSA), and there the card is
+       right and the paper misprints ORIOLE's registration. Re-deriving would be
+       worse. Verified the acronym-conflict veto still separates them.
+    7. cohort blocker — FOUND: it only caught cross-SITE splits. A within-site
+       biomarker/stage split now blocks too (v0.57.4).
+    8. atomic-write — FOUND 3 more non-atomic writers of the same two file
+       classes, including `npm run override` (v0.57.3). Now covered by an
+       invariant test rather than three point fixes.
+    9. the new prompt boundary — CLEAN. It constrains output shape; it grants the
+       source text no new capability.
+  A real round is still owed: hand-working a list is not an independent review,
+  and every previous round found things I would not have looked for.
   BLOCKED as of 2026-08-25: the codex usage limit is exhausted until 2026-08-30
   8:13 PM. Round four's prompt is written and ready to re-run — it lists the nine
   v0.56.0-v0.57.0 changes to read adversarially, which is where the last three
