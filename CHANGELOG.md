@@ -2,6 +2,79 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.56.0] - 2026-08-24
+
+A second adversarial gate round over the destructive path, run because the first
+one's findings 1 and 2 were lost to a capture error. It answered both its gate
+questions "yes" again and returned four findings, three of them able to remove a
+published card with `TRIAL_LINEAGE_AUTOSUPPRESS` OFF. All four are fixed here.
+
+### Fixed
+- **A partial rebuild published a deletion.** `buildDigest` survives a Phase 2
+  failure by design — it records the casualty in `meta.dropped` and ships what
+  succeeded, which is right for a FIRST build. On a REBUILD it silently
+  unpublished a live card: the artifact was overwritten without it,
+  `rebuild:queued` saw exit 0 and dequeued, `daily-build.sh` keeps rebuilt past
+  dates out of ANNOUNCE_DATES so no DM went out, and `catchall_document` turned
+  the dead permalink into a 200 home page rather than a 404. Every layer that
+  could have reported it stayed quiet. A rebuild that would lose an
+  already-published study now FAILS before the write (`publish-regression.ts`),
+  which the queue drain already handles: it retries, then dead-letters loudly.
+  Not hypothetical — the triggering flake (Phase 2 returning prose instead of
+  JSON) happened during an eval run in this same cycle.
+
+- **The destructive Telegram command had no authentication by default.**
+  `isChatAuthorized` treats an unset allowlist as accept-all. That is defensible
+  for INGESTION, where the worst case is queue junk a human reviews. It is not
+  defensible for `drop <date>/<slug>`, which unpublishes a live card with no
+  review using a slug printed on the public site — and `.env.example` documented
+  the bot token while omitting the allowlist, so a fresh setup was open to any
+  Telegram user who found the bot. Destructive commands now fail CLOSED via
+  `isDestructiveCommandAuthorized`: no allowlist means disabled, not permitted.
+  Refusals are logged and NOT replied to, since acknowledging confirms the bot
+  understood the command. `.env.example` now documents the key.
+
+- **A legacy suppress identity could migrate onto a sibling card.** An identity
+  with no `source_ids` matches on NCT and acronym key — exactly the fields an
+  efficacy card and its quality-of-life sibling SHARE. When the intended card
+  failed Phase 2, the NCT pass resolved to the surviving sibling and suppressed
+  that instead. Five committed sidecars are legacy-shaped today, all
+  suppressions. A legacy identity may still re-point across an ordinary rename
+  (what the mechanism is for) but not across a Phase 2 casualty, which is the
+  only signal that separates "renamed" from "vanished".
+
+- **A lone comparator NCT still satisfied registered identity.** v0.55.6 closed
+  the multi-NCT cue-bleed and left `if (distinct.length <= 1) return distinct`,
+  so a source citing exactly one NCT claimed it unconditionally. The exemption
+  rested on a stale measurement ("every one of the 15 NCT-bearing papers"). Over
+  all 35: 30 cite one NCT and 10 of those are UNCUED — including an ASTRO 2024
+  SBRT abstract whose only NCT is RTOG 9408's (NCT00002597, named as historical
+  context) and a hormone-duration paper whose only NCT is NRG GU006's
+  (NCT03371719). Both cards were carrying another trial's identity, which is the
+  evidence that authorises an automatic unpublish. Every registration must now be
+  cued. The cue list was widened to the phrasings the corpus actually uses
+  (singular "Clinicaltrial.gov", "Clinical trial information:", and the ﬁ
+  ligature `pdftotext` emits for "identifier"), which recovered three real
+  registrations; the eight wrong ones now abstain, and abstaining is the safe
+  direction.
+
+- **A published DOI was lowercased.** `normalizeDoi` is the single
+  canonicalization and it lowercases, correctly, for the `lower(doi)` dedup
+  index — but the Phase 2 parse ran the citation through it too, so NEJM's
+  "10.1056/NEJMoa2406909" published as "10.1056/nejmoa2406909". The regex
+  backstop already preserved casing, so the field's spelling depended on which
+  path filled it. `doiAsWritten` shares normalizeDoi's pipeline minus the
+  lowercasing; `doiSpellingIn` recovers the source spelling for a DOI read out of
+  the normalized column. Pre-existing since v0.55.0 on the parse path; v0.55.6's
+  column preference would have added a second route to it. Caught by the eval
+  judge (citation correctness 7.0 → 10.0).
+
+### Notes
+- `TRIAL_LINEAGE_AUTOSUPPRESS` remains **OFF**. Six findings from the first round
+  are still open (TODOS.md), and the flag should not be enabled until a gate
+  round comes back clean.
+- Eval: 8.4 PASS. Tests: 2403 across 119 files.
+
 ## [0.55.6] - 2026-08-24
 
 ### Fixed

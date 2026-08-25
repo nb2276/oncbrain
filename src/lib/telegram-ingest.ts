@@ -416,6 +416,26 @@ export function isChatAuthorized(
   return chatId != null && allowed.has(chatId);
 }
 
+// Authorization for a DESTRUCTIVE command (`drop <date>/<slug>`), which is a
+// stricter question than "may this chat ingest".
+//
+// isChatAuthorized treats an unset allowlist as "no policy => accept all". That
+// is a defensible default for INGESTION: the worst case is junk in the inbox
+// queue, which a human reviews before anything publishes. It is not defensible
+// for a command that unpublishes a live card with no review, using a slug
+// printed on the public site — and .env.example documents the bot token while
+// omitting the allowlist, so the shipped default was open.
+//
+// So: no allowlist configured means destructive commands are DISABLED, not
+// universally permitted. Only an explicitly listed chat may drop.
+export function isDestructiveCommandAuthorized(
+  chatId: number | null | undefined,
+  allowed: Set<number> | null,
+): boolean {
+  if (!allowed) return false; // unset policy is not permission
+  return chatId != null && allowed.has(chatId);
+}
+
 // The next Telegram getUpdates offset given which update ids failed to inbox.
 // The offset must NOT advance past the FIRST (lowest) failed update, so a
 // transient write failure (SQLITE_BUSY, disk full) re-fetches next run instead

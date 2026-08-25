@@ -328,3 +328,83 @@ describe('malformed identity entries fail closed', () => {
     expect(r.digest.sites[0].studies).toHaveLength(2);
   });
 });
+
+// A legacy identity (nct/name, no source_ids) cannot tell an efficacy card from
+// its quality-of-life sibling — NCT and acronym key are exactly what the two
+// SHARE. So the only question is why the recorded slug is missing, and the two
+// answers want opposite responses: renamed → re-point, vanished → refuse.
+//
+// Five committed sidecars are legacy-shaped today (2026-05-17 extend-trial /
+// radiosa-mfs-posthoc / rapchem, 2026-05-18 peace-2, 2026-05-31 enzarad), all
+// suppressions, so this is live data rather than a constructed case.
+describe('a legacy identity must not migrate onto a sibling card', () => {
+  const siblings = () =>
+    digest(
+      study('trialx-qol', 'Trial X quality of life', 'NCT01234567'),
+      study('unrelated', 'Something Else'),
+    );
+
+  it('REFUSES to re-point when a Phase 2 failure removed the intended card', () => {
+    // The curator retired Trial X's EFFICACY card. This run, that card's Phase 2
+    // call failed, so the only surviving Trial X card is the QoL one — which
+    // matches the legacy identity on NCT and name key alike. Re-pointing here
+    // unpublishes the wrong result.
+    const r = applyOverrides(
+      siblings(),
+      {
+        suppress: ['trialx-efficacy'],
+        identity: { 'trialx-efficacy': { nct: 'NCT01234567', name: 'Trial X' } },
+      },
+      { studyDropped: true },
+    );
+    expect(r.summary.suppressed).toEqual([]);
+    expect(r.summary.suppressMissing).toEqual(['trialx-efficacy']);
+    // The sibling is still standing — that is the whole point.
+    expect(r.digest.sites[0].studies.map((s) => s.slug)).toEqual(['trialx-qol', 'unrelated']);
+  });
+
+  it('still re-points on an ordinary rename, when nothing was dropped', () => {
+    // Same inputs, no casualty. A missing slug now means a rename, which is what
+    // the identity block exists for, so the default stays permissive.
+    const r = applyOverrides(siblings(), {
+      suppress: ['trialx'],
+      identity: { trialx: { nct: 'NCT01234567', name: 'Trial X' } },
+    });
+    expect(r.summary.suppressed).toEqual(['trialx-qol']);
+    expect(r.summary.resolvedRenames).toEqual(['trialx → trialx-qol']);
+  });
+
+  it('a live slug is unaffected by a drop elsewhere in the build', () => {
+    // The common path: the recorded slug is present, so nothing is inferred and
+    // the drop of some other study is irrelevant.
+    const r = applyOverrides(
+      siblings(),
+      { suppress: ['trialx-qol'], identity: { 'trialx-qol': { nct: 'NCT01234567', name: 'Trial X' } } },
+      { studyDropped: true },
+    );
+    expect(r.summary.suppressed).toEqual(['trialx-qol']);
+  });
+
+  // Provenance is the signal a legacy entry lacks. When it IS recorded the
+  // sibling ambiguity does not arise, so a drop must not make it stricter.
+  it('a provenance-bearing identity re-points across a drop', () => {
+    const withSrc = (slug: string, name: string, nct: string, ids: unknown[]) =>
+      ({ name, slug, nct, tldr: 't', details: [], tweet_ids: [], source_ids: ids }) as never;
+    const d = digest(
+      withSrc('trialx-renamed', 'Trial X', 'NCT01234567', [{ type: 'paper', id: 44 }]),
+      withSrc('trialx-qol', 'Trial X quality of life', 'NCT01234567', [{ type: 'paper', id: 43 }]),
+    );
+    const r = applyOverrides(
+      d,
+      {
+        suppress: ['trialx'],
+        identity: {
+          trialx: { nct: 'NCT01234567', name: 'Trial X', source_ids: [{ type: 'paper', id: 44 }] },
+        },
+      },
+      { studyDropped: true },
+    );
+    expect(r.summary.suppressed).toEqual(['trialx-renamed']);
+    expect(r.digest.sites[0].studies.map((s) => s.slug)).toEqual(['trialx-qol']);
+  });
+});

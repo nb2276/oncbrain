@@ -39,6 +39,25 @@ const TRAILING_PUBLISHER_TOKEN =
 // two surface forms (DOI then journal URL, journal URL then PDF, etc.).
 // Returns null if the input contains no recognizable DOI.
 export function normalizeDoi(input: string | null | undefined): string | null {
+  return extractCanonicalDoi(input, true);
+}
+
+// The same DOI, canonicalized in shape but spelled the way the source wrote it.
+//
+// normalizeDoi lowercases, which is correct for the `lower(doi)` dedup key and
+// wrong for a citation the reader sees: NEJM registers "10.1056/NEJMoa2406909"
+// and publishing "10.1056/nejmoa2406909" misquotes it. Both resolve — DOIs are
+// case-insensitive — but the digest's contract is that a quoted identifier is
+// reproduced verbatim, the same rule that governs effect sizes.
+//
+// Use this for anything a human reads. Use normalizeDoi for identity, dedup and
+// index lookups; that remains the single canonicalization, and this shares its
+// pipeline precisely so the two can never disagree about what counts as a DOI.
+export function doiAsWritten(input: string | null | undefined): string | null {
+  return extractCanonicalDoi(input, false);
+}
+
+function extractCanonicalDoi(input: string | null | undefined, lowercase: boolean): string | null {
   if (!input) return null;
   // Decode %2F-encoded slashes so a journal URL that escapes the DOI's
   // internal slash still matches the bare-DOI regex below. Targeted at
@@ -53,7 +72,8 @@ export function normalizeDoi(input: string | null | undefined): string | null {
   const stripped = m[1].replace(TRAILING_PUBLISHER_TOKEN, '');
   // Trim trailing punctuation that often rides along when a DOI is pasted
   // mid-sentence (".", ",", ")"), but keep legitimate DOI suffix chars.
-  return stripped.toLowerCase().replace(/[.,;)\]]+$/, '');
+  const trimmed = stripped.replace(/[.,;)\]]+$/, '');
+  return lowercase ? trimmed.toLowerCase() : trimmed;
 }
 
 // True when the string, on its own, IS a bare DOI (not embedded in prose).
@@ -74,4 +94,18 @@ export function extractDois(text: string | null | undefined): string[] {
     if (norm) out.add(norm);
   }
   return Array.from(out);
+}
+
+// How a given DOI is SPELLED in some source text, if it appears there at all.
+//
+// The papers.doi column is normalized (lowercased) because it backs the
+// `lower(doi)` unique index, so reading a citation straight out of it misquotes
+// any registrant code with capitals — NEJMoa, JCO, JAMA. The source text has the
+// real spelling; this finds it. Returns null when the DOI is not in the text,
+// which is normal for a paper ingested BY DOI that never repeats it in prose.
+export function doiSpellingIn(doi: string | null | undefined, text: string | null | undefined): string | null {
+  if (!doi || !text) return null;
+  const escaped = doi.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = text.match(new RegExp(escaped, 'i'));
+  return m ? doiAsWritten(m[0]) : null;
 }

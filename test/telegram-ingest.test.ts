@@ -13,6 +13,7 @@ import {
   TelegramApiError,
   parseAllowedChatIds,
   isChatAuthorized,
+  isDestructiveCommandAuthorized,
   computeNextTelegramOffset,
   type TelegramMessage,
 } from '../src/lib/telegram-ingest.ts';
@@ -536,6 +537,48 @@ describe('isChatAuthorized', () => {
     expect(isChatAuthorized(111, allow)).toBe(true);
     expect(isChatAuthorized(333, allow)).toBe(false);
     expect(isChatAuthorized(null, allow)).toBe(false);
+  });
+});
+
+// INGESTION AND DESTRUCTION ARE DIFFERENT QUESTIONS.
+//
+// isChatAuthorized treats an unset allowlist as accept-all, which is defensible
+// for ingestion: the worst case is junk in the inbox queue that a human sees
+// before anything publishes. `drop <date>/<slug>` unpublishes a live card with
+// no review, and every slug it needs is printed on the public site — so under
+// the shipped .env.example, which documented the bot token and not the
+// allowlist, any stranger who found the bot could unpublish any card.
+describe('isDestructiveCommandAuthorized', () => {
+  it('DENIES everyone when no allowlist is configured', () => {
+    // The one place where "no policy" must not mean "accept all".
+    expect(isDestructiveCommandAuthorized(123, null)).toBe(false);
+    expect(isDestructiveCommandAuthorized(null, null)).toBe(false);
+  });
+
+  it('denies everyone when the allowlist is set but empty', () => {
+    expect(isDestructiveCommandAuthorized(123, new Set())).toBe(false);
+  });
+
+  it('accepts only an explicitly listed chat', () => {
+    const allow = new Set([111, 222]);
+    expect(isDestructiveCommandAuthorized(111, allow)).toBe(true);
+    expect(isDestructiveCommandAuthorized(333, allow)).toBe(false);
+    expect(isDestructiveCommandAuthorized(null, allow)).toBe(false);
+  });
+
+  it('is strictly narrower than ingestion authorization', () => {
+    // The invariant worth stating directly: anything that may drop may also
+    // ingest, never the reverse.
+    for (const allowed of [null, new Set<number>(), new Set([111])]) {
+      for (const chat of [111, 333, null]) {
+        if (isDestructiveCommandAuthorized(chat, allowed)) {
+          expect(isChatAuthorized(chat, allowed)).toBe(true);
+        }
+      }
+    }
+    // And the specific gap that mattered.
+    expect(isChatAuthorized(999, null)).toBe(true);
+    expect(isDestructiveCommandAuthorized(999, null)).toBe(false);
   });
 });
 

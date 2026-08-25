@@ -49,6 +49,7 @@ import {
 } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
 import { markFigureSourcedDetails } from '../src/lib/source-tier.ts';
+import { lostPublishedStudies, publishRegressionMessage } from '../src/lib/publish-regression.ts';
 import {
   loadOverrides,
   applyOverrides,
@@ -772,7 +773,13 @@ export async function buildOneDate(
   // every rebuild (the LLM regenerates the digest from scratch each run).
   const overrides = loadOverrides(date, args.overridesDir);
   if (overrides) {
-    const applied = applyOverrides(digest, overrides, { digestDate: date });
+    const applied = applyOverrides(digest, overrides, {
+      digestDate: date,
+      // A Phase 2 casualty means a missing slug may be a VANISHED card rather
+      // than a renamed one, which changes how far a provenance-free identity
+      // can be trusted to re-point.
+      studyDropped: (digest.meta?.dropped ?? []).length > 0,
+    });
     digest = applied.digest;
     console.log(`  applied overrides: ${formatOverrideSummary(applied.summary)}`);
     // v0.49: an unmatched SUPPRESS is fatal, not a warning.
@@ -898,6 +905,20 @@ export async function buildOneDate(
   const liveSlugs = new Set(digest.sites.flatMap((site) => site.studies.map((x) => x.slug)));
   const aliases = retiredSlugs.filter((x) => !liveSlugs.has(x));
   const artifact = buildArtifact(date, confMeta, bookmarks, allPapers, slidesForDate, digest, crossDateIds, aliases);
+
+  // A REBUILD MUST NOT PUBLISH A DELETION. Overwriting the artifact is how a
+  // Phase 2 flake silently unpublishes an already-live card — see
+  // src/lib/publish-regression.ts for the full sequence and why nothing reports
+  // it. Fail before the write, so the published artifact survives intact.
+  const lostStudies = lostPublishedStudies({
+    published: readPublishedStudies(args, date),
+    dropped: droppedStudies,
+    intentionallyRemoved: new Set(overrides?.suppress ?? []),
+  });
+  if (lostStudies.length > 0) {
+    throw new Error(publishRegressionMessage(date, lostStudies));
+  }
+
   const paths = writeArtifact(args, artifact);
 
   // The successor is durable. Only now may the predecessor come down — see

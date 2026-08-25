@@ -35,6 +35,7 @@ import {
   unixToLocalDate,
   parseAllowedChatIds,
   isChatAuthorized,
+  isDestructiveCommandAuthorized,
   computeNextTelegramOffset,
 } from '../src/lib/telegram-ingest.ts';
 import { extractPaperUrls, tradePressOutletNames } from '../src/lib/paper-url.ts';
@@ -135,6 +136,7 @@ async function main() {
   let skippedNoTarget = 0;
   let skippedUnauthorized = 0;
   let dedupCommands = 0;
+  let refusedDrops = 0;
   // Update ids whose inbox write threw — used to hold the offset back so the
   // message re-fetches next run instead of being silently lost.
   const failedUpdateIds = new Set<number>();
@@ -163,6 +165,30 @@ async function main() {
     const dropCmd = parseDedupCommand(text);
     if (dropCmd) {
       if (args.sinceZero) continue; // don't replay drops on a history reset
+
+      // A DROP IS DESTRUCTIVE, SO IT FAILS CLOSED — an unset allowlist is not
+      // permission. Plain ingestion accepts every chat when
+      // TELEGRAM_ALLOWED_CHAT_IDS is unset (warned, and the worst case is junk
+      // in the inbox queue that a human sees before it publishes). `drop` is a
+      // different kind of act: it unpublishes a live card with no review, and
+      // every slug it needs is printed on the public site. Under the shipped
+      // .env.example — which documents the bot token and not the allowlist —
+      // any stranger who found the bot could unpublish any card by DMing
+      // "drop 2026-05-17/prime-trial".
+      //
+      // No reply on refusal: acknowledging the command confirms to an unknown
+      // sender that the bot understood it. The curator sees the log line.
+      if (!isDestructiveCommandAuthorized(chatId, allowedChatIds)) {
+        refusedDrops++;
+        console.warn(
+          `  ⚠ REFUSED drop ${dropCmd.date}/${dropCmd.slug} from chat ${chatId ?? 'unknown'} — ` +
+            (allowedChatIds
+              ? 'chat is not in TELEGRAM_ALLOWED_CHAT_IDS'
+              : 'TELEGRAM_ALLOWED_CHAT_IDS is unset, so destructive commands are disabled. ' +
+                'Set it (comma-separated numeric chat ids) in .env to enable `drop`.'),
+        );
+        continue;
+      }
       dedupCommands++;
       if (args.dryRun) {
         console.log(`  [dry-run] would drop: ${dropCmd.date}/${dropCmd.slug}`);
@@ -447,7 +473,7 @@ async function main() {
   }
 
   console.log(
-    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} unauthorized=${skippedUnauthorized} dedup-commands=${dedupCommands} next-offset=${nextOffset}`,
+    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} unauthorized=${skippedUnauthorized} dedup-commands=${dedupCommands} refused-drops=${refusedDrops} next-offset=${nextOffset}`,
   );
   console.log(`Next: \`npm run enrich:inbox\` to enrich pending items, then \`npm run build:day\`.`);
 }

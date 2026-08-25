@@ -98,7 +98,14 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 ## Trial lineage (v0.53 follow-ups)
 
-- **Nine open findings from the v0.55.6 gate round.** **Priority: P1.** The
+- **A SECOND gate round (v0.56.0) again answered both questions "yes".** Its own
+  four findings are fixed in v0.56.0 — three of them could remove a published card
+  with the flag OFF (partial-rebuild deletion, unauthenticated `drop`, legacy
+  identity migrating onto a sibling), and the fourth was a hole left in v0.55.6's
+  own fix (a lone comparator NCT satisfying registered identity). The lesson worth
+  keeping: two of the four were regressions introduced by the previous round's
+  fixes, so each round needs its own round.
+- **Six open findings from the FIRST gate round.** **Priority: P1.** The
   pre-enable adversarial round returned 11 findings over the destructive path and
   answered both gate questions "yes": with the flag ON cards can still be wrongly
   unpublished, and system-wide a partial rebuild can remove a published card with
@@ -114,8 +121,9 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
   can say "unless you drop one" with no authorized token visible;
   #11 artifact and override writes are neither atomic nor fsynced, and a torn
   sidecar can poison `rebuild:queued` for three nightly drains.
-  Findings #1 and #2 were LOST — the capture piped codex through `tail -50`.
-  Re-run the round to recover them. (v0.55.6 gate round)
+  Findings #1 and #2 were lost to a capture error and were NOT recovered: the
+  v0.56.0 re-run derived its own set against the newer HEAD rather than
+  reproducing the old numbering, so those two remain unknown. (v0.55.6 gate round)
 - **Re-run the destructive path through review before enabling the flag.**
   **Priority: P1 (gate).** Both blocking items are now closed — transactional
   suppression (v0.55.4) and own-registration corroboration (v0.55.5). What remains
