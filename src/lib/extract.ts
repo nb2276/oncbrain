@@ -191,18 +191,36 @@ export function ownRegistrations(text: string | null | undefined): string[] {
   const distinct = [...new Set(hits.map((h) => h.id.toUpperCase()))];
   if (distinct.length <= 1) return distinct;
 
-  const cued = new Set<string>();
+  // A CUE GOVERNS THE FIRST NCT AFTER IT, NOT EVERY NCT NEARBY.
+  //
+  // Each id used to scan its own preceding window independently, so a cue bled
+  // forward across an intervening registration:
+  //
+  //   "Trial registration: NCT11111111; comparator NCT22222222"
+  //
+  // returned BOTH, and the comparator then satisfied registered identity — the
+  // exact failure this function exists to prevent. The lookback now stops at the
+  // end of the previous NCT: whatever sits before that one is that one's
+  // context, and a comparator introduced afterwards has to earn its own cue.
+  const upper = text.toUpperCase();
+  const positions: { id: string; at: number }[] = [];
   for (const id of distinct) {
     let from = 0;
     for (;;) {
-      const i = text.toUpperCase().indexOf(id, from);
+      const i = upper.indexOf(id, from);
       if (i < 0) break;
-      if (REGISTRATION_CUE.test(text.slice(Math.max(0, i - CUE_WINDOW), i))) {
-        cued.add(id);
-        break;
-      }
-      from = i + 1;
+      positions.push({ id, at: i });
+      from = i + id.length;
     }
+  }
+  positions.sort((a, b) => a.at - b.at);
+
+  const cued = new Set<string>();
+  let previousEnd = 0;
+  for (const { id, at } of positions) {
+    const start = Math.max(0, at - CUE_WINDOW, previousEnd);
+    if (REGISTRATION_CUE.test(text.slice(start, at))) cued.add(id);
+    previousEnd = at + id.length;
   }
   return [...cued];
 }

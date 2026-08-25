@@ -1208,27 +1208,50 @@ export async function buildDigest(
   // measurement cannot see is a protection you cannot claim.
   //
   // Every caller now gets both: the eval, build:day, and the rebuild drain.
-  const groundingText = new Map<number, string>();
+  // KEYED BY TYPE **AND** ID. Papers, bookmarks and slide_uploads are separate
+  // tables with independent autoincrement ids, so paper 1, tweet 1 and slide 1
+  // all exist and a numeric-only key aliases them: a tweet-sourced study was
+  // handed a paper's text, which both withholds grounded prose and passes
+  // ungrounded prose. syntheticIdToSourceRef already returns {type, id} — the
+  // type was there all along and this dropped it.
+  const groundKey = (type: string, id: number): string => `${type}:${id}`;
+  const groundingText = new Map<string, string>();
   for (const it of items) {
-    const id = it.id;
+    const type = it.source_type ?? 'tweet';
     if (it.source_type === 'paper') {
       groundingText.set(
-        id,
-        [it.title, it.abstract ?? '', it.fulltext_excerpt_md ?? '', it.figure_ocr_md ?? '']
+        groundKey(type, it.id),
+        [
+          it.title,
+          it.abstract ?? '',
+          it.fulltext_excerpt_md ?? '',
+          // Both figure surfaces, structured preferred, matching what the
+          // study agent was actually given. The move from digest-builder
+          // dropped figure_structured_md, so a number read only from a
+          // structured figure looked ungrounded.
+          it.figure_structured_md ?? '',
+          it.figure_ocr_md ?? '',
+        ]
           .filter(Boolean)
           .join('\n'),
       );
     } else if (it.source_type === 'slide') {
-      groundingText.set(id, it.ocr_text ?? '');
+      groundingText.set(groundKey(type, it.id), it.ocr_text ?? '');
     } else {
-      groundingText.set(id, [it.text, ...(it.image_ocr_texts ?? [])].filter(Boolean).join('\n'));
+      groundingText.set(
+        groundKey(type, it.id),
+        [it.text, ...(it.image_ocr_texts ?? [])].filter(Boolean).join('\n'),
+      );
     }
   }
   const withheld: GroundingWithhold[] = [];
   for (const site of sitesWithSourceIds) {
     for (const study of site.studies) {
       const src = study.tweet_ids
-        .map((tid) => groundingText.get(syntheticIdToSourceRef(tid).id) ?? '')
+        .map((tid) => {
+          const ref = syntheticIdToSourceRef(tid);
+          return groundingText.get(groundKey(ref.type, ref.id)) ?? '';
+        })
         .filter(Boolean)
         .join('\n');
       if (!src.trim()) continue;
@@ -1241,9 +1264,24 @@ export async function buildDigest(
       }
       // Recover a citation the summariser dropped: exactly one DOI in the
       // sources, and none on the study, means the identifier is unambiguous.
+      //
+      // A paper row's OWN `doi` column is authoritative and outranks the text
+      // scan — a paper ingested by DOI carries it as a field and may never
+      // repeat it in the title or abstract, so a text-only search left the card
+      // with doi:null while the identifier sat right there on the source. The
+      // v0.54 version in digest-builder consulted it; the move to buildDigest
+      // dropped that and searched prose alone.
       if (!study.doi && study.content_type !== 'review') {
-        const recovered = soleDoiIn(src);
-        if (recovered) study.doi = recovered;
+        const ownDois = new Set<string>();
+        for (const tid of study.tweet_ids) {
+          const ref = syntheticIdToSourceRef(tid);
+          if (ref.type !== 'paper') continue;
+          const item = items.find((i) => i.source_type === 'paper' && i.id === ref.id);
+          const d = (item as { doi?: string | null } | undefined)?.doi;
+          if (typeof d === 'string' && d.trim()) ownDois.add(d.trim());
+        }
+        study.doi =
+          ownDois.size === 1 ? [...ownDois][0]! : (soleDoiIn(src) ?? null);
       }
     }
   }
