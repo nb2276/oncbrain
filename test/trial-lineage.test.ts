@@ -661,3 +661,77 @@ describe('cohort blocker', () => {
     expect(primaryBlocker(bs)!.code).toBe('cohort');
   });
 });
+
+// Disease site catches a basket trial's breast and lung cohorts. It does NOT
+// catch two cohorts of one site that differ by biomarker or stage, which is the
+// same failure one level down.
+//
+// Evidence, stated honestly: the corpus holds exactly ONE cross-date same-NCT
+// pair, so it cannot show this guard is needed. It can show what the guard costs
+// — zero, it fires on none of the published pairs — and that is why it is here.
+describe('population blocker', () => {
+  const report = (over: Record<string, unknown> = {}) =>
+    ({
+      date: '2026-08-14',
+      slug: 's',
+      name: 'BASKET-1',
+      ncts: ['NCT01234567'],
+      acronyms: ['BASKET1'],
+      facet: 'primary-efficacy',
+      maturity: 'full-publication',
+      followup_months: 30,
+      disease_site: 'breast',
+      endpoint: 'ORR',
+      stat_value: 'ORR 61%',
+      stat_detail: null,
+      ...over,
+    }) as never;
+
+  it('blocks two cohorts of ONE site that state contradictory biomarkers', () => {
+    const bs = suppressionBlockers(
+      report({ name: 'BASKET-1 HER2-low cohort', followup_months: 30 }),
+      report({ date: '2026-07-08', slug: 'p', name: 'BASKET-1 HER2-positive cohort', followup_months: 24 }),
+      true,
+    );
+    expect(bs.map((b) => b.code)).toContain('population');
+  });
+
+  it('blocks a nodal-status split', () => {
+    const bs = suppressionBlockers(
+      report({ name: 'TRIAL-X node-negative cohort', followup_months: 30 }),
+      report({ date: '2026-07-08', slug: 'p', name: 'TRIAL-X node-positive cohort', followup_months: 24 }),
+      true,
+    );
+    expect(bs.map((b) => b.code)).toContain('population');
+  });
+
+  it('does NOT block the ordinary same-population update', () => {
+    const bs = suppressionBlockers(
+      report({ name: 'BASKET-1 HER2-low cohort', followup_months: 60 }),
+      report({ date: '2026-07-08', slug: 'p', name: 'BASKET-1 HER2-low cohort', followup_months: 24 }),
+      true,
+    );
+    expect(bs).toEqual([]);
+  });
+
+  it('inherits the deliberate hormone-sensitivity exception', () => {
+    // mCRPC vs mCSPC is NOT an axis — TALAPRO-2 is TALAPRO-3's sibling readout,
+    // and losing that is worse than the imprecision it prevents. This path must
+    // not reintroduce it by the back door.
+    const bs = suppressionBlockers(
+      report({ name: 'TALAPRO in mCRPC', disease_site: 'prostate', followup_months: 30 }),
+      report({ date: '2026-07-08', slug: 'p', name: 'TALAPRO in mCSPC', disease_site: 'prostate', followup_months: 24 }),
+      true,
+    );
+    expect(bs.map((b) => b.code)).not.toContain('population');
+  });
+
+  it('is evidence, not an identity gap, so no drop token is offered', () => {
+    const bs = suppressionBlockers(
+      report({ name: 'BASKET-1 HER2-low cohort', followup_months: 30 }),
+      report({ date: '2026-07-08', slug: 'p', name: 'BASKET-1 HER2-positive cohort', followup_months: 24 }),
+      true,
+    );
+    expect(isIdentityOnly(bs)).toBe(false);
+  });
+});
