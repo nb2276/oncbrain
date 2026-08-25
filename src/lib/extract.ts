@@ -157,11 +157,31 @@ export function soleDoiIn(text: string | null | undefined): string | null {
 }
 
 // Registration cues: the words a paper uses when stating its OWN trial number,
-// as opposed to citing someone else's. Measured across the corpus, these are
-// what actually precede an NCT: "ClinicalTrials.gov" (12), "identifier" (7),
-// "registered" (4), "number" (1).
+// as opposed to citing someone else's. Re-measured over all 35 NCT-bearing
+// sources in the corpus (the earlier count of 15 was stale): the phrasings that
+// actually precede a source's own registration are "ClinicalTrials.gov" — with
+// the trailing `s` genuinely optional in the wild ("Clinicaltrial.gov ID:") —
+// "identifier", "registered", "number", and "Clinical trial information:",
+// which JCO-family abstracts use and the first list missed.
 const REGISTRATION_CUE =
-  /(?:trial\s+registration|registered|registration|clinicaltrials\.gov|ct\.gov|identifier|registry|nct\s*(?:number|no\.?|id))/i;
+  /(?:trial\s+registration|clinical\s+trial\s+(?:information|registration)|registered|registration|clinicaltrials?\.gov|ct\.gov|identifier|registry|nct\s*(?:number|no\.?|id))/i;
+
+// PDF text layers carry typographic ligatures, so `pdftotext` yields "identiﬁer"
+// (U+FB01) where the cue list has "identifier". That single codepoint silently
+// cost a real registration its cue, so fold the ligatures before matching.
+const LIGATURES: [RegExp, string][] = [
+  [/ﬀ/g, 'ff'],
+  [/ﬁ/g, 'fi'],
+  [/ﬂ/g, 'fl'],
+  [/ﬃ/g, 'ffi'],
+  [/ﬄ/g, 'ffl'],
+];
+
+function foldLigatures(s: string): string {
+  let out = s;
+  for (const [re, to] of LIGATURES) out = out.replace(re, to);
+  return out;
+}
 
 // How far before an NCT a cue still governs it. Covers "Trial registration:
 // ClinicalTrials.gov NCT03367702" and "registered at ClinicalTrials.gov (NCT...)".
@@ -176,20 +196,27 @@ const CUE_WINDOW = 60;
  * otherwise put that trial's identity onto this card and let a later paper about
  * the comparator supersede it.
  *
- * Three cases, in order:
- *   1. Exactly one distinct NCT — nothing to confuse it with. This is every one
- *      of the 15 NCT-bearing papers in the corpus today, so the stricter rules
- *      below cost nothing now and exist for the day a source cites two.
- *   2. Several, some with a registration cue — take the cued ones.
- *   3. Several, none cued — ABSTAIN. Guessing which is the subject's own is how
- *      a comparator's identity gets adopted, and identity is exactly the thing
- *      this must not get wrong.
+ * EVERY returned registration must be CUED. There is no exemption for a source
+ * that cites exactly one NCT.
+ *
+ * That exemption used to exist, on the measured claim that a lone NCT is always
+ * the source's own. Re-measuring killed it: of 30 single-NCT sources in the
+ * corpus, 10 are uncued, and several of those are unambiguously someone else's
+ * trial — an ASTRO 2024 SBRT abstract naming RTOG 9408 (NCT00002597) as
+ * historical context, a hormone-duration paper naming NRG GU006 (NCT03371719),
+ * two pancreatic papers whose only NCT sits in a disclosures block and belongs
+ * to a cited article. Each of those cards was carrying another trial's identity,
+ * which is precisely the evidence that authorises an automatic unpublish.
+ *
+ * So: a cue governs the FIRST registration after it, and anything uncited by a
+ * cue is not claimed. Abstaining is the safe direction — no identity means no
+ * supersession, whereas a wrong identity means the wrong card comes down.
  */
 export function ownRegistrations(text: string | null | undefined): string[] {
   if (!text) return [];
   const hits = extractCitations(text).filter((c) => c.kind === 'nct');
   const distinct = [...new Set(hits.map((h) => h.id.toUpperCase()))];
-  if (distinct.length <= 1) return distinct;
+  if (distinct.length === 0) return [];
 
   // A CUE GOVERNS THE FIRST NCT AFTER IT, NOT EVERY NCT NEARBY.
   //
@@ -219,7 +246,7 @@ export function ownRegistrations(text: string | null | undefined): string[] {
   let previousEnd = 0;
   for (const { id, at } of positions) {
     const start = Math.max(0, at - CUE_WINDOW, previousEnd);
-    if (REGISTRATION_CUE.test(text.slice(start, at))) cued.add(id);
+    if (REGISTRATION_CUE.test(foldLigatures(text.slice(start, at)))) cued.add(id);
     previousEnd = at + id.length;
   }
   return [...cued];

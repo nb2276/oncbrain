@@ -27,7 +27,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
-import { normalizeDoi } from './doi.ts';
+import { normalizeDoi, doiAsWritten, doiSpellingIn } from './doi.ts';
 import { soleDoiIn } from './extract.ts';
 import {
   withholdUngroundedComparators,
@@ -1280,8 +1280,13 @@ export async function buildDigest(
           const d = (item as { doi?: string | null } | undefined)?.doi;
           if (typeof d === 'string' && d.trim()) ownDois.add(d.trim());
         }
-        study.doi =
-          ownDois.size === 1 ? [...ownDois][0]! : (soleDoiIn(src) ?? null);
+        // The column is authoritative for WHICH DOI, the source text for how it
+        // is SPELLED — papers.doi is lowercased to back the `lower(doi)` index,
+        // and publishing that misquotes any capitalised registrant code.
+        const own = ownDois.size === 1 ? [...ownDois][0]! : null;
+        study.doi = own
+          ? (doiSpellingIn(own, src) ?? doiAsWritten(own))
+          : (soleDoiIn(src) ?? null);
       }
     }
   }
@@ -1901,9 +1906,14 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
       : nctRaw && /^\d{8}$/.test(nctRaw)
         ? `NCT${nctRaw}`
         : null;
-  // normalizeDoi is the single canonicalisation in the codebase (strips a
-  // doi: prefix or a doi.org URL, lowercases); anything it rejects is null.
-  const doi = typeof root.doi === 'string' ? normalizeDoi(root.doi) : null;
+  // CANONICAL SHAPE, SOURCE SPELLING. normalizeDoi is still the single
+  // canonicalisation for identity and dedup, but it lowercases — so routing the
+  // published citation through it turned NEJM's "10.1056/NEJMoa2406909" into
+  // "10.1056/nejmoa2406909". The regex-backstop path (soleDoiIn) already
+  // preserved casing, so the field's spelling depended on WHICH path filled it.
+  // doiAsWritten shares normalizeDoi's pipeline minus the lowercasing, so the
+  // two agree on what a DOI is and differ only where they should.
+  const doi = typeof root.doi === 'string' ? doiAsWritten(root.doi) : null;
   // v0.10: a `figures` array, each {url, caption}. v0.4 back-compat: a model
   // that still emits the single key_figure_url/caption pair is wrapped into a
   // one-element array. URLs are deduped (a model may cite the same image twice)

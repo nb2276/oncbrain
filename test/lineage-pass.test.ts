@@ -63,7 +63,7 @@ describe('lineage-pass', () => {
       const id = seedPaper({
         doi: '10.1000/a',
         title: 'SBRT vs MH-IMRT',
-        abstract: 'NRG-GU005 randomised NCT03367702 patients.',
+        abstract: 'NRG-GU005 randomised 400 patients. Trial registration: NCT03367702.',
         acronyms: ['NRG-GU005'],
       });
       const f = sourceFacts(db, [{ type: 'paper', id }]);
@@ -117,7 +117,7 @@ describe('lineage-pass', () => {
 
   describe('toTrialReport', () => {
     it('merges the card’s own nct with those its sources carry', () => {
-      const id = seedPaper({ doi: '10.1000/a', title: 'T', abstract: 'NCT03367702' });
+      const id = seedPaper({ doi: '10.1000/a', title: 'T', abstract: 'Trial registration: NCT03367702' });
       const r = toTrialReport(db, '2026-08-14', 'prostate', {
         slug: 's',
         name: 'NRG-GU005',
@@ -156,7 +156,7 @@ describe('lineage-pass', () => {
       const currentSrc = seedPaper({
         doi: '10.1001/jama.2026.12627',
         title: 'Stereotactic Body Radiotherapy vs Moderately Hypofractionated IMRT',
-        abstract: 'NRG-GU005 ... NCT03367702',
+        abstract: 'NRG-GU005 ... Trial registration: NCT03367702',
         date: '2026-08-14',
         maturity: 'full-publication',
         acronyms: ['NRG-GU005'],
@@ -209,7 +209,7 @@ describe('lineage-pass', () => {
       const currentSrc = seedPaper({
         doi: '10.1001/jama.2026.12627',
         title: 'Stereotactic Body Radiotherapy vs Moderately Hypofractionated IMRT',
-        abstract: 'NRG-GU005 ... NCT03367702',
+        abstract: 'NRG-GU005 ... Trial registration: NCT03367702',
         date: '2026-08-14',
         maturity: 'full-publication',
         acronyms: ['NRG-GU005'],
@@ -261,13 +261,13 @@ describe('lineage-pass', () => {
       const priorSrc = seedPaper({
         doi: '10.1000/astro',
         title: 'ASTRO 2025: NRG-GU005',
-        abstract: 'NCT03367702',
+        abstract: 'Trial registration: NCT03367702',
         maturity: 'conference-abstract',
       });
       const currentSrc = seedPaper({
         doi: '10.1001/jama.2026.12627',
         title: 'NRG-GU005 full report',
-        abstract: 'NCT03367702',
+        abstract: 'Trial registration: NCT03367702',
         date: '2026-08-14',
         maturity: 'full-publication',
       });
@@ -557,10 +557,10 @@ describe('lineage-pass destructive guards', () => {
 
   it('REFUSES to empty a date when TWO of its cards are superseded in one build', () => {
     // Each check alone sees one survivor; together they take the date to zero.
-    const pa = seed('10.1000/pa', 'TRIALA', { abstract: 'NCT00000001' });
-    const pb = seed('10.1000/pb', 'TRIALB', { abstract: 'NCT00000002' });
-    const ca = seed('10.1000/ca', 'TRIALA', { date: '2026-08-14', maturity: 'full-publication', abstract: 'NCT00000001' });
-    const cb = seed('10.1000/cb', 'TRIALB', { date: '2026-08-14', maturity: 'full-publication', abstract: 'NCT00000002' });
+    const pa = seed('10.1000/pa', 'TRIALA', { abstract: 'Trial registration: NCT00000001' });
+    const pb = seed('10.1000/pb', 'TRIALB', { abstract: 'Trial registration: NCT00000002' });
+    const ca = seed('10.1000/ca', 'TRIALA', { date: '2026-08-14', maturity: 'full-publication', abstract: 'Trial registration: NCT00000001' });
+    const cb = seed('10.1000/cb', 'TRIALB', { date: '2026-08-14', maturity: 'full-publication', abstract: 'Trial registration: NCT00000002' });
 
     const priors = [
       artifact('2026-07-08', [
@@ -580,8 +580,8 @@ describe('lineage-pass destructive guards', () => {
   });
 
   it('counts a date’s EXISTING override toward the empty-day guard', () => {
-    const pa = seed('10.1000/pa', 'TRIALA', { abstract: 'NCT00000001' });
-    const ca = seed('10.1000/ca', 'TRIALA', { date: '2026-08-14', maturity: 'full-publication', abstract: 'NCT00000001' });
+    const pa = seed('10.1000/pa', 'TRIALA', { abstract: 'Trial registration: NCT00000001' });
+    const ca = seed('10.1000/ca', 'TRIALA', { date: '2026-08-14', maturity: 'full-publication', abstract: 'Trial registration: NCT00000001' });
     const priors = [
       artifact('2026-07-08', [
         { slug: 'a', name: 'TRIALA', primary_endpoint: { name: 'Overall survival', stat_value: 'HR 0.62', stat_detail: null }, source_ids: [{ type: 'paper', id: pa }] },
@@ -656,7 +656,7 @@ describe('a multi-paper prior is never auto-suppressed', () => {
   });
 
   const paper = (doi: string, title: string, date = '2026-07-08'): number => {
-    const r = savePaper(db4, { doi, title, abstract: 'NCT00000001', bookmark_date: date });
+    const r = savePaper(db4, { doi, title, abstract: 'Trial registration: NCT00000001', bookmark_date: date });
     saveSourceFacet(db4, 'paper', r.id, {
       facet: 'primary-efficacy',
       maturity: date === '2026-07-08' ? 'conference-abstract' : 'full-publication',
@@ -717,7 +717,7 @@ describe('an ambiguous CURRENT card is also never allowed to suppress', () => {
   });
   const EP = { name: 'Overall survival', stat_value: 'HR 0.62', stat_detail: null };
   const mk = (doi: string, date: string, maturity: string): number => {
-    const r = savePaper(db5, { doi, title: 'TRIALX', abstract: 'NCT00000001', bookmark_date: date });
+    const r = savePaper(db5, { doi, title: 'TRIALX', abstract: 'Trial registration: NCT00000001', bookmark_date: date });
     saveSourceFacet(db5, 'paper', r.id, {
       facet: 'primary-efficacy', maturity, followup_months: 24, trial_acronyms: [],
     });
@@ -756,7 +756,7 @@ describe('auto-suppress is default OFF', () => {
   });
   const EP = { name: 'Overall survival', stat_value: 'HR 0.62', stat_detail: null };
   const mk = (doi: string, date: string, maturity: string): number => {
-    const r = savePaper(db6, { doi, title: 'TRIALX', abstract: 'NCT00000001', bookmark_date: date });
+    const r = savePaper(db6, { doi, title: 'TRIALX', abstract: 'Trial registration: NCT00000001', bookmark_date: date });
     saveSourceFacet(db6, 'paper', r.id, {
       facet: 'primary-efficacy', maturity, followup_months: 24, trial_acronyms: [],
     });
@@ -856,11 +856,28 @@ describe('sourceFacts takes only a source’s OWN registration', () => {
     expect(sourceFacts(db7, [{ type: 'paper', id: r.id }]).ncts).toEqual([]);
   });
 
-  it('still takes a lone registration, which is the corpus norm', () => {
+  // A LONE NCT IS NOT SELF-EVIDENTLY THE SOURCE'S OWN. This asserted the
+  // opposite until the corpus was re-measured: of 30 single-NCT sources, 10 are
+  // uncued, and among those an ASTRO SBRT abstract naming RTOG 9408
+  // (NCT00002597) and a hormone-duration paper naming NRG GU006 (NCT03371719)
+  // were each claiming another trial's registration — the exact evidence that
+  // authorises an automatic unpublish. The exemption was the bug, and this test
+  // was defending it.
+  it('abstains on a lone registration that carries no cue', () => {
     const r = savePaper(db7, {
       doi: '10.1000/lone',
       title: 'NRG-GU005',
       abstract: 'Randomised trial. NCT03367702.',
+      bookmark_date: '2026-08-14',
+    });
+    expect(sourceFacts(db7, [{ type: 'paper', id: r.id }]).ncts).toEqual([]);
+  });
+
+  it('takes a lone registration once it IS cued', () => {
+    const r = savePaper(db7, {
+      doi: '10.1000/lonecued',
+      title: 'NRG-GU005',
+      abstract: 'Randomised trial. Trial registration: NCT03367702.',
       bookmark_date: '2026-08-14',
     });
     expect(sourceFacts(db7, [{ type: 'paper', id: r.id }]).ncts).toEqual(['NCT03367702']);

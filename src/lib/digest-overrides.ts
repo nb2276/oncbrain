@@ -445,10 +445,15 @@ function applyRelatedTrialsOverride(
 // orchestrator output. Callers building production artifacts should pass
 // the date; tests and callers that don't care about determinism may omit
 // it (and get an ISO wall-clock value).
+//
+// `opts.studyDropped` says a Phase 2 call FAILED this run, so a card the date
+// normally carries is absent for a reason that has nothing to do with the
+// curator. It narrows how far a legacy (provenance-free) identity is trusted —
+// see the re-point rules in reindex.
 export function applyOverrides(
   digest: DigestOutput,
   overrides: DigestOverrides,
-  opts: { digestDate?: string } = {},
+  opts: { digestDate?: string; studyDropped?: boolean } = {},
 ): { digest: DigestOutput; summary: OverrideSummary } {
   const suppress = new Set(overrides.suppress ?? []);
   const edits = overrides.edits ?? {};
@@ -586,6 +591,33 @@ export function applyOverrides(
         hits = []; // unparseable provenance → refuse to re-point at all
       } else if (wantSources.length > 0) {
         hits = (hits.length > 0 ? hits : studies).filter(provenanceHit);
+      } else if (opts.studyDropped) {
+        // LEGACY IDENTITY (nct/name, no source_ids) MAY NOT RE-POINT ACROSS A
+        // PHASE 2 FAILURE.
+        //
+        // Provenance is the only signal that separates two cards of ONE trial,
+        // and a legacy entry has none: NCT and acronym key are exactly the
+        // fields an efficacy card and its quality-of-life sibling SHARE. So the
+        // question is only ever "why is the recorded slug missing", and there
+        // are two answers with opposite correct responses:
+        //
+        //   renamed  → re-point. This is what the identity block exists for and
+        //              the overwhelmingly common case, so it stays the default.
+        //   vanished → REFUSE. If Phase 2 failed on the card the override was
+        //              written against, the NCT/name passes will resolve to its
+        //              surviving sibling and suppress that instead — the curator
+        //              retires the efficacy card and the QoL card comes down.
+        //
+        // `studyDropped` is what tells them apart, and it is the only signal
+        // available: a rename leaves no casualty, a failure records one in
+        // meta.dropped. Five committed sidecars are legacy-shaped today
+        // (2026-05-17 extend-trial / radiosa-mfs-posthoc / rapchem, 2026-05-18
+        // peace-2, 2026-05-31 enzarad), all suppressions, so this is live data.
+        //
+        // Refusing leaves the suppress unmatched, which build:day already
+        // treats as fatal — loud and recoverable, versus silently deleting the
+        // wrong card.
+        hits = [];
       }
       if (hits.length === 1) {
         const to = slugOf(hits[0]);
