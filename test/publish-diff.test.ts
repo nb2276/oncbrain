@@ -15,6 +15,26 @@ const artifact = (studies: Array<[string, string]>, aliases: string[] = []) => (
   slug_aliases: aliases,
 });
 
+// With provenance, for the merge-vs-rename cases. A merged card carries BOTH
+// originals' source_ids; a renamed one carries only its own.
+const withSources = (
+  studies: Array<[string, string, number[]]>,
+  aliases: string[] = [],
+) => ({
+  digest: {
+    sites: [
+      {
+        studies: studies.map(([slug, name, ids]) => ({
+          slug,
+          name,
+          source_ids: ids.map((id) => ({ type: 'paper', id })),
+        })),
+      },
+    ],
+  },
+  slug_aliases: aliases,
+});
+
 describe('studiesLostInPublish', () => {
   it('passes an unchanged publish', () => {
     const a = artifact([['alpha', 'ALPHA'], ['bravo', 'BRAVO']]);
@@ -101,5 +121,91 @@ describe('studiesLostInPublish', () => {
     const msg = describePublishDiff('2026-07-08', d);
     expect(msg).toContain('BRAVO');
     expect(msg).toContain('CHARLIE');
+  });
+});
+
+// THE COUNT CHECK ONLY CATCHES A MERGE WHEN NOTHING ELSE CHANGED.
+//
+// Add one new study the same night and the arithmetic balances: two cards became
+// one, one card appeared, total unchanged — while the retired slug sits in
+// slug_aliases looking like an ordinary rename. From slugs and counts alone a
+// merge and a rename are genuinely indistinguishable. Provenance is what tells
+// them apart, and every study in the corpus records it.
+describe('a merge masked by a new card', () => {
+  it('is caught by provenance when counts and slugs both balance', () => {
+    const d = studiesLostInPublish({
+      baseline: withSources([['alpha', 'ALPHA', [1]], ['bravo', 'BRAVO', [2]]]),
+      incoming: withSources([['alpha', 'ALPHA + BRAVO', [1, 2]], ['charlie', 'CHARLIE', [3]]], ['bravo']),
+    });
+    expect(d.lost).toEqual([]); // slug is aliased
+    expect(d.countShortfall).toBe(0); // arithmetic balances
+    expect(d.merged.map((m) => m.slug)).toEqual(['bravo']); // provenance does not
+    expect(publishRemovesContent(d)).toBe(true);
+  });
+
+  it('does NOT fire on a legitimate rename alongside a new card', () => {
+    const d = studiesLostInPublish({
+      baseline: withSources([['old-slug', 'PRESTIGE-PSMA', [1]]]),
+      incoming: withSources([['new-slug', 'PRESTIGE-PSMA primary', [1]], ['c', 'CHARLIE', [3]]], ['old-slug']),
+    });
+    expect(publishRemovesContent(d)).toBe(false);
+  });
+
+  it('does not report the card that SURVIVED the merge', () => {
+    // alpha kept its slug and is still on the page; only bravo was swallowed.
+    const d = studiesLostInPublish({
+      baseline: withSources([['alpha', 'ALPHA', [1]], ['bravo', 'BRAVO', [2]]]),
+      incoming: withSources([['alpha', 'ALPHA + BRAVO', [1, 2]]], ['bravo']),
+    });
+    expect(d.merged.map((m) => m.slug)).toEqual(['bravo']);
+  });
+
+  it('abstains when provenance is absent, rather than guessing', () => {
+    // Older artifacts may predate source_ids; a guard that cannot read its input
+    // must not become a permanent outage.
+    const d = studiesLostInPublish({
+      baseline: artifact([['alpha', 'ALPHA'], ['bravo', 'BRAVO']]),
+      incoming: artifact([['alpha', 'MERGED'], ['charlie', 'C']], ['bravo']),
+    });
+    expect(d.merged).toEqual([]);
+  });
+
+  it('ignores a deliberately suppressed card', () => {
+    const d = studiesLostInPublish({
+      baseline: withSources([['alpha', 'ALPHA', [1]], ['bravo', 'BRAVO', [2]]]),
+      incoming: withSources([['alpha', 'ALPHA + BRAVO', [1, 2]], ['c', 'C', [3]]], ['bravo']),
+      suppressed: ['bravo'],
+    });
+    expect(d.merged).toEqual([]);
+  });
+
+  it('a late slide on the surviving card does not read as a merge', () => {
+    // Slides are non-substantive on both sides — a conference photo can arrive
+    // for a past date long after the card was built.
+    const baseline = {
+      digest: { sites: [{ studies: [
+        { slug: 'alpha', name: 'ALPHA', source_ids: [{ type: 'paper', id: 1 }] },
+        { slug: 'bravo', name: 'BRAVO', source_ids: [{ type: 'paper', id: 2 }] },
+      ] }] },
+      slug_aliases: [],
+    };
+    const incoming = {
+      digest: { sites: [{ studies: [
+        { slug: 'alpha', name: 'ALPHA', source_ids: [{ type: 'paper', id: 1 }, { type: 'slide', id: 7 }] },
+        { slug: 'bravo', name: 'BRAVO', source_ids: [{ type: 'paper', id: 2 }] },
+      ] }] },
+      slug_aliases: [],
+    };
+    expect(publishRemovesContent(studiesLostInPublish({ baseline, incoming }))).toBe(false);
+  });
+
+  it('names the swallowed card in the operator message', () => {
+    const d = studiesLostInPublish({
+      baseline: withSources([['alpha', 'ALPHA', [1]], ['bravo', 'BRAVO', [2]]]),
+      incoming: withSources([['alpha', 'MERGED', [1, 2]], ['c', 'C', [3]]], ['bravo']),
+    });
+    const msg = describePublishDiff('2026-07-08', d);
+    expect(msg).toContain('BRAVO');
+    expect(msg).toContain('absorbed');
   });
 });
