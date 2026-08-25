@@ -431,9 +431,28 @@ export function isChatAuthorized(
 export function isDestructiveCommandAuthorized(
   chatId: number | null | undefined,
   allowed: Set<number> | null,
+  /**
+   * The SENDER's user id (`message.from.id`). Required, and separately checked:
+   * a chat is a room, not a person.
+   *
+   * The allowlist can legitimately contain a private group or channel the
+   * curator uses to forward sources — the ingestion case it was designed for.
+   * Anyone else in that room inherited the power to unpublish any card, because
+   * only the chat id was checked. A channel post carries no `from` at all, so
+   * there is no actor to hold responsible; that must not authorise a removal
+   * either.
+   *
+   * Telegram user ids and private-chat ids share a numbering space: in a 1:1 DM
+   * `chat.id === from.id`, so the curator's own DM still passes with the same
+   * single entry in TELEGRAM_ALLOWED_CHAT_IDS that has always been there. What
+   * stops passing is a group whose id is allowed but whose members are not.
+   */
+  senderId: number | null | undefined,
 ): boolean {
   if (!allowed) return false; // unset policy is not permission
-  return chatId != null && allowed.has(chatId);
+  if (chatId == null || !allowed.has(chatId)) return false;
+  // The actor must be named AND allowed in their own right.
+  return senderId != null && allowed.has(senderId);
 }
 
 // The next Telegram getUpdates offset given which update ids failed to inbox.

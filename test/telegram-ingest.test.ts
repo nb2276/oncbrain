@@ -551,19 +551,19 @@ describe('isChatAuthorized', () => {
 describe('isDestructiveCommandAuthorized', () => {
   it('DENIES everyone when no allowlist is configured', () => {
     // The one place where "no policy" must not mean "accept all".
-    expect(isDestructiveCommandAuthorized(123, null)).toBe(false);
-    expect(isDestructiveCommandAuthorized(null, null)).toBe(false);
+    expect(isDestructiveCommandAuthorized(123, null, 123)).toBe(false);
+    expect(isDestructiveCommandAuthorized(null, null, null)).toBe(false);
   });
 
   it('denies everyone when the allowlist is set but empty', () => {
-    expect(isDestructiveCommandAuthorized(123, new Set())).toBe(false);
+    expect(isDestructiveCommandAuthorized(123, new Set(), 123)).toBe(false);
   });
 
   it('accepts only an explicitly listed chat', () => {
     const allow = new Set([111, 222]);
-    expect(isDestructiveCommandAuthorized(111, allow)).toBe(true);
-    expect(isDestructiveCommandAuthorized(333, allow)).toBe(false);
-    expect(isDestructiveCommandAuthorized(null, allow)).toBe(false);
+    expect(isDestructiveCommandAuthorized(111, allow, 111)).toBe(true);
+    expect(isDestructiveCommandAuthorized(333, allow, 333)).toBe(false);
+    expect(isDestructiveCommandAuthorized(null, allow, null)).toBe(false);
   });
 
   it('is strictly narrower than ingestion authorization', () => {
@@ -571,14 +571,14 @@ describe('isDestructiveCommandAuthorized', () => {
     // ingest, never the reverse.
     for (const allowed of [null, new Set<number>(), new Set([111])]) {
       for (const chat of [111, 333, null]) {
-        if (isDestructiveCommandAuthorized(chat, allowed)) {
+        if (isDestructiveCommandAuthorized(chat, allowed, chat)) {
           expect(isChatAuthorized(chat, allowed)).toBe(true);
         }
       }
     }
     // And the specific gap that mattered.
     expect(isChatAuthorized(999, null)).toBe(true);
-    expect(isDestructiveCommandAuthorized(999, null)).toBe(false);
+    expect(isDestructiveCommandAuthorized(999, null, 999)).toBe(false);
   });
 });
 
@@ -604,5 +604,38 @@ describe('computeNextTelegramOffset', () => {
 
   it('returns the current offset for an empty update batch', () => {
     expect(computeNextTelegramOffset([], new Set(), 42)).toBe(42);
+  });
+});
+
+// A CHAT IS A ROOM, NOT A PERSON.
+//
+// The allowlist can legitimately hold a private group the curator forwards
+// sources into — the ingestion case it was designed for. Checking only the chat
+// id gave everyone else in that room the power to unpublish any card, using a
+// slug printed on the public site.
+describe('destructive authorization identifies the sender', () => {
+  const allow = new Set([111]);
+
+  it('accepts the curator’s own DM', () => {
+    // In a 1:1 chat Telegram gives chat.id === from.id, so the single allowlist
+    // entry that has always been there keeps working.
+    expect(isDestructiveCommandAuthorized(111, allow, 111)).toBe(true);
+  });
+
+  it('REFUSES another member of an allowed group', () => {
+    const groupAllowed = new Set([-1001234567890, 111]);
+    expect(isDestructiveCommandAuthorized(-1001234567890, groupAllowed, 111)).toBe(true);
+    expect(isDestructiveCommandAuthorized(-1001234567890, groupAllowed, 222)).toBe(false);
+  });
+
+  it('REFUSES a channel post, which has no sender to hold responsible', () => {
+    const groupAllowed = new Set([-1001234567890]);
+    expect(isDestructiveCommandAuthorized(-1001234567890, groupAllowed, null)).toBe(false);
+    expect(isDestructiveCommandAuthorized(-1001234567890, groupAllowed, undefined)).toBe(false);
+  });
+
+  it('requires BOTH the room and the actor', () => {
+    expect(isDestructiveCommandAuthorized(999, allow, 111)).toBe(false); // room not allowed
+    expect(isDestructiveCommandAuthorized(111, allow, 999)).toBe(false); // actor not allowed
   });
 });

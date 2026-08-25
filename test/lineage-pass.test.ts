@@ -116,15 +116,33 @@ describe('lineage-pass', () => {
   });
 
   describe('toTrialReport', () => {
-    it('merges the card’s own nct with those its sources carry', () => {
+    // THIS ASSERTED THE UNION, AND THE UNION WAS THE BUG.
+    //
+    // `study.nct` is whatever Phase 2 wrote; the parser checks its shape and not
+    // that the trial it names is the one the card reports. Unioning it gave the
+    // card a second identity no source claims — and that defeats the very guard
+    // it looks like it strengthens, because the NCT-conflict check looks for
+    // disagreement and a set containing BOTH numbers agrees with everyone.
+    it('takes identity from the SOURCES, not from Phase 2’s nct field', () => {
       const id = seedPaper({ doi: '10.1000/a', title: 'T', abstract: 'Trial registration: NCT03367702' });
       const r = toTrialReport(db, '2026-08-14', 'prostate', {
         slug: 's',
         name: 'NRG-GU005',
-        nct: 'NCT99999999',
+        nct: 'NCT99999999', // uncorroborated — e.g. a comparator the model picked up
         source_ids: [{ type: 'paper', id }],
       });
-      expect(new Set(r!.ncts)).toEqual(new Set(['NCT03367702', 'NCT99999999']));
+      expect(r!.ncts).toEqual(['NCT03367702']);
+    });
+
+    it('keeps the card nct when the sources DO corroborate it', () => {
+      const id = seedPaper({ doi: '10.1000/b', title: 'T', abstract: 'Trial registration: NCT03367702' });
+      const r = toTrialReport(db, '2026-08-14', 'prostate', {
+        slug: 's',
+        name: 'NRG-GU005',
+        nct: 'NCT03367702',
+        source_ids: [{ type: 'paper', id }],
+      });
+      expect(r!.ncts).toEqual(['NCT03367702']);
     });
 
     it('skips a study with no slug — nothing can link to or suppress it', () => {

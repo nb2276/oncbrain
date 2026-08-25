@@ -35,6 +35,7 @@ import {
   type SlideUpload,
 } from '../src/lib/db.ts';
 import { fetchTweet, TweetFetchError } from '../src/lib/twitter-fetch.ts';
+import { parseAllowedChatIds } from '../src/lib/telegram-ingest.ts';
 import {
   buildDigest,
   createRelatedTrialsRunCache,
@@ -1009,7 +1010,28 @@ function applyLineage(
     }
 
     // Default OFF. See planLineage's autoSuppress parameter for why.
-    const autoSuppress = process.env.TRIAL_LINEAGE_AUTOSUPPRESS === 'on';
+    // AUTO-SUPPRESS REQUIRES A LOCKED-DOWN INGEST PATH.
+    //
+    // The flag alone is not enough, because of what feeds it. With
+    // TELEGRAM_ALLOWED_CHAT_IDS unset, `pull:telegram` accepts a source from ANY
+    // Telegram user, and the 1am cron runs pull → enrich → build with no human
+    // between inboxing and lineage. A stranger could submit a source claiming a
+    // published card's NCT with a registration cue, the same facet and endpoint,
+    // and a later follow-up — and the evidence gate, reading only what the
+    // source says about itself, would authorise removing the real card.
+    //
+    // The gate's inputs are attacker-controlled exactly when ingestion is open,
+    // so the two settings are one decision. Requiring both is not defence in
+    // depth; it is the missing half of the original condition.
+    const ingestLockedDown = (parseAllowedChatIds(process.env.TELEGRAM_ALLOWED_CHAT_IDS)?.size ?? 0) > 0;
+    const autoSuppressRequested = process.env.TRIAL_LINEAGE_AUTOSUPPRESS === 'on';
+    if (autoSuppressRequested && !ingestLockedDown) {
+      console.warn(
+        '  ⚠ lineage: TRIAL_LINEAGE_AUTOSUPPRESS=on IGNORED — TELEGRAM_ALLOWED_CHAT_IDS is unset, ' +
+          'so any Telegram user can feed the evidence gate. Set the allowlist to enable auto-suppress.',
+      );
+    }
+    const autoSuppress = autoSuppressRequested && ingestLockedDown;
     const actions = planLineage(db, date, digest, artifacts, suppressedByDate, autoSuppress);
     if (!autoSuppress && actions.some((a) => a.gateAuthorized)) {
       console.log(

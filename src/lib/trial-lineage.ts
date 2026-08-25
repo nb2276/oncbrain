@@ -270,7 +270,7 @@ const MATURITY_RANK: Record<Maturity, number> = {
  *  decides whether the curator DM may offer a one-reply drop, and deciding it by
  *  regex over prose was how a maturity regression got labelled an identity gap. */
 export type SuppressionBlocker = {
-  code: 'identity' | 'endpoint' | 'followup' | 'maturity' | 'symmetry';
+  code: 'identity' | 'endpoint' | 'followup' | 'maturity' | 'symmetry' | 'cohort';
   message: string;
 };
 
@@ -314,6 +314,30 @@ export function suppressionBlockers(
     out.push({
       code: 'maturity',
       message: `maturity regressed (${prior.maturity} → ${current.maturity})`,
+    });
+  }
+  // A SHARED REGISTRATION IS NOT A SHARED RESULT.
+  //
+  // One NCT can cover many cohorts. A basket trial registers once and reports
+  // its breast cohort and its lung cohort separately; a platform trial does the
+  // same per arm. TrialReport has no cohort, arm, population or intervention
+  // field, so to every check above those two readings are the same trial
+  // reporting the same endpoint with longer follow-up — an `update`. The lung
+  // result would supersede and remove the perfectly valid breast result.
+  //
+  // Disease site is the discriminator actually available, and it is the one that
+  // matters for a basket trial. Deliberately a SUPPRESSION blocker and not an
+  // identity rule: sameTrialIdentity still matches across sites, so the pair is
+  // still detected, still linked, and still reaches the curator DM. What it may
+  // not do is silently remove the other cohort's card.
+  if (
+    current.disease_site &&
+    prior.disease_site &&
+    current.disease_site !== prior.disease_site
+  ) {
+    out.push({
+      code: 'cohort',
+      message: `different disease site (${prior.disease_site} → ${current.disease_site}) — same registration, different cohort`,
     });
   }
   return out;

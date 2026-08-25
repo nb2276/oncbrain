@@ -590,3 +590,74 @@ describe('facetsCompatible', () => {
     expect(facetsCompatible(null, null)).toBe(false);
   });
 });
+
+// A SHARED REGISTRATION IS NOT A SHARED RESULT. One NCT can cover many cohorts:
+// a basket trial registers once and reports breast and lung separately. Nothing
+// in TrialReport records the cohort, so to every other check those two readings
+// are the same trial, same endpoint, longer follow-up — an `update`.
+describe('cohort blocker', () => {
+  const report = (over: Record<string, unknown> = {}) =>
+    ({
+      date: '2026-08-14',
+      slug: 's',
+      name: 'BASKET-1',
+      ncts: ['NCT01234567'],
+      acronyms: ['BASKET1'],
+      facet: 'primary-efficacy',
+      maturity: 'full-publication',
+      followup_months: 30,
+      disease_site: 'lung',
+      endpointName: 'ORR',
+      ...over,
+    }) as never;
+
+  it('blocks suppression when the two readings are different disease sites', () => {
+    const bs = suppressionBlockers(
+      report({ disease_site: 'lung', followup_months: 30 }),
+      report({ date: '2026-07-08', slug: 'p', disease_site: 'breast', followup_months: 24 }),
+      true,
+    );
+    expect(bs.map((b) => b.code)).toContain('cohort');
+  });
+
+  it('does not block the ordinary same-site update', () => {
+    const bs = suppressionBlockers(
+      report({ disease_site: 'prostate', followup_months: 60 }),
+      report({ date: '2026-07-08', slug: 'p', disease_site: 'prostate', followup_months: 24 }),
+      true,
+    );
+    expect(bs).toEqual([]);
+  });
+
+  it('abstains when either site is unrecorded rather than guessing', () => {
+    const bs = suppressionBlockers(
+      report({ disease_site: null, followup_months: 30 }),
+      report({ date: '2026-07-08', slug: 'p', disease_site: 'breast', followup_months: 24 }),
+      true,
+    );
+    expect(bs.map((b) => b.code)).not.toContain('cohort');
+  });
+
+  // Deliberately a SUPPRESSION blocker, not an identity rule: the pair must
+  // still be detected and reach the curator DM.
+  it('is not an identity rule — the trials still match across sites', () => {
+    expect(
+      sameTrialIdentity(
+        { ncts: new Set(['NCT01234567']), keys: new Set(['BASKET1']), site: 'lung' },
+        { ncts: new Set(['NCT01234567']), keys: new Set(['BASKET1']), site: 'breast' },
+      ),
+    ).toBe(true);
+  });
+
+  // A cohort blocker is EVIDENCE, not an identity gap, so the DM must not offer
+  // a one-reply drop for it — executeDedupDrop does not consult the gate.
+  it('is not offered to the curator as a droppable identity gap', () => {
+    const bs = suppressionBlockers(
+      report({ disease_site: 'lung', followup_months: 30 }),
+      report({ date: '2026-07-08', slug: 'p', disease_site: 'breast', followup_months: 24 }),
+      true,
+    );
+    expect(isIdentityOnly(bs)).toBe(false);
+    expect(primaryBlocker(bs)!.code).toBe('cohort');
+  });
+});
