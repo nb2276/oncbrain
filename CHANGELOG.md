@@ -2,6 +2,45 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.55.6] - 2026-08-24
+
+### Fixed
+- **The grounding pass handed a study another source's text.** Papers, bookmarks
+  and slide_uploads are separate tables with independent autoincrement ids, so
+  paper 1, tweet 1 and slide 1 all exist — and the source-text map was keyed by
+  the raw numeric id, aliasing all three. Reproduced by the reviewer: a
+  tweet-sourced study received a paper's DOI. One typo producing both failures
+  the gate exists to prevent, since the wrong source text can withhold grounded
+  prose AND pass ungrounded prose. Keyed by type and id now.
+
+  Introduced in v0.55.0 when the pass moved from build/digest-builder.ts into
+  buildDigest. `syntheticIdToSourceRef` had been returning `{type, id}` all
+  along; the move dropped the type.
+
+- **A registration cue claimed the comparator after it.** `ownRegistrations`
+  scanned each NCT's own preceding window independently, so
+  "Trial registration: NCT11111111; comparator NCT22222222" returned BOTH — and
+  the comparator then satisfied registered identity, which is the one thing that
+  authorises an automatic unpublish. Exactly the failure the function was added
+  in v0.55.5 to prevent. A cue now governs the FIRST registration after it: the
+  lookback stops at the end of the previous NCT, and a comparator introduced
+  afterwards has to earn its own cue.
+
+- **The DOI backstop ignored a paper's own `doi` column.** A paper ingested by
+  DOI carries it as a field and may never repeat it in title or abstract, so a
+  text-only search left the card at `doi:null` with the identifier sitting right
+  there on the source. The v0.54 version consulted the column; the move to
+  buildDigest dropped that. The same move also dropped `figure_structured_md`
+  from the grounding text, so a number read only from a structured figure looked
+  ungrounded.
+
+### Notes
+- All three were introduced by this release's own fixes, found by an adversarial
+  gate round over the destructive path. `TRIAL_LINEAGE_AUTOSUPPRESS` stays OFF:
+  that round returned 11 findings and answered its two gate questions "yes" —
+  with the flag on, cards can still be wrongly unpublished. These are the two
+  most severe plus one regression alongside them, not the whole list.
+
 ## [0.55.5] - 2026-08-24
 
 ### Fixed

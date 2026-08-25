@@ -98,6 +98,24 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
 
 ## Trial lineage (v0.53 follow-ups)
 
+- **Nine open findings from the v0.55.6 gate round.** **Priority: P1.** The
+  pre-enable adversarial round returned 11 findings over the destructive path and
+  answered both gate questions "yes": with the flag ON cards can still be wrongly
+  unpublished, and system-wide a partial rebuild can remove a published card with
+  no human reply. Two were fixed in v0.55.6 (source-type aliasing in the grounding
+  map, registration-cue bleed). Still open, by the reviewer's numbering:
+  #4 the empty-date guard is stale by commit time (concurrent builds or an
+  intervening curator drop can each approve one of two cards and suppress both);
+  #5 the enrich-time human drop path is not successor-transactional;
+  #7 `conflictingState` is bypassed by every degraded rerank fallback path;
+  #8 prior-coverage notifications still use `extractCitations`, not
+  `ownRegistrations`, so a comparator NCT can produce `droppable:true`;
+  #9 the DM header's `anyDroppable` counts priors that dedup later removes, so it
+  can say "unless you drop one" with no authorized token visible;
+  #11 artifact and override writes are neither atomic nor fsynced, and a torn
+  sidecar can poison `rebuild:queued` for three nightly drains.
+  Findings #1 and #2 were LOST — the capture piped codex through `tail -50`.
+  Re-run the round to recover them. (v0.55.6 gate round)
 - **Re-run the destructive path through review before enabling the flag.**
   **Priority: P1 (gate).** Both blocking items are now closed — transactional
   suppression (v0.55.4) and own-registration corroboration (v0.55.5). What remains

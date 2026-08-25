@@ -79,3 +79,33 @@ describe('ownRegistrations', () => {
     expect(ownRegistrations(null)).toEqual([]);
   });
 });
+
+// A cue governs the FIRST registration after it, not every NCT nearby. Each id
+// used to scan its own preceding window independently, so a cue bled forward
+// across an intervening registration and the comparator satisfied registered
+// identity — the exact failure this function exists to prevent.
+describe('ownRegistrations: a cue does not bleed onto the next NCT', () => {
+  it('claims only the registration the cue introduces', () => {
+    expect(ownRegistrations('Trial registration: NCT11111111; comparator NCT22222222'))
+      .toEqual(['NCT11111111']);
+  });
+
+  it('still finds the own registration when the comparator comes FIRST', () => {
+    expect(
+      ownRegistrations(
+        'Compared with VISION (NCT03511664). Registration: ClinicalTrials.gov NCT03367702.',
+      ),
+    ).toEqual(['NCT03367702']);
+  });
+
+  it('accepts two genuinely cued registrations', () => {
+    // A trial reporting two registrations (e.g. a companion study) is real; the
+    // rule is "each must earn its own cue", not "at most one".
+    expect(ownRegistrations('Registration: NCT11111111 and registered as NCT22222222'))
+      .toEqual(['NCT11111111', 'NCT22222222']);
+  });
+
+  it('still abstains when neither is claimed', () => {
+    expect(ownRegistrations('We compare NCT03511664 against NCT04567890.')).toEqual([]);
+  });
+});
