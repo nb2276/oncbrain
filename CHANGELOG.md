@@ -2,6 +2,36 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.57.2] - 2026-08-25
+
+### Fixed
+- **A merge masked by a new card passed both publish checks.** v0.57.0's guard
+  catches a Phase 1 merge through a study-count shortfall, but only when nothing
+  else changed. Add one new study the same night and the arithmetic balances —
+  two cards became one, one card appeared, total unchanged — while the retired
+  slug sits in `slug_aliases` looking like an ordinary rename. Reproduced: `lost`
+  empty, `countShortfall` zero, publish allowed, one previously independent card
+  gone.
+
+  From slugs and counts alone a merge and a rename are genuinely
+  indistinguishable, which is why the first version could not see it. Provenance
+  tells them apart: a merged card carries BOTH originals' `source_ids`, a renamed
+  card carries only its own, and every study in the corpus records them. A
+  baseline study is now reported when its whole source set is absorbed into one
+  incoming card that also absorbed another — never for a rename, never for the
+  card that survived the merge, and never when provenance is missing on either
+  side. Slides are non-substantive on both sides, so a late conference photo
+  landing on the surviving card does not read as a merge.
+
+  Measured against `data/digests/`: 45 published dates diffed against their
+  state six commits earlier, zero flagged.
+
+### Notes
+- Found by self-review against round four's own question list, because that round
+  still cannot run: the codex usage limit is exhausted until 2026-08-30. This is
+  the second finding recovered from that list by inspection.
+- `TRIAL_LINEAGE_AUTOSUPPRESS` stays OFF. Tests: 2469 across 123 files.
+
 ## [0.57.1] - 2026-08-25
 
 ### Fixed

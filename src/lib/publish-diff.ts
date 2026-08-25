@@ -27,6 +27,8 @@
 
 export type PublishedStudyRef = { slug: string; name: string };
 
+type SourceRef = { type?: unknown; id?: unknown };
+
 export type PublishDiff = {
   /** Published studies absent from the incoming artifact and not deliberately suppressed. */
   lost: PublishedStudyRef[];
@@ -39,6 +41,20 @@ export type PublishDiff = {
    * slug therefore looks accounted for. Only the count reveals it.
    */
   countShortfall: number;
+  /**
+   * Published studies whose sources were ABSORBED into another card.
+   *
+   * The count check catches a merge only when nothing else changed. Add one new
+   * study the same night and the arithmetic balances — two cards became one,
+   * one card appeared, total unchanged — while the retired slug sits in
+   * `slug_aliases` looking like an ordinary rename. From slugs and counts alone
+   * a merge and a rename are genuinely indistinguishable.
+   *
+   * Provenance distinguishes them: a merged card carries BOTH originals'
+   * `source_ids`, a renamed card carries only its own. Every study in the corpus
+   * records them, so this is checkable at the publish boundary.
+   */
+  merged: PublishedStudyRef[];
 };
 
 type ArtifactLike = {
@@ -46,13 +62,66 @@ type ArtifactLike = {
   slug_aliases?: unknown;
 };
 
-function studiesOf(artifact: unknown): PublishedStudyRef[] {
+function studiesOf(artifact: unknown): Array<PublishedStudyRef & { sources: Set<string> }> {
   const a = artifact as ArtifactLike | null | undefined;
-  const out: PublishedStudyRef[] = [];
+  const out: Array<PublishedStudyRef & { sources: Set<string> }> = [];
   for (const site of a?.digest?.sites ?? []) {
     for (const st of site?.studies ?? []) {
       const slug = typeof st?.slug === 'string' ? st.slug.trim() : '';
-      if (slug) out.push({ slug, name: typeof st?.name === 'string' ? st.name : slug });
+      if (slug) {
+        out.push({
+          slug,
+          name: typeof st?.name === 'string' ? st.name : slug,
+          sources: sourceKeys(st as { source_ids?: unknown }),
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * A study's substantive sources, as `type:id` keys.
+ *
+ * Slides are excluded on both sides, matching what the override identity check
+ * and lineage already treat as non-substantive: a conference photo can arrive
+ * for a past date long after the card was built, and that must not read as the
+ * card having changed.
+ */
+function sourceKeys(st: { source_ids?: unknown }): Set<string> {
+  const raw = Array.isArray(st?.source_ids) ? (st.source_ids as SourceRef[]) : [];
+  return new Set(
+    raw
+      .filter((r) => r && typeof r.type === 'string' && r.type !== 'slide' && Number.isInteger(r.id))
+      .map((r) => `${String(r.type)}:${String(r.id)}`),
+  );
+}
+
+/**
+ * Baseline studies absorbed into some incoming card.
+ *
+ * A baseline study is absorbed when its (non-empty) source set is wholly
+ * contained in one incoming study's. That alone is just a rename, so it counts
+ * as a MERGE only where one incoming card absorbs two or more baseline studies —
+ * and the survivor of that group is not reported, because it is still on the
+ * page. Abstains entirely when provenance is missing on either side.
+ */
+function mergedAway(
+  baseline: Array<PublishedStudyRef & { sources: Set<string> }>,
+  incoming: Array<PublishedStudyRef & { sources: Set<string> }>,
+): PublishedStudyRef[] {
+  const out: PublishedStudyRef[] = [];
+  for (const inc of incoming) {
+    if (inc.sources.size === 0) continue;
+    const absorbed = baseline.filter(
+      (b) => b.sources.size > 0 && [...b.sources].every((k) => inc.sources.has(k)),
+    );
+    if (absorbed.length < 2) continue;
+    // The one keeping its slug survived as itself; the others were folded in.
+    const survivor = absorbed.find((b) => b.slug === inc.slug);
+    for (const b of absorbed) {
+      if (survivor && b.slug === survivor.slug) continue;
+      out.push({ slug: b.slug, name: b.name });
     }
   }
   return out;
@@ -78,7 +147,7 @@ export function studiesLostInPublish(opts: {
 }): PublishDiff {
   const baseline = studiesOf(opts.baseline);
   const incoming = studiesOf(opts.incoming);
-  if (baseline.length === 0) return { lost: [], countShortfall: 0 };
+  if (baseline.length === 0) return { lost: [], countShortfall: 0, merged: [] };
 
   const suppressed = new Set(opts.suppressed ?? []);
   const incomingSlugs = new Set(incoming.map((s) => s.slug));
@@ -97,12 +166,19 @@ export function studiesLostInPublish(opts: {
   const expected = baseline.length - intentional.length;
   const countShortfall = Math.max(0, expected - incoming.length);
 
-  return { lost, countShortfall };
+  // Reported separately from `lost`: these cards are not missing so much as
+  // swallowed, and the operator message has to say which.
+  const merged = mergedAway(
+    baseline.filter((b) => !suppressed.has(b.slug)),
+    incoming,
+  );
+
+  return { lost, countShortfall, merged };
 }
 
 /** True when this publish would remove something live. */
 export function publishRemovesContent(d: PublishDiff): boolean {
-  return d.lost.length > 0 || d.countShortfall > 0;
+  return d.lost.length > 0 || d.countShortfall > 0 || d.merged.length > 0;
 }
 
 /** Operator-facing explanation for a refused date. */
@@ -120,6 +196,13 @@ export function describePublishDiff(date: string, d: PublishDiff): string {
     );
   } else if (d.countShortfall > 0) {
     lines.push(`  ${date}: also ${d.countShortfall} short on total study count.`);
+  }
+  if (d.merged.length > 0) {
+    lines.push(
+      `  ${date}: ${d.merged.length} published card(s) absorbed into another card's sources ` +
+        `(a Phase 1 merge; the slug is retired as an alias, so only provenance shows it):`,
+    );
+    for (const s of d.merged) lines.push(`    - ${s.name} (${s.slug})`);
   }
   return lines.join('\n');
 }
