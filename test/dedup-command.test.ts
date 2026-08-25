@@ -171,3 +171,58 @@ describe('executeDedupDrop enforces the structural guards', () => {
     expect(listRebuildQueue(db)).toHaveLength(1);
   });
 });
+
+// QUEUE BEFORE WRITE. The override and the queue entry are two non-atomic
+// writes, so one of them has to be the one that can fail harmlessly. An orphaned
+// queue entry is harmless — the rebuild runs and changes nothing. An orphaned
+// override is not: the card is marked suppressed with no rebuild scheduled, so
+// it stays live until some unrelated rebuild of that date fires and removes it
+// silently, long after the reply that promised it. commitLineageSuppressions
+// already had this order; this path had it backwards.
+describe('executeDedupDrop write ordering', () => {
+  it('does not write the override when queueing the rebuild fails', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'oncbrain-drop-'));
+    try {
+      const db = openDb(':memory:');
+      // Break the queue table so queueRebuild throws.
+      db.exec('DROP TABLE IF EXISTS rebuild_queue');
+      const res = executeDedupDrop(
+        db,
+        { date: '2026-07-08', slug: 'alpha' },
+        {
+          overridesDir: dir,
+          lookupDigest: () => ({
+            digest: { sites: [{ studies: [{ slug: 'alpha', name: 'ALPHA' }, { slug: 'bravo', name: 'BRAVO' }] }] },
+          }),
+        },
+      );
+      expect(res.ok).toBe(false);
+      // The card must still be published — no half-applied suppression.
+      expect(existsSync(join(dir, '2026-07-08.json'))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('writes both on the happy path', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'oncbrain-drop-ok-'));
+    try {
+      const db = openDb(':memory:');
+      const res = executeDedupDrop(
+        db,
+        { date: '2026-07-08', slug: 'alpha' },
+        {
+          overridesDir: dir,
+          lookupDigest: () => ({
+            digest: { sites: [{ studies: [{ slug: 'alpha', name: 'ALPHA' }, { slug: 'bravo', name: 'BRAVO' }] }] },
+          }),
+        },
+      );
+      expect(res.ok).toBe(true);
+      expect(JSON.parse(readFileSync(join(dir, '2026-07-08.json'), 'utf8')).suppress).toEqual(['alpha']);
+      expect(listRebuildQueue(db).map((q) => q.bookmark_date)).toEqual(['2026-07-08']);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

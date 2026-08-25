@@ -89,3 +89,49 @@ describe('publishRegressionMessage', () => {
     expect(msg).toContain('--suppress=');
   });
 });
+
+// A GUARD THAT ABORTS THE PUBLISH MUST NOT CRY WOLF. Its only action is to stop
+// the build, so a false alarm costs a whole day's digest.
+describe('lostPublishedStudies does not mistake a sibling for a removal', () => {
+  it('ignores a never-published sibling that shares the trial acronym', () => {
+    // NRG-GU005 already publishes its efficacy card. A brand-new quality-of-life
+    // cluster for the same trial fails Phase 2. Both names key to NRGGU005, so
+    // the key fallback matched the efficacy card and reported it as removed —
+    // while it was sitting in the output, untouched.
+    const lost = lostPublishedStudies({
+      published: [pub('nrg-gu005', 'NRG-GU005')],
+      surviving: [pub('nrg-gu005', 'NRG-GU005')],
+      dropped: [drop('nrg-gu005-qol', 'NRG-GU005 quality of life')],
+    });
+    expect(lost).toEqual([]);
+  });
+
+  it('still catches the real loss when the survivor is NOT in the output', () => {
+    const lost = lostPublishedStudies({
+      published: [pub('nrg-gu005', 'NRG-GU005')],
+      surviving: [pub('other', 'ARANOTE')],
+      dropped: [drop('nrg-gu005', 'NRG-GU005')],
+    });
+    expect(lost).toHaveLength(1);
+  });
+
+  it('catches a rename whose card did not survive', () => {
+    const lost = lostPublishedStudies({
+      published: [pub('prestige-psma', 'PRESTIGE-PSMA')],
+      surviving: [pub('aranote', 'ARANOTE')],
+      dropped: [drop('prestige-psma-primary', 'PRESTIGE-PSMA primary results')],
+    });
+    expect(lost).toHaveLength(1);
+  });
+
+  it('abstains when the acronym key is ambiguous across two published cards', () => {
+    // Two cards of one trial share a key; guessing which one a casualty refers
+    // to is exactly what produced the false alarm.
+    const lost = lostPublishedStudies({
+      published: [pub('gu005-eff', 'NRG-GU005 efficacy'), pub('gu005-qol', 'NRG-GU005 quality of life')],
+      surviving: [pub('gu005-eff', 'NRG-GU005 efficacy'), pub('gu005-qol', 'NRG-GU005 quality of life')],
+      dropped: [drop('gu005-new', 'NRG-GU005 safety')],
+    });
+    expect(lost).toEqual([]);
+  });
+});

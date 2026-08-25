@@ -61,6 +61,7 @@ import {
   findMergedPriors,
   supersedesFrom,
   type LineageArtifact,
+  remainingAfterSuppress,
 } from '../src/lib/lineage-pass.ts';
 import { persistSlugs } from '../src/lib/slug-persistence.ts';
 import { buildPriorIndex, findPriorEstimate, studiesFromArtifacts } from '../src/lib/prior-estimate.ts';
@@ -163,6 +164,7 @@ import {
   type OcrEntry,
 } from '../src/lib/vision-ocr.ts';
 import { writeFileSync, mkdirSync, existsSync, realpathSync, readdirSync, readFileSync } from 'node:fs';
+import { writeFileAtomic } from '../src/lib/atomic-write.ts';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -564,14 +566,17 @@ function readPublishedStudies(args: Args, date: string): DigestStudy[] {
 function writeArtifact(args: Args, artifact: DigestArtifact): { json: string; obsidian: string } {
   const jsonPath = resolve(args.outDir, `${artifact.date}.json`);
   if (!existsSync(dirname(jsonPath))) mkdirSync(dirname(jsonPath), { recursive: true });
-  writeFileSync(jsonPath, JSON.stringify(artifact, null, 2) + '\n');
+  // Atomic: a torn artifact is a published date that no longer parses, and
+  // every pass that reads it degrades to "no prior coverage" — the exact input
+  // state that makes lineage treat a returning trial as brand new.
+  writeFileAtomic(jsonPath, JSON.stringify(artifact, null, 2) + '\n');
 
   const obsidianName = artifact.conference
     ? `${artifact.date}-${artifact.conference.slug}.md`
     : `${artifact.date}.md`;
   const obsidianPath = resolve(args.obsidianDir, obsidianName);
   if (!existsSync(dirname(obsidianPath))) mkdirSync(dirname(obsidianPath), { recursive: true });
-  writeFileSync(obsidianPath, renderObsidian(artifact, { publicSiteUrl: process.env.PUBLIC_SITE_URL }));
+  writeFileAtomic(obsidianPath, renderObsidian(artifact, { publicSiteUrl: process.env.PUBLIC_SITE_URL }));
 
   return { json: jsonPath, obsidian: obsidianPath };
 }
@@ -776,9 +781,10 @@ export async function buildOneDate(
     const applied = applyOverrides(digest, overrides, {
       digestDate: date,
       // A Phase 2 casualty means a missing slug may be a VANISHED card rather
-      // than a renamed one, which changes how far a provenance-free identity
-      // can be trusted to re-point.
-      studyDropped: (digest.meta?.dropped ?? []).length > 0,
+      // than a renamed one, which changes how far a provenance-free identity can
+      // be trusted to re-point. The LIST, not a flag: the question is whether one
+      // of these could be the override's own target.
+      droppedStudies: digest.meta?.dropped ?? [],
     });
     digest = applied.digest;
     console.log(`  applied overrides: ${formatOverrideSummary(applied.summary)}`);
@@ -913,6 +919,11 @@ export async function buildOneDate(
   const lostStudies = lostPublishedStudies({
     published: readPublishedStudies(args, date),
     dropped: droppedStudies,
+    // What this build DID produce. Without it the name-key fallback cannot tell
+    // a removal from a sibling: one trial's efficacy and QoL cards share an
+    // acronym key, so a brand-new QoL cluster failing Phase 2 read as the loss
+    // of the untouched efficacy card and aborted a healthy publish.
+    surviving: digest.sites.flatMap((site) => site.studies),
     intentionallyRemoved: new Set(overrides?.suppress ?? []),
   });
   if (lostStudies.length > 0) {
@@ -1146,6 +1157,42 @@ export function commitLineageSuppressions(
       }
 
       if (added.length === 0 && alreadyPending.length === 0) continue;
+
+      // RE-CHECK THE EMPTY-DATE GUARD HERE, against state read moments ago.
+      //
+      // planLineage ran this check, but on a snapshot taken before Phase 2, the
+      // artifact write and every other suppression this build planned. Between
+      // then and now the prior date's override file can have grown: a curator
+      // `drop` reply landing mid-build, a concurrent build committing its own
+      // supersession, or simply this build's own earlier loop iterations. Each
+      // of those independently saw a survivor; together they can take the last
+      // one. The plan-time check cannot see any of them — `ov` here can.
+      //
+      // Refuse the whole batch for this date rather than part of it. This is the
+      // last guard before an unpublish, and an empty day wants the ARTIFACT
+      // removed, which is a different act and a human's to make.
+      const priorArtifact = readPublishedArtifact(args, priorDate);
+      // An artifact carrying no studies at all tells us nothing to protect —
+      // there is no last card to take. Only count it as an empty-date risk when
+      // the date actually publishes something today.
+      const publishedNow = priorArtifact
+        ? remainingAfterSuppress(priorArtifact as LineageArtifact, [], [])
+        : 0;
+      if (publishedNow > 0 && added.length > 0) {
+        const remaining = remainingAfterSuppress(
+          priorArtifact as LineageArtifact,
+          added,
+          ov.suppress ?? [],
+        );
+        if (remaining < 1) {
+          console.warn(
+            `  lineage: REFUSED to suppress ${added.map((x) => `${priorDate}/${x}`).join(', ')} — ` +
+              `would leave ${priorDate} with a headline and no studies. ` +
+              `Unpublish the date instead (git rm data/digests/${priorDate}.json) if that is what you want.`,
+          );
+          continue;
+        }
+      }
 
       queueRebuild(
         db,
