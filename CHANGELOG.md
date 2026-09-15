@@ -2,6 +2,42 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.57.6] - 2026-09-14
+
+### Fixed
+- **Lancet decimals read as two integers.** The Lancet family prints "OR 2·80
+  (0·75–10·41); p=0·079", and every grounding tokenizer reads `\d+\.\d+`, so
+  "2·80" became "2" and "80". A card quoting the paper's own "2.80" was judged
+  ungrounded: TORPEdO (2026-09-09) lost its primary endpoint and two results
+  tables to numbers printed verbatim in its source.
+
+  `effect-size.ts` and `figure-extract.ts` already normalized middle dots, each
+  for its own inputs. Instead of a fourth local fix, source text is normalized
+  once at `buildDigest`'s door, so the study agent, the table and endpoint gates
+  and the comparator gate read one spelling (the eval calls `buildDigest`, so it
+  sees the same). `source-tier.ts` gets the same treatment because the builder
+  feeds it raw DB rows. Only a dot BETWEEN TWO DIGITS is rewritten; " · "
+  separators and bullets are left alone.
+
+  Measured before writing the rule: 1447 digit·digit occurrences across the 11
+  stored papers that use the convention, none of them anything but a decimal
+  ("D0·1 cc" is D0.1 cc).
+
+- **The same gate was looser, not only stricter.** A model that echoed "HR 0·53"
+  was checked as "0" and "53", two integers that appear somewhere in almost any
+  paper. The cell gate now normalizes the card side too, so the value is checked
+  as the number it is.
+
+### Notes
+- TORPEdO rebuilt with the fix: primary endpoint and the co-primary/exploratory
+  table kept, no table dropped, significance no longer withheld, and every
+  headline number traceable (the first build flagged five that were not).
+- Ten other published cards were built from middle-dot papers. Six carry no
+  primary endpoint and are the likeliest to have lost numbers: 05-20
+  china-hyperfractionated-sib-ls-sclc, 05-31 can-2409, 06-04 mroqc-adt-patterns,
+  06-18 primary2, 07-01 hnscc-reirradiation-consensus, 08-24 star-trec. Not
+  rebuilt here: a bulk rebuild exhausts the claude-cli session window.
+
 ## [0.57.5] - 2026-09-14
 
 ### Fixed

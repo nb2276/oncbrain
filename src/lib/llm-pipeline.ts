@@ -64,6 +64,7 @@ import { buildCacheKey, readBuildCache, writeBuildCache } from './build-cache.ts
 import { isOcrAvailable, isSafeImageUrl } from './vision-ocr.ts';
 import { buildAssociationGraph, renderGroupsForPrompt } from './source-association.ts';
 import { isPreprintSource, clampPreprintVerdict } from './preprint.ts';
+import { normalizeItemDecimals, normalizeDecimalSeparators } from './decimal-separator.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -868,9 +869,13 @@ type SiteMeta = {
 };
 
 export async function buildDigest(
-  items: DigestInputItem[],
+  rawItems: DigestInputItem[],
   opts: BuildOptions,
 ): Promise<DigestOutput> {
+  // Before anything reads source text: the study agent, the table and endpoint
+  // gates, and the comparator gate must all see "2.80" where a Lancet paper
+  // printed "2·80". Shadowing the parameter leaves no path to the raw spelling.
+  const items = rawItems.map(normalizeItemDecimals);
   const ocrAvailable = isOcrAvailable();
 
   // Extended thinking (DIGEST_THINKING) requires temperature=1 (Anthropic API),
@@ -1739,7 +1744,7 @@ export function validatePrimaryEndpoint(
   // so requiring "95" in source would false-drop a legitimate CI. The bounds
   // themselves still get the adjacency check. Table cells don't carry the "% CI"
   // label, so this strip is endpoint-specific.
-  const stat = `${ep.stat_value} ${ep.stat_detail ?? ''}`.replace(/\b\d{2}(?:\.\d)?\s*%\s*CI\b/gi, 'CI');
+  const stat = normalizeDecimalSeparators(`${ep.stat_value} ${ep.stat_detail ?? ''}`).replace(/\b\d{2}(?:\.\d)?\s*%\s*CI\b/gi, 'CI');
   const bad = firstUnverifiedCellValue(stat, sourceTokens, sourcePairs);
   if (bad !== null) {
     if (slug) console.warn(`  [phase2:${slug}] primary_endpoint dropped: "${bad}" not verified in source`);
@@ -3161,6 +3166,11 @@ function firstUnverifiedCellValue(
   sourceTokens: Set<string>,
   sourcePairs: Set<string>,
 ): string | null {
+  // The card side gets the same normalization the source got at buildDigest's
+  // door. A model that echoes the paper's "HR 0·53" must be checked as "0.53":
+  // left raw it splits into "0" and "53", which fails against normalized source,
+  // and against raw source passed on two integers that appear anywhere at all.
+  cell = normalizeDecimalSeparators(cell);
   const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
   for (const tok of cell.match(tokenRe) ?? []) {
     if (!numericTokenInSet(tok, sourceTokens)) return tok;
