@@ -11,6 +11,8 @@
 #   4. rebuild:queued   — rebuild any PAST date whose enrichment gained richer
 #                         data (a full-paper PDF merged figures onto an
 #                         abstract-only study, a late conference slide)
+#   4b. queue:rebuild   — queue any date whose step-3 build FAILED, so a later
+#                         drain retries it after the window has moved past it
 #   5. astro build      — static site
 #   6. git commit/push  — ALWAYS to main (DigitalOcean deploys only main; if the
 #                         working tree is parked on a feature branch overnight,
@@ -41,6 +43,8 @@ FAILED=0
 # failure (NCBI flake, LLM ENOENT) could publish a partial-day / stale-day state
 # to the public site while the run still reports FAILED only via exit code.
 DIGEST_FAILED=0
+# Dates whose build:day stage failed this run. Queued for retry after the drain.
+FAILED_BUILD_DATES=""
 
 # Run a critical stage. Logs a loud failure line and flips FAILED, but does NOT
 # abort — later stages still run so a single broken date doesn't sink the day.
@@ -64,7 +68,15 @@ critical_digest() {
     echo "  ✗ $label FAILED (exit $rc)"
     FAILED=1
     DIGEST_FAILED=1
+    return "$rc"
   fi
+}
+
+# One date's build:day, remembering the date when it fails.
+build_day() {
+  local date="$1"
+  critical_digest "build:day $date" npm run build:day --silent -- --date="$date" \
+    || FAILED_BUILD_DATES="$FAILED_BUILD_DATES $date"
 }
 
 # Resolve project root regardless of where script was invoked from.
@@ -117,11 +129,11 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
 
   echo ""
   echo "→ Building digests for $YESTERDAY"
-  critical_digest "build:day $YESTERDAY" npm run build:day --silent -- --date="$YESTERDAY"
+  build_day "$YESTERDAY"
 
   echo ""
   echo "→ Building digests for $TODAY"
-  critical_digest "build:day $TODAY" npm run build:day --silent -- --date="$TODAY"
+  build_day "$TODAY"
 
   echo ""
   echo "→ Rebuilding any dates queued by enrichment (richer re-sends: full-paper PDFs, late slides)"
@@ -132,6 +144,25 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   # drain drops (not re-runs) any queue entry for them (avoids a wasted double
   # build).
   critical "rebuild:queued" npm run rebuild:queued --silent -- --skip="$TODAY,$YESTERDAY"
+
+  # A failed build strands its sources: the window above moves past the date by
+  # the next night or the one after, and nothing else queues a date whose build
+  # simply broke (TORPEdO, 2026-09-09: one session-limited build, five days
+  # unpublished). Queue it for the drain.
+  #
+  # AFTER the drain, not before. Queued before, the drain would fail open on the
+  # missing artifact (queuedAfterBuild) and retry in this same run — the same
+  # session limit that just failed it, spending one of its three attempts.
+  # Queued here, a failed TODAY is rebuilt by tomorrow's yesterday stage (whose
+  # fresh artifact lets the drain drop the entry), and a failed YESTERDAY is
+  # retried by tomorrow's drain.
+  if [ -n "$FAILED_BUILD_DATES" ]; then
+    echo ""
+    echo "→ Queueing failed builds for retry"
+    for d in $FAILED_BUILD_DATES; do
+      critical "queue:rebuild $d" npm run queue:rebuild --silent -- --date="$d" --reason="nightly build:day failed"
+    done
+  fi
 
   echo ""
   echo "→ Building Astro site"
