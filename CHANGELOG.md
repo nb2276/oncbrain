@@ -2,6 +2,27 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.57.5] - 2026-09-14
+
+### Fixed
+- **A failed nightly build stranded its date.** The cron builds only today and
+  yesterday. When one of those builds failed, the run logged it, the window moved
+  past the date, and nothing put it on `rebuild_queue`: enrichment queues a date
+  for richer data or an out-of-window source, never for a build that broke.
+  TORPEdO (2026-09-09) sat unpublished for five days after its one build hit the
+  claude-cli session limit, while every later run exited 0 with nothing to do.
+
+  `daily-build.sh` now records each failed `build:day` date and queues it with
+  the new `npm run queue:rebuild`, so the drain retries it under its existing
+  three-attempt cap. The queueing runs AFTER the drain, not before it. Queued
+  first, the drain fails open on the missing artifact and retries in the same
+  run, into the same session limit, spending an attempt for nothing.
+
+### Notes
+- One pre-existing failure, not from this change:
+  `digest-schema-migration` flags 2026-08-29, whose PROTEUS card carries no
+  modality/intent/methodology tag. Tests: 2488 across 124 files.
+
 ## [0.57.4] - 2026-08-25
 
 ### Added
