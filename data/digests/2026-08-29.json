@@ -1,27 +1,48 @@
 {
   "date": "2026-08-29",
   "conference": null,
-  "generated_at": 1788076876077,
+  "generated_at": 1789440527987,
   "digest": {
-    "top_line": "PROTEUS high-risk cohort: 5-yr BCR-FS 44%, MFS 71%, CSS 92% at 60-mo median f/u, but source gives no design, N, or treatment.",
-    "tldr": "Thin day, prostate only. A high-risk benchmark series reports 5-yr BCR-FS 44% / MFS 71% / CSS 92%, biochemical events well ahead of clinical ones, but with no arms, N, or treatment stated the numbers cannot be attributed to surgery, RT, or systemic therapy. Context only, not an RT decision.",
+    "top_line": "PROTEUS: 5-yr BCR-FS 44%, MFS 71%, CSS 92% at 60-mo median f/u in a real-world high-risk prostate cancer benchmark cohort.",
+    "tldr": "Prostate is the only site today. PROTEUS gives a descriptive real-world benchmark for high-risk prostate cancer (5-yr BCR-FS 44%, MFS 71%, CSS 92%), meant to put perioperative strategies in context. It has no comparator arm. N, eligibility, treatment received and the high-risk definition are not in the source, so it sets a reference range, not a treatment effect.",
     "sites": [
       {
         "disease_site": "prostate",
-        "intro": "One unqualified high-risk outcomes series; no modality attribution, so it sets a benchmark rather than moving a local-therapy decision.",
+        "intro": "One descriptive high-risk benchmark and no randomised readout, so the 5-yr BCR-FS of 44% is a reference point for trial design, not a comparison.",
         "studies": [
           {
             "name": "PROTEUS",
-            "tldr": "5-yr BCR-FS 44%, MFS 71%, CSS 92% at 60-mo median follow-up in a high-risk cohort.",
+            "tldr": "5-yr BCR-FS 44%, MFS 71%, CSS 92% at 60-mo median f/u in a real-world high-risk prostate cancer benchmark cohort.",
             "details": [
-              "📊 5-yr BCR-FS 44%, 5-yr MFS 71%, 5-yr CSS 92%",
-              "📊 Median follow-up 60 mo",
-              "🔍 Source tweet frames this as a real-world benchmark to contextualize perioperative treatment strategies in a high-risk population",
-              "⚠️ Design not stated in source: no phase, N, arms, or comparator reported",
-              "⚠️ Treatment received (surgery, RT, systemic) not specified in source, so the outcomes cannot be attributed to a modality",
-              "⚠️ Eligibility and risk-group definition not given in source; \"high-risk\" is unqualified",
-              "⚠️ The BCR-FS / MFS / CSS gap (44% vs 71% vs 92% at 5 yr) is consistent with biochemical events outrunning clinical ones, but no competing-risk or per-event detail is reported in source",
-              "⚠️ #PROTEUS in the source may refer to the trial hashtag rather than the cohort reported; the tweet gives no registration or design linking the numbers to a named trial"
+              "🔍 Design not stated in source; framed as a real-world benchmark",
+              "🔍 Median follow-up: 60 mo",
+              {
+                "text": "📊 5-yr outcomes",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "5-yr estimate"
+                  ],
+                  "rows": [
+                    [
+                      "BCR-FS",
+                      "44%"
+                    ],
+                    [
+                      "MFS",
+                      "71%"
+                    ],
+                    [
+                      "CSS",
+                      "92%"
+                    ]
+                  ]
+                }
+              },
+              "⚠️ No comparator arm; outcomes are descriptive, not a treatment effect",
+              "⚠️ N, eligibility, and treatment received not reported in source tweet",
+              "⚠️ Definition of high-risk not stated in source",
+              "Stated purpose: contextualize perioperative treatment strategies in this high-risk population"
             ],
             "figures": [],
             "nct": null,
@@ -32,42 +53,40 @@
             "slug": "proteus",
             "verdict": {
               "soc_implication": "unclear",
-              "rationale": "Source gives three 5-yr rates and follow-up only. No design, N, treatment, or comparator, so no SOC read is supportable.",
-              "audience": "High-risk prostate cancer; risk definition and treatment not specified in source"
+              "rationale": "Descriptive benchmark with no comparator, N, eligibility, or treatment details in source; cannot classify impact on any perioperative decision.",
+              "audience": "High-risk prostate cancer, perioperative setting"
             },
             "significance": null,
             "monday_clinic": null,
             "primary_endpoint": null,
             "analysis_sections": [
               {
-                "label": "Results",
-                "body": "At **median follow-up 60 mo**: **5-yr BCR-FS 44%**, **5-yr MFS 71%**, **5-yr CSS 92%**. No per-arm, per-subgroup, or comparator figures reported in source."
+                "label": "Design",
+                "body": "Design not stated in source; described as a **real-world benchmark**. **Median follow-up 60 mo.**"
               },
               {
-                "label": "Limitations",
-                "body": "Beyond the missing design, the source names no treatment received, so the 44% biochemical failure rate cannot be read as a benchmark for any specific perioperative strategy. No N, no risk-stratification criteria, and no confidence intervals accompany the three rates."
+                "label": "Endpoints",
+                "body": "Reported: **5-yr BCR-FS**, **5-yr MFS**, **5-yr CSS**. No primary endpoint or effect size stated."
               },
               {
-                "label": "Applies to",
-                "body": "Represents a high-risk prostate cancer cohort as characterised in the source. Does not represent any defined stage, grade, or treatment group, since the source states none."
+                "label": "Discussion",
+                "body": "Framed as a reference point for **perioperative treatment strategies** in high-risk disease, not a test of one. Useful only once the cohort definition and treatments received are known, since those determine which trial populations it can benchmark."
               }
             ],
             "interpretation": null,
             "relevant_specialties": [
-              "radonc",
               "medonc",
               "surgonc"
             ],
             "significance_by_specialty": null,
             "open_questions": [
-              "Which treatment produced these outcomes",
-              "Risk-group definition behind the 44% 5-yr BCR-FS",
-              "Whether perioperative systemic therapy improves on this benchmark"
+              "Which perioperative strategies improve on this BCR-FS benchmark?",
+              "Cohort high-risk definition and treatments received"
             ],
             "consort": null,
-            "modality": null,
-            "intent": null,
-            "methodology": null,
+            "modality": "surgery",
+            "intent": "curative",
+            "methodology": "real-world-evidence",
             "related_trials": [
               {
                 "nct": "NCT06627530",
@@ -93,41 +112,17 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Men ≥18 years of age;\n* Histologically confirmed unfavorable intermediate or high/very high risk non metastatic (by conventional imaging) prostate adenocarcinoma intended for surgery without neuroendocrine differentiation or small cell features;\n* Unfavorable…",
-                "answers_question": "Whether perioperative systemic therapy improves on this benchmark",
-                "relevance_phrase": "randomised neoadj darolutamide ± leuprorelin pre-RP"
-              },
-              {
-                "nct": "NCT07677566",
-                "brief_title": "177Lu-PSMA-617 Combined With Darolutamide in Neoadjuvant Treatment of High-risk Localized Prostate Cancer: a Prospective, Single-arm, Multi-center Clinical Trial",
-                "overall_status": "NOT_YET_RECRUITING",
-                "phase": [
-                  "PHASE4"
-                ],
-                "enrollment_count": 20,
-                "primary_completion_date": "2027-07",
-                "brief_summary": "The goal of this clinical trial is to explore the efficacy and safety of darolutamide combined with 177Lu-PSMA-617 in treating high-risk localized prostate cancer patients who are scheduled to undergo radical prostatectomy. The main questions it aims to answer are:\n\nDoes this combination treatment improve the pathological complete response rate (pCR)? What is the minimal residual disease (MRD) rate in these patients? What are the safety profiles and any adverse effects associated with this…",
-                "conditions": [
-                  "Prostate Cancer",
-                  "Prostate Cancer Patients"
-                ],
-                "interventions": [
-                  {
-                    "name": "Darolutamide combined with 177Lu-PSMA-617",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients must be ≥ 18 and ≤75 years of age\n2. All patients must have a histologically or cytologically diagnosis of prostate cancer，without distant metastasis, and suitable for radical prostatectomy\n3. All patients meet at least one of the following criteria： multi-parameter…",
-                "answers_question": "Whether perioperative systemic therapy improves on this benchmark",
-                "relevance_phrase": "single-arm neoadj Lu-PSMA + darolutamide, pCR pre-RP"
+                "answers_question": "Which perioperative strategies improve on this BCR-FS benchmark?",
+                "relevance_phrase": "RCT neoadjuvant leuprorelin+darolutamide pre-RP, pCR EP"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "perioperative therapy high-risk prostate cancer"
+                "perioperative high-risk prostate"
               ],
               "queries_failed": [],
-              "candidates_returned": 17,
-              "fetched_at": "2026-08-30T08:00:34.951Z",
+              "candidates_returned": 20,
+              "fetched_at": "2026-09-15T02:48:11.011Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [

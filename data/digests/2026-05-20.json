@@ -1,7 +1,7 @@
 {
   "date": "2026-05-20",
   "conference": null,
-  "generated_at": 1786456707443,
+  "generated_at": 1789442176574,
   "slug_aliases": [
     "breast-pmrt-proton-vs-photon-cc",
     "ls-sclc-54gy-hyperfractionated-rt",
@@ -18,61 +18,84 @@
     "rtog9804-e5194-tamoxifen"
   ],
   "digest": {
-    "top_line": "Hyperfractionated SIB to 54Gy beats 45Gy BID in LS-SCLC: mOS 60.7 vs 39.5mo, HR 0.55 (0.37-0.72), no added oesophagitis or pneumonitis.",
-    "tldr": "Thoracic carries the day: dose escalation inside the BID schedule finally moves LS-SCLC OS where CONVERT and CALGB 30610 failed with QD escalation, though early stopping and a 39.5mo control arm argue for caution. Breast offers two omission-adjacent reads: tamoxifen after lumpectomy alone cut 15yr IBR 19.0% → 11.4% in good-risk DCIS (non-randomized), and proton PMRT tracked with higher capsular contracture, driven mostly by DTI reconstruction.",
+    "top_line": "LS-SCLC phase 3: 54 Gy/30 fx BID SIB vs 45 Gy BID, mOS 60.7 vs 39.5 mo, HR 0.55 (0.37–0.72), p=0.003; similar toxicity, DSMB stopped at interim.",
+    "tldr": "Thoracic led: 54 Gy BID SIB improved OS (HR 0.55) and local PFS (HR 0.51) in LS-SCLC without added G3–4 oesophagitis or pneumonitis, stopped at interim. In breast, exploratory pooled data show tamoxifen cut 15-yr IBR to 11.4% vs 19.0% in unirradiated good-risk DCIS; retrospective proton PMRT capsular contracture HR 1.76 lost significance on MVA (P=.083).",
     "sites": [
       {
         "disease_site": "breast",
-        "intro": "Both reads are about what RT competes with or costs: tamoxifen as the alternative omission lever in good-risk DCIS, and reconstruction-modality interaction as a PMRT toxicity counterweight to the cardiac/pulmonary dosimetry case for protons.",
+        "intro": "Two questions next to the RT decision, both from non-randomised comparisons: tamoxifen as the lever when good-risk DCIS skips RT, and whether PBS proton PMRT adds implant capsular contracture over IMRT.",
         "studies": [
           {
-            "name": "Proton vs Photon PMRT Capsular Contracture",
-            "tldr": "2yr CC 50% with proton+DTI vs 12% photon+TE/I; proton HR 2.3 univariate, 1.76 (0.93-3.32) multivariable, ns.",
+            "name": "Pencil beam scanning proton vs IMRT photon PMRT: capsular contracture risk",
+            "tldr": "Proton vs photon PMRT CC HR 1.76 (0.93-3.32, P=.083) on MVA; 2-yr CC 50% with protons plus DTI.",
             "details": [
-              "🔍 Retrospective 2-center institutional cohort, N=175 (89 PBS proton, 86 IMRT photon), treated 2017-2023",
-              "🔍 All pts had subpectoral 2-stage TE/I or DTI reconstruction; every TE/I pt had the expander irradiated",
-              "📐 Median f/u 42 mo (proton) vs 47 mo (photon); CC estimated by Kaplan-Meier, Cox PH for covariates",
+              "🔍 Retrospective IRB-approved cohort, 2 centers within a single institution, Jan 2017 to Dec 2023",
+              "🔍 N=175: 89 PBS proton, 86 IMRT photon PMRT",
+              "🔍 Subpectoral 2-stage TE/I or DTI reconstruction; TE irradiated in all TE/I pts",
+              "🔍 Median age 49 (range 24-78); 63% Hispanic",
+              "⚠️ Cohorts imbalanced on reconstruction type (TE/I vs DTI, P<.001) and laterality (P<.001)",
               {
-                "text": "📊 2yr CC rate by modality × reconstruction type (P < .001 across the four groups)",
+                "text": "📐 Factors associated with capsular contracture (Cox)",
                 "table": {
                   "columns": [
-                    "Group",
-                    "n",
-                    "2yr CC rate"
+                    "Comparison",
+                    "Model",
+                    "HR (95% CI)",
+                    "P"
                   ],
                   "rows": [
                     [
-                      "Proton + DTI",
-                      "36",
-                      "50%"
+                      "Proton vs photon",
+                      "Univariate",
+                      "2.3 (1.26-4.30)",
+                      ".007"
                     ],
                     [
-                      "Photon + DTI",
-                      "15",
-                      "35%"
+                      "Proton vs photon",
+                      "Multivariable",
+                      "1.76 (0.93-3.32)",
+                      ".083"
                     ],
                     [
-                      "Proton + TE/I",
-                      "53",
-                      "23%"
-                    ],
-                    [
-                      "Photon + TE/I",
-                      "71",
-                      "12%"
+                      "DTI vs TE/I",
+                      "Multivariable",
+                      "3.0 (1.7-5.5)",
+                      "<.001"
                     ]
                   ]
                 }
               },
-              "📐 Reconstruction type outweighed modality: DTI vs TE/I HR 3.0 (1.7-5.5), P < .001 on multivariable analysis",
-              "📊 Proton effect attenuated from HR 2.3 (1.26-4.30, P=.007) univariate to HR 1.76 (0.93-3.32, P=.083) adjusted",
-              "⚠️ Groups imbalanced on the two variables that matter most here: laterality (P<.001) and reconstruction type (P<.001)",
-              "⚠️ Modality was not randomized; proton selection at a proton center plausibly tracks with chest wall anatomy and laterality",
-              "⚠️ CC is a clinician-graded (Baker-type) endpoint in an unblinded retrospective chart review; grading drift by modality is not excluded",
-              "🔗 Adds a reconstruction-toxicity counterweight to the proton PMRT literature, which has been argued mainly on cardiac and pulmonary dosimetry"
+              {
+                "text": "📊 2-yr CC rate by modality and reconstruction type (overall P<.001)",
+                "table": {
+                  "columns": [
+                    "Reconstruction",
+                    "Proton",
+                    "Photon"
+                  ],
+                  "rows": [
+                    [
+                      "DTI",
+                      "50% (n=36)",
+                      "35% (n=15)"
+                    ],
+                    [
+                      "TE/I",
+                      "23% (n=53)",
+                      "12% (n=71)"
+                    ]
+                  ]
+                }
+              },
+              "📐 Median f/u 42 mo proton vs 47 mo photon",
+              "📐 CC by Kaplan-Meier; Cox results checked with binary logistic regression",
+              "⚠️ PMRT dose, fractionation and superficial dose constraints not reported in source abstract",
+              "⚠️ Photon DTI stratum only n=15; that 2-yr estimate is imprecise",
+              "⚠️ CC definition and grading scale not stated in source abstract"
             ],
             "figures": [],
             "nct": null,
+            "doi": null,
             "tweet_ids": [
               1000000008,
               1000000006
@@ -80,55 +103,63 @@
             "slug": "proton-vs-photon-pmrt-capsular-contracture",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective, non-randomized modality assignment with baseline imbalance in reconstruction type and laterality; the proton signal loses significance once adjusted.",
-              "audience": "Post-mastectomy breast cancer, implant-based reconstruction (TE/I or DTI), receiving PMRT"
+              "rationale": "Retrospective cohort with reconstruction type imbalanced between modalities (P<.001); proton effect lost significance on multivariable analysis, so the modality signal stays confounded.",
+              "audience": "Subpectoral implant reconstruction (TE/I or DTI) receiving PMRT"
             },
-            "significance": "The actionable variable is reconstruction type, not beam: DTI carried HR 3.0 (1.7-5.5) for CC independent of modality, and proton+DTI was the worst cell at 50% at 2 years vs 12% for photon+TE/I. That reframes the pre-RT conversation with plastic surgery toward staged TE/I when protons are planned, rather than toward declining protons outright.",
-            "monday_clinic": "In a woman heading to PMRT after mastectomy with implant reconstruction, this informs the timing and type of reconstruction discussed with plastic surgery when proton is on the table; it says nothing about autologous reconstruction or prepectoral placement, neither of which was studied.",
+            "significance": "The proton excess persists within both reconstruction types (2-yr CC 23% vs 12% after TE/I, 50% vs 35% after DTI) even though the adjusted HR crossed 1. Dose, fractionation and superficial constraints are not reported in source, so the PBS planning lever behind it is unknown. It bears on proton selection for implant pts.",
+            "monday_clinic": "In a pt planned for subpectoral DTI reconstruction who is being considered for PBS proton PMRT, this questions that pairing (2-yr CC 50%); it does not address autologous or prepectoral reconstruction.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "IRB-approved **retrospective** cohort at 2 centers within one institution, PMRT delivered 2017-2023. **N=175** (89 PBS proton, 86 IMRT photon). CC estimated by Kaplan-Meier, with Cox proportional hazards for covariates and a binary logistic model as verification."
+                "body": "**Retrospective**, IRB-approved cohort from 2 centers within a single institution, Jan 2017 to Dec 2023. Hypothesis stated a priori: **proton cohort would have higher CC**. Median follow-up 42 mo proton, 47 mo photon."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Breast cancer pts who underwent **subpectoral** 2-stage TE/I or DTI reconstruction and then PMRT. Median age 49 (range 24-78), **63% Hispanic**. Groups were balanced except on **tumor laterality (P < .001)** and **reconstruction type (P < .001)**, the two axes the analysis turns on."
+                "body": "**Subpectoral 2-stage TE/I or DTI** reconstruction with PMRT; N=175 (89 proton, 86 photon). Median age 49 (range 24-78), 63% Hispanic. Groups balanced except **laterality and reconstruction type (both P<.001)**."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**Pencil beam scanning proton** PMRT vs **IMRT photon** PMRT. All TE/I pts had the **tissue expander in place and irradiated**, so this cohort speaks to expander-in-situ RT, not to post-exchange irradiation of a permanent implant. Dose and fractionation are not reported in source."
+                "body": "**Pencil beam scanning proton vs IMRT photon** PMRT; the TE was irradiated in all TE/I pts. Dose, fractionation, bolus and superficial dose constraints are **not reported in source**."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Capsular contracture** by Kaplan-Meier; associated factors by Cox proportional hazards, verified with binary logistic regression."
               },
               {
                 "label": "Results",
-                "body": "Proton was associated with CC on univariate analysis (**HR 2.3, 1.26-4.30, P=.007**) but the association **did not hold** after adjustment (**HR 1.76, 0.93-3.32, P=.083**). **DTI vs TE/I carried HR 3.0 (1.7-5.5), P < .001** in the multivariable model. No other factor was significantly associated with CC."
+                "body": "Reconstruction type was the only factor that stayed associated on multivariable analysis; the proton effect **did not reach significance** after adjustment (see tables)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The source frames proton vs photon CC data as scarce and reports this as the **largest PBS PMRT reconstruction cohort** to date. RADCOMP compares proton vs photon breast RT on cardiac outcomes, not reconstruction complications, so it will not settle this question."
               },
               {
                 "label": "Applies to",
-                "body": "Represents implant-based subpectoral reconstruction (TE/I or DTI) irradiated with modern PBS proton or IMRT photon PMRT. Does not represent autologous reconstruction, prepectoral implant placement, or unreconstructed chest wall PMRT."
+                "body": "Represents subpectoral TE/I or DTI implant reconstruction receiving PBS proton or IMRT photon PMRT. Does not represent autologous or prepectoral reconstruction."
               },
               {
                 "label": "Limitations",
-                "body": "Modality was assigned by practice pattern, not randomized, so the residual proton association could be confounding the model did not capture. CC is clinician-graded on unblinded chart review, and the DTI cells are thin (**36 proton, 15 photon**), which is where the widest rate gap sits."
+                "body": "Photon DTI stratum is only n=15, so the within-DTI modality contrast is underpowered. CC grading scale and RT planning parameters are absent from the abstract, which blocks translation to a specific planning change."
               },
               {
                 "label": "Discussion",
-                "body": "The paper set out to test a prespecified suspicion that protons increase CC and returned a **trend that did not clear significance** once reconstruction type entered the model. What it does establish is the interaction cell worth counseling on: **proton + DTI at 50% CC at 2 years**."
+                "body": "Adjusted proton HR 1.76 with an interval of **0.93-3.32** excludes neither no effect nor a large one; P=.083 is not reassurance. The consistent direction within both reconstruction types is the stronger signal, and **PBS plus DTI** is where the risk concentrates."
               }
             ],
-            "interpretation": "Proton PMRT has been argued into practice largely on dosimetry: better heart and lung sparing than photons in a population with decades of life ahead of them, where late cardiac events are the toxicity of record. The unresolved question has always been what the flat, skin-sparing-free entrance dose of pencil beam scanning does to the reconstruction sitting directly under it. This cohort is an attempt to answer it, and it is worth reading for what it does and does not establish.\n\nWhat it establishes cleanly is that reconstruction type dominates. DTI carried HR 3.0 (1.7-5.5) for capsular contracture against TE/I on multivariable analysis, and that estimate is both large and precise enough to act on. The modality signal is the weaker of the two: it started at HR 2.3 (1.26-4.30) univariate and fell to HR 1.76 (0.93-3.32, P=.083) once the model accounted for the covariates. A reader is entitled to read that attenuation two ways. The generous reading is that the study is underpowered at N=175 for a hazard of that size and the point estimate is stable, so the effect is likely real and the confidence interval simply has not closed. The skeptical reading is that reconstruction type was imbalanced between the arms at P < .001, which is precisely the variable that turned out to matter, and the univariate proton signal was partly reading that imbalance back to us. The paper's own framing, a trend, is the honest one.\n\nThe four-cell breakdown is the most useful output and also the most fragile. Proton with DTI at 50% at two years against photon with TE/I at 12% is a fourfold spread, but the DTI cells hold 36 and 15 patients. A difference of a handful of events moves the proton-versus-photon DTI comparison substantially, and no interaction test is reported in the source. Treat the 50% as a counseling figure for the highest-risk configuration rather than as an estimate of proton's specific contribution within DTI.\n\nTwo design features limit how far this transfers. All TE/I patients were irradiated with the expander in place, so this speaks to expander-in-situ PMRT and not to the alternative sequence where the exchange precedes radiation, a choice that plausibly changes capsule biology. And capsular contracture is a clinician-graded endpoint assessed on unblinded retrospective review by teams who knew the modality; the investigators had a prior hypothesis that protons would look worse, which is the setting in which grading drift is hardest to rule out.\n\nWhere this should land in practice is not as a reason to decline protons in a patient whose cardiac anatomy warrants them. It is a reason to move the reconstruction decision earlier in the conversation. If proton PMRT is planned and the patient is choosing between DTI and staged TE/I, this cohort argues the staged approach is the safer pairing, and the magnitude of the reconstruction effect is larger and better estimated than the modality effect it is being weighed against.",
+            "interpretation": "The takeaway most readers will carry, that protons raise capsular contracture risk, is weaker than the abstract's conclusion suggests. The univariate proton HR of 2.3 (1.26-4.30) falls to 1.76 (0.93-3.32) once covariates enter the model, and the only factor that kept a strong association was direct-to-implant reconstruction, HR 3.0 (1.7-5.5). That attenuation is the central methodological fact. Reconstruction type was unevenly distributed between cohorts (P<.001): 36 of the 89 proton pts had DTI against 15 of the 86 photon pts. An unadjusted modality comparison is therefore partly a comparison of reconstruction strategies.\n\nThe confidence interval tells a reader how to hold the adjusted result. An interval running from 0.93 to 3.32 rules out neither no effect nor a clinically large one, and with only 15 photon DTI pts the study cannot separate a modality effect within DTI from noise. Reading P=.083 as evidence that protons are safe with implants would be as wrong as reading the univariate HR as proof of harm. The stratified 2-yr rates are more persuasive than either model: the proton rate is higher within DTI (50% vs 35%) and within TE/I (23% vs 12%). Those are still unadjusted Kaplan-Meier estimates, and the overall P<.001 cannot by itself apportion the spread between modality and reconstruction type.\n\nThe abstract does not say why a proton excess would exist, and that limits what a radiation oncologist can do with it. A plausible mechanism would involve how PBS handles superficial dose around the implant and chest wall, but the source reports no dose, fractionation, bolus, skin constraint or planning technique. Without those, the finding cannot become a planning change, and a center with different superficial dose handling may or may not reproduce it. The laterality imbalance (P<.001) adds another layer. It plausibly reflects which pts were referred for protons, and referral patterns can carry confounders the model did not capture.\n\nThe source frames the case for proton PMRT around better cardiac and pulmonary dosimetry, and RADCOMP is testing that case on cardiac outcomes. This cohort offers a counterweight specific to implant reconstruction. It does not argue against protons in general. It argues that the reconstruction plan belongs in the modality decision, and that PBS combined with DTI is where the signal concentrates. Median follow-up of 42 and 47 months is not the weak point; confounding is. The finding would be wrong if the proton excess reflects referral pattern, surgical practice or era rather than dose. A cohort matched or stratified on reconstruction type, with superficial dose metrics reported, is what would settle it.",
             "relevant_specialties": [
               "radonc",
               "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The proton CC signal did not survive adjustment (HR 1.76, 0.93-3.32, P=.083), so this is not on its own grounds to decline protons where cardiac sparing is the indication. It is grounds to know the reconstruction plan before simulation: proton with DTI hit 50% CC at 2 years, and every TE/I patient here was irradiated with the expander in place.",
-              "surgonc": "Reconstruction type outweighed beam modality: DTI carried HR 3.0 (1.7-5.5) for CC versus staged TE/I on multivariable analysis. When PMRT is planned, particularly proton PMRT, that argues for staging the reconstruction rather than direct-to-implant, in subpectoral placement at least, which is all this cohort covers."
+              "radonc": "The proton excess lost significance on MVA (HR 1.76, 0.93-3.32), but 2-yr CC stayed higher with protons after both TE/I (23% vs 12%) and DTI (50% vs 35%). Dose, fractionation and superficial constraints are not reported, so the planning lever is unknown. It bears on proton selection for implant pts.",
+              "surgonc": "Reconstruction type carried the strongest association: DTI vs TE/I HR 3.0 (1.7-5.5), P<.001, with the TE irradiated in all TE/I pts. For a pt expected to need PMRT, this bears on DTI vs 2-stage planning, especially when proton PMRT is anticipated."
             },
             "open_questions": [
-              "Does prepectoral placement change the proton CC signal?",
-              "Expander-in-situ vs post-exchange RT sequencing for implant reconstruction",
-              "Proton PMRT reconstruction toxicity in a prospective randomized comparison"
+              "Does proton CC excess persist after matching on reconstruction type?",
+              "Which PBS superficial dose parameters drive capsular contracture?",
+              "Does prepectoral or autologous reconstruction change proton vs photon risk?"
             ],
             "consort": null,
             "modality": "radiation",
@@ -138,27 +169,13 @@
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "prepectoral reconstruction postmastectomy radiation",
-                "tissue expander radiation sequencing mastectomy",
-                "proton postmastectomy radiation breast reconstruction"
+                "proton breast reconstruction",
+                "prepectoral reconstruction radiation"
               ],
-              "queries_failed": [
-                {
-                  "term": "prepectoral reconstruction postmastectomy radiation",
-                  "reason": "empty"
-                },
-                {
-                  "term": "tissue expander radiation sequencing mastectomy",
-                  "reason": "empty"
-                },
-                {
-                  "term": "proton postmastectomy radiation breast reconstruction",
-                  "reason": "empty"
-                }
-              ],
-              "candidates_returned": 0,
-              "fetched_at": "2026-08-11T13:57:46.243Z",
-              "rerank_outcome": "failed"
+              "queries_failed": [],
+              "candidates_returned": 5,
+              "fetched_at": "2026-09-15T03:12:42.128Z",
+              "rerank_outcome": "abstained"
             },
             "source_ids": [
               {
@@ -172,207 +189,205 @@
             ]
           },
           {
-            "name": "NRG/RTOG 9804 + E5194 combined analysis",
-            "tldr": "15yr IBR 11.4% vs 19.0% with tamoxifen after lumpectomy alone in good-risk DCIS; MVA HR 0.54 for any IBR.",
+            "name": "NRG/RTOG 9804 + E5194 combined analysis (tamoxifen after lumpectomy, DCIS)",
+            "tldr": "15-yr IBR 11.4% vs 19.0% with vs without tamoxifen in good-risk DCIS treated by lumpectomy without RT; invasive IBR HR 0.43.",
             "details": [
-              "📊 15-yr IBR 11.4% (95% CI 7.9-15.5) with tam vs 19.0% (15.3-22.9) without, P=.001",
-              "📐 MVA any IBR HR 0.54 (0.35-0.83), P=.0045; invasive IBR HR 0.43 (0.24-0.77), P=.0042",
-              "📊 Tamoxifen cut invasive IBR (P=.0048) but not DCIS-IBR (P=.089)",
-              "🔍 Ancillary exploratory pooled analysis: RTOG 9804 non-RT arm (n=317) + E5194 good-risk cohort (n=561), N=878",
-              "🔍 Good-risk definition held constant: low/intermediate grade, ≤2.5 cm, margins ≥3 mm",
-              "🔍 Median f/u 14.85 yrs (min-max 0.005-24.44); 117 IBR events (65 invasive, 52 DCIS)",
-              "⚠️ Tamoxifen was OPTIONAL and non-randomized in both trials, so this is an observational comparison inside two trial cohorts",
-              "⚠️ Uptake differed sharply by trial (65.6% in 9804 vs 30.3% in E5194), and trial membership is itself the strongest imbalance (55.0% vs 21.8% from 9804)",
-              "⚠️ Tam users were also enriched for favorable pathology: negative re-excision 27.2% vs 10.6%, size ≤5 mm 57.0% vs 41.3% (both P<.0001)",
-              "🔗 Anchors against the RT question: 9804 randomized this same good-risk population to RT vs none, so the two omission levers can now be read side by side, though no head-to-head RT vs tam comparison is reported in source"
+              "🔍 Exploratory pooled analysis: non-RT arm of NRG/RTOG 9804 (n=317) + E5194 good-risk cohort (n=561)",
+              "🔍 Good-risk: low/intermediate grade DCIS, ≤2.5 cm, excision margins ≥3 mm, no RT",
+              "💊 Tamoxifen optional in both trials: 43.1% overall, 65.6% RTOG 9804 vs 30.3% E5194",
+              "🔍 Median f/u 14.85 yr (13.87 RTOG 9804, 16.15 E5194); Fine-Gray models",
+              {
+                "text": "📊 IBR outcomes by tamoxifen use (117 IBRs: 65 invasive, 52 DCIS)",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "Tamoxifen",
+                    "No tamoxifen",
+                    "Effect"
+                  ],
+                  "rows": [
+                    [
+                      "Any IBR, 15-yr estimate",
+                      "11.4% (7.9-15.5)",
+                      "19.0% (15.3-22.9)",
+                      "p=0.001"
+                    ],
+                    [
+                      "Any IBR, multivariable",
+                      "n/a",
+                      "n/a",
+                      "HR 0.54 (0.35-0.83), p=0.0045"
+                    ],
+                    [
+                      "Invasive IBR",
+                      "not reported",
+                      "not reported",
+                      "p=0.0048; MVA HR 0.43 (0.24-0.77), p=0.0042"
+                    ],
+                    [
+                      "DCIS-IBR",
+                      "not reported",
+                      "not reported",
+                      "p=0.089"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "⚠️ Baseline imbalance: tamoxifen users skewed lower-risk",
+                "table": {
+                  "columns": [
+                    "Characteristic",
+                    "Tamoxifen",
+                    "No tamoxifen",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "Enrolled on NRG/RTOG 9804",
+                      "55.0%",
+                      "21.8%",
+                      "<0.0001"
+                    ],
+                    [
+                      "Non-white",
+                      "13.8%",
+                      "9.2%",
+                      "0.034"
+                    ],
+                    [
+                      "Negative re-excision",
+                      "27.2%",
+                      "10.6%",
+                      "<0.0001"
+                    ],
+                    [
+                      "Pathologic size ≤5 mm",
+                      "57.0%",
+                      "41.3%",
+                      "<0.0001"
+                    ]
+                  ]
+                }
+              },
+              "⚠️ Multivariable covariates not listed in source; trial membership co-varies with tamoxifen use",
+              "⚠️ Tamoxifen dose, duration, adherence not reported in source",
+              "⚠️ CBE and OS were estimated but results not in source text",
+              "🔗 RTOG 9804 RT arm not analyzed; no tamoxifen-alone vs RT comparison here"
             ],
             "figures": [],
             "nct": null,
+            "doi": "10.1016/j.ijrobp.2026.04.103",
             "tweet_ids": [
               1000000051
             ],
             "slug": "rtog9804-e5194-dcis-tamoxifen",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Tamoxifen was optional and unrandomized in both parent trials; users differed on trial of origin, re-excision status and pathologic size, so confounding by indication is unadjustable away.",
-              "audience": "Good-risk DCIS post-lumpectomy, low/int grade, ≤2.5 cm, margins ≥3 mm, no RT"
+              "rationale": "Exploratory ancillary analysis; tamoxifen optional, not randomized, and imbalanced by trial, re-excision and size. Parent RCT tested RT, not tamoxifen, so residual confounding limits causal read.",
+              "audience": "Good-risk DCIS, lumpectomy without RT, low/int grade, ≤2.5 cm, margins ≥3 mm"
             },
-            "significance": "For the RT-omission conversation this is the other half of the ledger: in the same good-risk cohort 9804 randomized to RT, endocrine therapy alone carried 15-yr IBR 11.4% vs 19.0%, and the benefit sits entirely on invasive IBR (HR 0.43) rather than DCIS-IBR (P=.089). No RT-vs-tamoxifen comparison is reported in source, so this sizes the alternative, it does not substitute for it.",
-            "monday_clinic": "For the patient with low/intermediate-grade DCIS ≤2.5 cm and ≥3 mm margins who has already declined radiotherapy, this quantifies what endocrine therapy adds over surveillance alone at 15 years; it does not inform high-grade, larger, or close-margin DCIS, nor patients receiving RT.",
+            "significance": "The association was confined to invasive events (DCIS-IBR p=0.089), which made up 65 of 117 IBRs. For the RT-omission discussion, the 11.4% 15-yr IBR on tamoxifen has no RT arm in this analysis to benchmark against, and which good-risk subgroups drive it sits in Fig 3, with subgroup HRs not in source text.",
+            "monday_clinic": "In low/intermediate-grade DCIS ≤2.5 cm with margins ≥3 mm managed without RT after lumpectomy, this supports tamoxifen as an invasive-IBR risk-reduction option in the omission discussion; it does not extend to high-grade DCIS or pts receiving RT.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Ancillary **exploratory** combined analysis of two cooperative-group datasets, not a new randomization. Tamoxifen use was **optional** in both parent trials, so the tamoxifen comparison is observational; Fine-Gray univariate and multivariable models were used for the competing-risk endpoints."
+                "body": "**Ancillary exploratory analysis** combining the non-RT arm of NRG/RTOG 9804, which randomized good-risk DCIS to RT or no RT, with the good-risk E5194 cohort observed without RT. **Tamoxifen was optional and not randomized** in either trial. Univariate and multivariable **Fine-Gray** models; median follow-up **14.85 yr**."
               },
               {
                 "label": "Population & inclusion",
-                "body": "N=878: the **non-RT arm of NRG/RTOG 9804** (n=317) plus the **good-risk cohort of E5194** (n=561). Good-risk was defined identically across both: **low- or intermediate-grade DCIS, ≤2.5 cm, margins ≥3 mm**. Median age 59 (28-88)."
+                "body": "**N=878** (317 RTOG 9804, 561 E5194); median age 59 (28-88). Good-risk: **low- or intermediate-grade, ≤2.5 cm, excision margins ≥3 mm**, lumpectomy without RT."
               },
               {
                 "label": "Regimen",
-                "body": "Lumpectomy alone without radiotherapy, with or without **tamoxifen** by patient/physician choice. Overall uptake **43.1%**, but lopsided by trial: 65.6% in NRG/RTOG 9804 versus 30.3% in E5194."
+                "body": "Tamoxifen, optional per trial; used by **43.1%** overall (65.6% RTOG 9804 vs 30.3% E5194). Dose, duration and adherence not reported in source."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**No radiotherapy in any analyzed patient** by design: the 9804 contribution is its observation arm and E5194 was a non-RT cohort. The result therefore describes the population in which a reader has already elected RT omission."
+                "body": "**No RT** in the analyzed population. The RTOG 9804 RT arm is not part of this analysis, so tamoxifen alone is **not compared against RT** here."
               },
               {
                 "label": "Endpoints",
-                "body": "IBR, invasive IBR, DCIS-IBR, contralateral breast event and overall survival, compared between tamoxifen groups. Median follow-up **14.85 years** overall (13.87 in 9804, 16.15 in E5194); 15.92 years among those still alive."
+                "body": "**IBR** (any), invasive IBR, DCIS-IBR, contralateral breast event and overall survival. CBE and OS results are not reported in the source text."
               },
               {
                 "label": "Results",
-                "body": "117 IBR events (65 invasive, 52 DCIS). **15-yr IBR 11.4% (7.9-15.5) with tamoxifen vs 19.0% (15.3-22.9) without**, P=.001. On multivariable analysis **HR 0.54 (0.35-0.83)** for any IBR and **HR 0.43 (0.24-0.77)** for invasive IBR; DCIS-IBR was not significantly reduced (P=.089)."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents good-risk DCIS (low/intermediate grade, ≤2.5 cm, margins ≥3 mm) managed with lumpectomy and no radiotherapy. Does not represent high-grade or larger DCIS, close or positive margins, or patients who received adjuvant radiotherapy."
-              },
-              {
-                "label": "Limitations",
-                "body": "Beyond the non-randomized exposure, the tamoxifen groups differ on the axes that predict recurrence: trial of origin (55.0% vs 21.8% from 9804), negative re-excision (27.2% vs 10.6%) and size ≤5 mm (57.0% vs 41.3%). Duration of tamoxifen, adherence and receptor status are not given in the source, so a dose- or ER-defined read is unavailable."
-              },
-              {
-                "label": "Discussion",
-                "body": "The split between a significant invasive-IBR reduction and a null DCIS-IBR effect is the part worth carrying: it argues the drug is acting on the events that carry downstream consequence rather than uniformly suppressing recurrence. Whether that separation is biology or a power artifact of 52 DCIS events is not settled here."
+                "body": "117 IBRs (65 invasive, 52 DCIS). The reduction tracked **invasive IBR, not DCIS-IBR**."
               },
               {
                 "label": "vs leading data",
-                "body": "NRG/RTOG 9804 itself established that RT reduces IBR in this same good-risk cohort, so the field now has magnitudes for both omission levers in one population. The source reports no direct RT-versus-tamoxifen comparison, and the pooled cohort cannot supply one."
+                "body": "NSABP B-24 randomized tamoxifen after lumpectomy plus RT, and the UK/ANZ DCIS trial randomized tamoxifen and RT in a factorial design. Here tamoxifen is examined **only in good-risk pts managed without RT**, and without randomization."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents low- or intermediate-grade DCIS ≤2.5 cm with margins ≥3 mm treated with lumpectomy without RT. Does not represent high-grade DCIS or pts who received RT after lumpectomy."
+              },
+              {
+                "label": "Limitations",
+                "body": "Multivariable covariates are not listed in source, and trial membership also differs in follow-up (13.87 vs 16.15 yr). The **DCIS-IBR result (p=0.089) rests on 52 events** and does not exclude an effect."
+              },
+              {
+                "label": "Discussion",
+                "body": "Tamoxifen use tracked **lower invasive recurrence** in good-risk DCIS managed without RT, consistent in direction with randomized tamoxifen data. It does not settle whether tamoxifen alone approaches RT, or how much of the gap reflects the lower-risk profile of users."
               }
             ],
-            "interpretation": "The value of this analysis is not that tamoxifen reduces ipsilateral recurrence in DCIS, which has been the working assumption for two decades, but that it puts a long-horizon number on that reduction in the exact population where the field's current argument sits: good-risk DCIS in which the clinician has already decided to omit radiotherapy. NRG/RTOG 9804 defined that population prospectively and randomized it to RT or observation. By taking the observation arm of 9804 and welding it to E5194's identically-defined good-risk cohort, the authors get 878 patients followed a median of 14.85 years, which is long enough for DCIS recurrence to actually declare itself. That follow-up is the analysis's real asset, and it is why the 15-year estimates of 11.4% versus 19.0% deserve more weight than the effect size alone would earn.\n\nThe design, however, will not carry a causal claim, and the paper is explicit that this is exploratory. Tamoxifen was optional in both parent trials, which means the exposure was chosen rather than assigned, and the authors' own baseline table shows the choice was not random. Patients who took tamoxifen were far more likely to have come from 9804 (55.0% vs 21.8%), to have had a negative re-excision (27.2% vs 10.6%), and to have pathologic size at or under 5 mm (57.0% vs 41.3%). Every one of those imbalances points the same direction, toward lower baseline recurrence risk in the treated group. Multivariable Fine-Gray adjustment can attenuate that, and the fact that HR 0.54 survives adjustment is reassuring, but adjustment can only handle the confounders that were measured. Trial of origin in particular is doing double duty here, standing in for era, referral pattern, and surveillance intensity as much as for anything the model can name.\n\nThe more interesting internal signal is the dissociation between endpoint types. Tamoxifen was associated with reduced invasive IBR (HR 0.43, P=.0042) but not with reduced DCIS-IBR (P=.089). If that separation is real, it changes how the drug should be framed to a patient: not as a way to avoid a second lumpectomy, but as a way to lower the odds that the next event is one that requires systemic staging and treatment. That is a different value proposition, and a more defensible one. The caution is that with 52 DCIS events, a null P of .089 is as consistent with insufficient power as with a genuinely absent effect, and the paper does not settle which.\n\nFor a radiation oncologist the practical read is comparative rather than substitutive. Nothing here compares tamoxifen against radiotherapy, and the design cannot: every patient in the pooled cohort went without RT. What the analysis does supply is the counterfactual arm's magnitude, so that the conversation about omitting RT in good-risk DCIS can be conducted with two numbers instead of one. A patient declining radiotherapy is not thereby committed to accepting a 19% fifteen-year recurrence risk, and a patient declining both should understand which of the two curves they are on. For that to be wrong, the confounding would have to be strong enough to manufacture a near-halving of invasive recurrence out of a 16-point difference in the proportion with tumors at or under 5 mm, which is possible but not the most economical explanation of the data.",
+            "interpretation": "RTOG 9804 and E5194 are the two datasets that made RT omission a defensible conversation in good-risk DCIS: one randomized RT against observation, the other followed a comparable cohort without RT. Neither was built to ask what tamoxifen contributes once RT is dropped, because both left endocrine therapy to choice. This combined analysis turns that choice into an exposure, across 878 pts with a median follow-up of 14.85 years, and finds lower ipsilateral recurrence among users, with 15-year IBR of 11.4% versus 19.0% and an adjusted invasive IBR HR of 0.43.\n\nAgainst the randomized tamoxifen evidence the direction is unsurprising. NSABP B-24 tested tamoxifen after lumpectomy plus RT, and the UK/ANZ DCIS trial examined tamoxifen and RT together in a factorial design. What this dataset adds is population and horizon rather than a new mechanism: a defined good-risk group (low or intermediate grade, size up to 2.5 cm, margins of at least 3 mm) managed without RT, followed long enough to capture late ipsilateral events. Agreement in direction with randomized data raises plausibility. It does not convert an observational contrast into a randomized estimate for this population.\n\nThe confidence a reader places in the magnitude should be tempered by who took the drug. Users were more often RTOG 9804 enrollees (55.0% vs 21.8%), more often had pathologic size ≤5 mm (57.0% vs 41.3%) and more often had a negative re-excision (27.2% vs 10.6%). Each of those plausibly lowers recurrence on its own. The Fine-Gray models adjust, but the source text does not list the covariates, and trial membership bundles differences a single term may not absorb, including follow-up length (13.87 years in RTOG 9804, 16.15 in E5194). Exposure is also coarse: dose, duration and adherence are not reported. Direction is more credible than size, and if residual confounding runs the expected way, the adjusted HRs sit on the favorable side of the true effect.\n\nThe split between recurrence types deserves attention. The association held for invasive IBR (p=0.0048) but not DCIS-IBR (p=0.089), with 65 and 52 events respectively. A non-significant result on 52 events is weak evidence of no effect, so the honest reading is that the analysis could not show a DCIS-IBR reduction, not that tamoxifen spares only invasive disease. If the invasive-only pattern is real, it is the more consequential direction for an omission discussion.\n\nFor a radiation oncologist, the decision this informs is how to frame RT omission. It quantifies what pts choosing tamoxifen without RT still carry, an 11.4% 15-year IBR estimate, but the analysis includes no RT arm, so it cannot say whether tamoxifen alone approaches RT or whether combining them would add further control. It also does not reach high-grade DCIS. The finding would be wrong in its magnitude if the lower-risk profile of users, not the drug, explains most of the gap; the subgroup forest plot (Fig 3, HRs not in source text) and the unreported contralateral and survival results are where that would show.",
             "relevant_specialties": [
               "radonc",
-              "medonc",
-              "surgonc"
+              "medonc"
             ],
             "significance_by_specialty": {
-              "radonc": "This sizes the non-RT alternative in the very cohort 9804 randomized to RT or observation: 15-yr IBR 11.4% vs 19.0%, with the effect concentrated on invasive IBR (HR 0.43) and absent for DCIS-IBR (P=.089). No RT-versus-tamoxifen comparison exists in source, so it informs the omission discussion without answering it.",
-              "medonc": "Endocrine therapy in good-risk DCIS buys a 46% relative reduction in any IBR (HR 0.54) and 57% in invasive IBR at a median 14.85 years, but the source gives no ER status, duration or adherence data, so the number cannot be gated to a receptor-defined subgroup. Uptake was only 43.1%, itself non-random.",
-              "surgonc": "Margin and excision quality track with the exposure rather than being controlled for it: tamoxifen users more often had a negative re-excision (27.2% vs 10.6%) and size ≤5 mm (57.0% vs 41.3%). For a surgeon this reinforces that the ≥3 mm margin plus small low/intermediate-grade lesion is the substrate on which these 15-year numbers rest."
+              "radonc": "For RT omission in good-risk DCIS, tamoxifen alone still left 15-yr IBR at 11.4%, and this analysis has no RT arm to benchmark it against. The reduction tracked invasive IBR (HR 0.43), while DCIS-IBR did not separate (p=0.089).",
+              "medonc": "In good-risk DCIS managed without RT, tamoxifen associated with lower invasive IBR (HR 0.43, 0.24-0.77) but not DCIS-IBR (p=0.089). Dose, duration and adherence are not reported, and contralateral breast event results, the other half of the endocrine rationale, are not in source text."
             },
             "open_questions": [
-              "Whether the invasive-only benefit reflects biology or DCIS-event power",
-              "Optimal tamoxifen duration in RT-omitted good-risk DCIS",
-              "Whether ER status selects who benefits in DCIS"
+              "Does tamoxifen alone approximate RT for IBR control in good-risk DCIS?",
+              "Which good-risk DCIS subgroups gain enough to justify tamoxifen?",
+              "Is the lack of DCIS-IBR reduction real or underpowered?"
             ],
             "consort": null,
             "modality": "systemic",
             "intent": "curative",
-            "methodology": "phase-3-rct",
+            "methodology": "meta-analysis",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT01357772",
-                "brief_title": "Trial of Low Dose Tamoxifen in Women With Breast Intraepithelial Neoplasia - Long Term Follow-up",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "nct": "NCT07762885",
+                "brief_title": "Omission of Adjuvant Radiotherapy in Low- and Intermediate-Risk Ductal Carcinoma In Situ After Breast-Conserving Surgery",
+                "overall_status": "RECRUITING",
                 "phase": [
                   "PHASE3"
                 ],
-                "enrollment_count": 500,
-                "primary_completion_date": "2022-12",
-                "brief_summary": "The aim of the study is to evaluate whether tamoxifen at a low dose of 5mg/d reduces in the long term the incidence of invasive breast cancer and ductal carcinoma in situ, DCIS (DIN 1c, 2, 3) of the breast, in woman operated for lobular intraepithelial neoplasia (LIN1, 2 and 3) or ER-positive ductal intraepithelial neoplasia (DIN 1b, DIN2, DIN3, 1a excluded) of the breast.\n\nTo improve the risk-benefit ratio, the use of lower doses of the drug has been proposed.\n\nBiomarker trials revealed that 5…",
+                "enrollment_count": 636,
+                "primary_completion_date": "2031-06",
+                "brief_summary": "This is a prospective, multicenter, randomized, open-label, phase III non-inferiority trial designed to evaluate whether omission of postoperative radiotherapy is clinically acceptable in patients with low- and intermediate-risk ductal carcinoma in situ (DCIS) following breast-conserving surgery. Eligible patients include women aged ≥40 years with ER-positive, low- or intermediate-grade DCIS, tumor size ≤2.5 cm, negative surgical margins ≥3 mm, absence of comedo necrosis, and screen-detected…",
                 "conditions": [
-                  "Carcinoma, Intraductal, Noninfiltrating",
-                  "Recurrence, Local Neoplasm",
-                  "Breast Neoplasms",
-                  "Atypical Hyperplasia"
+                  "Ductal Carcinoma In Situ, DCIS"
                 ],
                 "interventions": [
                   {
-                    "name": "Tamoxifen",
-                    "type": "DRUG"
+                    "name": "Adjuvant Radiotherapy",
+                    "type": "RADIATION"
                   },
                   {
-                    "name": "placebo",
+                    "name": "tamoxifen",
                     "type": "DRUG"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Women of age ≥ 18 and \\< 75 years\n2. Women operated on for lobular (LIN 2 and 3) or ER positive or unknown ductal DCIS, i.e DIN 1-3, but DIN 1a excluded) intraepithelial neoplasia in the 5 years (60 months) prior the inclusion in the study. Both incident (diagnosis \\< 12…",
-                "answers_question": "Optimal tamoxifen duration in RT-omitted good-risk DCIS",
-                "relevance_phrase": "tamoxifen 5mg/d vs placebo in ER+ DIN, long-term"
-              },
-              {
-                "nct": "NCT06075953",
-                "brief_title": "DCIS: RECAST Trial Ductal Carcinoma In Situ: Re-Evaluating Conditions for Active Surveillance Suitability as Treatment",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 400,
-                "primary_completion_date": "2028-11",
-                "brief_summary": "The goal of this trial is to see if active surveillance monitoring and hormonal therapy in patients diagnosed with ductal cell carcinoma in situ (DCIS), an early stage of breast cancer, can be an effective management of the disease.\n\nParticipants will be asked to receive control hormonal therapy or an investigational hormonal therapy treatment. Participants will be asked to return for evaluation with MRI at three months and six months. Depending on the evaluation participants will have the…",
-                "conditions": [
-                  "Ductal Carcinoma in Situ"
-                ],
-                "interventions": [
-                  {
-                    "name": "Tamoxifen",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Exemestane",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Letrozole",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Anastrazole",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Testosterone + Anastrazole",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Elacestrant",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Z-endoxifen",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\nA. Female, at least 18 years old\n\nB. Previous diagnosis of HR+ DCIS (at least 50% ER or PR; biopsy will have been performed previously at diagnosis) with or without microinvasion\n\n* Patients with a diagnosis of hormone positive DCIS who have undergone surgery with positive…",
-                "answers_question": "Whether ER status selects who benefits in DCIS",
-                "relevance_phrase": "randomised endocrine agents in HR+ DCIS only"
-              },
-              {
-                "nct": "NCT07245316",
-                "brief_title": "Avoiding Surgery in Estrogen Receptor Positive Atypical Ductal Hyperplasia and In-situ Carcinoma Treated With Endocrine Treatment Trial",
-                "overall_status": "NOT_YET_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 340,
-                "primary_completion_date": "2032-12",
-                "brief_summary": "This study aims to evaluate the 5-year invasive ipsilateral breast cancer incidence rate in patients with hormone-receptor positive, HER-2 negative atypical ductal hyperplasia or in-situ carcimona who omitted surgery and received endocrine therapy.",
-                "conditions": [
-                  "Ductal Carcinoma in Situ of the Breast"
-                ],
-                "interventions": [
-                  {
-                    "name": "Avoiding surgery",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "1\\. Inclusion criteria:\n\n1. Female patients aged ≥35 years.\n2. Diagnosed with atypical ductal hyperplasia (ADH), ductal carcinoma in situ (DCIS), or lobular carcinoma in situ (LCIS) on core-needle biopsy, vacuum-assisted biopsy, or excisional biopsy.\n3. Immunohistochemistry (IHC) performed on…",
-                "answers_question": "Whether ER status selects who benefits in DCIS",
-                "relevance_phrase": "ER+ DCIS/ADH, 5y invasive IBC on endocrine alone"
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Female patients aged ≥40 years；\n2. Histologically confirmed low- or intermediate-grade ductal carcinoma in situ (DCIS) without invasive carcinoma, including incidental DCIS identified within benign breast lesions；\n3. Tumor size ≤2.5 cm on final pathology；\n4. Negative…",
+                "answers_question": "Does tamoxifen alone approximate RT for IBR control in good-risk DCIS?",
+                "relevance_phrase": "ph3 NI RT omission in ER+ low/int-grade DCIS, tamoxifen"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "tamoxifen ductal carcinoma in situ",
-                "endocrine therapy DCIS estrogen receptor"
+                "DCIS radiotherapy omission",
+                "DCIS tamoxifen"
               ],
               "queries_failed": [],
-              "candidates_returned": 16,
-              "fetched_at": "2026-08-11T13:57:52.077Z",
+              "candidates_returned": 20,
+              "fetched_at": "2026-09-15T03:14:22.670Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -387,102 +402,224 @@
       },
       {
         "disease_site": "thoracic",
-        "intro": "Involved-field BID RT with a 54Gy SIB, identical 3-week treatment time in both arms, so this isolates dose rather than acceleration.",
+        "intro": "Unlike QD escalation in CONVERT and CALGB 30610/RTOG 0538, involved-field BID SIB escalation to 54 Gy improved OS; the 39.5 mo control arm beats prior 45 Gy BID arms, so transfer depends on selection (PET-staged, ECOG 0–1, age ≤70).",
         "studies": [
           {
-            "name": "High-dose hyperfractionated SIB RT vs standard-dose RT (limited-stage SCLC)",
-            "tldr": "mOS 60.7 vs 39.5mo, HR 0.55 (0.37-0.72), p=0.003 for 54Gy SIB vs 45Gy BID, no added toxicity.",
+            "name": "High-dose hyperfractionated SIB RT vs standard-dose RT for limited-stage SCLC",
+            "tldr": "mOS 60.7 vs 39.5 mo, HR 0.55 (0.37–0.72), p=0.003 with 54 Gy/30 fx BID SIB vs 45 Gy/30 fx BID in LS-SCLC; toxicity similar.",
             "details": [
-              "🔍 Open-label phase 3, 16 Chinese hospitals, N=224 (54Gy n=108, 45Gy n=116), ITT primary, NCT03214003",
-              "🔍 Both arms 30 BID fractions over 3 weeks, ≥6h interfraction, 10 fx/week; total time identical, so this isolates dose, not acceleration",
-              "🔍 SIB design: 54Gy to GTV/IGTV with PTV held at 45Gy in both arms; control was 45Gy to GTV and PTV alike",
-              "🔍 PET-CT staging mandatory, involved-field only (elective nodal irradiation omitted), VMAT + 4DCT + CBCT",
-              "📊 Secondary time-to-event endpoints (54Gy vs 45Gy)",
-              "📊 Local PFS gain (HR 0.51) with a null MFS (HR 0.81, p=0.248) puts the OS signal on in-chest control, not distant disease",
+              "🔍 Open-label randomised phase 3, 16 hospitals in China, N=224 (108 vs 116), median f/u 46 mo",
+              "🔍 54 Gy/30 fx SIB to GTV/IGTV (PTV 45 Gy) vs 45 Gy/30 fx, both BID VMAT over 3 wks",
+              "🔍 Involved field only: PET-CT-positive primary + nodes, no elective nodal irradiation",
+              "💊 Concurrent cisplatin or carboplatin + etoposide × 4, TRT started 0–42 days after cycle 1",
               {
-                "text": "📊 Grade 3-4 RT toxicity, similar across arms",
-                "subdetails": [
-                  "Oesophagitis: 14 (13%) vs 14 (12%), p=0.84",
-                  "Pneumonitis: 5 (5%) vs 7 (6%), p=0.663",
-                  "Late grade 3 pneumonitis: 2 vs 3 pts; no late grade 3 oesophagitis either arm",
-                  "One treatment-related death, 54Gy arm (myocardial infarction)"
-                ]
+                "text": "📊 Efficacy, ITT (54 Gy vs 45 Gy)",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "54 Gy SIB",
+                    "45 Gy",
+                    "HR (95% CI), p"
+                  ],
+                  "rows": [
+                    [
+                      "Median OS (primary)",
+                      "60.7 mo (49.2–62.0)",
+                      "39.5 mo (27.5–51.4)",
+                      "0.55 (0.37–0.72), p=0.003"
+                    ],
+                    [
+                      "2-yr OS",
+                      "76%",
+                      "54%",
+                      "p=0.001"
+                    ],
+                    [
+                      "Median PFS",
+                      "30.5 mo (14.5–46.5)",
+                      "16.7 mo (10.7–22.7)",
+                      "0.70 (0.49–0.99), p=0.044"
+                    ],
+                    [
+                      "Median local PFS",
+                      "Not reached",
+                      "40.6 mo (22.8–58.4)",
+                      "0.51 (0.33–0.78), p=0.002"
+                    ],
+                    [
+                      "Median MFS",
+                      "40.2 mo (26.6–53.8)",
+                      "23.8 mo (10.1–37.5)",
+                      "0.81 (0.57–1.16), p=0.248"
+                    ],
+                    [
+                      "DCR",
+                      "97%",
+                      "93%",
+                      "p=0.218"
+                    ]
+                  ]
+                }
               },
-              "🔗 vs CONVERT (66Gy QD) and CALGB 30610 (70Gy QD): both failed to beat 45Gy BID. Escalating within the BID schedule is the difference here",
-              "🔗 vs the Nordic phase 2 (60Gy/40 BID): 2yr OS 74.2% vs 48.1%, same direction, and this is the phase 3 version of that signal",
-              "⚠️ Stopped early at interim (88 deaths, HR 0.50) with 224 of a planned 326 pts; early-stopped trials overestimate effect",
-              "⚠️ Control arm mOS 39.5mo is far above the 45Gy literature (20.8-30mo), so both arms are a highly selected cohort",
-              "⚠️ Age >70 and ECOG 2 excluded; median age 64. No centralised QA of contours or plans"
+              {
+                "text": "📊 Acute G3–4 toxicity, as-treated",
+                "table": {
+                  "columns": [
+                    "Event",
+                    "54 Gy",
+                    "45 Gy",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "Oesophagitis",
+                      "14 (13%)",
+                      "14 (12%)",
+                      "0.84"
+                    ],
+                    [
+                      "Pneumonitis",
+                      "5 (5%)",
+                      "7 (6%)",
+                      "0.663"
+                    ],
+                    [
+                      "Neutropenia",
+                      "48 (44%)",
+                      "48 (41%)",
+                      "0.64"
+                    ],
+                    [
+                      "Thrombocytopenia",
+                      "14 (13%)",
+                      "17 (14%)",
+                      "0.71"
+                    ]
+                  ]
+                }
+              },
+              "⚠️ DSMB stopped at interim (88 deaths, 224 of 326 planned): HR 0.50 (0.32–0.78), p=0.002",
+              "⚠️ Control mOS 39.5 mo exceeds prior 45 Gy BID arms (20.8–30 mo): age 18–70, ECOG 0–1, PET-staged",
+              {
+                "text": "🔗 Dose escalation vs 45 Gy BID across randomised trials, as cited in source",
+                "table": {
+                  "columns": [
+                    "Trial",
+                    "Escalated schedule",
+                    "Endpoint",
+                    "Escalated arm",
+                    "45 Gy BID arm"
+                  ],
+                  "rows": [
+                    [
+                      "This trial (phase 3)",
+                      "54 Gy/30 fx BID SIB",
+                      "mOS · 2-yr OS",
+                      "60.7 mo · 76%",
+                      "39.5 mo · 54%"
+                    ],
+                    [
+                      "CONVERT (phase 3)",
+                      "66 Gy/33 fx QD",
+                      "mOS · 2-yr OS",
+                      "25 mo · 51%",
+                      "30 mo · 56%"
+                    ],
+                    [
+                      "CALGB 30610/RTOG 0538 (phase 3)",
+                      "70 Gy QD",
+                      "Median survival · 5-yr OS",
+                      "28.5 mo · 29%",
+                      "30.1 mo · 32%"
+                    ],
+                    [
+                      "Northern European randomised phase 2",
+                      "60 Gy/40 fx BID",
+                      "2-yr OS",
+                      "74.2%",
+                      "48.1%"
+                    ]
+                  ]
+                }
+              }
             ],
             "figures": [],
             "nct": "NCT03214003",
+            "doi": "10.1016/S2213-2600(24)00189-9",
             "tweet_ids": [
               1000000007
             ],
             "slug": "china-hyperfractionated-sib-ls-sclc",
             "verdict": {
-              "soc_implication": "challenges-soc",
-              "rationale": "Randomised phase 3, prespecified OS primary hit at interim. Diverges from CONVERT/CALGB 30610 dose-escalation failures. Early stopping and single-country cohort temper it.",
-              "audience": "LS-SCLC, age 18-70, ECOG 0-1, PET-CT staged, ≤2 prior chemo courses"
+              "soc_implication": "early-signal",
+              "rationale": "Stopped at interim for benefit with 224 of 326 planned accrued; truncated RCTs tend to overstate effect. Single-country, open-label, no central RT QA, age ≤70.",
+              "audience": "LS-SCLC (VALSG), age 18–70, ECOG 0–1, PET-CT and brain MRI staged"
             },
-            "significance": "The dose went to GTV only: PTV stayed 45Gy in both arms, so this is an SIB boost, not a uniform 54Gy plan, and that is why grade 3-4 oesophagitis stayed at 13%. Local PFS HR 0.51 against a null MFS (HR 0.81) locates the benefit in the chest. Deliverable on VMAT with PET-defined involved fields.",
-            "monday_clinic": "In a fit LS-SCLC patient under 70 with PET-defined disease starting concurrent chemoRT, this supports an SIB boost to 54Gy/30 BID over uniform 45Gy; it does not speak to patients over 70, ECOG 2, or once-daily schedules.",
-            "primary_endpoint": null,
+            "significance": "Escalation is a GTV/IGTV-only SIB (PTV held at 45 Gy) within the same 30 fx, 3-week BID course on PET-defined involved fields. Local PFS separated (HR 0.51) while MFS did not (HR 0.81), fitting an in-field effect. The decision it moves is BID dose, 45 vs 54 Gy, not BID vs once daily.",
+            "monday_clinic": "In PET-CT and brain-MRI staged LS-SCLC, age 18–70 and ECOG 0–1, planned for concurrent platinum-etoposide with BID thoracic RT, this supports 54 Gy SIB as an alternative to 45 Gy; it does not extend to pts over 70, ECOG 2, or once-daily schedules.",
+            "primary_endpoint": {
+              "name": "Overall survival",
+              "klass": "overall-survival",
+              "stat_value": "HR 0.55",
+              "stat_detail": "95% CI 0.37–0.72, p=0.003 · mOS 60.7 vs 39.5 mo"
+            },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**Open-label randomised phase 3**, 16 public hospitals in China, 1:1, enrolled June 30 2017 to April 6 2021. Stratified by ECOG, stage, prior chemotherapy course, and platinum choice. **Median follow-up 46 months** (IQR 33-56); **terminated early** by the DSMB in April 2021 on interim benefit."
+                "body": "**Open-label randomised phase 3**, 1:1, 16 public hospitals in China, N=224 (108 vs 116) enrolled June 2017 to April 2021. Stratified by ECOG, stage, prior chemo courses and platinum choice. **Stopped early by the DSMB** at the interim after 88 deaths; median follow-up 46 mo."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**Aged 18-70**, ECOG **0-1**, VALSG limited-stage confirmed on **whole-body FDG PET-CT and brain MRI**, previously untreated or after one to two courses of platinum-etoposide. Median age 64, 46% female, 86% stage III, 79% current or former smokers. Age over 70 and ECOG 2 were excluded."
+                "body": "**Age 18–70, ECOG 0–1**, LS-SCLC by VALSG staging, with mandatory whole-body **PET-CT and brain MRI**. Untreated or after 1–2 courses of platinum-etoposide. Median age 64; 86% stage III; 79% current or former smokers."
               },
               {
                 "label": "Regimen",
-                "body": "Four cycles of cisplatin 75 mg/m² (or carboplatin AUC 5) with etoposide 100 mg/m² days 1-3 every 3 weeks; **99% completed all four cycles** in both arms. PCI 25 Gy in 10 fractions for responsive disease, given to 82% vs 81%."
+                "body": "Cisplatin 75 mg/m² or carboplatin AUC 5 plus etoposide 100 mg/m² days 1–3, 4 courses every 3 weeks; almost 99% received all 4. PCI 25 Gy/10 fx for responders (82% vs 81%)."
               },
               {
                 "label": "Radiotherapy",
-                "body": "VMAT, 6-MV, **30 twice-daily fractions over 3 weeks**, minimum 6 h apart, starting 0-42 days after cycle 1. Experimental arm delivered a **simultaneous integrated boost of 54 Gy to GTV/IGTV with the PTV at 45 Gy**; the control arm had **45 Gy to both GTV and PTV**. Target volumes were PET-positive lesions only, with **elective nodal irradiation omitted** and a 5 mm CTV margin."
+                "body": "**54 Gy/30 fx SIB to GTV/IGTV with PTV at 45 Gy** vs 45 Gy/30 fx, both VMAT, BID at least 6 h apart, 5 days/wk for 3 weeks, starting 0–42 days after chemo cycle 1. Involved field: PET-positive primary and nodes, CTV = GTV + 5 mm, **no elective nodal irradiation**. Constraints included MLD ≤15 Gy, lung V20 <30%, cord max ≤40 Gy."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary: overall survival** in the ITT population, from the start of chemotherapy. Secondary: PFS, local PFS, metastatic-free survival, disease control rate, acute and late toxicity, and HRQOL (reported elsewhere)."
+                "body": "**Primary:** OS in ITT, measured from chemo start. **Secondary:** PFS, local PFS, MFS, DCR, acute and late toxicity (CTCAE v5.0), HRQOL (to be reported separately). Powered on HR 0.65 at 81% power, target 326 pts."
+              },
+              {
+                "label": "Results",
+                "body": "Primary endpoint crossed the interim boundary and held at the January 2023 cutoff, with 40 (37%) vs 66 (57%) deaths. Arm-level estimates are in the efficacy table."
               },
               {
                 "label": "Safety",
-                "body": "**No toxicity penalty for the boost**: grade 3-4 oesophagitis 13% vs 12% (p=0.84) and pneumonitis 5% vs 6% (p=0.663). Grade 3-4 neutropenia 44% vs 41%. Late grade 3 pneumonitis in 2 vs 3 pts, no late grade 3 oesophagitis or pulmonary fibrosis in either arm. One treatment-related death (myocardial infarction, 54 Gy arm)."
+                "body": "Acute G3–4 RT toxicity similar between arms. No late G3 oesophagitis or stricture in either arm; late G3 pneumonitis in 2 vs 3 pts, no G3 pulmonary fibrosis. **One treatment-related death** (myocardial infarction) in the 54 Gy arm."
               },
               {
                 "label": "vs leading data",
-                "body": "**CONVERT** (66 Gy in 33 once-daily fractions) and **CALGB 30610/RTOG 0538** (70 Gy once daily) both failed to beat 45 Gy twice daily, with median OS 25 vs 30 mo and 28.5 vs 30.1 mo respectively. Neither escalated arm was hyperfractionated or accelerated. The **Nordic phase 2** (60 Gy in 40 twice-daily fractions) did show a gain, 2-year OS 74.2% vs 48.1%, and this trial is the phase 3 counterpart of that signal."
+                "body": "INT-0096 set 45 Gy/30 fx BID as the reference. **CONVERT** (66 Gy/33 fx QD) and **CALGB 30610/RTOG 0538** (70 Gy QD) escalated dose without acceleration or hyperfractionation and did not beat it; the Northern European randomised phase 2 of 60 Gy/40 fx BID was the only prior BID escalation signal. The authors describe this as the first phase 3 to escalate while keeping BID delivery."
               },
               {
                 "label": "Applies to",
-                "body": "Represents PET-staged LS-SCLC in fit pts aged 70 or under with ECOG 0-1 treated with concurrent platinum-etoposide and involved-field VMAT. Does not represent pts over 70, ECOG 2, or anyone treated on a once-daily schedule or with elective nodal coverage."
+                "body": "Represents fit, PET-CT and brain-MRI staged LS-SCLC pts aged 18–70 with ECOG 0–1 receiving concurrent platinum-etoposide. Does not represent pts over 70, ECOG 2, or anyone staged without PET-CT."
               },
               {
                 "label": "Limitations",
-                "body": "Stopping at the interim analysis with 224 of a planned 326 pts inflates the observed effect, and the appendix-level subgroup analysis has not been done. There was **no centralised QA** of contouring or planning across the 16 centres, and prognostic variables that plausibly drive a dose effect (tumour volume, PTV size) were not balanced by design."
+                "body": "Control mOS of 39.5 mo beat the 24 mo design assumption and prior 45 Gy BID arms (20.8–30 mo), marking a selected cohort. Tumour and RT volumes were not controlled, and the interim analysis is listed as the only protocol amendment despite being described as preplanned. Reporting inconsistencies: median age given as both 64 and 62, and the OS CI upper bound (62.0) sits just above the 60.7 mo median."
               },
               {
                 "label": "Discussion",
-                "body": "The **21.2-month OS gain is larger than the trial powered for** (assumed HR 0.65, 37 vs 24 mo), and the control arm's 39.5 mo sits well above the 20.8-30 mo reported elsewhere for 45 Gy. That points to cohort selection (PET staging, VALSG limited stage, age and ECOG caps) rather than an underperforming control, which is reassuring for internal validity but limits transfer. Local PFS separating (HR 0.51) while MFS does not (HR 0.81) is the mechanistically coherent read for a dose escalation confined to the chest."
+                "body": "The authors credit **local control** for the OS gain, but first-relapse rates were near identical (59 [55%] vs 65 [56%]) and chest-first failure **did not differ significantly**, so patterns of failure do not yet show where the benefit arises. Subgroup and HRQOL results are unreported."
               }
             ],
-            "interpretation": "The question this trial answers is narrower and more useful than \"does dose escalation work in LS-SCLC.\" That broader question has been asked twice with once-daily schedules and answered no: CONVERT at 66 Gy in 33 fractions and CALGB 30610/RTOG 0538 at 70 Gy in 35 fractions both failed to improve on 45 Gy twice daily, and in CALGB the escalated arm's median survival ran slightly behind the control. What was untested at phase 3 was escalation that keeps the twice-daily, accelerated schedule intact. Holding the overall treatment time at 3 weeks in both arms is the design decision that makes this trial interpretable: the arms differ in dose to gross disease and in nothing else, so a positive result is attributable to dose rather than to the confound of a longer or shorter course that has muddied earlier comparisons.\n\nThe second design choice worth attention is the simultaneous integrated boost itself. The PTV prescription was 45 Gy in both arms; only the GTV or IGTV received 54 Gy in the experimental arm. This is not a uniform 54 Gy plan, and it explains why the toxicity comparison is as flat as it is, with grade 3-4 oesophagitis at 13% versus 12% and pneumonitis at 5% versus 6%. A reader tempted to translate this into a uniformly escalated plan would be leaving the trial's evidence behind and should expect the oesophagus to notice. The same caveat applies to target definition: every patient was staged with FDG PET-CT, elective nodal irradiation was omitted, and the boost volume was PET-positive disease. Escalating dose to a generously drawn elective volume is a different intervention with a different toxicity ceiling.\n\nHow much should the magnitude move confidence? Less than the headline implies. The trial was designed around an assumed hazard ratio of 0.65 with medians of 37 versus 24 months, and it stopped at a preplanned interim after 88 deaths with 224 of 326 planned patients accrued. Trials halted early for benefit systematically overstate effect size, and a 21.2-month median difference is a large overshoot of the design assumption. The direction of the result is well supported by the interim boundary being crossed on a properly specified spending function; the size of it is the part to discount. The Nordic randomised phase 2 comparing 60 Gy in 40 twice-daily fractions with 45 Gy reported a 2-year OS gain of similar shape, 74.2% against 48.1%, and the consistency of two independent trials pointing the same way is a stronger argument than either magnitude taken alone.\n\nGeneralisability is where the trial gives up the most. The control arm reached 39.5 months, against 20.8 to 30 months in prior 45 Gy series, meaning the entire cohort outperformed the literature. The investigators attribute this to PET staging, the more conservative VALSG limited-stage definition, exclusion of ECOG 2, and an upper age limit of 70 in a disease whose median age at diagnosis is closer to 67 to 71. Those are credible explanations, and they are also a description of a population most oncologists do not entirely have. Absolute survival should be expected to fall in a less selected group; whether the relative benefit of the boost falls with it is unknown, since the subgroup analyses have not been reported and there was no centralised quality assurance to confirm that the dose actually delivered matched the dose prescribed across 16 centres.\n\nFor the local-regional argument, the pattern of failure data is the most persuasive element. Local PFS separated substantially (HR 0.51) while metastasis-free survival did not (HR 0.81, p=0.248), and first-relapse sites were similarly distributed between arms. A chest-confined intervention producing a chest-confined benefit is the result one would predict if the effect is real, and its absence would have been the strongest reason to suspect chance.",
+            "interpretation": "For a radiation oncologist who already treats limited-stage disease twice daily, the escalation question has mostly been tested sideways. INT-0096 made 45 Gy in 30 BID fractions the reference, and the two phase 3 attempts to improve on it, CONVERT at 66 Gy in 33 once-daily fractions and CALGB 30610/RTOG 0538 at 70 Gy once daily, raised dose while giving up acceleration and hyperfractionation. Neither improved survival, which left unresolved whether dose was the wrong lever or whether abandoning the short BID course cancelled any gain. This trial isolates the variable: same 30 fractions, same three weeks, same 45 Gy PTV, with only the GTV/IGTV boosted to 54 Gy. The Northern European randomised phase 2 of 60 Gy in 40 BID fractions pointed the same way, so the direction is now supported by two randomised datasets.\n\nThe magnitude deserves less trust than the direction. The DSMB stopped the trial after 88 deaths with 224 of 326 planned pts accrued, when the interim HR was 0.50; with follow-up to January 2023 it sat at 0.55. Trials truncated for benefit tend to overstate effect, and drift toward the null as events accrue is the expected pattern. An upper CI bound of 0.72 leaves room for a real benefit even if the estimate shrinks further, but the 21.2-month median gain the authors cite should not be carried to tumor board as a stable figure.\n\nThe control arm is the second caution. Standard-dose pts reached a median OS of 39.5 mo, against 20.8–30 mo in earlier 45 Gy BID cohorts and a 24-month design assumption. The authors point to VALSG staging, mandatory PET-CT and brain MRI, and exclusion of ECOG 2 and anyone over 70, in a disease whose NCDB median age is 67. Selection does not bias the randomised contrast, but absolute medians will not transfer, and the relative benefit is untested in the older, less fit pts seen in practice. Open-label assessment matters little for OS but more for investigator-read PFS and local PFS, and with no central RT quality assurance across 16 centres, contour and delivered-dose consistency are unverified.\n\nThe mechanism is plausible but not closed. Local PFS favoured 54 Gy (HR 0.51) while MFS did not separate (HR 0.81, p=0.248), which fits an in-field effect. Yet first-relapse rates were 55% vs 56% and chest-first failure did not differ significantly, so the local-control story is not visible in first-site failure data, which record where relapse began rather than later in-field progression. Toxicity parity is the other half of the case: G3–4 acute oesophagitis 13% vs 12%, against the 32% the authors cite from INT-0096, delivered with VMAT, 4D-CT, cone-beam verification and involved fields. That parity likely depends on a GTV-only boost within PET-restricted volumes and may not hold with elective nodal fields or larger boost volumes.\n\nWhat it moves: for a fit, PET-staged pt already planned for concurrent chemo with BID thoracic RT, a 54 Gy SIB is a defensible alternative to 45 Gy. What it leaves open: whether 54 Gy in 30 fractions matches or beats 60 Gy in 40 BID fractions, whether benefit survives beyond age 70, and how a higher GTV dose behaves alongside consolidation immunotherapy, which was not part of this chemo-only protocol.",
             "relevant_specialties": [
-              "radonc",
-              "medonc"
+              "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The escalation is an SIB to GTV only, with PTV held at 45Gy in both arms, which is why grade 3-4 oesophagitis stayed at 13% vs 12%. Local PFS HR 0.51 against a null MFS (HR 0.81) confirms a chest-confined benefit. PET-defined involved fields, no elective nodal irradiation.",
-              "medonc": "The chemotherapy backbone was fixed and identical (4 cycles platinum-etoposide, 99% completion in both arms), so the OS gain is attributable to the RT dose, not the regimen. Grade 3-4 neutropenia was unchanged at 44% vs 41%, so referring a fit under-70 patient for the boost schedule carries no extra haematologic cost."
+              "radonc": "A GTV/IGTV-only boost to 54 Gy with PTV at 45 Gy keeps 30 fx BID over 3 weeks on involved PET-defined fields, with G3–4 acute oesophagitis 13% vs 12%. The actionable choice is BID dose, 45 vs 54 Gy, for fit PET-staged pts; once-daily escalation is not addressed."
             },
             "open_questions": [
-              "Tolerability of 54Gy BID SIB in pts over 70",
-              "Replication outside China with centralised RT quality assurance",
-              "Optimal boost dose between 54Gy and 60Gy twice daily"
+              "Does the 54 Gy SIB benefit hold in pts older than 70 or ECOG 2?",
+              "54 Gy/30 fx SIB BID vs 60 Gy/40 fx BID or high-dose once-daily?",
+              "Does higher thoracic dose add benefit alongside consolidation immunotherapy?"
             ],
             "consort": {
               "enrolled": 235,
@@ -503,7 +640,7 @@
                 }
               ]
             },
-            "modality": "combined",
+            "modality": "radiation",
             "intent": "curative",
             "methodology": "phase-3-rct",
             "significance_perspective": "Radiation oncology",
@@ -536,18 +673,19 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed diagnosis of small cell lung cancer (SCLC)\n* Limited-stage disease (Stage I-III; any T, any N, M0), eligible for definitive radiotherapy\n* Measurable disease according to RECIST 1.1\n* Age ≥18 years\n* ECOG performance status 0-2\n* No prior thoracic…",
-                "answers_question": "Optimal boost dose between 54Gy and 60Gy twice daily",
-                "relevance_phrase": "randomises 45 vs 60 vs SIB 45-54Gy BID"
+                "answers_question": "54 Gy/30 fx SIB BID vs 60 Gy/40 fx BID or high-dose once-daily?",
+                "relevance_phrase": "phase 3: SIB 45-54 Gy vs 60 Gy vs 45 Gy BID, LS-SCLC"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "elderly limited-stage small cell lung cancer radiotherapy",
-                "twice-daily thoracic radiotherapy dose escalation small cell"
+                "SCLC thoracic radiotherapy elderly",
+                "SCLC hyperfractionated thoracic radiotherapy",
+                "SCLC radiotherapy immunotherapy"
               ],
               "queries_failed": [],
-              "candidates_returned": 10,
-              "fetched_at": "2026-08-11T13:58:08.918Z",
+              "candidates_returned": 44,
+              "fetched_at": "2026-09-15T03:15:31.532Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
