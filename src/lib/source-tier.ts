@@ -18,6 +18,7 @@
 // markFigureSourcedDetails on each study's details.
 
 import { detailAllText, withSourceTier, type DigestDetail } from './llm-pipeline.ts';
+import { normalizeDecimalSeparators } from './decimal-separator.ts';
 
 // A "significant" number: a decimal (8.7, 0.62) or a 2+ digit integer (95, 340).
 // Bare single digits (arm counts, "2 arms") are excluded so a trivial axis label
@@ -27,9 +28,13 @@ const SIGNIFICANT_NUM_RE = /\d+\.\d+|\d{2,}/g;
 // The significant numeric tokens in a blob of text, as bare magnitude strings
 // ("8.7", "0.62", "95", "340"). Percent signs / units are dropped so "95%" in a
 // figure matches "95" in a bullet — membership is on the magnitude.
+// Decimal separators are normalized first. The builder passes raw DB rows, where
+// a Lancet "0·62" reads as "62": a figure's number then never matches the bullet
+// (a missed mark), and an abstract's never excludes it (a mark granted to a
+// number the abstract states, whenever the OCR spelled it "0.62").
 export function numericTokens(text: string | null | undefined): string[] {
   if (!text) return [];
-  return text.match(SIGNIFICANT_NUM_RE) ?? [];
+  return normalizeDecimalSeparators(text).match(SIGNIFICANT_NUM_RE) ?? [];
 }
 
 // Mark each detail figure-sourced when one of its significant numbers is present
