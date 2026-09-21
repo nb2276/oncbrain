@@ -95,6 +95,53 @@ describe('downloadTelegramFile', () => {
     ).rejects.toMatchObject({ kind: 'auth', status: 401 });
   });
 
+  it('throws too_large on a 400 whose description says the file is too big', async () => {
+    // The real failure mode: Telegram's getFile rejects a >20MB file with 400
+    // BEFORE returning any file_size, so the MAX_BYTES check below never runs.
+    // PIIS1879850026002730.pdf (22.5MB) hit exactly this and was silently
+    // retried forever as if it were a transient 'network' failure.
+    const fetchImpl = vi.fn(async () => ({
+      ok: false,
+      status: 400,
+      json: async () => ({ ok: false, error_code: 400, description: 'Bad Request: file is too big' }),
+    }));
+    await expect(
+      downloadTelegramFile('AgADBQADr', 'fake-token', {
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      }),
+    ).rejects.toMatchObject({ kind: 'too_large', status: 400 });
+  });
+
+  it('throws not_found (not network) on an unrecognized 400', async () => {
+    // An invalid/expired file_id also 400s. Not the size case, but still
+    // permanent — retrying an invalid file_id never succeeds either.
+    const fetchImpl = vi.fn(async () => ({
+      ok: false,
+      status: 400,
+      json: async () => ({ ok: false, error_code: 400, description: 'Bad Request: wrong file_id' }),
+    }));
+    await expect(
+      downloadTelegramFile('bad-id', 'fake-token', {
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      }),
+    ).rejects.toMatchObject({ kind: 'not_found', status: 400 });
+  });
+
+  it('still classifies a 400 with an unparseable body as permanent, not network', async () => {
+    const fetchImpl = vi.fn(async () => ({
+      ok: false,
+      status: 400,
+      json: async () => {
+        throw new Error('not json');
+      },
+    }));
+    await expect(
+      downloadTelegramFile('bad-id', 'fake-token', {
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      }),
+    ).rejects.toMatchObject({ kind: 'not_found', status: 400 });
+  });
+
   it('throws too_large when file_size exceeds cap', async () => {
     const fetchImpl = makeFetchMock({
       ok: true,
