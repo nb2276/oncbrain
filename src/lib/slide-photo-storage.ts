@@ -73,6 +73,30 @@ export async function downloadTelegramFile(
     if (metaRes.status === 401 || metaRes.status === 403) {
       throw new TelegramFileError(`Telegram getFile auth failed (${metaRes.status})`, 'auth', metaRes.status);
     }
+    // Telegram answers getFile with 400 whenever it refuses the request
+    // outright, never as a transient blip — almost always "file is too big"
+    // (its hard server-side 20MB download cap, which a MAX_BYTES check below
+    // never sees because getFile fails before returning a file_size at all)
+    // or an invalid/expired file_id. Retrying changes nothing either way, so
+    // this must not fall into the generic 'network' branch below (retryable):
+    // a PDF over 20MB retried silently forever with no curator DM is exactly
+    // how PIIS1879850026002730.pdf (22.5MB, 2026-09-20) went unprocessed for
+    // a week without ever surfacing.
+    if (metaRes.status === 400) {
+      let description = '';
+      try {
+        const body = (await metaRes.json()) as { description?: string };
+        description = body.description ?? '';
+      } catch {
+        // Telegram's error body is normally valid JSON; an unparseable one
+        // still means this exact request will never succeed — fall through
+        // with an empty description rather than treating it as transient.
+      }
+      if (/too big/i.test(description)) {
+        throw new TelegramFileError(`Telegram getFile: ${description}`, 'too_large', 400);
+      }
+      throw new TelegramFileError(`Telegram getFile: ${description || 'Bad Request'}`, 'not_found', 400);
+    }
     if (!metaRes.ok) {
       throw new TelegramFileError(`Telegram getFile HTTP ${metaRes.status}`, 'network', metaRes.status);
     }
