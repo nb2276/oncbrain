@@ -75,6 +75,9 @@ npm run build:day -- --backfill # rebuild every date that has bookmarks
 npm run build:day -- --dry-run  # no LLM call, see what would happen
 npm run rebuild:queued          # v0.23: rebuild PAST dates the enrichment layer flagged after a richer re-send (full-paper PDF merged figures onto an abstract-only study, late slide); drains rebuild_queue. --skip=d1,d2 drops already-rebuilt dates. Run by the daily cron.
 npm run queue:rebuild -- --date=<date> [--reason="..."]   # v0.57.5: put one date on rebuild_queue. The cron calls it for a date whose own build:day failed, so a session-limited build is retried instead of stranded
+npm run watch:doi -- --add-file=<path>   # v0.58.1: bulk-register a DOI-only citation list (a conference abstract booklet, e.g.) whose Crossref record has no abstract yet
+npm run watch:doi -- --check [--dry-run] # re-checks nightly (wired into daily-build.sh): promotes on the SAME doi gaining a Crossref abstract; a title-search hit only DMs the curator to confirm, never auto-publishes
+npm run watch:doi -- --list | --remove=<doi>
 npm run build                   # Astro static build
 
 # Durable digest overrides (survive build:day regeneration)
@@ -198,7 +201,7 @@ DigestStudy {
 ```
 src/
   lib/
-    db.ts                  SQLite schema + queries + migrations (bookmarks, papers, slide_uploads, inbox_items, conferences, settings). v0.53 adds report_facet / maturity / followup_months / trial_acronyms_json to BOTH papers and bookmarks — nullable throughout, and null means "unclassified", which makes the lineage classifier abstain
+    db.ts                  SQLite schema + queries + migrations (bookmarks, papers, slide_uploads, inbox_items, conferences, settings). v0.53 adds report_facet / maturity / followup_months / trial_acronyms_json to BOTH papers and bookmarks — nullable throughout, and null means "unclassified", which makes the lineage classifier abstain. v0.58.1 adds doi_watch (a DOI-only citation with no abstract yet — see build/doi-watch.ts)
     telegram-ingest.ts     Telegram Bot API: extractTweetUrls / extractPaperPmids / extractPaperUrls / extractPdfDocument / extractSlidePhoto + sendMessage
     inbox-enrichment.ts    Type-dispatched enrichment loop (tweet→bookmark, paper→papers, slide→slides, PDF→papers + v0.15 figure OCR + v0.20 grounded figure structuring when a local Qwen/Ollama is up); E2/E3 replies; cross-day NCT nudge; conference auto-stamp via detectAndEnsureConference
     conference-detect.ts   v0.14.9: detect a major oncology meeting (ASCO/ESMO/ASTRO/ESTRO/AACR/ASH/SABCS + ASCO GU/GI) from a source's hashtags / URL-hosts / prose so bot-ingested sources get a conference_slug. v0.31: added ESTRO + an acronym+year prose form ("ASTRO 2025", "ESTRO 2026") since real abstracts brand that way, not "ASTRO Annual Meeting"
@@ -288,6 +291,7 @@ build/
   find-duplicates.ts       CLI (npm run find:dups): scan published digests for cross-day duplicate study cards (v0.26); read-only, prints suggested --suppress commands (--json for tooling)
   studio.ts                CLI (npm run studio): interactive @clack/prompts TUI over overrides + build:day + pull/enrich
   pull-telegram.ts         CLI: poll Telegram bot, write inbox_items (v0.26: also intercepts a "drop <date>/<slug>" reply → dedup suppress)
+  doi-watch.ts             CLI (npm run watch:doi, v0.58.1): a DOI-only citation whose Crossref record has no abstract (an Elsevier/Red Journal abstract supplement, e.g.) — --add-file bulk-registers a citation list, --check re-tries nightly (wired into daily-build.sh), --list/--remove round it out. Promotes into a normal inbox item only on the SAME doi gaining a Crossref abstract; a title-search hit (paper-suggest.ts, reused) only DMs the curator to confirm — never auto-publishes
   enrich-inbox.ts          CLI: drain pending inbox_items into typed source tables (sweeps orphaned OCR temp dirs)
   figure-extract.ts        CLI (npm run figure-extract): grounded figure extraction on one image or PDF page (Vision+Qwen→Opus); manual runs / spikes
   notify-curator.ts        CLI: Telegram "build done" summary to the curator

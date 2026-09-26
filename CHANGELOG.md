@@ -2,6 +2,45 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.58.1] - 2026-09-26
+
+### Added
+- **DOI watchlist** (`npm run watch:doi`). A DOI that resolves via Crossref but
+  carries no abstract has nothing for the study agent to analyze — a title
+  alone. The common trigger is an Elsevier/Red Journal conference-abstract
+  supplement (ASTRO's IJROBP supplement, e.g.): those publishers don't submit
+  abstract text to Crossref, and `resolveFromDoi` never falls back to fetching
+  the publisher page (deliberate — that's what keeps it immune to Elsevier's
+  bot-blocking). Rather than publish an empty stub, `--check` re-tries nightly
+  (wired into `daily-build.sh`, right after `pull:telegram`) for the SAME doi's
+  Crossref record gaining an abstract, and promotes it into a normal inbox item
+  when it does — `enrich:inbox` does the real fetch+save through the same
+  tested path a live Telegram submission uses.
+
+  `--add-file=<path>` bulk-registers from a citation list (paragraphs
+  separated by a blank line: a trial-name line, then a line with the paper's
+  URL or bare DOI, hashtag and all — kept verbatim so conference auto-tagging
+  still fires once promoted). `--list` / `--remove=<doi>` round it out.
+
+  A title-search fallback (paper-suggest.ts's title-overlap-gated PubMed
+  search, reused as-is) was tried and NOT wired to auto-promote: measured
+  against 22 real ASTRO 2026 abstracts, searching on the curator's short
+  trial-name note false-matched 7 of 9 hits to a plainly unrelated paper (too
+  few distinctive tokens for the gate paper-suggest.ts was calibrated for — a
+  page's own recovered title, not a 6-word paraphrase). Switching the query to
+  Crossref's own (longer, real) title cut that to 3 candidates, all plausible
+  on inspection — but a title match still only DMs the curator to confirm
+  (the exact suggest-and-forward flow a blocked publisher page already uses),
+  never auto-publishes: the worst failure mode here is a wrong trial's numbers
+  under the right trial's name.
+
+  Honest caveat, stated in the module header: for an Elsevier abstract
+  supplement specifically, waiting on Crossref may be a long shot rather than
+  a lag — withholding that content class's abstract text reads as standing
+  editorial practice, not a temporary indexing delay. Still worth having for
+  the general case (a real transient Crossref gap, a different publisher
+  backfilling later).
+
 ## [0.58.0] - 2026-09-26
 
 ### Added

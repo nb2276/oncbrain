@@ -29,6 +29,11 @@ import {
   dequeueRebuild,
   bumpRebuildAttempt,
   paperHasFigures,
+  addDoiWatch,
+  listDoiWatch,
+  markDoiWatchChecked,
+  resolveDoiWatch,
+  removeDoiWatch,
   type ResolutionCandidate,
 } from '../src/lib/db.ts';
 import type Database from 'better-sqlite3';
@@ -427,6 +432,58 @@ describe('db', () => {
       // A late failure from the stale claim must not bump the fresh entry.
       bumpRebuildAttempt(db, '2026-05-18', stale);
       expect(listRebuildQueue(db)[0]!.attempts).toBe(0);
+    });
+  });
+
+  describe('doi_watch (v0.58)', () => {
+    it('adds, normalizes the DOI, lists unresolved, and re-adding refreshes title/note', () => {
+      addDoiWatch(db, { doi: 'https://doi.org/10.1016/J.IJROBP.2026.06.2463', title: 'T1', note: 'N1' });
+      expect(listDoiWatch(db)).toMatchObject([{ doi: '10.1016/j.ijrobp.2026.06.2463', title: 'T1', note: 'N1' }]);
+
+      addDoiWatch(db, { doi: '10.1016/j.ijrobp.2026.06.2463', title: 'T1 fixed typo', note: 'N1' });
+      const entries = listDoiWatch(db);
+      expect(entries).toHaveLength(1); // idempotent on the normalized DOI, not a second row
+      expect(entries[0]!.title).toBe('T1 fixed typo');
+    });
+
+    it('rejects a string that does not normalize to a DOI', () => {
+      expect(addDoiWatch(db, { doi: 'not a doi' })).toBeNull();
+      expect(listDoiWatch(db)).toEqual([]);
+    });
+
+    it('markDoiWatchChecked bumps attempts and stamps last_checked_at', () => {
+      addDoiWatch(db, { doi: '10.1000/x' });
+      expect(listDoiWatch(db)[0]!.attempts).toBe(0);
+      expect(listDoiWatch(db)[0]!.last_checked_at).toBeNull();
+      markDoiWatchChecked(db, '10.1000/x');
+      markDoiWatchChecked(db, '10.1000/x');
+      const e = listDoiWatch(db)[0]!;
+      expect(e.attempts).toBe(2);
+      expect(e.last_checked_at).not.toBeNull();
+    });
+
+    it('resolveDoiWatch drops the entry out of listDoiWatch (resolved, not deleted)', () => {
+      addDoiWatch(db, { doi: '10.1000/x' });
+      resolveDoiWatch(db, '10.1000/x', 'crossref', 42);
+      expect(listDoiWatch(db)).toEqual([]);
+      const row = db.prepare('SELECT * FROM doi_watch WHERE doi = ?').get('10.1000/x') as {
+        resolved_via: string;
+        resolved_inbox_item_id: number;
+      };
+      expect(row.resolved_via).toBe('crossref');
+      expect(row.resolved_inbox_item_id).toBe(42);
+    });
+
+    it('removeDoiWatch deletes the row outright', () => {
+      addDoiWatch(db, { doi: '10.1000/x' });
+      removeDoiWatch(db, '10.1000/x');
+      expect(db.prepare('SELECT * FROM doi_watch WHERE doi = ?').get('10.1000/x')).toBeUndefined();
+    });
+
+    it('lists unresolved entries oldest-added first', () => {
+      addDoiWatch(db, { doi: '10.1000/a' });
+      addDoiWatch(db, { doi: '10.1000/b' });
+      expect(listDoiWatch(db).map((e) => e.doi)).toEqual(['10.1000/a', '10.1000/b']);
     });
   });
 

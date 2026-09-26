@@ -357,6 +357,28 @@ CREATE TABLE IF NOT EXISTS rebuild_queue (
   queued_at INTEGER NOT NULL,
   attempts INTEGER NOT NULL DEFAULT 0
 );
+
+-- v0.58: DOI watchlist. A DOI that resolves via Crossref but with no abstract
+-- (an Elsevier/Red Journal conference-abstract supplement, e.g. ASTRO's, is the
+-- common case — those publishers don't submit abstract text to Crossref at all)
+-- has nothing for the study agent to analyze: a title alone. Rather than publish
+-- an empty stub, npm run watch:doi -- --check re-checks nightly for a richer
+-- record — either Crossref adding an abstract to the SAME doi later, or the
+-- abstract getting separately MEDLINE-indexed with its own PMID (paper-suggest.ts's
+-- title-overlap-gated search, reused as-is) — and inboxes it normally once found.
+-- note carries the original message text (title/trial-name line, hashtag and
+-- all) so the eventual inbox item still gets conference-tagged automatically.
+CREATE TABLE IF NOT EXISTS doi_watch (
+  doi TEXT PRIMARY KEY,
+  title TEXT,
+  note TEXT,
+  added_at INTEGER NOT NULL,
+  last_checked_at INTEGER,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  resolved_at INTEGER,
+  resolved_via TEXT,
+  resolved_inbox_item_id INTEGER
+);
 `;
 
 export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): Database.Database {
@@ -1290,6 +1312,75 @@ export function bumpRebuildAttempt(
     )
     .get(bookmarkDate, queuedAt) as { attempts: number } | undefined;
   return row?.attempts ?? 0;
+}
+
+// v0.58: DOI watchlist. See the doi_watch schema comment for why this exists.
+
+export type DoiWatchEntry = {
+  doi: string;
+  title: string | null;
+  note: string | null;
+  added_at: number;
+  last_checked_at: number | null;
+  attempts: number;
+};
+
+// Idempotent on `doi` (the primary key): a re-add refreshes title/note (a
+// richer re-send, e.g. the curator fixing a typo in the trial-name line)
+// without resetting added_at/attempts — this is a re-registration, not a new
+// watch.
+export function addDoiWatch(
+  db: Database.Database,
+  entry: { doi: string; title?: string | null; note?: string | null },
+): string | null {
+  // Same canonicalization every other DOI-keyed table uses (eng-review decision
+  // 3, doi.ts) — otherwise two spellings of the same DOI could watch twice.
+  const doi = normalizeDoi(entry.doi);
+  if (!doi) return null;
+  db.prepare(
+    `INSERT INTO doi_watch (doi, title, note, added_at, attempts)
+     VALUES (?, ?, ?, ?, 0)
+     ON CONFLICT(doi) DO UPDATE SET
+       title = excluded.title,
+       note = excluded.note`,
+  ).run(doi, entry.title ?? null, entry.note ?? null, Date.now());
+  return doi;
+}
+
+// Unresolved entries only, oldest-added first (the order a curator would want
+// to review a `--list`).
+export function listDoiWatch(db: Database.Database): DoiWatchEntry[] {
+  return db
+    .prepare(
+      `SELECT doi, title, note, added_at, last_checked_at, attempts
+         FROM doi_watch WHERE resolved_at IS NULL ORDER BY added_at ASC`,
+    )
+    .all() as DoiWatchEntry[];
+}
+
+export function markDoiWatchChecked(db: Database.Database, doi: string): void {
+  db.prepare(
+    'UPDATE doi_watch SET last_checked_at = ?, attempts = attempts + 1 WHERE doi = ?',
+  ).run(Date.now(), doi);
+}
+
+// `via` names how it was found ('crossref' — the same DOI's Crossref record
+// gained an abstract, auto-promoted — or 'suggested' — a title-search hit was
+// DM'd to the curator to confirm, no inbox item created (inboxItemId null))
+// so `--list` history is legible.
+export function resolveDoiWatch(
+  db: Database.Database,
+  doi: string,
+  via: string,
+  inboxItemId: number | null,
+): void {
+  db.prepare(
+    'UPDATE doi_watch SET resolved_at = ?, resolved_via = ?, resolved_inbox_item_id = ? WHERE doi = ?',
+  ).run(Date.now(), via, inboxItemId, doi);
+}
+
+export function removeDoiWatch(db: Database.Database, doi: string): void {
+  db.prepare('DELETE FROM doi_watch WHERE doi = ?').run(doi);
 }
 
 // v0.24: true when a paper already on file (matched by ANY identifier) already
