@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   classifyPaperTarget,
   extractPaperUrls,
+  extractPaperDois,
   firstDoiInUrl,
   isTradePressUrl,
   tradePressLabel,
@@ -164,6 +165,47 @@ describe('extractPaperUrls', () => {
   });
   it('pulls an ASCO Daily News URL (dailynews.ascopubs.org subdomain)', () => {
     expect(extractPaperUrls('https://dailynews.ascopubs.org/do/some-coverage')).toHaveLength(1);
+  });
+});
+
+describe('extractPaperDois', () => {
+  it('pulls a bare DOI with no URL wrapper', () => {
+    expect(extractPaperDois('10.1016/j.ijrobp.2026.02.001')).toEqual([
+      '10.1016/j.ijrobp.2026.02.001',
+    ]);
+  });
+  it('pulls every DOI from a one-per-line abstract-booklet list', () => {
+    const dois = extractPaperDois(
+      '10.1016/j.ijrobp.2026.02.001\n10.1016/j.ijrobp.2026.02.002\n10.1200/JCO.2026.44.5',
+    );
+    expect(dois.sort()).toEqual(
+      ['10.1016/j.ijrobp.2026.02.001', '10.1016/j.ijrobp.2026.02.002', '10.1200/jco.2026.44.5'].sort(),
+    );
+  });
+  it('accepts a "doi:" label too', () => {
+    expect(extractPaperDois('doi: 10.1056/NEJMoa2024001')).toEqual(['10.1056/nejmoa2024001']);
+  });
+  it('does not double-count a DOI already captured as a doi.org URL', () => {
+    const text = 'see https://doi.org/10.1056/NEJMoa2024001';
+    const urls = extractPaperUrls(text);
+    expect(extractPaperDois(text, [], urls)).toEqual([]);
+  });
+  it('still finds an unrelated bare DOI alongside an excluded URL', () => {
+    const text = 'https://doi.org/10.1056/NEJMoa2024001 and also 10.1016/j.ijrobp.2026.02.001';
+    const urls = extractPaperUrls(text);
+    expect(extractPaperDois(text, [], urls)).toEqual(['10.1016/j.ijrobp.2026.02.001']);
+  });
+  it('reads a DOI out of a text_link entity', () => {
+    const dois = extractPaperDois('see this', [
+      { type: 'text_link', url: 'doi:10.1016/j.ijrobp.2026.02.001' },
+    ]);
+    expect(dois).toEqual(['10.1016/j.ijrobp.2026.02.001']);
+  });
+  it('returns empty for text with no DOI', () => {
+    expect(extractPaperDois('just a note, no citation')).toEqual([]);
+  });
+  it('returns empty for undefined text', () => {
+    expect(extractPaperDois(undefined)).toEqual([]);
   });
 });
 

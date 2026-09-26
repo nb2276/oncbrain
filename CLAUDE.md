@@ -206,7 +206,7 @@ src/
     tweet-syndication.ts   Twitter syndication CDN client (token formula derivation)
     pubmed-client.ts       NCBI E-utilities: efetch PubMed metadata + abstract, PMC for Methods/Results
     crossref-client.ts     v0.8 PR1: DOI-keyed metadata via Crossref REST (polite pool)
-    paper-url.ts           v0.8 PR1: classify + extract DOI / journal / PMC paper URLs; trade-press host allowlist (isTradePressUrl)
+    paper-url.ts           v0.8 PR1: classify + extract DOI / journal / PMC paper URLs; trade-press host allowlist (isTradePressUrl). v0.58: extractPaperDois — a BARE DOI with no URL wrapper (an abstract-booklet citation list), which extractPaperUrls can't see (no scheme) and extractPaperPmids won't (no "PMID:" label, and a DOI isn't digits-only). Send several, one per line, in one Telegram message — each inboxes separately
     html-meta.ts           v0.8 PR1: Highwire + OpenGraph meta extraction from journal pages
     doi.ts                 v0.8 PR1: normalizeDoi (single canonicalization) + extractDois
     ssrf-fetch.ts          v0.8 PR1: SSRF-safe HTTPS fetch (private-IP block, per-hop redirect revalidation)
