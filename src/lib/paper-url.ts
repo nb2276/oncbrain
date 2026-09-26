@@ -1,18 +1,30 @@
 // Paper-URL detection + classification.
 //
-// Two jobs:
+// Three jobs:
 //   1. extractPaperUrls() — ingestion-time detection. Pull DOI/journal/PMC
 //      URLs out of a Telegram message that are NOT already caught by the
 //      existing extractPaperPmids (which handles pubmed.ncbi URLs + "PMID: N").
 //      pull-telegram stores these as type='paper' inbox items with the raw
 //      URL as raw_target.
-//   2. classifyPaperTarget() — enrichment-time classification. Look at an
+//   2. extractPaperDois() — ingestion-time detection of a BARE DOI (no URL
+//      wrapper at all). A conference abstract booklet or citation manager
+//      export lists DOIs exactly this way ("10.1016/j.ijrobp.2026.02.001"),
+//      and that shape matches none of extractPaperUrls' patterns (no scheme)
+//      or extractPaperPmids' (no "PMID:" label, and a DOI isn't digits-only
+//      anyway) — the message silently dropped with no reply, since
+//      looksLikeAttemptedShare also requires an http(s) link to trigger the
+//      "couldn't recognize that" nudge. Unlike a bare PMID (any random
+//      number, hence the required "PMID:" label to avoid false positives), a
+//      DOI's `10.NNNN/...` shape is unambiguous enough to trust unlabeled.
+//   3. classifyPaperTarget() — enrichment-time classification. Look at an
 //      inbox item's raw_target and decide how to resolve it: bare PMID,
 //      bare DOI, or a URL that needs fetch+meta-extract. Resolution runs at
 //      enrichment (eng-review decision 1), so this is where the branching
-//      lives.
+//      lives. It already handles a bare-DOI raw_target (the `isBareDoi`
+//      branch below) — extractPaperDois is what was missing to ever hand it
+//      one.
 
-import { normalizeDoi, isBareDoi } from './doi.ts';
+import { normalizeDoi, isBareDoi, extractDois } from './doi.ts';
 import { PUBMED_URL_RE } from './telegram-ingest.ts';
 
 // PMC article URLs. Two forms: the legacy
@@ -239,6 +251,39 @@ export function extractPaperUrls(
   for (const e of entities) {
     if ((e.type === 'text_link' || e.type === 'url') && typeof e.url === 'string') {
       consider(e.url);
+    }
+  }
+  return Array.from(found);
+}
+
+// Ingestion-time: bare DOIs pasted directly in message text, no URL wrapper.
+// See the module header for why this exists and why no "DOI:" label is
+// required (unlike PMID_CITATION_RE's required "PMID:" label).
+//
+// `excludeUrls` is that same message's extractPaperUrls() result — a
+// "https://doi.org/10.xxx" URL and a bare repeat of the same DOI elsewhere in
+// the message are one paper, not two; without this, both would inbox as
+// separate items (a wasted duplicate enrichment attempt, not a wrong publish,
+// since savePaper merges on DOI — but pointless to create in the first place).
+export function extractPaperDois(
+  text: string | undefined,
+  entities: Array<{ type: string; url?: string }> = [],
+  excludeUrls: string[] = [],
+): string[] {
+  const alreadyCaptured = new Set(
+    excludeUrls.map((u) => firstDoiInUrl(u)).filter((d): d is string => d !== null),
+  );
+  const found = new Set<string>();
+  const collect = (s: string | undefined) => {
+    if (!s) return;
+    for (const doi of extractDois(s)) {
+      if (!alreadyCaptured.has(doi)) found.add(doi);
+    }
+  };
+  collect(text);
+  for (const e of entities) {
+    if ((e.type === 'text_link' || e.type === 'url') && typeof e.url === 'string') {
+      collect(e.url);
     }
   }
   return Array.from(found);

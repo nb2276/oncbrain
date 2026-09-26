@@ -38,7 +38,7 @@ import {
   isDestructiveCommandAuthorized,
   computeNextTelegramOffset,
 } from '../src/lib/telegram-ingest.ts';
-import { extractPaperUrls, tradePressOutletNames } from '../src/lib/paper-url.ts';
+import { extractPaperUrls, extractPaperDois, tradePressOutletNames } from '../src/lib/paper-url.ts';
 import { parseDedupCommand, executeDedupDrop } from '../src/lib/dedup-command.ts';
 
 const OFFSET_KEY = 'telegram_offset';
@@ -216,6 +216,11 @@ async function main() {
     const tweetUrls = extractTweetUrls(text, entities);
     const paperPmids = extractPaperPmids(text, entities);
     const paperUrls = extractPaperUrls(text, entities);
+    // v0.58: bare DOIs (no URL wrapper) — a conference abstract booklet or
+    // citation export lists them exactly this way. excludeUrls: paperUrls so
+    // a "https://doi.org/10.xxx" URL and a bare repeat of the same DOI in the
+    // same message inbox once, not twice.
+    const paperDois = extractPaperDois(text, entities, paperUrls);
     const slidePhoto = extractSlidePhoto(msg);
     const pdfDoc = extractPdfDocument(msg);
     // An image sent as a document (HEIC/HEIF from iOS Photos, etc.) that isn't a
@@ -227,6 +232,7 @@ async function main() {
       tweetUrls.length === 0 &&
       paperPmids.length === 0 &&
       paperUrls.length === 0 &&
+      paperDois.length === 0 &&
       !slidePhoto &&
       !pdfDoc &&
       !imageDoc
@@ -333,6 +339,36 @@ async function main() {
         }
       } catch (err) {
         console.warn(`  failed to inbox ${url}: ${(err as Error).message}`);
+        failedUpdateIds.add(update.update_id);
+      }
+    }
+
+    // v0.58: bare DOIs, no URL wrapper. Stored raw as type=paper; resolved via
+    // Crossref (not PubMed — no PMID exists to key on) at enrich:inbox time,
+    // same as classifyPaperTarget's existing 'doi' branch already expects.
+    for (const doi of paperDois) {
+      if (args.dryRun) {
+        console.log(`  [dry-run] would inbox: msg=${msg.message_id} type=paper doi=${doi}`);
+        savedPapers++;
+        continue;
+      }
+      try {
+        const r = saveInboxItem(db, {
+          type: 'paper',
+          raw_target: doi,
+          raw_message_text: text || null,
+          telegram_msg_id: msg.message_id,
+          telegram_chat_id: msg.chat?.id ?? null,
+          bookmark_date: date,
+        });
+        if (r.created) {
+          console.log(`  inbox #${r.id}: paper ${date} DOI:${doi}`);
+          savedPapers++;
+        } else {
+          skippedDuplicate++;
+        }
+      } catch (err) {
+        console.warn(`  failed to inbox DOI:${doi}: ${(err as Error).message}`);
         failedUpdateIds.add(update.update_id);
       }
     }

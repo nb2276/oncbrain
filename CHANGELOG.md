@@ -2,6 +2,30 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.58.0] - 2026-09-26
+
+### Added
+- **Bare-DOI ingestion.** A Telegram message consisting of a plain DOI with no
+  URL wrapper ("10.1016/j.ijrobp.2026.02.001", exactly how a conference
+  abstract booklet or a citation-manager export lists one) was silently
+  dropped: `extractPaperUrls` needs a scheme, `extractPaperPmids` needs a
+  "PMID:" label (a DOI isn't digits-only anyway), and `looksLikeAttemptedShare`
+  — the gate for the "couldn't recognize that" reply — also requires an
+  http(s) link. No inbox row, no reply, nothing.
+
+  `extractPaperDois` (`src/lib/paper-url.ts`) fills the gap, reusing
+  `extractDois`/`isBareDoi` from `doi.ts` — already the enrichment-time
+  classifier's own definition of a DOI, just never wired to ingestion. No
+  label required: unlike a bare PMID (any random number), a DOI's
+  `10.NNNN/...` shape is unambiguous on its own. Several DOIs, one per line,
+  in a single message inbox as separate items; a DOI already captured as a
+  `doi.org` URL in the same message is excluded so it doesn't inbox twice.
+
+  Nothing changed on the resolution side — `classifyPaperTarget`'s `'doi'`
+  branch already existed and already routes to Crossref (there's no PMID to
+  key on). This was purely a missing wire between ingestion and a capability
+  enrichment already had.
+
 ## [0.57.6] - 2026-09-14
 
 ### Fixed
