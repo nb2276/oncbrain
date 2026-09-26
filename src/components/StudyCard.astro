@@ -603,18 +603,6 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       <p class="clinic-resting-text" set:html={linkifyCitations(restingClinic)} />
     </section>
   )}
-  {/* v0.51: the long-form read is on /study/<slug>/ and NOTHING advertised it.
-      109 study pages carried a ~550-word interpretation while the date page —
-      the primary daily surface — had no href to a study page at all, only a
-      share URL. Generating that analysis and never surfacing it is the whole
-      cost with none of the benefit.
-
-      Placed directly after the at-rest prose, which is where a reader who wants
-      more has just run out of card, and rendered only when an interpretation
-      actually exists so it never promises a page that just repeats this one. */}
-  {!standalone && shareUrl && typeof study.interpretation === 'string' && study.interpretation.trim() && (
-    <a class="longform-link" href={shareUrl}>The longer read<span aria-hidden="true"> →</span></a>
-  )}
   {/* v0.32: hidden per-specialty variants; the SpecialtyBar reveals the one the
       reader picks and hides the default. Server-rendered so each keeps citation
       links + styling for free. */}
@@ -1083,6 +1071,22 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
         ))}
       </div>
     </details>
+  )}
+  {/* v0.51: the long-form read is on /study/<slug>/ and NOTHING advertised it.
+      109 study pages carried a ~550-word interpretation while the date page —
+      the primary daily surface — had no href to a study page at all, only a
+      share URL. Generating that analysis and never surfacing it is the whole
+      cost with none of the benefit.
+
+      v0.58: moved here (was right after the at-rest prose, sandwiched between
+      it and the "N details"/"Sources" toggles). Same font/color as those two
+      native <details> disclosures, no icon of its own — it read as a broken
+      third twin of a pair that expands IN PLACE, when clicking it actually
+      LEAVES the card. Ending the fold-toggle group instead, with a distinct
+      ↗ (not →, which echoes the toggles' own "keep going" implication), reads
+      as one clean closing line rather than an interruption. */}
+  {!standalone && shareUrl && typeof study.interpretation === 'string' && study.interpretation.trim() && (
+    <a class="longform-link" href={shareUrl}>The longer read<span aria-hidden="true"> ↗</span></a>
   )}
   {hasTagChips && (
     <div class="meta">
@@ -1627,10 +1631,13 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   }
   /* Quiet by design: it is an offer, not a call to action, and it sits inside
      the 90-second scan the card exists to protect. Sans-serif + muted keeps it
-     legible as an affordance without competing with the result above it. */
+     legible as an affordance without competing with the result above it.
+     v0.58: now the closing line after the depth/sources toggles (was before
+     them) — top margin to separate from ".sources", same rhythm as
+     ".study-depth { margin-top: 0.5rem }" so the three sit as one group. */
   .longform-link {
     display: inline-block;
-    margin: 0 0 0.7rem;
+    margin: 0.6rem 0 0;
     font-family: var(--font-sans);
     font-size: 0.78rem;
     letter-spacing: 0.01em;
