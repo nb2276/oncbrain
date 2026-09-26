@@ -3,6 +3,9 @@
 #
 # Pipeline (v0.5+):
 #   1. pull:telegram    — drain new bot messages into inbox_items queue
+#   1b. watch:doi --check — v0.58.1: promote a watched DOI (Crossref resolved
+#                         it but with no abstract yet) into inbox_items once a
+#                         richer record appears, so step 2 picks it up tonight
 #   2. enrich:inbox     — process pending items (tweets enrich now; papers
 #                         + slides land in v0.5 Phase B + C, deferred)
 #   3. build:day        — regenerate yesterday's + today's digests
@@ -122,6 +125,15 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   echo ""
   echo "→ Pulling Telegram → inbox"
   critical "pull:telegram" npm run pull:telegram --silent
+
+  # v0.58: a watched DOI (Crossref resolved it, but with no abstract — an
+  # Elsevier/Red Journal conference-abstract supplement, e.g.) getting a richer
+  # record promotes into a normal inbox item right here, so enrich:inbox below
+  # picks it up the SAME night. Best-effort: a miss here just means "check
+  # again tomorrow," never a reason to skip the rest of the pipeline.
+  echo ""
+  echo "→ Checking DOI watchlist"
+  npm run watch:doi --silent -- --check || echo "  ⚠ watch:doi --check exited non-zero (continuing)"
 
   echo ""
   echo "→ Enriching inbox items"
