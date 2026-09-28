@@ -2,6 +2,28 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.58.2] - 2026-09-28
+
+### Fixed
+- **The "longer read" link, round three.** v0.58.1 moved it to close the
+  "N details"/"Sources" toggle group instead of interrupting it — right, but
+  that meant burying it under a fold most readers never open, on a card that
+  can run past 1000 words at desktop width. It's now appended INLINE onto the
+  end of whichever resting paragraph (why-it-matters, or Monday clinic when
+  that's what's showing) actually renders last — the reader runs out of card
+  and the offer is in the same sentence, the way a blog excerpt ends "Read
+  more →". Built as one HTML string, not a JSX sibling, since the paragraph
+  is `set:html` from `linkifyCitations` — a plain sibling anchor renders on
+  its own line regardless of CSS `display`.
+- **The standalone study page opened collapsed on mobile.** `/study/<slug>/`
+  exists to read ONE study in full; its depth fold used to follow the same
+  viewport-based auto-expand as a list page (collapsed under 1024px), so a
+  phone visit needed an extra tap before showing any analysis. Now rendered
+  `open` server-side on that page specifically (`data-standalone` on the
+  card root), and `Base.astro`'s viewport sync — which runs on every page and
+  would otherwise re-collapse it — is taught to leave a standalone card's
+  fold alone.
+
 ## [0.58.1] - 2026-09-26
 
 ### Added

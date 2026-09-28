@@ -485,7 +485,15 @@ const { namespaceMap, intersectionAllowlist } = tagFoundations();
 
         function syncDepth() {
           var ds = document.querySelectorAll('details.study-depth, details.consort');
-          for (var i = 0; i < ds.length; i++) ds[i].open = mqDesktop.matches;
+          for (var i = 0; i < ds.length; i++) {
+            // The standalone /study/<slug>/ page (data-standalone on its one
+            // .study root) renders its depth fold server-side open at any
+            // width — the whole point of that page is reading one study in
+            // full. Without this check, this same viewport-based sync (it
+            // runs on every page, including that one) would immediately
+            // re-collapse it on a mobile visit.
+            ds[i].open = mqDesktop.matches || !!ds[i].closest('.study[data-standalone]');
+          }
         }
 
         function decideFigures(card) {

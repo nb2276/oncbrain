@@ -289,6 +289,28 @@ const restingClinic =
     ? mondayClinicText
     : null;
 
+// v0.51: the long-form read is on /study/<slug>/ and NOTHING advertised it.
+// 109 study pages carried a ~550-word interpretation while the date page — the
+// primary daily surface — had no href to a study page at all, only a share
+// URL. Generating that analysis and never surfacing it is the whole cost with
+// none of the benefit.
+//
+// v0.58: lived as its own block, first right after the at-rest prose, then
+// (v0.58.1) after the "N details"/"Sources" fold toggles — both read as
+// stray: sandwiched between prose and toggles it looked like a broken third
+// disclosure, and after the toggles it was buried below a fold most readers
+// never open. v0.58.2: appended INLINE onto the end of whichever resting
+// paragraph actually renders last (restingClinic when both it and
+// restingProse show, else restingProse) — the reader runs out of card and the
+// offer is right there in the same sentence, the way a "Read more →" ends a
+// blog excerpt. Built as one HTML string (not a JSX sibling) because the
+// paragraph itself is set:html from linkifyCitations; a plain sibling anchor
+// would render on its own line, exactly the block-level look this now avoids.
+const longformLinkHtml =
+  !standalone && shareUrl && typeof study.interpretation === 'string' && study.interpretation.trim()
+    ? ` <a class="longform-link" href="${shareUrl}">The longer read<span aria-hidden="true"> ↗</span></a>`
+    : '';
+
 // v0.27: the curator's own note on this study — the human editor's voice, set
 // durably via the override CLI (never LLM-generated). Rendered as its own
 // margin-note callout, visually distinct from the blue AI "why it matters"
@@ -457,7 +479,7 @@ const normTrial = (t: string) => t.trim().replace(/\s+/g, ' ').toUpperCase();
 const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
 ---
 
-<div class:list={['study', hasFigures && 'has-figures', study.verdict?.soc_implication && `verdict-${study.verdict.soc_implication}`]} id={anchorId} data-tags={dataTags || undefined} data-specialties={study.relevant_specialties && study.relevant_specialties.length > 0 ? study.relevant_specialties.join(' ') : undefined} data-compare-key={compareKey || undefined} data-compare-name={compareKey ? study.name : undefined} data-compare-stat={compareKey && effect ? describeEffect(effect) : undefined}>
+<div class:list={['study', hasFigures && 'has-figures', study.verdict?.soc_implication && `verdict-${study.verdict.soc_implication}`]} id={anchorId} data-standalone={standalone || undefined} data-tags={dataTags || undefined} data-specialties={study.relevant_specialties && study.relevant_specialties.length > 0 ? study.relevant_specialties.join(' ') : undefined} data-compare-key={compareKey || undefined} data-compare-name={compareKey ? study.name : undefined} data-compare-stat={compareKey && effect ? describeEffect(effect) : undefined}>
   <div class="study-head">
   {/* ── Triage layer: always visible. v0.30: name + a compact verdict CHIP on
       one row (the mockup glance top); the verdict rationale moves into the fold
@@ -594,14 +616,24 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
           <Fragment><span class="significance-sep" aria-hidden="true"> · </span>{restingProse.sublabel}</Fragment>
         )}
       </div>
-      <p class="significance-text" set:html={linkifyCitations(restingProse.text)} />
+      <p
+        class="significance-text"
+        set:html={linkifyCitations(restingProse.text) + (restingClinic ? '' : longformLinkHtml)}
+      />
     </section>
   )}
   {restingClinic && (
     <section class="clinic-block" aria-label="Monday clinic decision">
       <div class="clinic-label">Monday clinic</div>
-      <p class="clinic-resting-text" set:html={linkifyCitations(restingClinic)} />
+      <p class="clinic-resting-text" set:html={linkifyCitations(restingClinic) + longformLinkHtml} />
     </section>
+  )}
+  {/* Neither resting block rendered (no significance, no clinic line) but the
+      study still has a standalone page worth pointing to — the link needs
+      somewhere to land. Rare: most studies that clear the interpretation bar
+      also clear one of these two. */}
+  {!restingProse && !restingClinic && longformLinkHtml && (
+    <p class="longform-link-standalone" set:html={longformLinkHtml} />
   )}
   {/* v0.32: hidden per-specialty variants; the SpecialtyBar reveals the one the
       reader picks and hides the default. Server-rendered so each keeps citation
@@ -749,7 +781,12 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   {/* ── Depth layer: folded behind a tap. Bullets flow IMRD-style (Methods →
       Results → Critique → Notes), with CONSORT nested inside Methods. ── */}
   {hasDepth && (
-    <details class="study-depth">
+    // Server-rendered open on the standalone page — no reason to wait for
+    // Base.astro's viewport-based auto-expand (that script still runs and
+    // would happily set it right back to open at desktop width; this just
+    // means a mobile visitor to /study/<slug>/ — the page whose whole point
+    // is reading ONE study in full — doesn't get a collapsed fold first.
+    <details class="study-depth" open={standalone || undefined}>
       <summary>
         <span class="depth-summary-count">{depthSummary}</span>
         {trialsBadgeText && (
@@ -1071,22 +1108,6 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
         ))}
       </div>
     </details>
-  )}
-  {/* v0.51: the long-form read is on /study/<slug>/ and NOTHING advertised it.
-      109 study pages carried a ~550-word interpretation while the date page —
-      the primary daily surface — had no href to a study page at all, only a
-      share URL. Generating that analysis and never surfacing it is the whole
-      cost with none of the benefit.
-
-      v0.58: moved here (was right after the at-rest prose, sandwiched between
-      it and the "N details"/"Sources" toggles). Same font/color as those two
-      native <details> disclosures, no icon of its own — it read as a broken
-      third twin of a pair that expands IN PLACE, when clicking it actually
-      LEAVES the card. Ending the fold-toggle group instead, with a distinct
-      ↗ (not →, which echoes the toggles' own "keep going" implication), reads
-      as one clean closing line rather than an interruption. */}
-  {!standalone && shareUrl && typeof study.interpretation === 'string' && study.interpretation.trim() && (
-    <a class="longform-link" href={shareUrl}>The longer read<span aria-hidden="true"> ↗</span></a>
   )}
   {hasTagChips && (
     <div class="meta">
@@ -1631,13 +1652,15 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   }
   /* Quiet by design: it is an offer, not a call to action, and it sits inside
      the 90-second scan the card exists to protect. Sans-serif + muted keeps it
-     legible as an affordance without competing with the result above it.
-     v0.58: now the closing line after the depth/sources toggles (was before
-     them) — top margin to separate from ".sources", same rhythm as
-     ".study-depth { margin-top: 0.5rem }" so the three sit as one group. */
+     legible as an affordance without competing with the prose it closes.
+     v0.58.2: appended INLINE onto the last word of the resting paragraph
+     (significance-text or clinic-resting-text — see longformLinkHtml), so
+     `display: inline` (not inline-block, which added its own vertical margin
+     inside a text line) and a small LEFT margin stand in for the word-space a
+     literal leading space in the source string already mostly provides. */
   .longform-link {
-    display: inline-block;
-    margin: 0.6rem 0 0;
+    display: inline;
+    margin-left: 0.15em;
     font-family: var(--font-sans);
     font-size: 0.78rem;
     letter-spacing: 0.01em;
@@ -1645,8 +1668,11 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
     text-decoration: none;
     border-bottom: 1px solid var(--rule);
     padding-bottom: 1px;
+    white-space: nowrap;
   }
   .longform-link:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  /* Fallback position (no significance, no clinic line to attach to — rare). */
+  .longform-link-standalone { margin: 0.5rem 0 0; }
   .study-tldr--plain {
     background: transparent;
     border: none;
