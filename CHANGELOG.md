@@ -2,6 +2,19 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.58.3] - 2026-09-28
+
+### Fixed
+- **"The longer read" heading was smaller than its own body text.** A
+  /design-review of the standalone study page (three studies, both
+  viewports) found the mechanics sound — reading measure ~69ch, a real
+  (if quiet) border-top anchoring it to the card above, the depth fold
+  open by default — but the `<h2>` itself rendered at 12px against
+  0.68-0.75rem for every other small-caps label on the card, AND against
+  the 16-17px body prose it introduces: smaller than a caption, on the one
+  block of content the whole page exists to deliver. Bumped to 0.875rem
+  (14px), same quiet small-caps treatment otherwise.
+
 ## [0.58.2] - 2026-09-28
 
 ### Fixed
