@@ -184,12 +184,18 @@ const description = entry
     padding-top: 1.75rem;
     border-top: 1px solid var(--border);
   }
+  /* v0.58.3: was 0.75rem — smaller than every other small-caps label on the
+     site (.significance-label is 0.68rem) AND smaller than the 1.02rem body
+     it introduces, an inverted heading/body relationship for the one block
+     of prose the whole standalone page exists to deliver. Same quiet
+     small-caps treatment, just enough larger to read as where the read
+     begins rather than a caption under the card. */
   .interpretation h2 {
     margin: 0 0 1rem;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 600;
-    letter-spacing: 0.09em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--fg-muted);
   }
