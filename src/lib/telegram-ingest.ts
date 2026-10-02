@@ -306,14 +306,9 @@ export function extractPaperPmids(
 const NOISE_HOST_RE =
   /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be|google\.[a-z.]+|bit\.ly|t\.co)\b/i;
 
-// True when a message that matched NO extractor still looks like an attempted
-// source share: a document attachment, OR at least one link the curator might
-// have meant as a source (i.e. NOT an obvious talk/shortener/social host).
-// Gates the "couldn't recognize that" reply so conversational text ("thanks",
-// bot commands) and shared non-source links stay unanswered, while a genuinely
-// dropped paper link gets surfaced instead of vanishing silently.
-export function looksLikeAttemptedShare(msg: TelegramMessage): boolean {
-  if (msg.document) return true; // e.g. a .docx the PDF extractor rejected
+// Shared by looksLikeAttemptedShare + describeAttemptedShare so the two never
+// disagree on what counts as a link candidate.
+function collectShareLinkCandidates(msg: TelegramMessage): string[] {
   const text = msg.text ?? msg.caption ?? '';
   const candidates: string[] = [];
   for (const m of text.matchAll(/https?:\/\/[^\s<>")]+/gi)) candidates.push(m[0]);
@@ -327,7 +322,34 @@ export function looksLikeAttemptedShare(msg: TelegramMessage): boolean {
       if (slice) candidates.push(slice);
     }
   }
-  return candidates.some((u) => !NOISE_HOST_RE.test(u));
+  return candidates;
+}
+
+// True when a message that matched NO extractor still looks like an attempted
+// source share: a document attachment, OR at least one link the curator might
+// have meant as a source (i.e. NOT an obvious talk/shortener/social host).
+// Gates the "couldn't recognize that" reply so conversational text ("thanks",
+// bot commands) and shared non-source links stay unanswered, while a genuinely
+// dropped paper link gets surfaced instead of vanishing silently.
+export function looksLikeAttemptedShare(msg: TelegramMessage): boolean {
+  if (msg.document) return true; // e.g. a .docx the PDF extractor rejected
+  return collectShareLinkCandidates(msg).some((u) => !NOISE_HOST_RE.test(u));
+}
+
+// What to quote back to the curator in the "couldn't ingest" reply, so the
+// failed link/text is apparent rather than the curator having to guess which
+// of several things they sent didn't land. Preference order: the attachment's
+// filename (a rejected .docx has no URL at all), else the first non-noise
+// link candidate, else a short snippet of the free text itself (a pasted
+// citation with no URL). Null only when there's truly nothing to quote.
+export function describeAttemptedShare(msg: TelegramMessage): string | null {
+  if (msg.document?.file_name) return msg.document.file_name;
+  const link = collectShareLinkCandidates(msg).find((u) => !NOISE_HOST_RE.test(u));
+  if (link) return link;
+  const text = (msg.text ?? msg.caption ?? '').trim();
+  if (!text) return null;
+  const snippet = text.length > 120 ? `${text.slice(0, 117)}...` : text;
+  return snippet;
 }
 
 // v0.5 Phase C: extract slide photo attachment from a Telegram message.

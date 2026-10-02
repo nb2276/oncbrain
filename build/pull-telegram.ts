@@ -30,6 +30,7 @@ import {
   extractPdfDocument,
   extractImageDocument,
   looksLikeAttemptedShare,
+  describeAttemptedShare,
   messageOf,
   sendMessage,
   unixToLocalDate,
@@ -45,10 +46,17 @@ const OFFSET_KEY = 'telegram_offset';
 
 // Built from the trade-outlet source of truth so the curator-facing list can't
 // drift from the hosts the enricher actually accepts.
-const UNRECOGNIZED_SOURCE_REPLY =
-  `Couldn't find an ingestible source in that message. I can take: tweet/X links, ` +
-  `PubMed or DOI links, journal article pages, trade articles (${tradePressOutletNames().join(', ')}), ` +
-  `PDFs, and slide photos.`;
+const UNRECOGNIZED_SOURCE_KINDS =
+  `tweet/X links, PubMed or DOI links, journal article pages, trade articles ` +
+  `(${tradePressOutletNames().join(', ')}), PDFs, and slide photos.`;
+
+function unrecognizedSourceReply(msg: Parameters<typeof describeAttemptedShare>[0]): string {
+  const target = describeAttemptedShare(msg);
+  const lead = target
+    ? `Couldn't find an ingestible source in "${target}".`
+    : `Couldn't find an ingestible source in that message.`;
+  return `${lead} I can take: ${UNRECOGNIZED_SOURCE_KINDS}`;
+}
 
 type Args = {
   sinceZero: boolean;
@@ -248,7 +256,7 @@ async function main() {
           console.log(`  [dry-run] would reply unrecognized-source: msg=${msg.message_id}`);
         } else {
           try {
-            await sendMessage(token, msg.chat.id, UNRECOGNIZED_SOURCE_REPLY, {
+            await sendMessage(token, msg.chat.id, unrecognizedSourceReply(msg), {
               disableWebPagePreview: true,
             });
             console.log(`  replied unrecognized-source: msg=${msg.message_id}`);

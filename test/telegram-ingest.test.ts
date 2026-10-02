@@ -8,6 +8,7 @@ import {
   extractPdfDocument,
   extractImageDocument,
   looksLikeAttemptedShare,
+  describeAttemptedShare,
   messageOf,
   unixToLocalDate,
   TelegramApiError,
@@ -495,6 +496,66 @@ describe('looksLikeAttemptedShare', () => {
         msg({ text: 'https://youtu.be/x and https://some-journal.org/article/5' }),
       ),
     ).toBe(true);
+  });
+});
+
+describe('describeAttemptedShare', () => {
+  const msg = (overrides: Partial<TelegramMessage>): TelegramMessage => ({
+    message_id: 1,
+    date: 0,
+    ...overrides,
+  });
+
+  it('quotes the document filename for a rejected attachment', () => {
+    expect(
+      describeAttemptedShare(
+        msg({
+          document: { file_id: 'F1', file_unique_id: 'U1', mime_type: 'application/msword', file_name: 'notes.docx' },
+        }),
+      ),
+    ).toBe('notes.docx');
+  });
+
+  it('quotes the dropped link when no document is present', () => {
+    expect(
+      describeAttemptedShare(msg({ text: 'https://www.some-news-site.com/article/123' })),
+    ).toBe('https://www.some-news-site.com/article/123');
+  });
+
+  it('prefers a real link over a noise host alongside it', () => {
+    expect(
+      describeAttemptedShare(
+        msg({ text: 'https://youtu.be/x and https://some-journal.org/article/5' }),
+      ),
+    ).toBe('https://some-journal.org/article/5');
+  });
+
+  it('quotes a url entity even when the text itself hides it', () => {
+    expect(
+      describeAttemptedShare(
+        msg({
+          text: 'this trial',
+          entities: [{ type: 'text_link', offset: 0, length: 10, url: 'https://e.com/a' }],
+        }),
+      ),
+    ).toBe('https://e.com/a');
+  });
+
+  it('falls back to a free-text snippet when there is no link or document', () => {
+    expect(describeAttemptedShare(msg({ text: 'PMID: 99999999 see attached' }))).toBe(
+      'PMID: 99999999 see attached',
+    );
+  });
+
+  it('truncates a long free-text snippet', () => {
+    const long = 'x'.repeat(200);
+    const result = describeAttemptedShare(msg({ text: long }));
+    expect(result).toHaveLength(120);
+    expect(result).toMatch(/\.\.\.$/);
+  });
+
+  it('returns null for an empty message', () => {
+    expect(describeAttemptedShare(msg({}))).toBeNull();
   });
 });
 
