@@ -10,29 +10,7 @@
 //   npm run find:dups            human report + suggested suppress commands
 //   npm run find:dups -- --json  machine-readable candidates (for cron / tooling)
 import { listDigests } from '../src/lib/digest-data.ts';
-import { findCrossDateDuplicates, type DuplicateCandidate } from '../src/lib/study-dedup.ts';
-
-function suggestions(c: DuplicateCandidate): string[] {
-  // Heuristic: keep the NEWEST card (usually the fuller full-paper version),
-  // suggest suppressing the older ones — but never auto-suggest suppressing a
-  // review (flagged re-coverage is intentional).
-  const newest = c.occurrences[c.occurrences.length - 1]!;
-  const lines: string[] = [];
-  for (const o of c.occurrences) {
-    if (o === newest) continue;
-    if (o.isReview) {
-      lines.push(`    (skip ${o.date}/${o.slug}: review — likely intentional)`);
-      continue;
-    }
-    lines.push(
-      `    npm run override -- --date=${o.date} --suppress=${o.slug}   # keep ${newest.date}/${newest.slug}`,
-    );
-  }
-  if (newest.isReview) {
-    lines.push(`    note: newest (${newest.date}/${newest.slug}) is a review — the earlier card may be the keeper`);
-  }
-  return lines;
-}
+import { findCrossDateDuplicates, suppressionSuggestions as suggestions } from '../src/lib/study-dedup.ts';
 
 function main(): void {
   const json = process.argv.includes('--json');
@@ -56,7 +34,7 @@ function main(): void {
     const label = c.reason === 'shared-nct' ? `NCT ${c.matchKey}` : `acronym ${c.matchKey}`;
     console.log(`● ${label}  (${c.occurrences.length} cards)`);
     for (const o of c.occurrences) {
-      const tags = [o.nct ?? 'no-nct', o.isReview ? 'review' : null].filter(Boolean).join(', ');
+      const tags = [o.nct ?? 'no-nct', o.isReview ? 'review/presentation' : null].filter(Boolean).join(', ');
       console.log(`    ${o.date}  ${o.slug.padEnd(28)} ${o.name}  [${tags}]`);
     }
     for (const s of suggestions(c)) console.log(s);

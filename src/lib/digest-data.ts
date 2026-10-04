@@ -13,7 +13,7 @@ import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { assignSlugsForDate } from './slug-resolve.ts';
 import type { ModalityTag, IntentTag, MethodologyTag } from './tags.ts';
-import type { ContentType } from './content-type.ts';
+import type { ContentType, StudyPresentation } from './content-type.ts';
 
 // Detail union (v0.4.0 → v0.4.2):
 //   - flat string for single statements
@@ -185,6 +185,9 @@ export type DigestStudy = {
   // v0.16: trial acronyms a review names, lifted verbatim — plain text, never
   // linked (no NCT inference). Empty/absent for study reports.
   discussed_trials?: string[];
+  // v0.59: a presentation's summary + adversarial read. Mirrored from
+  // llm-pipeline.ts — keep in lockstep.
+  presentation?: StudyPresentation | null;
   // v0.17 (T6): acronym (normalized) → resolved same-date study slug, for
   // linking the "Trials discussed" list to the auto-resolved card. Mirrored from
   // llm-pipeline.ts — keep in lockstep.

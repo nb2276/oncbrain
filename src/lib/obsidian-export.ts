@@ -10,6 +10,8 @@
 // Output is committed alongside the JSON. User points Obsidian at data/obsidian/
 // (open as vault, or symlink into an existing vault).
 
+import { archivedMediaPath } from './tweet-media-archive.ts';
+
 export type DigestArtifactForExport = {
   date: string; // YYYY-MM-DD
   conference: { slug: string; name: string } | null;
@@ -46,6 +48,10 @@ export type DigestArtifactForExport = {
         significance?: string | null;
         significance_perspective?: string | null;
         open_questions?: string[] | null;
+        // v0.59: a talk's summary + adversarial read, and the trials it cites.
+        content_type?: string;
+        presentation?: { speaker: string | null; summary: string | null; critique: string[] } | null;
+        discussed_trials?: string[];
       }>;
       open_questions: string[] | null;
     }>;
@@ -65,6 +71,10 @@ export type DigestArtifactForExport = {
     note: string | null;
     fetched_via: string;
     conference_slug: string | null;
+    // v0.59: the archive path is derived from these, so a presentation's
+    // sources can embed the vault copy of each slide.
+    bookmark_date?: string;
+    image_urls?: string[];
   }>;
   papers?: Array<{
     id: number;
@@ -254,6 +264,25 @@ function renderBody(artifact: DigestArtifactForExport): string {
         lines.push('');
       }
 
+      // v0.59: a talk's summary + adversarial read, as two callouts so the
+      // argument and its critique stay visibly separate in the vault too.
+      const pres = study.content_type === 'presentation' ? study.presentation : null;
+      if (pres) {
+        if (pres.summary) {
+          lines.push(`> [!abstract] Presentation${pres.speaker ? ` · ${pres.speaker}` : ''}`);
+          for (const line of wikilinkify(pres.summary).split('\n')) lines.push(`> ${line}`);
+          lines.push('');
+        }
+        if (pres.critique.length > 0) {
+          lines.push('> [!warning] Adversarial read');
+          for (const c of pres.critique) lines.push(`> - ${wikilinkify(c)}`);
+          lines.push('');
+        }
+      }
+      if (study.content_type === 'presentation' && study.discussed_trials?.length) {
+        lines.push(`**Trials cited:** ${study.discussed_trials.join(' · ')}`, '');
+      }
+
       // v0.10: render the figure gallery. Normalize the v0.4 single-figure
       // shape (key_figure_url/caption) into the array so old artifacts export
       // identically.
@@ -327,6 +356,14 @@ function renderBody(artifact: DigestArtifactForExport): string {
             const handleSuffix = b.author_handle && b.author_name ? ` (${b.author_handle})` : '';
             lines.push(`- 🐦 [${who}${handleSuffix}](${b.url})`);
             lines.push(`  > ${wikilinkify(b.text).replace(/\n/g, '\n  > ')}`);
+            // v0.59: a talk's slides from the local archive (gitignored
+            // media/ subtree), so the deck survives the post being deleted.
+            if (study.content_type === 'presentation' && b.bookmark_date) {
+              for (const url of b.image_urls ?? []) {
+                const rel = archivedMediaPath(b.bookmark_date, url);
+                if (rel) lines.push(`  - ![[${rel}]]`);
+              }
+            }
             if (b.note) lines.push(`  - 📝 *Curator note:* ${b.note}`);
           } else if (ref.type === 'paper') {
             const p = papersById.get(ref.id);

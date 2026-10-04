@@ -10,8 +10,8 @@ import {
 } from '../src/lib/content-type.ts';
 
 describe('content-type enum', () => {
-  it('exposes exactly the two values', () => {
-    expect([...CONTENT_TYPE_VALUES]).toEqual(['study_report', 'review']);
+  it('exposes exactly the three values', () => {
+    expect([...CONTENT_TYPE_VALUES]).toEqual(['study_report', 'review', 'presentation']);
   });
 
   it('defaults to study_report (back-compat: absent === study_report)', () => {

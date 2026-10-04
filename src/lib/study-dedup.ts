@@ -21,6 +21,7 @@ import {
   ACRONYM_RE,
   ACRONYM_PATTERN_BLACKLIST,
 } from './source-association.ts';
+import { isNonStudyContent } from './content-type.ts';
 
 // Cooperative trial groups: a BARE group name can't identify one trial (EORTC
 // ran many), but group + a study number IS a canonical trial id (EORTC 22922,
@@ -106,7 +107,9 @@ export type DedupOccurrence = {
   slug: string;
   name: string;
   nct: string | null;
-  isReview: boolean; // content_type === 'review' → likely intentional re-coverage
+  // review OR presentation (v0.59): neither reports one trial, so a shared
+  // acronym is a citation, likely intentional re-coverage, never a duplicate.
+  isReview: boolean;
 };
 
 export type DuplicateCandidate = {
@@ -121,7 +124,7 @@ function toOccurrence(date: string, s: DedupStudyInput): DedupOccurrence {
     slug: s.slug ?? '',
     name: s.name,
     nct: s.nct ?? null,
-    isReview: s.content_type === 'review',
+    isReview: isNonStudyContent(s.content_type),
   };
 }
 
@@ -191,3 +194,31 @@ export function findCrossDateDuplicates(artifacts: DedupArtifact[]): DuplicateCa
     return la < lb ? 1 : la > lb ? -1 : a.matchKey < b.matchKey ? -1 : 1;
   });
 }
+
+// The find:dups report's suggested commands (build/find-duplicates.ts). Lives
+// here, not in the CLI, so it is testable without running the CLI's main().
+export function suppressionSuggestions(c: DuplicateCandidate): string[] {
+  // Heuristic: keep the NEWEST study report (usually the fuller full-paper
+  // version), suggest suppressing the older study reports. A review or a talk
+  // only CITES the trial, so it is never the keeper and never the target: a
+  // newer talk used to be chosen as the keeper, which printed a command to
+  // suppress the trial's own results card in its favour.
+  const reports = c.occurrences.filter((o) => !o.isReview);
+  const lines: string[] = [];
+  for (const o of c.occurrences) {
+    if (o.isReview) lines.push(`    (skip ${o.date}/${o.slug}: review/presentation — cites the trial, not a duplicate)`);
+  }
+  if (reports.length < 2) {
+    lines.push('    (no suppression: fewer than two study reports of this trial)');
+    return lines;
+  }
+  const keeper = reports[reports.length - 1]!;
+  for (const o of reports) {
+    if (o === keeper) continue;
+    lines.push(
+      `    npm run override -- --date=${o.date} --suppress=${o.slug}   # keep ${keeper.date}/${keeper.slug}`,
+    );
+  }
+  return lines;
+}
+

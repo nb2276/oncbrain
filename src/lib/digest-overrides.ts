@@ -4,6 +4,7 @@
 // build time and applied as the final step before the artifact is written, so
 // curator edits and removals are durable: suppress studies, override study text
 // (tldr / name / bullets / verdict), or override the cross-site top_line/tldr.
+import { parsePresentation } from './content-type.ts';
 import { readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { writeFileAtomic } from './atomic-write.ts';
 import { resolve, dirname } from 'node:path';
@@ -48,6 +49,10 @@ const EDITABLE_STUDY_KEYS = [
   // other prose surfaces — it is the longest thing the LLM writes, so a bad one
   // must be fixable (or clearable with null) without re-running Phase 2.
   'interpretation',
+  // v0.59: a talk's summary + adversarial read + speaker. The critique is the
+  // surface most likely to reach past the slides, so it must be fixable (or
+  // clearable with null) without re-running Phase 2.
+  'presentation',
   // v0.10: cross-cutting tag fields. The Phase 2 LLM emits these but is
   // imperfect on hard semantic calls (palliative vs curative, phase 2 vs
   // phase 3). Curator overrides land here so a wrong emission can be fixed
@@ -214,6 +219,20 @@ function pickEditable(edit: StudyEdit, slug: string): { picked: StudyEdit; warni
         continue;
       }
       out[k] = raw;
+    } else if (k === 'presentation') {
+      // The sidecar is a trust boundary: shape-guard through the same parser
+      // Phase 2 uses, so a malformed hand-edit can't reach the renderer.
+      const raw = edit[k];
+      if (raw === null) {
+        out[k] = null;
+        continue;
+      }
+      const parsed = parsePresentation(raw);
+      if (!parsed) {
+        warnings.push(`${slug}: invalid presentation (needs a summary or a critique point); dropped`);
+        continue;
+      }
+      out[k] = parsed;
     } else {
       out[k] = edit[k];
     }

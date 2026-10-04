@@ -10,11 +10,12 @@
 // Like nct-coverage.ts this is a courtesy NUDGE, never a merge: acronyms are
 // ambiguous, so a false hit is a stray heads-up message, not lost data.
 
+import { isNonStudyContent } from './content-type.ts';
 import { studyDedupKey } from './study-dedup.ts';
 
 export type AcronymCoverageArtifact = {
   date: string; // YYYY-MM-DD
-  digest: { sites: Array<{ studies: Array<{ name: string; slug?: string }> }> };
+  digest: { sites: Array<{ studies: Array<{ name: string; slug?: string; content_type?: string }> }> };
 };
 
 // slug carried so a nudge can name a droppable target (reply "drop <date>/<slug>").
@@ -32,6 +33,9 @@ export function buildAcronymCoverageIndex(
   for (const a of artifacts) {
     for (const site of a.digest.sites) {
       for (const study of site.studies) {
+        // v0.59: a review or talk names trials it only cites; indexing it would
+        // offer "drop" between it and the trial cards it discusses.
+        if (isNonStudyContent(study.content_type)) continue;
         const key = studyDedupKey(study.name);
         if (!key) continue;
         const entry: AcronymCoverageEntry = { date: a.date, name: study.name, slug: study.slug ?? '' };

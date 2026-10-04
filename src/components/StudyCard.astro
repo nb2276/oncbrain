@@ -15,7 +15,7 @@ import ConsortFlow from './ConsortFlow.astro';
 import EffectMark from './EffectMark.astro';
 import { effectForStudy, axisBucket, describeEffect } from '../lib/effect-size.ts';
 import { isSafeImageUrl } from '../lib/vision-ocr.ts';
-import { VERDICT_META, REVIEW_GLYPH } from '../lib/verdict.ts';
+import { VERDICT_META, REVIEW_GLYPH, PRESENTATION_GLYPH } from '../lib/verdict.ts';
 import { tradePressLabel } from '../lib/paper-url.ts';
 import {
   domainForMark,
@@ -462,10 +462,25 @@ const provenanceUrl = isHttpUrl(provenanceUrlRaw) ? provenanceUrlRaw : null;
 // v0.16 review extras: a content_type:review carries no verdict (stripped at
 // build) and surfaces a plain-text "Trials discussed" acronym list instead.
 const isReview = study.content_type === 'review';
+// v0.59: a talk lists the trials its slides cite in the same callout.
+const isPresentation = study.content_type === 'presentation';
 // Array.isArray guard (not just ??): a hand-edited / corrupted artifact with a
 // non-array discussed_trials would otherwise crash .map at build.
 const discussedTrials =
-  isReview && Array.isArray(study.discussed_trials) ? study.discussed_trials : [];
+  (isReview || isPresentation) && Array.isArray(study.discussed_trials) ? study.discussed_trials : [];
+const discussedTrialsLabel = isPresentation ? 'Trials cited' : 'Trials discussed';
+// v0.59: the talk summary + adversarial read. Guarded like discussed_trials
+// against a hand-edited artifact with the wrong shape.
+const presentation =
+  isPresentation && study.presentation && typeof study.presentation === 'object' ? study.presentation : null;
+const presentationSummary =
+  presentation && typeof presentation.summary === 'string' && presentation.summary.trim() ? presentation.summary : null;
+const presentationCritique =
+  presentation && Array.isArray(presentation.critique)
+    ? presentation.critique.filter((c): c is string => typeof c === 'string' && c.trim().length > 0)
+    : [];
+const presentationSpeaker =
+  presentation && typeof presentation.speaker === 'string' && presentation.speaker.trim() ? presentation.speaker : null;
 const hasDiscussedTrials = discussedTrials.length > 0;
 // v0.17 (T6): a discussed-trial acronym → resolved same-date study slug, for
 // deep-linking the "Trials discussed" list to the auto-resolved card. Keyed by
@@ -590,9 +605,29 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
       <span>Surfaced from a review's discussed trials</span>
     </p>
   )}
+  {isPresentation && (presentationSummary || presentationCritique.length > 0 || presentationSpeaker) && (
+    <section class="presentation-block" aria-label="Presentation summary and adversarial read">
+      <div class="presentation-label">
+        <span aria-hidden="true">{PRESENTATION_GLYPH}</span> Presentation{presentationSpeaker && (
+          <Fragment><span class="significance-sep" aria-hidden="true"> · </span><span class="presentation-speaker">{presentationSpeaker}</span></Fragment>
+        )}
+      </div>
+      {presentationSummary && (
+        <p class="presentation-summary" set:html={linkifyCitations(presentationSummary)} />
+      )}
+      {presentationCritique.length > 0 && (
+        <div class="presentation-critique">
+          <div class="presentation-critique-label">Adversarial read</div>
+          <ul>
+            {presentationCritique.map((c) => <li set:html={linkifyCitations(c)} />)}
+          </ul>
+        </div>
+      )}
+    </section>
+  )}
   {hasDiscussedTrials && (
-    <section class="discussed-trials" aria-label="Trials discussed in this review">
-      <div class="discussed-trials-label">Trials discussed</div>
+    <section class="discussed-trials" aria-label={`${discussedTrialsLabel} in this ${isPresentation ? 'presentation' : 'review'}`}>
+      <div class="discussed-trials-label">{discussedTrialsLabel}</div>
       <p class="discussed-trials-list">
         {discussedTrials.map((t, i) => (
           <Fragment>
@@ -1464,6 +1499,59 @@ const isReviewResolved = papers.some((p) => p.resolved_from_review === true);
   /* Linked discussed-trial acronym (jumps to the resolved card on this page). */
   .dt-link { color: var(--accent); text-decoration: none; }
   .dt-link:hover { text-decoration: underline; }
+
+  /* v0.59 presentation: what the talk argued, then where it is weakest. Same
+     callout shell as "why it matters"; the neutral left bar keeps it from
+     reading as the AI significance read, and the critique sits under a hairline
+     so the two halves can't blur into one paragraph. Tokens only (two themes). */
+  .presentation-block {
+    margin: 0.65rem 0 0.7rem;
+    padding: 0.6rem 0.85rem 0.65rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--fg-muted);
+    border-radius: 4px;
+  }
+  /* Neutral header, not --accent: the accent blue stays reserved for the AI
+     "why it matters" callout that sits directly below, so the two can't read
+     as one block. */
+  .presentation-label,
+  .presentation-critique-label {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 0.35rem;
+  }
+  /* The speaker is content, not a label: readable size, its own weight. */
+  .presentation-speaker {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0.01em;
+    color: var(--fg);
+  }
+  .presentation-summary {
+    margin: 0;
+    font-size: 0.97rem;
+    line-height: 1.55;
+    color: var(--fg);
+  }
+  .presentation-critique {
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .presentation-critique ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.94rem;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+  .presentation-critique li + li { margin-top: 0.25rem; }
 
   /* v0.16 review "Trials discussed": the acronym landscape a press round-up
      names. Plain text, NOT links (no NCT inference) — same callout shell as the
