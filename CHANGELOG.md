@@ -2,6 +2,82 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.59.0] - 2026-10-03
+
+### Added
+- **Presentations: a third content type for a speaker's talk.** A post
+  sharing a talk's slides (a speaker posting "some of my slides" from a
+  session) argues a framework across the evidence rather than reporting one
+  trial, and neither existing type fit it: `study_report` gave it a bogus
+  verdict, `review` rendered it as a bare acronym list. Phase 1 now
+  autodetects `content_type: presentation` from the shape of the content,
+  and the card leads with a **presentation block**: the speaker (only when
+  the sources print the name), a summary of what the talk argued, and an
+  **adversarial read**, two to four points on where the argument is weakest
+  (the evidence level under each recommendation, referral/selection bias,
+  head-to-head data that doesn't exist, assumptions the framework makes).
+  Takeaways land in the bullets, a slide's decision framework as a table,
+  the slides as the figure gallery, and the cited trials in the same
+  callout reviews use ("Trials cited"). 🎤 in the triage rail.
+- Like a review, a presentation carries **no verdict, NCT, DOI, primary
+  endpoint, CONSORT flow, or methodology tag**. All are forced off at parse,
+  so a talk never draws an effect mark, never enters the compare tray, and
+  never shows up on a tag landing beside real guidelines. The first real
+  build tagged a talk `consensus-guideline`. `isNonStudyContent()` is now the
+  one predicate for "review or presentation", so a new surface can't handle
+  one and forget the other (verdict strip, DOI backstop, NCT collision
+  warning, cross-date dedup).
+- **Grounding covers the new prose.** The adversarial read is the surface
+  most likely to reach past the slides, so `groundPresentation` withholds a
+  summary or critique sentence when:
+  - a number fails the same verifier the tables and primary endpoint use
+    (decimal separators, `.65`/`0.65`, CI-bound adjacency);
+  - a percentage isn't printed as a percentage in the source ("84 patients"
+    does not ground "84%");
+  - a magnitude is written in words ("ninety-nine percent", "halved",
+    "threefold", "one in ten", "a third of"). Narrow on purpose: measured
+    against the corpus, a broad version tripped on 1.6% of real prose
+    ("twice daily", "grade 2 in 13").
+  The speaker survives only as a contiguous name the sources print (accents,
+  possessives and middle initials folded). The poster's own name counts only
+  when the post says the talk is theirs ("my slides"); someone photographing
+  another person's talk is not its speaker. A rejected speaker is replaced
+  with "the speaker" on every field of the card, BEFORE synthesis, so the
+  day's headline never sees the name; if any trace survives, the card is
+  dropped (and the curator told) rather than publish an adversarial read
+  under a misattributed physician's name. The comparator gate and the
+  dropped-disease-state check audit the summary and the critique too.
+- **Cited trials are grounded, on reviews too.** "Trials cited" (and a
+  review's "Trials discussed") now keeps only acronyms the sources print as a
+  whole token, separator-insensitive. A remembered acronym published as a
+  citation is the same fabrication as a remembered hazard ratio, and reviews
+  had the gap since v0.16.
+- **Talks never enter trial lineage or the drop nudge.** A review or talk
+  cites trials; it is never a reading of one. `toTrialReport` abstains on
+  both, the acronym coverage index skips them, and the source-facet prompt
+  abstains on a talk, so a talk can't supersede a trial card or be offered as
+  a one-reply drop against one.
+- **Overrides can't undo the invariants.** `enforcePresentationInvariants`
+  re-clears NCT/DOI/endpoint/CONSORT/methodology after curator overrides, and
+  `presentation` is itself overridable (shape-guarded by the Phase 2 parser),
+  so a bad critique point is fixable without re-running Phase 2.
+- **Local archive of post images.** Every image attached to a bookmarked
+  post is downloaded at full resolution (`name=orig`) into
+  `data/obsidian/media/tweets/<date>/` at enrich time, and again at build
+  for anything missed. A talk's slides survive the post being deleted. The
+  directory is gitignored, LOCAL-ONLY like `papers/`, and guarded by
+  `test/publish-boundary.test.ts`. The site keeps rendering slides from
+  Twitter's CDN through the embed, so we never re-host a speaker's deck.
+  The Obsidian note embeds the archived slides on presentation cards. Kill
+  switch: `TWEET_MEDIA_ARCHIVE=off`. The boundary is enforced at runtime
+  too: the archiver refuses to write unless `git check-ignore` confirms the
+  directory is ignored in this checkout, and `daily-build.sh` never stages
+  `data/obsidian/{papers,media}` on either publish path. Downloads go through
+  `ssrfSafeFetchBuffer` (host-pinned, size cap enforced while streaming),
+  four at a time; a 404/410 leaves a `.miss` marker so a deleted post isn't
+  re-fetched on every build. Skipped on `--backfill`, `--dry-run` and
+  `--skip-fetch`.
+
 ## [0.58.3] - 2026-09-28
 
 ### Fixed
