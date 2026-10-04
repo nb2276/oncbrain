@@ -16,7 +16,10 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, readdirSy
 import { resolve } from 'node:path';
 
 const CACHE_DIR = resolve(process.cwd(), 'data/.cache/build');
-const CACHE_VERSION = 'v2';
+// v3 (v0.59): invalidates studies cached by a pre-presentation build. The
+// presentation gates run AFTER the cache read (buildDigest), so changing them
+// needs no further bump.
+const CACHE_VERSION = 'v3';
 // TTL scopes the cache to a RESUME window, not a permanent content cache. A
 // session-limited build finishes on a re-run within a few hours; a next-day
 // build (the 1am cron) or a `rebuild:queued`/`--backfill` refresh gets a fresh

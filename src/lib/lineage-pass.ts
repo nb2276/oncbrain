@@ -14,6 +14,7 @@
 // behind the card — their registered NCTs and the acronyms they declared for the
 // trial they report.
 
+import { isNonStudyContent } from './content-type.ts';
 import type Database from 'better-sqlite3';
 import { ownRegistrations } from './extract.ts';
 import {
@@ -32,6 +33,7 @@ export type LineageStudy = {
   nct?: string | null;
   source_ids?: { type: 'tweet' | 'paper' | 'slide'; id: number }[];
   primary_endpoint?: { name?: string | null; stat_value?: string | null; stat_detail?: string | null } | null;
+  content_type?: string;
 };
 
 export type LineageArtifact = {
@@ -173,6 +175,10 @@ export function toTrialReport(
   study: LineageStudy,
 ): TrialReport | null {
   if (!study.slug) return null; // a card we cannot link to or suppress by slug
+  // A review or a talk CITES trials; it is never a reading of one. Abstaining
+  // here closes both sides at once: a talk can't supersede a trial card, and a
+  // trial card can't supersede (or be offered as a drop against) a talk.
+  if (isNonStudyContent(study.content_type)) return null;
   const facts = sourceFacts(db, study.source_ids ?? []);
   // IDENTITY COMES FROM THE SOURCES, NOT FROM PHASE 2.
   //

@@ -33,6 +33,7 @@ import {
   withholdUngroundedComparators,
   droppedDiseaseStates,
   conflictingState,
+  groundedTrialNames,
   type GroundingWithhold,
 } from './comparator-grounding.ts';
 import {
@@ -56,8 +57,14 @@ import {
 } from './tags.ts';
 import {
   type ContentType,
+  type StudyPresentation,
   parseContentType,
   DEFAULT_CONTENT_TYPE,
+  isNonStudyContent,
+  parsePresentation,
+  groundPresentation,
+  scrubSpeakerName,
+  speakerNameRemains,
 } from './content-type.ts';
 import { loadStudyContext, isSafeSlug } from './study-retrieval.ts';
 import { buildCacheKey, readBuildCache, writeBuildCache } from './build-cache.ts';
@@ -77,6 +84,11 @@ export type DigestInputTweet = {
   source_type?: 'tweet'; // default; optional for v0.4 callers
   id: number;
   author: string | null;
+  // v0.59: the poster's display name, kept apart from `author` (the handle) so
+  // the study-report prompt stays byte-stable. Used only by a presentation:
+  // the poster sharing "my slides" is usually the speaker, and the sources
+  // otherwise may never print their name.
+  author_name?: string | null;
   text: string;
   note?: string | null;
   image_urls?: string[];
@@ -391,7 +403,8 @@ export type DigestStudy = {
   modality?: ModalityTag | null;
   intent?: IntentTag | null;
   methodology?: MethodologyTag | null;
-  // v0.16: study_report (default) vs review. Inherited from the Phase 1
+  // v0.16: study_report (default) vs review (v0.59: or presentation, which
+  // follows the review's no-verdict rules). Inherited from the Phase 1
   // cluster, not emitted by Phase 2. A `review` carries no verdict (forced
   // null at build, after overrides) and renders `discussed_trials` instead of
   // a numbers-first card. Older artifacts won't have this; renderers fall back
@@ -406,6 +419,10 @@ export type DigestStudy = {
   // build emits the artifact JSON and the Astro pages re-read it through that
   // definition, so the two MUST keep these shapes in lockstep.
   discussed_trials?: string[];
+  // v0.59: a `presentation`'s talk summary + adversarial read (+ the speaker,
+  // only when the sources name one). Absent on every other content type.
+  // Mirrored in digest-data.ts — keep in lockstep.
+  presentation?: StudyPresentation | null;
   // v0.17 (T6): on a `review`, maps a discussed-trial acronym (normalized,
   // upper-case) → the slug of the same-date study auto-resolved from it, so the
   // "Trials discussed" list can link to the resolved card. Computed at build
@@ -992,11 +1009,18 @@ export async function buildDigest(
     const studyKey = opts.resumeCache
       ? buildCacheKey('study', {
           cluster,
+          // v0.59: the presentation directive lives in code, not in a prompt
+          // file promptFingerprint hashes, so it keys the cache explicitly.
+          directive: cluster.content_type === 'presentation' ? PRESENTATION_DIRECTIVE : '',
           // Include image URLs (sent to Claude vision on the api backend) + the OCR
           // + the image cap, so a changed image set / cap can't serve a stale study.
           tweets: capped.map((t) => ({
             id: t.id,
             text: t.text,
+            // v0.59: the poster's display name reaches a presentation's prompt
+            // (behind the first-person cue), so a changed name must re-run it.
+            author_name:
+              cluster.content_type === 'presentation' && FIRST_PERSON_TALK.test(t.text) ? t.author_name ?? null : undefined,
             ocr: t.image_ocr_texts ?? [],
             imgs: t.image_urls ?? [],
           })),
@@ -1132,6 +1156,23 @@ export async function buildDigest(
     }
   }
 
+  // v0.59: presentation grounding, post-cache and pre-synthesis (see
+  // groundPresentationStudy). A card that still names a rejected speaker after
+  // scrubbing is dropped here, so Phase 3 never reads it.
+  for (let i = successful.length - 1; i >= 0; i--) {
+    const { cluster, study } = successful[i]!;
+    if (study.content_type !== 'presentation') continue;
+    const studyTweets = cluster.tweet_ids
+      .map((id) => tweetById.get(id))
+      .filter((t): t is DigestInputTweet => Boolean(t));
+    const { notes, drop } = groundPresentationStudy(study, studyTweets);
+    for (const n of notes) console.warn(`  [grounding] ${cluster.slug}: presentation ${n}`);
+    if (drop) {
+      successful.splice(i, 1);
+      dropped.push({ slug: cluster.slug, name: cluster.name, reason: 'presentation names a speaker the sources do not support' });
+    }
+  }
+
   if (successful.length === 0) {
     throw new DigestParseError('All Phase 2 study agents failed. Cannot continue to synthesis.');
   }
@@ -1261,6 +1302,13 @@ export async function buildDigest(
         .join('\n');
       if (!src.trim()) continue;
       withheld.push(...withholdUngroundedComparators(study, src));
+      if (study.discussed_trials && study.discussed_trials.length > 0) {
+        const { kept, dropped: unsourced } = groundedTrialNames(study.discussed_trials, src);
+        if (unsourced.length > 0) {
+          withheld.push({ slug: study.slug ?? study.name, surface: 'discussed_trials', trials: unsourced });
+          study.discussed_trials = kept.length > 0 ? kept : undefined;
+        }
+      }
       const dropped = droppedDiseaseStates(study, src);
       if (dropped.length > 0) {
         console.warn(
@@ -1276,7 +1324,7 @@ export async function buildDigest(
       // with doi:null while the identifier sat right there on the source. The
       // v0.54 version in digest-builder consulted it; the move to buildDigest
       // dropped that and searched prose alone.
-      if (!study.doi && study.content_type !== 'review') {
+      if (!study.doi && !isNonStudyContent(study.content_type)) {
         const ownDois = new Set<string>();
         for (const tid of study.tweet_ids) {
           const ref = syntheticIdToSourceRef(tid);
@@ -1459,7 +1507,8 @@ export function detectClusterCollisions(
     // trial. That overlap is the designed state, not a split/over-cluster, so
     // excluding reviews here prevents false-positive warnings that would mask
     // genuine ones.
-    if (c.content_type === 'review') continue;
+    // v0.59: a presentation cites trials the same way a review does.
+    if (isNonStudyContent(c.content_type)) continue;
     const text =
       c.name +
       ' ' +
@@ -1511,6 +1560,12 @@ async function runStudyAgent(
   const tweetsForPrompt = tweets.map((t) => ({
     id: t.id,
     author: t.author,
+    // Only a post that says the talk is the poster's own carries their display
+    // name into the prompt: otherwise the model would be handed a plausible
+    // speaker for someone else's talk.
+    ...(cluster.content_type === 'presentation' && t.author_name && FIRST_PERSON_TALK.test(t.text)
+      ? { author_name: t.author_name }
+      : {}),
     text: t.text,
     note: t.note ?? null,
     images: (t.image_urls ?? []).map((url, idx) => ({
@@ -1531,7 +1586,9 @@ async function runStudyAgent(
   const contentTypeBlock =
     cluster.content_type === 'review'
       ? 'Classification: REVIEW (set by Phase 1). This item is a multi-trial / topic round-up, NOT a single-study report. You MUST populate `discussed_trials` with the trial acronyms it names, copied verbatim. Do not fabricate a single-result analysis.'
-      : '';
+      : cluster.content_type === 'presentation'
+        ? PRESENTATION_DIRECTIVE
+        : '';
 
   const prompt = template
     .replace('{{VOICE}}', VOICE_POINTER)
@@ -1595,6 +1652,25 @@ async function runStudyAgent(
   const finalStudy = validatePrimaryEndpoint(dedupedStudy, tweets, cluster.slug);
   return { study: finalStudy, raw };
 }
+
+// v0.59: the Phase 2 directive for a talk. Kept here rather than in the prompt
+// file because it is only spliced in for a presentation cluster, so the
+// study-report prompt stays byte-stable for the rest of the corpus.
+const PRESENTATION_DIRECTIVE = [
+  'Classification: PRESENTATION (set by Phase 1). This is a speaker\'s TALK: slides shared from a session, arguing a framework or decision across the evidence. It is NOT a single-study report, so:',
+  '- `tldr`: the talk\'s thesis in one sentence (no headline number required).',
+  '- `details`: the key takeaways, one per bullet, grounded in the slides / post. A decision framework on a slide (criteria, an algorithm, "when X, prefer Y") is the most valuable thing to capture, as a table when it compares options across criteria.',
+  '- `verdict`, `primary_endpoint`, `consort`, `nct`: null. A slide quoting another trial\'s HR is a cited result, not this card\'s endpoint.',
+  '- `discussed_trials`: the trial acronyms the slides cite, verbatim (same rules as a review).',
+  '- `figures`: the most informative slides, in the order a reader should see them.',
+  '- `presentation`: REQUIRED, an object:',
+  '  - `speaker`: the presenter\'s name exactly as the sources print it, or null. The poster sharing "my slides" is the speaker; someone photographing another person\'s talk is not.',
+  '  - `summary`: 3 to 5 sentences (≤110 words): what the speaker argued, the framework they proposed, and what it rests on. Your words, not the slides\'.',
+  '- Name the presenter ONLY in `speaker`. Everywhere else (`tldr`, `details`, `summary`, `critique`, `significance`, every prose field) write "the speaker", never a person\'s name and never a gendered pronoun. A name the sources do not support is replaced with "the speaker" on every field.',
+  '  - `critique`: the ADVERSARIAL READ, 2 to 4 points, each one sentence ≤40 words. Read the talk the way a skeptical peer reviewer would: where is the argument weakest? The evidence level under each recommendation (retrospective series vs randomized data, single-institution, selection by who was referred to which modality), an assumption the framework smuggles in, a population or scenario it does not cover, head-to-head data that does not exist, a competing view the talk omits. Name a missing comparison or a trial only if you are certain it exists, and attach NO number that is not on the slides or in the post. Critique the argument, never the speaker. If the talk is a fair, well-hedged summary, say what still remains unproven rather than inventing a flaw.',
+  '- Numbers in `summary` and `critique`: digits only, each quoted verbatim from the source with the same meaning (a count of patients is not a percentage). Never write a magnitude in words. A number, percentage or spelled-out quantity that is not in the source withholds that sentence.',
+  '- `significance` / `monday_clinic`: same rules as any study, applied to the decision the talk is about.',
+].join('\n');
 
 // Validate every promoted figure against its own OCR, reusing the single-figure
 // validator (validateKeyFigure). A figure is dropped entirely when its URL fails
@@ -1751,6 +1827,116 @@ export function validatePrimaryEndpoint(
     return { ...study, primary_endpoint: null };
   }
   return study;
+}
+
+// v0.59: the post says the talk is the poster's OWN. Only then does the poster's
+// name count as a source for the speaker: someone photographing another
+// person's talk is not its speaker. Deliberately narrow ("I gave up on TARE"
+// and "I spoke with Dr X" must not qualify).
+export const FIRST_PERSON_TALK =
+  /\b(?:my|our)\s+(?:own\s+)?(?:slides?|talk|presentation|lecture|deck)\b|\bI\s+(?:presented|gave\s+(?:a|my|the)\s+(?:talk|presentation|lecture))\b/i;
+
+/**
+ * v0.59: ground a presentation card against its own sources. Runs on every
+ * successful Phase 2 result AFTER the resume cache and BEFORE Phase 3, so a
+ * cached study can't skip a newer gate and synthesis (top_line, the day's
+ * TL;DR, site intros: the OG card and channel post) never sees an unvetted
+ * name.
+ *   - the presentation block via groundPresentation (speaker, numbers,
+ *     percentages, spelled magnitudes);
+ *   - a REJECTED speaker's name is scrubbed from every prose field, then the
+ *     whole card is searched for any trace of it; a trace means `drop`. An
+ *     adversarial read published under a misattributed physician's name is
+ *     worse than a missing card, and the curator is told about a drop.
+ */
+export function groundPresentationStudy(
+  study: DigestStudy,
+  tweets: DigestInputTweet[],
+): { notes: string[]; drop: boolean } {
+  if (study.content_type !== 'presentation' || !study.presentation) return { notes: [], drop: false };
+  const srcText = [
+    // The curator's own note is trusted for who gave the talk.
+    ...tweets.map((t) => t.note ?? ''),
+    ...tweets.flatMap((t) => (FIRST_PERSON_TALK.test(t.text) ? [t.author ?? '', t.author_name ?? ''] : [])),
+    ...collectStudySourceFragments(tweets),
+  ].join('\n');
+  const { presentation, withheld, rejectedSpeaker } = groundPresentation(
+    study.presentation,
+    srcText,
+    sourceNumberCheck(tweets),
+  );
+  study.presentation = presentation ?? undefined;
+  if (!rejectedSpeaker) return { notes: withheld, drop: false };
+
+  const scrub = (t: string) => scrubSpeakerName(t, rejectedSpeaker);
+  study.name = scrub(study.name);
+  study.tldr = scrub(study.tldr);
+  study.details = study.details.map((d) => {
+    if (typeof d === 'string') return scrub(d);
+    const out = { ...d, text: scrub(d.text) } as typeof d;
+    if ('subdetails' in out && Array.isArray(out.subdetails)) out.subdetails = out.subdetails.map(scrub);
+    if ('table' in out && out.table) {
+      out.table = { columns: out.table.columns.map(scrub), rows: out.table.rows.map((r) => r.map(scrub)) };
+    }
+    return out;
+  });
+  if (study.analysis_sections) {
+    study.analysis_sections = study.analysis_sections.map((x) => ({ label: scrub(x.label), body: scrub(x.body) }));
+  }
+  for (const k of ['significance', 'monday_clinic', 'interpretation'] as const) {
+    const v = study[k];
+    if (typeof v === 'string') study[k] = scrub(v);
+  }
+  if (study.significance_by_specialty) {
+    for (const [k, v] of Object.entries(study.significance_by_specialty)) {
+      if (typeof v === 'string') study.significance_by_specialty[k as keyof typeof study.significance_by_specialty] = scrub(v);
+    }
+  }
+  if (study.open_questions) study.open_questions = study.open_questions.map(scrub);
+  if (study.figures) {
+    study.figures = study.figures.map((f) => ({
+      ...f,
+      caption:
+        typeof f.caption === 'string'
+          ? scrub(f.caption)
+          : f.caption
+            ? { columns: f.caption.columns.map(scrub), rows: f.caption.rows.map((r) => r.map(scrub)) }
+            : f.caption,
+    }));
+  }
+  withheld.push(`scrubbed "${rejectedSpeaker}" from card prose`);
+
+  // Every published string on the card, the slug included (it becomes the
+  // /study/ URL). Machine fields that never carry prose are skipped.
+  const SKIP = new Set(['url', 'tweet_ids', 'source_ids', 'related_trials', 'related_trials_provenance']);
+  const strings: string[] = [];
+  const walk = (v: unknown, key = ''): void => {
+    if (SKIP.has(key)) return;
+    if (typeof v === 'string') strings.push(v);
+    else if (Array.isArray(v)) v.forEach((x) => walk(x));
+    else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) walk(x, k);
+  };
+  walk(study);
+  if (speakerNameRemains(strings, rejectedSpeaker)) {
+    withheld.push(`"${rejectedSpeaker}" still named after scrubbing; card dropped`);
+    return { notes: withheld, drop: true };
+  }
+  return { notes: withheld, drop: false };
+}
+
+// v0.59: the numeric verifier the tables and the primary endpoint use, as a
+// reusable check over free prose: every number must be a source token (after
+// decimal-separator normalization, with .65/0.65 equivalence) and every
+// range/CI it writes must be an adjacent pair in some source fragment.
+export function sourceNumberCheck(tweets: DigestInputTweet[]): (prose: string) => string | null {
+  const fragments = collectStudySourceFragments(tweets).map(normalizeDecimalSeparators);
+  const tokenRe = /\d+\.\d+|\.\d+|\d+/g;
+  const sourceTokens = new Set((fragments.join(' ').match(tokenRe) ?? []).map(normalizeNumericToken));
+  const sourcePairs = new Set<string>();
+  for (const frag of fragments) {
+    for (const key of sourceAdjacentNumberPairs(frag)) sourcePairs.add(key);
+  }
+  return (prose) => firstUnverifiedCellValue(prose, sourceTokens, sourcePairs);
 }
 
 // Each source's text + each image's OCR as a SEPARATE fragment. Adjacency is
@@ -1942,8 +2128,10 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
   // Phase 2 owns (it reads the full source text), and only a review carries it;
   // a study report never renders an acronym list even if the model emits one.
   const content_type = cluster.content_type;
-  const discussedTrials =
-    content_type === 'review' ? parseDiscussedTrials(root.discussed_trials) : [];
+  const nonStudy = isNonStudyContent(content_type);
+  const isPresentation = content_type === 'presentation';
+  // A presentation's "trials cited" reuses the review's verbatim acronym list.
+  const discussedTrials = nonStudy ? parseDiscussedTrials(root.discussed_trials) : [];
 
   return {
     name,
@@ -1955,13 +2143,16 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     // the review card via StudyCard's shared head). Phase 2 inherits the cluster
     // content_type but parses `nct` ungated, so force it null for reviews here —
     // the same enforcement posture as stripReviewVerdicts at build time.
-    nct: content_type === 'review' ? null : nct,
+    nct: nonStudy ? null : nct,
     // A review surveys many trials and owns none of their identifiers — the same
     // reason its `nct` is forced null (v0.audit).
-    doi: content_type === 'review' ? null : doi,
+    doi: nonStudy ? null : doi,
     tweet_ids: cluster.tweet_ids,
     slug: cluster.slug,
-    verdict: parseVerdict(root.verdict),
+    // A talk has no single result to triage. Cleared here as well as by
+    // stripReviewVerdicts at build so no intermediate (eval, resume cache)
+    // carries one.
+    verdict: isPresentation ? undefined : parseVerdict(root.verdict),
     // v0.22: the perspective-framed "Why it matters" prose. The lens display
     // label (significance_perspective) is stamped later, at build assembly,
     // where opts.perspectiveName is known — the parser only sees the raw text.
@@ -1972,20 +2163,28 @@ export function parseStudyAgentResponse(raw: string, cluster: StudyCluster): Dig
     monday_clinic: parseSignificance(root.monday_clinic),
     // v0.30: structured primary endpoint (shape-guarded here, numbers validated
     // in validatePrimaryEndpoint). Absent === no stated primary → TL;DR head.
-    primary_endpoint: parsePrimaryEndpoint(root.primary_endpoint),
+    // A slide quoting a cited trial's HR is that trial's number, not this
+    // card's endpoint: a presentation never heads with one (nor a CONSORT
+    // flow), so it never draws an effect mark or enters the compare tray.
+    primary_endpoint: isPresentation ? null : parsePrimaryEndpoint(root.primary_endpoint),
     analysis_sections: parseAnalysisSections(root.analysis_sections),
     interpretation: parseInterpretation(root.interpretation),
     relevant_specialties: parseRelevantSpecialties(root.relevant_specialties),
     significance_by_specialty: parseSignificanceBySpecialty(root.significance_by_specialty),
     open_questions: parseOpenQuestions(root.open_questions),
-    consort: parseConsort(root.consort),
+    consort: isPresentation ? null : parseConsort(root.consort),
     modality,
     intent,
-    methodology,
+    // A talk has no study design. Left to the model, the first real one was
+    // tagged consensus-guideline, which would list a talk on that tag landing
+    // beside actual guidelines.
+    methodology: isPresentation ? null : methodology,
     // Omit the default so the committed study-report corpus stays unchanged;
-    // absent === study_report. Only a review records the field.
+    // absent === study_report. Only a non-default type (review, presentation)
+    // records the field.
     content_type: content_type === DEFAULT_CONTENT_TYPE ? undefined : content_type,
     discussed_trials: discussedTrials.length > 0 ? discussedTrials : undefined,
+    presentation: isPresentation ? parsePresentation(root.presentation) ?? undefined : undefined,
   };
 }
 

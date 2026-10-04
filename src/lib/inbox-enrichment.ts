@@ -74,6 +74,7 @@ import {
   TelegramFileError,
 } from './slide-photo-storage.ts';
 import { ocrFile, isOcrAvailable } from './vision-ocr.ts';
+import { archiveTweetImages, isMediaArchiveEnabled } from './tweet-media-archive.ts';
 import { listDigests } from './digest-data.ts';
 import { extractCitations, ownRegistrations } from './extract.ts';
 import { extractDois } from './doi.ts';
@@ -1505,6 +1506,13 @@ async function enrichTweetItem(
       tweet_html: tweet.html,
       image_urls: tweet.image_urls,
     });
+    // v0.59: vault copy of the post's images (a speaker's slides), taken at
+    // enrichment so it exists before the post can disappear. Best-effort; the
+    // build re-attempts any miss.
+    if (tweet.image_urls.length > 0 && isMediaArchiveEnabled()) {
+      const r = await archiveTweetImages(item.bookmark_date, tweet.image_urls);
+      for (const f of r.failed) console.warn(`  [enrich] media archive: ${f}`);
+    }
     // The fetched tweet text is the strongest conference signal (#ASCO26). Stamp
     // it only if the curator's message didn't already tag the bookmark.
     const tweetConference = detectAndEnsureConference(db, [tweet.text], item.bookmark_date);

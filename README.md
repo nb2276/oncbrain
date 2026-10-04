@@ -38,7 +38,7 @@ admin form @ 3001 ┘                       ▼                          │    
                                                                      └─▶ auto-deploy on push
 ```
 
-Admin form, Telegram poller, enrichment, and build pipeline run locally only. The public site is pure static HTML (plus the RSS feed and JSON API, also static). Full-text PDFs are filed into a gitignored Obsidian vault and never published.
+Admin form, Telegram poller, enrichment, and build pipeline run locally only. The public site is pure static HTML (plus the RSS feed and JSON API, also static). Full-text PDFs, and full-resolution copies of images attached to bookmarked posts, are filed into a gitignored Obsidian vault and never published.
 
 ## Setup (one time)
 
@@ -130,6 +130,7 @@ Organized by **disease site** (22-slug enum, see `DESIGN.md`), newest date first
   - On mobile the depth stays folded for the 90-second scan; on desktop (≥1024px) it auto-expands, and a sticky **triage rail** (≥1200px) lists every study by verdict for quick jumping.
   - **Focus on your specialty:** a header control lets a reader mark radiation / medical / surgical oncology. Studies relevant to none of the picks dim (they stay in view — a systemic trial can still move a radonc decision), and the "Why it matters" prose reframes to the picked specialty's decision lens. Saved in `localStorage`.
   - **Dark by default**, light via the header toggle, persisted and applied before first paint.
+  - **Non-study content carries no verdict.** A trade-press round-up (🗞️ review) shows its outlet and a "Trials discussed" list; a speaker's talk shared as slides (🎤 presentation) leads with the speaker, a summary of what the talk argued, an **adversarial read** of where its argument is weakest, and a "Trials cited" list. Cited trial names are kept only when the sources print them.
 
 Disease-site emoji anchors live in `DESIGN.md`; the per-study bullet + verdict emoji vocabulary and voice rules live in `VOICE.md`.
 

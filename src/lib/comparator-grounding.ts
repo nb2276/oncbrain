@@ -86,6 +86,40 @@ function normalize(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+/**
+ * v0.59: keep only the cited-trial names the sources actually print. A review
+ * or a talk lists "Trials discussed / cited" from the model's reading, and a
+ * remembered acronym published as a citation the source never made is the
+ * same fabrication as a remembered hazard ratio. Matched as a whole token,
+ * separator-insensitive ("NRG-GU005" ~ "NRG GU005"), so "STOP" does not ride on
+ * "stopped".
+ */
+export function groundedTrialNames(names: string[], sourceText: string): { kept: string[]; dropped: string[] } {
+  // A separator (space, any dash, slash, dot) may appear in the source only
+  // where the NAME has one or at a letter/digit boundary ("NRG-GU005" ~
+  // "NRG GU005" ~ "NRG – GU005"). Never between two letters: "HERA" must not
+  // ride on "her a".
+  const src = sourceText.toLowerCase();
+  const SEP = String.raw`[\s\-‐-―_/.·]*`;
+  const kept: string[] = [];
+  const dropped: string[] = [];
+  for (const name of names) {
+    const runs = name
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .flatMap((r) => r.match(/[a-z]+|[0-9]+/g) ?? [])
+      .filter(Boolean);
+    if (runs.length === 0) {
+      dropped.push(name);
+      continue;
+    }
+    const body = runs.join(SEP);
+    if (new RegExp(String.raw`(^|[^a-z0-9])${body}($|[^a-z0-9])`).test(src)) kept.push(name);
+    else dropped.push(name);
+  }
+  return { kept, dropped };
+}
+
 function isTrialCandidate(raw: string): boolean {
   const lead = raw.split('-')[0]!.toUpperCase();
   if (lead.length < 3) return false;
@@ -215,6 +249,10 @@ type AuditStudy = {
   significance_by_specialty?: Record<string, string> | null;
   monday_clinic?: string | null;
   interpretation?: string | null;
+  // v0.59: a presentation's talk summary + adversarial read. The critique is the
+  // surface MOST likely to reach past the sources ("unlike X, which showed…"),
+  // so it is audited like every other long-form field.
+  presentation?: { summary: string | null; critique: string[] } | null;
 };
 
 function detailText(d: unknown): string {
@@ -274,6 +312,24 @@ export function withholdUngroundedComparators(
       out.push({ slug, surface: key, trials: bad });
       study[key] = null;
     }
+  }
+
+  if (study.presentation && typeof study.presentation === 'object') {
+    const p = study.presentation;
+    const badSummary = check(p.summary);
+    if (badSummary.length > 0) {
+      out.push({ slug, surface: 'presentation.summary', trials: badSummary });
+      p.summary = null;
+    }
+    const kept: string[] = [];
+    (Array.isArray(p.critique) ? p.critique : []).forEach((c, i) => {
+      const bad = check(c);
+      if (bad.length === 0) kept.push(c);
+      else out.push({ slug, surface: `presentation.critique[${i}]`, trials: bad });
+    });
+    p.critique = kept;
+    // undefined (key omitted), matching the pipeline's empty-block sentinel.
+    if (!p.summary && kept.length === 0) study.presentation = undefined;
   }
 
   if (study.significance_by_specialty && typeof study.significance_by_specialty === 'object') {
@@ -370,6 +426,8 @@ export function droppedDiseaseStates(
     study.interpretation ?? '',
     study.verdict?.audience ?? '',
     ...Object.values(study.significance_by_specialty ?? {}),
+    study.presentation?.summary ?? '',
+    ...(study.presentation?.critique ?? []),
   ]
     .join(' ')
     .toLowerCase();

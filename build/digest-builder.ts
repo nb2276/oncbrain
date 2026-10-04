@@ -49,6 +49,7 @@ import {
   type DigestStudy,
 } from '../src/lib/llm-pipeline.ts';
 import { renderObsidian } from '../src/lib/obsidian-export.ts';
+import { archiveTweetImages, isMediaArchiveEnabled } from '../src/lib/tweet-media-archive.ts';
 import { markFigureSourcedDetails } from '../src/lib/source-tier.ts';
 import { lostPublishedStudies, publishRegressionMessage } from '../src/lib/publish-regression.ts';
 import {
@@ -67,7 +68,7 @@ import {
 import { persistSlugs } from '../src/lib/slug-persistence.ts';
 import { buildPriorIndex, findPriorEstimate, studiesFromArtifacts } from '../src/lib/prior-estimate.ts';
 import { clampPreprintVerdict } from '../src/lib/preprint.ts';
-import { stripReviewVerdicts, coerceConsensusVerdicts } from '../src/lib/content-type.ts';
+import { stripReviewVerdicts, coerceConsensusVerdicts, enforcePresentationInvariants } from '../src/lib/content-type.ts';
 import {
   auditDigestSelfConsistency,
   formatUntraceableHeadlines,
@@ -270,6 +271,7 @@ function toDigestInput(bookmarks: Bookmark[]): DigestInputTweet[] {
       source_type: 'tweet' as const,
       id: b.id,
       author: b.author_handle ?? b.author_name ?? null,
+      author_name: b.author_name,
       text: b.tweet_text!,
       note: b.notes,
       image_urls: parseImageUrls(b.image_urls),
@@ -397,6 +399,29 @@ async function ensureOcrTexts(db: ReturnType<typeof openDb>, bookmarks: Bookmark
     updateBookmarkOcrTexts(db, b.id, entries);
     const recognized = entries.filter((e) => e.text.length > 0).length;
     console.log(`    [ocr] #${b.id} ${recognized}/${urls.length} image(s) recognized`);
+  }
+}
+
+// v0.59: keep a vault copy of every post image in this build (a speaker's
+// slides outlive the post). Idempotent: an archived image or a recorded
+// permanent miss costs a stat. Best-effort: a miss never fails a build.
+// Skipped on --backfill so a corpus refresh doesn't first pull every historic
+// image at full resolution before its first LLM call.
+async function ensureMediaArchived(bookmarks: Bookmark[], skip: boolean): Promise<void> {
+  if (skip || !isMediaArchiveEnabled()) return;
+  let saved = 0;
+  const failed: string[] = [];
+  for (const b of bookmarks) {
+    const urls = parseImageUrls(b.image_urls);
+    if (urls.length === 0) continue;
+    const r = await archiveTweetImages(b.bookmark_date, urls);
+    saved += r.saved;
+    failed.push(...r.failed);
+  }
+  if (saved > 0) console.log(`  archived ${saved} post image(s) to the vault`);
+  if (failed.length > 0) {
+    console.warn(`    [media-archive] ${failed.length} failed${failed.length > 5 ? ' (showing 5)' : ''}`);
+    for (const f of failed.slice(0, 5)) console.warn(`    [media-archive] ${f}`);
   }
 }
 
@@ -661,6 +686,9 @@ export async function buildOneDate(
   // whose ocr is already aligned with image_urls length.
   const afterFetch = listBookmarks(db, { bookmark_date: date });
   await ensureOcrTexts(db, afterFetch);
+  // Not on --backfill (see above), and never on --dry-run / --skip-fetch: both
+  // promise no network and no writes.
+  await ensureMediaArchived(afterFetch, args.backfill || args.dryRun || args.skipFetch);
 
   // Re-read after the fetch step may have updated rows.
   const bookmarks = listBookmarks(db, { bookmark_date: date }).filter(
@@ -854,13 +882,17 @@ export async function buildOneDate(
       if (study.is_preprint) study.verdict = clampPreprintVerdict(study.verdict) ?? undefined;
     }
   }
-  // v0.16: force every `review` study verdict-less in the same post-override
+  // v0.16: force every `review` (v0.59: and `presentation`) study verdict-less in the same post-override
   // phase (Codex #9). A multi-trial review has no single SOC implication to
   // triage; it surfaces discussed_trials instead. Runs AFTER overrides so a
   // curator verdict edit can't reintroduce one. See stripReviewVerdicts.
   const strippedReviewVerdicts = stripReviewVerdicts(digest);
   if (strippedReviewVerdicts > 0) {
-    console.log(`  stripped ${strippedReviewVerdicts} verdict(s) from review studies`);
+    console.log(`  stripped ${strippedReviewVerdicts} verdict(s) from review/presentation studies`);
+  }
+  const presentationFixes = enforcePresentationInvariants(digest);
+  if (presentationFixes > 0) {
+    console.log(`  cleared single-result fields on ${presentationFixes} presentation(s) after overrides`);
   }
 
   // v0.41: a consensus/guideline document takes the `consensus` verdict. Same

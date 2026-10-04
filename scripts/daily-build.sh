@@ -205,6 +205,9 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
       echo ""
       echo "→ Staging data/ for commit"
       git add data 2>/dev/null || true
+      # Local-only vault content (filed PDFs, archived post images) must never
+      # publish, even on a checkout whose .gitignore predates its rule.
+      git reset -q -- data/obsidian/papers data/obsidian/media 2>/dev/null || true
 
       # Which digest dates actually changed this run? A late-evening tweet can land
       # on yesterday's date, so notifying only $TODAY would miss it. Derive the
@@ -244,7 +247,9 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
         # below can still return 0 ("Everything up-to-date", or it carries only a
         # pre-existing backlog) — so without this the run announces a date that
         # never left the laptop.
-        if ! git commit -m "auto: $TODAY 1am pull" -- data; then
+        # Vault paths excluded from the PATHSPEC too: a pathspec commit takes the
+        # working-tree content of any TRACKED file under it, staged or not.
+        if ! git commit -m "auto: $TODAY 1am pull" -- data ':(exclude)data/obsidian/papers' ':(exclude)data/obsidian/media'; then
           echo "  ✗ git commit FAILED — nothing published"
           FAILED=1
           CHANGED_DATES=""
@@ -293,12 +298,15 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
           | while IFS= read -r -d '' rec; do
               f="${rec:3}"
               [ -f "$f" ] || continue
+              # Local-only vault content never publishes, ignore rule or not.
+              case "$f" in data/obsidian/papers/*|data/obsidian/media/*) continue ;; esac
               mkdir -p "$PUBLISH_WT/$(dirname "$f")"
               cp "$f" "$PUBLISH_WT/$f"
             done
         git ls-files -z -- data \
           | while IFS= read -r -d '' f; do
               [ -f "$f" ] || continue
+              case "$f" in data/obsidian/papers/*|data/obsidian/media/*) continue ;; esac
               if ! git -C "$PUBLISH_WT" cat-file -e "HEAD:$f" 2>/dev/null; then
                 mkdir -p "$PUBLISH_WT/$(dirname "$f")"
                 cp "$f" "$PUBLISH_WT/$f"
@@ -348,7 +356,7 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
         else
           # Same rule as the on-main path: an uncommitted-but-staged digest with a
           # succeeding push would be announced without ever deploying.
-          if ! git -C "$PUBLISH_WT" commit -m "auto: $TODAY 1am pull" -- data; then
+          if ! git -C "$PUBLISH_WT" commit -m "auto: $TODAY 1am pull" -- data ':(exclude)data/obsidian/papers' ':(exclude)data/obsidian/media'; then
             echo "  ✗ git commit FAILED — nothing published"
             FAILED=1
             CHANGED_DATES=""
