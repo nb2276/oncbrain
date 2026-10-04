@@ -43,7 +43,7 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 - **Admin server**: Hono 4 (localhost only, on port 3001)
 - **DB**: better-sqlite3 (synchronous), file at `./oncbrain.db`
 - **LLM**: Anthropic Claude Sonnet via `@anthropic-ai/sdk` OR via `claude -p` (subscription path). v0.8 PR2: also called at *enrichment* time (not just build) to extract metadata from PDF text.
-- **Tests**: Vitest (2373 tests across 117 files as of v0.55). `test/global-setup.ts` builds `dist/` once before collection when the artifacts are absent, so `npm test` is correct cold or warm.
+- **Tests**: Vitest (2594 tests across 127 files as of v0.59). `test/global-setup.ts` builds `dist/` once before collection when the artifacts are absent, so `npm test` is correct cold or warm.
 - **Theme**: dark by default with a light opt-in (v0.30). All colors come from CSS custom properties in `Base.astro` (`:root` dark, `:root[data-theme='light']` override) — a hardcoded hex in a component breaks one theme. See `DESIGN.md → Color`.
 - **PDF ingestion** (v0.8 PR2): poppler (`brew install poppler`) provides `pdftotext` (text layer) + `pdftoppm` (rasterize scanned pages for Apple Vision OCR) + `pdfimages` (v0.15: locate figure pages). No npm dep. A missing binary yields a clear Telegram reply, not a crash.
 - **Figure OCR** (v0.15, Path A): for a text-layer PDF, `pdfimages -list` finds the pages carrying a real figure (large raster image) and `pdftoppm`→Vision OCRs just those, capturing numbers printed *inside* figures (subgroup medians, forest-plot estimates, n-at-risk, image-rendered tables) that `pdftotext` can't see. Stored in `papers.figure_ocr_md` (local-only, never published — same IP boundary as `fulltext_excerpt_md`) and fed to the Phase 2 study agent as labeled lower-confidence source so it can *ground* a figure-locked magnitude instead of flagging it missing. Backfill the back catalog with `npx tsx build/backfill-figure-ocr.ts`.
@@ -103,7 +103,7 @@ DIGEST_THINKING=8000 LLM_BACKEND=api npm run build:day -- --date=<date>  # + Pha
 DIGEST_PERSPECTIVE=radonc npm run build:day -- --date=<date>            # specialty lens for Phase 2 (radonc | medonc | your own); see prompts/perspectives/
 
 # Tests + eval
-npm test                        # vitest run (2373 tests)
+npm test                        # vitest run (2594 tests)
 npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations / v0.13 query+trial axes)
 npm run quality-eval                                # multi-persona quality review of today's digest
 npm run quality-eval -- --date=2026-06-05           # specific day
@@ -314,6 +314,7 @@ data/
   overrides/<date>.json         committed curator overrides applied at build (suppress/edit studies)
   obsidian/<date>[-<conf>].md   committed Obsidian markdown twin
   obsidian/papers/<site>/<slug>.pdf  v0.8 PR2: filed full-text PDFs (gitignored, never published)
+  obsidian/media/tweets/<date>/<media-key>  v0.59: full-resolution archive of bookmarked post images (gitignored, never published; TWEET_MEDIA_ARCHIVE=off)
   slide-photos/<date>/<uuid>.<ext>  curator slide uploads (gitignored by default — see CHANGELOG v0.5)
 public/
   favicon.svg / favicon.ico
@@ -360,6 +361,7 @@ TODOS.md                   deferred work tracker (seeded from CHANGELOG "Not yet
   Cap is **2 minutes** (DO deploys in ~40s). Kill switch `DEPLOY_WAIT=off`; cap override `DEPLOY_WAIT_TIMEOUT_MS`. `--dry-run` never waits. Also worth knowing: the catchall means **every** typo'd URL 200s as the home page, so broken links never surface as 404s anywhere on this site.
 - **Curator name** (`PUBLIC_CURATOR_NAME`, `PUBLIC_CURATOR_HANDLE`) is local-only — DO's build doesn't see `.env`. Set these as DO app env vars to attribute on the live site.
 - **Filed PDFs are local-only** (v0.8 PR2). Full-text PDFs forwarded to the bot are filed under `data/obsidian/papers/<site>/<slug>.pdf` (gitignored, no `public/` symlink, never in the Astro build) and embedded in the Obsidian daily note. The public site carries only the summary. This is a hard IP constraint — never publish the PDFs (a test in `test/publish-boundary.test.ts` guards it).
+- **Archived post images are local-only** (v0.59). Every image on a bookmarked post (a speaker's slides) is saved full-resolution to `data/obsidian/media/tweets/<date>/` at enrich time (and at build for misses) so a talk survives the post being deleted. Same boundary as filed PDFs: gitignored, guarded by `test/publish-boundary.test.ts`, the archiver refuses to write unless `git check-ignore` confirms the directory is ignored, and `daily-build.sh` excludes `data/obsidian/{papers,media}` on both publish paths. The site keeps rendering slides from Twitter's CDN via the embed. Kill switch `TWEET_MEDIA_ARCHIVE=off`.
 
 ## Skill routing
 
@@ -377,7 +379,7 @@ When a user request matches a gstack skill, invoke via the Skill tool:
 ## Testing
 
 ```
-npm test                   # 2373 tests across 117 files, all should pass
+npm test                   # 2594 tests across 127 files, all should pass
 npm run test:watch         # vitest watch mode
 npx astro check            # type check (0 errors expected)
 ```
@@ -388,7 +390,7 @@ Tests live in `test/`. Each lib module has a corresponding test file. Naming con
 
 Single source of truth: `package.json` `"version"` field. CHANGELOG.md gets a new section per release.
 
-**Released:** v0.55.5 (trial lineage + grounding. A trial the digest already covered that comes back is classified `update` / `new-card` / `duplicate` rather than collapsed into one "previously covered" nudge; auto-suppression is DEFAULT OFF behind `TRIAL_LINEAGE_AUTOSUPPRESS`, and evidence (`gateAuthorized`) is kept separate from permission (`autoSuppress`) so a flag can never substitute for missing evidence. A build-time gate withholds prose attaching a number to a trial the sources never mention; the eval went 5.0 FAIL to 8.2-9.2 PASS, its first pass. Also: a source enriching outside the two-day build window no longer strands (the organs-at-risk paper survived three submissions unpublished), suppression commits only AFTER the successor artifact is durable, identity counts only a source's OWN trial registration, and the curator DM names a study Phase 2 dropped. Prior: v0.52.0 (Monday-clinic line rests on the card). Prior: v0.40.0 (channel post + date card de-duplicated: the OG card owns `top_line`, the Telegram body owns inventory + link). Prior: v0.39.x (content-level publish boundary; notify-CLI DRY; stranded-publish fix). Prior: v0.33-v0.38 (effect-size marks: ratio forest dot, paired bars, corpus-wide ruler, share-card renderer, compare tray, longitudinal magnitude). Prior: v0.30-v0.32 (endpoint-forward card, reader-selectable specialty relevance, per-specialty "why it matters"). Full history in CHANGELOG.md.
+**Released:** v0.59.0 (presentations: a third `content_type` for a speaker's talk shared as slides on X. Phase 1 autodetects it; the card leads with a speaker / summary / adversarial-read block and carries no verdict, NCT, DOI, primary endpoint, CONSORT or methodology tag, forced off at parse and re-cleared after overrides. `groundPresentation` withholds a sentence with an unsourced number or worded magnitude, and a speaker name the sources don't print is replaced before synthesis. Cited-trial acronyms are now grounded on reviews too. Talks never enter trial lineage or the drop nudge. Also: a local-only full-resolution archive of bookmarked post images at `data/obsidian/media/`). Prior: v0.55.5 (trial lineage + grounding. A trial the digest already covered that comes back is classified `update` / `new-card` / `duplicate` rather than collapsed into one "previously covered" nudge; auto-suppression is DEFAULT OFF behind `TRIAL_LINEAGE_AUTOSUPPRESS`, and evidence (`gateAuthorized`) is kept separate from permission (`autoSuppress`) so a flag can never substitute for missing evidence. A build-time gate withholds prose attaching a number to a trial the sources never mention; the eval went 5.0 FAIL to 8.2-9.2 PASS, its first pass. Also: a source enriching outside the two-day build window no longer strands (the organs-at-risk paper survived three submissions unpublished), suppression commits only AFTER the successor artifact is durable, identity counts only a source's OWN trial registration, and the curator DM names a study Phase 2 dropped. Prior: v0.52.0 (Monday-clinic line rests on the card). Prior: v0.40.0 (channel post + date card de-duplicated: the OG card owns `top_line`, the Telegram body owns inventory + link). Prior: v0.39.x (content-level publish boundary; notify-CLI DRY; stranded-publish fix). Prior: v0.33-v0.38 (effect-size marks: ratio forest dot, paired bars, corpus-wide ruler, share-card renderer, compare tray, longitudinal magnitude). Prior: v0.30-v0.32 (endpoint-forward card, reader-selectable specialty relevance, per-specialty "why it matters"). Full history in CHANGELOG.md.
 
 ## Planning artifacts
 
