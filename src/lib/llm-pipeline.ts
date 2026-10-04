@@ -1017,6 +1017,10 @@ export async function buildDigest(
           tweets: capped.map((t) => ({
             id: t.id,
             text: t.text,
+            // v0.59: the poster's display name reaches a presentation's prompt
+            // (behind the first-person cue), so a changed name must re-run it.
+            author_name:
+              cluster.content_type === 'presentation' && FIRST_PERSON_TALK.test(t.text) ? t.author_name ?? null : undefined,
             ocr: t.image_ocr_texts ?? [],
             imgs: t.image_urls ?? [],
           })),
