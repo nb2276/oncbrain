@@ -19,6 +19,11 @@ describe('PDF publish boundary', () => {
     expect(gitignore).toMatch(/^data\/obsidian\/papers\/?$/m);
   });
 
+  it('gitignores data/obsidian/media/ (v0.59 post-image archive)', () => {
+    const gitignore = readFileSync(resolve(root, '.gitignore'), 'utf-8');
+    expect(gitignore).toMatch(/^data\/obsidian\/media\/?$/m);
+  });
+
   it('keeps the daily .md notes committable (only the papers/ subtree is ignored)', () => {
     const gitignore = readFileSync(resolve(root, '.gitignore'), 'utf-8');
     // A blanket data/obsidian/ ignore would also hide the public-safe daily

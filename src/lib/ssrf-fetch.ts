@@ -247,7 +247,12 @@ export async function ssrfSafeFetchBuffer(
         current = new URL(loc, current).toString();
         continue;
       }
-      if (!res.ok) throw new SsrfError(`HTTP ${res.status}`, current);
+      if (!res.ok) {
+        // Release the connection: an unread body on a rejected response would
+        // otherwise hold it open after the timer below is cleared.
+        await res.body?.cancel().catch(() => {});
+        throw new SsrfError(`HTTP ${res.status}`, current);
+      }
       const lenHeader = res.headers.get('content-length');
       if (lenHeader && Number(lenHeader) > maxBody) {
         controller.abort();
