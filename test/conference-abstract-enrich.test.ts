@@ -120,6 +120,23 @@ describe('conference abstract enrichment', () => {
     expect(status(db)).toBe('failed');
   });
 
+  it('a DNS failure on the pinned portal host stays retryable', async () => {
+    const db = openDb(':memory:');
+    mockedFetchText.mockRejectedValue(new SsrfError('DNS resolution failed', GI003));
+    await runEnrichmentLoop(db, send(db, GI003));
+    expect(status(db)).toBe('failed');
+  });
+
+  it('a confirm with a different DOI than the row holds is refused, not swapped', async () => {
+    const db = openDb(':memory:');
+    mockedFetchText.mockResolvedValue(GI003_HTML);
+    await runEnrichmentLoop(db, send(db, `${GI003} ${DOI}`));
+    addDoiWatch(db, { doi: '10.1016/j.ijrobp.2026.06.009', title: 'x' });
+    await runEnrichmentLoop(db, send(db, `${GI003} 10.1016/j.ijrobp.2026.06.009`));
+    expect(papers(db).map((p) => p.doi)).toEqual([DOI]);
+    expect(listDoiWatch(db).map((w) => w.doi)).toEqual(['10.1016/j.ijrobp.2026.06.009']);
+  });
+
   it('a portal 404 is permanent', async () => {
     const db = openDb(':memory:');
     mockedFetchText.mockRejectedValue(new SsrfError('HTTP 404', GI003));

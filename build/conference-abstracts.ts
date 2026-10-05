@@ -13,8 +13,10 @@
 //   npm run conf:abstracts -- --ingest --url=<abstract link> [--doi=<doi>] [--date=YYYY-MM-DD] [--quiet] [--dry-run]
 //       Queue one confirmed abstract into the inbox (then `npm run enrich:inbox`).
 //       --quiet skips only the per-item "Got it" reply (a bulk backfill), never
-//       the prior-coverage nudge. Re-running with a corrected --doi or --date
-//       queues a new item; an identical re-run is a no-op.
+//       the prior-coverage nudge, nor a refused-DOI reply. Re-running with a
+//       different --doi or --date queues a new item (an identical re-run is a
+//       no-op); enrichment adds a DOI to an abstract that has none but never
+//       replaces one it already carries.
 //
 // The nightly cron runs `--match --notify`, so a watched DOI that never gets a
 // Crossref abstract still surfaces as a one-tap confirmation.

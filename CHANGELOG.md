@@ -22,13 +22,15 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   clusters with that day's tweets and slides. The body is located by its label
   text, not its markup, since abstracts on one portal wrap their section
   labels differently, and parsing fails closed if either end of the body is
-  missing. A portal outage (5xx, 429, timeout) retries; a 404 or a page with no
+  missing. A portal outage (5xx, 429, timeout, DNS) retries; a 404 or a page with no
   abstract body fails permanently with a reason.
 - **Confirming a DOI after the fact.** Replying "`<link> <doi>`" for an
   abstract already on file attaches the DOI to that row, retires the watch,
   and queues the card's date for rebuild when it is already published, so the
   public card and JSON API pick the DOI up. The DOI token must be one bare DOI
-  (`10.x/a,10.x/b` pairs nothing).
+  (`10.x/a,10.x/b` pairs nothing). A confirm naming a different DOI than the
+  row already carries is refused with a reply saying so, never swapped
+  silently; the watch stays open.
 - **The trial's own registration only.** The abstract header names an NCT
   only when the portal marks it as the trial's ("Clinical Trial Number:"),
   never a comparator the body mentions. "clinical trial number" joins the
@@ -55,8 +57,9 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   runs when a watched DOI belongs to the meeting's journal (capped at 200
   pages a listing and 5 minutes; a partial index is not cached). Nothing is
   ingested without that reply. `--ingest --url=… --doi=… --date=… [--quiet]
-  [--dry-run]` queues a confirmed abstract directly: a corrected DOI or date
-  queues a new item, an identical re-run is a no-op, and `--quiet` skips only
+  [--dry-run]` queues a confirmed abstract directly: a different DOI or date
+  queues a new item (a DOI is added where none is attached, never replaced),
+  an identical re-run is a no-op, and `--quiet` skips only
   the per-item "Got it" DM in a bulk backfill (never the prior-coverage
   nudge).
 - **Nightly**: `daily-build.sh` runs `conf:abstracts --match --notify` after

@@ -411,14 +411,22 @@ async function enrichPaperItem(
     if (confirmedDoi && doiOnRow === confirmedDoi) {
       resolveDoiWatch(db, confirmedDoi, 'conference_portal', item.id);
     }
-    const reply = r.created
+    // A confirm naming a DIFFERENT DOI than the row already holds (or one
+    // another paper owns) is refused, never silently swapped: a DOI change
+    // re-keys the paper's identity, and that is a curator edit, not a reply.
+    const doiRefused = confirmedDoi !== null && doiOnRow !== confirmedDoi;
+    const reply = doiRefused
+      ? `${r.created ? 'Got it' : 'Already on file'}: ${saveInput.title}. Did NOT attach ${confirmedDoi}: ` +
+        (doiOnRow ? `this abstract already carries ${doiOnRow}.` : 'another paper on file already has that DOI.') +
+        ' The DOI watch stays open.'
+      : r.created
       ? `Got it: ${saveInput.title} (${contentDepthNote(saveInput)}). Appears in the next digest.`
       : doiAttached
         ? `Already on file: ${saveInput.title}. Attached DOI ${confirmedDoi}${queuedDate ? `, and queued ${queuedDate} for rebuild` : ''}.`
         : replyForPaperMerge(saveInput.title, r, queuedDate);
     // A bulk backfill (`conf:abstracts --ingest --quiet`) skips only this
     // per-item acknowledgement; the prior-coverage nudge still reaches the curator.
-    if (!isQuietInboxItem(item)) await replyToCurator(item, reply);
+    if (doiRefused || !isQuietInboxItem(item)) await replyToCurator(item, reply);
     return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
   } catch (err) {
     return { status: 'failed', reason: `paper insert failed: ${(err as Error).message}` };
@@ -958,9 +966,11 @@ async function resolveConferenceAbstract(
     html = await ssrfSafeFetchText(url, { allowedHostSuffixes: [adapter.host] });
   } catch (err) {
     const msg = (err as Error).message;
-    // Retry a server error, rate limit, timeout or network failure; a refused
-    // host, redirect problem, 4xx or oversize body won't improve.
-    const transient = !(err instanceof SsrfError) || /^HTTP (5\d\d|429)$/.test(msg);
+    // Retry a server error, rate limit, timeout, DNS or network failure (the
+    // portal host is pinned, so a lookup failure is an outage, not a refusal);
+    // a refused host, redirect problem, 4xx or oversize body won't improve.
+    const transient =
+      !(err instanceof SsrfError) || /^(HTTP (5\d\d|429)|DNS resolution failed|host did not resolve)$/.test(msg);
     if (!transient) throw err;
     throw new TransientFetchError(`portal fetch failed (${msg}); will retry`);
   }
