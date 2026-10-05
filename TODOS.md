@@ -203,7 +203,13 @@ Design doc: `~/.gstack/projects/nb2276-oncbrain/2026-06-09-design-triage-and-dis
   gate cannot run at enrich time, because a source has no `primary_endpoint`
   until Phase 2.
 
+## Conference abstracts (v0.60 follow-ups)
+
+- **More meeting-portal adapters.** **Priority: P2.** Only ASTRO's `amportal.astro.org` has an adapter. Candidates: ESMO (OncologyPRO), the ASCO Meetings Library, AACR. Each is one entry in `src/lib/conference-abstract.ts` (host, journal DOI prefix, listing paths, page + listing parser) plus a fixture test. Check first that the portal's abstract pages are server-rendered; a JS-rendered portal needs a different approach (the browser, or an API the page calls). (v0.60 review)
+
 ## Known limitations (informational — not on a roadmap)
+
+- **The ASTRO portal renders "≤" as "=" in some abstracts.** The ingested abstract carries what the portal serves; the confirm-only matcher is unaffected, but a threshold in the text ("PSA = 0.2") can read as an equality. (v0.60)
 
 - **Three traps when auditing the corpus by hand against the DB.** (1) `source_ids[].type` is `tweet`, NOT `bookmark`, so keying on the wrong string silently yields EMPTY source text and every number reads as ungrounded. (2) The bookmarks OCR column is `image_ocr_texts` (plural). (3) Stored abstracts encode the middle dot as `&#xb7;`, which `normalizeNumericText` does not decode. All three produced false "ungrounded" verdicts while verifying v0.48 arm outcomes.
 
