@@ -23,6 +23,7 @@
 // the existing sites[] structure is unchanged, so Astro pages and Obsidian
 // export continue to work without conditional logic.
 
+import { consortIsCoherent } from './consort.ts';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -619,7 +620,7 @@ export type ConsortArm = {
 export type ConsortDiagram = {
   enrolled?: number | null; // assessed/enrolled before randomization, if reported
   excluded?: number | null; // excluded before randomization, if reported
-  randomized: number; // total randomized
+  randomized: number | null; // total randomized, ONLY when the source prints it (never summed from arms)
   arms: ConsortArm[]; // >= 2 arms
 };
 
@@ -2281,8 +2282,9 @@ export function parseConsort(raw: unknown): ConsortDiagram | null {
   const posInt = (v: unknown): number | null =>
     typeof v === 'number' && Number.isFinite(v) && Number.isInteger(v) && v > 0 ? v : null;
 
+  // Optional: a source may print the arm allocations without a total, and the
+  // total is never back-calculated from them (see consort.ts).
   const randomized = posInt(obj.randomized);
-  if (randomized === null) return null;
 
   const armsRaw = Array.isArray(obj.arms) ? obj.arms : [];
   const arms: ConsortArm[] = [];
@@ -2309,9 +2311,8 @@ export function parseConsort(raw: unknown): ConsortDiagram | null {
     // artifact for no gain.
     arms.push(outcome ? { label, allocated, analyzed, outcome } : { label, allocated, analyzed });
   }
-  if (arms.length < 2) return null;
-
-  return { enrolled: posInt(obj.enrolled), excluded: posInt(obj.excluded), randomized, arms };
+  const diagram = { enrolled: posInt(obj.enrolled), excluded: posInt(obj.excluded), randomized, arms };
+  return consortIsCoherent(diagram) ? diagram : null;
 }
 
 // Parses the optional verdict block emitted by Phase 2. Forgiving: if the

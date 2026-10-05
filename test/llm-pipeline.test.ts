@@ -958,11 +958,29 @@ describe('parseConsort', () => {
     expect(parseConsort({ randomized: 100, arms: [{ label: 'A', allocated: 100 }] })).toBeNull();
   });
 
-  it('rejects missing/invalid total randomized', () => {
-    expect(
-      parseConsort({ arms: [{ label: 'A', allocated: 50 }, { label: 'B', allocated: 50 }] }),
-    ).toBeNull();
+  it('keeps an arms-only flow when the source prints no randomized total, never summing one', () => {
+    // MAVERICK's slides: "PCI + MRI (n=152)", "MRI alone (n=151)", "Total accrual: 304".
+    const r = parseConsort({ arms: [{ label: 'PCI + MRI', allocated: 152 }, { label: 'MRI alone', allocated: 151 }] });
+    expect(r?.randomized).toBeNull();
+    expect(r?.arms.map((a) => a.allocated)).toEqual([152, 151]);
+    expect(parseConsort({ randomized: 0, arms: [{ label: 'A', allocated: 5 }, { label: 'B', allocated: 5 }] })?.randomized).toBeNull();
     expect(parseConsort({ randomized: 0, arms: [] })).toBeNull();
+  });
+
+  it('withholds a flow whose arms allocate more than were randomized', () => {
+    // STAR-TREC drew a non-randomized preference cohort as a third arm: 426 of 384.
+    expect(
+      parseConsort({
+        randomized: 384,
+        arms: [
+          { label: 'LCCRT-OP', allocated: 172 },
+          { label: 'SCRT-OP', allocated: 172 },
+          { label: 'Primary TME (40 randomised + 42 by preference)', allocated: 82 },
+        ],
+      }),
+    ).toBeNull();
+    // fewer allocated than randomized is normal (post-randomization exclusions)
+    expect(parseConsort({ randomized: 304, arms: [{ label: 'A', allocated: 152 }, { label: 'B', allocated: 151 }] })).not.toBeNull();
   });
 
   it('drops arms without a label or positive allocated count', () => {
