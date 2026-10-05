@@ -24,6 +24,21 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   labels differently, and parsing fails closed if either end of the body is
   missing. A portal outage (5xx, 429, timeout) retries; a 404 or a page with no
   abstract body fails permanently with a reason.
+- **Confirming a DOI after the fact.** Replying "`<link> <doi>`" for an
+  abstract already on file attaches the DOI to that row, retires the watch,
+  and queues the card's date for rebuild when it is already published, so the
+  public card and JSON API pick the DOI up. The DOI token must be one bare DOI
+  (`10.x/a,10.x/b` pairs nothing).
+- **The trial's own registration only.** The abstract header names an NCT
+  only when the portal marks it as the trial's ("Clinical Trial Number:"),
+  never a comparator the body mentions. "clinical trial number" joins the
+  registration cues; in the corpus it appears on one source, GI003's own.
+- **Duplicate nudge measured from the filed date.** The "previously covered"
+  nudge now asks what was covered before the date a source is FILED on, not
+  the date it was sent. A portal abstract files on its presentation date, so
+  measuring from the send date made the card it was joining look like an
+  earlier duplicate and offered a one-reply drop of it. The same applied to
+  any re-send that merges onto a row filed earlier.
 - **Published like a PubMed abstract (curator decision).** The portal abstract
   text goes into `papers.abstract` and reaches the digest the same way a
   PubMed abstract does. Identity is the portal's numeric abstract id, so the

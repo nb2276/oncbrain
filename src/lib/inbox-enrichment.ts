@@ -399,21 +399,23 @@ async function enrichPaperItem(
     );
 
   try {
-    const { r, queuedDate } = savePaperAndQueueRebuild(db, saveInput);
-    // v0.60: a confirmed portal abstract carries its supplement DOI. Persist it
-    // on the winning row FIRST (a re-send merges by content_hash, and that merge
-    // never writes a DOI), then retire the watch only if the row really holds
-    // that DOI. Otherwise the nightly check would later ingest the same
-    // abstract a second time, or a watch would close on a row without its DOI.
-    if (saveInput.fetched_via === 'conference_abstract' && saveInput.doi) {
-      const watched = normalizeDoi(saveInput.doi);
-      if (watched && attachPaperDoiIfMissing(db, r.id, watched) === watched) {
-        resolveDoiWatch(db, watched, 'conference_portal', item.id);
-      }
+    // v0.60: a confirmed portal abstract carries its supplement DOI. It is
+    // persisted on the winning row inside the save transaction (a re-send merges
+    // by content_hash, and that merge never writes a DOI), and the watch retires
+    // only if the row really holds that DOI. Otherwise the nightly check would
+    // later ingest the same abstract a second time, or a watch would close on a
+    // row without its DOI.
+    const confirmedDoi =
+      saveInput.fetched_via === 'conference_abstract' && saveInput.doi ? normalizeDoi(saveInput.doi) : null;
+    const { r, queuedDate, doiOnRow, doiAttached } = savePaperAndQueueRebuild(db, saveInput, confirmedDoi);
+    if (confirmedDoi && doiOnRow === confirmedDoi) {
+      resolveDoiWatch(db, confirmedDoi, 'conference_portal', item.id);
     }
     const reply = r.created
       ? `Got it: ${saveInput.title} (${contentDepthNote(saveInput)}). Appears in the next digest.`
-      : replyForPaperMerge(saveInput.title, r, queuedDate);
+      : doiAttached
+        ? `Already on file: ${saveInput.title}. Attached DOI ${confirmedDoi}${queuedDate ? `, and queued ${queuedDate} for rebuild` : ''}.`
+        : replyForPaperMerge(saveInput.title, r, queuedDate);
     // A bulk backfill (`conf:abstracts --ingest --quiet`) skips only this
     // per-item acknowledgement; the prior-coverage nudge still reaches the curator.
     if (!isQuietInboxItem(item)) await replyToCurator(item, reply);
@@ -510,14 +512,19 @@ export function needsRebuildQueue(
 function savePaperAndQueueRebuild(
   db: Database.Database,
   input: NewPaper,
-): { r: SavePaperResult; queuedDate: string | null } {
+  attachDoi: string | null = null,
+): { r: SavePaperResult; queuedDate: string | null; doiOnRow: string | null; doiAttached: boolean } {
   return db.transaction(() => {
     const r = savePaper(db, input);
+    // A DOI confirmed onto an existing row changes the published card (its DOI
+    // link and the JSON API), so it counts as content for the rebuild decision.
+    const attach = attachDoi ? attachPaperDoiIfMissing(db, r.id, attachDoi) : { doi: null, attached: false };
     let queuedDate: string | null = null;
     if (r.bookmarkDate) {
       const contentFields = r.mergedFields.filter((f) =>
         (PAPER_CONTENT_FIELDS as readonly string[]).includes(f),
       );
+      if (attach.attached && !r.created) contentFields.push('doi');
       // Something must actually have changed: a fresh row, or a collision that
       // merged real content. A repeat submission adding nothing gets no rebuild.
       const changed = r.created || contentFields.length > 0;
@@ -531,7 +538,7 @@ function savePaperAndQueueRebuild(
         queuedDate = r.bookmarkDate;
       }
     }
-    return { r, queuedDate };
+    return { r, queuedDate, doiOnRow: attach.doi, doiAttached: attach.attached };
   })();
 }
 
@@ -1370,6 +1377,14 @@ function getEnrichedText(
   return [r?.ocr_text, r?.curator_note].filter(Boolean).join(' ');
 }
 
+function filedDate(db: Database.Database, type: InboxItem['type'], rowId: number): string | null {
+  const table = type === 'tweet' ? 'bookmarks' : type === 'paper' ? 'papers' : 'slide_uploads';
+  const r = db.prepare(`SELECT bookmark_date FROM ${table} WHERE id = ?`).get(rowId) as
+    | { bookmark_date: string | null }
+    | undefined;
+  return r?.bookmark_date ?? null;
+}
+
 // Trial lineage: classify WHAT this source reports about its trial (facet +
 // maturity + follow-up), so the build can tell a matured re-reading of one
 // objective from a genuinely different objective and act differently on each.
@@ -1432,8 +1447,14 @@ async function notifyPriorCoverage(
     // evidence gate. Same rule as lineage: an NCT merely CITED is not identity.
     const fullText = getEnrichedText(db, item.type, rowId);
     if (!fullText) return;
+    // "Prior" is relative to the date the source is FILED on, not the message
+    // date: a portal abstract files on its presentation date, and a re-send
+    // merges onto a row already filed earlier. Measured from the message date,
+    // the card this source belongs to looks like an earlier, separate card and
+    // the nudge offers to drop it.
+    const sourceDate = filedDate(db, item.type, rowId) ?? item.bookmark_date;
     const ncts = ownRegistrations(fullText);
-    const nctPrior = ncts.length ? findPriorCoverage(index, ncts, item.bookmark_date) : [];
+    const nctPrior = ncts.length ? findPriorCoverage(index, ncts, sourceDate) : [];
 
     // Acronym match: extract from the SUBJECT text only (a paper's title, a
     // tweet's body), NOT the full excerpt. An oncology paper names many
@@ -1444,7 +1465,7 @@ async function notifyPriorCoverage(
     const acronymPrior = findPriorAcronymCoverage(
       acronymIndex,
       extractTextAcronymKeys(getSubjectText(db, item.type, rowId)),
-      item.bookmark_date,
+      sourceDate,
     );
 
     // Decide, per prior, whether to OFFER a drop. The full evidence gate cannot

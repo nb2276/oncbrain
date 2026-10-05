@@ -19,6 +19,7 @@
 import { createHash } from 'node:crypto';
 import { decodeHtmlEntities } from './html-meta.ts';
 import { normalizeDoi } from './doi.ts';
+import { ownRegistrations } from './extract.ts';
 
 export type ConferenceAbstract = {
   title: string;
@@ -153,7 +154,11 @@ const ASTRO: ConferenceAdapter = {
     const presented_on =
       year && month && dateBlock ? `${year}-${month}-${dateBlock[2]!.padStart(2, '0')}` : null;
 
-    const nct = abstract.match(/\bNCT\s?(\d{8})\b/i)?.[1];
+    // Only the trial's OWN registration (a cued "Clinical Trial Number:" line),
+    // never the first NCT the body mentions: a comparator NCT in the header
+    // would read as this abstract's identity.
+    const own = ownRegistrations(abstract);
+    const nct = own.length === 1 ? own[0]!.slice(3) : undefined;
     return {
       title,
       number: numbered ? numbered[1]!.replace(/\s+/g, ' ').toUpperCase() : null,
@@ -227,8 +232,11 @@ export function pairedPortalDoi(text: string | null | undefined): { url: string;
   const urlTok = tokens.find((t) => isConferenceAbstractUrl(t));
   const doiTok = tokens.find((t) => t !== urlTok);
   if (!urlTok || !doiTok || /^https?:/i.test(doiTok)) return null;
+  // The WHOLE token must be one bare DOI: normalizeDoi extracts the first DOI
+  // from any text, so "10.x/a,10.x/b" would otherwise pair the first and drop
+  // the second.
   const doi = normalizeDoi(doiTok);
-  if (!doi) return null;
+  if (!doi || doi !== doiTok.toLowerCase()) return null;
   const adapter = adapterForUrl(urlTok)!;
   // The supplement DOI must belong to this meeting's journal.
   if (!doi.startsWith(adapter.doiPrefix)) return null;

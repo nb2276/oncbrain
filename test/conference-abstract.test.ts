@@ -12,6 +12,7 @@ import {
   NotAnAbstractError,
 } from '../src/lib/conference-abstract.ts';
 import { extractPaperUrls } from '../src/lib/paper-url.ts';
+import { ownRegistrations } from '../src/lib/extract.ts';
 import { detectConference } from '../src/lib/conference-detect.ts';
 
 const astro = ADAPTERS.find((a) => a.id === 'astro')!;
@@ -87,6 +88,11 @@ describe('ASTRO abstract parser', () => {
     expect(() => astro.parse('<html><h1>Discussant</h1></html>', 'u')).toThrow(NotAnAbstractError);
   });
 
+  it('the NCT is the cued registration, never a comparator the body names', () => {
+    expect(ownRegistrations('Proton therapy did not improve OS. Clinical Trial Number: NCT03186898')).toEqual(['NCT03186898']);
+    expect(ownRegistrations('Building on the STELLAR II trial (NCT05484024), we treated 40 patients.')).toEqual([]);
+  });
+
   it('keeps superscripts as ^x in the body so a p-value exponent survives', () => {
     const a = astro.parse(fixture('astro-gi003'), GI003);
     expect(a.abstract).not.toMatch(/<sup>/);
@@ -149,6 +155,8 @@ describe('confirm reply pairing', () => {
     expect(pairedPortalDoi(`${GI003} ${DOI} 10.1016/j.ijrobp.2026.06.005`)).toBeNull(); // two DOIs
     expect(pairedPortalDoi(`${GI003} see ${DOI}`)).toBeNull(); // prose
     expect(pairedPortalDoi(`${GI003} https://doi.org/${DOI}`)).toBeNull(); // DOI as a URL
+    expect(pairedPortalDoi(`${GI003} ${DOI},10.1016/j.ijrobp.2026.06.005`)).toBeNull(); // two DOIs in one token
+    expect(pairedPortalDoi(`${GI003} doi:${DOI}`)).toBeNull(); // not bare
     expect(pairedPortalDoi(`${GI003} 10.1056/NEJMoa2400001`)).toBeNull(); // another journal
     expect(pairedPortalDoi(`https://amportal.astro.org/sessions/pl-01-22946 ${DOI}`)).toBeNull(); // session page
   });

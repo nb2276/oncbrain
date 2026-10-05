@@ -91,6 +91,19 @@ describe('conference abstract enrichment', () => {
     expect(listDoiWatch(db)).toHaveLength(0);
   });
 
+  it('a DOI confirmed onto an already-published abstract queues its date for rebuild', async () => {
+    const db = openDb(':memory:');
+    mockedFetchText.mockResolvedValue(GI003_HTML);
+    // Filed 2026-09-28: outside the nightly build window by the reply date, so
+    // nothing else would ever rebuild the card with its DOI.
+    await runEnrichmentLoop(db, send(db, GI003));
+    db.prepare('DELETE FROM rebuild_queue').run();
+    await runEnrichmentLoop(db, send(db, `${GI003} ${DOI}`));
+    const q = db.prepare('SELECT bookmark_date, reason FROM rebuild_queue').all() as Array<{ bookmark_date: string; reason: string }>;
+    expect(q.map((x) => x.bookmark_date)).toEqual(['2026-09-28']);
+    expect(q[0]!.reason).toMatch(/doi/);
+  });
+
   it('a page with no abstract body fails permanently with a specific reason', async () => {
     const db = openDb(':memory:');
     mockedFetchText.mockResolvedValue('<html><h1>Discussant</h1></html>');

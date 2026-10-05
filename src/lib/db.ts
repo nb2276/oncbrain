@@ -1385,15 +1385,20 @@ export function resolveDoiWatch(
 
 // v0.60: attach a confirmed DOI to a paper row that has none, unless another
 // paper already owns that DOI. Returns the DOI the row holds afterwards (null
-// when it has none), so the caller can act only on what was really persisted.
-export function attachPaperDoiIfMissing(db: Database.Database, paperId: number, doi: string): string | null {
+// when it has none) and whether this call wrote it, so the caller can act only
+// on what was really persisted and rebuild a published card that gained one.
+export function attachPaperDoiIfMissing(
+  db: Database.Database,
+  paperId: number,
+  doi: string,
+): { doi: string | null; attached: boolean } {
   const row = db.prepare('SELECT doi FROM papers WHERE id = ?').get(paperId) as { doi: string | null } | undefined;
-  if (!row) return null;
-  if (row.doi) return normalizeDoi(row.doi);
+  if (!row) return { doi: null, attached: false };
+  if (row.doi) return { doi: normalizeDoi(row.doi), attached: false };
   const owner = db.prepare('SELECT id FROM papers WHERE lower(doi) = lower(?) AND id != ?').get(doi, paperId);
-  if (owner) return null;
+  if (owner) return { doi: null, attached: false };
   db.prepare('UPDATE papers SET doi = ? WHERE id = ?').run(doi, paperId);
-  return doi;
+  return { doi, attached: true };
 }
 
 // Inbox items queued by a CLI (watch:doi, conf:abstracts) rather than a real
