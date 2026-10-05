@@ -1,4 +1,5 @@
 ---
+import { consortIsCoherent, randomizedCount } from '../lib/consort.ts';
 // The CONSORT enrolment flow: assessed → randomized → per-arm allocation.
 //
 // EXTRACTED IN v0.47 because it was rendering nowhere. The markup used to live
@@ -24,14 +25,16 @@ type ConsortArm = {
 export type Consort = {
   enrolled?: number | null;
   excluded?: number | null;
-  randomized: number;
+  randomized?: number | null;
   arms: ConsortArm[];
 };
 interface Props {
   consort: Consort | null | undefined;
 }
 const { consort } = Astro.props;
-const show = Boolean(consort && Array.isArray(consort.arms) && consort.arms.length >= 2);
+// Coherence (arms can't allocate more than were randomized) is shared with the
+// parser, so an artifact built before that rule still can't draw an impossible flow.
+const show = consortIsCoherent(consort);
 // The outcome row renders only when EVERY arm has one. A flow showing a result
 // under one arm and a blank under the other reads as "the other arm had no
 // result", which is a different and wrong claim — the prompt already asks the
@@ -54,7 +57,9 @@ const showOutcomes = Boolean(
             </div>
           </>
         )}
-        <div class="consort-node consort-rand">Randomized <b>{consort.randomized}</b></div>
+        {/* No total when the source prints only the arm allocations: the label
+            stays, the number is never summed from the arms. */}
+        <div class="consort-node consort-rand">Randomized{randomizedCount(consort) != null && <Fragment> <b>{randomizedCount(consort)}</b></Fragment>}</div>
         <div class="consort-arrow">↓</div>
         <div class="consort-arms">
           {consort.arms.map((a) => (

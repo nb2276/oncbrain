@@ -282,7 +282,7 @@ export type ConsortArm = {
 export type ConsortDiagram = {
   enrolled?: number | null;
   excluded?: number | null;
-  randomized: number;
+  randomized: number | null;
   arms: ConsortArm[];
 };
 

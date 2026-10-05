@@ -15,9 +15,10 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { listStudyPages } from '../src/lib/digest-data.ts';
+import { consortIsCoherent } from '../src/lib/consort.ts';
 
-type ConsortLike = { randomized?: number; arms?: Array<{ label?: string }> } | null | undefined;
-const renderable = (c: ConsortLike) => Boolean(c && Array.isArray(c.arms) && c.arms.length >= 2);
+type ConsortLike = { randomized?: number | null; arms: Array<{ label?: string; allocated: number }> } | null | undefined;
+const renderable = (c: ConsortLike) => consortIsCoherent(c);
 const pageFor = (param: string) => resolve(process.cwd(), 'dist', 'study', param, 'index.html');
 
 describe('CONSORT diagram rendering', () => {
@@ -51,6 +52,15 @@ describe('CONSORT diagram rendering', () => {
     }
     // the structured fold is the one that was broken; make sure it is exercised
     expect(structured.length).toBeGreaterThan(0);
+  });
+
+  it('never draws an impossible flow already in the corpus (arms over the randomized total)', () => {
+    const star = listStudyPages().find((e) => e.study.slug === 'star-trec');
+    expect(star, 'STAR-TREC fixture card').toBeTruthy();
+    expect(renderable(star!.study.consort as ConsortLike)).toBe(false);
+    if (existsSync(pageFor(star!.param))) {
+      expect(readFileSync(pageFor(star!.param), 'utf8')).not.toMatch(/class="consort-flow/);
+    }
   });
 
   it('never renders a one-arm "flow"', () => {

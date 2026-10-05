@@ -2,6 +2,27 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.60.1] - 2026-10-04
+
+### Fixed
+- **A randomized trial whose source prints only the arm counts now gets its
+  CONSORT flow.** The Phase 2 prompt required an explicit randomized TOTAL as
+  well as per-arm allocations, and forbade summing the arms, so the model
+  correctly left `consort` empty for SWOG S1827/MAVERICK (the slide reads
+  "Total accrual: 304" with "PCI + MRI (n=152)" and "MRI alone (n=151)") and
+  for DeLLphi-304 (254 vs 255, no total). The total is now optional: the flow
+  draws the arms under a bare "Randomized" node, and the total is never
+  back-calculated. Of 57 randomized-trial cards, 22 carry no flow; these two
+  were the misses, and the rest are correct abstentions (subgroup or secondary
+  analyses, totals without arm counts). They pick it up on their next rebuild.
+- **An impossible flow is no longer drawn.** STAR-TREC (2026-08-24) showed a
+  non-randomized preference cohort ("40 randomised + 42 by preference") as a
+  third arm, 426 allocated out of 384 randomized. A flow whose arms allocate
+  more than the printed randomized total is withheld at parse AND at render
+  (`src/lib/consort.ts`), so the published card stops drawing it without a
+  rebuild. The prompt now also says an arm is a randomized group, never a
+  preference cohort, subgroup or analysis population.
+
 ## [0.60.0] - 2026-10-04
 
 ### Added
