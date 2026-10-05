@@ -2,6 +2,21 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.59.1] - 2026-10-04
+
+### Fixed
+- **The 1am Telegram pull can miss a message that is sitting in the queue.**
+  On 2026-10-04 the cron's `getUpdates` came back empty while the talk link
+  sent the evening before was pending (`pending_update_count: 1`); the same
+  offset returned it fine 20 hours later. 2026-05-27 had the same miss. The
+  pull short-polled (`timeout=0`), which Telegram documents as "for testing
+  purposes only". `pollUpdates` now long-polls (10s); if the answer is still
+  empty while Telegram reports something pending, it retries twice, and if
+  that fails it peeks at every update kind (same offset, nothing consumed)
+  and logs what was waiting before restoring the filter. That separates a
+  real miss from the harmless case the old warning could not: an edit or
+  reaction counts as pending but is never delivered and expires in 24h.
+
 ## [0.59.0] - 2026-10-03
 
 ### Added
