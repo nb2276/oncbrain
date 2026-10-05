@@ -85,7 +85,8 @@ const SERIES: Series[] = [
     name: 'ASTRO Annual Meeting',
     acronym: 'ASTRO',
     hashtags: [/#ASTRO(20\d\d|\d{2})\b/i],
-    hosts: ['meetings.astro.org'],
+    // amportal: the meeting's abstract portal (conference-abstract.ts, v0.60).
+    hosts: ['meetings.astro.org', 'amportal.astro.org'],
     // Real abstract/slide text brands the meeting "ASTRO 2025:" far more often
     // than "ASTRO Annual Meeting", so match the acronym+year form too. The
     // required whitespace + trailing year keeps "AUA/ASTRO guidelines" (year, if

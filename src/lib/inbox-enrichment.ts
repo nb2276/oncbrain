@@ -11,6 +11,13 @@
 // in the queue are skipped with a clear log line and left at 'pending'.
 
 import {
+  adapterForUrl,
+  conferenceAbstractHash,
+  NotAnAbstractError,
+  type ConferenceAbstract,
+  type ConferenceAdapter,
+} from './conference-abstract.ts';
+import {
   saveBookmark,
   savePaper,
   saveSlideUpload,
@@ -22,6 +29,7 @@ import {
   upsertConference,
   queueRebuild,
   paperHasFigures,
+  resolveDoiWatch,
   saveSourceFacet,
   todayIso,
   PAPER_CONTENT_FIELDS,
@@ -77,7 +85,7 @@ import { ocrFile, isOcrAvailable } from './vision-ocr.ts';
 import { archiveTweetImages, isMediaArchiveEnabled } from './tweet-media-archive.ts';
 import { listDigests } from './digest-data.ts';
 import { extractCitations, ownRegistrations } from './extract.ts';
-import { extractDois } from './doi.ts';
+import { extractDois, normalizeDoi } from './doi.ts';
 import {
   buildNctCoverageIndex,
   findPriorCoverage,
@@ -384,6 +392,13 @@ async function enrichPaperItem(
 
   try {
     const { r, queuedDate } = savePaperAndQueueRebuild(db, saveInput);
+    // v0.60: a portal abstract carrying its supplement DOI retires that DOI's
+    // watch, so the nightly check can't ingest the same abstract twice when
+    // Crossref finally gets its text. A no-op when the DOI isn't watched.
+    if (saveInput.fetched_via === 'conference_abstract' && saveInput.doi) {
+      const watched = normalizeDoi(saveInput.doi);
+      if (watched) resolveDoiWatch(db, watched, 'conference_portal', item.id);
+    }
     const reply = r.created
       ? `Got it: ${saveInput.title} (${contentDepthNote(saveInput)}). Appears in the next digest.`
       : replyForPaperMerge(saveInput.title, r, queuedDate);
@@ -816,6 +831,12 @@ async function resolveFromUrl(
   // for this URL — resolve it via Crossref/PubMed WITHOUT fetching the publisher
   // page (faster; immune to bot-blocks/rate-limits). A retryable API error here
   // propagates so the item retries instead of falling through to a doomed fetch.
+  // v0.60: a meeting-portal abstract page. Checked first: the portal URL
+  // carries no DOI/PMID and no citation meta, and its abstract is the whole
+  // point (the journal supplement's DOI often has no abstract text for weeks).
+  const conf = adapterForUrl(url);
+  if (conf) return resolveConferenceAbstract(conf, url, item, note);
+
   const viaUrlId = await resolveFromUrlEmbeddedId(url, item, note);
   if (viaUrlId) return viaUrlId;
 
@@ -876,6 +897,57 @@ async function resolveFromUrl(
     curator_note: note,
     inbox_item_id: item.id,
     fetched_via: 'html_meta',
+  };
+}
+
+// v0.60: parse a conference-portal abstract page into a paper row.
+//
+// Identity is the page itself (content_hash over host+path), like a trade
+// article. The journal-supplement DOI is attached ONLY when the curator's
+// message names exactly one DOI (the conf:abstracts confirm flow sends
+// "<url> <doi>"): that pairing is the curator's assertion, never inferred.
+// With a DOI attached, the matching doi_watch entry is retired, so the
+// nightly check doesn't ingest the same abstract a second time once Crossref
+// finally carries it.
+async function resolveConferenceAbstract(
+  adapter: ConferenceAdapter,
+  url: string,
+  item: InboxItem,
+  note: string | null,
+): Promise<NewPaper> {
+  const html = await ssrfSafeFetchText(url, { allowedHostSuffixes: [adapter.host] });
+  let a: ConferenceAbstract;
+  try {
+    a = adapter.parse(html, url);
+  } catch (err) {
+    if (err instanceof NotAnAbstractError) {
+      throw new MetaNotFoundError('that portal page has no abstract text (a session or discussant page?) — send the abstract\'s own link');
+    }
+    throw err;
+  }
+  const msgDois = extractDois(item.raw_message_text ?? '');
+  const doi = msgDois.length === 1 ? msgDois[0]! : null;
+  const header = [
+    a.meeting && a.number ? `${a.meeting} abstract ${a.number}` : a.meeting,
+    a.session,
+    a.presented_on,
+    a.presenter ? `presented by ${a.presenter}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  return {
+    content_hash: conferenceAbstractHash(url),
+    doi,
+    source_url: url,
+    title: a.title,
+    authors_json: JSON.stringify(a.authors.map((name) => ({ name }))),
+    journal: a.meeting ? `${a.meeting} Annual Meeting` : 'Conference abstract',
+    pub_date: a.presented_on,
+    abstract: `${header}\n\n${a.abstract}`,
+    bookmark_date: item.bookmark_date,
+    curator_note: note,
+    inbox_item_id: item.id,
+    fetched_via: 'conference_abstract',
   };
 }
 

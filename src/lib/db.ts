@@ -98,6 +98,7 @@ export type FetchedVia =
   | 'pdf' // PDF with a text layer
   | 'pdf_ocr' // scanned PDF, text recovered via Apple Vision OCR
   | 'review-resolved' // v0.17: a paper a curator approved from a review's discussed-trials manifest
+  | 'conference_abstract' // v0.60: abstract page on a meeting portal (conference-abstract.ts)
   | 'pending'
   | 'failed';
 
