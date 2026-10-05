@@ -85,15 +85,20 @@ export async function fetchUpdates(
   const fetchImpl = opts.fetchImpl ?? fetch;
   const params = new URLSearchParams();
   if (opts.offset !== undefined) params.set('offset', String(opts.offset));
-  params.set('timeout', String(opts.timeoutSec ?? 0));
+  const timeoutSec = opts.timeoutSec ?? 0;
+  params.set('timeout', String(timeoutSec));
   // We want both DMs and channel posts. allowed_updates filters to those kinds.
+  // Telegram persists this per bot, so every call sends the same list.
   params.set('allowed_updates', JSON.stringify(['message', 'channel_post']));
 
   const url = `${API_BASE}/bot${token}/getUpdates?${params}`;
 
   let response: Response;
   try {
-    response = await fetchImpl(url);
+    // A hard client-side ceiling past the long-poll window, so a stalled
+    // connection fails fast instead of holding the critical cron step for
+    // Node's multi-minute default.
+    response = await fetchImpl(url, { signal: AbortSignal.timeout((timeoutSec + 15) * 1000) });
   } catch (err) {
     throw new TelegramApiError(`Network error: ${(err as Error).message}`);
   }
@@ -124,11 +129,113 @@ export type TelegramWebhookInfo = {
   allowed_updates?: string[];
 };
 
-// Snapshot of the bot's server-side state. We call this immediately after an
-// empty getUpdates to catch the "Telegram returned result:[] but the queue
-// actually had updates" Bot API stale-read failure mode. If pending_update_count
-// is > 0 right after fetchUpdates returned 0, that proves provider inconsistency,
-// not curator silence.
+// v0.59.1: the daily pull long-polls instead of short-polling. On 2026-10-04
+// (and 2026-05-27 before it) a timeout=0 getUpdates at 01:00 returned [] while
+// the curator's message sat in the queue; the same offset returned it hours
+// later. Telegram documents short polling as "for testing purposes only".
+export const LONG_POLL_SEC = 10;
+export const EMPTY_POLL_RETRIES = 2;
+
+/**
+ * Fetch the pending updates, defending against an empty answer while Telegram
+ * says the queue is not empty:
+ *   1. long-poll once;
+ *   2. if empty, read pending_update_count and log it;
+ *   3. if anything is pending, long-poll again up to EMPTY_POLL_RETRIES times.
+ *
+ * The retries are best-effort: one that fails is logged and the run ends with
+ * nothing consumed, so the offset holds and the next run tries again. That
+ * covers a 409 from an overlapping pull too (Telegram allows one getUpdates
+ * per bot at a time, and a long poll makes overlap likelier). Only the first
+ * call's failure propagates, as before.
+ *
+ * Deliberately NOT done: peeking at other update kinds to explain a pending
+ * count. Telegram persists allowed_updates per bot, so a wider peek would
+ * leave edits/reactions flowing into ingestion if its restoring call failed.
+ * pending_update_count also counts kinds the filter excludes (an edit, a
+ * reaction), which never arrive and expire after 24h, so a pending count that
+ * survives the retries is reported as a hint, not a confirmed miss.
+ */
+export async function pollUpdates(
+  token: string,
+  opts: { offset?: number; fetchImpl?: typeof fetch; log?: (line: string) => void } = {},
+): Promise<TelegramUpdate[]> {
+  const log = opts.log ?? ((l: string) => console.log(l));
+  const base = { offset: opts.offset, fetchImpl: opts.fetchImpl, timeoutSec: LONG_POLL_SEC };
+
+  let updates: TelegramUpdate[];
+  try {
+    updates = await fetchUpdates(token, base);
+  } catch (err) {
+    if (err instanceof TelegramApiError && err.status === 409) {
+      // Telegram answers 409 for TWO different things: an overlapping
+      // getUpdates (benign, the other poller drains the queue) and an active
+      // webhook (every message is going elsewhere: a misconfiguration or a
+      // leaked-token takeover). Only the first may pass quietly.
+      let webhookUrl = '';
+      try {
+        webhookUrl = (await fetchWebhookInfo(token, { fetchImpl: opts.fetchImpl })).url;
+      } catch {
+        throw err; // can't tell which 409 this is: fail loudly
+      }
+      if (webhookUrl) {
+        throw new TelegramApiError(
+          `getUpdates 409: a webhook is set (${new URL(webhookUrl).host}); bot messages are being delivered there, not polled`,
+          409,
+        );
+      }
+      log('[diag] getUpdates 409 with no webhook: another poller is active; nothing consumed, next run retries');
+      return [];
+    }
+    throw err;
+  }
+  if (updates.length > 0) return updates;
+
+  let pending = 0;
+  try {
+    const info = await fetchWebhookInfo(token, { fetchImpl: opts.fetchImpl });
+    pending = info.pending_update_count;
+    log(
+      `[diag] ${JSON.stringify({
+        event: 'telegram_empty_poll',
+        ts: new Date().toISOString(),
+        offset: opts.offset ?? null,
+        pending_update_count: info.pending_update_count,
+        webhook_url: info.url || null,
+        last_error_date: info.last_error_date ?? null,
+        last_error_message: info.last_error_message ?? null,
+      })}`,
+    );
+  } catch (err) {
+    log(`[diag] getWebhookInfo failed: ${(err as Error).message}`);
+    return [];
+  }
+  if (pending === 0) return [];
+
+  for (let attempt = 1; attempt <= EMPTY_POLL_RETRIES; attempt++) {
+    try {
+      updates = await fetchUpdates(token, base);
+    } catch (err) {
+      log(`[diag] retry ${attempt} failed (${(err as Error).message}); nothing consumed, next run retries`);
+      return [];
+    }
+    if (updates.length > 0) {
+      log(`[diag] recovered ${updates.length} update(s) on retry ${attempt} (getUpdates had returned [] with ${pending} pending)`);
+      return updates;
+    }
+  }
+  log(
+    `[diag] WARN: ${pending} update(s) pending but none delivered after ${EMPTY_POLL_RETRIES} long-poll retries. ` +
+      'Either an excluded kind (edit/reaction, expires in 24h) or a Telegram miss; the next run polls the same offset.',
+  );
+  return [];
+}
+
+// Snapshot of the bot's server-side state, read after an empty getUpdates.
+// A pending_update_count > 0 there is a HINT, not proof of a missed message:
+// it also counts update kinds our allowed_updates filter excludes (an edit, a
+// reaction), which are never delivered and expire after 24h. pollUpdates
+// retries on it rather than treating it as a confirmed miss.
 export async function fetchWebhookInfo(
   token: string,
   opts: { fetchImpl?: typeof fetch } = {},
@@ -138,7 +245,7 @@ export async function fetchWebhookInfo(
   const url = `${API_BASE}/bot${token}/getWebhookInfo`;
   let response: Response;
   try {
-    response = await fetchImpl(url);
+    response = await fetchImpl(url, { signal: AbortSignal.timeout(15_000) });
   } catch (err) {
     throw new TelegramApiError(`Network error: ${(err as Error).message}`);
   }
@@ -393,7 +500,11 @@ export function extractImageDocument(msg: TelegramMessage): TelegramDocument | n
 
 export function messageOf(update: TelegramUpdate): TelegramMessage | undefined {
   // Channels POST as channel_post; DMs as message. Both feed the same pipeline.
-  return update.message || update.channel_post || update.edited_message || update.edited_channel_post;
+  // Edits are deliberately NOT ingested: an edited link would land as a new
+  // source on the original send date, and an edited "drop <date>/<slug>" would
+  // re-run a suppression. Our allowed_updates filter excludes them anyway; this
+  // holds if one ever arrives (the update still advances the offset).
+  return update.message || update.channel_post;
 }
 
 // Converts a Unix timestamp (seconds) to YYYY-MM-DD in the local timezone.

@@ -2,6 +2,35 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.59.1] - 2026-10-04
+
+### Fixed
+- **The 1am Telegram pull can miss a message that is sitting in the queue.**
+  On 2026-10-04 the cron's `getUpdates` came back empty while the talk link
+  sent the evening before was pending (`pending_update_count: 1`); the same
+  offset returned it fine 20 hours later. 2026-05-27 had the same miss. The
+  pull short-polled (`timeout=0`), which Telegram documents as "for testing
+  purposes only". `pollUpdates` now long-polls (10s) and, if the answer is
+  empty while Telegram reports something pending, long-polls twice more.
+  Every call keeps the stored offset, so nothing is consumed on a miss and the
+  next run retries the same queue.
+- **A flaky retry or an overlapping pull no longer fails the cron.** A failed
+  retry, or a 409 from a second poller (likelier now that each poll holds the
+  connection for 10s), ends the pull with nothing consumed instead of marking
+  the run FAILED. A 409 is checked against `getWebhookInfo` first: Telegram
+  also returns 409 when a webhook is set, which means every curator message is
+  being delivered somewhere else, so that case (and any 409 that can't be
+  classified) still fails loudly. Every Telegram call also has a hard client
+  timeout, so a stalled connection can't hold the critical cron step for
+  minutes. The pull summary now counts skipped non-message updates.
+- **Edited messages are never ingested.** An edited link would have landed as
+  a new source on the original send date, and an edited `drop <date>/<slug>`
+  would have re-run a suppression. The bot's filter already excludes edits;
+  `messageOf` now refuses them too.
+- The "stale read" warning is now worded as a hint: `pending_update_count`
+  also counts kinds the filter excludes (edits, reactions), which are never
+  delivered and expire after 24h.
+
 ## [0.59.0] - 2026-10-03
 
 ### Added

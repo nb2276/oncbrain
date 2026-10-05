@@ -16,6 +16,9 @@ import {
   isChatAuthorized,
   isDestructiveCommandAuthorized,
   computeNextTelegramOffset,
+  pollUpdates,
+  LONG_POLL_SEC,
+  EMPTY_POLL_RETRIES,
   type TelegramMessage,
 } from '../src/lib/telegram-ingest.ts';
 
@@ -241,9 +244,10 @@ describe('messageOf', () => {
     expect(messageOf({ update_id: 1, channel_post: msg })).toBe(msg);
   });
 
-  it('returns edited_message when only that present', () => {
-    const msg = { message_id: 3, date: 0, text: 'edited' };
-    expect(messageOf({ update_id: 1, edited_message: msg })).toBe(msg);
+  it('ignores edits: an edited link or "drop" must not ingest or re-run (v0.59.1)', () => {
+    const msg = { message_id: 1, date: 0, chat: { id: 1, type: 'private' } } as TelegramMessage;
+    expect(messageOf({ update_id: 1, edited_message: msg })).toBeUndefined();
+    expect(messageOf({ update_id: 1, edited_channel_post: msg })).toBeUndefined();
   });
 
   it('returns undefined for updates with no message fields', () => {
@@ -698,5 +702,103 @@ describe('destructive authorization identifies the sender', () => {
   it('requires BOTH the room and the actor', () => {
     expect(isDestructiveCommandAuthorized(999, allow, 111)).toBe(false); // room not allowed
     expect(isDestructiveCommandAuthorized(111, allow, 999)).toBe(false); // actor not allowed
+  });
+});
+
+describe('pollUpdates (v0.59.1 long-poll + retry on empty-with-pending)', () => {
+  // getUpdates answers come from a queue (an Error entry throws); getWebhookInfo is fixed.
+  function router(getUpdatesAnswers: Array<unknown[] | Error | { status: number }>, pending: number | Error) {
+    const urls: string[] = [];
+    const inits: Array<RequestInit | undefined> = [];
+    const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
+      urls.push(url);
+      inits.push(init);
+      if (url.includes('/getWebhookInfo')) {
+        if (pending instanceof Error) throw pending;
+        return { ok: true, status: 200, json: async () => ({ ok: true, result: { url: '', pending_update_count: pending } }) };
+      }
+      const a = getUpdatesAnswers.shift() ?? [];
+      if (a instanceof Error) throw a;
+      if (!Array.isArray(a)) return { ok: false, status: a.status, json: async () => ({ ok: false }) };
+      return { ok: true, status: 200, json: async () => ({ ok: true, result: a }) };
+    }) as unknown as typeof fetch;
+    const gets = () => urls.filter((u) => u.includes('/getUpdates'));
+    return { fetchImpl, urls, inits, gets };
+  }
+  const msg = { update_id: 53, message: { message_id: 1, date: 0, chat: { id: 1, type: 'private' }, text: 'x' } };
+
+  it('long-polls with a hard client timeout and returns a non-empty first answer untouched', async () => {
+    const r = router([[msg]], 0);
+    expect(await pollUpdates('t', { offset: 53, fetchImpl: r.fetchImpl, log: () => {} })).toEqual([msg]);
+    expect(r.urls).toHaveLength(1);
+    expect(r.urls[0]).toContain(`timeout=${LONG_POLL_SEC}`);
+    expect(r.inits[0]?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('returns [] without retrying when nothing is pending', async () => {
+    const r = router([[]], 0);
+    expect(await pollUpdates('t', { offset: 53, fetchImpl: r.fetchImpl, log: () => {} })).toEqual([]);
+    expect(r.gets()).toHaveLength(1);
+  });
+
+  it('recovers a message the first poll missed while it was pending (the 2026-10-04 miss)', async () => {
+    const r = router([[], [], [msg]], 1);
+    expect(await pollUpdates('t', { offset: 53, fetchImpl: r.fetchImpl, log: () => {} })).toEqual([msg]);
+    expect(r.gets()).toHaveLength(3);
+    // Every call keeps the stored offset and the default filter: nothing is
+    // confirmed and the bot's persisted allowed_updates never widens.
+    for (const u of r.gets()) {
+      expect(u).toContain('offset=53');
+      expect(decodeURIComponent(u)).toContain('allowed_updates=["message","channel_post"]');
+    }
+  });
+
+  it('gives up after the retries with a WARN, consuming nothing', async () => {
+    const logs: string[] = [];
+    const r = router([[], [], []], 1);
+    expect(await pollUpdates('t', { offset: 53, fetchImpl: r.fetchImpl, log: (l) => logs.push(l) })).toEqual([]);
+    expect(r.gets()).toHaveLength(1 + EMPTY_POLL_RETRIES);
+    expect(logs.some((l) => l.includes('WARN: 1 update(s) pending but none delivered'))).toBe(true);
+  });
+
+  it('a failing retry ends the run quietly instead of failing the cron', async () => {
+    const logs: string[] = [];
+    const r = router([[], new Error('socket hang up')], 1);
+    expect(await pollUpdates('t', { offset: 53, fetchImpl: r.fetchImpl, log: (l) => logs.push(l) })).toEqual([]);
+    expect(logs.some((l) => l.includes('retry 1 failed'))).toBe(true);
+  });
+
+  it('a 409 from an overlapping poller (no webhook) is not a failure', async () => {
+    const logs: string[] = [];
+    const r = router([{ status: 409 }], 0);
+    expect(await pollUpdates('t', { offset: 53, fetchImpl: r.fetchImpl, log: (l) => logs.push(l) })).toEqual([]);
+    expect(logs.some((l) => l.includes('another poller'))).toBe(true);
+  });
+
+  it('a 409 because a webhook is set fails loudly (messages are being diverted)', async () => {
+    const fetchImpl = vi.fn(async (url: string) =>
+      url.includes('/getWebhookInfo')
+        ? { ok: true, status: 200, json: async () => ({ ok: true, result: { url: 'https://evil.example/hook', pending_update_count: 3 } }) }
+        : { ok: false, status: 409, json: async () => ({ ok: false }) },
+    ) as unknown as typeof fetch;
+    await expect(pollUpdates('t', { offset: 53, fetchImpl, log: () => {} })).rejects.toThrow(/webhook is set \(evil\.example\)/);
+  });
+
+  it('a 409 we cannot classify (getWebhookInfo fails) fails loudly', async () => {
+    const r = router([{ status: 409 }], new Error('down'));
+    await expect(pollUpdates('t', { offset: 53, fetchImpl: r.fetchImpl, log: () => {} })).rejects.toBeInstanceOf(TelegramApiError);
+  });
+
+  it('any other first-call failure still propagates', async () => {
+    const r = router([{ status: 500 }], 0);
+    await expect(pollUpdates('t', { offset: 53, fetchImpl: r.fetchImpl, log: () => {} })).rejects.toBeInstanceOf(TelegramApiError);
+  });
+
+  it('returns [] and logs when getWebhookInfo fails, without retrying', async () => {
+    const logs: string[] = [];
+    const r = router([[]], new Error('boom'));
+    expect(await pollUpdates('t', { offset: 53, fetchImpl: r.fetchImpl, log: (l) => logs.push(l) })).toEqual([]);
+    expect(r.gets()).toHaveLength(1);
+    expect(logs.some((l) => l.includes('getWebhookInfo failed'))).toBe(true);
   });
 });

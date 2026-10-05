@@ -22,8 +22,7 @@ import {
   setSetting,
 } from '../src/lib/db.ts';
 import {
-  fetchUpdates,
-  fetchWebhookInfo,
+  pollUpdates,
   extractTweetUrls,
   extractPaperPmids,
   extractSlidePhoto,
@@ -90,33 +89,11 @@ async function main() {
 
   console.log(`Polling Telegram (offset=${offset ?? 'none'})${args.dryRun ? ' [dry-run]' : ''}...`);
 
-  const updates = await fetchUpdates(token, { offset });
+  // Long-poll with retry on an empty answer while Telegram reports pending
+  // updates (see pollUpdates). Diagnostics log as [diag] lines.
+  const updates = await pollUpdates(token, { offset });
   if (updates.length === 0) {
     console.log('No new updates.');
-    // Catch Telegram Bot API stale-read failure mode: getUpdates returns result:[]
-    // while the server actually has updates queued. We saw this on 2026-05-27 when
-    // a message sat in the queue ~12h yet the 01:00 cron got empty. Crossing
-    // getUpdates against getWebhookInfo.pending_update_count proves it next time.
-    try {
-      const info = await fetchWebhookInfo(token);
-      const diag = {
-        event: 'telegram_empty_poll',
-        ts: new Date().toISOString(),
-        offset: offset ?? null,
-        pending_update_count: info.pending_update_count,
-        webhook_url: info.url || null,
-        last_error_date: info.last_error_date ?? null,
-        last_error_message: info.last_error_message ?? null,
-      };
-      console.log(`[diag] ${JSON.stringify(diag)}`);
-      if (info.pending_update_count > 0) {
-        console.log(
-          `[diag] WARN: getUpdates returned [] but ${info.pending_update_count} update(s) pending — possible Telegram stale read.`,
-        );
-      }
-    } catch (err) {
-      console.log(`[diag] getWebhookInfo failed: ${(err as Error).message}`);
-    }
     return;
   }
 
@@ -145,6 +122,7 @@ async function main() {
   let skippedUnauthorized = 0;
   let dedupCommands = 0;
   let refusedDrops = 0;
+  let skippedNonMessage = 0;
   // Update ids whose inbox write threw — used to hold the offset back so the
   // message re-fetches next run instead of being silently lost.
   const failedUpdateIds = new Set<number>();
@@ -153,7 +131,12 @@ async function main() {
 
   for (const update of updates) {
     const msg = messageOf(update);
-    if (!msg) continue;
+    if (!msg) {
+      // An edit or other non-message kind (edits are refused on purpose, see
+      // messageOf). The offset still advances past it.
+      skippedNonMessage++;
+      continue;
+    }
 
     const chatId = msg.chat?.id ?? null;
     if (chatId != null) seenChatIds.add(chatId);
@@ -521,7 +504,7 @@ async function main() {
   }
 
   console.log(
-    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} unauthorized=${skippedUnauthorized} dedup-commands=${dedupCommands} refused-drops=${refusedDrops} next-offset=${nextOffset}`,
+    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} unauthorized=${skippedUnauthorized} dedup-commands=${dedupCommands} refused-drops=${refusedDrops} non-message=${skippedNonMessage} next-offset=${nextOffset}`,
   );
   console.log(`Next: \`npm run enrich:inbox\` to enrich pending items, then \`npm run build:day\`.`);
 }
