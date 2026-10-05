@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, lstatSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 // Several test files assert against build artifacts in dist/ (pwa-build,
@@ -18,9 +18,32 @@ import { fileURLToPath } from 'node:url';
 // against. A warm run skips the build entirely.
 const root = fileURLToPath(new URL('..', import.meta.url));
 
+// Existence alone isn't enough: a dist built before a new digest landed, a
+// branch switch, or a src/ edit is STALE, and the dist-reading tests then fail
+// as if the code had regressed (pwa-build's latest-digest checks, the /tags/
+// publish boundary). Rebuild when any build input is newer than the build.
+const BUILD_INPUTS = ['src', 'public', 'data/digests', 'data/overrides', 'astro.config.ts', 'package.json'];
+
+/** Newest mtime under `path`. Symlinks are not followed (public/slides → photo archive). */
+export function newestMtime(path: string): number {
+  if (!existsSync(path)) return 0;
+  const st = lstatSync(path);
+  if (!st.isDirectory()) return st.mtimeMs;
+  let newest = st.mtimeMs; // a deleted file bumps its directory
+  for (const name of readdirSync(path)) newest = Math.max(newest, newestMtime(`${path}/${name}`));
+  return newest;
+}
+
+export function distIsStale(dir: string = root): boolean {
+  const marker = `${dir}/dist/index.html`;
+  if (!existsSync(`${dir}/dist/pwa-sw.js`) || !existsSync(marker)) return true;
+  const builtAt = statSync(marker).mtimeMs;
+  return BUILD_INPUTS.some((p) => newestMtime(`${dir}/${p}`) > builtAt);
+}
+
 export default function setup() {
-  if (!existsSync(`${root}/dist/pwa-sw.js`) || !existsSync(`${root}/dist/index.html`)) {
-    console.log('[global-setup] dist/ build artifacts missing; running `npm run build` once before the suite (~30s)');
+  if (distIsStale()) {
+    console.log('[global-setup] dist/ is missing or older than its inputs; running `npm run build` once before the suite (~30s)');
     // stderr passes through so a broken build is diagnosable from the test log.
     execSync('npm run build', { cwd: root, stdio: ['ignore', 'ignore', 'inherit'] });
   }
