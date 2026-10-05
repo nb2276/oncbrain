@@ -2,7 +2,7 @@
 
 Curated, AI-summarized digest of oncology meeting research and published studies. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets), alongside newly published journal papers. One oncologist curates the sources; an AI pipeline summarizes each study with comparative-literature context and a standard-of-care verdict.
 
-**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.55.5
+**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.60.0
 
 ## Architecture
 
@@ -13,8 +13,10 @@ Telegram bot ─────┐      pull:telegram ─▶ inbox_items queue     
   tweets, paper   │                          │                      ▲           (static site)
   URLs / DOIs /   ├──▶   enrich:inbox  ◀──────┘                      │                  │
   PMIDs, trade-   │        oEmbed · PubMed · Crossref ·              │                  │
-  press articles, │        trade-press HTML · PDF text +             │                  ▼
-  PDFs, slides    │        Apple Vision OCR                          │           public reads
+  press articles, │        trade-press HTML · meeting-portal         │                  ▼
+  portal abstract │        abstract · PDF text + Apple Vision OCR    │           public reads
+  links, PDFs,    │                                                  │
+  slides          │                                                  │
 admin form @ 3001 ┘                       ▼                          │           static HTML +
                          SQLite (oncbrain.db): bookmarks /           │           RSS + JSON API
                          papers / slide_uploads                      │           at oncbrain.
@@ -68,7 +70,7 @@ Two ingestion paths, both write to the same SQLite inbox queue. Use either or bo
 
 1. Open Telegram, find `@BotFather`, send `/newbot`. Get a token, paste it into `.env` as `TELEGRAM_BOT_TOKEN`.
 2. Optional: create a private Telegram channel and add the bot as admin.
-3. Throughout the day, DM the bot: tweet URLs, paper links (DOI / PubMed / journal pages), trade-press articles (ASCO Post, OncLive, UroToday, Targeted Oncology, Cancer Network, Healio, MedPage Today, OncoDaily, ASCO Daily News), full-text PDFs, or slide photos (or post them in your private channel).
+3. Throughout the day, DM the bot: tweet URLs, paper links (DOI / PubMed / journal pages, or bare DOIs one per line), trade-press articles (ASCO Post, OncLive, UroToday, Targeted Oncology, Cancer Network, Healio, MedPage Today, OncoDaily, ASCO Daily News), meeting-portal abstract links (ASTRO `amportal.astro.org`), full-text PDFs, or slide photos (or post them in your private channel).
 4. Drain the queue and enrich the items into bookmarks / papers / slides:
 
 ```bash
@@ -77,6 +79,19 @@ npm run enrich:inbox    # tweets → oEmbed, papers → PubMed/Crossref, PDFs �
 ```
 
 The bot also recognizes a `/note <text>` command on the same message to attach a curator note, and replies with what it ingested (or a named reason if it could not). If a forwarded message carries a link it can't ingest, it replies with the source types it accepts instead of dropping the message silently; conversational text and obvious non-source links (YouTube, shorteners) stay unanswered.
+
+### Conference abstracts Crossref doesn't have yet
+
+A meeting's journal-supplement DOIs are often registered weeks before Crossref carries the abstract text, while the meeting portal serves the full abstract the day it's presented.
+
+```bash
+npm run watch:doi -- --add-file=dois.txt     # watch a DOI-only citation list; re-checked nightly
+npm run conf:abstracts -- --index            # crawl the portal's abstract + poster listings (cached 36h)
+npm run conf:abstracts -- --match            # rank portal abstracts against every watched DOI
+npm run conf:abstracts -- --ingest --url=<portal abstract link> --doi=<doi> [--date=YYYY-MM-DD] [--quiet]
+```
+
+The nightly cron runs `--match --notify`: for each watched DOI with a likely portal match it DMs you once, with the exact line to reply with (`<abstract link> <doi>`). Nothing is ingested until you reply. That reply ingests the abstract with its DOI, files it on its presentation date, and retires the watch. Forwarding a portal abstract link on its own works too. Only ASTRO's portal has an adapter so far; adding another meeting is one adapter entry in `src/lib/conference-abstract.ts`.
 
 ### Path B: localhost admin form
 
@@ -156,7 +171,7 @@ npm run cron:install                                          # registers macOS 
 sudo pmset repeat wakeorpoweron MTWRFSU 00:55:00              # wake laptop 5 min before (sleep guard)
 ```
 
-Each run: `pull:telegram → enrich:inbox → build:day (yesterday + today) → rebuild:queued → astro build → git push → notify:curator + notify:channel` per changed date. `rebuild:queued` drains the rebuild queue: past dates the enrichment layer flagged after a richer re-send (a full-paper PDF landing on what was an abstract-only card, a late slide). Idempotent — empty days are no-ops. Logs append to `~/Library/Logs/oncbrain-cron.log`. Uninstall with `npm run cron:uninstall`; test manually with `npm run cron:test`; diagnose a missed run with `npm run cron:doctor`.
+Each run: `pull:telegram → watch:doi --check → conf:abstracts --match --notify → enrich:inbox → build:day (yesterday + today) → rebuild:queued → astro build → git push → notify:curator + notify:channel` per changed date. `rebuild:queued` drains the rebuild queue: past dates the enrichment layer flagged after a richer re-send (a full-paper PDF landing on what was an abstract-only card, a late slide). Idempotent — empty days are no-ops. Logs append to `~/Library/Logs/oncbrain-cron.log`. Uninstall with `npm run cron:uninstall`; test manually with `npm run cron:test`; diagnose a missed run with `npm run cron:doctor`.
 
 ## URLs
 
@@ -218,9 +233,9 @@ npm run test:watch # watch mode
 npx astro check    # type check (0 errors expected)
 ```
 
-2373 tests across 117 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, reader-selectable specialty relevance plus its per-specialty "why it matters", the v0.33-v0.36 effect-size marks (parser, geometry, corpus ruler, and the satori share-card renderer), and the v0.53-v0.55 trial-lineage and grounding work (the update/new-card/duplicate decision table, its authorization gate, comparator grounding, and the identity rules that decide when one card may replace another).
+2646 tests across 131 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, meeting-portal abstracts and confirm-only matching, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, reader-selectable specialty relevance plus its per-specialty "why it matters", the v0.33-v0.36 effect-size marks (parser, geometry, corpus ruler, and the satori share-card renderer), and the v0.53-v0.55 trial-lineage and grounding work (the update/new-card/duplicate decision table, its authorization gate, comparator grounding, and the identity rules that decide when one card may replace another).
 
-A vitest `globalSetup` builds `dist/` once before collection when it's missing, so a cold checkout passes. After switching branches, run `rm -rf dist && npm run build` first — the dist-reading tests reuse an existing build, and a stale one fails like a code regression.
+A vitest `globalSetup` builds `dist/` once before collection when it's missing or older than any build input (`src/`, `public/`, `data/digests/`, `data/overrides/`, the Astro config, `package.json`), so the dist-reading tests pass cold, after a branch switch, and after a new digest lands.
 
 ## Eval
 
@@ -238,7 +253,7 @@ Two things worth knowing before you read a score. The cap means a single unsuppo
 
 ## Conferences (optional)
 
-Conferences are an optional tag on bookmarks. When all bookmarks for a date share one conference, the published digest displays that conference's badge. Add conferences via `http://localhost:3001/conferences` (admin form).
+Conferences are an optional tag on bookmarks. When all bookmarks for a date share one conference, the published digest displays that conference's badge. Bot-ingested sources are tagged automatically from meeting hashtags, meeting hosts (including the ASTRO abstract portal) and year-bearing prose; add conferences by hand via `http://localhost:3001/conferences` (admin form).
 
 ## Takedown requests
 
