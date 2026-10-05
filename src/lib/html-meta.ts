@@ -69,15 +69,31 @@ function metaContentAll(html: string, name: string): string[] {
   return out;
 }
 
-function decodeEntities(s: string): string {
-  return s
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#x27;/g, "'");
+// Named entities seen in journal and meeting pages. Anything else stays as
+// written rather than being guessed.
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  le: '≤', ge: '≥', plusmn: '±', times: '×', minus: '−', ndash: '–', mdash: '—',
+  micro: 'µ', deg: '°', middot: '·', hellip: '…', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“',
+  alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', kappa: 'κ', lambda: 'λ', mu: 'μ', chi: 'χ',
+  aacute: 'á', eacute: 'é', iacute: 'í', oacute: 'ó', uacute: 'ú', ntilde: 'ñ',
+  auml: 'ä', euml: 'ë', iuml: 'ï', ouml: 'ö', uuml: 'ü', ccedil: 'ç', agrave: 'à', egrave: 'è',
+  Aacute: 'Á', Eacute: 'É', Oacute: 'Ó', Uacute: 'Ú', Ntilde: 'Ñ', Ouml: 'Ö', Uuml: 'Ü', szlig: 'ß',
+};
+
+// Single pass, so an escaped entity ("&amp;lt;") decodes once to "&lt;" and
+// is not decoded a second time into "<".
+export function decodeHtmlEntities(s: string): string {
+  return s.replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/gi, (m, e: string) => {
+    if (e[0] === '#') {
+      const cp = e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1));
+      return Number.isFinite(cp) && cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : m;
+    }
+    return NAMED_ENTITIES[e] ?? m;
+  });
 }
+
+const decodeEntities = decodeHtmlEntities;
 
 // Normalize Highwire citation_date / citation_publication_date to YYYY-MM-DD
 // or YYYY. Formats vary: "2026/05/17", "2026-05-17", "2026".

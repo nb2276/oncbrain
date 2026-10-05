@@ -14,17 +14,36 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   as a paper: title, abstract number, session, presentation date, presenter,
   authors, the Purpose/Methods/Results/Conclusion body and the NCT, tagged to
   the meeting. Send it as "`<link> <doi>`" to attach the supplement DOI, which
-  also retires that DOI's watch so it can't be ingested twice. The body is
-  located by its label text, not its markup, since abstracts on one portal
-  wrap their section labels differently.
+  also retires that DOI's watch so it can't be ingested twice. Pairing is
+  strict: the message must be exactly one abstract link and one bare DOI from
+  the meeting's journal, because `savePaper` matches on DOI first and a stray
+  DOI would merge the abstract onto another paper. The abstract is filed on
+  its presentation date (when that is within 60 days before the send), so it
+  clusters with that day's tweets and slides. The body is located by its label
+  text, not its markup, since abstracts on one portal wrap their section
+  labels differently, and parsing fails closed if either end of the body is
+  missing. A portal outage (5xx, 429, timeout) retries; a 404 or a page with no
+  abstract body fails permanently with a reason.
+- **Published like a PubMed abstract (curator decision).** The portal abstract
+  text goes into `papers.abstract` and reaches the digest the same way a
+  PubMed abstract does. Identity is the portal's numeric abstract id, so the
+  same abstract under a second session or an edited title is one paper.
+- **Known limitation:** the ASTRO portal renders "≤" as "=" in some
+  abstracts. The ingested text carries what the portal serves.
 - **`npm run conf:abstracts`**, confirm-only matching. `--index` crawls the
   portal's server-rendered abstract and poster listings (872 ASTRO 2026
   abstracts, retrying a failed page); `--match` ranks them against every
   still-watched DOI's label (trial identifiers and doses weigh most) and
   `--notify` DMs the curator each new top candidate with the exact line to
-  reply with. Nothing is ingested without that reply. `--ingest --url=…
-  --doi=… --date=… [--quiet]` queues a confirmed abstract directly; `--quiet`
-  keeps a bulk backfill from sending a "Got it" DM per item.
+  reply with. Each DOI/candidate pair is offered at most once, a DOI whose
+  confirm reply is already waiting in the inbox is skipped, and the crawl only
+  runs when a watched DOI belongs to the meeting's journal (capped at 200
+  pages a listing and 5 minutes; a partial index is not cached). Nothing is
+  ingested without that reply. `--ingest --url=… --doi=… --date=… [--quiet]
+  [--dry-run]` queues a confirmed abstract directly: a corrected DOI or date
+  queues a new item, an identical re-run is a no-op, and `--quiet` skips only
+  the per-item "Got it" DM in a bulk backfill (never the prior-coverage
+  nudge).
 - **Nightly**: `daily-build.sh` runs `conf:abstracts --match --notify` after
   `watch:doi --check`, so a watched DOI that never gets a Crossref abstract
   still surfaces as a one-tap confirmation.

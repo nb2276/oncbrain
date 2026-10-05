@@ -6,6 +6,9 @@ import {
   isConferenceAbstractUrl,
   conferenceAbstractHash,
   rankListingMatches,
+  pairedPortalDoi,
+  planNotifications,
+  watchedForMeeting,
   NotAnAbstractError,
 } from '../src/lib/conference-abstract.ts';
 import { extractPaperUrls } from '../src/lib/paper-url.ts';
@@ -32,6 +35,12 @@ describe('conference abstract URLs', () => {
 
   it('identity ignores query and fragment', () => {
     expect(conferenceAbstractHash(`${GI003}?utm=x#top`)).toBe(conferenceAbstractHash(GI003));
+  });
+
+  it('identity is the trailing abstract id, not the session code or title slug', () => {
+    const moved = 'https://amportal.astro.org/sessions/pd-02-22950/retitled-slug-113309';
+    expect(conferenceAbstractHash(moved)).toBe(conferenceAbstractHash(GI003));
+    expect(conferenceAbstractHash(GI003.replace(/113309$/, '113310'))).not.toBe(conferenceAbstractHash(GI003));
   });
 
   it('the portal host tags the ASTRO meeting', () => {
@@ -78,6 +87,23 @@ describe('ASTRO abstract parser', () => {
     expect(() => astro.parse('<html><h1>Discussant</h1></html>', 'u')).toThrow(NotAnAbstractError);
   });
 
+  it('keeps superscripts as ^x in the body so a p-value exponent survives', () => {
+    const a = astro.parse(fixture('astro-gi003'), GI003);
+    expect(a.abstract).not.toMatch(/<sup>/);
+    expect(a.authors.every((x) => !/\^|<sup>/.test(x))).toBe(true); // affiliation marks stripped from names
+  });
+
+  it('fails closed when the page lost its end marker (share block)', () => {
+    const html = fixture('astro-gi003').replace(/session__share/g, 'session__gone');
+    expect(() => astro.parse(html, GI003)).toThrow(NotAnAbstractError);
+  });
+
+  it('a section label in <head> or a script never starts the body', () => {
+    const html = `<html><head><meta name="description" content="Purpose/Objective(s): leaked"><script>var x="Background: no";</script></head>
+      <body><h1>12 - A Title</h1><p>nothing here</p><div class="session__share"></div></body></html>`;
+    expect(() => astro.parse(html, 'u')).toThrow(NotAnAbstractError);
+  });
+
   it('parses a listing page, skipping discussant slots', () => {
     const html = fixture('astro-abstracts-p1');
     const entries = astro.parseListing(html);
@@ -107,5 +133,73 @@ describe('confirm-only matching', () => {
 
   it('a weak overlap is not offered at all', () => {
     expect(rankListingMatches('Palliative re-irradiation — prior response predicts response', entries)).toEqual([]);
+  });
+});
+
+describe('confirm reply pairing', () => {
+  const DOI = '10.1016/j.ijrobp.2026.06.004';
+
+  it('pairs exactly one portal link with one bare journal DOI, either order', () => {
+    expect(pairedPortalDoi(`${GI003} ${DOI}`)).toEqual({ url: GI003, doi: DOI });
+    expect(pairedPortalDoi(`${DOI}\n${GI003}`)).toEqual({ url: GI003, doi: DOI });
+  });
+
+  it('never pairs anything looser', () => {
+    expect(pairedPortalDoi(GI003)).toBeNull(); // no DOI
+    expect(pairedPortalDoi(`${GI003} ${DOI} 10.1016/j.ijrobp.2026.06.005`)).toBeNull(); // two DOIs
+    expect(pairedPortalDoi(`${GI003} see ${DOI}`)).toBeNull(); // prose
+    expect(pairedPortalDoi(`${GI003} https://doi.org/${DOI}`)).toBeNull(); // DOI as a URL
+    expect(pairedPortalDoi(`${GI003} 10.1056/NEJMoa2400001`)).toBeNull(); // another journal
+    expect(pairedPortalDoi(`https://amportal.astro.org/sessions/pl-01-22946 ${DOI}`)).toBeNull(); // session page
+  });
+});
+
+describe('matcher token boundaries', () => {
+  const e = (number: string, title: string) => ({ number, title, url: number });
+
+  it('an identifier never matches a longer one that starts with it', () => {
+    expect(rankListingMatches('NRG-GU003', [e('1', 'NRG GU0031 something else')])).toEqual([]);
+  });
+
+  it('a dose never matches a larger dose ending in it', () => {
+    expect(rankListingMatches('40 Gy', [e('1', '140Gy boost')])).toEqual([]);
+  });
+
+  it('a shared year is not an identifier', () => {
+    expect(rankListingMatches('ASTRO 2026 update', [e('1', 'A 2026 analysis of something')])).toEqual([]);
+  });
+
+  it('a listing title is entity-decoded', () => {
+    const html = '<a href="https://amportal.astro.org/sessions/pl-01-1/x-5">12 - Dose &ge;60 Gy &amp; PCI</a>';
+    expect(astro.parseListing(html)[0]?.title).toBe('Dose ≥60 Gy & PCI');
+  });
+});
+
+describe('nightly notification plan', () => {
+  const entries = [
+    { number: '7', title: 'Five-Year Results: NRG Oncology GU003 hypofractionated postprostatectomy', url: 'u7' },
+    { number: '8', title: 'NRG GU003 patient-reported outcomes hypofractionated', url: 'u8' },
+  ];
+  const watched = [
+    { doi: '10.1016/j.ijrobp.2026.06.100', title: 'NRG-GU003 hypofractionated PORT' },
+    { doi: '10.1056/nejmoa1', title: 'NRG-GU003 hypofractionated PORT' }, // not this meeting's journal
+    { doi: '10.1016/j.ijrobp.2026.06.101', title: null }, // nothing to match on
+  ];
+
+  it('only this meeting\'s labelled watches gate the crawl', () => {
+    expect(watchedForMeeting(astro, watched).map((w) => w.doi)).toEqual(['10.1016/j.ijrobp.2026.06.100']);
+  });
+
+  it('offers the best candidate once, then the next one, never a repeat', () => {
+    const first = planNotifications(astro, watched, entries, {}, new Set());
+    expect(first).toHaveLength(1);
+    const sentUrl = first[0]!.candidate.url;
+    const second = planNotifications(astro, watched, entries, { [first[0]!.doi]: [sentUrl] }, new Set());
+    expect(second[0]?.candidate.url).not.toBe(sentUrl);
+    expect(planNotifications(astro, watched, entries, { [first[0]!.doi]: ['u7', 'u8'] }, new Set())).toEqual([]);
+  });
+
+  it('skips a DOI whose confirm reply is already waiting in the inbox', () => {
+    expect(planNotifications(astro, watched, entries, {}, new Set(['10.1016/j.ijrobp.2026.06.100']))).toEqual([]);
   });
 });

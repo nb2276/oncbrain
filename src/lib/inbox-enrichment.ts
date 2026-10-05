@@ -13,6 +13,7 @@
 import {
   adapterForUrl,
   conferenceAbstractHash,
+  pairedPortalDoi,
   NotAnAbstractError,
   type ConferenceAbstract,
   type ConferenceAdapter,
@@ -30,6 +31,7 @@ import {
   queueRebuild,
   paperHasFigures,
   resolveDoiWatch,
+  attachPaperDoiIfMissing,
   saveSourceFacet,
   todayIso,
   PAPER_CONTENT_FIELDS,
@@ -382,6 +384,12 @@ async function enrichPaperItem(
 
   // Tag the paper if its source URL is a meeting abstract host, or the curator's
   // message / the title carries a meeting hashtag or name.
+  // A portal abstract names its own meeting and year ("ASTRO 2026"): use it,
+  // so an abstract confirmed in a later year isn't tagged with that year.
+  if (saveInput.fetched_via === 'conference_abstract' && saveInput.journal) {
+    saveInput.conference_slug =
+      saveInput.conference_slug ?? detectAndEnsureConference(db, [saveInput.journal], saveInput.bookmark_date);
+  }
   saveInput.conference_slug =
     saveInput.conference_slug ??
     detectAndEnsureConference(
@@ -392,20 +400,35 @@ async function enrichPaperItem(
 
   try {
     const { r, queuedDate } = savePaperAndQueueRebuild(db, saveInput);
-    // v0.60: a portal abstract carrying its supplement DOI retires that DOI's
-    // watch, so the nightly check can't ingest the same abstract twice when
-    // Crossref finally gets its text. A no-op when the DOI isn't watched.
+    // v0.60: a confirmed portal abstract carries its supplement DOI. Persist it
+    // on the winning row FIRST (a re-send merges by content_hash, and that merge
+    // never writes a DOI), then retire the watch only if the row really holds
+    // that DOI. Otherwise the nightly check would later ingest the same
+    // abstract a second time, or a watch would close on a row without its DOI.
     if (saveInput.fetched_via === 'conference_abstract' && saveInput.doi) {
       const watched = normalizeDoi(saveInput.doi);
-      if (watched) resolveDoiWatch(db, watched, 'conference_portal', item.id);
+      if (watched && attachPaperDoiIfMissing(db, r.id, watched) === watched) {
+        resolveDoiWatch(db, watched, 'conference_portal', item.id);
+      }
     }
     const reply = r.created
       ? `Got it: ${saveInput.title} (${contentDepthNote(saveInput)}). Appears in the next digest.`
       : replyForPaperMerge(saveInput.title, r, queuedDate);
-    await replyToCurator(item, reply);
+    // A bulk backfill (`conf:abstracts --ingest --quiet`) skips only this
+    // per-item acknowledgement; the prior-coverage nudge still reaches the curator.
+    if (!isQuietInboxItem(item)) await replyToCurator(item, reply);
     return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
   } catch (err) {
     return { status: 'failed', reason: `paper insert failed: ${(err as Error).message}` };
+  }
+}
+
+function isQuietInboxItem(item: InboxItem): boolean {
+  if (!item.attachments_json) return false;
+  try {
+    return (JSON.parse(item.attachments_json) as { quiet?: boolean }).quiet === true;
+  } catch {
+    return false;
   }
 }
 
@@ -902,20 +925,38 @@ async function resolveFromUrl(
 
 // v0.60: parse a conference-portal abstract page into a paper row.
 //
-// Identity is the page itself (content_hash over host+path), like a trade
-// article. The journal-supplement DOI is attached ONLY when the curator's
-// message names exactly one DOI (the conf:abstracts confirm flow sends
-// "<url> <doi>"): that pairing is the curator's assertion, never inferred.
-// With a DOI attached, the matching doi_watch entry is retired, so the
-// nightly check doesn't ingest the same abstract a second time once Crossref
-// finally carries it.
+// Identity is the abstract itself (content_hash over host + the page's
+// numeric id). The journal-supplement DOI is attached ONLY from the curator's
+// exact confirm reply, "<link> <doi>" and nothing else (pairedPortalDoi):
+// savePaper matches on DOI first, so a DOI picked up from prose would merge
+// this abstract onto a different paper.
+//
+// Filed under the date it was PRESENTED when that is earlier than the reply
+// (within a meeting's tail), so it lands with the same day's tweets and
+// slides about the trial and Phase 1 clusters them into one card instead of
+// publishing a second card on the reply date.
+const PRESENTED_DATE_WINDOW_DAYS = 60;
+
+// A portal outage must retry, not park the submission permanently.
+class TransientFetchError extends Error {}
+
 async function resolveConferenceAbstract(
   adapter: ConferenceAdapter,
   url: string,
   item: InboxItem,
   note: string | null,
 ): Promise<NewPaper> {
-  const html = await ssrfSafeFetchText(url, { allowedHostSuffixes: [adapter.host] });
+  let html: string;
+  try {
+    html = await ssrfSafeFetchText(url, { allowedHostSuffixes: [adapter.host] });
+  } catch (err) {
+    const msg = (err as Error).message;
+    // Retry a server error, rate limit, timeout or network failure; a refused
+    // host, redirect problem, 4xx or oversize body won't improve.
+    const transient = !(err instanceof SsrfError) || /^HTTP (5\d\d|429)$/.test(msg);
+    if (!transient) throw err;
+    throw new TransientFetchError(`portal fetch failed (${msg}); will retry`);
+  }
   let a: ConferenceAbstract;
   try {
     a = adapter.parse(html, url);
@@ -925,16 +966,26 @@ async function resolveConferenceAbstract(
     }
     throw err;
   }
-  const msgDois = extractDois(item.raw_message_text ?? '');
-  const doi = msgDois.length === 1 ? msgDois[0]! : null;
+  const pairing = pairedPortalDoi(item.raw_message_text);
+  const doi = pairing && conferenceAbstractHash(pairing.url) === conferenceAbstractHash(url) ? pairing.doi : null;
   const header = [
     a.meeting && a.number ? `${a.meeting} abstract ${a.number}` : a.meeting,
     a.session,
     a.presented_on,
     a.presenter ? `presented by ${a.presenter}` : null,
+    a.nct,
   ]
     .filter(Boolean)
     .join(' · ');
+  const days = a.presented_on
+    ? (Date.parse(item.bookmark_date) - Date.parse(a.presented_on)) / 86_400_000
+    : NaN;
+  const bookmark_date =
+    a.presented_on && days >= 0 && days <= PRESENTED_DATE_WINDOW_DAYS ? a.presented_on : item.bookmark_date;
+  // The confirm reply is a command, not a note: nothing of it is the curator's voice.
+  const curator_note = pairing
+    ? null
+    : (note ?? '').replace(/https:\/\/\S+/g, '').replace(/\s+/g, ' ').trim() || null;
   return {
     content_hash: conferenceAbstractHash(url),
     doi,
@@ -944,8 +995,8 @@ async function resolveConferenceAbstract(
     journal: a.meeting ? `${a.meeting} Annual Meeting` : 'Conference abstract',
     pub_date: a.presented_on,
     abstract: `${header}\n\n${a.abstract}`,
-    bookmark_date: item.bookmark_date,
-    curator_note: note,
+    bookmark_date,
+    curator_note,
     inbox_item_id: item.id,
     fetched_via: 'conference_abstract',
   };
@@ -1127,6 +1178,9 @@ function classifyResolveError(err: unknown): { retryable: boolean; message: stri
   }
   if (err instanceof CrossrefError) {
     return { retryable: err.kind === 'network' || err.kind === 'rate_limit', message: `crossref ${err.kind}: ${err.message}` };
+  }
+  if (err instanceof TransientFetchError) {
+    return { retryable: true, message: err.message };
   }
   if (err instanceof SsrfError) {
     // A blocked/refused fetch won't get better on retry — permanent.
