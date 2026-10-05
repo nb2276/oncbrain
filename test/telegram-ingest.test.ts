@@ -16,6 +16,8 @@ import {
   isChatAuthorized,
   isDestructiveCommandAuthorized,
   computeNextTelegramOffset,
+  pollUpdates,
+  LONG_POLL_SEC,
   type TelegramMessage,
 } from '../src/lib/telegram-ingest.ts';
 
@@ -698,5 +700,58 @@ describe('destructive authorization identifies the sender', () => {
   it('requires BOTH the room and the actor', () => {
     expect(isDestructiveCommandAuthorized(999, allow, 111)).toBe(false); // room not allowed
     expect(isDestructiveCommandAuthorized(111, allow, 999)).toBe(false); // actor not allowed
+  });
+});
+
+describe('pollUpdates (v0.59.1 long-poll + retry on empty-with-pending)', () => {
+  // Route by method: getUpdates answers come from a queue, getWebhookInfo is fixed.
+  function router(getUpdatesAnswers: unknown[][], pending: number) {
+    const urls: string[] = [];
+    const fetchImpl = vi.fn(async (url: string) => {
+      urls.push(url);
+      const result = url.includes('/getWebhookInfo')
+        ? { url: '', pending_update_count: pending }
+        : (getUpdatesAnswers.shift() ?? []);
+      return { ok: true, status: 200, json: async () => ({ ok: true, result }) };
+    }) as unknown as typeof fetch;
+    return { fetchImpl, urls };
+  }
+  const msg = { update_id: 53, message: { message_id: 1, date: 0, chat: { id: 1, type: 'private' }, text: 'x' } };
+
+  it('long-polls by default and returns a non-empty first answer untouched', async () => {
+    const { fetchImpl, urls } = router([[msg]], 0);
+    const out = await pollUpdates('t', { offset: 53, fetchImpl, log: () => {} });
+    expect(out).toEqual([msg]);
+    expect(urls).toHaveLength(1);
+    expect(urls[0]).toContain(`timeout=${LONG_POLL_SEC}`);
+  });
+
+  it('returns [] without retrying when nothing is pending', async () => {
+    const { fetchImpl, urls } = router([[]], 0);
+    expect(await pollUpdates('t', { offset: 53, fetchImpl, log: () => {} })).toEqual([]);
+    expect(urls.filter((u) => u.includes('/getUpdates'))).toHaveLength(1);
+  });
+
+  it('recovers a message the first poll missed while it was pending (the 2026-10-04 miss)', async () => {
+    const logs: string[] = [];
+    const { fetchImpl } = router([[], [msg]], 1);
+    const out = await pollUpdates('t', { offset: 53, fetchImpl, log: (l) => logs.push(l) });
+    expect(out).toEqual([msg]);
+    expect(logs.some((l) => /recovered 1 update\(s\) on retry 1/.test(l))).toBe(true);
+  });
+
+  it('after the retries, peeks at all kinds without consuming, logs them, then restores the filter', async () => {
+    const logs: string[] = [];
+    const edit = { update_id: 51, edited_message: { message_id: 1, date: 0, chat: { id: 1, type: 'private' } } };
+    const { fetchImpl, urls } = router([[], [], [], [edit], []], 1);
+    const out = await pollUpdates('t', { offset: 51, fetchImpl, log: (l) => logs.push(l) });
+    expect(out).toEqual([]);
+    const gets = urls.filter((u) => u.includes('/getUpdates'));
+    expect(gets).toHaveLength(5); // first + 2 retries + peek + restore
+    // Every call uses the stored offset: nothing is confirmed/consumed.
+    expect(gets.every((u) => u.includes('offset=51'))).toBe(true);
+    expect(decodeURIComponent(gets[3]!)).toContain('edited_message');
+    expect(decodeURIComponent(gets[4]!)).toContain('["message","channel_post"]');
+    expect(logs.some((l) => l.includes('waiting updates: 51:edited_message'))).toBe(true);
   });
 });

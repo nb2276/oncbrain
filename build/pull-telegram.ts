@@ -22,8 +22,7 @@ import {
   setSetting,
 } from '../src/lib/db.ts';
 import {
-  fetchUpdates,
-  fetchWebhookInfo,
+  pollUpdates,
   extractTweetUrls,
   extractPaperPmids,
   extractSlidePhoto,
@@ -90,33 +89,11 @@ async function main() {
 
   console.log(`Polling Telegram (offset=${offset ?? 'none'})${args.dryRun ? ' [dry-run]' : ''}...`);
 
-  const updates = await fetchUpdates(token, { offset });
+  // Long-poll with retry on an empty answer while Telegram reports pending
+  // updates (see pollUpdates). Diagnostics log as [diag] lines.
+  const updates = await pollUpdates(token, { offset });
   if (updates.length === 0) {
     console.log('No new updates.');
-    // Catch Telegram Bot API stale-read failure mode: getUpdates returns result:[]
-    // while the server actually has updates queued. We saw this on 2026-05-27 when
-    // a message sat in the queue ~12h yet the 01:00 cron got empty. Crossing
-    // getUpdates against getWebhookInfo.pending_update_count proves it next time.
-    try {
-      const info = await fetchWebhookInfo(token);
-      const diag = {
-        event: 'telegram_empty_poll',
-        ts: new Date().toISOString(),
-        offset: offset ?? null,
-        pending_update_count: info.pending_update_count,
-        webhook_url: info.url || null,
-        last_error_date: info.last_error_date ?? null,
-        last_error_message: info.last_error_message ?? null,
-      };
-      console.log(`[diag] ${JSON.stringify(diag)}`);
-      if (info.pending_update_count > 0) {
-        console.log(
-          `[diag] WARN: getUpdates returned [] but ${info.pending_update_count} update(s) pending — possible Telegram stale read.`,
-        );
-      }
-    } catch (err) {
-      console.log(`[diag] getWebhookInfo failed: ${(err as Error).message}`);
-    }
     return;
   }
 

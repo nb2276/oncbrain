@@ -63,7 +63,13 @@ export type FetchUpdatesOptions = {
   offset?: number;
   timeoutSec?: number; // long-poll timeout; 0 = short poll
   fetchImpl?: typeof fetch;
+  // Update kinds to request. Defaults to DMs + channel posts. NOTE: Telegram
+  // persists this per bot, so a diagnostic call with a wider list must be
+  // followed by a call with the default to restore it.
+  allowedUpdates?: string[];
 };
+
+export const DEFAULT_ALLOWED_UPDATES = ['message', 'channel_post'];
 
 export class TelegramApiError extends Error {
   constructor(
@@ -87,7 +93,7 @@ export async function fetchUpdates(
   if (opts.offset !== undefined) params.set('offset', String(opts.offset));
   params.set('timeout', String(opts.timeoutSec ?? 0));
   // We want both DMs and channel posts. allowed_updates filters to those kinds.
-  params.set('allowed_updates', JSON.stringify(['message', 'channel_post']));
+  params.set('allowed_updates', JSON.stringify(opts.allowedUpdates ?? DEFAULT_ALLOWED_UPDATES));
 
   const url = `${API_BASE}/bot${token}/getUpdates?${params}`;
 
@@ -123,6 +129,103 @@ export type TelegramWebhookInfo = {
   last_error_message?: string;
   allowed_updates?: string[];
 };
+
+// v0.59.1: the daily pull long-polls instead of short-polling. On 2026-10-04
+// (and 2026-05-27 before it) a timeout=0 getUpdates at 01:00 returned [] while
+// the curator's message sat in the queue; the same offset returned it hours
+// later. Telegram documents short polling as "for testing purposes only".
+export const LONG_POLL_SEC = 10;
+export const EMPTY_POLL_RETRIES = 2;
+const ALL_UPDATE_KINDS = [
+  'message',
+  'edited_message',
+  'channel_post',
+  'edited_channel_post',
+  'message_reaction',
+  'message_reaction_count',
+  'my_chat_member',
+  'chat_member',
+  'callback_query',
+];
+
+export function updateKind(u: { update_id: number } & Record<string, unknown>): string {
+  return Object.keys(u).find((k) => k !== 'update_id') ?? 'unknown';
+}
+
+/**
+ * Fetch the pending updates, defending against an empty answer while Telegram
+ * says the queue is not empty:
+ *   1. long-poll once;
+ *   2. if empty, read pending_update_count (logged as before);
+ *   3. if anything is pending, long-poll again up to EMPTY_POLL_RETRIES times;
+ *   4. still empty: peek at ALL update kinds (same offset, so nothing is
+ *      consumed) and log their ids/kinds, so the next miss says what was
+ *      waiting; then poll once more with the default filter, which also
+ *      restores the bot's persisted allowed_updates.
+ * pending_update_count also counts kinds the filter excludes (an edit, a
+ * reaction), which never arrive and expire after 24h; step 4 tells those
+ * apart from a real miss.
+ */
+export async function pollUpdates(
+  token: string,
+  opts: {
+    offset?: number;
+    fetchImpl?: typeof fetch;
+    timeoutSec?: number;
+    retries?: number;
+    log?: (line: string) => void;
+  } = {},
+): Promise<TelegramUpdate[]> {
+  const log = opts.log ?? ((l: string) => console.log(l));
+  const timeoutSec = opts.timeoutSec ?? LONG_POLL_SEC;
+  const retries = opts.retries ?? EMPTY_POLL_RETRIES;
+  const base = { offset: opts.offset, fetchImpl: opts.fetchImpl, timeoutSec };
+
+  let updates = await fetchUpdates(token, base);
+  if (updates.length > 0) return updates;
+
+  let pending = 0;
+  try {
+    const info = await fetchWebhookInfo(token, { fetchImpl: opts.fetchImpl });
+    pending = info.pending_update_count;
+    log(
+      `[diag] ${JSON.stringify({
+        event: 'telegram_empty_poll',
+        ts: new Date().toISOString(),
+        offset: opts.offset ?? null,
+        pending_update_count: info.pending_update_count,
+        webhook_url: info.url || null,
+        last_error_date: info.last_error_date ?? null,
+        last_error_message: info.last_error_message ?? null,
+      })}`,
+    );
+  } catch (err) {
+    log(`[diag] getWebhookInfo failed: ${(err as Error).message}`);
+    return [];
+  }
+  if (pending === 0) return [];
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    updates = await fetchUpdates(token, base);
+    if (updates.length > 0) {
+      log(`[diag] recovered ${updates.length} update(s) on retry ${attempt} (getUpdates had returned [] with ${pending} pending)`);
+      return updates;
+    }
+  }
+
+  try {
+    const peek = await fetchUpdates(token, { ...base, timeoutSec: 0, allowedUpdates: ALL_UPDATE_KINDS });
+    const kinds = peek.map((u) => `${u.update_id}:${updateKind(u as unknown as { update_id: number } & Record<string, unknown>)}`);
+    log(
+      `[diag] WARN: ${pending} pending but none delivered after ${retries} retries; ` +
+        (kinds.length > 0 ? `waiting updates: ${kinds.join(', ')}` : 'unfiltered peek also empty'),
+    );
+  } catch (err) {
+    log(`[diag] unfiltered peek failed: ${(err as Error).message}`);
+  }
+  // Restores the persisted default filter, and delivers anything that is now there.
+  return fetchUpdates(token, { ...base, timeoutSec: 0 });
+}
 
 // Snapshot of the bot's server-side state. We call this immediately after an
 // empty getUpdates to catch the "Telegram returned result:[] but the queue
