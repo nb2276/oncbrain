@@ -164,7 +164,7 @@ export function soleDoiIn(text: string | null | undefined): string | null {
 // "identifier", "registered", "number", and "Clinical trial information:",
 // which JCO-family abstracts use and the first list missed.
 const REGISTRATION_CUE =
-  /(?:trial\s+registration|clinical\s+trial\s+(?:information|registration)|registered|registration|clinicaltrials?\.gov|ct\.gov|identifier|registry|nct\s*(?:number|no\.?|id))/i;
+  /(?:trial\s+registration|clinical\s+trial\s+(?:information|registration|number)|registered|registration|clinicaltrials?\.gov|ct\.gov|identifier|registry|nct\s*(?:number|no\.?|id))/i;
 
 // PDF text layers carry typographic ligatures, so `pdftotext` yields "identiﬁer"
 // (U+FB01) where the cue list has "identifier". That single codepoint silently

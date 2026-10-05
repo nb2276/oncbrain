@@ -39,6 +39,7 @@ import {
   computeNextTelegramOffset,
 } from '../src/lib/telegram-ingest.ts';
 import { extractPaperUrls, extractPaperDois, tradePressOutletNames } from '../src/lib/paper-url.ts';
+import { pairedPortalDoi } from '../src/lib/conference-abstract.ts';
 import { parseDedupCommand, executeDedupDrop } from '../src/lib/dedup-command.ts';
 
 const OFFSET_KEY = 'telegram_offset';
@@ -211,7 +212,10 @@ async function main() {
     // citation export lists them exactly this way. excludeUrls: paperUrls so
     // a "https://doi.org/10.xxx" URL and a bare repeat of the same DOI in the
     // same message inbox once, not twice.
-    const paperDois = extractPaperDois(text, entities, paperUrls);
+    // v0.60: the exact confirm reply "<portal abstract link> <doi>" is ONE
+    // source: its DOI pairs with the abstract, not a second paper. Any other
+    // message keeps every DOI it cites (pairedPortalDoi is deliberately strict).
+    const paperDois = pairedPortalDoi(text) ? [] : extractPaperDois(text, entities, paperUrls);
     const slidePhoto = extractSlidePhoto(msg);
     const pdfDoc = extractPdfDocument(msg);
     // An image sent as a document (HEIC/HEIF from iOS Photos, etc.) that isn't a

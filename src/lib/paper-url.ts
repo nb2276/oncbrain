@@ -24,6 +24,7 @@
 //      branch below) — extractPaperDois is what was missing to ever hand it
 //      one.
 
+import { isConferenceAbstractUrl } from './conference-abstract.ts';
 import { normalizeDoi, isBareDoi, extractDois } from './doi.ts';
 import { PUBMED_URL_RE } from './telegram-ingest.ts';
 
@@ -241,7 +242,8 @@ export function extractPaperUrls(
         DOI_URL_RE.test(url) ||
         PMC_URL_RE.test(url) ||
         JOURNAL_HOST_RE.test(url) ||
-        isTradePressUrl(url)
+        isTradePressUrl(url) ||
+        isConferenceAbstractUrl(url)
       ) {
         found.add(url);
       }

@@ -6,6 +6,10 @@
 #   1b. watch:doi --check — v0.58.1: promote a watched DOI (Crossref resolved
 #                         it but with no abstract yet) into inbox_items once a
 #                         richer record appears, so step 2 picks it up tonight
+#   1c. conf:abstracts --match --notify — v0.60: match still-watched DOIs
+#                         against the meeting portal's abstract listings and DM
+#                         the curator each new candidate (confirm-only; the
+#                         curator's reply ingests it)
 #   2. enrich:inbox     — process pending items (tweets enrich now; papers
 #                         + slides land in v0.5 Phase B + C, deferred)
 #   3. build:day        — regenerate yesterday's + today's digests
@@ -134,6 +138,10 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   echo ""
   echo "→ Checking DOI watchlist"
   npm run watch:doi --silent -- --check || echo "  ⚠ watch:doi --check exited non-zero (continuing)"
+
+  echo ""
+  echo "→ Matching watched DOIs against meeting portals"
+  npm run conf:abstracts --silent -- --match --notify || echo "  ⚠ conf:abstracts --match exited non-zero (continuing)"
 
   echo ""
   echo "→ Enriching inbox items"

@@ -55,6 +55,7 @@ import {
   resolveDoiWatch,
   removeDoiWatch,
   type DoiWatchEntry,
+  SYNTHETIC_TELEGRAM_MSG_ID,
 } from '../src/lib/db.ts';
 import { extractPaperDois, extractPaperUrls, firstDoiInUrl } from '../src/lib/paper-url.ts';
 import { normalizeDoi } from '../src/lib/doi.ts';
@@ -152,7 +153,7 @@ function cmdRemove(db: ReturnType<typeof openDb>, doi: string): void {
 // positive, so this is never mistaken for one, and every consumer here keys
 // on (type, raw_target) anyway — the UNIQUE index's third column — which is
 // unique per paper regardless of what telegram_msg_id says.
-const SYNTHETIC_MSG_ID = -1;
+const SYNTHETIC_MSG_ID = SYNTHETIC_TELEGRAM_MSG_ID;
 
 async function cmdCheck(db: ReturnType<typeof openDb>, dryRun: boolean): Promise<void> {
   const entries = listDoiWatch(db);

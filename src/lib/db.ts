@@ -98,6 +98,7 @@ export type FetchedVia =
   | 'pdf' // PDF with a text layer
   | 'pdf_ocr' // scanned PDF, text recovered via Apple Vision OCR
   | 'review-resolved' // v0.17: a paper a curator approved from a review's discussed-trials manifest
+  | 'conference_abstract' // v0.60: abstract page on a meeting portal (conference-abstract.ts)
   | 'pending'
   | 'failed';
 
@@ -1364,20 +1365,46 @@ export function markDoiWatchChecked(db: Database.Database, doi: string): void {
   ).run(Date.now(), doi);
 }
 
-// `via` names how it was found ('crossref' — the same DOI's Crossref record
-// gained an abstract, auto-promoted — or 'suggested' — a title-search hit was
-// DM'd to the curator to confirm, no inbox item created (inboxItemId null))
-// so `--list` history is legible.
+// `via` names how it was found, so `--list` history is legible:
+//   'crossref'          the same DOI's Crossref record gained an abstract (auto-promoted)
+//   'suggested'         a title-search hit was DM'd to the curator to confirm
+//                       (no inbox item created; inboxItemId null)
+//   'conference_portal' v0.60: the curator confirmed the meeting-portal abstract
+//                       for this DOI and it was ingested with the DOI attached
+export type DoiWatchResolution = 'crossref' | 'suggested' | 'conference_portal';
 export function resolveDoiWatch(
   db: Database.Database,
   doi: string,
-  via: string,
+  via: DoiWatchResolution,
   inboxItemId: number | null,
 ): void {
   db.prepare(
     'UPDATE doi_watch SET resolved_at = ?, resolved_via = ?, resolved_inbox_item_id = ? WHERE doi = ?',
   ).run(Date.now(), via, inboxItemId, doi);
 }
+
+// v0.60: attach a confirmed DOI to a paper row that has none, unless another
+// paper already owns that DOI. Returns the DOI the row holds afterwards (null
+// when it has none) and whether this call wrote it, so the caller can act only
+// on what was really persisted and rebuild a published card that gained one.
+export function attachPaperDoiIfMissing(
+  db: Database.Database,
+  paperId: number,
+  doi: string,
+): { doi: string | null; attached: boolean } {
+  const row = db.prepare('SELECT doi FROM papers WHERE id = ?').get(paperId) as { doi: string | null } | undefined;
+  if (!row) return { doi: null, attached: false };
+  if (row.doi) return { doi: normalizeDoi(row.doi), attached: false };
+  const owner = db.prepare('SELECT id FROM papers WHERE lower(doi) = lower(?) AND id != ?').get(doi, paperId);
+  if (owner) return { doi: null, attached: false };
+  db.prepare('UPDATE papers SET doi = ? WHERE id = ?').run(doi, paperId);
+  return { doi, attached: true };
+}
+
+// Inbox items queued by a CLI (watch:doi, conf:abstracts) rather than a real
+// Telegram message carry a NEGATIVE telegram_msg_id: real ids are always
+// positive, so the two can never collide on the (msg id, type, target) key.
+export const SYNTHETIC_TELEGRAM_MSG_ID = -1;
 
 export function removeDoiWatch(db: Database.Database, doi: string): void {
   db.prepare('DELETE FROM doi_watch WHERE doi = ?').run(doi);

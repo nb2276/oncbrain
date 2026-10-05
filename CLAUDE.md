@@ -43,7 +43,7 @@ Admin + Telegram poller + build run locally only. The deployed site is pure stat
 - **Admin server**: Hono 4 (localhost only, on port 3001)
 - **DB**: better-sqlite3 (synchronous), file at `./oncbrain.db`
 - **LLM**: Anthropic Claude Sonnet via `@anthropic-ai/sdk` OR via `claude -p` (subscription path). v0.8 PR2: also called at *enrichment* time (not just build) to extract metadata from PDF text.
-- **Tests**: Vitest (2594 tests across 127 files as of v0.59). `test/global-setup.ts` builds `dist/` once before collection when the artifacts are absent, so `npm test` is correct cold or warm.
+- **Tests**: Vitest (2642 tests across 130 files as of v0.60). `test/global-setup.ts` builds `dist/` once before collection when the artifacts are absent, so `npm test` is correct cold or warm.
 - **Theme**: dark by default with a light opt-in (v0.30). All colors come from CSS custom properties in `Base.astro` (`:root` dark, `:root[data-theme='light']` override) — a hardcoded hex in a component breaks one theme. See `DESIGN.md → Color`.
 - **PDF ingestion** (v0.8 PR2): poppler (`brew install poppler`) provides `pdftotext` (text layer) + `pdftoppm` (rasterize scanned pages for Apple Vision OCR) + `pdfimages` (v0.15: locate figure pages). No npm dep. A missing binary yields a clear Telegram reply, not a crash.
 - **Figure OCR** (v0.15, Path A): for a text-layer PDF, `pdfimages -list` finds the pages carrying a real figure (large raster image) and `pdftoppm`→Vision OCRs just those, capturing numbers printed *inside* figures (subgroup medians, forest-plot estimates, n-at-risk, image-rendered tables) that `pdftotext` can't see. Stored in `papers.figure_ocr_md` (local-only, never published — same IP boundary as `fulltext_excerpt_md`) and fed to the Phase 2 study agent as labeled lower-confidence source so it can *ground* a figure-locked magnitude instead of flagging it missing. Backfill the back catalog with `npx tsx build/backfill-figure-ocr.ts`.
@@ -78,6 +78,8 @@ npm run queue:rebuild -- --date=<date> [--reason="..."]   # v0.57.5: put one dat
 npm run watch:doi -- --add-file=<path>   # v0.58.1: bulk-register a DOI-only citation list (a conference abstract booklet, e.g.) whose Crossref record has no abstract yet
 npm run watch:doi -- --check [--dry-run] # re-checks nightly (wired into daily-build.sh): promotes on the SAME doi gaining a Crossref abstract; a title-search hit only DMs the curator to confirm, never auto-publishes
 npm run watch:doi -- --list | --remove=<doi>
+npm run conf:abstracts -- --index | --match [--notify] [--dry-run]   # v0.60: index a meeting portal's abstract listings; match watched DOIs; DM confirm-only candidates (nightly via daily-build.sh)
+npm run conf:abstracts -- --ingest --url=<portal abstract link> [--doi=<doi>] [--date=YYYY-MM-DD] [--quiet] [--dry-run]   # queue a confirmed portal abstract (then enrich:inbox)
 npm run build                   # Astro static build
 
 # Durable digest overrides (survive build:day regeneration)
@@ -103,7 +105,7 @@ DIGEST_THINKING=8000 LLM_BACKEND=api npm run build:day -- --date=<date>  # + Pha
 DIGEST_PERSPECTIVE=radonc npm run build:day -- --date=<date>            # specialty lens for Phase 2 (radonc | medonc | your own); see prompts/perspectives/
 
 # Tests + eval
-npm test                        # vitest run (2594 tests)
+npm test                        # vitest run (2642 tests)
 npm run eval                    # LLM-as-judge eval (score: factual / clinical / citation / clustering / hallucinations / v0.13 query+trial axes)
 npm run quality-eval                                # multi-persona quality review of today's digest
 npm run quality-eval -- --date=2026-06-05           # specific day
@@ -210,6 +212,7 @@ src/
     tweet-syndication.ts   Twitter syndication CDN client (token formula derivation)
     pubmed-client.ts       NCBI E-utilities: efetch PubMed metadata + abstract, PMC for Methods/Results
     crossref-client.ts     v0.8 PR1: DOI-keyed metadata via Crossref REST (polite pool)
+    conference-abstract.ts v0.60: meeting-portal abstract adapters (ASTRO amportal first): recognise an abstract page URL, parse it (title, number, session, date, presenter, authors, body, NCT; body found by label TEXT not markup), parse the server-rendered listings, and rank listings against a watched DOI's label for CONFIRM-ONLY suggestions. Ingested as papers fetched_via 'conference_abstract', content_hash keyed on host + the trailing numeric abstract id; a DOI is attached only when the curator's message is EXACTLY "<abstract link> <bare journal DOI>" (pairedPortalDoi), which also retires its doi_watch entry. Filed on the presented date when within 60 days. The abstract text is published like a PubMed abstract (curator decision). planNotifications is the pure nightly DM plan (each DOI/candidate pair offered once)
     paper-url.ts           v0.8 PR1: classify + extract DOI / journal / PMC paper URLs; trade-press host allowlist (isTradePressUrl). v0.58: extractPaperDois — a BARE DOI with no URL wrapper (an abstract-booklet citation list), which extractPaperUrls can't see (no scheme) and extractPaperPmids won't (no "PMID:" label, and a DOI isn't digits-only). Send several, one per line, in one Telegram message — each inboxes separately
     html-meta.ts           v0.8 PR1: Highwire + OpenGraph meta extraction from journal pages
     doi.ts                 v0.8 PR1: normalizeDoi (single canonicalization) + extractDois
@@ -379,7 +382,7 @@ When a user request matches a gstack skill, invoke via the Skill tool:
 ## Testing
 
 ```
-npm test                   # 2594 tests across 127 files, all should pass
+npm test                   # 2642 tests across 130 files, all should pass
 npm run test:watch         # vitest watch mode
 npx astro check            # type check (0 errors expected)
 ```

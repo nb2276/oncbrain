@@ -11,6 +11,14 @@
 // in the queue are skipped with a clear log line and left at 'pending'.
 
 import {
+  adapterForUrl,
+  conferenceAbstractHash,
+  pairedPortalDoi,
+  NotAnAbstractError,
+  type ConferenceAbstract,
+  type ConferenceAdapter,
+} from './conference-abstract.ts';
+import {
   saveBookmark,
   savePaper,
   saveSlideUpload,
@@ -22,6 +30,8 @@ import {
   upsertConference,
   queueRebuild,
   paperHasFigures,
+  resolveDoiWatch,
+  attachPaperDoiIfMissing,
   saveSourceFacet,
   todayIso,
   PAPER_CONTENT_FIELDS,
@@ -77,7 +87,7 @@ import { ocrFile, isOcrAvailable } from './vision-ocr.ts';
 import { archiveTweetImages, isMediaArchiveEnabled } from './tweet-media-archive.ts';
 import { listDigests } from './digest-data.ts';
 import { extractCitations, ownRegistrations } from './extract.ts';
-import { extractDois } from './doi.ts';
+import { extractDois, normalizeDoi } from './doi.ts';
 import {
   buildNctCoverageIndex,
   findPriorCoverage,
@@ -374,6 +384,12 @@ async function enrichPaperItem(
 
   // Tag the paper if its source URL is a meeting abstract host, or the curator's
   // message / the title carries a meeting hashtag or name.
+  // A portal abstract names its own meeting and year ("ASTRO 2026"): use it,
+  // so an abstract confirmed in a later year isn't tagged with that year.
+  if (saveInput.fetched_via === 'conference_abstract' && saveInput.journal) {
+    saveInput.conference_slug =
+      saveInput.conference_slug ?? detectAndEnsureConference(db, [saveInput.journal], saveInput.bookmark_date);
+  }
   saveInput.conference_slug =
     saveInput.conference_slug ??
     detectAndEnsureConference(
@@ -383,14 +399,46 @@ async function enrichPaperItem(
     );
 
   try {
-    const { r, queuedDate } = savePaperAndQueueRebuild(db, saveInput);
-    const reply = r.created
+    // v0.60: a confirmed portal abstract carries its supplement DOI. It is
+    // persisted on the winning row inside the save transaction (a re-send merges
+    // by content_hash, and that merge never writes a DOI), and the watch retires
+    // only if the row really holds that DOI. Otherwise the nightly check would
+    // later ingest the same abstract a second time, or a watch would close on a
+    // row without its DOI.
+    const confirmedDoi =
+      saveInput.fetched_via === 'conference_abstract' && saveInput.doi ? normalizeDoi(saveInput.doi) : null;
+    const { r, queuedDate, doiOnRow, doiAttached } = savePaperAndQueueRebuild(db, saveInput, confirmedDoi);
+    if (confirmedDoi && doiOnRow === confirmedDoi) {
+      resolveDoiWatch(db, confirmedDoi, 'conference_portal', item.id);
+    }
+    // A confirm naming a DIFFERENT DOI than the row already holds (or one
+    // another paper owns) is refused, never silently swapped: a DOI change
+    // re-keys the paper's identity, and that is a curator edit, not a reply.
+    const doiRefused = confirmedDoi !== null && doiOnRow !== confirmedDoi;
+    const reply = doiRefused
+      ? `${r.created ? 'Got it' : 'Already on file'}: ${saveInput.title}. Did NOT attach ${confirmedDoi}: ` +
+        (doiOnRow ? `this abstract already carries ${doiOnRow}.` : 'another paper on file already has that DOI.') +
+        ' The DOI watch stays open.'
+      : r.created
       ? `Got it: ${saveInput.title} (${contentDepthNote(saveInput)}). Appears in the next digest.`
-      : replyForPaperMerge(saveInput.title, r, queuedDate);
-    await replyToCurator(item, reply);
+      : doiAttached
+        ? `Already on file: ${saveInput.title}. Attached DOI ${confirmedDoi}${queuedDate ? `, and queued ${queuedDate} for rebuild` : ''}.`
+        : replyForPaperMerge(saveInput.title, r, queuedDate);
+    // A bulk backfill (`conf:abstracts --ingest --quiet`) skips only this
+    // per-item acknowledgement; the prior-coverage nudge still reaches the curator.
+    if (doiRefused || !isQuietInboxItem(item)) await replyToCurator(item, reply);
     return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
   } catch (err) {
     return { status: 'failed', reason: `paper insert failed: ${(err as Error).message}` };
+  }
+}
+
+function isQuietInboxItem(item: InboxItem): boolean {
+  if (!item.attachments_json) return false;
+  try {
+    return (JSON.parse(item.attachments_json) as { quiet?: boolean }).quiet === true;
+  } catch {
+    return false;
   }
 }
 
@@ -472,14 +520,19 @@ export function needsRebuildQueue(
 function savePaperAndQueueRebuild(
   db: Database.Database,
   input: NewPaper,
-): { r: SavePaperResult; queuedDate: string | null } {
+  attachDoi: string | null = null,
+): { r: SavePaperResult; queuedDate: string | null; doiOnRow: string | null; doiAttached: boolean } {
   return db.transaction(() => {
     const r = savePaper(db, input);
+    // A DOI confirmed onto an existing row changes the published card (its DOI
+    // link and the JSON API), so it counts as content for the rebuild decision.
+    const attach = attachDoi ? attachPaperDoiIfMissing(db, r.id, attachDoi) : { doi: null, attached: false };
     let queuedDate: string | null = null;
     if (r.bookmarkDate) {
       const contentFields = r.mergedFields.filter((f) =>
         (PAPER_CONTENT_FIELDS as readonly string[]).includes(f),
       );
+      if (attach.attached && !r.created) contentFields.push('doi');
       // Something must actually have changed: a fresh row, or a collision that
       // merged real content. A repeat submission adding nothing gets no rebuild.
       const changed = r.created || contentFields.length > 0;
@@ -493,7 +546,7 @@ function savePaperAndQueueRebuild(
         queuedDate = r.bookmarkDate;
       }
     }
-    return { r, queuedDate };
+    return { r, queuedDate, doiOnRow: attach.doi, doiAttached: attach.attached };
   })();
 }
 
@@ -816,6 +869,12 @@ async function resolveFromUrl(
   // for this URL — resolve it via Crossref/PubMed WITHOUT fetching the publisher
   // page (faster; immune to bot-blocks/rate-limits). A retryable API error here
   // propagates so the item retries instead of falling through to a doomed fetch.
+  // v0.60: a meeting-portal abstract page. Checked first: the portal URL
+  // carries no DOI/PMID and no citation meta, and its abstract is the whole
+  // point (the journal supplement's DOI often has no abstract text for weeks).
+  const conf = adapterForUrl(url);
+  if (conf) return resolveConferenceAbstract(conf, url, item, note);
+
   const viaUrlId = await resolveFromUrlEmbeddedId(url, item, note);
   if (viaUrlId) return viaUrlId;
 
@@ -876,6 +935,87 @@ async function resolveFromUrl(
     curator_note: note,
     inbox_item_id: item.id,
     fetched_via: 'html_meta',
+  };
+}
+
+// v0.60: parse a conference-portal abstract page into a paper row.
+//
+// Identity is the abstract itself (content_hash over host + the page's
+// numeric id). The journal-supplement DOI is attached ONLY from the curator's
+// exact confirm reply, "<link> <doi>" and nothing else (pairedPortalDoi):
+// savePaper matches on DOI first, so a DOI picked up from prose would merge
+// this abstract onto a different paper.
+//
+// Filed under the date it was PRESENTED when that is earlier than the reply
+// (within a meeting's tail), so it lands with the same day's tweets and
+// slides about the trial and Phase 1 clusters them into one card instead of
+// publishing a second card on the reply date.
+const PRESENTED_DATE_WINDOW_DAYS = 60;
+
+// A portal outage must retry, not park the submission permanently.
+class TransientFetchError extends Error {}
+
+async function resolveConferenceAbstract(
+  adapter: ConferenceAdapter,
+  url: string,
+  item: InboxItem,
+  note: string | null,
+): Promise<NewPaper> {
+  let html: string;
+  try {
+    html = await ssrfSafeFetchText(url, { allowedHostSuffixes: [adapter.host] });
+  } catch (err) {
+    const msg = (err as Error).message;
+    // Retry a server error, rate limit, timeout, DNS or network failure (the
+    // portal host is pinned, so a lookup failure is an outage, not a refusal);
+    // a refused host, redirect problem, 4xx or oversize body won't improve.
+    const transient =
+      !(err instanceof SsrfError) || /^(HTTP (5\d\d|429)|DNS resolution failed|host did not resolve)$/.test(msg);
+    if (!transient) throw err;
+    throw new TransientFetchError(`portal fetch failed (${msg}); will retry`);
+  }
+  let a: ConferenceAbstract;
+  try {
+    a = adapter.parse(html, url);
+  } catch (err) {
+    if (err instanceof NotAnAbstractError) {
+      throw new MetaNotFoundError('that portal page has no abstract text (a session or discussant page?) — send the abstract\'s own link');
+    }
+    throw err;
+  }
+  const pairing = pairedPortalDoi(item.raw_message_text);
+  const doi = pairing && conferenceAbstractHash(pairing.url) === conferenceAbstractHash(url) ? pairing.doi : null;
+  const header = [
+    a.meeting && a.number ? `${a.meeting} abstract ${a.number}` : a.meeting,
+    a.session,
+    a.presented_on,
+    a.presenter ? `presented by ${a.presenter}` : null,
+    a.nct,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const days = a.presented_on
+    ? (Date.parse(item.bookmark_date) - Date.parse(a.presented_on)) / 86_400_000
+    : NaN;
+  const bookmark_date =
+    a.presented_on && days >= 0 && days <= PRESENTED_DATE_WINDOW_DAYS ? a.presented_on : item.bookmark_date;
+  // The confirm reply is a command, not a note: nothing of it is the curator's voice.
+  const curator_note = pairing
+    ? null
+    : (note ?? '').replace(/https:\/\/\S+/g, '').replace(/\s+/g, ' ').trim() || null;
+  return {
+    content_hash: conferenceAbstractHash(url),
+    doi,
+    source_url: url,
+    title: a.title,
+    authors_json: JSON.stringify(a.authors.map((name) => ({ name }))),
+    journal: a.meeting ? `${a.meeting} Annual Meeting` : 'Conference abstract',
+    pub_date: a.presented_on,
+    abstract: `${header}\n\n${a.abstract}`,
+    bookmark_date,
+    curator_note,
+    inbox_item_id: item.id,
+    fetched_via: 'conference_abstract',
   };
 }
 
@@ -1055,6 +1195,9 @@ function classifyResolveError(err: unknown): { retryable: boolean; message: stri
   }
   if (err instanceof CrossrefError) {
     return { retryable: err.kind === 'network' || err.kind === 'rate_limit', message: `crossref ${err.kind}: ${err.message}` };
+  }
+  if (err instanceof TransientFetchError) {
+    return { retryable: true, message: err.message };
   }
   if (err instanceof SsrfError) {
     // A blocked/refused fetch won't get better on retry — permanent.
@@ -1244,6 +1387,14 @@ function getEnrichedText(
   return [r?.ocr_text, r?.curator_note].filter(Boolean).join(' ');
 }
 
+function filedDate(db: Database.Database, type: InboxItem['type'], rowId: number): string | null {
+  const table = type === 'tweet' ? 'bookmarks' : type === 'paper' ? 'papers' : 'slide_uploads';
+  const r = db.prepare(`SELECT bookmark_date FROM ${table} WHERE id = ?`).get(rowId) as
+    | { bookmark_date: string | null }
+    | undefined;
+  return r?.bookmark_date ?? null;
+}
+
 // Trial lineage: classify WHAT this source reports about its trial (facet +
 // maturity + follow-up), so the build can tell a matured re-reading of one
 // objective from a genuinely different objective and act differently on each.
@@ -1306,8 +1457,14 @@ async function notifyPriorCoverage(
     // evidence gate. Same rule as lineage: an NCT merely CITED is not identity.
     const fullText = getEnrichedText(db, item.type, rowId);
     if (!fullText) return;
+    // "Prior" is relative to the date the source is FILED on, not the message
+    // date: a portal abstract files on its presentation date, and a re-send
+    // merges onto a row already filed earlier. Measured from the message date,
+    // the card this source belongs to looks like an earlier, separate card and
+    // the nudge offers to drop it.
+    const sourceDate = filedDate(db, item.type, rowId) ?? item.bookmark_date;
     const ncts = ownRegistrations(fullText);
-    const nctPrior = ncts.length ? findPriorCoverage(index, ncts, item.bookmark_date) : [];
+    const nctPrior = ncts.length ? findPriorCoverage(index, ncts, sourceDate) : [];
 
     // Acronym match: extract from the SUBJECT text only (a paper's title, a
     // tweet's body), NOT the full excerpt. An oncology paper names many
@@ -1318,7 +1475,7 @@ async function notifyPriorCoverage(
     const acronymPrior = findPriorAcronymCoverage(
       acronymIndex,
       extractTextAcronymKeys(getSubjectText(db, item.type, rowId)),
-      item.bookmark_date,
+      sourceDate,
     );
 
     // Decide, per prior, whether to OFFER a drop. The full evidence gate cannot

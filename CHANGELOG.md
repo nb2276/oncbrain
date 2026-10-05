@@ -2,6 +2,72 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.60.0] - 2026-10-04
+
+### Added
+- **Conference abstracts straight from the meeting portal.** A late-breaking
+  or plenary abstract's journal-supplement DOI is often registered weeks before
+  Crossref carries its text: the ASTRO 2026 Red Journal DOIs sat abstract-less
+  for 8+ nights while `watch:doi` re-checked them. The meeting's own portal
+  serves the full abstract, server-rendered, the day it is presented. Send an
+  `amportal.astro.org/sessions/…` abstract link to the bot and it is ingested
+  as a paper: title, abstract number, session, presentation date, presenter,
+  authors, the Purpose/Methods/Results/Conclusion body and the NCT, tagged to
+  the meeting. Send it as "`<link> <doi>`" to attach the supplement DOI, which
+  also retires that DOI's watch so it can't be ingested twice. Pairing is
+  strict: the message must be exactly one abstract link and one bare DOI from
+  the meeting's journal, because `savePaper` matches on DOI first and a stray
+  DOI would merge the abstract onto another paper. The abstract is filed on
+  its presentation date (when that is within 60 days before the send), so it
+  clusters with that day's tweets and slides. The body is located by its label
+  text, not its markup, since abstracts on one portal wrap their section
+  labels differently, and parsing fails closed if either end of the body is
+  missing. A portal outage (5xx, 429, timeout, DNS) retries; a 404 or a page with no
+  abstract body fails permanently with a reason.
+- **Confirming a DOI after the fact.** Replying "`<link> <doi>`" for an
+  abstract already on file attaches the DOI to that row, retires the watch,
+  and queues the card's date for rebuild when it is already published, so the
+  public card and JSON API pick the DOI up. The DOI token must be one bare DOI
+  (`10.x/a,10.x/b` pairs nothing). A confirm naming a different DOI than the
+  row already carries is refused with a reply saying so, never swapped
+  silently; the watch stays open.
+- **The trial's own registration only.** The abstract header names an NCT
+  only when the portal marks it as the trial's ("Clinical Trial Number:"),
+  never a comparator the body mentions. "clinical trial number" joins the
+  registration cues; in the corpus it appears on one source, GI003's own.
+- **Duplicate nudge measured from the filed date.** The "previously covered"
+  nudge now asks what was covered before the date a source is FILED on, not
+  the date it was sent. A portal abstract files on its presentation date, so
+  measuring from the send date made the card it was joining look like an
+  earlier duplicate and offered a one-reply drop of it. The same applied to
+  any re-send that merges onto a row filed earlier.
+- **Published like a PubMed abstract (curator decision).** The portal abstract
+  text goes into `papers.abstract` and reaches the digest the same way a
+  PubMed abstract does. Identity is the portal's numeric abstract id, so the
+  same abstract under a second session or an edited title is one paper.
+- **Known limitation:** the ASTRO portal renders "≤" as "=" in some
+  abstracts. The ingested text carries what the portal serves.
+- **`npm run conf:abstracts`**, confirm-only matching. `--index` crawls the
+  portal's server-rendered abstract and poster listings (872 ASTRO 2026
+  abstracts, retrying a failed page); `--match` ranks them against every
+  still-watched DOI's label (trial identifiers and doses weigh most) and
+  `--notify` DMs the curator each new top candidate with the exact line to
+  reply with. Each DOI/candidate pair is offered at most once, a DOI whose
+  confirm reply is already waiting in the inbox is skipped, and the crawl only
+  runs when a watched DOI belongs to the meeting's journal (capped at 200
+  pages a listing and 5 minutes; a partial index is not cached). Nothing is
+  ingested without that reply. `--ingest --url=… --doi=… --date=… [--quiet]
+  [--dry-run]` queues a confirmed abstract directly: a different DOI or date
+  queues a new item (a DOI is added where none is attached, never replaced),
+  an identical re-run is a no-op, and `--quiet` skips only
+  the per-item "Got it" DM in a bulk backfill (never the prior-coverage
+  nudge).
+- **Nightly**: `daily-build.sh` runs `conf:abstracts --match --notify` after
+  `watch:doi --check`, so a watched DOI that never gets a Crossref abstract
+  still surfaces as a one-tap confirmation.
+- One adapter per portal (`src/lib/conference-abstract.ts`); ASTRO's amportal
+  is the first. A new meeting is a new adapter entry.
+
 ## [0.59.1] - 2026-10-04
 
 ### Fixed

@@ -188,12 +188,15 @@ export async function ssrfSafeFetchText(
       // loop so the next hop gets re-validated.
       if (res.status >= 300 && res.status < 400) {
         const loc = res.headers.get('location');
+        // Release the redirect's connection before following it.
+        await res.body?.cancel().catch(() => {});
         if (!loc) throw new SsrfError(`redirect with no Location (${res.status})`, current);
         current = new URL(loc, current).toString();
         continue; // finally clears the timer before the next hop
       }
 
       if (!res.ok) {
+        await res.body?.cancel().catch(() => {});
         throw new SsrfError(`HTTP ${res.status}`, current);
       }
 
