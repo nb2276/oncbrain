@@ -122,6 +122,7 @@ async function main() {
   let skippedUnauthorized = 0;
   let dedupCommands = 0;
   let refusedDrops = 0;
+  let skippedNonMessage = 0;
   // Update ids whose inbox write threw — used to hold the offset back so the
   // message re-fetches next run instead of being silently lost.
   const failedUpdateIds = new Set<number>();
@@ -130,7 +131,12 @@ async function main() {
 
   for (const update of updates) {
     const msg = messageOf(update);
-    if (!msg) continue;
+    if (!msg) {
+      // An edit or other non-message kind (edits are refused on purpose, see
+      // messageOf). The offset still advances past it.
+      skippedNonMessage++;
+      continue;
+    }
 
     const chatId = msg.chat?.id ?? null;
     if (chatId != null) seenChatIds.add(chatId);
@@ -498,7 +504,7 @@ async function main() {
   }
 
   console.log(
-    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} unauthorized=${skippedUnauthorized} dedup-commands=${dedupCommands} refused-drops=${refusedDrops} next-offset=${nextOffset}`,
+    `Done. inboxed-tweets=${savedTweets} inboxed-papers=${savedPapers} inboxed-slides=${savedSlides} duplicates=${skippedDuplicate} no-target=${skippedNoTarget} unauthorized=${skippedUnauthorized} dedup-commands=${dedupCommands} refused-drops=${refusedDrops} non-message=${skippedNonMessage} next-offset=${nextOffset}`,
   );
   console.log(`Next: \`npm run enrich:inbox\` to enrich pending items, then \`npm run build:day\`.`);
 }
