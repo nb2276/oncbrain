@@ -78,6 +78,8 @@ npm run queue:rebuild -- --date=<date> [--reason="..."]   # v0.57.5: put one dat
 npm run watch:doi -- --add-file=<path>   # v0.58.1: bulk-register a DOI-only citation list (a conference abstract booklet, e.g.) whose Crossref record has no abstract yet
 npm run watch:doi -- --check [--dry-run] # re-checks nightly (wired into daily-build.sh): promotes on the SAME doi gaining a Crossref abstract; a title-search hit only DMs the curator to confirm, never auto-publishes
 npm run watch:doi -- --list | --remove=<doi>
+npm run conf:abstracts -- --index | --match [--notify]   # v0.60: index a meeting portal's abstract listings; match watched DOIs; DM confirm-only candidates (nightly via daily-build.sh)
+npm run conf:abstracts -- --ingest --url=<portal abstract link> [--doi=<doi>] [--date=YYYY-MM-DD] [--quiet]   # queue a confirmed portal abstract (then enrich:inbox)
 npm run build                   # Astro static build
 
 # Durable digest overrides (survive build:day regeneration)
@@ -210,6 +212,7 @@ src/
     tweet-syndication.ts   Twitter syndication CDN client (token formula derivation)
     pubmed-client.ts       NCBI E-utilities: efetch PubMed metadata + abstract, PMC for Methods/Results
     crossref-client.ts     v0.8 PR1: DOI-keyed metadata via Crossref REST (polite pool)
+    conference-abstract.ts v0.60: meeting-portal abstract adapters (ASTRO amportal first): recognise an abstract page URL, parse it (title, number, session, date, presenter, authors, body, NCT; body found by label TEXT not markup), parse the server-rendered listings, and rank listings against a watched DOI's label for CONFIRM-ONLY suggestions. Ingested as papers fetched_via 'conference_abstract', content_hash keyed on host+path; a DOI is attached only when the curator's message names exactly one, which also retires its doi_watch entry
     paper-url.ts           v0.8 PR1: classify + extract DOI / journal / PMC paper URLs; trade-press host allowlist (isTradePressUrl). v0.58: extractPaperDois — a BARE DOI with no URL wrapper (an abstract-booklet citation list), which extractPaperUrls can't see (no scheme) and extractPaperPmids won't (no "PMID:" label, and a DOI isn't digits-only). Send several, one per line, in one Telegram message — each inboxes separately
     html-meta.ts           v0.8 PR1: Highwire + OpenGraph meta extraction from journal pages
     doi.ts                 v0.8 PR1: normalizeDoi (single canonicalization) + extractDois

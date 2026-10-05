@@ -2,6 +2,35 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.60.0] - 2026-10-04
+
+### Added
+- **Conference abstracts straight from the meeting portal.** A late-breaking
+  or plenary abstract's journal-supplement DOI is often registered weeks before
+  Crossref carries its text: the ASTRO 2026 Red Journal DOIs sat abstract-less
+  for 8+ nights while `watch:doi` re-checked them. The meeting's own portal
+  serves the full abstract, server-rendered, the day it is presented. Send an
+  `amportal.astro.org/sessions/…` abstract link to the bot and it is ingested
+  as a paper: title, abstract number, session, presentation date, presenter,
+  authors, the Purpose/Methods/Results/Conclusion body and the NCT, tagged to
+  the meeting. Send it as "`<link> <doi>`" to attach the supplement DOI, which
+  also retires that DOI's watch so it can't be ingested twice. The body is
+  located by its label text, not its markup, since abstracts on one portal
+  wrap their section labels differently.
+- **`npm run conf:abstracts`**, confirm-only matching. `--index` crawls the
+  portal's server-rendered abstract and poster listings (872 ASTRO 2026
+  abstracts, retrying a failed page); `--match` ranks them against every
+  still-watched DOI's label (trial identifiers and doses weigh most) and
+  `--notify` DMs the curator each new top candidate with the exact line to
+  reply with. Nothing is ingested without that reply. `--ingest --url=…
+  --doi=… --date=… [--quiet]` queues a confirmed abstract directly; `--quiet`
+  keeps a bulk backfill from sending a "Got it" DM per item.
+- **Nightly**: `daily-build.sh` runs `conf:abstracts --match --notify` after
+  `watch:doi --check`, so a watched DOI that never gets a Crossref abstract
+  still surfaces as a one-tap confirmation.
+- One adapter per portal (`src/lib/conference-abstract.ts`); ASTRO's amportal
+  is the first. A new meeting is a new adapter entry.
+
 ## [0.59.1] - 2026-10-04
 
 ### Fixed
