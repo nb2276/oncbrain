@@ -8,7 +8,7 @@
   "scripts": {
     "admin": "tsx admin/server.ts",
     "dev": "astro dev",
-    "prebuild": "bash scripts/link-slides.sh",
+    "prebuild": "bash scripts/ignore-build-dirs.sh && bash scripts/link-slides.sh",
     "predev": "bash scripts/link-slides.sh",
     "prepreview": "bash scripts/link-slides.sh",
     "build": "astro build",
