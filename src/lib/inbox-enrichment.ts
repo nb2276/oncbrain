@@ -820,7 +820,8 @@ async function enrichPdfPaper(
     const reply = r.created
       ? `Got it: ${meta.title} (filed to your vault${extracted.via === 'ocr' ? ', via OCR' : ''}). Appears in the next digest.`
       : replyForPaperMerge(meta.title, r, queuedDate);
-    await replyToCurator(item, reply);
+    // A drip from ingest:local is quiet: no per-item acknowledgement.
+    if (!isQuietInboxItem(item)) await replyToCurator(item, reply);
     return { status: 'enriched', enrichedRowId: r.id, bookmarkCreated: r.created };
   } catch (err) {
     return { status: 'failed', reason: `paper insert failed: ${(err as Error).message}` };
