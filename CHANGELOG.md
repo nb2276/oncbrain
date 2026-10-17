@@ -2,6 +2,35 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.61.0] - 2026-10-17
+
+### Added
+- **Local ingestion, no Telegram: `npm run ingest:local`.** For PDFs already
+  on disk (a downloaded reference folder, a meeting's abstract book), where
+  forwarding each one to the bot is impractical. Point it at files or folders
+  (walked recursively) and the PDFs are staged; the nightly cron then releases
+  `INGEST_LOCAL_NIGHTLY` of them (default **5**) into that night's inbox, so a
+  hundred papers spread over three weeks instead of exhausting the
+  subscription in one build. `--now` releases straight away; `--kind=talk`
+  tells Phase 1 a PDF is a slide deck, so it publishes as a talk card;
+  `--vault --site=<slug>` files a document into the private vault with no card
+  (protocols, manuals). `--release`, `--list` and `--dry-run` round it out.
+- Enrichment reads a staged PDF from disk instead of Telegram, and only a
+  `.pdf` inside the project is accepted. The drip is quiet (no per-item
+  "Got it" DM; the duplicate nudge still fires), and it skips the Opus
+  figure-reconcile pass to protect the subscription. The free Apple Vision
+  figure OCR still runs, and the structured pass can be backfilled later with
+  `build/backfill-figure-structured.ts`.
+
+### Fixed
+- **The 1am publish failed for 13 nights (2026-10-05 to 10-17).** `astro
+  build` died with "Unknown system error -11" (EDEADLK) because Dropbox's
+  File Provider was syncing `dist/`. File Provider honours only
+  `com.apple.fileprovider.ignore#P`; the legacy `com.dropbox.ignored` flag set
+  in the first fix was not enough, which interactive builds hid because they
+  usually win the race. `prebuild` now sets both on `dist/` and
+  `node_modules/`. Verified by running the real launchd job.
+
 ## [0.60.1] - 2026-10-04
 
 ### Fixed

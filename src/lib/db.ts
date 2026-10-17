@@ -380,6 +380,21 @@ CREATE TABLE IF NOT EXISTS doi_watch (
   resolved_via TEXT,
   resolved_inbox_item_id INTEGER
 );
+
+-- v0.61: local PDFs the curator downloaded (tempaddpapers/), staged so the
+-- nightly cron can release a few per night into inbox_items instead of
+-- spending a week of the subscription on one build. kind: 'paper' (study,
+-- guideline, review) or 'talk' (slide deck; Phase 1 sees a note saying so).
+CREATE TABLE IF NOT EXISTS local_ingest_queue (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  path TEXT NOT NULL UNIQUE,
+  kind TEXT NOT NULL,
+  note TEXT,
+  queued_at INTEGER NOT NULL,
+  released_at INTEGER,
+  released_date TEXT,
+  inbox_item_id INTEGER
+);
 `;
 
 export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): Database.Database {
@@ -1752,4 +1767,97 @@ export function reopenStaleResolutions(
         )
         .run(currentVersion);
   return info.changes;
+}
+
+// --- v0.61: local PDF drip ---------------------------------------------------
+
+export type LocalIngestKind = 'paper' | 'talk';
+export type LocalIngestEntry = {
+  id: number;
+  path: string;
+  kind: LocalIngestKind;
+  note: string | null;
+  queued_at: number;
+  released_at: number | null;
+  released_date: string | null;
+  inbox_item_id: number | null;
+};
+
+/** Stage a local PDF. Idempotent on path; returns the row id, and whether it was new. */
+export function enqueueLocalIngest(
+  db: Database.Database,
+  entry: { path: string; kind: LocalIngestKind; note?: string | null },
+): { id: number; created: boolean } {
+  const r = db
+    .prepare('INSERT OR IGNORE INTO local_ingest_queue (path, kind, note, queued_at) VALUES (?, ?, ?, ?)')
+    .run(entry.path, entry.kind, entry.note ?? null, Date.now());
+  if (r.changes > 0) return { id: Number(r.lastInsertRowid), created: true };
+  const row = db.prepare('SELECT id FROM local_ingest_queue WHERE path = ?').get(entry.path) as { id: number };
+  return { id: row.id, created: false };
+}
+
+export function listLocalIngest(db: Database.Database): LocalIngestEntry[] {
+  return db.prepare('SELECT * FROM local_ingest_queue ORDER BY id').all() as LocalIngestEntry[];
+}
+
+// Local PDF items get a negative synthetic Telegram id like other CLI-queued
+// items, derived from the queue row so it is stable and never collides with a
+// real message id.
+const LOCAL_INGEST_MSG_ID_BASE = -3_000_000_000;
+
+/**
+ * Release up to `limit` staged PDFs into inbox_items, dated `date`, in staging
+ * order. One transaction: a crash can't release a row without its inbox item.
+ * Counts what was already released for `date`, so a second run the same day
+ * (a manual re-run of the cron) tops up to the limit instead of doubling it.
+ */
+export function releaseLocalIngest(
+  db: Database.Database,
+  // ids: release only these rows (ingest:local --now), outside the nightly cap.
+  opts: { limit: number; date: string; chatId: number | null; ids?: number[] },
+): LocalIngestEntry[] {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(opts.date)) throw new Error(`date must be YYYY-MM-DD, got: ${opts.date}`);
+  return db.transaction(() => {
+    let rows: LocalIngestEntry[];
+    if (opts.ids) {
+      const wanted = new Set(opts.ids);
+      rows = (db.prepare('SELECT * FROM local_ingest_queue WHERE released_at IS NULL ORDER BY id').all() as LocalIngestEntry[]).filter(
+        (r) => wanted.has(r.id),
+      );
+    } else {
+      const already = (
+        db
+          .prepare('SELECT COUNT(*) AS n FROM local_ingest_queue WHERE released_date = ? AND released_at IS NOT NULL')
+          .get(opts.date) as { n: number }
+      ).n;
+      const room = Math.max(0, opts.limit - already);
+      if (room === 0) return [];
+      rows = db
+        .prepare('SELECT * FROM local_ingest_queue WHERE released_at IS NULL ORDER BY id LIMIT ?')
+        .all(room) as LocalIngestEntry[];
+    }
+    const out: LocalIngestEntry[] = [];
+    for (const row of rows) {
+      const { id } = saveInboxItem(db, {
+        type: 'paper',
+        raw_target: row.path,
+        raw_message_text: row.note,
+        // quiet: no per-item "Got it" DM for a drip; the prior-coverage nudge
+        // still fires. figure_structured:false keeps the drip off the Opus
+        // figure-reconcile calls (raw Vision figure OCR still runs).
+        attachments_json: JSON.stringify({ kind: 'pdf', local_path: row.path, quiet: true, figure_structured: false }),
+        telegram_msg_id: LOCAL_INGEST_MSG_ID_BASE - row.id,
+        telegram_chat_id: opts.chatId,
+        bookmark_date: opts.date,
+      });
+      db.prepare('UPDATE local_ingest_queue SET released_at = ?, released_date = ?, inbox_item_id = ? WHERE id = ?').run(
+        Date.now(),
+        opts.date,
+        id,
+        row.id,
+      );
+      out.push({ ...row, released_at: Date.now(), released_date: opts.date, inbox_item_id: id });
+    }
+    return out;
+  })();
 }

@@ -143,6 +143,13 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
   echo "→ Matching watched DOIs against meeting portals"
   npm run conf:abstracts --silent -- --match --notify || echo "  ⚠ conf:abstracts --match exited non-zero (continuing)"
 
+  # v0.61: drip locally staged PDFs (npm run ingest:local) into tonight's
+  # inbox, INGEST_LOCAL_NIGHTLY (default 5) per night, dated today so tonight's
+  # build:day picks them up. Before enrich so they enrich the same night.
+  echo ""
+  echo "→ Releasing staged local PDFs"
+  npm run ingest:local --silent -- --release || echo "  ⚠ ingest:local --release exited non-zero (continuing)"
+
   echo ""
   echo "→ Enriching inbox items"
   critical "enrich:inbox" npm run enrich:inbox --silent
