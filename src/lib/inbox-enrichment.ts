@@ -114,9 +114,9 @@ import { isQwenAvailable } from './qwen-client.ts';
 import { extractPaperMetaFromText } from './pdf-meta.ts';
 import { isPdfBuffer, filePdfToVault, filePdfUnfiled } from './pdf-storage.ts';
 import { deriveSlug } from './slug.ts';
-import { writeFileSync, unlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve as resolvePath, sep } from 'node:path';
 import { createHash, randomBytes } from 'node:crypto';
 import type Database from 'better-sqlite3';
 
@@ -442,6 +442,25 @@ function isQuietInboxItem(item: InboxItem): boolean {
   }
 }
 
+// v0.61: a PDF staged from the curator's disk (build/ingest-local.ts) carries
+// its absolute path instead of a Telegram file_id. Only a .pdf path inside the
+// project is honoured, so a stray attachments_json can't read arbitrary files.
+// figure_structured:false skips the Opus figure-reconcile pass (subscription
+// budget); the raw Vision figure OCR still runs.
+function localPdfSource(item: InboxItem): { path: string | null; refused: boolean; figureStructured: boolean } {
+  try {
+    const meta = JSON.parse(item.attachments_json ?? '{}') as { local_path?: unknown; figure_structured?: unknown };
+    const figureStructured = meta.figure_structured !== false;
+    if (meta.local_path === undefined) return { path: null, refused: false, figureStructured };
+    const abs = typeof meta.local_path === 'string' ? resolvePath(meta.local_path) : '';
+    const root = resolvePath(process.cwd()) + sep;
+    if (!abs.startsWith(root) || !/\.pdf$/i.test(abs)) return { path: null, refused: true, figureStructured };
+    return { path: abs, refused: false, figureStructured };
+  } catch {
+    return { path: null, refused: false, figureStructured: true };
+  }
+}
+
 function isPdfInboxItem(item: InboxItem): boolean {
   if (!item.attachments_json) return false;
   try {
@@ -589,13 +608,24 @@ async function enrichPdfPaper(
   item: InboxItem,
   note: string | null,
 ): Promise<EnrichmentResult> {
+  const local = localPdfSource(item);
+  if (local.refused) {
+    return { status: 'failed', reason: 'local pdf path refused (must be a .pdf inside the project)', permanent: true };
+  }
+
+  // 1. Download bytes (or, v0.61, read a staged local PDF).
+  let buffer: Buffer;
+  if (local.path) {
+    try {
+      buffer = readFileSync(local.path);
+    } catch (err) {
+      return { status: 'failed', reason: `local pdf unreadable: ${(err as Error).message}`, permanent: true };
+    }
+  } else {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
     return { status: 'failed', reason: 'TELEGRAM_BOT_TOKEN missing — cannot download PDF' };
   }
-
-  // 1. Download bytes.
-  let buffer: Buffer;
   try {
     buffer = (await downloadTelegramFile(item.raw_target, token)).buffer;
   } catch (err) {
@@ -610,6 +640,7 @@ async function enrichPdfPaper(
       return { status: 'failed', reason: `pdf download ${err.kind}: ${err.message}`, permanent: !retryable };
     }
     return { status: 'failed', reason: `pdf download error: ${(err as Error).message}` };
+  }
   }
 
   // 2. Verify the bytes really are a PDF.
@@ -649,7 +680,7 @@ async function enrichPdfPaper(
       figureOcr = await extractPdfFigureOcr(tmpPdf);
       // Only worth the Qwen+Opus pass when the paper actually has figure pages
       // (figureOcr non-empty) AND the local vision stack is up.
-      if (figureOcr && (await isQwenAvailable())) {
+      if (figureOcr && local.figureStructured && (await isQwenAvailable())) {
         if (!process.env.VITEST) {
           console.log(`  [enrich] PDF ${pdfLabel}: grounded figure structuring (Vision + Qwen → Opus reconcile)`);
         }
