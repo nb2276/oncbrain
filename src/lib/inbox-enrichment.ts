@@ -112,7 +112,7 @@ import { enrichPmcOaFigures, resolvePmcIdForDoi } from './pmc-oa.ts';
 import { enrichHtmlFigures, isHtmlFigureOcrEnabled } from './html-figures.ts';
 import { isQwenAvailable } from './qwen-client.ts';
 import { extractPaperMetaFromText } from './pdf-meta.ts';
-import { isPdfBuffer, filePdfToVault, filePdfUnfiled } from './pdf-storage.ts';
+import { isPdfBuffer, filePdfToVault, filePdfUnfiled, vaultBaseName } from './pdf-storage.ts';
 import { deriveSlug } from './slug.ts';
 import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -770,10 +770,11 @@ async function enrichPdfPaper(
   }
 
   // 5. File the PDF into the vault by its provisional disease site.
-  const slug = deriveSlug(meta.title);
+  // v0.62: <year>-<first author>-<short title>, not the bare title slug.
+  const name = vaultBaseName({ title: meta.title, authors: meta.authors, pubDate: meta.pub_date });
   let filedRelPath: string;
   try {
-    filedRelPath = filePdfToVault({ buffer, site: meta.disease_site, slug }).relPath;
+    filedRelPath = filePdfToVault({ buffer, site: meta.disease_site, name }).relPath;
   } catch (err) {
     await replyToCurator(
       item,

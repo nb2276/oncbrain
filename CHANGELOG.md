@@ -2,6 +2,23 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.62.0] - 2026-10-17
+
+### Changed
+- **Vault PDFs are named so you can find them.** A filed PDF used to be the
+  first 64 characters of its title, cut mid-word, with no year or author
+  (`surgery-and-tile-based-radiation-therapy-versus-surgery-and-ster.pdf`). It
+  is now `<year>-<first author>-<short title>`, stopwords dropped and cut at a
+  word boundary (`2026-weinberg-surgery-tile-based-radiation-therapy-surgery.pdf`).
+- **A different PDF never overwrites another.** Two papers whose names
+  collided used to share one file, the second silently replacing the first.
+  A different PDF on a taken name now gets `-2`; identical bytes still reuse
+  the existing file, so re-sending a PDF stays idempotent.
+- `build/rename-vault.ts [--dry-run]` renamed the existing vault (49 files,
+  including the vault-only protocols, which get a cleaned version of their own
+  name) and rewrote the paths recorded in `papers.pdf_path`, the Obsidian
+  notes' wikilinks and the digest artifacts. Only the path strings changed.
+
 ## [0.61.0] - 2026-10-17
 
 ### Added

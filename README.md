@@ -2,7 +2,7 @@
 
 Curated, AI-summarized digest of oncology meeting research and published studies. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets), alongside newly published journal papers. One oncologist curates the sources; an AI pipeline summarizes each study with comparative-literature context and a standard-of-care verdict.
 
-**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.61.0
+**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.62.0
 
 ## Architecture
 
@@ -219,7 +219,7 @@ Every `npm run build:day` also writes Obsidian-flavored markdown to `data/obsidi
 - Wikilinks for NCT trial numbers, PMIDs, DOIs, conference notes, neighboring dates
 - Callout for TL;DR
 - Sources per study with curator notes
-- Filed full-text PDFs at `data/obsidian/papers/<site>/<slug>.pdf` (gitignored, local-only), embedded into the daily note as a `[[wikilink]]` — the vault doubles as a private research library
+- Filed full-text PDFs at `data/obsidian/papers/<site>/<year>-<author>-<title>.pdf` (gitignored, local-only), embedded into the daily note as a `[[wikilink]]` — the vault doubles as a private research library
 
 Symlink `data/obsidian/` into your Obsidian vault, or open the repo as a vault directly. Backlinks across digests show up in Obsidian's graph view.
 
@@ -247,7 +247,7 @@ npm run test:watch # watch mode
 npx astro check    # type check (0 errors expected)
 ```
 
-2658 tests across 133 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, meeting-portal abstracts and confirm-only matching, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, reader-selectable specialty relevance plus its per-specialty "why it matters", the v0.33-v0.36 effect-size marks (parser, geometry, corpus ruler, and the satori share-card renderer), and the v0.53-v0.55 trial-lineage and grounding work (the update/new-card/duplicate decision table, its authorization gate, comparator grounding, and the identity rules that decide when one card may replace another).
+2662 tests across 133 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, meeting-portal abstracts and confirm-only matching, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, reader-selectable specialty relevance plus its per-specialty "why it matters", the v0.33-v0.36 effect-size marks (parser, geometry, corpus ruler, and the satori share-card renderer), and the v0.53-v0.55 trial-lineage and grounding work (the update/new-card/duplicate decision table, its authorization gate, comparator grounding, and the identity rules that decide when one card may replace another).
 
 A vitest `globalSetup` builds `dist/` once before collection when it's missing or older than any build input (`src/`, `public/`, `data/digests/`, `data/overrides/`, the Astro config, `package.json`), so the dist-reading tests pass cold, after a branch switch, and after a new digest lands.
 
