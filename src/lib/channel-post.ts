@@ -76,3 +76,27 @@ export function formatChannelPost(artifact: ChannelArtifact, siteUrl: string): s
   lines.push('', `Full digest → ${url}`);
   return lines.join('\n');
 }
+
+// v0.62.1: studies built only from local-drip PDFs (ingest:local, the
+// curator's downloaded reference library) are announced to the curator by DM,
+// never to the reader channel: they are old literature being back-filled, not
+// new research. A study with ANY other source (a tweet, a Telegram paper, a
+// slide) is still news and stays in the post.
+export type StudySourceRef = { type: string; id: number };
+
+export function withoutDripStudies<T extends ChannelArtifact>(
+  artifact: T,
+  isDripPaper: (paperId: number) => boolean,
+): { artifact: T; dropped: number } {
+  let dropped = 0;
+  const sites = artifact.digest.sites.map((site) => ({
+    ...site,
+    studies: site.studies.filter((study) => {
+      const refs = ((study as { source_ids?: StudySourceRef[] }).source_ids ?? []) as StudySourceRef[];
+      const dripOnly = refs.length > 0 && refs.every((r) => r.type === 'paper' && isDripPaper(r.id));
+      if (dripOnly) dropped++;
+      return !dripOnly;
+    }),
+  }));
+  return { artifact: { ...artifact, digest: { ...artifact.digest, sites } }, dropped };
+}
