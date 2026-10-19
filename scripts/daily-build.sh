@@ -100,7 +100,10 @@ LOG_FILE="$LOG_DIR/oncbrain-cron.log"
 # paths into the launchd plist, but we also extend here as belt-and-suspenders for
 # manual invocations and stale plists.) ~/.local/bin is where the claude CLI lives;
 # without it the claude-cli LLM backend spawns a bare `claude` that ENOENTs.
-export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+# ~/.bun/bin: the gstack pre-push hook (.git/hooks/pre-push) runs `bun`; without
+# it every 1am push fails with "bun: command not found" (2026-10-18 and 10-19
+# were built but stranded on the laptop).
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 # We deliberately do NOT source .env here. The Node scripts (tsx + dotenv/config)
 # load it themselves with proper unquoted-value handling. Bash 'source' would
@@ -247,7 +250,7 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
           if git push origin main 2>&1; then
             echo "  pushed → DigitalOcean will auto-deploy"
           else
-            echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
+            echo "  ✗ git push FAILED — see git's error just above (a failing pre-push hook, a missing tool on PATH, or auth)"
             FAILED=1
             CHANGED_DATES=""
           fi
@@ -271,7 +274,7 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
         elif git push origin main 2>&1; then
           echo "  pushed → DigitalOcean will auto-deploy"
         else
-          echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
+          echo "  ✗ git push FAILED — see git's error just above (a failing pre-push hook, a missing tool on PATH, or auth)"
           FAILED=1
           # Nothing reached DigitalOcean, so nothing is announceable. CHANGED_DATES
           # was captured BEFORE the push (it has to be — the commit clears the
@@ -363,7 +366,7 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
             if git -C "$PUBLISH_WT" push origin main 2>&1; then
               echo "  pushed main → DigitalOcean will auto-deploy"
             else
-              echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
+              echo "  ✗ git push FAILED — see git's error just above (a failing pre-push hook, a missing tool on PATH, or auth)"
               FAILED=1
               CHANGED_DATES=""
             fi
@@ -378,7 +381,7 @@ YESTERDAY="$(date -v-1d +%Y-%m-%d)"
           elif git -C "$PUBLISH_WT" push origin main 2>&1; then
             echo "  pushed main → DigitalOcean will auto-deploy"
           else
-            echo "  ✗ git push FAILED (auth? — check ssh-agent / keychain)"
+            echo "  ✗ git push FAILED — see git's error just above (a failing pre-push hook, a missing tool on PATH, or auth)"
             FAILED=1
             # Same guard as the on-main path: nothing deployed, so nothing is
             # announceable. Without this the run announces dates that never left
