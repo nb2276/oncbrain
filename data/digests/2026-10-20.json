@@ -1,200 +1,174 @@
 {
   "date": "2026-10-20",
   "conference": null,
-  "generated_at": 1792483691221,
+  "generated_at": 1792569903316,
   "digest": {
-    "top_line": "MDACC RNI after NAT in cN+ breast (N=1289): adjusted 10-yr LRR HR 0.497 (0.279-0.884), DR HR 0.731, but univariate LRR 9.4% vs 8.1%, P=.62.",
-    "tldr": "All five studies are breast, all retrospective or pooled, all asking who needs PMRT or RNI. After NAC, risk follows residual disease and biology: 5y LRR 4.1% with pCR vs 9.5% without, TNBC non-pCR 18.5%, CPS+EG spread 71% to 99%. Without NAC, age <45 with >25% N+ reached 58.0% 10-yr LRR±SDR without PMRT.",
+    "top_line": "Nine-trial NACT pool (N=10,075): 5-yr LRR 4.1% with pCR vs 9.5% without (HR 3.33), TNBC non-pCR 18.5%, the risk group to target for post-NACT RT.",
+    "tldr": "All-breast, all-retrospective day on locoregional risk for RT selection. After NACT, residual disease and TNBC drive LRR (non-pCR HR 3.33; CPS+EG 5-yr LRR-free 71% to 99%), and RNI's adjusted LRR HR 0.497 rests on a null univariate split. With upfront mastectomy and no RT, RS ≥18 (10-yr LRR 16.5% vs 9.7%) and age <45 with >25% nodes positive flag LRR risk.",
     "sites": [
       {
         "disease_site": "breast",
-        "intro": "Five non-randomized datasets on selecting PMRT and RNI by risk. None randomized RT, so every RT effect estimate here carries confounding by indication.",
+        "intro": "Five retrospective or pooled cohorts on who needs PMRT or RNI. None randomised RT, so every RT signal here is confounded by indication.",
         "studies": [
           {
-            "name": "CPS+EG staging and local-regional recurrence after neoadjuvant chemotherapy",
-            "tldr": "5-yr LRR-free survival spanned 71% to 99% across CPS+EG scores vs 86% to 97% by clinical or pathologic stage alone, in 1697 pts after NAC.",
+            "name": "21-gene Recurrence Score and locoregional recurrence in node-positive breast cancer (SWOG 8814 correlative)",
+            "tldr": "10-yr LRR 16.5% vs 9.7% for RS ≥18 vs <18 (P=.02) in ER/PR+ node-positive breast; widest split at 1-3 nodes after mastectomy without RT.",
             "details": [
+              "🔍 Retrospective translational cohort from phase 3 SWOG S8814 (tamoxifen alone vs CAF-T), N=316 postmenopausal ER/PR+ node-positive women",
+              "🔍 Excluded mastectomy + RT (n=37), BCS without RT (n=9), unknown surgery (n=5)",
+              "📊 Prespecified primary analysis (continuous RS, multivariable) null: HR 1.14 per 10-point increase (95% CI 0.97-1.35, P=.11)",
               {
-                "text": "🔍 Retrospective, single-institution (MD Anderson), N=1697 treated 1997-2005; median f/u 51 mo",
-                "source_tier": "figure"
-              },
-              "🔍 CPS+EG = clinical stage + post-NAC pathologic stage + ER-negative (1 pt) + nuclear grade 3 (1 pt); score 0-6",
-              "💊 NAC anthracycline- and/or taxane-based; pts given neoadjuvant trastuzumab excluded",
-              {
-                "text": "🔍 Local therapy after NAC (non-randomized, chosen by pt/surgeon/rad onc)",
-                "subdetails": [
-                  "BCT: 656 (39%)",
-                  "Mastectomy alone: 297 (17%)",
-                  "Mastectomy + PMRT: 744 (44%)"
-                ],
-                "source_tier": "figure"
-              },
-              {
-                "text": "📊 5-yr LRR-free survival by CPS+EG score (Table 4)",
+                "text": "📊 10-yr actuarial LRR by RS category (secondary analysis, cut at 18)",
                 "table": {
                   "columns": [
-                    "CPS+EG score",
-                    "5-yr LRR-free (%)",
-                    "95% CI (%)"
+                    "Cohort",
+                    "n",
+                    "RS 0-17",
+                    "RS ≥18",
+                    "P"
                   ],
                   "rows": [
                     [
-                      "0",
-                      "97.8",
-                      "91.3-99.5"
+                      "All pts",
+                      "316",
+                      "9.7%",
+                      "16.5%",
+                      ".02"
                     ],
                     [
-                      "1",
-                      "98.6",
-                      "95.8-99.5"
+                      "Mastectomy, no RT",
+                      "252",
+                      "7.7%",
+                      "16.8%",
+                      ".03"
                     ],
                     [
-                      "2",
-                      "95.3",
-                      "92.4-97.1"
+                      "Mastectomy, no RT, 1-3 nodes",
+                      "165",
+                      "1.5%",
+                      "11.1%",
+                      ".051"
                     ],
                     [
-                      "3",
-                      "93.5",
-                      "90.2-95.7"
-                    ],
-                    [
-                      "4",
-                      "85.4",
-                      "79.8-89.6"
-                    ],
-                    [
-                      "5",
-                      "79.0",
-                      "67.5-86.8"
-                    ],
-                    [
-                      "6",
-                      "70.8",
-                      "49.8-84.3"
+                      "Mastectomy, no RT, ≥4 nodes",
+                      "not stated",
+                      "25.9%",
+                      "27.0%",
+                      ".27"
                     ]
                   ]
                 }
               },
               {
-                "text": "📊 Crude LRR by local therapy (overall 6.5%, N=110)",
-                "subdetails": [
-                  "BCT: 36 events, 5.5%",
-                  "Mastectomy alone: 24 events, 8.1%",
-                  "Mastectomy + PMRT: 50 events, 6.7%"
-                ],
-                "source_tier": "figure"
-              },
-              {
-                "text": "📊 PMRT-indicated subgroup (cStage III or ypN+, N=1103): LRR-free by local therapy (Fig 2)",
+                "text": "📐 LRR multivariable model",
                 "table": {
                   "columns": [
-                    "CPS+EG stratum",
-                    "BCT N",
-                    "Mastectomy N",
-                    "PMRT N",
+                    "Variable",
+                    "HR (95% CI)",
                     "P"
                   ],
                   "rows": [
                     [
-                      "0-2 (N=358)",
-                      "114",
-                      "72",
-                      "172",
-                      "0.73"
+                      "Intermediate or high RS",
+                      "2.36 (1.02-5.45)",
+                      ".04"
                     ],
                     [
-                      "3-6 (N=745)",
-                      "202",
-                      "51",
-                      "492",
-                      "0.0006"
+                      "≥4 nodes",
+                      "3.37 (1.69-6.72)",
+                      ".001"
+                    ],
+                    [
+                      "Mastectomy",
+                      "1.11 (0.45-2.71)",
+                      ".82"
+                    ],
+                    [
+                      "Chemotherapy",
+                      "0.58 (0.29-1.15)",
+                      ".12"
                     ]
                   ]
-                },
-                "source_tier": "figure"
+                }
               },
-              "📐 MVA: CPS+EG ≥3, ≥4 and ≥6 linked to higher LRR risk; mastectomy alone higher, PMRT marginally lower",
-              "⚠️ Table 5 HRs can't be reliably tied to rows in source; per-score HRs not quoted here",
-              "⚠️ Text says LRR-free was higher with mastectomy alone in CPS+EG ≥3, contradicting the MVA; direction unclear from source",
+              "📊 Nodal burden: 10-yr LRR 9.0% with 1-3 nodes vs 24.4% with ≥4 (P=.002)",
+              "⚠️ ≥4 nodes after mastectomy: low RS did not lower LRR (25.9% vs 27.0%), so no PMRT omission signal in pN2a",
               {
-                "text": "⚠️ Overall LRR given as 6.5% in Results but 6.1% in Discussion",
-                "source_tier": "figure"
+                "text": "🔗 vs NSABP B-28 (all pts got chemo, no PMRT allowed), 10-yr LRR",
+                "subdetails": [
+                  "1-3 nodes: 2.4% low / 4.1% intermediate / 6.0% high RS",
+                  "≥4 nodes, mastectomy: 5.5% / 9.6% / 23.5%",
+                  "S8814 1-3 node mastectomy pts with RS ≥18 ran higher at 11.1%"
+                ]
               },
-              {
-                "text": "⚠️ PMRT-omission inference rests on non-randomized comparisons with small cells (mastectomy alone N=72 in CPS+EG 0-2)",
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔗 vs NSABP B-18/B-27: 10-yr LRR 10.3% BCT, 12.3% mastectomy; those trials gave no PMRT",
-                "source_tier": "figure"
-              }
+              "⚠️ Cut point of 18 confirmed as optimal only post hoc; subsets exploratory, not adjusted for multiplicity",
+              "⚠️ BCS arm uninformative: 6 LRR events total (2/29 low vs 4/35 intermediate/high RS)",
+              "🔍 Mean LRR follow-up 8.2 y; median 8.7 y (IQR 7.0-10.2) for pts without LRR"
             ],
             "figures": [],
             "nct": null,
-            "doi": "10.1097/sla.0000000000001492",
+            "doi": "10.1001/jamaoncol.2019.5559",
             "tweet_ids": [
-              1000000130
+              1000000132
             ],
-            "slug": "cps-eg-lrr-post-neoadjuvant",
+            "slug": "rs-locoregional-recurrence-node-positive",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective single-institution series; PMRT-omission claim rests on non-randomized, physician-selected local therapy with a P=0.73 null read as equivalence in small subgroups. Pre-trastuzumab cohort.",
-              "audience": "Breast cancer after NAC, cStage III or ypN+, no neoadjuvant trastuzumab"
+              "rationale": "Retrospective correlative of a chemo trial with nonrandomized RT. Prespecified continuous-RS analysis null (P=.11); the cut at 18 was confirmed post hoc; nodal subsets exploratory with few events.",
+              "audience": "Postmenopausal ER/PR+ node-positive breast, mastectomy without PMRT"
             },
-            "significance": "In the PMRT-indicated subgroup (cStage III or ypN+), pts with CPS+EG 0-2 had no LRR-free difference across BCT, mastectomy alone and PMRT (P=0.73, N=358), while scores 3-6 separated (P=0.0006). ER status and grade add biology to the post-NAC PMRT decision beyond ypN status, but cell sizes are small and HER2+ pts given trastuzumab are absent.",
-            "monday_clinic": "In ER-positive or low-grade breast cancer with residual nodal disease after NAC and CPS+EG ≤2, this supports a discussion about the small absolute PMRT benefit; it does not extend to HER2+ pts treated with neoadjuvant trastuzumab.",
+            "significance": "In mastectomy-only pts with 1-3 nodes, 10-yr LRR was 1.5% at RS <18 vs 11.1% at RS ≥18 (P=.051, n=165). That gives the PMRT de-escalation hypothesis TailorRT is testing a biological basis. At ≥4 nodes low RS offered no protection (25.9% vs 27.0%), so a low score is no reason to drop PMRT in pN2a.",
+            "monday_clinic": "In a postmenopausal ER/PR+ pN1 pt after mastectomy with RS ≥18, this argues against treating the score as reassurance when discussing PMRT; it does not support omitting PMRT at RS <18 outside a trial, and does not apply to ≥4 positive nodes.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Retrospective analysis of the two MD Anderson cohorts used to build and validate CPS+EG, **N=1697**, treated 1997-2005. Median follow-up **51 mo**. Local therapy was not randomized."
+                "body": "**Retrospective translational cohort** within phase 3 SWOG S8814, which enrolled 1989-1995. RT use was **not randomized**: it was expected after BCS and left to physician discretion after mastectomy. Reported under REMARK guidelines."
               },
               {
                 "label": "Population & inclusion",
-                "body": "All pts received NAC (anthracycline, taxane, or both). **Neoadjuvant trastuzumab excluded**, as were pts given preoperative RT or missing ER/grade. Median age 50."
+                "body": "**Postmenopausal, ER/PR+, node-positive** women from the tamoxifen-only and CAF-T arms who had RS assayed. Final **N=316**: BCS + RT or mastectomy without RT. Pts who received PMRT were excluded, so the mastectomy cohort is the group whose physicians judged RT unnecessary."
               },
               {
-                "label": "Radiotherapy",
-                "body": "PMRT was routinely recommended for **clinical stage III, ypN+**, and select cT1-2N1 with high-risk features. Dose, fractionation and target volumes are not reported in the source."
+                "label": "Regimen",
+                "body": "Tamoxifen 20 mg daily for 5 y, alone or after 6 cycles of CAF (CAF-T). The concurrent CAF + tamoxifen arm was excluded."
               },
               {
                 "label": "Endpoints",
-                "body": "**LRR** = invasive recurrence in ipsilateral breast, chest wall or regional nodes, counted regardless of distant failure, measured from diagnosis."
+                "body": "**Primary:** LRR (breast, chest wall, axillary, infraclavicular, supraclavicular or IMN), censored at distant recurrence or death. The primary analysis used continuous RS; the secondary analysis compared RS <18 vs ≥18."
               },
               {
                 "label": "Results",
-                "body": "CPS+EG spread 5-yr LRR-free from **71% to 99%** vs **86% to 97%** for clinical or pathologic stage. In the PMRT-indicated subgroup, CPS+EG 0-2 showed **no difference by local therapy (P=0.73)**."
+                "body": "The **continuous-RS primary analysis was not significant** (P=.11). The categorical split and the subset tables carry the signal."
               },
               {
                 "label": "vs leading data",
-                "body": "Matches **NSABP B-18/B-27**, where clinical nodal status and pathologic response predicted LRR, but adds ER and grade, which neither B-18/B-27 nor the MD Anderson Prognostic Index included. NSABP B-51 is the randomized test of regional RT after nodal downstaging."
+                "body": "**Direction agrees with NSABP B-28**, where RS also independently predicted LRR. Absolute LRR at 1-3 nodes was higher here than in B-28, which treated every pt with chemo and allowed no PMRT. MA.20 and EORTC 22922 show a nodal RT DFS benefit even where LRR is low, so LRR alone may underestimate what RT buys."
               },
               {
                 "label": "Applies to",
-                "body": "Represents pts receiving anthracycline/taxane NAC without trastuzumab, treated at a high-volume center in the 2000s. Does not represent HER2+ pts treated with neoadjuvant anti-HER2 therapy or modern multi-agent regimens."
+                "body": "Represents postmenopausal ER/PR+ pN1 pts after mastectomy without PMRT, on tamoxifen-based therapy. Does not represent pN2a disease, BCS pts, or pts on modern systemic therapy."
               },
               {
                 "label": "Limitations",
-                "body": "A null P=0.73 in a subgroup of 358 (72 with mastectomy alone) is underpowered for equivalence. The Results text contradicts the MVA on the direction of the mastectomy-alone effect, and the overall LRR rate differs between sections (6.5% vs 6.1%)."
+                "body": "**Treatment era:** CAF and tamoxifen only, with no taxanes or AIs, both of which may lower baseline LRR. LRR was censored at distant recurrence, which can undercount local failures. The ≥4-node mastectomy subset had no n reported."
               },
               {
                 "label": "Discussion",
-                "body": "CPS+EG separates LRR risk better than anatomic stage alone, which supports adding biology to post-NAC local therapy decisions. It does not show that PMRT can be safely omitted. That claim needs randomized data."
+                "body": "RS looks prognostic for LRR beyond nodal count, but **it cannot yet select pN1 pts for PMRT omission**. That question belongs to TailorRT (MA.39), which randomizes only low-RS pN1 pts. Nodal burden still dominates the risk at ≥4 nodes."
               }
             ],
-            "interpretation": "The defensible finding here is prognostic. A score built for disease-specific survival, adding ER status and nuclear grade to clinical and post-NAC pathologic stage, separates local-regional risk better than either stage alone. The CPS+EG range of 71% to 99% five-year LRR-free survival, against 86% to 97% for clinical or pathologic stage, is a real gain in discrimination. It agrees with what the NSABP B-18 and B-27 combined analysis found for clinical nodal status and pathologic response, and it extends that work and the MD Anderson Prognostic Index by adding tumor biology, which neither of those used.\n\nThe therapeutic claim is weaker, and readers should treat it that way. The suggestion that PMRT could be omitted for CPS+EG 0 to 2 in clinical stage III or ypN+ disease comes from a null comparison (P=0.73) across three non-randomized local therapy groups, one with only 72 mastectomy-alone pts. A non-significant log-rank test in a subgroup this size is absence of evidence, not evidence of equivalence. Local therapy was also chosen by the patient, surgeon and radiation oncologist, so the mastectomy-alone group in the low-score stratum was almost certainly selected for favorable features beyond the score. Confounding by indication runs in the direction that flatters omission.\n\nTwo internal inconsistencies should lower confidence further. The Results text says five-year LRR-free survival in CPS+EG 3 to 6 was higher with mastectomy alone, but the multivariable model reports higher LRR risk with mastectomy alone and marginally lower risk with PMRT. Both cannot be right. The direction in the multivariable model is the clinically plausible one, but a reader cannot check the curve from the source. The overall LRR rate also appears as 6.5% in one section and 6.1% in another. Neither error overturns the prognostic result, but both suggest the subgroup analysis was handled less carefully than the headline staging comparison.\n\nThe bigger problem for transfer to current practice is the era. The cohort excludes pts treated with neoadjuvant trastuzumab, and the authors themselves name this as the most important limitation. HER2+ disease responding to anti-HER2 therapy has a different LRR profile, and modern NAC for triple-negative and HER2+ disease produces pathologic response rates that change what a given ypN stage means. A score calibrated on anthracycline and taxane regimens from 1997 to 2005 may misclassify pts treated today, most likely by overstating risk in pts who respond well to current regimens.\n\nFor the radiation oncologist, the practical read is narrower than the authors' conclusion. CPS+EG is a reasonable way to name the low-biology, ER-positive or low-grade pt with residual nodal disease for whom the absolute LRR benefit of PMRT is probably small. That pt is a fair candidate for a shared-decision discussion, not a demonstrated omission candidate. The randomized test of regional RT after nodal downstaging, NSABP B-51, asks a related question in a different population (nodes cleared rather than residual) and cannot settle the residual-node scenario either. For this study's conclusion to be wrong, unmeasured selection in the mastectomy-alone group would need to explain the null result. Given how local therapy was assigned, that is the likeliest explanation.",
+            "interpretation": "The appeal of this analysis is that it asks a local-therapy question of a genomic assay built and validated for systemic decisions. The answer is suggestive, not conclusive. Its direction matches NSABP B-28, the other node-positive dataset where RS tracked locoregional failure, and the two cohorts complement each other. B-28 gave everyone chemotherapy and prohibited PMRT, so its mastectomy pts were unselected for local risk. In S8814, physicians could give PMRT to higher-risk pts, and those pts were removed. The mastectomy-alone group here is therefore one that clinicians had already judged low enough risk to skip RT. Even in that group, RS ≥18 identified a 1-3 node subset with 10-yr LRR of 11.1%. That is the most clinically relevant finding: a group many radiation oncologists would consider borderline carried a failure rate that most would treat.\n\nThe methodological picture should temper confidence in specific ways. The prespecified primary analysis, RS as a continuous term, did not reach significance. The positive results come from a dichotomy at 18 that the authors chose because of event counts and then confirmed post hoc as the best cut. Optimizing a cut point on the same data inflates the apparent separation. The headline 1-3 node contrast rests on 165 pts with a P value at the threshold, and the low-RS 1.5% figure reflects very few events. A rate that low invites over-reading: it is the estimate most likely to rise on replication. Censoring LRR at distant recurrence also means local failures that came after or alongside distant disease are not counted, which matters in a tamoxifen-era cohort with substantial distant failure.\n\nThe era cuts both ways. These pts received CAF or tamoxifen alone, with no taxanes, AIs, or modern nodal staging. Modern systemic therapy likely lowers the absolute LRR in every RS stratum. That could make low-RS omission safer than this cohort suggests, but it could also shrink the gap that makes RS discriminating. Whether RS adds information on top of contemporary pathology and therapy is not something a 1989-1995 cohort can settle.\n\nThe ≥4-node result is more robust in practical terms. LRR was about a quarter regardless of RS, so a favorable score does not offset nodal burden. That is consistent with PMRT staying standard for pN2a and aligns with the B-28 high-RS ≥4-node rate.\n\nThe last caution comes from the regional RT trials the authors cite. MA.20 and EORTC 22922 showed DFS gains from nodal irradiation despite modest LRR differences, so a low LRR estimate does not by itself show that RT adds nothing. Prognosis for LRR and benefit from RT are different questions. This study speaks only to the first. TailorRT, which randomizes low-RS pN1 pts, is the right test of the second, and this analysis is best read as the rationale for that trial rather than as a reason to act now.",
             "relevant_specialties": [
-              "radonc",
-              "surgonc"
+              "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "In cStage III or ypN+ disease after NAC, CPS+EG 0-2 showed no LRR-free difference with or without PMRT (P=0.73, N=358). That points to ER and grade as a way to name lower-yield PMRT candidates, but the null comes from small, non-randomized cells in a pre-trastuzumab cohort.",
-              "surgonc": "Crude LRR was 8.1% after mastectomy alone vs 5.5% after BCT, and the MVA flags mastectomy alone as higher risk. CPS+EG ≥3 marks pts in whom choosing mastectomy without PMRT carries real local-regional risk after NAC."
+              "radonc": "In mastectomy-only pN1 pts, 10-yr LRR was 1.5% at RS <18 vs 11.1% at RS ≥18 (P=.051), which supports the TailorRT hypothesis and argues for PMRT discussion at higher RS. At ≥4 nodes LRR was 25.9% vs 27.0% irrespective of RS, so pN2a PMRT is unchanged."
             },
             "open_questions": [
-              "Does CPS+EG stratify LRR in HER2+ pts given neoadjuvant anti-HER2 therapy?",
-              "Is PMRT omission safe for low CPS+EG ypN+ disease in a randomized setting?"
+              "Is PMRT omission safe in pN1 with low RS?",
+              "Does RS predict LRR under modern systemic therapy?",
+              "Does low LRR risk predict lack of RT DFS benefit?"
             ],
             "consort": null,
             "modality": "radiation",
@@ -204,102 +178,80 @@
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "HER2 neoadjuvant breast radiotherapy",
-                "postmastectomy radiation neoadjuvant breast"
+                "recurrence score regional nodal irradiation",
+                "genomic classifier breast radiotherapy"
               ],
-              "queries_failed": [],
-              "candidates_returned": 23,
-              "fetched_at": "2026-10-20T08:06:35.319Z",
+              "queries_failed": [
+                {
+                  "term": "genomic classifier breast radiotherapy",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 20,
+              "fetched_at": "2026-10-21T08:03:24.299Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [
               {
                 "type": "paper",
-                "id": 130
+                "id": 132
               }
             ]
           },
           {
-            "name": "Pooled analysis of nine neoadjuvant breast cancer trials: locoregional recurrence after NACT",
-            "tldr": "5y LRR 4.1% with pCR vs 9.5% without (MV HR 3.33); TNBC non-pCR 18.5%. Surgery type not an independent predictor in 10,075 pts.",
+            "name": "Locoregional recurrence after neoadjuvant chemotherapy: pooled analysis of nine trials",
+            "tldr": "5-yr LRR 4.1% with pCR vs 9.5% without (multivariate HR 3.33); TNBC non-pCR 18.5%. Surgery type not independent after NACT.",
             "details": [
               {
-                "text": "🔍 Exploratory pooled IPD analysis, N=10,075, nine GBG/AGO-B neoadjuvant trials, 1998-2013",
+                "text": "🔍 Exploratory IPD pooled analysis of 9 prospective GBG/AGO-B neoadjuvant trials (1998-2013), N=10,075",
                 "source_tier": "figure"
               },
-              "🔍 Anthracycline/taxane-based NACT in all trials; cT4a-c and cT4d eligible in all but GeparDuo",
-              "📊 Median f/u 67 mo; LRR as first event, competing risks (Gray / Fine-Gray)",
-              "📊 Overall 5y LRR: BCS 7.8%, mastectomy 11.3%; mastectomy not significant on multivariate analysis",
+              "🔍 Anthracycline/taxane NACT throughout; median f/u 67 mo",
+              "🔍 LRR as first event; distant recurrence, second malignancy and death treated as competing events (Gray / Fine-Gray)",
+              "📊 Overall 5-yr LRR: 7.8% after BCS vs 11.3% after mastectomy",
+              "📊 5-yr LRR by subtype: HR+/HER2- 6.0%, HR+/HER2+ 7.6%, HR-/HER2+ 10.5%, TNBC 14.4%",
               {
-                "text": "📐 Non-pCR vs pCR: MV HR 3.33 (95% CI 2.60-4.28), p<0.001",
-                "source_tier": "figure"
-              },
-              {
-                "text": "📐 TNBC vs HR+/HER2-: MV HR 2.72 (95% CI 2.23-3.31), p<0.001",
+                "text": "📐 Multivariate: non-pCR HR 3.33 (95% CI 2.60-4.28); TNBC vs HR+/HER2- HR 2.72 (2.23-3.31); both p<0.001",
                 "source_tier": "figure"
               },
               {
-                "text": "📊 5y cumulative LRR by subtype, pCR vs non-pCR",
+                "text": "📊 5-yr cumulative LRR, pCR vs non-pCR",
                 "table": {
                   "columns": [
-                    "Subtype",
-                    "Overall",
+                    "Stratum",
                     "pCR",
                     "Non-pCR"
                   ],
                   "rows": [
                     [
                       "HR+/HER2-",
-                      "6.0%",
                       "3.9%",
                       "5.9%"
                     ],
                     [
                       "HR+/HER2+",
-                      "7.6%",
                       "4.8%",
                       "8.1%"
                     ],
                     [
                       "HR-/HER2+",
-                      "10.5%",
                       "3.1%",
                       "14.8%"
                     ],
                     [
                       "TNBC",
-                      "14.4%",
                       "4.2%",
                       "18.5%"
-                    ]
-                  ]
-                },
-                "source_tier": "figure"
-              },
-              {
-                "text": "📊 5y cumulative LRR by surgery type",
-                "table": {
-                  "columns": [
-                    "Surgery",
-                    "pCR",
-                    "Non-pCR",
-                    "TNBC",
-                    "HR+/HER2-"
-                  ],
-                  "rows": [
+                    ],
                     [
                       "BCS",
                       "4.0%",
-                      "8.8%",
-                      "12.5%",
-                      "4.9%"
+                      "8.8%"
                     ],
                     [
                       "Mastectomy",
                       "3.9%",
-                      "11.3%",
-                      "20.4%",
-                      "8.1%"
+                      "11.3%"
                     ]
                   ]
                 },
@@ -308,20 +260,25 @@
               {
                 "text": "📐 Independent LRR predictors within non-pCR pts",
                 "subdetails": [
-                  "Age <50: HR 1.32 (95% CI 1.12-1.55), p=0.001",
-                  "cN+: HR 1.49 (95% CI 1.27-1.74), p<0.001",
-                  "G3: HR 1.39 (95% CI 1.16-1.65), p<0.001",
-                  "TNBC: HR 2.77 (95% CI 2.27-3.39), p<0.001"
+                  "Age <50: HR 1.32 (1.12-1.55)",
+                  "cN+: HR 1.49 (1.27-1.74)",
+                  "G3: HR 1.39 (1.16-1.65)",
+                  "TNBC: HR 2.77 (2.27-3.39)"
                 ],
                 "source_tier": "figure"
               },
               {
-                "text": "📊 After pCR, only cN+ trended toward LRR: HR 1.61 (95% CI 0.99-2.61), p=0.054",
+                "text": "📊 After pCR, only cN+ trended toward higher LRR: HR 1.61 (0.99-2.61), p=0.054",
                 "source_tier": "figure"
               },
-              "⚠️ No patient-level adjuvant RT data; protocols only recommended RT per guidelines",
-              "⚠️ Surgery type likely confounded by selection: higher-risk pts steered to mastectomy",
-              "⚠️ Older trials gave HER2+ pts no anti-HER2 therapy; no post-neoadjuvant T-DM1 or capecitabine"
+              {
+                "text": "📊 Mastectomy subgroup: non-pCR HR 4.00 (2.22-7.21); TNBC HR 2.48; cN+ HR 1.86",
+                "source_tier": "figure"
+              },
+              "⚠️ No patient-level RT data: PMRT and RNI use unknown, so RT's contribution to these rates cannot be separated",
+              "⚠️ Mastectomy LRR excess likely selection bias (higher-risk pts sent to mastectomy), per authors",
+              "⚠️ Pre-modern post-neoadjuvant therapy: older trials gave no anti-HER2 therapy to HER2+ pts; no T-DM1 or capecitabine escalation",
+              "🔗 vs EBCTCG NACT vs adjuvant meta-analysis: higher local recurrence with NACT, especially with suboptimal local therapy"
             ],
             "figures": [],
             "nct": null,
@@ -332,65 +289,67 @@
             "slug": "pooled-neoadjuvant-lrr-nine-trials",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Large pooled IPD from prospective trials, but exploratory and prognostic only. No patient-level RT data, so cannot inform RT benefit. Consistent with prior LRR-after-NACT series.",
-              "audience": "Primary breast cancer, cT1-4d, after anthracycline/taxane NACT"
+              "rationale": "Large mature IPD pool of prospective trials confirming known LRR predictors after NACT. Exploratory, prognostic only, and blind to RT delivery, so it cannot test an RT decision.",
+              "audience": "Primary breast cancer after anthracycline/taxane NACT, incl. cT4a-d"
             },
-            "significance": "The pCR split is where the RT read lives: LRR after pCR was 3.1-4.8% across all subtypes, while non-pCR HR-/HER2+ and TNBC reached 14.8% and 18.5%. Because RT delivery was not captured, these are LRR rates under guideline-directed RT, framing ypN0 de-escalation versus non-pCR TNBC as the highest-yield target for intensified locoregional therapy.",
-            "monday_clinic": "In a pt with residual disease after anthracycline/taxane NACT, particularly TNBC or HR-/HER2+, this supports treating locoregional risk as high regardless of BCS vs mastectomy; it does not establish whether RT changes that risk, since RT was not recorded.",
+            "significance": "Residual disease interacts with subtype: TNBC non-pCR LRR was 18.5% at 5y versus 4.2% after pCR, and HR-/HER2+ 14.8% vs 3.1%. With RT use unrecorded, these rates show where post-neoadjuvant RNI/PMRT escalation trials should focus. Within pCR, only cN+ trended toward risk (HR 1.61, p=0.054), relevant to node-based de-escalation.",
+            "monday_clinic": "In TNBC or HR-/HER2+ breast cancer with residual disease after NACT, this backs a high-LRR-risk read when weighing PMRT and nodal coverage; after pCR it shows low LRR across subtypes but cannot say whether omitting RT is safe, because RT delivery was not recorded.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Exploratory pooled analysis of individual pt data from **nine prospective GBG/AGO-B neoadjuvant trials** (1998-2013), **N=10,075**. LRR as first event, with distant recurrence, second malignancy and death as competing events; pCR analyses used landmarks. Median follow-up 67 mo."
+                "body": "Exploratory **individual-patient-data pooled analysis** of 9 prospective GBG/AGO-B neoadjuvant trials (GeparDuo through GeparSepto, PREPARE, TECHNO), 1998-2013. **N=10,075**; median follow-up **67 mo**. Pathologic response was analysed with landmarking (multivariate set N=9552)."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Primary invasive breast cancer, mostly ≥2 cm, with **cT4a-c and inflammatory cT4d** eligible in all trials except GeparDuo. 43.2% cN1, 44.3% G3; TNBC 25.8%, HR+/HER2- 45.8%. pCR (ypT0 ypN0) in 20.4%."
+                "body": "Histologically confirmed primary invasive breast cancer, tumour mostly ≥2 cm; **locally advanced cT4a-c and inflammatory cT4d** eligible in all trials except GeparDuo. 63.6% HR-positive, 28.1% HER2-positive; pCR (ypT0 ypN0) in 20.4%."
               },
               {
                 "label": "Regimen",
-                "body": "All trials used **anthracycline/taxane-based NACT**. Anti-HER2 therapy varied by trial (trastuzumab, lapatinib, pertuzumab); GeparDuo, GeparTrio and PREPARE gave HER2+ pts **no anti-HER2 therapy**."
+                "body": "Anthracycline/taxane-based NACT in all trials. Anti-HER2 therapy varied by trial (trastuzumab, lapatinib, pertuzumab in later trials; **none in GeparDuo, GeparTrio, PREPARE**). Endocrine therapy ≥5 years for ER/PgR-positive pts."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Protocols recommended adjuvant RT per national and international guidelines, with regional nodal RT based mainly on nodal stage. **No patient-level RT data were available**, so RT is not an analyzable variable."
+                "body": "Protocols recommended adjuvant RT per national guidelines, with RNI indicated mainly by nodal stage. **No patient-level RT data were available**, so receipt, fields and dose are unknown."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**LRR as first event** (breast/chest wall, axillary, infra/supraclavicular nodes) measured from surgery; distant recurrence, second malignancy and death were competing events."
               },
               {
                 "label": "Results",
-                "body": "On multivariate analysis, **age, cN, grade, subtype and pCR** were independent LRR predictors; **surgery type was not**. Non-pCR carried **MV HR 3.33 (2.60-4.28)** and TNBC **MV HR 2.72 (2.23-3.31)** vs HR+/HER2-."
+                "body": "5-yr LRR **7.8% BCS vs 11.3% mastectomy**, but surgery type was **not an independent predictor** in multivariate analysis. Age, cN, grade, subtype and pCR were independent; **non-pCR HR 3.33** and **TNBC HR 2.72**."
               },
               {
                 "label": "vs leading data",
-                "body": "The authors place this against the EBCTCG meta-analysis, which found higher local recurrence after NACT than adjuvant therapy in older trials, and the CPS+EG score as an alternative LRR stratifier. Response-adapted nodal RT after NACT is being tested prospectively in NSABP B-51, which this dataset cannot substitute for."
+                "body": "The authors place this alongside the EBCTCG meta-analysis, which found higher local recurrence after NACT than after adjuvant chemotherapy, especially with suboptimal local therapy. The NSABP B-51 question (RNI after nodal pCR) is the RT decision these data frame but cannot answer."
               },
               {
                 "label": "Applies to",
-                "body": "Represents pts with primary breast cancer, including locally advanced and inflammatory disease, after anthracycline/taxane NACT. Does not represent pts given modern post-neoadjuvant therapy (T-DM1, capecitabine) or populations where RT receipt is known."
+                "body": "Represents pts with primary breast cancer, including cT4 and inflammatory disease, treated with anthracycline/taxane NACT in German cooperative-group trials. Does not represent pts given modern post-neoadjuvant escalation (T-DM1, capecitabine) or pts with known RT delivery."
               },
               {
                 "label": "Limitations",
-                "body": "HER2+ estimates mix eras with and without anti-HER2 therapy, which the authors cite to explain the lower HR+/HER2+ LRR. gBRCA status and Ki-67 were incomplete. LRR was investigator-reported on case report forms."
+                "body": "Anti-HER2 therapy was **inconsistent across eras**, which the authors use to explain the lower LRR in HR+/HER2+ disease. gBRCA status incomplete; the univariate surgery effect is likely confounded by selection."
               },
               {
                 "label": "Discussion",
-                "body": "pCR largely erases the subtype gradient in LRR, while non-pCR TNBC and HR-/HER2+ concentrate the locoregional risk. What it does not settle is whether RT intensity or extent modifies that risk, since RT was not recorded."
+                "body": "Biology and response drive LRR after NACT more than surgery type. The **non-pCR TNBC and HR-/HER2+** groups are where locoregional escalation has the most room to show benefit. With RT unrecorded, the low post-pCR rates are not evidence that RT can be omitted."
               }
             ],
-            "interpretation": "The value of this dataset is scale and denominator quality rather than any causal claim. Ten thousand pts drawn from prospective neoadjuvant trials, with protocol-defined pCR and investigator-reported LRR, gives cumulative incidence estimates by subtype and response that smaller single-institution series cannot stabilise. The headline structure is what most breast radiation oncologists already assume: response and biology dominate, and once pCR is reached the subtype gradient nearly disappears, with five-year LRR in the 3.1 to 4.8% range across all four subtypes. The divergence opens only in non-pCR pts, where TNBC reaches 18.5% and HR-/HER2+ 14.8%, against 5.9% for HR+/HER2-.\n\nThe RT reader has to hold one fact above all others: radiotherapy was not recorded at the patient level. The protocols recommended guideline-based RT, so these rates describe outcomes under contemporary practice of the era, presumably with most BCS pts and many node-positive mastectomy pts irradiated. That makes the numbers useful as a baseline risk map and useless as evidence about what RT adds or what omitting it costs. A 3.9% LRR after pCR and mastectomy does not tell you that PMRT can be dropped in ypN0 pts, because some unknown fraction of those pts received it. The question of response-adapted regional nodal RT belongs to NSABP B-51, and this analysis neither anticipates nor substitutes for that trial's answer.\n\nThe surgery-type finding deserves care. Crude LRR was higher after mastectomy, 11.3% vs 7.8%, but surgery type fell out on multivariate analysis and did not predict LRR within any subtype. The authors attribute this to selection, with higher-risk pts steered toward mastectomy, and that is the plausible reading. It is a reassurance about BCS after NACT rather than evidence that mastectomy is inferior, and it also suggests that whatever local therapy those mastectomy pts received was not fully offsetting their baseline risk, which is the authors' own argument for revisiting PMRT application after NACT.\n\nTransferability to current practice is the main source of doubt. The trials span 1998 to 2013. HER2+ pts in GeparDuo, GeparTrio and PREPARE received no anti-HER2 therapy, and nobody received post-neoadjuvant T-DM1 or capecitabine, both of which the authors note improve outcomes in non-pCR disease with unreported LRR effect. The non-pCR HR-/HER2+ estimate is therefore probably an overestimate for a pt treated today, and the non-pCR TNBC estimate may also shrink with modern escalation, including immunotherapy, which these trials predate. The HR+/HER2- rates, under adjuvant endocrine therapy for at least five years, are likely the most transferable.\n\nFor this to mislead, the unmeasured RT distribution would need to differ systematically across the subgroups being compared, for example if non-pCR TNBC pts were less often irradiated. That seems unlikely given guideline-driven indications, but it cannot be excluded. The practical use is as a counselling and trial-eligibility reference: non-pCR TNBC and HR-/HER2+ define the population where intensified locoregional strategies are worth testing, and pCR identifies the group where de-escalation trials are reasonable to pursue.",
+            "interpretation": "The core message of this pooled analysis is that after neoadjuvant chemotherapy, locoregional risk follows tumour biology and response more than the operation. A crude gap between mastectomy and breast conservation (11.3% vs 7.8% at five years) vanishes once age, nodal stage, grade, subtype and pCR enter the model. That fits the authors' reading that mastectomy was given to higher-risk patients, and it should stop anyone from treating mastectomy after NACT as a local-control choice in itself. The decision that matters is what follows surgery.\n\nFor a radiation oncologist, the most useful output is the subtype-by-response grid. Without pCR, TNBC reached 18.5% and HR-/HER2+ 14.8% LRR at five years. With pCR, every subtype fell between 3.1% and 4.8%. In other words, achieving pCR erases most of the subtype gradient, and the high-risk tail sits almost entirely in residual-disease, hormone-receptor-negative tumours. Among pCR patients, only clinical node positivity hinted at residual risk (HR 1.61, p=0.054). That borderline signal is the part of the dataset most relevant to the current de-escalation debate. NSABP B-51 asked whether regional nodal irradiation can be dropped after nodal conversion, and this analysis neither supports nor undermines that question. It only shows that the baseline-node-positive, pCR population is not obviously risk-free.\n\nThe major caveat sets the ceiling on everything above: no patient-level radiotherapy data exist. Protocols recommended RT per guidelines, so most of these rates are presumably rates after some RT, but which patients got PMRT, which got nodal fields, and to what extent, is unknown. The low post-pCR LRR therefore cannot be read as the natural history of an untreated chest wall or nodal basin. It describes the outcome of a guideline-era mix of local therapy. The same problem cuts the other way for the high-risk groups. A TNBC non-pCR rate of 18.5% after presumably frequent RT points to radioresistance or systemic failure appearing locally first, not to an unirradiated population that RT would obviously rescue.\n\nThe treatment era limits generalisability. Several trials gave HER2-positive patients no anti-HER2 therapy, and none used post-neoadjuvant escalation with T-DM1 or capecitabine. Both have since improved outcomes in residual disease, though, as the authors note, their effect on LRR has not been reported. Contemporary non-pCR TNBC and HER2-positive patients probably carry lower locoregional risk than reported here, by an unknown margin. The HR+/HER2+ estimates are the most era-contaminated.\n\nWhat would make this analysis misleading? A systematic link between RT omission and the high-risk strata, or the reverse, would distort any implied RT effect, and the dataset cannot test for either. It is best used as a risk-stratification map for designing and enrolling trials in post-neoadjuvant locoregional therapy, not as evidence for any individual RT decision.",
             "relevant_specialties": [
               "radonc",
-              "medonc",
               "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "LRR after pCR stayed 3.1-4.8% across subtypes, versus 18.5% in non-pCR TNBC and 20.4% for TNBC after mastectomy. RT use was not recorded per pt, so this is risk stratification under guideline RT, not RT efficacy; it supports response-adapted thinking about PMRT and nodal RT after NACT.",
-              "medonc": "Non-pCR TNBC (18.5%) and HR-/HER2+ (14.8%) carry the highest LRR risk, and these trials predate post-neoadjuvant T-DM1 or capecitabine, whose LRR impact the authors note is unreported. HER2+ pts in the earlier trials got no anti-HER2 therapy, which caps how well HER2+ estimates transfer.",
-              "surgonc": "Mastectomy carried higher crude 5y LRR (11.3% vs 7.8% BCS) but was not an independent predictor on multivariate analysis, and surgery type did not predict LRR within any subtype. Biology and pCR, not extent of breast surgery, drove LRR here, though selection toward mastectomy limits that read."
+              "radonc": "Residual-disease TNBC (18.5%) and HR-/HER2+ (14.8%) carry the 5-yr LRR burden, while pCR flattens every subtype to 3.1-4.8%. RT delivery was unrecorded, so this sets risk strata for PMRT/RNI decisions after NACT rather than proving that RT can be omitted after pCR.",
+              "surgonc": "Mastectomy's crude LRR excess (11.3% vs 7.8% for BCS) disappears on multivariate analysis, and surgery type predicted LRR in no subtype. After NACT, choosing mastectomy over BCS did not independently improve local control; response and biology did."
             },
             "open_questions": [
-              "Does RT extent modify LRR in non-pCR TNBC after NACT?",
-              "Can regional nodal RT be omitted after ypN0 conversion?",
-              "LRR impact of post-neoadjuvant T-DM1 or capecitabine"
+              "Is RNI or PMRT safely omitted after nodal pCR in initially cN+ pts?",
+              "Does locoregional RT escalation reduce LRR in non-pCR TNBC?",
+              "Do post-neoadjuvant T-DM1 or capecitabine lower LRR?"
             ],
             "consort": null,
             "modality": null,
@@ -398,33 +357,6 @@
             "methodology": "meta-analysis",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
-              {
-                "nct": "NCT06559696",
-                "brief_title": "Internal Mammary Lymph Nodes Irradiation in High-risk Breast Cancer After Neoadjuvant Chemotherapy",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 722,
-                "primary_completion_date": "2032-07",
-                "brief_summary": "The aim of this study is to explore the impact of internal mammary nodal irradiation on disease-free survival in high-risk breast cancer patients (ypN+or supra/subclavicular lymph node positive) after neoadjuvant chemotherapy.",
-                "conditions": [
-                  "Breast Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "internal mammary nodal irradiation",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "No internal mammary node irradiation",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed invasive breast cancer\n* Underwent neoadjuvant chemotherapy\n* Eastern Cooperative Oncology Group Performance Status Scale 0-2\n* ypN+ after neoadjuvant chemotherapy or supraclavicular/subclavicular lymph node metastasis before system therapy\n* No…",
-                "answers_question": "Does RT extent modify LRR in non-pCR TNBC after NACT?",
-                "relevance_phrase": "phase 3 IMN RT vs none in ypN+ after NACT, DFS"
-              },
               {
                 "nct": "NCT01872975",
                 "brief_title": "Standard or Comprehensive Radiation Therapy in Treating Patients With Early-Stage Breast Cancer Previously Treated With Chemotherapy and Surgery",
@@ -454,8 +386,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* The patient must have signed and dated an Institutional Review Board (IRB)-approved consent form that conforms to federal and institutional guidelines\n* The patient must have an Eastern Cooperative Oncology Group (ECOG) performance status of 0 or 1\n* Patient must have…",
-                "answers_question": "Can regional nodal RT be omitted after ypN0 conversion?",
-                "relevance_phrase": "randomised regional nodal RT vs none after NACT + surgery"
+                "answers_question": "Is RNI or PMRT safely omitted after nodal pCR in initially cN+ pts?",
+                "relevance_phrase": "randomized regional nodal XRT vs none after chemo + surgery"
               },
               {
                 "nct": "NCT07724769",
@@ -477,8 +409,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Female patients \\>= 18 years old.\n* Histologically confirmed invasive breast cancer, cT1-3 N1M0 according to the 8th AJCC edition.\n* Biopsy-proven cN1 disease at diagnosis.\n* Completion of standard neoadjuvant systemic therapy.\n* Surgical treatment of breast and axilla.\n*…",
-                "answers_question": "Can regional nodal RT be omitted after ypN0 conversion?",
-                "relevance_phrase": "RNI de-escalation in cN1 → pN0 after neoadjuvant therapy"
+                "answers_question": "Is RNI or PMRT safely omitted after nodal pCR in initially cN+ pts?",
+                "relevance_phrase": "RNI de-escalation in biopsy-proven cN1 → ypN0 after NAT"
               },
               {
                 "nct": "NCT04109079",
@@ -510,49 +442,45 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18\n* Male or female\n* cT1-3N1M0 breast cancer at diagnosis (prior to NACT) as per AJCC 8th edition (see Section 6.4.1)\n\n  o Patients with occult primary invasive breast cancer (no identifiable invasive cancer in the breast) with FNA or core biopsy proven nodal…",
-                "answers_question": "Can regional nodal RT be omitted after ypN0 conversion?",
-                "relevance_phrase": "omit ALND + axillary RT if SLNB ypN0, DFS non-inferiority"
+                "answers_question": "Is RNI or PMRT safely omitted after nodal pCR in initially cN+ pts?",
+                "relevance_phrase": "omit ALND + axillary RT if SLN negative post-NACT, cN1"
               },
               {
-                "nct": "NCT07869628",
-                "brief_title": "A Multicenter, Randomized, Controlled Phase III Clinical Trial on Adjuvant Intensified Therapy for Patients With Residual Disease After Neoadjuvant Treatment for Triple-negative Breast Cancer",
-                "overall_status": "NOT_YET_RECRUITING",
+                "nct": "NCT06559696",
+                "brief_title": "Internal Mammary Lymph Nodes Irradiation in High-risk Breast Cancer After Neoadjuvant Chemotherapy",
+                "overall_status": "RECRUITING",
                 "phase": [
                   "PHASE3"
                 ],
-                "enrollment_count": 852,
-                "primary_completion_date": "2029-08",
-                "brief_summary": "This study is a multicenter, randomized controlled phase III clinical trial. The aim of this study is to observe the efficacy and safety of PD-1 inhibitors combined with capecitabine, PD-1 inhibitors alone, or capecitabine alone in patients with TNBC who have residual lesions after neoadjuvant treatment.\n\nThe subjects will be randomly assigned in a 1:1:1 ratio to Group A (capecitabine combined with PD-1 inhibitor), Group B (PD-1 inhibitor), and Group C (capecitabine). The stratification factors…",
+                "enrollment_count": 722,
+                "primary_completion_date": "2032-07",
+                "brief_summary": "The aim of this study is to explore the impact of internal mammary nodal irradiation on disease-free survival in high-risk breast cancer patients (ypN+or supra/subclavicular lymph node positive) after neoadjuvant chemotherapy.",
                 "conditions": [
-                  "Newly Diagnosed Triple-negative Breast Cancer"
+                  "Breast Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "Capecitabine and PD-1 inhibitor",
-                    "type": "DRUG"
+                    "name": "internal mammary nodal irradiation",
+                    "type": "RADIATION"
                   },
                   {
-                    "name": "PD-1 inhibitor",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Capecitabine",
-                    "type": "DRUG"
+                    "name": "No internal mammary node irradiation",
+                    "type": "RADIATION"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n\\- Before implementing any trial-related procedures, sign a written informed consent.\n\n\\- Female, aged 18 years or above, and under 75 years old.\n\n\\- ECOG PS 0-1.\n\n\\-\n\nPrimary invasive breast cancer confirmed by initial pathology:\n\n1. Tumor stage: II-IIIc, without internal…",
-                "answers_question": "LRR impact of post-neoadjuvant T-DM1 or capecitabine",
-                "relevance_phrase": "phase 3 PD-1 ± capecitabine for TNBC residual disease"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed invasive breast cancer\n* Underwent neoadjuvant chemotherapy\n* Eastern Cooperative Oncology Group Performance Status Scale 0-2\n* ypN+ after neoadjuvant chemotherapy or supraclavicular/subclavicular lymph node metastasis before system therapy\n* No…",
+                "answers_question": "Does locoregional RT escalation reduce LRR in non-pCR TNBC?",
+                "relevance_phrase": "phase 3 IMN RT vs none, ypN+ after NACT, DFS endpoint"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "triple negative breast residual disease radiotherapy",
-                "regional nodal irradiation neoadjuvant breast"
+                "regional nodal irradiation neoadjuvant breast",
+                "triple negative residual disease radiotherapy"
               ],
               "queries_failed": [],
-              "candidates_returned": 39,
-              "fetched_at": "2026-10-20T08:06:33.242Z",
+              "candidates_returned": 40,
+              "fetched_at": "2026-10-21T08:03:13.455Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -563,21 +491,38 @@
             ]
           },
           {
-            "name": "Postmastectomy RT selection in T1-T2 N1-3 breast cancer (BC Cancer cohort)",
-            "tldr": "10-yr LRR±SDR 15.9% without PMRT overall; 58.0% if age <45 with >25% nodes positive vs 10.8% if ≥45 with ≤25% positive.",
+            "name": "PMRT selection in T1-T2, 1-3 node-positive breast cancer",
+            "tldr": "10y KM LRR±SDR 15.9% without PMRT in pT1-T2 1-3 N+; age <45 with >25% nodes positive reached 58.0%.",
             "details": [
               {
-                "text": "🔍 Retrospective population-based BCCA cohort, N=821 pT1-T2 N1-3, mastectomy + ALND, no PMRT, diagnosed 1989-1997",
-                "source_tier": "figure"
-              },
-              "🔍 296 pts who received RT excluded from the 1117 eligible, so the cohort is the RT-unselected remainder",
-              "💊 Systemic therapy in 94%: HT alone 57.1%, CHT alone 21.7%, both 15.1%; CHT mostly AC or CMF",
-              {
-                "text": "📊 10-yr KM ILRR 12.7%, LRR±SDR 15.9%; median f/u 7.7 yr",
+                "text": "🔍 Retrospective population-based BCCA cohort, N=821, diagnosed 1989-1997, mastectomy without adjuvant RT",
                 "source_tier": "figure"
               },
               {
-                "text": "📐 Multivariate Cox: independent predictors of LRR",
+                "text": "🔍 All had modified radical mastectomy + ALND; median 10 nodes removed (range 1-39)",
+                "source_tier": "figure"
+              },
+              "⚠️ 296 pts who received PMRT were excluded, so the no-RT cohort may be selected toward lower risk",
+              "💊 Systemic therapy in 94%: AC 202, CMF 91, FAC 4 of 302 chemo pts; tamoxifen in 581",
+              {
+                "text": "📊 10y KM ILRR 12.7% (SE 1.3), LRR±SDR 15.9% (SE 1.5); median f/u 7.7y",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 10y KM BCSS 71.3%, OS 58.2%; distant recurrence 31.2% (n=256)",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 Regional recurrence sites (n=57)",
+                "subdetails": [
+                  "Axillary: 36 (63%)",
+                  "Clavicular: 19 (33%)",
+                  "Internal mammary: 2 (3%)"
+                ],
+                "source_tier": "figure"
+              },
+              {
+                "text": "📐 Multivariable Cox: independent predictors of LRR",
                 "table": {
                   "columns": [
                     "Factor",
@@ -610,21 +555,15 @@
                 "source_tier": "figure"
               },
               {
-                "text": "📊 Risk classification model, 10-yr KM LRR",
+                "text": "📊 Risk classification model, 10y KM LRR (Fig 1)",
                 "table": {
                   "columns": [
                     "Subgroup",
-                    "n",
+                    "N",
                     "ILRR",
                     "LRR±SDR"
                   ],
                   "rows": [
-                    [
-                      "Age <45",
-                      "123",
-                      "22.8%",
-                      "29.3%"
-                    ],
                     [
                       "Age <45, >25% N+",
                       "19",
@@ -636,12 +575,6 @@
                       "104",
                       "18.5%",
                       "23.8%"
-                    ],
-                    [
-                      "Age ≥45",
-                      "698",
-                      "10.8%",
-                      "13.7%"
                     ],
                     [
                       "Age ≥45, >25% N+",
@@ -660,23 +593,15 @@
                 "source_tier": "figure"
               },
               {
-                "text": "📊 Pattern of regional failure (57 regional recurrences)",
-                "subdetails": [
-                  "Axilla: 36 (63%)",
-                  "Clavicular: 19 (33%)",
-                  "Internal mammary: 2 (3%)"
-                ],
+                "text": "⚠️ >25% N+ ILRR CI 0.99-4.05 crosses 1 despite p=0.05",
                 "source_tier": "figure"
               },
-              "📊 Grade 3, T2, and >1 positive node raised univariate risk but dropped out on multivariate analysis",
               {
-                "text": "🔗 Baseline LRR well below the ~30% at 10 yr in DBCG 82b/82c no-PMRT arms",
+                "text": "⚠️ Model breakpoints chosen by significance + subgroup size; no external validation; top-risk cell N=19",
                 "source_tier": "figure"
               },
-              "⚠️ Pre-taxane, pre-trastuzumab era; HER2 status not analyzed",
-              "⚠️ RT benefit inferred from an assumed two-thirds relative reduction, not measured in this cohort",
               {
-                "text": "⚠️ Small cells drive the top tier: the >50% LRR group is n=19",
+                "text": "🔗 DBCG 82b/82c no-PMRT LRR ~30% at 10y vs this cohort's 13-16%, attributed to axillary staging + selection differences",
                 "source_tier": "figure"
               }
             ],
@@ -689,106 +614,87 @@
             "slug": "pmrt-t1-t2-n1-3-bc-cancer",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective no-PMRT cohort; RT benefit extrapolated from assumed relative reduction, not observed. Data-derived cutpoints, small top-risk cells, pre-taxane/pre-HER2 systemic therapy.",
-              "audience": "pT1-T2 N1-3 breast, mastectomy + ALND, no PMRT, 1989-1997 era"
+              "rationale": "Retrospective single-province no-RT cohort; excluded PMRT recipients; data-driven breakpoints, no validation set; pre-taxane, ALND-era systemic therapy limits transfer to modern pts.",
+              "audience": "pT1-T2, 1-3 N+ breast after mastectomy + ALND, no PMRT"
             },
-            "significance": "Pattern of failure is the target-volume read: of 57 regional recurrences, 33% were clavicular and 3% internal mammary. That supports SCV coverage in a selected N1 patient over routine IMN coverage. Staging was ALND with a median of 10 nodes removed, so the >25% nodal-ratio cutpoint does not carry over to SLNB-only axillae.",
-            "monday_clinic": "In pT1-T2 N1-3 pts ≥45 with ≤25% of dissected nodes positive, 10-yr LRR±SDR without PMRT was 10.8%, which supports discussing omission; it does not extend to pts <45, those with >25% nodes positive, or SLNB-staged axillae.",
+            "significance": "Clavicular nodes carried 19 of 57 regional recurrences (33%) versus 2 for internal mammary, so the residual risk this model flags sits mostly in the axillary-supraclavicular field. In women ≥45 with ≤25% nodes positive, 10y LRR±SDR was 10.8%, near the authors' <10% omission threshold, while medial or ER-negative tumors pushed that subset to approximately 20%.",
+            "monday_clinic": "In a woman ≥45 with a lateral, ER-positive pT1-T2 tumor and ≤25% of ALND nodes positive, this supports discussing PMRT omission; it does not extend to SLNB-only staging, where the nodal-ratio factor cannot be computed.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Retrospective population-based cohort from the BCCA Breast Cancer Outcomes Unit, **N=821**, median follow-up **7.7 yr**. Cox multivariate analysis plus a stepwise risk classification model."
+                "body": "Retrospective population-based cohort from the BCCA Breast Cancer Outcomes Unit database. **N=821** of 1117 identified, after excluding **296 who received RT**. Cox multivariable modeling, then a classification model built from the significant factors. Median follow-up **7.7y**."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**pT1-T2 with 1-3 positive nodes**, modified radical mastectomy with axillary dissection, **no adjuvant RT**. Excluded pT3-T4, ≥4 nodes, M1, and the 296 pts who received RT."
+                "body": "**pT1-T2, 1-3 positive axillary nodes**, diagnosed 1989-1997, all treated with modified radical mastectomy and axillary dissection. Excluded pT3-T4, ≥4 N+, M1 and unknown pTN. Median age 62."
               },
               {
                 "label": "Regimen",
-                "body": "Systemic therapy in **94%**. Chemotherapy was mostly AC (202) or CMF (91), and hormonal therapy was mostly tamoxifen (581)."
+                "body": "Adjuvant systemic therapy in **94%** per BCCA guidelines: chemo alone 21.7%, hormonal alone 57.1%, both 15.1%. Chemo was AC, CMF or FAC; hormonal therapy was mostly tamoxifen."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**No pt received locoregional RT**; the study defines baseline no-PMRT risk to inform selection, not RT efficacy. Authors anchor benefit estimates on an RT relative LRR reduction of **approximately two-thirds**."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary:** isolated LRR and LRR±SDR (10-yr KM). **Secondary:** BCSS and OS, which were 71.3% and 58.2% at 10 yr."
+                "body": "**Primary:** isolated LRR (chest wall, axillary, infraclavicular, IMN as first site) and LRR±simultaneous distant recurrence. **Secondary:** BCSS and OS."
               },
               {
                 "label": "Results",
-                "body": "Independent predictors were **age <45, >25% nodes positive, medial location, ER-negative**. In pts ≥45 with ≤25% nodes positive, tumor location and ER status further separated moderate risk (~20%) from low risk (<10%)."
+                "body": "Overall 10y LRR±SDR **15.9%**. Each of age <45, T2, grade 3, ER-negative, medial location, >1 N+ or >25% N+ alone conferred **>20%** 10y LRR on univariate analysis. Age was the first model split (**29.3% vs 13.7%**, p<0.0001)."
               },
               {
                 "label": "vs leading data",
-                "body": "No-PMRT LRR here sits below the **~30% at 10 yr** in DBCG 82b/82c, and close to the BCCA randomized trial (**16% at 10 yr**) and the systemic-therapy trial cohorts (**12-20%**). The authors attribute that spread to differences in axillary staging, systemic therapy, and selection."
+                "body": "No-PMRT LRR here (13-16% at 10y) sits well below the **~30%** in DBCG 82b/82c and nearer the BCCA randomized trial (**16% at 10y**) and systemic-therapy trial cohorts (**12-20%**). Authors attribute the gap to axillary staging, systemic therapy and selection differences."
               },
               {
                 "label": "Applies to",
-                "body": "Represents pT1-T2 N1-3 pts after mastectomy and full ALND, treated with 1990s AC/CMF and tamoxifen. Does not represent SLNB-only staging, HER2-directed or taxane-based therapy, or neoadjuvant-treated pts."
+                "body": "Represents pT1-T2, 1-3 N+ women after mastectomy with full axillary dissection, treated with 1990s AC/CMF/tamoxifen-era systemic therapy and no PMRT. Does not represent SLNB-only axillary staging or pts on modern systemic regimens."
               },
               {
                 "label": "Limitations",
-                "body": "Cutpoints (age 45, 25% nodal ratio) were picked by examining significance, so they need external validation. Top-tier estimates rest on n=19, and HER2 status is absent."
+                "body": "Excluding the 296 PMRT recipients likely removed higher-risk pts, biasing baseline risk downward. The **>25% nodes positive** ratio depends on ALND node yield, and its ILRR HR CI (0.99-4.05) touches 1. The ER status row in Table 1 shows a transposition in the source."
               },
               {
                 "label": "Discussion",
-                "body": "The authors propose **<10% LRR as low risk (spare PMRT)** and **>30% as high risk (PMRT justified)**, with **15-20%** as the threshold for discussing PMRT. The model sorts pts by baseline risk but cannot show that PMRT benefit scales with it."
+                "body": "Authors propose **<10%** 10y LRR as a low-risk group that may be spared PMRT, **>30%** as justifying it, and **15-20%** as the threshold for discussion. The model supports considering PMRT in all women <45 and recommending it when >25% of nodes are positive."
               }
             ],
-            "interpretation": "This paper belongs to the generation of work that tried to settle the N1 PMRT question after the Danish and British Columbia randomized trials. Those trials showed a survival gain with PMRT in women receiving systemic therapy, but their no-RT arms carried locoregional failure rates that many centres did not recognise in their own patients. The authors frame the discrepancy explicitly. DBCG 82b and 82c reported roughly 30% LRR at 10 years without PMRT, while the systemic-therapy trial cohorts clustered at 12-20%. This series lands at the lower end, with a 15.9% LRR±SDR. That supports the long-standing suspicion that the Danish control arms were inflated by limited axillary dissection, which is why routine PMRT for every N1 patient never became universal.\n\nThe useful contribution is the stratification, not the pooled rate. Four factors held up independently: age under 45, more than a quarter of dissected nodes positive, medial location, and ER-negative disease. When stacked, they produce a spread from 10.8% in older women with a low nodal ratio to 58.0% in young women with a high one. Read against the authors' framework, the claim is that the absolute benefit of PMRT tracks the baseline risk. They assume a roughly two-thirds relative reduction and use the EBCTCG ratio of about one survival event saved per four locoregional events. That framework is reasonable, but the cohort never tests it. Nobody here received RT, so the benefit side of the argument is imported wholesale, and the paper is really a prognostic model wearing a predictive conclusion.\n\nSeveral methodological choices should temper confidence. The age cutpoint was chosen because it gave the strongest univariate separation, and the classification breakpoints were picked by inspecting significance and subgroup size. Both practices overfit, and the model has no external validation set. The highest-risk cell holds 19 women, so its 58.0% estimate is fragile. Excluding the 296 patients who did receive RT makes the cohort a selected remainder: whatever drove clinicians to irradiate those women (likely adverse features) has been subtracted. That would bias the residual risk estimates downward, which is the opposite direction from the paper's argument and somewhat reassuring for its low-risk tier.\n\nTransfer to current practice is the biggest problem. Every patient had a full axillary dissection with a median of 10 nodes removed. The nodal-ratio factor depends on that denominator and has no clean equivalent after sentinel node biopsy alone. Systemic therapy was AC, CMF, and tamoxifen, with no taxanes, no trastuzumab, no aromatase inhibitors, and no HER2 data. Modern systemic therapy likely lowers baseline LRR across the board, which would push more of this cohort's moderate-risk tier toward the authors' proposed omission threshold. SUPREMO was designed to answer this intermediate-risk question prospectively, and its results, rather than this model, are the better anchor for an omission discussion today.\n\nThe pattern of failure deserves more attention than it usually gets. Regional failures were mostly axillary despite full dissection, a third were clavicular, and internal mammary failures were rare. When PMRT is chosen for a selected N1 patient, that pattern supports supraclavicular coverage and gives little direct support for routine IMN treatment, though IMN failures are notoriously underdetected clinically. The paper is best used as a historical calibration of untreated risk, not as a selection tool for a contemporary SLNB-staged patient.",
+            "interpretation": "The value of this cohort is that it measures what happens to pT1-T2, 1-3 node-positive women when nobody irradiates them, in a population treated with adjuvant systemic therapy almost universally. That baseline is what the absolute benefit of PMRT depends on. The randomized evidence for PMRT in this group came largely from DBCG 82b and 82c, where no-PMRT locoregional recurrence ran near 30% at 10 years. Here it is 12.7% isolated and 15.9% with simultaneous distant recurrence, closer to the BCCA randomized trial and to the systemic-therapy trial cohorts the authors cite. If the relative reduction from RT is roughly constant, as the authors assume, a lower baseline shrinks the absolute gain, and the argument for routine PMRT in every 1-3 N+ woman weakens. This paper turns that observation into a selection tool.\n\nThe tool itself deserves less confidence than the baseline does. The breakpoints were chosen by looking at which splits gave the strongest statistical separation with workable subgroup sizes, inside the same dataset, with no validation cohort. Data-driven cutpoints tend to overstate separation, and the most striking cell, 58.0% LRR±SDR in women under 45 with more than 25% of nodes positive, rests on 19 women. The more transferable result is the multivariable model: age under 45, nodal ratio above 25%, medial location and ER-negative status hold up as independent predictors on both endpoints, with hazard ratios in the 2 to 3.7 range. Even there, the nodal-ratio estimate for isolated LRR has a lower bound of 0.99.\n\nTwo selection features pull in opposite directions. Excluding the 296 women who did receive RT probably removed pts their treating physicians judged higher risk, which would push the reported baseline down and make the low-risk group look safer than an unselected population. Against that, the cohort was staged with full axillary dissection and a median of 10 nodes removed, which is more thorough than much of the trial data the authors compare against and should reduce understaging. The nodal-ratio factor depends on dissection yield, so it does not carry over to a sentinel-node-only axilla, where the denominator is small by design.\n\nThe era matters more than the paper could anticipate. Systemic therapy was AC, CMF or FAC plus tamoxifen. Better systemic control lowers locoregional recurrence on its own, so the risk-group estimates here likely overstate what a comparable pt faces now, and the model's thresholds would need recalibrating rather than applying as printed. SUPREMO was designed to answer the 1-3 node-positive PMRT question prospectively, and its result is the natural test of whether risk-adapted selection of this kind holds.\n\nFor the RT reader, the pattern-of-failure data carry practical weight: a third of regional recurrences were clavicular and very few involved the internal mammary chain, which bears on target volumes when PMRT is chosen. The paper also gives a usable framework for counselling. Below about 10% the morbidity of PMRT is hard to justify; above about 30% it is hard to withhold; the middle band is a discussion. That framing has aged better than any specific cutpoint, and it is where this study still informs a decision.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Clavicular sites made up 33% of regional failures and internal mammary 3%, which favors SCV coverage over routine IMN coverage when PMRT is chosen in N1 disease. The 10.8% LRR±SDR in pts ≥45 with ≤25% nodes positive defines an omission-discussion tier, though only for ALND-staged axillae."
+              "radonc": "Clavicular nodes carried 19 of 57 regional recurrences (33%) versus 2 for internal mammary, pointing PMRT coverage at the supraclavicular field. Age <45, >25% nodes positive, medial location and ER-negative status each moved 10y LRR above 20%, giving a factor-based frame for the 1-3 N+ PMRT discussion."
             },
             "open_questions": [
-              "Does the nodal-ratio factor translate to SLNB-only staging?",
-              "Baseline LRR in N1 disease with modern taxane and HER2-directed therapy",
-              "External validation of the age 45 and 25% nodal-ratio cutpoints"
+              "Does the risk model validate with modern systemic therapy?",
+              "Nodal-ratio factor usable after SLNB-only axillary staging?",
+              "Do genomic risk scores refine PMRT selection in 1-3 N+?"
             ],
             "consort": null,
             "modality": "radiation",
             "intent": "curative",
             "methodology": "retrospective",
             "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT05440149",
-                "brief_title": "The Postoperative Radiotherapy in N1 Breast Cancer Patients",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 1106,
-                "primary_completion_date": "2026-12",
-                "brief_summary": "This study is a multicenter, randomized, phase 3 clinical trial in patients with breast cancer, randomizing radiotherapy group (postmastectomy radiation therapy (PMRT)/whole breast irradiation plus regional radiotherapy (WBI+regional RT) versus and no PMRT/WBI alone group. This is a non-inferiority study aiming that there is no significant difference in the 7-year disease-free survival rate between the two groups.",
-                "conditions": [
-                  "Radiotherapy",
-                  "Breast Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "No PMRT for mastectomy / No regional RT for BCS",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "PMRT for mastectomy / WBI + Regional RT for BCS",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patients aged 19 years or older.\n* A female patient who underwent breast-conserving surgery or mastectomy for invasive breast cancer.\n* Patient with stage pN1 after surgery on histopathologic examination.\n\n  * However, if mastectomy was performed, 5 or more nodes should be…",
-                "answers_question": "Baseline LRR in N1 disease with modern taxane and HER2-directed therapy",
-                "relevance_phrase": "phase 3 PMRT vs no PMRT in pN1, 7-yr DFS NI"
-              }
-            ],
+            "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "postmastectomy radiotherapy sentinel node breast",
-                "postmastectomy radiotherapy omission breast"
+                "postmastectomy radiotherapy node-positive breast",
+                "sentinel node breast regional radiotherapy",
+                "genomic score breast radiotherapy omission"
               ],
-              "queries_failed": [],
-              "candidates_returned": 2,
-              "fetched_at": "2026-10-20T08:06:46.149Z",
-              "rerank_outcome": "picked_N"
+              "queries_failed": [
+                {
+                  "term": "genomic score breast radiotherapy omission",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 21,
+              "fetched_at": "2026-10-21T08:03:23.912Z",
+              "rerank_outcome": "abstained"
             },
             "source_ids": [
               {
@@ -798,123 +704,209 @@
             ]
           },
           {
-            "name": "21-Gene Recurrence Score and Locoregional Recurrence in Node-Positive Breast Cancer (SWOG 8814 analysis)",
-            "tldr": "10-yr LRR 9.7% vs 16.5% for RS <18 vs ≥18 (P=.02) in postmenopausal ER/PR+ node-positive pts; signal confined to N1 after mastectomy alone.",
+            "name": "CPS+EG staging and local-regional recurrence after neoadjuvant chemotherapy",
+            "tldr": "5-yr freedom from LRR by CPS+EG score spanned 71% to 99%, vs 86% to 97% by clinical or pathologic stage, in 1697 pts after NACT.",
             "details": [
-              "🔍 Retrospective translational cohort from phase 3 SWOG S8814 (tamoxifen or CAF-T arms), N=316 with RS",
-              "🔍 Postmenopausal, ER/PR+, node-positive; excluded mastectomy + RT (n=37) and BCS without RT (n=9)",
-              "📊 1° prespecified model (continuous RS) not significant: HR 1.14 per 10-point RS (95% CI 0.97-1.35), P=.11",
+              "🔍 Retrospective MD Anderson cohort, N=1697, treated 1997 to 2005, prospectively maintained database",
+              "🔍 CPS+EG = clinical stage + post-NACT pathologic stage + ER status + nuclear grade (AJCC 7th)",
+              "⚠️ Excluded pts given neoadjuvant trastuzumab and pts given preoperative RT",
               {
-                "text": "📊 10-yr actuarial LRR by RS category (low <18 vs intermediate/high ≥18)",
+                "text": "🔍 Median f/u 51 mo (range 4 to 113)",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 Crude LRR by local therapy (overall 6.5%, N=110)",
                 "table": {
                   "columns": [
-                    "Subset",
-                    "RS <18",
-                    "RS ≥18",
-                    "P"
+                    "Local therapy",
+                    "N",
+                    "LRR events",
+                    "Crude LRR"
                   ],
                   "rows": [
                     [
-                      "All pts (n=316)",
-                      "9.7%",
-                      "16.5%",
-                      ".02"
+                      "Breast conserving therapy",
+                      "656",
+                      "36",
+                      "5.5%"
                     ],
                     [
-                      "Mastectomy, no RT (n=252)",
-                      "7.7%",
-                      "16.8%",
-                      ".03"
+                      "Mastectomy alone",
+                      "297",
+                      "24",
+                      "8.1%"
                     ],
                     [
-                      "Mastectomy, no RT, 1-3 nodes (n=165)",
-                      "1.5%",
-                      "11.1%",
-                      ".051"
+                      "Mastectomy + PMRT",
+                      "744",
+                      "50",
+                      "6.7%"
+                    ]
+                  ]
+                },
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 5-yr LRR-free survival by CPS+EG score",
+                "table": {
+                  "columns": [
+                    "CPS+EG score",
+                    "5-yr LRR-free (%)",
+                    "95% CI (%)"
+                  ],
+                  "rows": [
+                    [
+                      "0",
+                      "97.8",
+                      "91.3–99.5"
                     ],
                     [
-                      "Mastectomy, no RT, ≥4 nodes",
-                      "25.9%",
-                      "27.0%",
-                      ".27"
+                      "1",
+                      "98.6",
+                      "95.8–99.5"
+                    ],
+                    [
+                      "2",
+                      "95.3",
+                      "92.4–97.1"
+                    ],
+                    [
+                      "3",
+                      "93.5",
+                      "90.2–95.7"
+                    ],
+                    [
+                      "4",
+                      "85.4",
+                      "79.8–89.6"
+                    ],
+                    [
+                      "5",
+                      "79.0",
+                      "67.5–86.8"
+                    ],
+                    [
+                      "6",
+                      "70.8",
+                      "49.8–84.3"
                     ]
                   ]
                 }
               },
-              "📐 MVA: RS ≥18 HR 2.36 (95% CI 1.02-5.45), P=.04",
-              "📐 MVA: ≥4 nodes HR 3.37 (95% CI 1.69-6.72), P=.001",
-              "📊 By nodal burden, whole cohort: 10-yr LRR 9.0% (1-3 nodes) vs 24.4% (≥4), P=.002",
-              "⚠️ RS 18 cut point confirmed only in post hoc exploration; subset analyses not adjusted for multiplicity",
-              "⚠️ Mastectomy-alone cohort is physician-selected: higher-risk pts received PMRT and were excluded",
-              "⚠️ BCS + RT subgroup: only 6 events (2/29 vs 4/35), underpowered for RS comparison",
-              "🔗 vs NSABP B-28 (1-3 nodes, all chemo): 10-yr LRR 2.4% / 4.1% / 6.0% for low / intermediate / high RS",
-              "🔍 Median f/u 8.7 yr (IQR 7.0-10.2) in pts without LRR"
+              {
+                "text": "📊 PMRT-indicated cohort (cStage III or ypN+, N=1103): 5-yr LRR-free survival by local therapy",
+                "table": {
+                  "columns": [
+                    "Subgroup",
+                    "BCT N",
+                    "Mastectomy alone N",
+                    "Mastectomy + PMRT N",
+                    "P"
+                  ],
+                  "rows": [
+                    [
+                      "CPS+EG 0-2 (N=358)",
+                      "114",
+                      "72",
+                      "172",
+                      "0.73"
+                    ],
+                    [
+                      "CPS+EG 3-6 (N=745)",
+                      "202",
+                      "51",
+                      "492",
+                      "0.0006"
+                    ]
+                  ]
+                },
+                "source_tier": "figure"
+              },
+              "📊 MVA: CPS+EG ≥3, ≥4 and ≥6 tied to higher LRR risk; ≥5 nonsignificant trend",
+              "📊 MVA: mastectomy alone significantly higher LRR risk vs BCT; PMRT marginally lower",
+              "⚠️ Table 5 row-level HRs not reliably attributable in source extraction; omitted here",
+              {
+                "text": "⚠️ Omission signal rests on 72 mastectomy-alone pts in the CPS+EG ≤2 subset",
+                "source_tier": "figure"
+              },
+              "⚠️ Confounding by indication: local therapy chosen by pt, surgeon and radonc, not randomized",
+              "⚠️ Text says mastectomy alone had HIGHER LRR-free survival in CPS+EG ≥3, contradicting the MVA; per-arm rates not in source text",
+              {
+                "text": "⚠️ Overall LRR given as 6.5% in Results and 6.1% in Discussion",
+                "source_tier": "figure"
+              },
+              "⚠️ RT dose, fractionation and target volumes not reported in source",
+              {
+                "text": "🔗 vs NSABP B-18/B-27 (cited): 10-yr LRR 10.3% BCT, 12.3% mastectomy, but no PMRT given",
+                "source_tier": "figure"
+              }
             ],
             "figures": [],
             "nct": null,
-            "doi": "10.1001/jamaoncol.2019.5559",
+            "doi": "10.1097/sla.0000000000001492",
             "tweet_ids": [
-              1000000132
+              1000000130
             ],
-            "slug": "rs-locoregional-recurrence-node-positive",
+            "slug": "cps-eg-lrr-post-neoadjuvant",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective subset of SWOG S8814; prespecified continuous-RS model was null (P=.11), so the dichotomized signal and nodal subsets driving the PMRT read are exploratory.",
-              "audience": "Postmenopausal ER/PR+ node-positive breast, mastectomy without PMRT"
+              "rationale": "Retrospective single-institution cohort; the PMRT-omission claim rests on a non-randomized subgroup with confounding by indication and only 72 mastectomy-alone pts.",
+              "audience": "Breast cancer post-NACT without trastuzumab, cStage III or ypN+"
             },
-            "significance": "In N1 disease treated by mastectomy alone, 10-yr LRR was 1.5% with RS <18 vs 11.1% with RS ≥18 (P=.051), while ≥4 nodes ran 25.9% vs 27.0% regardless of RS. That splits the PMRT question: RS may help select N1 pts for omission (the TailorRT question), but gives no route to omit PMRT in N2+.",
-            "monday_clinic": "In a postmenopausal ER/PR+ N1 pt after mastectomy with an RS already in hand, a low score supports a TailorRT-style omission discussion on trial rather than off it; with ≥4 nodes the RS does not change the PMRT decision.",
-            "primary_endpoint": {
-              "name": "Locoregional recurrence (continuous RS)",
-              "klass": "local-control",
-              "stat_value": "HR 1.14 per 10-point RS",
-              "stat_detail": "95% CI 0.97-1.35, P=.11, not significant"
-            },
+            "significance": "The PMRT read is in the CPS+EG ≤2 slice of the PMRT-indicated cohort (cStage III or ypN+): 5-yr LRR-free survival did not differ by local therapy (P=0.73), but only 72 pts had mastectomy alone. ER-positive or low-grade biology drives those low scores, so the proposed de-escalation gate is biology on top of residual nodal stage.",
+            "monday_clinic": "In cStage III or ypN+ disease after anthracycline/taxane NACT with ER-positive or low-grade biology (CPS+EG ≤2), this is hypothesis-level support for discussing PMRT omission; it does not extend to pts treated with neoadjuvant trastuzumab or to CPS+EG ≥3.",
+            "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Retrospective translational analysis of the phase 3 **SWOG S8814** trial (enrolled 1989-1995), restricted to the tamoxifen-alone and CAF-T arms with banked tissue. RT use and LRR were abstracted retrospectively from trial records; reported per REMARK."
+                "body": "**Retrospective** analysis of two MD Anderson cohorts used to build (932 pts, 1997 to 2003) and validate (804 pts, 2004 to 2005) CPS+EG; 39 excluded, **N=1697**. Median f/u **51 mo**."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**Postmenopausal, ER/PR-positive, node-positive** women; final cohort **N=316** after excluding mastectomy + RT (n=37), BCS without RT (n=9) and unknown surgery (n=5). 210 (66.5%) had 1-3 positive nodes; 124 (39.2%) received tamoxifen only."
+                "body": "All pts received **neoadjuvant anthracycline and/or taxane chemotherapy**; median age 50. **Neoadjuvant trastuzumab and preoperative RT excluded**; 20 pts missing ER or grade also excluded."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Local therapy: BCT 656 (39%), mastectomy alone 297 (17%), mastectomy + PMRT 744 (44%). Institutional PMRT indications were **clinical stage III, ypN+, or select cT1/T2N1 with high-risk features**. Dose, fractionation and fields **not reported in source**."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary:** LRR (breast, chest wall, axillary, infraclavicular, supraclavicular or IMN), with RS modeled as a continuous linear term. **Secondary:** RS <18 vs ≥18, chosen owing to event numbers."
+                "body": "**LRR** = invasive cancer in ipsilateral breast, chest wall or regional nodes, counted regardless of distant timing. Objectives: CPS+EG vs stage for LRR stratification, and whether a score threshold could identify pts safely omitting PMRT."
               },
               {
                 "label": "Results",
-                "body": "The prespecified continuous model was **not significant** (HR 1.14 per 10 points, P=.11). In MVA, **RS ≥18 (HR 2.36, P=.04)** and **≥4 nodes (HR 3.37, P=.001)** were independent; subset LRR rates in the table above."
+                "body": "5-yr freedom from LRR **71% to 99%** by CPS+EG vs **86% to 97%** by clinical or pathologic stage. In the PMRT-indicated cohort with **CPS+EG ≤2**, local therapy type made **no difference** (P=0.73)."
               },
               {
                 "label": "vs leading data",
-                "body": "Direction matches **NSABP B-28**, where RS was also independently associated with LRR, but B-28 N1 rates were low at every RS (2.4% / 4.1% / 6.0%). **MA.20** and **EORTC 22922** established a DFS benefit from regional nodal RT despite low LRR rates, which is why LRR risk alone may not settle omission."
+                "body": "NSABP B-18/B-27 (cited) reported 10-yr LRR of 10.3% with BCT and 12.3% with mastectomy but gave no PMRT, so cannot address it. The MD Anderson Prognostic Index omitted ER and grade. NSABP B-51 later randomized regional nodal RT in cN+ → ypN0, a different population from the ypN+ pts here."
               },
               {
                 "label": "Applies to",
-                "body": "Represents postmenopausal ER/PR+ pts with 1-3 positive nodes after mastectomy, treated with tamoxifen or anthracycline-based chemo then tamoxifen. Does not represent premenopausal, ER-negative, or modern taxane / aromatase inhibitor-treated pts, nor the BCS setting (6 events)."
+                "body": "Represents non-trastuzumab NACT pts with cStage III or ypN+ disease and ER-positive or low-grade biology. Does not represent HER2+ pts treated with neoadjuvant anti-HER2 therapy or modern immunotherapy-containing regimens."
               },
               {
                 "label": "Limitations",
-                "body": "The mastectomy-alone group is the **physician-selected lower-risk** stratum, since higher-risk pts got PMRT and were excluded, so the ≥4-node no-RT subset is unusual. No RT technique, target volume or dose data, and subset event counts are not reported, so the **1.5% N1 low-RS rate rests on few events**."
+                "body": "Prose direction for the CPS+EG ≥3 subgroup (mastectomy alone favored) contradicts the MVA; overall LRR is reported as both **6.5%** and **6.1%**. Median f/u of **51 mo** is short for ER-positive disease, the biology driving the favorable scores."
               },
               {
                 "label": "Discussion",
-                "body": "RS behaves as a **prognostic marker for LRR** alongside nodal count, not a substitute for it. The authors' read: keep PMRT for pN2a at any RS and N1 with RS ≥18; enroll low-RS N1 pts on **TailorRT (MA.39)** rather than omitting off trial."
+                "body": "The stratification claim is sound and adds biology to anatomic staging for LRR. The omission claim is a null comparison in a small, selected subgroup with no equivalence margin, so it frames a trial question rather than settling one."
               }
             ],
-            "interpretation": "The appeal of this analysis is that it asks a radiation question of a systemic-therapy trial whose design happened to leave a natural no-PMRT cohort behind. SWOG S8814 allowed PMRT at physician discretion, so a large share of mastectomy pts never received it, and their LRR becomes an estimate of the untreated locoregional risk that PMRT would be addressing. Read that way, the most useful number is not the headline dichotomy for the whole cohort but the split by nodal burden: in N1 pts after mastectomy alone, low RS sat at 1.5% versus 11.1% for RS 18 or higher, while with 4 or more nodes the RS made no difference (25.9% vs 27.0%). The assay appears to discriminate only where nodal burden has not already declared the risk.\n\nConfidence should be tempered by the analysis hierarchy. The prespecified primary analysis, RS as a continuous term, did not reach significance. The positive result comes from the secondary dichotomized model, with the 18 cut point endorsed only by post hoc exploration, and the N1 mastectomy result itself is an unadjusted subset with a P value at the threshold. That combination is the classic shape of a finding that shrinks on replication. The exclusion logic adds a second layer: the higher-risk mastectomy pts were the ones offered PMRT and were removed, so the no-RT group is enriched for physician-judged favorable disease, and the 4-plus-node pts left in it are an atypical, selected minority. The near-identical 25.9% and 27.0% rates there still argue strongly against using RS to omit PMRT in N2 disease, because even a favorably selected group recurred at that rate.\n\nAgainst NSABP B-28 the picture is consistent in direction but not in magnitude. B-28 also found RS independently associated with LRR, yet among its 1-3 node pts LRR stayed low at every RS, so in that cohort the absolute stakes of the RS split were small. B-28 differed in two ways that matter: no PMRT was permitted, and every pt received chemotherapy, whereas S8814 included a tamoxifen-alone arm. The higher N1 rate in RS 18 or higher pts here may partly reflect less effective systemic therapy, which is the second era problem: CAF and tamoxifen in a 1989-1995 cohort, before taxanes, aromatase inhibitors and modern axillary staging. Absolute LRR in a contemporary N1 pt is likely lower across the board, which narrows any RS-attributable difference.\n\nThe deeper reason this does not settle PMRT omission is that LRR is not the whole justification for nodal RT. MA.20 and EORTC 22922 both showed a DFS benefit from regional nodal irradiation in populations where LRR was already low, so a marker that predicts low LRR does not by itself predict that RT adds nothing. That is exactly the gap TailorRT was built to close, randomizing low-RS N1 pts. Until it reads out, the defensible use of this paper is narrower than its abstract: RS 18 or higher in N1 is a reason not to omit, and RS in N2 is not a reason to omit at all.",
+            "interpretation": "This paper takes on a question randomized data had not answered when it was written: whether a pt with clinical stage III or residual node-positive disease after neoadjuvant chemotherapy and mastectomy needs PMRT. The authors argue that anatomy alone overstates risk for a subset whose tumors are ER-positive or lower grade, and that adding those two biologic variables to clinical and pathologic stage widens the spread of 5-yr freedom from LRR to 71% to 99%, against 86% to 97% for either staging axis alone. That stratification claim is the paper's strongest contribution. It uses the whole 1697-pt cohort, it holds up on multivariate analysis, and it carries a scoring system the same group had already built and validated for disease-specific survival over to a local-regional endpoint.\n\nThe PMRT-omission claim is weaker, and the reason is structural rather than statistical. Local therapy was chosen by the pt, surgeon and radiation oncologist under an institutional policy that routed clinical stage III and ypN+ pts to PMRT. In the CPS+EG ≤2 slice of the PMRT-indicated cohort, the pts who did not get PMRT were pts someone had already judged to be lower risk, and there were only 72 of them. A null log-rank result (P=0.73) in a 358-pt group with few events shows no detectable difference; it does not show equivalence. No confidence interval on the between-arm difference and no non-inferiority margin are given, and confounding by indication runs in the direction that flatters omission.\n\nThe reporting also needs a careful read. For the CPS+EG ≥3 subgroup, the text states that LRR-free survival was higher with mastectomy alone, which conflicts with the multivariate model where mastectomy alone carried significantly higher LRR risk and PMRT was marginally protective. The figure and text agree on significance (0.0006 and <0.001) but the prose direction looks inverted. The crude overall LRR is given as 6.5% in Results and 6.1% in Discussion. Neither changes the central argument, but both are reasons to want the per-arm rates before quoting this subgroup in a tumor board.\n\nAgainst the literature the authors cite, the pooled NSABP B-18/B-27 experience had higher LRR (10.3% with BCT, 12.3% with mastectomy) but did not deliver PMRT, so it cannot inform the omission question, and the MD Anderson Prognostic Index scored anatomic and pathologic features without ER or grade. NSABP B-51 later tested regional nodal RT prospectively, but in cN+ pts converted to ypN0; the residual ypN+ pts at the center of this paper sit outside that trial, so for them this retrospective signal remains close to the best available framing.\n\nTransferability is the main constraint for a current reader. The cohort was treated from 1997 to 2005 with anthracycline and taxane regimens, and pts given neoadjuvant trastuzumab were excluded, so HER2-directed and immunotherapy-containing regimens, which change both pCR rates and the biology of residual disease, are not represented. RT technique is not described. The 51-month median follow-up matters most here: the low-score group is defined largely by ER-positivity, the biology in which local-regional events accrue late. The way this result would turn out wrong is late recurrence beyond 5 years in exactly the pts it proposes to spare.",
             "relevant_specialties": [
-              "radonc"
+              "radonc",
+              "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "In N1 disease after mastectomy alone, 10-yr LRR was 1.5% with RS <18 vs 11.1% with RS ≥18 (P=.051), while ≥4 nodes ran 25.9% vs 27.0% regardless of RS. RS may help select N1 pts for a PMRT omission trial, but gives no route to omit PMRT in N2+."
+              "radonc": "The omission signal sits in ypN+ or cStage III pts with CPS+EG ≤2 (N=358, P=0.73 across local therapies), the group PMRT policy treats by default. Field design, dose and target volumes are not reported, so nothing here speaks to nodal coverage or de-escalated volumes, only to the yes/no PMRT decision.",
+              "surgonc": "Mastectomy alone carried the highest crude LRR (8.1% vs 5.5% BCT) and significantly higher LRR risk on MVA vs BCT. After NACT, choosing mastectomy does not reduce local-regional risk on its own; BCT outcomes held across the cohort."
             },
             "open_questions": [
-              "Is PMRT omission safe in low-RS N1 disease?",
-              "Does RS predict LRR with modern endocrine and taxane therapy?",
-              "Does RS predict regional nodal RT DFS benefit, not just LRR?"
+              "Is PMRT omission safe in ypN+ pts with CPS+EG ≤2 beyond 5 years?",
+              "Does CPS+EG stratify LRR after modern anti-HER2 or immunotherapy NACT?",
+              "Prospective validation of biology-based PMRT selection after NACT"
             ],
             "consort": null,
             "modality": "radiation",
@@ -923,100 +915,120 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT06464913",
-                "brief_title": "Randomized Phase II Trial: Chest Wall RT Omission After Prosthetic Reconstruction",
-                "overall_status": "RECRUITING",
+                "nct": "NCT01872975",
+                "brief_title": "Standard or Comprehensive Radiation Therapy in Treating Patients With Early-Stage Breast Cancer Previously Treated With Chemotherapy and Surgery",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
-                  "PHASE2"
+                  "NA"
                 ],
-                "enrollment_count": 152,
-                "primary_completion_date": "2028-09",
-                "brief_summary": "The goal of this randomized Phase II clinical trial is to test the effects of omitting chest wall radiotherapy (RT) after prosthetic reconstruction in early-stage breast cancer patients. The main questions it aims to answer are:\n\n* Can omitting chest wall RT after prosthetic reconstruction reduce the failure rate of breast reconstruction without significantly increasing the local recurrence rate?\n* Does this approach ensure an improvement in the quality of life for patients without sacrificing…",
+                "enrollment_count": 1636,
+                "primary_completion_date": "2023-09",
+                "brief_summary": "This randomized phase III trial studies standard or comprehensive radiation therapy in treating patients with early-stage breast cancer who have undergone surgery. Radiation therapy uses high-energy x rays to kill tumor cells. It is not yet known whether comprehensive radiation therapy is more effective than standard radiation therapy in treating patients with breast cancer",
                 "conditions": [
-                  "Breast Neoplasms"
+                  "Stage IB Breast Cancer",
+                  "Stage II Breast Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "With or without chest wall RT",
+                    "name": "regional nodal XRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "chestwall XRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "WBI",
                     "type": "RADIATION"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Undergoes prosthetic reconstruction (including cold knife one-step prosthetic reconstruction or two-step expander-prosthetic reconstruction.);\n* Histologically confirmed invasive breast cancer patients with stage T1-2N1M0;\n* ECOG score of 0-1;\n* Indications for neoadjuvant…",
-                "answers_question": "Is PMRT omission safe in low-RS N1 disease?",
-                "relevance_phrase": "randomized chest wall RT omission, T1-2N1 reconstruction"
+                "eligibility_brief": "Inclusion Criteria:\n\n* The patient must have signed and dated an Institutional Review Board (IRB)-approved consent form that conforms to federal and institutional guidelines\n* The patient must have an Eastern Cooperative Oncology Group (ECOG) performance status of 0 or 1\n* Patient must have…",
+                "answers_question": "Prospective validation of biology-based PMRT selection after NACT",
+                "relevance_phrase": "randomized regional nodal XRT vs none in ypN0 after NAC"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "recurrence score breast radiotherapy omission",
-                "genomic assay breast regional nodal irradiation"
+                "postmastectomy radiation neoadjuvant breast",
+                "regional nodal irradiation neoadjuvant breast"
               ],
-              "queries_failed": [
-                {
-                  "term": "genomic assay breast regional nodal irradiation",
-                  "reason": "empty"
-                }
-              ],
-              "candidates_returned": 15,
-              "fetched_at": "2026-10-20T08:06:49.800Z",
+              "queries_failed": [],
+              "candidates_returned": 22,
+              "fetched_at": "2026-10-21T08:03:46.270Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {
                 "type": "paper",
-                "id": 132
+                "id": 130
               }
             ]
           },
           {
             "name": "Long-term impact of regional nodal irradiation after neoadjuvant systemic therapy",
-            "tldr": "Adjusted 10-yr LRR HR 0.497 (0.279-0.884) and DR HR 0.731 with RNI after NAT in cN+ breast; univariate LRR 9.4% vs 8.1%, P=.62.",
+            "tldr": "Adjusted LRR HR 0.497 and DR HR 0.731 with RNI after NAT in cN+ stage II-III breast; unadjusted 10-yr LRR 9.4% vs 8.1%, P=.62.",
             "details": [
-              "🔍 Single-institution retrospective (MDACC), N=1289, cytologically confirmed node-positive stage II-III, NAT 1989-2007",
-              "🔍 RNI given in 1080/1289 (83.8%), at the discretion of the treating radiation oncologist",
-              "🔍 Median f/u 10.2 yr after definitive surgery",
+              "🔍 Single-institution retrospective (MD Anderson), N=1289, treated 1989-2007",
+              "🔍 Stage II-III, cytologically confirmed axillary mets, NAT then BCS or mastectomy with ALND",
+              "🔍 RNI given to 1080/1289 (83.8%), at treating radiation oncologist's discretion",
+              "📊 Median f/u 10.2 yrs after definitive surgery; 162/1289 (12.6%) had LRR",
+              "📊 Axillary pCR in 368/1289 (28.5%); 10-yr LRR 9.7% no pCR vs 4.8% pCR, P=.006",
               {
-                "text": "📊 RNI effect: univariate 10-yr cumulative incidence vs multicovariate Cox",
+                "text": "📊 Univariate 10-yr cumulative incidence, no RNI vs RNI",
                 "table": {
                   "columns": [
                     "Endpoint",
-                    "Univariate 10-yr (no RNI vs RNI)",
-                    "Multicovariate HR (95% CI)"
+                    "No RNI",
+                    "RNI",
+                    "P"
                   ],
                   "rows": [
                     [
-                      "LRR",
-                      "9.4% vs 8.1%, P=.62",
-                      "0.497 (0.279-0.884), P=.02"
+                      "LRR, all pts",
+                      "9.4%",
+                      "8.1%",
+                      ".62"
                     ],
                     [
-                      "Any DR",
-                      "31.3% vs 36.5%, P=.16",
-                      "0.731 (0.541-0.988), P=.04"
+                      "LRR, axillary pCR",
+                      "5.5%",
+                      "4.6%",
+                      ".98"
                     ],
                     [
-                      "DSS / OS",
-                      "Not significant",
-                      "Not significant"
+                      "LRR, no axillary pCR",
+                      "12.5%",
+                      "9.3%",
+                      ".24"
+                    ],
+                    [
+                      "DR, all pts",
+                      "31.3%",
+                      "36.5%",
+                      ".16"
+                    ],
+                    [
+                      "DR, axillary pCR",
+                      "20.3%",
+                      "15.9%",
+                      ".25"
+                    ],
+                    [
+                      "DR, no axillary pCR",
+                      "40.4%",
+                      "43.4%",
+                      ".68"
                     ]
                   ]
                 }
               },
-              "📊 Without axillary pCR: adjusted LRR HR 0.476 (0.253-0.898), P=.02",
-              "⚠️ No multicovariate analysis for axillary pCR: too few LRR events. The B-51 question goes untested here",
-              "📊 HER2+ on trastuzumab: adjusted DR HR 0.237 (0.109-0.517), P=.0003",
-              {
-                "text": "📊 Axillary pCR 368/1289 (28.5%), prognostic on univariate analysis",
-                "subdetails": [
-                  "10-yr LRR 9.7% no pCR vs 4.8% pCR, P=.006",
-                  "10-yr DR 43.0% vs 17.0%, P<.001"
-                ]
-              },
-              "🔍 RT: median breast/CW 50 Gy/25 fx, then median boost 10 Gy/5 fx; multi-isocentric technique",
-              "⚠️ Control arm is mostly no RT: 142/209 (67.9%) of no-RNI pts got no RT at all",
-              "⚠️ Tangent field details unavailable, so high-tangent incidental nodal dose in the 'no RNI' group is unknown",
-              "⚠️ Univariate signal null or reversed for DR. The benefit appears only after adjustment, so confounding by indication is likely",
-              "⚠️ HER2+ pts without trastuzumab were excluded from all multicovariate models"
+              "📐 Multicovariate Cox, RNI vs no RNI (HER2+ without trastuzumab excluded)",
+              "📊 RNI did not affect DSS or OS on univariate or multicovariate analysis",
+              "⚠️ Univariate null flips to benefit only after adjustment: confounding by indication (RNI pts younger, LVSI+, higher cT/cN)",
+              "⚠️ LRR MVA in axillary pCR pts not attempted: too few events (n=19)",
+              "⚠️ Tangent details unavailable; high-tangent coverage in 'no RNI' pts unknown",
+              "⚠️ 51/162 LRRs excluded from LRR analysis because DM preceded LRR (competing risk)",
+              "🔗 Authors frame result as consistent with EORTC 22922 and MA.20 RNI benefit after adjuvant chemo"
             ],
             "figures": [],
             "nct": null,
@@ -1027,57 +1039,61 @@
             "slug": "rni-after-neoadjuvant-mdacc",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective, RNI by physician discretion. The benefit appears only on adjusted analysis and is null on univariate. The comparator is mostly no RT, and it can't test RNI omission in ypN0.",
-              "audience": "cN+ (cytology-proven) stage II-III breast, post-NAT, BCS or mastectomy + ALND"
+              "rationale": "Retrospective, discretionary RNI with marked baseline imbalance; benefit appears only after covariate adjustment, univariate null. HER2+ trastuzumab DR signal is a subgroup estimate.",
+              "audience": "cN+ stage II-III breast, NAT then BCS/mastectomy with ALND"
             },
-            "significance": "Residual nodal disease is where the adjusted LRR benefit holds (HR 0.476 without axillary pCR). In the ypN0 group, too few events allowed no model, so this supports RNI for ypN+ and says nothing on omission after nodal pCR. Two-thirds of the no-RNI group had no RT at all, so the HRs likely overstate RNI's increment over breast/chest wall RT.",
-            "monday_clinic": "In cN+ breast with residual axillary disease after NAT, this supports elective nodal coverage; it does not inform omitting RNI after conversion to ypN0, where the adjusted model was never fit.",
+            "significance": "The unadjusted 10-yr LRR curves barely separate (9.4% vs 8.1%), yet RNI held up in residual-nodal disease on MVA (HR 0.476), which is where most RNI is already given. The axillary pCR arm stays uninformative: 5.5% vs 4.6% with too few events to model, so it does not answer the omission question.",
+            "monday_clinic": "In cN+ breast with residual axillary disease after NAT and ALND, this supports keeping RNI in the plan; it does not establish safe RNI omission after axillary pCR.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Single-institution **retrospective** cohort, MD Anderson, NAT 1989-2007. Median follow-up **10.2 yr**. Competing-risk cumulative incidence (Gray test) plus multicovariate Cox models."
+                "body": "Single-institution **retrospective** cohort, N=1289, 1989-2007. Median follow-up **10.2 yrs** after definitive surgery. LRR and DR by cumulative incidence with competing risks; Cox multicovariate models."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Stage II-III breast cancer with **cytologically confirmed axillary metastases**, NAT, then BCS or mastectomy with ALND, **N=1289**. RNI pts were younger, with more LVSI, higher cT/cN/stage and less breast and axillary response."
+                "body": "Stage II-III breast cancer with **cytologically confirmed axillary metastases**, NAT, then BCS or mastectomy **with ALND**. Axillary pCR in 368 (28.5%)."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Median breast/chest wall **50 Gy/25 fx**, median boost **10 Gy/5 fx**. RNI was defined as RT deliberately covering at least one regional basin. The institutional standard covered undissected axilla, SCV and IMN, with variable field design."
+                "body": "RNI defined as RT purposely directed to at least one regional nodal basin, at physician discretion, given to **1080 (83.8%)**. Median breast/chest wall **50 Gy/25 fx**, median boost **10 Gy/5 fx**; institutional standard covered undissected axilla, SCV and IMN, with variable field design. Of 209 without RNI, 142 had no RT at all."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**LRR** (breast or regional nodes) and **DR** (LRR or DM, first event), plus DSS and OS."
               },
               {
                 "label": "Results",
-                "body": "Univariate 10-yr LRR **9.4% vs 8.1%** (P=.62), with no difference within pCR strata. Adjusted LRR **HR 0.497** (0.279-0.884) and DR **HR 0.731** (0.541-0.988). **No DSS or OS effect.**"
+                "body": "Univariate RNI effect null for LRR and DR. Adjusted, RNI reduced **LRR (HR 0.497)** and **DR (HR 0.731)**, with the largest DR effect in HER2+ pts on trastuzumab (**HR 0.237**). **No DSS or OS effect.**"
               },
               {
                 "label": "vs leading data",
-                "body": "EORTC 22922 and MA.20 established LRR and DM reduction with RNI after adjuvant chemo, without a significant OS gain. This cohort maps that direction onto the NAT setting. NSABP B-51/RTOG 1304 is the randomized test of omission in cN1 converting to ypN0."
+                "body": "Authors read the benefit as carrying over the LRR and DM reductions seen in **EORTC 22922** and **MA.20** after adjuvant chemo into the NAT setting. They contrast prior HER2+ series (Danish 82b/c, SweBCG91-RT) suggesting relative radioresistance, and the ALTTO subset showing no RNI effect."
               },
               {
                 "label": "Applies to",
-                "body": "Represents cN+ stage II-III breast after NAT and ALND, particularly with residual nodal disease. Does not represent ypN0 pts considering RNI omission, sentinel-only axillary staging, or modern HER2 dual blockade and post-NAT systemic escalation."
+                "body": "Represents cN+ stage II-III breast cancer after NAT and ALND, mostly mastectomy. Does not represent SLNB-only axillary staging or the cN1 to ypN0 omission question NSABP B-51/RTOG 1304 tests."
               },
               {
                 "label": "Limitations",
-                "body": "The control group is mostly **no RT at all** (142/209), so RNI is confounded with any RT. Tangent geometry is unknown, so incidental nodal dose in controls can't be excluded. HER2+ pts without trastuzumab were dropped from the models. The NAT era predates current regimens."
+                "body": "RNI pts had more adverse baseline features, so adjustment does heavy lifting. 'No RNI' may include unrecorded high tangents. Half the HER2+ cohort predated trastuzumab and was excluded from MVA, shrinking the subgroup behind the HR 0.237 estimate."
               },
               {
                 "label": "Discussion",
-                "body": "The univariate-to-adjusted reversal, with DR numerically higher with RNI before adjustment, shows how strongly treatment allocation tracked risk. The adjusted HRs are hypothesis-supporting at best. The HER2+/trastuzumab DR signal runs against older data suggesting HER2+ radioresistance and needs prospective confirmation."
+                "body": "Supports RNI after NAT when nodal disease persists. **Does not settle omission after axillary pCR**; the authors defer that to B-51."
               }
             ],
-            "interpretation": "The headline finding here depends entirely on adjustment. Unadjusted, RNI did nothing for 10-year LRR (9.4% vs 8.1%), and distant recurrence was numerically worse in the RNI group (36.5% vs 31.3%). Only after the Cox model accounted for age, grade, LVSI, margin, residual breast disease, subtype and axillary response did RNI emerge as protective, at an LRR HR of 0.497 and a DR HR of 0.731. That pattern is what one expects when physicians gave nodal RT to the higher-risk pts, and the paper's own baseline table confirms it: the RNI group was younger, had more advanced cT and cN, and responded less well in breast and axilla. A model can only adjust for the covariates it captured. Confounding by indication in a cohort where 84% got the treatment, with the untreated minority selected for favorable features, rarely gets fully adjusted away. A reader should treat the adjusted HRs as a direction, not a magnitude.\n\nThe comparator matters more for an RT reader than the abstract suggests. Two-thirds of the no-RNI group received no radiation at all. The estimate is therefore closer to 'RT including nodes vs mostly no RT' than to the question we actually face in clinic, which is breast or chest wall RT with or without nodal fields. Tangent geometry was not recorded, so some of the remaining no-RNI pts may have had substantial incidental level I/II dose. Both features push the apparent RNI effect away from what the increment of nodal coverage alone would deliver.\n\nAgainst EORTC 22922 and MA.20, which established that RNI after adjuvant chemotherapy lowers locoregional and distant recurrence without a clear OS gain, the direction here is concordant. The authors read it as evidence that the adjuvant-era benefit carries into the neoadjuvant setting. The more defensible read is narrower. Among pts with residual axillary disease, where the adjusted LRR HR of 0.476 held, the data fit with continuing to treat nodes, which is already standard. The decision clinicians actually want help with is omission after nodal pCR, and this cohort cannot answer it: the ypN0 group had too few events for a multivariable model, and the unadjusted pCR-stratified comparisons were null. That question belongs to NSABP B-51/RTOG 1304, which the authors themselves point to.\n\nThe HER2+ trastuzumab distant-recurrence HR of 0.237 is the most striking number and the most fragile one. It is a subgroup estimate from a cohort in which about half of HER2+ pts were treated before trastuzumab and were excluded from modelling. It also runs against earlier subtype analyses suggesting HER2+ disease derives smaller locoregional benefit from RT. A radiosensitizing interaction with trastuzumab is biologically plausible. An effect that large on distant disease from nodal fields alone should also prompt a search for residual imbalance before it is taken as biology.\n\nWhat would make the study wrong? Unmeasured risk features that tracked RNI use, which is likely in a discretionary series. A control group whose benefit came from incidental tangent dose. And systemic therapy from 1989-2007 that differs enough from current regimens, including post-NAT escalation for residual disease, to change the baseline LRR risk RNI acts on. The nomogram is a useful way to put residual-risk factors in front of a pt. Its RNI term inherits the same confounding.",
+            "interpretation": "The central tension in this paper is that the crude data and the adjusted data tell different stories. On the cumulative incidence curves, RNI did nothing visible: 10-year LRR 9.4% without and 8.1% with, and DR actually ran higher in the RNI group. Only after adjustment does RNI emerge as protective, halving LRR risk and trimming DR. That pattern is exactly what confounding by indication predicts. Physicians gave RNI to younger women with LVSI, higher clinical T and N category, and less response in breast and axilla, so the RNI group started out at higher risk. Adjustment for measured covariates is the right move, but it can only correct for what was recorded, and in a discretionary series the unrecorded reasons a radiation oncologist chose to treat the nodes (extent of residual disease beyond ypN category, imaging findings, extranodal extension) are the ones most likely to matter. A reader should treat the adjusted HRs as a plausible direction with an uncertain magnitude, not as an estimate of what RNI would achieve if randomly assigned.\n\nThe comparison group is also less clean than its label suggests. Two thirds of the patients without RNI received no radiation at all, so 'no RNI' here partly means 'no RT', and some LRR benefit may reflect breast or chest wall treatment rather than nodal coverage. In the other direction, tangent geometry was unavailable, so some 'no RNI' patients may have had incidental low axillary dose through high tangents. Those two biases push in opposite directions, and the paper cannot separate them.\n\nThe subgroup with the clearest clinical relevance, residual nodal disease after NAT, is also where the result is least surprising. An adjusted LRR HR of 0.476 in patients without axillary pCR fits what most radiation oncologists already do, and it is consistent with the authors' reading of EORTC 22922 and MA.20 as transferable to the neoadjuvant setting. The genuinely open question, whether nodes can be left alone after cN1 converts to ypN0, is the one this cohort cannot answer: 5.5% versus 4.6% LRR in pCR patients rests on too few events to model, and the authors explicitly defer to NSABP B-51/RTOG 1304.\n\nThe HER2+ trastuzumab DR signal (HR 0.237) is the most striking number and the most fragile. It comes from 145 patients, runs against prior series suggesting HER2+ disease gains less from RT, and predates dual HER2 blockade and post-neoadjuvant escalation for residual disease. It is hypothesis-generating at best.\n\nThe absence of any DSS or OS effect at 10 years is coherent with the randomized adjuvant trials and should temper any reading of the DR result as a survival argument. Practically, the nomogram is the more durable contribution: it lets a reader estimate absolute 10-year LRR from margins, grade, subtype and nodal response, which is the number that actually drives a coverage decision.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The adjusted LRR benefit holds with residual axillary disease (HR 0.476) but was never modelled in ypN0, so this supports RNI for ypN+ and leaves omission after nodal pCR to B-51. Most no-RNI pts (142/209) had no RT at all, so the HR overstates the nodal-field increment."
+              "radonc": "The unadjusted 10-yr LRR curves barely separate (9.4% vs 8.1%), yet RNI held up in residual-nodal disease on MVA (HR 0.476), where nodal coverage is already standard. The axillary pCR group (5.5% vs 4.6%) had too few events to model, so it cannot support omission."
             },
             "open_questions": [
-              "Can RNI be safely omitted after cN+ to ypN0 conversion?",
-              "Does the HER2+ trastuzumab DR benefit persist with modern dual HER2 blockade?",
-              "RNI increment over breast/chest wall RT alone after NAT"
+              "Is RNI omission safe after cN1 to ypN0 conversion?",
+              "Does the HER2+ RNI benefit persist with modern HER2-directed NAT?",
+              "Does the nomogram validate in an SLNB-staged cohort?"
             ],
             "consort": null,
             "modality": "radiation",
@@ -1085,6 +1101,38 @@
             "methodology": "retrospective",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
+              {
+                "nct": "NCT01872975",
+                "brief_title": "Standard or Comprehensive Radiation Therapy in Treating Patients With Early-Stage Breast Cancer Previously Treated With Chemotherapy and Surgery",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 1636,
+                "primary_completion_date": "2023-09",
+                "brief_summary": "This randomized phase III trial studies standard or comprehensive radiation therapy in treating patients with early-stage breast cancer who have undergone surgery. Radiation therapy uses high-energy x rays to kill tumor cells. It is not yet known whether comprehensive radiation therapy is more effective than standard radiation therapy in treating patients with breast cancer",
+                "conditions": [
+                  "Stage IB Breast Cancer",
+                  "Stage II Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "regional nodal XRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "chestwall XRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "WBI",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* The patient must have signed and dated an Institutional Review Board (IRB)-approved consent form that conforms to federal and institutional guidelines\n* The patient must have an Eastern Cooperative Oncology Group (ECOG) performance status of 0 or 1\n* Patient must have…",
+                "answers_question": "Is RNI omission safe after cN1 to ypN0 conversion?",
+                "relevance_phrase": "randomised regional nodal XRT vs breast/chestwall alone"
+              },
               {
                 "nct": "NCT07724769",
                 "brief_title": "De-escalation of RNI in Breast Cancer Patients With pN0 After Neoadjuvant Therapy",
@@ -1105,8 +1153,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Female patients \\>= 18 years old.\n* Histologically confirmed invasive breast cancer, cT1-3 N1M0 according to the 8th AJCC edition.\n* Biopsy-proven cN1 disease at diagnosis.\n* Completion of standard neoadjuvant systemic therapy.\n* Surgical treatment of breast and axilla.\n*…",
-                "answers_question": "Can RNI be safely omitted after cN+ to ypN0 conversion?",
-                "relevance_phrase": "response-adapted RNI de-escalation, cN1 to pN0 after NAT"
+                "answers_question": "Is RNI omission safe after cN1 to ypN0 conversion?",
+                "relevance_phrase": "RNI de-escalation in biopsy-proven cN1 → pN0 after NAT"
               },
               {
                 "nct": "NCT04109079",
@@ -1138,77 +1186,18 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18\n* Male or female\n* cT1-3N1M0 breast cancer at diagnosis (prior to NACT) as per AJCC 8th edition (see Section 6.4.1)\n\n  o Patients with occult primary invasive breast cancer (no identifiable invasive cancer in the breast) with FNA or core biopsy proven nodal…",
-                "answers_question": "Can RNI be safely omitted after cN+ to ypN0 conversion?",
-                "relevance_phrase": "omits axillary RT if ypN0 on SNB after NACT, DFS NI"
-              },
-              {
-                "nct": "NCT01872975",
-                "brief_title": "Standard or Comprehensive Radiation Therapy in Treating Patients With Early-Stage Breast Cancer Previously Treated With Chemotherapy and Surgery",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 1636,
-                "primary_completion_date": "2023-09",
-                "brief_summary": "This randomized phase III trial studies standard or comprehensive radiation therapy in treating patients with early-stage breast cancer who have undergone surgery. Radiation therapy uses high-energy x rays to kill tumor cells. It is not yet known whether comprehensive radiation therapy is more effective than standard radiation therapy in treating patients with breast cancer",
-                "conditions": [
-                  "Stage IB Breast Cancer",
-                  "Stage II Breast Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "regional nodal XRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "chestwall XRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "WBI",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* The patient must have signed and dated an Institutional Review Board (IRB)-approved consent form that conforms to federal and institutional guidelines\n* The patient must have an Eastern Cooperative Oncology Group (ECOG) performance status of 0 or 1\n* Patient must have…",
-                "answers_question": "RNI increment over breast/chest wall RT alone after NAT",
-                "relevance_phrase": "randomises regional nodal XRT vs breast/chest wall alone"
-              },
-              {
-                "nct": "NCT06559696",
-                "brief_title": "Internal Mammary Lymph Nodes Irradiation in High-risk Breast Cancer After Neoadjuvant Chemotherapy",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 722,
-                "primary_completion_date": "2032-07",
-                "brief_summary": "The aim of this study is to explore the impact of internal mammary nodal irradiation on disease-free survival in high-risk breast cancer patients (ypN+or supra/subclavicular lymph node positive) after neoadjuvant chemotherapy.",
-                "conditions": [
-                  "Breast Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "internal mammary nodal irradiation",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "No internal mammary node irradiation",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed invasive breast cancer\n* Underwent neoadjuvant chemotherapy\n* Eastern Cooperative Oncology Group Performance Status Scale 0-2\n* ypN+ after neoadjuvant chemotherapy or supraclavicular/subclavicular lymph node metastasis before system therapy\n* No…",
-                "answers_question": "RNI increment over breast/chest wall RT alone after NAT",
-                "relevance_phrase": "phase 3 IMN RT vs none after NAC, DFS primary"
+                "answers_question": "Is RNI omission safe after cN1 to ypN0 conversion?",
+                "relevance_phrase": "omits ALND + axillary RT in cN1 → ypN0 on SLNB, DFS 1° EP"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
                 "regional nodal irradiation neoadjuvant breast",
-                "HER2 breast radiotherapy nodal"
+                "HER2 breast nodal radiotherapy"
               ],
               "queries_failed": [],
               "candidates_returned": 33,
-              "fetched_at": "2026-10-20T08:07:40.679Z",
+              "fetched_at": "2026-10-21T08:04:35.178Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
