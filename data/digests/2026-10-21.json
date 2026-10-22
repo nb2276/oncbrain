@@ -1,77 +1,83 @@
 {
   "date": "2026-10-21",
   "conference": null,
-  "generated_at": 1792570063484,
+  "generated_at": 1792656273742,
   "digest": {
-    "top_line": "HYPO-RT-PC: 42.7 Gy/7 fx non-inferior to 78 Gy/39 fx, 5y FFS 84% vs 84%, HR 1.002 (0.758-1.325), intermediate-to-high-risk prostate, no ADT.",
-    "tldr": "Prostate carried the day with hypofractionation data from 7 to 28 fx: HYPO-RT-PC non-inferior at 5y, 70 Gy/28 fx with 10-y late G3+ GU 2% and GI 1%, and RTOG 0415 modeling rectal D5% ≤62 Gy to halve late ≥G2 GI. Breast: crude LRR 4.7% after mastectomy without PMRT in high-risk T1-T2N0.",
+    "top_line": "HYPO-RT-PC: 5yr FFS 84% vs 84%, adj HR 1.002 (95% CI 0.758-1.325), 42.7 Gy/7 fx non-inferior to 78 Gy/39 fx in intermediate-to-high-risk prostate, no ADT.",
+    "tldr": "Prostate RT led the day: HYPO-RT-PC gives randomised support for 7-fx UHF, though the upper CI bound sits just under the NI margin; 70 Gy/28 fx IMRT holds 10-yr late G≥3 GU 2%, GI 1%; RTOG 0415 modeling sets rectal D5% ≤62 Gy for 10% late ≥G2 GI in low-risk pts. Breast: crude LRR 4.7% without PMRT in high-risk T1-T2N0.",
     "sites": [
       {
         "disease_site": "prostate",
-        "intro": "Three of four prostate cards inform hypofractionation, from rectal dose constraints at 2.5 Gy/fx to 7 fx ultra-hypo; Decipher + NCCN reclassified 30% of localized pts.",
+        "intro": "A fractionation and dose-constraint day: UHF non-inferiority, 10-yr moderate-hypo durability, rectal D5% targets, and a Decipher-integrated risk system (C-index 0.77 vs 0.68 in training).",
         "studies": [
           {
-            "name": "NRG/RTOG 0415 Late Toxicity Tolerance Doses",
+            "name": "NRG/RTOG 0415 late toxicity tolerance doses",
             "tldr": "Rectal D5% (EQD2) ≤62 Gy predicted halving late ≥G2 GI toxicity from 20% to 10% after 70 Gy at 2.5 Gy/fx in low-risk prostate cancer.",
             "details": [
               {
-                "text": "🔍 Dose-volume modeling of the HRT arm of NRG/RTOG 0415, low-risk prostate cancer, N=521",
+                "text": "🔍 Secondary dose-volume analysis of the HRT arm of NRG/RTOG 0415, low-risk prostate cancer, N=521",
                 "source_tier": "figure"
               },
-              "🔍 RT: 70 Gy at 2.5 Gy/fx, 3DCRT/IMRT N=108/413",
-              "🔍 Doses converted to EQD2Gy (rectum α/β 3 Gy, bladder α/β 6 Gy)",
+              "💊 RT: 70 Gy at 2.5 Gy/fraction, 3DCRT/IMRT N=108/413",
               {
-                "text": "🔍 Cohort randomly split 70% training / 30% validation; logistic regression with bootstrapping",
-                "source_tier": "figure"
-              },
-              {
-                "text": "📊 Crude late ≥G2 GI 19%, GU 29% at median f/u 5.9 yr",
+                "text": "🔍 Median f/u 5.9 yr; crude late ≥G2 GI 19%, GU 29%",
                 "source_tier": "figure"
               },
               {
-                "text": "📊 Rectal D5% (EQD2) threshold by target late ≥G2 GI rate",
+                "text": "🔍 Random 70%/30% training/validation split; logistic NTCP models on bootstrapping, EQD2 with rectum α/β 3 Gy, bladder 6 Gy",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📐 Two generalizable GI models (D5% ± acute GI tox): AUCvalidation 0.64 and 0.65, p=0.01 and 0.03, pHL 0.45-0.56",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 Rectal D5%[Gy] (EQD2) thresholds by target late ≥G2 GI rate",
                 "table": {
                   "columns": [
                     "Late GI rate",
-                    "All pts (Model IV)",
-                    "Pts with acute GI tox (Model II)"
+                    "D5% (Model IV)",
+                    "D5% if acute GI tox (Model II)"
                   ],
                   "rows": [
                     [
-                      "20%",
-                      "D5% 65 Gy (observed)",
-                      "D5% ≤59"
+                      "20% (observed)",
+                      "65 Gy",
+                      "≤59 Gy"
                     ],
                     [
                       "15%",
-                      "D5% ≤64 Gy",
-                      "D5% ≤58"
+                      "≤64 Gy",
+                      "≤58 Gy"
                     ],
                     [
                       "10%",
-                      "D5% ≤62",
-                      "D5% ≤55"
+                      "≤62 Gy",
+                      "≤55 Gy"
                     ]
                   ]
                 },
                 "source_tier": "figure"
               },
-              "📐 Validation AUC 0.65 (Model IV, D5% alone) and 0.64 (Model II, D5% + acute GI tox)",
               {
-                "text": "📊 Proctitis: 14% observed at D5% 64 Gy; D5% ≤62 Gy models a drop to 7%",
+                "text": "📊 Proctitis: observed 14% at D5% 64 Gy; ≤63 Gy for 10%; 62 Gy limit modeled to 7%",
                 "source_tier": "figure"
               },
               {
-                "text": "📊 Late GU: no dose-volume predictor; acute GU tox only a trend (AUC 0.57, p=0.07)",
-                "source_tier": "figure"
-              },
-              "⚠️ AUC 0.64-0.65 is modest discrimination; thresholds are population-level, not per-pt risk",
-              {
-                "text": "⚠️ Rectal constraint (EQD2 74 Gy ≤15%) adherence was only 77% among pts with late GI tox",
+                "text": "📊 GU: no dose-response for bladder; acute GU tox only a trend (AUCtraining 0.57, p=0.07)",
                 "source_tier": "figure"
               },
               {
-                "text": "🔗 Parent trial: late ≥G2 GI 22% vs 20% (p=0.005), GU 26% vs 21% (p=0.009), HRT vs CFRT",
+                "text": "⚠️ Rectal V74Gy[%] ≤15 constraint adherence only 84% overall, 77% among pts with late GI tox",
+                "source_tier": "figure"
+              },
+              {
+                "text": "⚠️ Discrimination modest (AUC 0.64-0.65); proctitis model only approached significance in validation (p=0.07)",
+                "source_tier": "figure"
+              },
+              "⚠️ Single-arm subset of one trial, IMRT-heavy cohort; technique effect could not be resolved",
+              {
+                "text": "🔗 Parent trial: HRT vs CFRT late ≥G2 GI 22% vs 20% (p=0.005), GU 26% vs 21% (p=0.009)",
                 "source_tier": "figure"
               }
             ],
@@ -84,61 +90,61 @@
             "slug": "rtog-0415-tolerance-doses",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Secondary modeling of one arm of a phase III trial; modest validation AUC, internal split only, no external cohort, and α/β-dependent EQD2 thresholds.",
-              "audience": "Low-risk prostate cancer, moderate HRT 70 Gy at 2.5 Gy/fx"
+              "rationale": "Post-hoc NTCP modeling within one arm of a phase III; modest AUC 0.64-0.65, internal split validation only, no prospective test of the proposed D5% constraint.",
+              "audience": "Low-risk prostate cancer, HRT arm of NRG/RTOG 0415"
             },
-            "significance": "The tolerance dose sits in the small high-dose rectal volume, not intermediate-dose sparing: D5% (EQD2) ≤62 Gy models late ≥G2 GI from 20% to 10%, and pts with acute GI toxicity need ≤55 Gy for the same rate. The GU signal is absent, so bladder constraints won't fix the larger GU toxicity rate.",
-            "monday_clinic": "In low-risk prostate cancer planned for moderate HRT at 2.5 Gy/fx, this supports adding a rectal D5% (EQD2) ≤62 Gy plan objective alongside standard rectal constraints; it does not inform late GU risk, where no bladder dose metric predicted toxicity.",
+            "significance": "The constraint that matters is a small-volume hotspot, not the high-dose V74Gy rule, which 16% of plans missed anyway. Pts with acute GI toxicity have a lower modeled tolerance (D5% ≤55 Gy for a 10% late GI rate), so planning targets may need to differ by acute course. Bladder dose explained nothing for GU, pointing elsewhere for mitigation.",
+            "monday_clinic": "In low-risk prostate cancer planned for moderate HRT at 2.5 Gy/fx, this supports adding a rectal D5% (EQD2) ceiling near 62 Gy as a GI-toxicity planning goal; it does not inform GU toxicity, where no bladder dose-response emerged.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Secondary dose-volume analysis of the **HRT arm of NRG/RTOG 0415**, N=521. Random **70% training / 30% validation** split with preserved toxicity rates; univariate and multivariate logistic regression on bootstrapping. Median follow-up **5.9 years**."
+                "body": "Secondary dose-volume analysis of the **HRT arm** of the multicenter NRG/RTOG 0415 trial, N=521. Cohort split **70%/30%** into training and validation with preserved toxicity rates; univariate and multivariate logistic regression on bootstrapping."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**Low-risk prostate cancer** treated on the hypofractionated arm. 3DCRT N=108, IMRT N=413."
+                "body": "**Low-risk prostate cancer** treated on the HRT arm. Median follow-up **5.9 yr**."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**70 Gy at 2.5 Gy/fraction**. Dose metrics converted to EQD2Gy with **rectum α/β 3 Gy, bladder α/β 6 Gy**. Protocol rectal constraint EQD2 74 Gy ≤15%."
+                "body": "**70 Gy at 2.5 Gy/fraction**, 3DCRT/IMRT N=108/413. Doses converted to EQD2 with rectum α/β 3 Gy and bladder 6 Gy; trial rectal constraint EQD2 74 Gy ≤15%."
               },
               {
                 "label": "Endpoints",
-                "body": "Late ≥G2 GI and GU toxicity, plus Proctitis and Pollakiuria (rates 19%, 28%, 14%, 18%). Generalizability required validation AUC within training AUC ± SD, p ≤ 0.05 and Hosmer-Lemeshow p > 0.05."
+                "body": "**Late ≥G2 GI and GU toxicity**, plus proctitis and pollakiuria (the symptoms with rates ≥10%). Generalizability required validation AUC within training AUC ± SD, p≤0.05, and pHL >0.05."
               },
               {
                 "label": "Results",
-                "body": "Two models generalized for late GI: **D5% alone (AUC 0.65)** and **D5% + acute GI toxicity (AUC 0.64)**. Proctitis followed D5% similarly but validation only approached significance (p=0.07). **No GU predictor** identified, including on re-analysis at α/β 0.8 Gy."
+                "body": "**Rectal D5%** was the dominant GI predictor; with or without acute GI toxicity it generalized (AUCvalidation **0.64, 0.65**). Modeled late GI falls from 20% to 10% at **D5% ≤62 Gy**. **No GU dose-response** was found, including at α/β 0.8 Gy."
               },
               {
                 "label": "vs leading data",
-                "body": "PROFIT, CHHiP, HYPRO and RTOG 0415 established moderate HRT efficacy with late GI/GU toxicity trending higher than CFRT. In RTOG 0415, late ≥G2 GI was **22% vs 20% (p=0.005)** and GU **26% vs 21% (p=0.009)**, HRT vs CFRT; this analysis supplies the HRT-specific rectal constraint those trials lacked."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents low-risk prostate cancer treated with moderate HRT at 2.5 Gy/fx, mostly IMRT. Does not represent ultrahypofractionated SBRT, pelvic nodal RT, or higher-risk disease on ADT."
+                "body": "PROFIT, CHHiP, HYPRO and RTOG 0415 established moderate HRT with similar biochemical control to CFRT but a tendency to more late toxicity. The late GI rate here was **19% vs 2%** in a cited high-dose CFRT IMRT series planned with a strict high-dose rectal constraint."
               },
               {
                 "label": "Limitations",
-                "body": "Internal split-sample validation only, from one trial. Technique imbalance (IMRT 79% vs 3DCRT 21%) limits any technique-specific dose-response read. Thresholds shift if the true rectal α/β differs from 3 Gy, though α/β 1 or 5 Gy did not change model agreement."
+                "body": "Validation is an internal random split of the same cohort, not an external dataset. The IMRT-heavy mix (**79% vs 21%**) left a technique interaction untestable, and constraint adherence was incomplete, so part of the signal may reflect plan quality rather than tolerance."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents low-risk prostate cancer treated with moderate HRT at 2.5 Gy/fx. Does not represent ultrahypofractionated SBRT, nodal fields, or GU toxicity mitigation."
               },
               {
                 "label": "Discussion",
-                "body": "Late GI toxicity tracks **small high-dose rectal 'hotspots'** more than the intermediate-dose volume. Authors pair the **D5% ≤62 Gy** objective with **rectal spacers** to reach it. Late GU toxicity likely depends on a critical structure other than the bladder."
+                "body": "Results point to small rectal hotspots as the modifiable driver of excess late GI toxicity after moderate HRT, with authors also advocating **rectal spacers**. GU toxicity likely needs a substructure (not whole-bladder) approach."
               }
             ],
-            "interpretation": "The moderate hypofractionation trials settled the efficacy question for localized prostate cancer: PROFIT, CHHiP, HYPRO and RTOG 0415 all showed biochemical control comparable to conventional fractionation. What they left open was the toxicity tradeoff, since late GI and GU events tended to run higher on the hypofractionated arms, and in RTOG 0415 that difference reached statistical significance for both domains. Planners have largely carried over constraints built for conventional fractionation, converted through an assumed α/β. This paper is one of the few attempts to derive a tolerance dose from pts actually treated on a hypofractionated schedule with prospectively graded toxicity, and that is its main value.\n\nThe central finding is anatomical rather than volumetric. The intermediate-dose rectal volumes (V30 to V40) appeared as candidates but dropped out, and the metric that survived validation was the minimum dose to the hottest 5% of rectum. That points the planner toward the small high-dose region abutting the PTV, which is exactly the region standard DVH constraints at high dose levels only loosely control. The observation that adherence to the protocol's high-dose rectal constraint was lower among pts who developed late GI toxicity supports the same reading: the events cluster where the plan let the hotspot through.\n\nConfidence should be tempered in several directions. Discrimination is modest, with validation AUCs of 0.64 and 0.65, so D5% explains only part of who develops toxicity; a plan meeting the threshold still carries meaningful risk. Validation came from a random split of the same trial, which tests overfitting but not transportability to other institutions, contouring conventions, or image guidance practices. The thresholds are expressed in EQD2 under an α/β of 3 Gy, so a clinic applying them must convert its physical D5% the same way, and the sensitivity analysis on α/β is reassuring but limited to model agreement. The cohort was heavily IMRT, which weakens the conclusion that technique carries no independent effect.\n\nThe acute-toxicity interaction matters for practice. Pts who had acute GI toxicity needed a considerably lower D5% to reach the same late rate, which suggests either a consequential-late-effect mechanism or a marker of intrinsic sensitivity. Neither is resolved here, and acute toxicity is not known at planning, so it is a monitoring signal rather than a planning input.\n\nThe GU result is a negative finding worth taking seriously. Late GU toxicity was more common than GI, yet no bladder metric predicted it, even at a low α/β. That argues against tightening bladder constraints as the lever and toward substructures such as the urethra or bladder neck, which this dataset did not contour. Whether these rectal thresholds hold under ultrahypofractionation, or with a spacer that changes the geometry of the hotspot, remains untested.",
+            "interpretation": "The HRT trials that moved prostate practice toward moderate hypofractionation, PROFIT, CHHiP, HYPRO and RTOG 0415 among them, settled the efficacy question but left a toxicity residue: late GI and GU events tended to run higher than with conventional fractionation, and in RTOG 0415 the difference reached significance for both domains. The obvious response is better normal-tissue constraints, yet most constraints in use were inherited from conventional schedules. This analysis is one of the few attempts to derive HRT-specific rectal tolerance from prospectively collected trial toxicity, which is its main value.\n\nThe finding that matters is where the risk sits in the DVH. The parent trial already carried a high-dose rectal volume constraint, but the model points at the minimum dose to the hottest 5% of rectum rather than the intermediate-dose volumes or the protocol's V74 rule. That is consistent with a hotspot mechanism, and it is clinically convenient: a D5% objective is easy to add to an IMRT optimizer without rewriting the whole constraint set. The other practical point is that adherence to the existing rectal constraint was incomplete, lower still among pts who developed toxicity. Some of the excess late GI risk after HRT may therefore be a plan-quality problem rather than a fractionation problem, and a new number will not fix plans that do not meet the old one.\n\nConfidence should be tempered by the statistics. Discrimination is modest, with validation AUCs of 0.64 and 0.65, which means D5% explains only a fraction of who gets late GI toxicity. Validation was an internal random split of the same 521 pts, so the model was tested on pts planned under the same protocol, the same contouring rules and the same era of IMRT; that is generalizability within a trial, not across practice. The proctitis model only approached significance in validation. The predicted halving of toxicity at D5% 62 Gy is a model extrapolation along a fitted logistic curve over a narrow dose range, not an observed effect of lowering the dose, and the cohort is dominated by IMRT, so any technique effect is unresolved.\n\nThe acute-toxicity interaction deserves more attention than it gets. Pts with acute GI toxicity had considerably lower modeled thresholds, which, if real, suggests either individual radiosensitivity or a consequential-late mechanism, and in either case argues that a single constraint is too blunt. It does not yet tell a planner what to do before treatment starts, since acute toxicity is not known at planning.\n\nThe null GU result is informative. Late GU toxicity was more common than GI, yet whole-bladder dose explained none of it even with a much lower α/β. That supports looking at urinary substructures rather than tightening bladder constraints. What the analysis cannot answer is whether a D5% objective, applied prospectively and combined with spacers, actually lowers late GI toxicity after moderate HRT; that would require an external or prospective test, and the paper offers none. It is a reasonable, low-cost planning objective to consider, not a validated tolerance.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The tolerance dose sits in the small high-dose rectal volume: D5% (EQD2) ≤62 Gy models late ≥G2 GI from 20% to 10%, and ≤55 Gy for pts with acute GI toxicity. No bladder metric predicted the larger GU rate, so GU mitigation needs a different structure."
+              "radonc": "The constraint that matters is a small-volume rectal hotspot (D5%), not the V74Gy rule that 16% of plans missed anyway. Pts with acute GI toxicity carry lower modeled tolerance (D5% ≤55 Gy for a 10% late GI rate), and bladder dose explained nothing for GU, pointing mitigation toward substructures."
             },
             "open_questions": [
-              "Do rectal D5% thresholds transfer to ultrahypofractionated SBRT?",
-              "Which GU substructure drives late GU toxicity after HRT?",
-              "Does rectal spacer use reach D5% targets and lower late GI rates?"
+              "Does a prospective D5% ≤62 Gy rectal objective lower late GI toxicity?",
+              "Which urinary substructure drives late GU toxicity after HRT?",
+              "Does rectal spacer use make the D5% threshold redundant?"
             ],
             "consort": null,
             "modality": "radiation",
@@ -166,19 +172,19 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years old.\n* Subjects must have pathologically confirmed (by routine hematoxylin and eosin (H\\&E) staining) invasive adenocarcinoma of the prostate and been planning to undergo SBRT.\n* Subjects must have intermediate risk prostate cancer as defined by the presence of…",
-                "answers_question": "Does rectal spacer use reach D5% targets and lower late GI rates?",
-                "relevance_phrase": "SpaceOAR Vue, late GI toxicity EP, int-risk SBRT"
+                "answers_question": "Does rectal spacer use make the D5% threshold redundant?",
+                "relevance_phrase": "SpaceOAR Vue effect on late GI toxicity, prostate SBRT"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "prostate SBRT rectal toxicity",
+                "prostate hypofractionated rectal toxicity",
                 "urethra sparing prostate radiotherapy",
                 "rectal spacer prostate radiotherapy"
               ],
               "queries_failed": [],
-              "candidates_returned": 40,
-              "fetched_at": "2026-10-21T08:06:08.620Z",
+              "candidates_returned": 35,
+              "fetched_at": "2026-10-22T08:02:48.160Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -189,175 +195,463 @@
             ]
           },
           {
-            "name": "Integrated Clinical-Genomic Risk Groups (Decipher + NCCN)",
-            "tldr": "Decipher + NCCN three-tier groups: 10-yr DM 3.5%, 29.4%, 54.6% (validation 0%, 25.9%, 55.2%); 30% of localized prostate pts reclassified.",
+            "name": "Moderate hypofractionation 70 Gy/28 fx, 10-year outcomes",
+            "tldr": "10-yr bRFS 71%, cRFS 86%, PCSM 6.8% after 70 Gy/28 fx IMRT for localized prostate cancer; late G≥3 GU 2%, GI 1%.",
             "details": [
-              "🔍 Retrospective development: training n=756 (RP, 1997-2004), median f/u 8 yr",
-              "🔍 Retrospective validation: n=235 biopsy specimens, 1995-2005",
-              "🔍 Prospective genomic cohorts n=4,960 (RP) and n=977 (biopsy) used for reclassification only, not outcomes",
               {
-                "text": "🔍 Point system: NCCN points + Decipher points → total 0-5",
-                "subdetails": [
-                  "NCCN: low 0, fav-int 1, unfav-int 2, high/very-high 3",
-                  "Decipher: <0.45 = 0, 0.45-0.6 = 1, >0.6 = 2",
-                  "Clinical-genomic: 0-1 low, 2-3 int, 4-5 high"
-                ]
+                "text": "🔍 Single-institution series, 854 consecutive pts treated 1998-2012, prospectively maintained registry",
+                "source_tier": "figure"
+              },
+              "🔍 Median f/u 11.3 yr (max 19 yr)",
+              {
+                "text": "🔍 Risk mix: 266 LR, 238 FIR, 106 UIR, 244 HR (NCCN high risk 29%)",
+                "source_tier": "figure"
               },
               {
-                "text": "📊 NCCN four-tier, training cohort: 10-yr outcomes",
+                "text": "🔍 RT technique",
+                "subdetails": [
+                  "70 Gy/28 fx at 2.5 Gy/fx, IMRT in all pts",
+                  "Authors cite equivalence to 80 Gy in 2 Gy/fx at α/β 1.5",
+                  "CTV: prostate alone for LR; prostate + proximal SV (≥1 cm) for IR/HR",
+                  "PTV margin 4 to 10 mm",
+                  "Daily IGRT, BAT ultrasound in 94.8%"
+                ],
+                "source_tier": "figure"
+              },
+              {
+                "text": "💊 ADT in 61%, mostly 1-6 mo; 18% received >6 mo",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 10-yr outcomes by risk group (abstract values)",
                 "table": {
                   "columns": [
-                    "NCCN group",
-                    "10-yr DM",
-                    "HR DM (95% CI)",
-                    "10-yr PCSM"
+                    "Endpoint",
+                    "LR",
+                    "FIR",
+                    "UIR",
+                    "HR",
+                    "p"
                   ],
                   "rows": [
                     [
-                      "Low",
-                      "7.3%",
-                      "Ref",
-                      "5.8%"
+                      "bRFS",
+                      "88%",
+                      "78%",
+                      "71%",
+                      "42%",
+                      "<.0001"
                     ],
                     [
-                      "Fav-int",
-                      "9.2%",
-                      "1.2 (0.5 to 3.0), P = .64",
-                      "2.7%"
+                      "cRFS",
+                      "95%",
+                      "91%",
+                      "85%",
+                      "72%",
+                      "<.0001"
                     ],
                     [
-                      "Unfav-int",
-                      "38.0%",
-                      "5.5 (2.8 to 12.1)",
-                      "15.9%"
-                    ],
-                    [
-                      "High",
-                      "39.5%",
-                      "6.0 (3.2 to 13.0)",
-                      "16.8%"
+                      "PCSM",
+                      "2%",
+                      "5%",
+                      "5%",
+                      "15%",
+                      "n/a"
                     ]
                   ]
-                }
+                },
+                "source_tier": "figure"
               },
               {
-                "text": "📊 Clinical-genomic three-tier: 10-yr outcomes",
-                "table": {
-                  "columns": [
-                    "CG group",
-                    "DM training",
-                    "DM validation",
-                    "HR DM training",
-                    "PCSM training"
-                  ],
-                  "rows": [
-                    [
-                      "Low",
-                      "3.5%",
-                      "0%",
-                      "Ref",
-                      "2.0%"
-                    ],
-                    [
-                      "Int",
-                      "29.4%",
-                      "25.9%",
-                      "9.3 (4.8 to 21.5)",
-                      "10.7%"
-                    ],
-                    [
-                      "High",
-                      "54.6%",
-                      "55.2%",
-                      "21.9 (11.1 to 50.4)",
-                      "27.3%"
-                    ]
-                  ]
-                }
+                "text": "📊 Whole cohort 10-yr OS 69% (95% CI 66%-73%)",
+                "source_tier": "figure"
               },
-              "📐 Training c-index 10-yr DM: six-tier CG 0.77 vs NCCN four-tier 0.68, three-tier 0.65, CAPRA 0.68",
-              "📐 Validation six-tier CG c-index 0.84 (95% CI, 0.61 to 0.93)",
               {
-                "text": "📊 Reclassification NCCN → three-tier CG (prospective cohorts I / II)",
+                "text": "📊 Clinical failures 125 (15%): 117 distant metastases, 8 local-only",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 Late G≥3 toxicity, 10-yr cumulative incidence",
                 "subdetails": [
-                  "Overall: 33.4% / 29.9%",
-                  "Fav-int: 56.8% / 44.4%",
-                  "Unfav-int: 36.0% / 40.5%",
-                  "Six-tier vs six-tier (cohort II): 66.6% reclassified"
-                ]
+                  "GU 2% (95% CI 0.8%-3.0%), mostly urethral stricture needing dilatation",
+                  "GI 1% (95% CI 0.5%-2.0%), mostly rectal bleeding",
+                  "Grade 5: 1 GU, 1 GI (rectovesicular fistula, septic death)",
+                  "Fig 3 read: G≥3 GU 3.7% at 15 yr"
+                ],
+                "source_tier": "figure"
               },
-              "⚠️ ADT/RT-adjusted HRs attenuate: CG int 3.5 (1.5 to 8.3), high 6.1 (2.6 to 14.4)",
-              "⚠️ Validation fragile: 47 low-risk pts at risk; high-risk HR 62.5 (8.5 to 7,969.6)",
-              "⚠️ Abstract cites NCCN c-index 0.73 (0.60 to 0.86); Table 2 gives 0.68 (0.64 to 0.73)",
-              "⚠️ Training cohort all RP; prognostic performance in RT-treated pts not separately reported",
-              "⚠️ Many authors employed by or hold stock in GenomeDx, the Decipher manufacturer"
+              {
+                "text": "⚠️ HR bRFS 42% at 10 yr; only 5/244 HR pts received elective pelvic nodal RT",
+                "source_tier": "figure"
+              },
+              "⚠️ Toxicity captured by retrospective chart review, physician-reported, no validated instruments",
+              {
+                "text": "⚠️ Ultrasound-era IGRT and 4-10 mm margins; may not transfer to fiducial/CBCT practice",
+                "source_tier": "figure"
+              },
+              {
+                "text": "🔗 vs RTOG 0415 (same 70 Gy/28 fx): authors cite G3 toxicity 3% to 4% at 5 yr, IMRT not mandatory",
+                "source_tier": "figure"
+              }
             ],
             "figures": [],
             "nct": null,
-            "doi": "10.1200/JCO.2017.74.2940",
+            "doi": "10.1016/j.ijrobp.2019.01.091",
+            "tweet_ids": [
+              1000000135
+            ],
+            "slug": "prostate-70gy-28fx-10y-outcomes",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Single-institution nonrandomized cohort without a comparator arm; long follow-up adds durability to randomized hypofractionation data but cannot establish equivalence on its own.",
+              "audience": "Localized prostate cancer, all NCCN risk groups, definitive RT ± ADT"
+            },
+            "significance": "Failure after 70 Gy/28 fx was almost entirely distant: 117 of 125 clinical failures were metastatic, 8 local-only. The HR 10-yr bRFS of 42% came with only 5/244 HR pts receiving elective nodal RT, which the authors attribute to short ADT and rare nodal coverage rather than inadequate prostate dose.",
+            "monday_clinic": "In localized low and intermediate-risk prostate cancer, this supports 70 Gy/28 fx IMRT with daily IGRT as a durable schedule past 10 yr; it does not settle HR disease treated with short ADT and no pelvic nodal RT.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Single-institution consecutive series from a **prospectively maintained registry**, 854 pts treated 1998-2012. **Median follow-up 11.3 yr** (max 19). Not randomized; no comparator arm."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Biopsy-proven, **clinically localized** prostate adenocarcinoma across all NCCN risk groups: 266 LR, 238 FIR, 106 UIR, 244 HR. Median age 68, median PSA 8.6 ng/mL. ADT in **61%**, mostly 1-6 mo."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**70 Gy/28 fx at 2.5 Gy/fx**, IMRT with daily IGRT (BAT ultrasound 94.8%). CTV prostate alone for LR, plus proximal SV for IR/HR; **PTV margin 4-10 mm**. Elective pelvic nodes in only 5 of 244 HR pts."
+              },
+              {
+                "label": "Results",
+                "body": "Whole-cohort 10-yr **bRFS 71%**, **cRFS 86%**, **OS 69%**, **PCSM 6.8%**. Of 125 clinical failures, **117 were distant and 8 local-only**."
+              },
+              {
+                "label": "Safety",
+                "body": "10-yr late **G≥3 GU 2%** (mostly urethral stricture) and **G≥3 GI 1%** (mostly rectal bleeding). One grade 5 event each in GU and GI. 119 pts (14%) developed a new cancer, lung most common."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Authors place this alongside RTOG 0415, CHHiP, PROFIT, HYPRO and the MDACC series, none with 10-yr outcomes at publication. RTOG 0415 used the same 70 Gy/28 fx with **G3 toxicity 3% to 4% at 5 yr**, under looser dose-volume constraints and without mandatory IMRT."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents localized prostate cancer treated with 70 Gy/28 fx IMRT and daily IGRT at a high-volume center, mostly with short or no ADT. Does not represent HR disease managed with ≥2 yr ADT or elective pelvic nodal RT."
+              },
+              {
+                "label": "Limitations",
+                "body": "Toxicity was **physician-reported** from retrospective chart review, likely underreporting events. Institutional constraints (rectal/bladder V70 5%, up to 10%) are far tighter than NRG-GU005 allows, so the toxicity rates may not hold under trial or community constraints."
+              },
+              {
+                "label": "Discussion",
+                "body": "The schedule controls the prostate well over 10+ yr; the risk-group gradient is driven by distant failure. What is left open is whether HR outcomes improve with longer ADT and nodal coverage at this fractionation."
+              }
+            ],
+            "interpretation": "The value of this series lies in its follow-up, not its design. When it was reported, the randomized moderate hypofractionation trials (CHHiP, PROFIT, HYPRO, RTOG 0415) had established non-inferiority at roughly five to six years, and the remaining worry was late: does a 2.5 Gy/fx schedule produce late urethral or rectal injury, or late biochemical failure, after the trials stop reporting? A median of 11.3 years and a maximum near two decades speaks directly to that worry, and the answer here is reassuring. Late G≥3 GU of 2% and GI of 1% at 10 years is at the low end of anything reported for this dose. The figure read of G≥3 GU at 3.7% by 15 years suggests urethral events keep accruing slowly, which matters for a younger pt choosing a schedule.\n\nThe oncologic data need to be read through the pattern of failure. Of 125 clinical failures, 117 were distant and 8 were local-only. That is the strongest RT-relevant signal in the paper: at this EQD2 the prostate itself is rarely where the disease comes back. The poor HR result (10-yr bRFS 42%, PCSM 15%) therefore does not argue against the fractionation. It argues that the HR cohort was undertreated by modern standards, with elective nodal RT in only 5 of 244 pts and most ADT courses at 6 months or less. The authors now use at least 2 years of ADT and selectively treat pelvic nodes to 50.4 Gy/28 fx by simultaneous integrated boost, but this paper does not report outcomes with that approach, so the HR numbers should not be quoted as the expected outcome of hypofractionation in HR disease.\n\nThree features should temper confidence in the toxicity figures. First, they were captured by retrospective chart review, physician-reported, without validated instruments; underreporting runs in the favorable direction. Second, the dose constraints are unusually strict: rectal and bladder V70 held to 5% (acceptable to 10%) against NRG-GU005 allowing rectal V70 25% and bladder V70 35%. A center reproducing the schedule under trial or looser constraints should expect rates closer to the 3% to 4% at 5 years the authors cite from RTOG 0415. Third, this is a single high-volume institution with standardized planning, and the authors themselves flag that multi-institutional reproducibility is unclear.\n\nThe technical era cuts both ways. Image guidance was ultrasound in 94.8% and PTV margins ran 4 to 10 mm. Modern fiducial or CBCT-based IGRT with tighter margins should lower toxicity further, but it also narrows coverage, and a series dominated by ultrasound alignment cannot tell us whether smaller margins preserve the low local failure rate.\n\nWhat this changes: little for practice that has already adopted moderate hypofractionation on randomized evidence, but it removes much of the residual concern about late events past the trials' reporting window for low and intermediate-risk localized disease. What it does not settle is the HR question, where the confounding by short ADT and absent nodal coverage makes the outcome data uninformative about the schedule itself.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Failure after 70 Gy/28 fx was almost entirely distant (117 of 125 clinical failures; 8 local-only), so prostate dose is not the HR weak point. Low late toxicity was achieved with rectal/bladder V70 held to 5%, far tighter than NRG-GU005 allows, which gates whether the 2%/1% rates transfer."
+            },
+            "open_questions": [
+              "HR outcomes with 70 Gy/28 fx plus ≥2 yr ADT and pelvic nodal RT",
+              "Toxicity reproducibility under looser multi-institutional dose constraints",
+              "Whether tighter modern IGRT margins preserve low local failure"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "retrospective",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT07693075",
+                "brief_title": "Efficacy and Safety of Simultaneous Integrated Boost Radiotherapy in HR/VHR Prostate Cancer With EPLNI",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 30,
+                "primary_completion_date": "2026-09",
+                "brief_summary": "The aim of this study is to evaluate the efficacy and safety of hypofractionated simultaneous integrated boost volumetric arc radiation therapy (SIB - VMAT) for high-risk and very high-risk localized prostate cancer in terms of:\n\n1. Acute and late gastrointestinal and genitourinary toxicities.\n2. Evaluate the efficacy in terms of early bPFS.\n3. Dosimetric evaluation in terms of target coverage and organs at risk sparing",
+                "conditions": [
+                  "Prostate Cancer Patients Treated by Radiotherapy"
+                ],
+                "interventions": [
+                  {
+                    "name": "Simultaneous Integrated Boost Volumetric Modulated Arc Therapy (SIB-VMAT)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed adenocarcinoma of the prostate.\n* Classification as High-Risk (HR) or Very High-Risk (VHR) per NCCN guidelines (e.g., T3a+, PSA \\> 20 ng/mL, or Gleason Score 8-10).\n* Adequate baseline urinary function (IPSS \\\\le 20).\n* Multiparametric MRI of the…",
+                "answers_question": "HR outcomes with 70 Gy/28 fx plus ≥2 yr ADT and pelvic nodal RT",
+                "relevance_phrase": "hypofx SIB-VMAT + EPLNI in HR/VHR, bPFS endpoint"
+              },
+              {
+                "nct": "NCT07325721",
+                "brief_title": "Hypofractionated Radiotherapy With a Focal Microboost for High-Risk and Locally Advanced Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 46,
+                "primary_completion_date": "2029-01",
+                "brief_summary": "This study is for adult men with previously untreated high risk, very high risk, or pelvic lymph node positive prostate cancer. The purpose of this study is to evaluate the safety and effectiveness of the combination of two emerging radiation treatment techniques (hypofractionated radiotherapy and microboost technique). Participation will include standard of care visits along with questionnaires and blood draws completed for research purposes. There is optional banking of blood and prostate…",
+                "conditions": [
+                  "Prostate Cancer",
+                  "Prostate Cancer Patients Treated by Radiotherapy"
+                ],
+                "interventions": [
+                  {
+                    "name": "Hypofractionated radiation with a microboost",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Provision of signed and dated informed consent form.\n2. Stated willingness to comply with all study procedures and availability for the duration of the study.\n3. Biologically male patients aged 18 years and older.\n4. Ability to receive pelvic radiotherapy and be willing to…",
+                "answers_question": "HR outcomes with 70 Gy/28 fx plus ≥2 yr ADT and pelvic nodal RT",
+                "relevance_phrase": "hypofx + microboost, HR/VHR/N+ intact prostate"
+              },
+              {
+                "nct": "NCT03827616",
+                "brief_title": "Moderately Hypofractionated Radiotherapy for Prostate Cancer.",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 400,
+                "primary_completion_date": "2029-02",
+                "brief_summary": "Radiation therapy is one of the standard treatments for men with prostate cancer. Moderately hypofractionated radiotherapy has been established to be equivalent to standard fractionated radiotherapy in several large randomized clinical trials, however different hypofractionated regimens have been used in these studies. The two most common hypofractionated regimens are 70 Gy in 28 fractions and 60 Gy in 20 fractions, both are considered standard of care, however it is not unknown which regimen…",
+                "conditions": [
+                  "Prostatic Neoplasms",
+                  "Genital Neoplasms"
+                ],
+                "interventions": [
+                  {
+                    "name": "Hypofractionated IMRT using helical Tomotherapy.",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Hypofractionated IMRT using helical Tomotherapy.",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion criteria:\n\n1\\. Histologically confirmed adenocarcinoma of the prostate. 2 The presence of the following studies: TRUS of the prostate gland, pelvis MRI, OSG.\n\n3 Histological evaluation of prostate biopsy with assignment of the Gleason index.\n\n4 Clinical stage T1-3N0M0 (AJCC 7th edition).…",
+                "answers_question": "Toxicity reproducibility under looser multi-institutional dose constraints",
+                "relevance_phrase": "70 Gy/28 fx vs 60 Gy/20 fx, intact T1-3N0M0"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "hypofractionated prostate pelvic nodal",
+                "moderate hypofractionation prostate toxicity"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 29,
+              "fetched_at": "2026-10-22T08:03:03.872Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 135
+              }
+            ]
+          },
+          {
+            "name": "Integrated clinical-genomic risk groups (Decipher + NCCN)",
+            "tldr": "10y DM 3.5%/29.4%/54.6% for clinical-genomic low/int/high vs NCCN 7.3%/9.2%/38.0%/39.5% in localized prostate cancer; 30% reclassified.",
+            "details": [
+              "🔍 Retrospective development: training n=756 (RP specimens, 1997-2004), validation n=235 (biopsy specimens, 1995-2005)",
+              "🔍 Reclassification-only prospective cohorts: n=4,960 (RP) and n=977 (biopsy); no outcome data in these",
+              {
+                "text": "🔍 Point system: NCCN 0-3 + Decipher 0-2 → total 0-5",
+                "subdetails": [
+                  "Decipher <0.45 = 0, 0.45-0.6 = 1, >0.6 = 2",
+                  "3-tier: low 0-1, int 2-3, high 4-5",
+                  "6-tier: very-low (0) to very-high (5)"
+                ]
+              },
+              {
+                "text": "📊 10y distant metastasis and HR for DM by risk system",
+                "table": {
+                  "columns": [
+                    "Risk group",
+                    "10y DM, training",
+                    "10y DM, validation",
+                    "HR DM, training (95% CI)"
+                  ],
+                  "rows": [
+                    [
+                      "NCCN low",
+                      "7.3%",
+                      "n/a",
+                      "Ref"
+                    ],
+                    [
+                      "NCCN fav-int",
+                      "9.2%",
+                      "n/a",
+                      "1.2 (0.5-3.0)"
+                    ],
+                    [
+                      "NCCN unfav-int",
+                      "38.0%",
+                      "n/a",
+                      "5.4 (2.8-12.0)"
+                    ],
+                    [
+                      "NCCN high",
+                      "39.5%",
+                      "n/a",
+                      "6.0 (3.2-13.0)"
+                    ],
+                    [
+                      "CG low",
+                      "3.5%",
+                      "0%",
+                      "Ref"
+                    ],
+                    [
+                      "CG int",
+                      "29.4%",
+                      "25.9%",
+                      "9.3 (4.8-21.5)"
+                    ],
+                    [
+                      "CG high",
+                      "54.6%",
+                      "55.2%",
+                      "21.9 (11.1-50.4)"
+                    ]
+                  ]
+                }
+              },
+              "📊 NCCN did not separate low from fav-int, or unfav-int from high, for DM in the RP cohort",
+              {
+                "text": "📐 C-index for 10y DM",
+                "table": {
+                  "columns": [
+                    "System",
+                    "Cohort",
+                    "C-index (95% CI)"
+                  ],
+                  "rows": [
+                    [
+                      "CG 6-tier",
+                      "Training",
+                      "0.77 (0.72-0.81)"
+                    ],
+                    [
+                      "NCCN 4-tier",
+                      "Training",
+                      "0.68 (0.64-0.72)"
+                    ],
+                    [
+                      "NCCN 3-tier",
+                      "Training",
+                      "0.65 (0.60-0.69)"
+                    ],
+                    [
+                      "CAPRA score",
+                      "Training",
+                      "0.68 (0.62-0.74)"
+                    ],
+                    [
+                      "CG 6-tier",
+                      "Validation",
+                      "0.84 (0.61-0.93)"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📊 10y PCSM, clinical-genomic groups (training)",
+                "subdetails": [
+                  "Low 2.0%, int 10.7%, high 27.3%",
+                  "HR vs low: int 6.5 (2.5-14.0), high 18.9 (7.2-69.3)"
+                ]
+              },
+              {
+                "text": "📊 Reclassification vs NCCN in prospective cohorts",
+                "subdetails": [
+                  "Cohort I (RP): 33.4% (1,655 of 4,960) reclassified by 3-tier",
+                  "Cohort I: 56.8% of fav-int and 36.0% of unfav-int reclassified",
+                  "Cohort II (biopsy): 29.9% (292 of 977) reclassified",
+                  "6-tier vs NCCN 6-tier: 66.6% reclassified"
+                ]
+              },
+              "⚠️ Abstract's c-index 0.84 is the 235-pt validation estimate (CI 0.61-0.93); like-for-like training contrast is 0.77 vs 0.68",
+              "⚠️ Treatment-adjusted HRs shrink: CG int 3.5 (1.5-8.3), high 6.1 (2.6-14.4) after adjusting for ADT and RT",
+              "⚠️ Validation HRs 21.3 (2.8 to 2,727.6) and 62.5 (8.5 to 7,969.6): sparse events, 0% low-risk DM",
+              "⚠️ Prognostic only; no test of whether treatment changes on reclassification alter outcomes",
+              "⚠️ Many authors employed by GenomeDx, the Decipher manufacturer"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1200/jco.2017.74.2940",
             "tweet_ids": [
               1000000137
             ],
             "slug": "spratt-clinical-genomic-risk-groups",
             "verdict": {
               "soc_implication": "early-signal",
-              "rationale": "Retrospective derivation with a 235-pt biopsy validation set and very wide HR CIs; prognostic only, no test that group-guided treatment improves outcome. Sponsor-employed authors.",
-              "audience": "Localized prostate cancer, NCCN low to high risk, pre-treatment"
+              "rationale": "Retrospective development with a 235-pt biopsy validation set and sparse low-risk events; prognostic only, no evidence that reclassification-driven treatment changes outcomes.",
+              "audience": "Localized prostate cancer, NCCN low to high risk, with Decipher available"
             },
-            "significance": "The RT-relevant split is inside intermediate risk: NCCN unfav-int and high-risk carried near-identical 10-yr DM (38.0% vs 39.5%), and 36.0% and 40.5% of unfav-int pts changed group with Decipher. That makes the integrated group, not NCCN tier alone, the better prognostic gate when sizing ADT with RT, though benefit by group was not tested.",
-            "monday_clinic": "In NCCN intermediate-risk localized prostate cancer weighing RT with or without ADT, this supports a Decipher-integrated group as a sharper prognostic estimate; it does not show that changing therapy by group changes metastasis rates.",
+            "significance": "The pre-RT setting is the biopsy validation cohort (n=235), where 10y DM ran 0%/25.9%/55.2% across clinical-genomic tiers. The reclassification hits the NCCN favorable/unfavorable intermediate boundary hardest (56.8% and 36.0% moved in prospective cohort I), which is the line that gates adding ADT to RT.",
+            "monday_clinic": "In NCCN intermediate-risk localized prostate cancer, a biopsy Decipher score can move the pt across the favorable/unfavorable line that frames the RT plus ADT discussion; it does not establish that treating to the new tier changes metastasis or survival.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**Retrospective** development (n=756, RP specimens, 1997-2004) and validation (n=235, biopsy, 1995-2005) cohorts; two prospective genomic cohorts (n=4,960 and n=977) for **reclassification only**. Competing-risks analysis for DM; time-dependent c-indices."
+                "body": "**Retrospective** development (training n=756, RP genomic data) and validation (n=235, **biopsy** genomic data) with competing-risks DM estimates; training median follow-up **8 years**. Two prospective cohorts (n=4,960 RP; n=977 biopsy) used for **reclassification only**."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**Localized prostate cancer** across NCCN low to very-high risk. Training cohort median age 61.0, validation 64.0."
+                "body": "**Localized prostate cancer** across NCCN low to high/very-high risk. Training cohort second-line therapy included adjuvant RT 7%, salvage RT 13%, salvage ADT 18%."
               },
               {
                 "label": "Endpoints",
-                "body": "**10-yr distant metastasis** (main) and **10-yr PCSM**; discrimination by c-index; proportion reclassified from NCCN."
+                "body": "**Primary outcome: distant metastasis** at 10 years; PCSM secondary. Discrimination by time-dependent c-index; reclassification vs NCCN three-, four- and six-tier systems."
               },
               {
                 "label": "Results",
-                "body": "Three-tier CG separated 10-yr DM into **3.5%, 29.4%, 54.6%** in training and **0%, 25.9%, 55.2%** in validation, where NCCN unfav-int and high were indistinguishable."
+                "body": "Clinical-genomic tiers separated DM where NCCN fav-int and unfav-int did not split from their neighbors; c-index **0.77 vs 0.68** for NCCN four-tier in training."
               },
               {
                 "label": "vs leading data",
-                "body": "Benchmarked against **NCCN** and **CAPRA** within the same cohorts: training c-index 0.77 for six-tier CG vs 0.68 for both NCCN four-tier and CAPRA score. No external comparator classifier was tested."
+                "body": "Benchmarked against **NCCN** risk groups and **CAPRA** (continuous score 0.68, groups 0.64 in training), both outperformed on DM discrimination. The authors frame NCCN as built to predict biochemical recurrence, which ICECaP found is not a surrogate for survival."
               },
               {
                 "label": "Applies to",
-                "body": "Represents pre-treatment localized prostate cancer with a Decipher result from RP or biopsy tissue. Does not represent node-positive, metastatic, or post-treatment recurrent disease."
+                "body": "Represents localized prostate cancer with a Decipher result from RP or biopsy tissue, NCCN low through high risk. Does not represent node-positive or metastatic disease, or a population in which reclassification has been shown to change treatment benefit."
               },
               {
                 "label": "Limitations",
-                "body": "Treatment-adjusted HRs shrink (CG high **6.1** vs **21.9** unadjusted), so part of the separation may track treatment received. Abstract and Table 2 disagree on the NCCN c-index (0.73 vs 0.68)."
+                "body": "Adjusting for ADT and RT cuts clinical-genomic HRs from **9.3 and 21.9 to 3.5 and 6.1**, so part of the gradient tracks treatment received. Training specimens date from 1997-2004, and many authors are GenomeDx employees."
               },
               {
                 "label": "Discussion",
-                "body": "The tool converts a continuous genomic score into **guideline-compatible tiers**, which is its practical value. It is prognostic: whether intensifying or de-intensifying therapy by CG group helps is **unanswered**."
+                "body": "The system turns a continuous classifier score into categories that fit existing NCCN-based decision rules, which is its practical value. It **does not answer** whether treatment intensification or de-intensification by the new tier changes outcomes."
               }
             ],
-            "interpretation": "The core contribution here is translational rather than biological. Decipher already carried prognostic information, but a continuous probability of metastasis does not slot into guidelines written around categorical risk tiers. Spratt and colleagues solve that by adding genomic points to NCCN points and collapsing the total into three or six groups, so the output speaks the same language as the treatment tables a clinician already uses. That design choice explains both the appeal of the system and its limits.\n\nThe most clinically useful finding is not the headline c-index but the behaviour of NCCN intermediate risk in the training cohort. Favorable-intermediate tracked low risk (10-yr DM 9.2% vs 7.3%, HR 1.2) and unfavorable-intermediate tracked high risk (38.0% vs 39.5%). In other words, the four-tier NCCN scheme was effectively behaving as two tiers for metastasis in this cohort, and the genomic layer is what restores a middle group. For a radiation oncologist, intermediate risk is where the ADT decision is least settled, and the reclassification data (56.8% and 44.4% of favorable-intermediate, 36.0% and 40.5% of unfavorable-intermediate moving groups in the two prospective cohorts) say that tier assignment alone is unstable exactly where it matters most.\n\nConfidence should be tempered on several fronts. The training cohort was entirely prostatectomy specimens from 1997 to 2004, so the outcome relationships were learned in surgically treated men with pathologic grading, then applied to biopsy tissue in a validation set of 235. That validation set is small enough that the low-risk group had zero metastases and the high-risk HR has an upper bound in the thousands; the direction is reassuring, the magnitude is not estimable. When the authors adjust for ADT and RT received, the clinical-genomic HRs fall from 9.3 and 21.9 to 3.5 and 6.1, which suggests that some apparent separation reflects who got salvage or adjuvant therapy. The prospective cohorts of nearly 6,000 men contribute only genomic distributions and reclassification, not outcomes. And the abstract's NCCN c-index of 0.73 does not match the 0.68 in Table 2, a discrepancy a reader should notice before quoting the discrimination gain. Many authors were employed by the classifier's manufacturer.\n\nWhat the paper does not establish is predictive value. A man reclassified from unfavorable-intermediate to clinical-genomic low risk has a lower estimated metastasis rate, but nothing here shows that omitting ADT with RT is safe for him, or that adding it helps a man moved upward. Those are questions for biomarker-stratified randomized trials, and the system is best read as the scaffolding such trials can use for eligibility rather than a basis for changing therapy on its own.\n\nFor whom it would be wrong: if contemporary staging with PSMA PET and MRI-targeted biopsy already captures much of what Decipher adds, the reclassification fraction in a modern cohort could be smaller than reported here. The system remains a prognostic refinement, credible in direction, uncertain in magnitude, and silent on treatment benefit.",
+            "interpretation": "The core argument of this paper is less that Decipher adds prognostic information, which earlier work had already suggested, and more that a continuous genomic score is clinically inert unless it maps onto the categories treatment recommendations are written in. Collapsing NCCN points and Decipher points into a 0 to 5 scale is a pragmatic answer to that, and the training data show why it was worth attempting: in this RP cohort the NCCN four-tier system did not distinguish low from favorable-intermediate risk (HR 1.2, 95% CI 0.5 to 3.0) or unfavorable-intermediate from high risk (10-year DM 38.0% vs 39.5%). A risk system whose middle boundaries carry little prognostic separation for metastasis is a weak foundation for decisions such as whether to add ADT to RT, and the clinical-genomic tiers spread DM from 3.5% to 54.6%.\n\nThe discrimination headline deserves a closer read. The abstract sets the clinical-genomic c-index of 0.84 against NCCN, but 0.84 comes from the 235-patient biopsy validation cohort with a confidence interval of 0.61 to 0.93. The within-cohort comparison in training, 0.77 for the six-tier system vs 0.68 for NCCN four-tier, is the fairer contrast and still favors the new system, but by a smaller margin than the abstract implies. The validation hazard ratios, with upper bounds of 2,727.6 and 7,969.6, reflect a low-risk group with no metastatic events at 10 years; that is reassuring directionally and nearly uninformative about magnitude.\n\nThe more important methodological signal is in the treatment-adjusted model. Once ADT, RT and institution are accounted for in training, the intermediate and high clinical-genomic HRs fall from 9.3 and 21.9 to 3.5 and 6.1. They remain significant, and the NCCN HRs shrink too (to 2.5 for both unfavorable-intermediate and high), so the relative advantage holds. But it means part of the raw gradient reflects who received salvage and adjuvant therapy, and a reader should anchor on the adjusted magnitudes when explaining risk to a patient.\n\nFor a radiation oncologist, the most relevant finding is where reclassification concentrates. In the large prospective RP cohort, 56.8% of NCCN favorable-intermediate and 36.0% of unfavorable-intermediate patients moved tier, which is exactly the boundary that frames short-course ADT with RT. The training set, however, is post-prostatectomy tissue from 1997 to 2004, and the biopsy validation cohort that mirrors a pre-RT decision is small. The prospective cohorts contribute reclassification counts but no outcomes, so the 30% figure describes how often the label changes, not how often the label change is correct.\n\nWhat the study cannot settle is prediction. A prognostic tier tells you baseline risk; it does not tell you that a reclassified favorable-intermediate patient benefits from ADT, or that a reclassified unfavorable-intermediate patient can safely omit it. That requires randomized data stratified or selected by the score. The extensive author employment by the manufacturer does not invalidate the analysis but argues for independent replication, ideally in biopsy cohorts treated with contemporary RT.",
             "relevant_specialties": [
               "radonc",
               "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "NCCN unfav-int and high-risk had near-identical 10-yr DM (38.0% vs 39.5%), and 36.0% and 40.5% of unfav-int pts changed group with Decipher. The integrated group is a sharper prognostic gate for ADT with RT, but RT-treated performance was not reported separately and benefit by group was untested.",
-              "surgonc": "The system was trained on RP specimens with 8-yr median follow-up, so its prognostic separation is most directly grounded in surgically treated men. Fav-int pts were reclassified in 56.8% and 44.4% of the prospective cohorts, informing who might be counselled toward surveillance versus treatment, with no outcome test of that choice."
+              "radonc": "Biopsy-based validation (n=235) is the pre-RT setting: 10y DM 0%/25.9%/55.2% by tier. Reclassification concentrates at the favorable/unfavorable intermediate split (56.8% and 36.0% moved), the boundary that gates ADT with RT, though adjusted HRs shrink to 3.5 and 6.1 once ADT and RT are modeled.",
+              "surgonc": "Training was on RP specimens, 476 (63%) treated with prostatectomy alone, 8-yr median f/u. NCCN low vs fav-int did not differ for DM (HR 1.2), while clinical-genomic high reached 54.6% 10y DM; in the prospective RP cohort 27.2% of NCCN high-risk were reclassified."
             },
             "open_questions": [
-              "Does treatment intensity selected by clinical-genomic group change metastasis rates?",
-              "Prognostic performance in RT-treated vs RP-treated pts",
-              "Reclassification yield in PSMA-PET-staged contemporary cohorts"
+              "Does genomic reclassification predict ADT benefit with RT?",
+              "Independent validation in larger biopsy-based cohorts"
             ],
             "consort": null,
             "modality": null,
-            "intent": "curative",
+            "intent": null,
             "methodology": "retrospective",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
@@ -421,18 +715,66 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically (histologically or cytologically) proven diagnosis of adenocarcinoma of the prostate within 270 days prior to registration\n* Unfavorable intermediate risk prostate cancer, defined as having ALL the following bulleted criteria:\n\n  * Has at least one intermediate…",
-                "answers_question": "Does treatment intensity selected by clinical-genomic group change metastasis rates?",
-                "relevance_phrase": "phase 3 Decipher-guided RT±ADT de-/intensification, UIR"
+                "answers_question": "Does genomic reclassification predict ADT benefit with RT?",
+                "relevance_phrase": "phase 3 Decipher-guided RT ± ADT/darolutamide by risk"
+              },
+              {
+                "nct": "NCT05169970",
+                "brief_title": "A Study of Stereotactic Body Radiation Therapy (SBRT) Without Androgen Deprivation Therapy (ADT) in People With Unfavorable Intermediate-Risk Prostate Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 222,
+                "primary_completion_date": "2027-12",
+                "brief_summary": "The researchers are doing this study to find out if stereotactic body radiation therapy (SBRT) without androgen deprivation therapy (ADT) is an effective treatment approach for people with unfavorable intermediate-risk prostate. The researchers will see whether SBRT can prevent participants' cancer from coming back and/or spreading to other parts of the body. In addition, they will look closely at how safe and effective it is to rely on Decipher test results for determining which patients would…",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic Body Radiation Therapy (SBRT)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Stereotactic Body Radiation Therapy (SBRT)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically proven diagnosis of prostate adenocarcinoma within 12 months of enrollment\n* Unfavorable intermediate risk prostate cancer by NCCN 2021 risk stratification guidelines, including any of the following clinicopathologic features:\n* Gleason Score 4+3\n* ≥ 50% biopsy…",
+                "answers_question": "Does genomic reclassification predict ADT benefit with RT?",
+                "relevance_phrase": "UIR SBRT without ADT, Decipher-guided selection"
+              },
+              {
+                "nct": "NCT02723734",
+                "brief_title": "Validation Study on the Impact of Decipher® Testing - VANDAAM Study",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": null,
+                "enrollment_count": 240,
+                "primary_completion_date": "2023-07",
+                "brief_summary": "The primary purpose of this study is to determine whether a tumor test recently developed by GenomeDx Biosciences known as Decipher® can predict aggressive prostate cancer with the same accuracy in African-American men (AAM) as in non-African-American men (NAAM). The Decipher® test was developed from samples derived mainly from men of European origins and little is known about its performance in AAM. It is important to study whether this test can be used in AAM who are known to experience the…",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Decipher® Testing",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Adult patients with Karnofsky Performance Status \\>70\n* Eastern Cooperative Oncology Group (ECOG) Performance Status 0-1\n* Pathologically (histologically) proven diagnosis of prostate cancer (PCa) undergoing their first line of treatment\n* Meet National Comprehensive Cancer…",
+                "answers_question": "Independent validation in larger biopsy-based cohorts",
+                "relevance_phrase": "Decipher accuracy in AAM vs non-AAM, 1st-line pts"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
                 "Decipher prostate radiotherapy",
-                "genomic classifier prostate radiation"
+                "genomic classifier prostate biopsy"
               ],
               "queries_failed": [],
-              "candidates_returned": 19,
-              "fetched_at": "2026-10-21T08:06:44.437Z",
+              "candidates_returned": 22,
+              "fetched_at": "2026-10-22T08:03:23.516Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -444,57 +786,70 @@
           },
           {
             "name": "HYPO-RT-PC",
-            "tldr": "5y FFS 84% vs 84%, adjusted HR 1.002 (95% CI 0.758-1.325): 42.7 Gy/7 fx non-inferior to 78 Gy/39 fx in intermediate-to-high-risk prostate cancer, no ADT.",
+            "tldr": "5yr FFS 84% vs 84%, adjusted HR 1.002 (95% CI 0.758-1.325): 42.7 Gy/7 fx non-inferior to 78 Gy/39 fx in intermediate-to-high-risk prostate, no ADT.",
             "details": [
-              "📊 1° EP met: 5y FFS 84% (80-87) in both arms",
-              "📐 Adjusted HR 1.002 (95% CI 0.758-1.325) vs critical NI HR 1.338",
-              "📐 Upper CI bound 1.325 sits just inside the 1.338 limit",
-              "🔍 Open-label randomised phase 3 NI, 12 centres Sweden/Denmark, N=1200, median f/u 5.0y",
-              "🔍 42.7 Gy/7 fx (3 d/wk, 2.5 wk) vs 78.0 Gy/39 fx (5 d/wk, 8 wk), mean PTV dose",
-              "🔍 CTV prostate only, no SVs; 7 mm isotropic CTV-PTV margin with gold fiducials",
-              "💊 No ADT permitted in either arm",
+              "🔍 Open-label randomised phase 3 non-inferiority trial, 12 centres in Sweden and Denmark, N=1200 (2005-2015)",
               {
-                "text": "📊 Efficacy + toxicity by arm (per-protocol)",
+                "text": "🔍 Population and eligibility",
+                "subdetails": [
+                  "Men up to 75 years, T1c-T3a, N0M0, PSA ≤20 ng/mL",
+                  "1054 (89%) intermediate risk, 126 (11%) high risk",
+                  "No ADT permitted"
+                ]
+              },
+              {
+                "text": "🔍 RT technique",
+                "subdetails": [
+                  "UHF 42.7 Gy/7 fx, 3 d/wk over 2.5 wk vs CF 78.0 Gy/39 fx, 5 d/wk over 8 wk",
+                  "Dose prescribed as mean PTV dose",
+                  "CTV prostate only, seminal vesicles not included",
+                  "Gold fiducials: isotropic 7 mm CTV-PTV margin",
+                  "3DCRT 80%, VMAT/IMRT 20% in each arm",
+                  "Median total treatment time 16 vs 57 days"
+                ]
+              },
+              {
+                "text": "📊 Efficacy and G2+ toxicity by arm (per-protocol)",
                 "table": {
                   "columns": [
                     "Endpoint",
-                    "Ultra-hypo 42.7 Gy/7 fx",
-                    "Conventional 78 Gy/39 fx",
-                    "Effect"
+                    "UHF 42.7 Gy/7 fx",
+                    "CF 78.0 Gy/39 fx",
+                    "Comparison"
                   ],
                   "rows": [
                     [
-                      "5y FFS",
+                      "5yr FFS",
                       "84% (80-87)",
                       "84% (80-87)",
-                      "HR 1.002 (0.758-1.325)"
+                      "adj HR 1.002 (0.758-1.325)"
                     ],
                     [
-                      "5y OS",
+                      "5yr OS",
                       "94% (92-96)",
                       "96% (95-98)",
                       "HR 1.11 (0.73-1.69)"
                     ],
                     [
-                      "Acute G2+ GU, end of RT",
+                      "Acute G2+ GU, end RT",
                       "28% (158/569)",
                       "23% (132/578)",
                       "p=0.057"
                     ],
                     [
-                      "G2+ GU at 1y",
+                      "G2+ GU at 1yr",
                       "6% (32/528)",
                       "2% (13/529)",
                       "p=0.0037"
                     ],
                     [
-                      "G2+ GU at 5y",
+                      "G2+ GU at 5yr",
                       "5% (11/243)",
                       "5% (12/249)",
                       "p=1.00"
                     ],
                     [
-                      "G2+ bowel at 5y",
+                      "G2+ bowel at 5yr",
                       "1% (3/244)",
                       "4% (9/249)",
                       "p=0.14"
@@ -503,31 +858,49 @@
                 }
               },
               {
-                "text": "📊 Cumulative late G2+ toxicity (RTOG), ultra-hypo vs conventional",
+                "text": "📊 Cumulative late physician-reported G2+ toxicity",
                 "table": {
                   "columns": [
-                    "Toxicity",
-                    "2y",
-                    "5y"
+                    "Endpoint",
+                    "UHF",
+                    "CF",
+                    "Log-rank p"
                   ],
                   "rows": [
                     [
-                      "Urinary",
-                      "13% vs 9%",
-                      "18% vs 17%"
+                      "GU at 2yr",
+                      "13% (11-16)",
+                      "9% (7-12)",
+                      "0.63"
                     ],
                     [
-                      "Bowel",
-                      "6% vs 5%",
-                      "10% vs 10%"
+                      "GU at 5yr",
+                      "18% (15-22)",
+                      "17% (14-20)",
+                      "0.63"
+                    ],
+                    [
+                      "Bowel at 2yr",
+                      "6% (5-9)",
+                      "5% (4-8)",
+                      "1.00"
+                    ],
+                    [
+                      "Bowel at 5yr",
+                      "10% (7-13)",
+                      "10% (7-13)",
+                      "1.00"
                     ]
                   ]
                 }
               },
-              "⚠️ Designed for superiority; converted to NI after blinded interim showed 87% 5y FFS",
-              "⚠️ 80% 3DCRT; transfer to IMRT/SBRT with tighter margins not tested here",
-              "⚠️ 89% intermediate risk; high-risk n=126 too few to stand alone",
-              "🔗 Extends moderate-hypofx trials CHHiP, RTOG 0415, PROFIT, HYPRO to 7 fx"
+              "📐 Upper CI bound 1.325 sits just under the prespecified NI limit of 1.338",
+              "📊 Erectile function fell from almost 70% to 35% at 5yr, no arm difference",
+              "⚠️ Redesigned mid-trial from superiority (70% → 80% FFS) to NI after blinded interim estimated 87% 5yr FFS",
+              "⚠️ Per-protocol primary; ITT differs by only 10 pts (1%)",
+              "⚠️ Open-label: physician-graded toxicity unblinded, though biochemical relapse assessed blindly",
+              "🔗 Moderate hypofractionation (CHHiP, RTOG 0415, PROFIT, HYPRO) already changed practice; this is the first randomised UHF readout",
+              "🔗 2018 ASTRO/ASCO/AUA guideline graded UHF conditional pending randomised evidence"
             ],
             "figures": [],
             "nct": null,
@@ -538,87 +911,87 @@
             "slug": "hypo-rt-pc",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Randomised phase 3 NI met its 1° EP at 5y median f/u, but open-label, converted mid-trial from superiority, mostly 3DCRT; supports a guideline-listed option rather than redefining SOC alone.",
-              "audience": "Intermediate-to-high-risk localised prostate, PSA ≤20, no ADT, age ≤75"
+              "rationale": "Randomised phase 3, NI primary met at 5yr median f/u; open-label, per-protocol primary, redesigned from superiority mid-trial. Backs guideline-conditional UHF rather than redefining SOC alone.",
+              "audience": "Intermediate/high-risk N0M0 prostate, PSA ≤20, no ADT, age ≤75"
             },
-            "significance": "The transferable unit is narrower than the headline: prostate-only CTV with no SVs, 7 mm isotropic margins on fiducials, 80% 3DCRT, no ADT. The price is early GU toxicity (G2+ at 1y 6% vs 2%, p=0.0037) that converges by 5y (5% vs 5%). This supports 7-fx UHF for intermediate-risk disease, not a specific modern 5-fx SBRT schedule.",
-            "monday_clinic": "In intermediate-risk localised prostate cancer with PSA ≤20 and no planned ADT, this supports 42.7 Gy/7 fx as non-inferior to 78 Gy/39 fx on FFS; it does not address pts needing ADT, seminal vesicle or nodal coverage.",
+            "significance": "The schedule tested is 42.7 Gy/7 fx every other weekday to a prostate-only CTV (no seminal vesicles) with a 7 mm fiducial margin, 80% 3DCRT, no ADT. That supports UHF for prostate-only volumes without ADT, not SV-inclusive or ADT-paired high-risk plans. Counsel on the 1yr G2+ GU bump (6% vs 2%).",
+            "monday_clinic": "In a man up to 75 with intermediate-risk, N0M0 prostate cancer, PSA ≤20 and no ADT planned, this supports 7-fraction UHF as disease-control equivalent to 39 fractions; it does not extend to pts needing ADT, PSA >20, or seminal vesicle coverage.",
             "primary_endpoint": {
-              "name": "Failure-free survival",
+              "name": "Failure-free survival (biochemical or clinical failure)",
               "klass": "surrogate",
-              "stat_value": "HR 1.002",
-              "stat_detail": "95% CI 0.758-1.325 vs NI limit 1.338; 5y FFS 84% both arms"
+              "stat_value": "5yr FFS 84% vs 84%",
+              "stat_detail": "adjusted HR 1.002 (95% CI 0.758-1.325), non-inferior vs HR limit 1.338"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Open-label, randomised 1:1, **phase 3 non-inferiority**, 12 centres in Sweden and Denmark, accrued 2005-2015. **N=1200** randomised, 1180 per-protocol. Median follow-up **5.0y** (IQR 3.1-7.0)."
+                "body": "**Open-label randomised phase 3 non-inferiority** trial, 1:1, 12 centres in Sweden and Denmark, **N=1200** randomised 2005-2015. Median follow-up **5.0 yr** (IQR 3.1-7.0)."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Men up to 75y with **intermediate-to-high-risk** prostate cancer, T1c-T3a, N0 M0, **PSA ≤20 ng/mL**, WHO PS 0-2. **89% intermediate risk**, 11% high risk; median PSA 8.6 vs 8.7."
+                "body": "Men up to 75 with **intermediate-to-high-risk, T1c-T3a N0M0** prostate cancer, **PSA ≤20**, WHO PS 0-2. **No ADT allowed.** 89% intermediate risk, 11% high risk."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**42.7 Gy/7 fx** (3 d/wk over 2.5 wk) vs **78.0 Gy/39 fx** (5 d/wk over 8 wk), prescribed as mean PTV dose, designed equi-effective for late effects at α/β = 3 Gy. **CTV prostate only, no SVs**; 7 mm isotropic margin with gold fiducials (90%). 3DCRT 80%, VMAT/IMRT 20%. **No ADT.**"
+                "body": "**42.7 Gy/7 fx** (3 d/wk, 2.5 wk) vs **78.0 Gy/39 fx** (5 d/wk, 8 wk), prescribed as mean PTV dose and designed equi-effective for late effects at α/β = 3 Gy. **CTV prostate only**, no seminal vesicles; 7 mm isotropic margin with fiducials; 80% 3DCRT."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary:** failure-free survival (Phoenix nadir + 2.0 ng/mL biochemical or clinical failure), per-protocol. NI margin **4% at 5y**, critical HR 1.338. Secondary: OS, PCSS, toxicity, QoL."
+                "body": "**Primary:** failure-free survival (Phoenix nadir+2 biochemical or clinical failure), per-protocol, NI margin **4% at 5yr** (critical HR **1.338**). Secondary: OS, PCSS, RTOG toxicity, erectile function."
               },
               {
                 "label": "Results",
-                "body": "**Non-inferiority shown**; 102 vs 100 primary events (conventional vs ultra-hypo). Post-hoc subgroups (age, Gleason, T stage, PSA, risk group) showed no interaction."
+                "body": "Efficacy and toxicity by arm are tabulated above; the primary met NI with a point estimate of essentially no difference."
               },
               {
                 "label": "Safety",
-                "body": "Acute G2+ GU higher with UHF at end of RT (**28% vs 23%, p=0.057**) and at **1y (6% vs 2%, p=0.0037)**. No late difference at 5y; cumulative late G2+ GU **18% vs 17%** and bowel **10% both**. Erectile function fell from almost 70% to 35% at 5y, no arm difference."
+                "body": "UHF carries a **higher acute and 1yr GU burden** (G2+ at 1yr 6% vs 2%, p=0.0037) that **converges by 5yr** (5% vs 5%). Late bowel toxicity no different; patient-reported acute urinary and bowel symptoms higher with UHF."
               },
               {
                 "label": "vs leading data",
-                "body": "CHHiP, RTOG 0415, PROFIT and HYPRO established **moderate** hypofractionation; this is the first randomised trial of **ultra**-hypofractionation, where the 2018 ASTRO/ASCO/AUA guideline had graded UHF only conditional pending randomised evidence."
+                "body": "CHHiP, RTOG 0415, PROFIT and HYPRO established **moderate hypofractionation** against conventional fractionation. HYPO-RT-PC is the first randomised test of **ultra-hypofractionation**, the evidence the 2018 ASTRO/ASCO/AUA guideline said it was waiting for."
               },
               {
                 "label": "Applies to",
-                "body": "Represents intermediate-risk localised prostate cancer, PSA ≤20, treated to the prostate alone without ADT. Does not represent high-risk disease needing ADT, SV or elective nodal coverage, or PSA >20."
+                "body": "Represents men up to 75 with intermediate-to-high-risk (89% intermediate), N0M0, T1c-T3a prostate cancer, PSA ≤20, treated without ADT. Does not represent pts receiving ADT, PSA >20, or volumes covering seminal vesicles or pelvic nodes."
               },
               {
                 "label": "Limitations",
-                "body": "Upper CI bound (**1.325**) sits just under the **1.338** critical HR, so a modest disadvantage is not excluded. Late-toxicity denominators at 5y are ~**243-249** per arm, and technique (mostly 3DCRT, 7 mm margins) predates current SBRT delivery."
+                "body": "The upper CI bound (1.325) clears the 1.338 limit **narrowly**. 80% 3DCRT and a 7 mm margin predate modern SBRT delivery, and 7 fx every other weekday is not the 5 fx schedule most programs use. Five-year median follow-up is short for late intermediate-risk failures."
               },
               {
                 "label": "Discussion",
-                "body": "Seven fractions match 39 on FFS at 5y with a transient early GU cost, cutting treatment time from **57 to 16 days**. It doesn't settle late failures beyond 5y, the high-risk/ADT setting, or which modern 5-fx SBRT schedule inherits this result."
+                "body": "The trial settles **disease-control equivalence of UHF** for prostate-only, ADT-free treatment. It leaves open UHF with ADT, with SV or nodal coverage, and against moderate hypofractionation."
               }
             ],
-            "interpretation": "This is the first randomised test of ultra-hypofractionation in prostate cancer, and it extends the direction the moderate-hypofractionation trials (CHHiP, RTOG 0415, PROFIT, HYPRO) already set: shortening the course does not cost disease control. What it adds is the jump from moderate schedules to seven fractions, cutting overall treatment time from 57 to 16 days. On its face the efficacy result is about as clean as a non-inferiority trial gets, identical 5-year FFS of 84% and an adjusted HR of 1.002.\n\nThe honest read runs through the upper confidence bound rather than the point estimate. At 1.325 it sits only just inside the prespecified critical HR of 1.338, so non-inferiority was shown, but the data do not exclude a modest disadvantage near the margin. A reader's confidence should also account for the trial's history. It was designed for superiority, and after a blinded interim estimated 5-year FFS at 87%, it was converted to non-inferiority with accrual extended to 1200. Because the interim was blinded the switch is defensible, yet a hypothesis changed mid-trial is something to keep in view. The per-protocol primary analysis is the conservative choice for non-inferiority, and since ITT differs by only ten pts, that question is moot here.\n\nThe radiobiology frames what the trial can and cannot show. The schedules were built to be equi-effective for late normal-tissue effects at an α/β of 3 Gy. If prostate tumour is more fraction-sensitive than late-responding tissue, as the trial's rationale assumes, the seven-fraction arm should carry relatively more tumour effect at matched late toxicity. The equal FFS fits isoeffect, not a gain, so the result neither confirms nor refutes the low α/β hypothesis in efficacy terms. The toxicity curves do fit the expected trade. UHF front-loads GU morbidity (acute G2+ 28% vs 23%, G2+ at 1 year 6% vs 2%), then converges, with 5-year G2+ GU at 5% in both arms and cumulative late GU at 18% vs 17%. Pt-reported acute urinary and bowel symptoms track the same pattern.\n\nTransferability is the main question for a practising radiation oncologist. This is a 3DCRT-dominant trial (80%) with prostate-only CTVs, no seminal vesicles, 7 mm isotropic margins on fiducials, no ADT, PSA capped at 20 and 89% intermediate risk. It supports ultra-hypofractionation as a principle for that population. It does not validate any particular modern five-fraction SBRT schedule, which differs in dose, fraction number, margin and delivery. The 11% high-risk minority showed no interaction in post-hoc subgroups, but those analyses were never powered, and they say nothing about UHF alongside ADT or with SV or nodal coverage.\n\nTwo things could still overturn the read. First, median follow-up is 5.0 years in a disease whose biochemical failures accrue late, and the numbers at risk thin out quickly after year 5. Second, prostate cancer deaths were 11 vs 8, with 5-year cumulative incidence of 2% vs under 1% (p=0.46). That is almost certainly noise at these event counts, but longer follow-up should be checked for it rather than assumed away.",
+            "interpretation": "The question HYPO-RT-PC answers is narrower than its headline. Moderate hypofractionation was already established by CHHiP, RTOG 0415, PROFIT and HYPRO, and the 2018 ASTRO/ASCO/AUA guideline still graded ultra-hypofractionation as conditional because no randomised data existed. This trial supplies that randomised comparison, but against dose-escalated conventional fractionation (78 Gy in 39 fractions), not against the moderate schedules most centres had already moved to. A reader choosing between a moderate schedule and an ultra-hypofractionated one gets indirect support here, not a head-to-head answer.\n\nThe efficacy result is as clean as non-inferiority results get on the point estimate: identical 5-year failure-free survival of 84% and an adjusted HR of 1.002. The confidence interval tells a more careful story. Its upper bound of 1.325 sits just below the prespecified limit of 1.338, so the data rule out a meaningful disadvantage only by a small cushion. The margin itself was set after the trial was converted from a superiority design, prompted by a blinded interim that estimated 87% failure-free survival overall. Because that interim was blinded to arm, the redesign does not look like outcome-driven goalpost moving, but the reader should know the 4% margin was chosen mid-course. The per-protocol primary is a common worry in non-inferiority trials, since it can flatter equivalence; here the per-protocol and ITT populations differ by 10 pts, so that concern is close to moot.\n\nTransferability is where the RT details matter most. The schedule was 42.7 Gy in 7 fractions given three days a week, prescribed to the mean PTV dose, to a prostate-only CTV that excluded the seminal vesicles, with a 7 mm isotropic margin and 3DCRT in 80% of pts. That is not the five-fraction SBRT most programs deliver today, and the direction of the difference cuts both ways: tighter modern margins and IMRT should reduce toxicity, while a higher dose per fraction and a shorter course could raise it. The absence of ADT and the small high-risk fraction (11%) mean the result says little about unfavourable disease where ADT or seminal vesicle coverage is standard.\n\nThe toxicity pattern deserves a specific counselling conversation rather than a summary of equivalence. UHF produced more acute urinary morbidity and a real bump in grade 2 or worse urinary toxicity at one year (6% vs 2%), and cumulative late urinary toxicity at two years ran 13% vs 9% before converging to 18% vs 17% at five years. Toxicity grading was unblinded, though patient-reported outcomes moved in the same direction, which makes the signal more believable rather than less.\n\nWhat would make the conclusion wrong is late biochemical failure. Median follow-up of five years is short for an intermediate-risk population, and prostate cancer deaths (11 vs 8) are too few to read. The decision this moves is fraction number for prostate-only, ADT-free treatment; it does not settle ultra-hypofractionation with ADT, with elective volumes, or against moderate hypofractionation.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The transferable unit is narrow: prostate-only CTV, no SVs, 7 mm fiducial-guided margins, 80% 3DCRT, no ADT. Early GU toxicity is the cost (G2+ at 1y 6% vs 2%) and converges by 5y, supporting 7-fx UHF for intermediate-risk disease rather than any specific 5-fx SBRT schedule."
+              "radonc": "The schedule tested is 42.7 Gy/7 fx every other weekday to a prostate-only CTV (no seminal vesicles) with a 7 mm fiducial margin, 80% 3DCRT, no ADT. That supports UHF for prostate-only volumes without ADT, not SV-inclusive or ADT-paired high-risk plans. Counsel on the 1yr G2+ GU bump (6% vs 2%)."
             },
             "open_questions": [
-              "Does 7-fx UHF hold with ADT in high-risk disease?",
-              "Durability of FFS and late GU toxicity beyond 5 years",
-              "Transfer to 5-fx SBRT with tighter margins"
+              "UHF with concurrent ADT or seminal vesicle coverage in high-risk disease",
+              "UHF versus moderate hypofractionation head-to-head",
+              "Late biochemical failure beyond 5-year median follow-up"
             ],
             "consort": {
-              "enrolled": null,
+              "enrolled": 1200,
               "excluded": null,
               "randomized": 1200,
               "arms": [
                 {
-                  "label": "Conventional 78 Gy/39 fx",
-                  "allocated": 602,
-                  "analyzed": 591,
-                  "outcome": "5y FFS 84%"
-                },
-                {
-                  "label": "Ultra-hypo 42.7 Gy/7 fx",
+                  "label": "Ultra-hypofractionation 42.7 Gy/7 fx",
                   "allocated": 598,
                   "analyzed": 589,
-                  "outcome": "5y FFS 84%"
+                  "outcome": "5yr FFS 84%"
+                },
+                {
+                  "label": "Conventional 78.0 Gy/39 fx",
+                  "allocated": 602,
+                  "analyzed": 591,
+                  "outcome": "5yr FFS 84%"
                 }
               ]
             },
@@ -627,33 +1000,6 @@
             "methodology": "phase-3-rct",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
-              {
-                "nct": "NCT05019846",
-                "brief_title": "SRT Versus SRT+ADT in Prostate Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 310,
-                "primary_completion_date": "2025-12",
-                "brief_summary": "To clarify the role of short-term Androgen deprivation therapy (ADT) in the context of intermediate unfavorable and a subclass of high-risk patients treated with prostate Stereotactic radiotherapy (SRT).\n\nIn intermediate unfavorable risk group, when choosing standard external beam radiotherapy, short term ADT is superior in terms of biochemical disease free survival (bDFS) to EBRT alone. In high risk disease, results of the combination therapy are even more clear. Prostate SRT has been endorsed…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Triptorelin Embonate",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Bicalutamide 50 mg",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histological confirmation of prostate acinar adenocarcinoma with a minimum of 10 biopsy cores taken\n* Prostate protocol MRI for local staging\n* Patients belonging to intermediate unfavorable group according to the D'Amico/NCCN risk group classification:\n\n  * -Grade group 3…",
-                "answers_question": "Does 7-fx UHF hold with ADT in high-risk disease?",
-                "relevance_phrase": "phase 3 prostate SBRT ± short ADT, UIR/high-risk"
-              },
               {
                 "nct": "NCT03938649",
                 "brief_title": "SRAM study_Postate Cancer",
@@ -678,19 +1024,135 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Histological confirmation of prostate adenocarcinoma\n* High risk prostate cancer patients (i.e. T3 to T4 disease and/or PSA \\> 20 and/or Gleason score ≥ 8)\n* ECOG performance score 0-1\n* Age ≥ 18\n* History/physical examination within 2 weeks prior to registration\n* Able to…",
-                "answers_question": "Does 7-fx UHF hold with ADT in high-risk disease?",
-                "relevance_phrase": "high-risk randomised SBRT vs 76 Gy/38 fx IMRT"
+                "answers_question": "UHF with concurrent ADT or seminal vesicle coverage in high-risk disease",
+                "relevance_phrase": "randomized SBRT vs 76 Gy/38 fx IMRT, high-risk N0"
+              },
+              {
+                "nct": "NCT06625970",
+                "brief_title": "Study Evaluating the Efficacy and Safety of Darolutamide and Stereotactic Dose Escalated Radiotherapy in Patients With Localized Prostate Cancer and High-risk Features of Relapse",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 700,
+                "primary_completion_date": "2033-10",
+                "brief_summary": "PEACE 7 is an international, multicenter, randomized, open-label phase III study that aims at evaluating the efficacy and safety of darolutamide and of stereotactic dose escalated prostate radiotherapy in patients with localised prostate cancer and high-risk features of relapse (defined as patients with at least 2 high-risk criteria from National Comprehensive Cancer Network (NCCN) classification) using a factorial (2x2) design.\n\nThe primary objective of this study is to assess the efficacy of…",
+                "conditions": [
+                  "High Risk Prostate Carcinoma",
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Darolutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Stereotactic Body RadioTherapy (SBRT)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "ADT (Standard of Care)",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Signed a written informed consent form prior to any trial specific procedures\n\n   Note: In case of physical incapacitation, a trusted representative of their choice, which is not the investigator or sponsor, can sign on the behalf of the patients\n2. Men, 18 years ≤ Age ≤ 80…",
+                "answers_question": "UHF with concurrent ADT or seminal vesicle coverage in high-risk disease",
+                "relevance_phrase": "phase 3 2x2: SBRT dose escalation ± darolutamide, high-risk"
+              },
+              {
+                "nct": "NCT01794403",
+                "brief_title": "Radiation Hypofractionation Via Extended Versus Accelerated Therapy (HEAT) For Prostate Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 161,
+                "primary_completion_date": "2027-02",
+                "brief_summary": "Accelerated Hypofractionation Radiotherapy for prostate cancer of 36.25 Gy delivered in 5 fractions will not be inferior to the standard treatment of 70.2 Gy given in 26 fractions with respect to four-year biochemical failure (PSA failure) by Phoenix definition post-treatment completion.",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Extended Hypofractionation Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Accelerated Hypofractionation Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically proven prostate adenocarcinoma.\n\n   * Gleason score 2-7 (reviewed by reference lab at UM).\n   * Biopsy within one year of date of enrollment.\n2. Clinical stage ≤ T2 based on DRE and/or ≤ T3a based on MRI (if done); N0-Nx; M0-Mx (AJCC 7th Edition)\n\n   * T-stage…",
+                "answers_question": "UHF versus moderate hypofractionation head-to-head",
+                "relevance_phrase": "36.25 Gy/5 fx vs 70.2 Gy/26 fx, 4-yr BF non-inferiority"
+              },
+              {
+                "nct": "NCT03386045",
+                "brief_title": "Optimal Prostate Study",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 503,
+                "primary_completion_date": "2028-08",
+                "brief_summary": "To compare the toxicity, rate of local control, biochemical failure rate and quality of life of three different radiotherapy techniques (moderate hypofractionation, stereotactic body radiotherapy (SBRT) and standard radiotherapy plus 2 fractions of SBRT (BOOSTER)",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Optimal SBRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Optimal Booster",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion criteria\n\n* Histologically proven prostate adenocarcinoma\n* PSA obtained within three months prior to enrolment\n* ECOG performance status 0 to 2\n* Ability to understand and the willingness to sign a written consent\n* Suitable for high dose irradiation to the prostate\n\nTo be eligible for…",
+                "answers_question": "UHF versus moderate hypofractionation head-to-head",
+                "relevance_phrase": "moderate hypo vs SBRT vs EBRT+SBRT boost; BF, toxicity"
+              },
+              {
+                "nct": "NCT05705921",
+                "brief_title": "Standard Moderately Hypofractionated RT vs. Ultra-hypofractionated Focal Lesion Ablative Microboost in Prostate Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 484,
+                "primary_completion_date": "2032-01",
+                "brief_summary": "EBRT is one of the standard treatment options for patients with localized PCA. Based on the outcome of randomized trials, moderately hypofractionated RT(19-25 fractions of 2.5-3.4Gy) is considered equivalent to conventional fractionated schemes with 35-39 fractions of 2Gy. A schedule of 20 fractions to a dose of 60-62Gy is adopted as standard of care for all risk-groups. Driven by the success of moderate hypofractionation, there is a strong trend towards extreme hypofractionation, also called…",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Radiotherapy standard",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Radiotherapy Hypo-FLAME",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Men ≥ 18 years with histologically confirmed prostate adenocarcinoma\n* No evidence of lymph node or distant metastases N0M0.\n* MRI visible tumor on mpMRI (PI-RADS v2 ≥ 4).\n* Intermediate- or high-risk PCa, defined as at least one of the following risk criteria (note; both the…",
+                "answers_question": "UHF versus moderate hypofractionation head-to-head",
+                "relevance_phrase": "UHF focal microboost vs 20-fx moderate hypo, int/high risk"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
                 "prostate SBRT androgen deprivation",
-                "prostate hypofractionation late toxicity",
-                "prostate stereotactic radiotherapy"
+                "prostate SBRT moderate hypofractionation"
               ],
               "queries_failed": [],
-              "candidates_returned": 53,
-              "fetched_at": "2026-10-21T08:06:41.695Z",
+              "candidates_returned": 33,
+              "fetched_at": "2026-10-22T08:03:20.267Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -699,232 +1161,61 @@
                 "id": 136
               }
             ]
-          },
-          {
-            "name": "Ten-Year Outcomes of 70 Gy/28 fx Hypofractionated IMRT",
-            "tldr": "10-y bRFS 71%, cRFS 86%, late G3+ GU 2% and GI 1% after 70 Gy/28 fx IMRT in localized prostate cancer; HR bRFS only 42%.",
-            "details": [
-              {
-                "text": "🔍 Single-institution retrospective series: 854 consecutive pts, 1998-2012, from a prospectively maintained registry",
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔍 Median f/u 11.3 y (max 19); median age 68, median PSA 8.6 ng/mL",
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔍 RT technique",
-                "subdetails": [
-                  "70 Gy/28 fx (2.5 Gy/fx) IMRT, EQD2 80 Gy assuming α/β 1.5",
-                  "CTV: prostate alone (LR); prostate + proximal SV ≥1 cm (IR/HR)",
-                  "PTV margin 4-10 mm",
-                  "Daily IGRT, BAT ultrasound in 94.8%"
-                ],
-                "source_tier": "figure"
-              },
-              {
-                "text": "💊 ADT in 61%, mostly 1-6 mo; 18% received >6 mo",
-                "source_tier": "figure"
-              },
-              "⚠️ Only 5 of 244 HR pts received elective pelvic nodal RT",
-              {
-                "text": "📊 10-y outcomes by NCCN risk group (bRFS, cRFS p<.0001)",
-                "table": {
-                  "columns": [
-                    "Endpoint",
-                    "All",
-                    "LR",
-                    "FIR",
-                    "UIR",
-                    "HR"
-                  ],
-                  "rows": [
-                    [
-                      "bRFS",
-                      "71%",
-                      "88%",
-                      "78%",
-                      "71%",
-                      "42%"
-                    ],
-                    [
-                      "cRFS",
-                      "86%",
-                      "95%",
-                      "91%",
-                      "85%",
-                      "72%"
-                    ],
-                    [
-                      "PCSM",
-                      "7%",
-                      "2%",
-                      "5%",
-                      "5%",
-                      "15%"
-                    ]
-                  ]
-                },
-                "source_tier": "figure"
-              },
-              {
-                "text": "📊 10-y OS 69% (95% CI 66-73%)",
-                "source_tier": "figure"
-              },
-              "📊 Clinical failure in 125 pts: 117 distant mets, only 8 local-only",
-              {
-                "text": "📊 Late G3+ toxicity, 10-y cumulative incidence",
-                "subdetails": [
-                  "GU 2% (95% CI 0.8-3.0%), mostly urethral stricture needing dilatation",
-                  "GI 1% (95% CI 0.5-2.0%), mostly rectal bleeding",
-                  "One G5 GU event and one G5 GI event (rectovesical fistula)"
-                ],
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔗 RTOG 0415 used the same 70 Gy/28 fx; G3 toxicity 3-4% at 5 y, IMRT not mandated",
-                "source_tier": "figure"
-              },
-              "⚠️ Toxicity abstracted retrospectively and physician-reported, no validated PROs, so likely underreported"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1016/j.ijrobp.2019.01.091",
-            "tweet_ids": [
-              1000000135
-            ],
-            "slug": "prostate-70gy-28fx-10y-outcomes",
-            "verdict": {
-              "soc_implication": "methodologically-limited",
-              "rationale": "Single-institution retrospective series, no comparator arm. HR cohort got mostly short ADT and no nodal RT, so HR control cannot be read against modern practice.",
-              "audience": "Localized prostate cancer, all NCCN risk groups, definitive IMRT"
-            },
-            "significance": "Of 125 clinical failures, 117 were distant and only 8 local-only, so the 42% HR bRFS points to nodal/systemic undertreatment (5 of 244 HR pts got pelvic nodal RT) rather than a 2.5 Gy/fx dose deficit. Whether the toxicity transfers depends on dosimetry: the institution's current constraints cap rectal and bladder V70 at 5%, while NRG-GU005 allows 25% rectal V70.",
-            "monday_clinic": "In low-risk and favorable-intermediate localized prostate cancer, this supports 70 Gy/28 fx prostate-directed IMRT with daily IGRT as an option with 10-y follow-up; it does not inform HR disease managed with ≥2 y ADT or elective pelvic nodal RT.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Single-institution (Cleveland Clinic) series of **854 consecutive pts** treated 1998-2012, followed through a prospectively maintained registry, with toxicity captured by **retrospective chart review**. Median f/u **11.3 y** (max 19)."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Biopsy-proven, clinically **localized prostate adenocarcinoma** across all NCCN risk groups; **HR pts made up 29%** (244). Median age 68, median PSA 8.6 ng/mL."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "**70 Gy/28 fx at 2.5 Gy/fx** IMRT (EQD2 80 Gy at α/β 1.5) with daily IGRT, mostly BAT ultrasound (94.8%). CTV was the prostate alone for LR and the prostate + proximal SV ≥1 cm for IR/HR, with a PTV margin of 4-10 mm. **Only 5 HR pts got elective nodal RT.**"
-              },
-              {
-                "label": "Regimen",
-                "body": "ADT in **61%**, mostly 1-6 mo; **18% received >6 mo**. Timing and duration were left to the physician."
-              },
-              {
-                "label": "Results",
-                "body": "10-y OS **69%**. Of 125 clinical failures, **117 were distant mets** and only 8 local-only."
-              },
-              {
-                "label": "Safety",
-                "body": "Late G3+ GU 10-y cumulative incidence **2%**, mostly urethral stricture; G3+ GI **1%**, mostly rectal bleeding. One G5 event in each category."
-              },
-              {
-                "label": "vs leading data",
-                "body": "CHHiP, PROFIT and HYPRO established moderate hypofractionation but had not reported 10-y outcomes at the time. **RTOG 0415** used the identical 70 Gy/28 fx and reported G3 toxicity of 3-4% at 5 y without mandating IMRT and with looser constraints."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents localized prostate cancer across NCCN risk groups treated with 70 Gy/28 fx IMRT to the prostate ± proximal SV with daily IGRT. Does not represent HR pts treated with ≥2 y ADT or elective pelvic nodal RT."
-              },
-              {
-                "label": "Limitations",
-                "body": "Most pts were localized with **transabdominal ultrasound**, and early IMRT delivery was slow, so geographic misses are possible and the results may not transfer to fiducial/CBCT-guided VMAT. Some pts were lost to follow-up, so late events relied on chart review."
-              },
-              {
-                "label": "Discussion",
-                "body": "Durable control in LR/FIR and **low late toxicity to 10 y** support 70/28 as a prostate-directed schedule. The poor HR result reflects distant failure under short ADT and no nodal coverage, which **the series cannot separate from fractionation**."
-              }
-            ],
-            "interpretation": "This series is valuable for its duration, not its design. CHHiP, PROFIT and HYPRO established moderate hypofractionation against conventional fractionation, but none had reported 10-year outcomes when this cohort was published. A cohort followed a median 11.3 years, with a maximum near 19, answers a question those trials could not yet address: whether a 2.5 Gy fraction size produces late toxicity that appears only after the trial reports are written. The answer here is reassuring. Late G3+ GU cumulative incidence was 2% at 10 years and G3+ GI was 1%. The GU curve keeps rising after year 10 (3.7% at 15 years in the figure), a slow late signal a 5-year trial would miss.\n\nTwo caveats limit how much weight the toxicity figures can carry. First, events were abstracted retrospectively and graded by physicians without validated pt-reported instruments, which biases toward undercounting. Second, the institution's planning constraints are tighter than the cooperative-group protocols: its current guidelines cap rectal and bladder V70 at 5%, while NRG-GU005 permits 25% of the rectum at 70 Gy. RTOG 0415, which used the identical 70 Gy in 28 fractions without mandating IMRT, reported G3 toxicity of 3% to 4% at 5 years. That suggests the low event rate owes as much to conservative dosimetry at a high-volume center as to the fractionation. A reader adopting 70/28 should adopt the constraints along with it.\n\nThe oncologic outcomes split by risk group, and that split is the more instructive finding. Low and favorable-intermediate pts reached 10-year bRFS of 88% and 78%. High-risk pts reached 42%. That could be read as a dose or fraction-size failure, but the failure pattern argues otherwise: of 125 clinical failures, 117 were distant and only 8 were local-only. Only 5 of 244 high-risk pts received elective nodal coverage, and across the whole cohort only 18% received more than 6 months of ADT. Undertreatment of occult nodal and systemic disease explains the poor high-risk control better than an inadequate local dose. The authors read it the same way: their current practice uses at least 2 years of ADT and selectively treats the pelvic nodes.\n\nThe series cannot settle whether the high-risk result improves under modern management, because nothing here tests it; the authors defer to RTOG 0924 on nodal coverage. A single-institution consecutive cohort also cannot establish comparative efficacy. There is no conventionally fractionated arm, and the localization method used for almost all pts (BAT ultrasound) has since been replaced by fiducial and CBCT guidance, which cuts both ways: better targeting may improve control, and tighter margins may change the toxicity profile. The fair conclusion is narrow. For prostate-only or prostate plus proximal seminal vesicle IMRT, 70 Gy in 28 fractions carries a low, slowly rising late toxicity burden over two decades, and its disease control in low and intermediate risk holds at 10 years. It says little about the high-risk pt treated today.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Of 125 clinical failures, 117 were distant and only 8 local-only, so the 42% HR bRFS points to nodal/systemic undertreatment (5 of 244 HR pts got pelvic nodal RT), not a 2.5 Gy/fx dose deficit. Toxicity transfer depends on the institution's current V70 ≤5% rectal/bladder constraints, much tighter than NRG-GU005's 25% rectal V70."
-            },
-            "open_questions": [
-              "Does ≥2 y ADT plus pelvic nodal RT close the HR bRFS gap at 70 Gy/28 fx?",
-              "Are ≤2% late G3+ toxicity rates reproducible multi-institutionally?",
-              "Does a rectal spacer further reduce late GI toxicity at 2.5 Gy/fx?"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": "curative",
-            "methodology": "retrospective",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "hypofractionated prostate pelvic nodal",
-                "moderate hypofractionation prostate radiotherapy",
-                "rectal spacer prostate radiotherapy"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 45,
-              "fetched_at": "2026-10-21T08:06:47.090Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 135
-              }
-            ]
           }
         ],
         "open_questions": null
       },
       {
         "disease_site": "breast",
-        "intro": "Retrospective MSKCC series bears on PMRT omission in strictly N0 T1-T2 disease with high-risk features.",
+        "intro": "Retrospective single-institution data on omitting PMRT in node-negative pts with high-risk features after mastectomy.",
         "studies": [
           {
-            "name": "High-Risk T1-T2N0 Breast Cancer After Mastectomy Without PMRT",
-            "tldr": "Crude LRR 4.7% at median 5.6y without PMRT in 657 T1-T2N0 pts with ≥1 high-risk feature; only tumor size predicted LRR (HR 1.70).",
+            "name": "High-risk T1-T2N0 breast, LRR without PMRT",
+            "tldr": "Crude LRR 4.7% at median 5.6y after mastectomy without PMRT in T1-T2N0 with ≥1 high-risk feature; only tumor size predicted LRR (HR 1.70).",
             "details": [
-              "🔍 Retrospective single-institution (MSKCC) cohort, mastectomy 2006-2011, N=657 without PMRT",
-              "🔍 High-risk features: age <40, multifocal/multicentric, LVI, medial/central location, high nuclear grade",
-              "🔍 Strict N0: SLNs free of any tumor, incl. ITCs and micromets; neoadjuvant chemo excluded",
-              "💊 86% adjuvant systemic therapy; 98% SLNB alone (median 4 SLNs)",
+              "🔍 Single-institution (MSKCC) retrospective cohort, mastectomies 2006-2011",
+              "🔍 N=672 T1-T2N0 with ≥1 high-risk feature; 15 who received PMRT excluded, leaving 657",
               {
-                "text": "📊 LRR 31 pts (4.7%): local 17 (2.6%), regional 17 (2.6%); median time to LRR 33 mo",
+                "text": "🔍 High-risk features defined by the authors",
+                "subdetails": [
+                  "Age <40y",
+                  "Multifocal/multicentric",
+                  "LVI",
+                  "Medial/central location",
+                  "High nuclear grade"
+                ]
+              },
+              "🔍 98% SLNB alone; 86% received adjuvant systemic therapy",
+              "📊 LRR 4.7% (31 pts) at median 5.6y; median time to LRR 33 mo",
+              {
+                "text": "📊 Local recurrence 2.6% (17 pts), regional recurrence 2.6% (17 pts)",
                 "source_tier": "figure"
               },
-              "📐 Tumor size (continuous) → LRR HR 1.70 (95% CI 1.26-2.29), p=.006",
-              "📐 Systemic therapy → LRR HR 0.40 (95% CI 0.17-0.92), p=.03",
-              "📊 LRR by number of high-risk features (log-rank p=.54)",
+              "📐 Tumor size (continuous) predicted LRR: HR 1.70 (95% CI 1.26-2.29), P=.006",
+              "📐 Systemic therapy reduced LRR: HR 0.40 (95% CI 0.17-0.92), P=.03",
+              "📊 Age, grade, LVI, multifocality, location: not associated with LRR (all P>.05)",
+              "📊 LRR by number of high-risk features (log-rank P=.54)",
               {
-                "text": "📊 Pattern of first LRR (n=31)",
+                "text": "📊 Site of LRR (31 events)",
                 "subdetails": [
                   "Chest wall alone: 14 (45%)",
-                  "Axilla alone: 9 (29%)",
-                  "Chest wall + axilla: 3 (10%)",
-                  "SCV alone: 2 (6%); IMN alone: 1 (3%)"
+                  "Axillary nodes alone: 9 (29%)",
+                  "Supraclavicular alone: 2 (6%)",
+                  "Internal mammary alone: 1 (3%)"
                 ],
                 "source_tier": "figure"
               },
               {
-                "text": "⚠️ 8 of 22 isolated LRRs were axilla-only; 7 of those 8 had SLNB alone, possibly false-negative SLNB",
+                "text": "⚠️ 8 of 22 isolated LRRs were axilla-only, 7 after SLNB alone; authors suspect false-negative SLNB",
                 "source_tier": "figure"
               },
               {
                 "text": "⚠️ 10 of 31 LRR pts (32%) did not receive recommended systemic therapy",
                 "source_tier": "figure"
               },
-              "🔗 vs EORTC 22922: regional recurrence 2.7% vs 4.2% with RNI; this cohort 2.6% regional with no RT",
-              {
-                "text": "⚠️ Only 4 or 5 RF group n=32 (KM): wide CI, underpowered for the highest-risk stratum",
-                "source_tier": "figure"
-              }
+              "⚠️ ≥4-feature subgroup small; the 9.4% crude rate has a wide CI (0.71-0.98)",
+              "🔗 vs EORTC 22922: regional recurrence 2.7% vs 4.2% with nodal RT; this cohort 2.6% regional without any RT",
+              "⚠️ High-volume dedicated breast surgeons; generalizability uncertain per authors"
             ],
             "figures": [],
             "nct": null,
@@ -935,61 +1226,61 @@
             "slug": "breast-t1-t2n0-mastectomy-lrr",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective single-institution series with no PMRT comparator arm; cannot estimate RT benefit, and the ≥4-feature stratum is too small to exclude meaningful risk.",
-              "audience": "T1-T2N0 breast, mastectomy, ≥1 high-risk feature, no neoadjuvant chemo"
+              "rationale": "Single-institution retrospective series with no PMRT comparator; describes baseline LRR risk, cannot estimate PMRT benefit. Small ≥4-feature subgroup limits the null risk-factor finding.",
+              "audience": "T1-T2N0 breast, mastectomy + SLNB, ≥1 high-risk feature, no PMRT"
             },
-            "significance": "Failures split evenly local vs regional (2.6% each), and axilla-only recurrences mostly followed SLNB alone, so a field covering chest wall or nodes would address a small absolute pool. Tumor size was the lone predictor (HR 1.70 continuous); the ≥4-feature group reached 9.4% crude LRR on small numbers, the stratum where PMRT/RNI discussion stays live.",
-            "monday_clinic": "In SLN-negative T1-T2 disease after mastectomy with adjuvant systemic therapy, a single classic high-risk feature (age <40, LVI, multifocality, medial location, high grade) does not on these data justify PMRT; it does not address pts declining systemic therapy or larger T2 tumors with multiple features.",
+            "significance": "Regional failure without any RT was 2.6%, already below the 4.2% control-arm regional rate in EORTC 22922, which leaves little room for nodal or chest wall RT to add benefit in this group. Tumor size is the one feature that held up (HR 1.70 continuous). Note that axilla-only failures after SLNB alone were overrepresented.",
+            "monday_clinic": "In T1-T2N0 post-mastectomy pts getting indicated systemic therapy, LVI, age <40, multifocality, high grade or medial location alone do not support PMRT referral in this series; it does not address T2 tumors with several features, where data were sparse.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Retrospective single-institution cohort (MSKCC), mastectomy **January 2006 to December 2011**. Of 672 eligible pts, 15 who received PMRT were excluded, leaving **N=657**. Median follow-up **5.6 years**."
+                "body": "Single-institution **retrospective** cohort at MSKCC, mastectomies January 2006 to December 2011. **Median follow-up 5.6y**. LRR defined as biopsy-proven ipsilateral chest wall or axillary, internal mammary or supraclavicular recurrence."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**T1-T2N0** invasive breast cancer with **≥1 high-risk feature**; N0 defined as no tumor in SLNs, including ITCs and micrometastases. Excluded recurrent, bilateral and **neoadjuvant chemo** pts. Median age 49, median tumor size 1.4 cm."
+                "body": "**T1-T2N0** invasive breast cancer with **≥1 high-risk feature** (age <40y, multifocal/multicentric, LVI, medial/central location, high nuclear grade). N0 meant no tumor in the SLNs, including ITCs and micrometastases. Neoadjuvant chemo, bilateral and recurrent disease excluded; 15 PMRT pts excluded, leaving 657."
               },
               {
                 "label": "Regimen",
-                "body": "**86%** received adjuvant systemic therapy; 91% of ER+ pts received endocrine therapy and 70% of HER2+ pts received trastuzumab. **98%** had SLNB alone."
+                "body": "98% had SLNB alone. **86% received adjuvant systemic therapy**: 41% chemo plus endocrine, 14% chemo alone, 32% endocrine alone. 70% of HER2+ pts got trastuzumab."
               },
               {
-                "label": "Endpoints",
-                "body": "**Primary outcome:** LRR rate, biopsy-proven ipsilateral chest wall or axillary, IMN or SCV nodal recurrence."
+                "label": "Radiotherapy",
+                "body": "**No PMRT** in the analyzed cohort. Only 15 of 672 (2%) received PMRT over the study period, so no RT comparator exists."
               },
               {
                 "label": "Results",
-                "body": "LRR **4.7%** (31 pts), 22 isolated and 9 synchronous with distant recurrence. Tumor size predicted LRR (**HR 1.70**, 95% CI 1.26-2.29); systemic therapy reduced it (**HR 0.40**, 95% CI 0.17-0.92). Number of risk factors was **not associated** with LRR (p=.54)."
+                "body": "**LRR 4.7%** (31 pts), local and regional each 2.6%. **Tumor size HR 1.70** (95% CI 1.26-2.29); **systemic therapy HR 0.40** (95% CI 0.17-0.92). Number of risk factors **not associated** with LRR (P=.54)."
               },
               {
                 "label": "vs leading data",
-                "body": "MA.20 and EORTC 22922 showed DFS gains from RNI in populations that included high-risk N0 pts, but N0 pts were a minority and mastectomy a smaller share in EORTC. EORTC 22922 regional recurrence was 2.7% vs 4.2%; this cohort's regional rate without any RT was 2.6%."
+                "body": "EORTC 22922 and MA.20 showed DFS benefit from regional nodal RT in populations that included high-risk N0 disease; per the source, N0 made up 10% of MA.20 and 44% of EORTC. The regional recurrence here without RT (2.6%) sits below the EORTC 22922 control arm (4.2%). SUPREMO, which includes high-risk N0 pts, is the randomized test of this question."
               },
               {
                 "label": "Applies to",
-                "body": "Represents SLN-negative T1-T2 pts after mastectomy with ≥1 traditional high-risk feature on modern adjuvant systemic therapy. Does not represent neoadjuvant chemotherapy pts, node-positive disease, or pts forgoing systemic therapy."
+                "body": "Represents T1-T2N0 pts after mastectomy with SLNB, at least one conventional high-risk feature, and modern adjuvant systemic therapy. Does not represent pts after neoadjuvant chemo, T3 or node-positive disease, or pts who decline systemic therapy."
               },
               {
                 "label": "Limitations",
-                "body": "High-volume dedicated breast surgeons may have lowered LRR, limiting generalizability. Grade unknown in 36 pts, excluded from risk analysis. No receptor-subtype breakdown of the RT question, and follow-up predates mature late-recurrence capture in ER+ disease."
+                "body": "Only 32 pts had 4-5 features (Fig 1), so the null risk-count finding is underpowered where it matters most. Surgery was done by high-volume breast surgeons, and axilla-only failures after SLNB suggest a false-negative contribution not addressed by PMRT decisions alone."
               },
               {
                 "label": "Discussion",
-                "body": "Traditional high-risk features, alone or summed, did **not** stratify LRR in an era of near-universal systemic therapy; tumor size was the exception. The open question is whether the small **≥4-feature** and larger T2 subsets carry enough risk for PMRT, which SUPREMO's N0 subset may address."
+                "body": "Authors attribute the low LRR to contemporary systemic therapy and argue conventional features **do not by themselves mandate PMRT**. The data establish baseline risk without RT, not the size of any PMRT benefit, so the question for T2 tumors carrying several features stays open."
               }
             ],
-            "interpretation": "The value of this cohort is less its headline rate than what it does to the list of features that historically pushed node-negative mastectomy pts toward PMRT. The older series that built that list, Abi-Raad, Truong, Yildirim and Berberoglu, Sharma, drew on pts treated from the 1980s into the mid-2000s, when systemic therapy was given to far fewer women, and they reported LRR approaching 20% in pts with multiple risk factors. Here, with 86% receiving adjuvant systemic therapy, age under 40, LVI, grade, multifocality and medial location each failed to predict LRR, and summing them did not either (p=.54). The most plausible reading is that systemic therapy absorbed much of the locoregional risk those features once flagged, which is consistent with the systemic-therapy HR of 0.40 inside this same cohort.\n\nThat said, the design cannot answer the question it is ultimately being used for. With only 15 PMRT recipients excluded, there is no RT comparator at all, so the paper establishes a baseline risk without RT, not the size of an RT benefit. For an RT reader the useful framing is absolute: what is left to prevent. Local and regional failures were each 2.6%, so even an idealized field covering both would act on a small pool, and the regional rate sits at the level EORTC 22922 achieved with nodal irradiation (2.7%). That comparison is across populations and eras and should not be pushed hard, but it argues against adding RNI on the basis of medial location alone, which was the N0 entry criterion for EORTC.\n\nThe weak spots are where the signal hides. The 4 or 5 risk-factor group had a crude LRR of 9.4% and a 5-year LRR-free survival of 92% with a CI reaching down to 0.71; a null log-rank test across groups this unbalanced in size is not evidence of no effect in the smallest one. Tumor size as a continuous variable did carry risk, so a larger T2 tumor with several features is not the patient this study clears. The axillary pattern also deserves attention: 8 of 22 isolated LRRs were axilla-only, nearly all after SLNB alone, which points to staging error rather than biology and argues for counting nodes retrieved before deciding the axilla was adequately sampled.\n\nTwo further factors should temper transfer. Surgery was done by high-volume dedicated breast surgeons, and a third of the recurrences occurred in pts who did not receive recommended systemic therapy, so the low rate is conditional on both. Median follow-up of 5.6 years is also short for ER+ disease, which made up most of the cohort and recurs late.\n\nThe practical read: in a sentinel-negative T1-T2 patient after mastectomy who is completing indicated systemic therapy, a single traditional feature is a weak reason for PMRT. The cases that remain genuinely open are the larger T2 tumors with stacked features and pts declining systemic therapy, which is where SUPREMO's node-negative subset should be watched.",
+            "interpretation": "The value of this series is that it measures the untreated baseline. Most of what the field believed about high-risk node-negative disease after mastectomy came from cohorts treated in the 1980s to early 2000s, when far fewer pts received adjuvant systemic therapy and HER2-directed therapy was not routine. The authors report 86% systemic therapy use against the 38% to 77% they cite for older series, and a crude LRR of 4.7% against historical figures as high as 20% in pts with multiple features. If the baseline has fallen that far, any proportional benefit from PMRT now buys a much smaller absolute gain, and that is the real argument of the paper.\n\nThe comparison with the nodal irradiation trials makes the same point from a different direction. EORTC 22922 and MA.20 are the evidence usually invoked to justify regional RT in high-risk N0 disease, yet node-negative pts were a minority of MA.20 and EORTC enrolled mostly breast-conserving surgery. The regional recurrence here with no RT at all, 2.6%, falls below the 4.2% the source quotes for the EORTC 22922 control arm. Cross-series comparison of this kind is weak, since definitions, follow-up and populations differ, but it does suggest the trial-derived benefit should not be ported directly onto a modern mastectomy population with negative SLNs on careful serial sectioning.\n\nThe methodological limits should move confidence in specific ways. First, this is a cohort with no RT arm, so it cannot say what PMRT would have prevented; it can only say what happens without it. Second, the headline negative finding, that counting risk factors does not stratify LRR, rests on a log-rank test across groups where the highest-risk stratum had only 32 pts. The crude rate there was 9.4% with a lower 5-year LRR-free bound of 0.71, which is not reassurance; it is an unresolved estimate. A reader should treat \"features do not matter\" as \"features could not be shown to matter in this sample.\" Third, the risk score weights five heterogeneous features equally, which can dilute a genuine signal from any one of them. Tumor size, the one variable analyzed continuously, was the one that came through (HR 1.70), and that may partly reflect the greater statistical power of a continuous term.\n\nThe pattern of failure deserves more attention than the abstract gives it. Eight of 22 isolated LRRs were axilla-only, and 7 of those 8 followed SLNB alone. The authors suspect false-negative SLNB. That is a surgical staging issue, and chest wall-directed RT would not address it, while comprehensive nodal RT might. This is a reminder that a low aggregate LRR can hide a failure mode that one specific RT field would target.\n\nThe systemic therapy association (HR 0.40) is real-world and confounded by indication, and a third of pts who failed had not received recommended systemic therapy. For an RT decision, the practical read is that the low baseline applies to pts actually receiving indicated systemic treatment. The paper supports not referring T1-T2N0 pts for PMRT on the strength of LVI, age, grade, multifocality or medial location alone. It leaves open T2 tumors carrying several features, and those are the pts SUPREMO's node-negative subset is positioned to inform.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Failures split evenly local vs regional (2.6% each), so neither chest wall nor RNI alone covers most of a small absolute pool. Tumor size was the lone predictor (HR 1.70 continuous); the ≥4-feature group reached 9.4% crude LRR on small numbers, the stratum where PMRT/RNI discussion stays live."
+              "radonc": "Regional failure without RT was 2.6%, below the 4.2% EORTC 22922 control-arm regional rate, so nodal RT in high-risk N0 post-mastectomy has little absolute room to work. Tumor size (HR 1.70) is the only feature that predicted LRR, which argues for weighting size over feature counting when weighing PMRT for T2N0."
             },
             "open_questions": [
-              "PMRT benefit in T2N0 with ≥4 high-risk features",
-              "Late LRR beyond 5 years in ER+ N0 disease",
-              "SUPREMO results in node-negative high-risk subset"
+              "Does PMRT benefit T2N0 tumors with multiple high-risk features?",
+              "Does regional nodal RT add benefit in high-risk N0 after mastectomy?",
+              "How much axillary failure reflects false-negative SLNB?"
             ],
             "consort": null,
             "modality": "radiation",
@@ -1017,23 +1308,18 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Women with unilateral pT1,2N0M0 breast cancer or multifocal breast cancer if largest discrete tumour at least 2cm or if the tumour area comprises multiple small adjacent foci of invasive carcinoma then overall maximum dimension taken. This must be greater than 2cm.\n* Upfront…",
-                "answers_question": "PMRT benefit in T2N0 with ≥4 high-risk features",
+                "answers_question": "Does PMRT benefit T2N0 tumors with multiple high-risk features?",
                 "relevance_phrase": "PMRT in pT1-2N0 with multiple adverse prognostic factors"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
                 "postmastectomy radiotherapy node-negative breast",
-                "SUPREMO postmastectomy radiotherapy"
+                "regional nodal irradiation breast mastectomy"
               ],
-              "queries_failed": [
-                {
-                  "term": "SUPREMO postmastectomy radiotherapy",
-                  "reason": "empty"
-                }
-              ],
-              "candidates_returned": 3,
-              "fetched_at": "2026-10-21T08:07:13.697Z",
+              "queries_failed": [],
+              "candidates_returned": 23,
+              "fetched_at": "2026-10-22T08:04:08.196Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
