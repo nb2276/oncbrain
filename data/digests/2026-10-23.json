@@ -1,165 +1,326 @@
 {
   "date": "2026-10-23",
   "conference": null,
-  "generated_at": 1792742945521,
+  "generated_at": 1792829022445,
   "digest": {
-    "top_line": "Gomez LCT, oligometastatic NSCLC: mOS 41.2 vs 17.0 mo (P = .017) with RT/surgery to all sites after first-line therapy; randomized phase II stopped early at N=49.",
-    "tldr": "Oligomets and gyn carried the day. In NSCLC with ≤3 mets and no progression on first-line therapy, LCT more than doubled mOS (41.2 vs 17.0 mo), though the trial stopped early for benefit. In the PORTEC-3 final analysis, adding chemo to pelvic RT improved 5y FFS (HR 0.71) but not OS (HR 0.76, ns), with G3+ AEs at 60% vs 12%.",
+    "top_line": "Gomez LCT randomized phase II: mOS 41.2 vs 17.0 mo (P=.017), mPFS 14.2 vs 4.4 mo with RT/surgery to all sites in ≤3-met NSCLC after front-line therapy.",
+    "tldr": "LCT to all sites in oligometastatic NSCLC more than doubled mOS (41.2 vs 17.0 mo), though accrual stopped at 49 of 94 planned. In high-risk endometrial, PORTEC-3 CRT raised 5y FFS (HR 0.71) but not OS over pelvic RT alone, which held pelvic control at 91%. Brachy dosimetry and an HPV+ OPSCC risk model round it out.",
     "sites": [
       {
         "disease_site": "gyn",
-        "intro": "Two brachy planning studies (eBT OAR sparing vs replanned Ir-192, cylinder tip-space dosimetry) sit beside PORTEC-3; neither reports late clinical toxicity.",
+        "intro": "Adjuvant endometrial: PORTEC-3 defines what chemo adds to pelvic RT, plus two dosimetry papers on vaginal cuff brachy.",
         "studies": [
           {
-            "name": "PORTEC-3",
-            "tldr": "Adding chemo to pelvic RT: 5y FFS 75.5% vs 68.6% (HR 0.71, p=0.022); 5y OS 81.8% vs 76.7%, HR 0.76, ns.",
+            "name": "Postoperative endometrial cancer with electronic brachytherapy (Axxent)",
+            "tldr": "Axxent eBT vs replanned Ir-192 HDR: bladder D2cc 63.8% vs 70.1%, rectum 61.2% vs 68.4% of prescription; one G2 acute toxicity in 94 pts.",
             "details": [
-              "🔍 Open-label randomised phase 3, 103 centres, GCIG intergroup",
-              "🔍 686 enrolled, 660 eligible pts in final ITT analysis (330 per arm)",
-              "🔍 Median f/u 60.2 mo (IQR 48.1-73.1)",
+              "🔍 Single-centre series, N=94 postop endometrial pts treated with Axxent 50 kVp eBT, Sept 2015 to Oct 2017",
+              "🔍 Same 94 CTs replanned a posteriori for Ir-192 and Co-60 (282 plans); dosimetric comparison, not a clinical comparator arm",
               {
-                "text": "🔍 Eligibility, high-risk EC (FIGO 2009)",
+                "text": "💊 RT regimens",
                 "subdetails": [
-                  "Stage IA endometrioid grade 3 with LVSI",
-                  "Stage IB endometrioid grade 3",
-                  "Endometrioid stage II or III",
-                  "Serous or clear cell, stage IA (with invasion) to III"
+                  "eBT alone: 25 Gy in 5 fx, n=37 (stage IA plus seven IB1)",
+                  "Pelvic EBRT 23 × 2 Gy then eBT 15 Gy in 3 fx, n=57",
+                  "Prescribed at 5 mm from cylinder; PTV = active length + 5 mm",
+                  "Cylinders 2.5 to 3.5 cm diameter; 33 pts (35%) had prior chemo"
                 ]
               },
-              "💊 RT both arms: pelvic EBRT 48.6 Gy in 1.8 Gy fractions",
-              "💊 CRT arm: cisplatin 50 mg/m² x2 during RT, then carboplatin AUC5 + paclitaxel 175 mg/m² x4",
-              "🔍 Vaginal brachy boost in 47% (46% CRT vs 48% RT), mostly for cervical invasion",
               {
-                "text": "📊 5y outcomes, CRT vs RT alone (prose-reported values)",
+                "text": "📊 Mean OAR dose, eBT vs Ir-192 HDR plans",
+                "table": {
+                  "columns": [
+                    "OAR parameter",
+                    "Axxent eBT",
+                    "Ir-192 HDR"
+                  ],
+                  "rows": [
+                    [
+                      "Bladder D2cc (%PD)",
+                      "63.8%",
+                      "70.1%"
+                    ],
+                    [
+                      "Bladder V50%",
+                      "7.2%",
+                      "12.7%"
+                    ],
+                    [
+                      "Bladder V35%",
+                      "15.2%",
+                      "28.2%"
+                    ],
+                    [
+                      "Rectum D2cc (%PD)",
+                      "61.2%",
+                      "68.4%"
+                    ],
+                    [
+                      "Rectum V50%",
+                      "7.9%",
+                      "14.3%"
+                    ],
+                    [
+                      "Rectum V35%",
+                      "16.7%",
+                      "32%"
+                    ]
+                  ]
+                }
+              },
+              "📊 Co-60 plans similar to Ir-192 per authors",
+              "📊 V150/V200 higher with eBT; gap narrows as cylinder diameter increases",
+              {
+                "text": "📊 Toxicity (RTOG) at 1 month, all 94 pts",
+                "subdetails": [
+                  "Vaginal: G0 94.7%, G1 5.3%, no G2",
+                  "Rectal: G0 98.9%, G1 1.1%",
+                  "Urinary: G0 97.9%, G1 2.1%",
+                  "Acute phase: only one G2 event across all pts"
+                ]
+              },
+              {
+                "text": "📊 31 pts with ≥12 mo follow-up (median 19 mo): no recurrence",
+                "source_tier": "figure"
+              },
+              "⚠️ Prescription not RBE-corrected: mean energy 26 vs 355 keV for Ir-192; cited RBE 1.29 to 1.85 at 5 mm",
+              "⚠️ OAR reductions are physical dose under TG-43, no heterogeneity correction",
+              "⚠️ Mean f/u 14 mo (4 to 25); late vaginal, GI, GU toxicity and cuff recurrence not assessable"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1017/S1460396918000353",
+            "tweet_ids": [
+              1000000144
+            ],
+            "slug": "endometrial-electronic-brachytherapy-axxent",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Single-centre uncontrolled series, 14 mo mean f/u; HDR comparison is replanning, not a treated arm; no late toxicity or local control data at meaningful follow-up.",
+              "audience": "Postop endometrial cancer, FIGO IA to IVA, adjuvant VBT ± pelvic EBRT"
+            },
+            "significance": "The prescription copied Ir-192 doses onto a 26 keV source with no RBE adjustment, so the OAR %PD reductions are physical-dose figures and the higher V150/V200 sits at the mucosa. Low acute mucositis at 25 Gy/5 fx and 15 Gy/3 fx is reassuring, but vaginal stenosis and late effects are untested here.",
+            "monday_clinic": "In postop endometrial pts needing vaginal cuff brachytherapy at a centre with no HDR afterloader, this supports eBT as feasible on acute toxicity; it does not inform late vaginal toxicity or cuff control vs Ir-192 HDR.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Single-centre series of **94 pts** treated with Axxent eBT, Sept 2015 to Oct 2017. Each eBT plan was **replanned a posteriori** for Ir-192 and Co-60 (282 plans); toxicity scored by RTOG. Mean follow-up **14 mo (4 to 25)**."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Postoperative endometrial cancer, mean age 65.9 (33 to 84), FIGO IA through IVA. 33 pts (35%) received chemo before RT."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**eBT alone 25 Gy/5 fx** (n=37, stage IA plus seven IB1) or **pelvic EBRT 23 × 2 Gy then eBT 15 Gy/3 fx** (n=57), twice weekly. Dose prescribed at **5 mm** from a 2.5 to 3.5 cm cylinder; 50 kVp source, TG-43 planning, **no RBE correction**."
+              },
+              {
+                "label": "Safety",
+                "body": "Only **one G2** acute event. At 1 month, vaginal G1 5.3%, rectal G1 1.1%, urinary G1 2.1%, **no G2**."
+              },
+              {
+                "label": "vs leading data",
+                "body": "PORTEC-2 established vaginal brachytherapy as adjuvant RT for high-intermediate risk disease using conventional HDR; this series does not test eBT against that clinical benchmark. A cited multicentre eBT series reported bladder V50% 11.5 ± 9.7% and rectum 17.4 ± 10.9%, in the same range as here."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents postop endometrial pts receiving cylinder-based vaginal cuff brachytherapy, alone or after pelvic EBRT, at a centre using a 50 kVp eBT unit. Does not represent pts needing interstitial or cervical brachytherapy, or anyone needing late-toxicity or recurrence data."
+              },
+              {
+                "label": "Limitations",
+                "body": "Higher V150/V200 places hotter dose at the vaginal mucosa, where late stenosis would show and 14 mo cannot capture it. TG-43 without heterogeneity correction may misstate low-energy dose in tissue."
+              },
+              {
+                "label": "Discussion",
+                "body": "The OAR advantage comes from rapid dose fall-off at low energy, the same property that concentrates dose near the applicator surface. Whether **uncorrected RBE** translates into more late mucosal toxicity, or whether RBE-based de-escalation would cost control, remains open."
+              }
+            ],
+            "interpretation": "The question this series answers is narrower than its conclusion suggests. It shows that a 50 kVp electronic source, run with the same prescription and cylinder geometry as a conventional afterloader, delivers less physical dose to bladder and rectum and produces very little acute toxicity in 94 women. That is useful to know, but it is a planning result plus an uncontrolled toxicity audit, and the comparator never treated anyone. The Ir-192 and Co-60 plans were computed retrospectively on the same CT datasets, so the comparison isolates source physics and nothing else. That makes the dosimetric difference clean and the clinical difference unmeasured.\n\nThe central issue a radiation oncologist should weigh is radiobiology. The authors prescribed eBT without correcting for relative biological effectiveness, despite a mean beam energy of 26 keV against 355 keV for Ir-192, and they cite RBE estimates of 1.29 to 1.85 relative to Ir-192 at 5 mm. Read one way, that means the bladder and rectal reductions they report in percent of prescription are understated as biological sparing for those organs at depth, and work by Rava et al. cited in the paper points in that direction for BED3. Read the other way, the vaginal mucosa sits closest to the source, where V150 and V200 were already higher with eBT, and the same RBE logic implies a biologically hotter surface dose. Acute mucositis was low, but mucosal late effects such as stenosis and telangiectasia are the toxicities that would express that excess, and they cannot appear within a mean 14 months.\n\nThe absence of recurrence carries limited weight. Only 31 pts had reached 12 months, and vaginal cuff recurrence after adjuvant brachytherapy is uncommon enough that a series this size and duration could not distinguish eBT from HDR even if a real deficit existed. The authors themselves note that dose de-escalation for RBE could compromise control, citing a skin series where reduced dosing lowered tumour control, which frames the trade-off honestly: the prescription choice here leans toward control at a possible mucosal cost.\n\nAgainst the context of PORTEC-2, which established vaginal brachytherapy as adjuvant therapy for high-intermediate risk disease with conventional sources, eBT is being offered as a substitute delivery device rather than a new treatment. The case for it is logistical: no shielded vault, no isotope exchange, portability. For a department without an afterloader, the acute safety data make eBT a defensible choice. For a department with one, this paper gives no clinical reason to switch, and the calculation method (TG-43, no heterogeneity correction) adds uncertainty to the low-energy dose estimates themselves. What would change the read is multi-year follow-up with formal late vaginal toxicity scoring and cuff recurrence rates, ideally against a contemporaneous HDR cohort.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Ir-192 prescriptions were applied to a 26 keV source without RBE correction (cited RBE 1.29 to 1.85 at 5 mm), so the bladder and rectal %PD reductions are physical dose and the mucosa carries higher V150/V200. Acute toxicity at 25 Gy/5 fx and 15 Gy/3 fx was low; late vaginal effects remain untested."
+            },
+            "open_questions": [
+              "Late vaginal mucosal toxicity with uncorrected RBE",
+              "Vaginal cuff control vs Ir-192 HDR at longer follow-up",
+              "Should eBT prescriptions be RBE-adjusted?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": null,
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "electronic brachytherapy endometrial",
+                "vaginal brachytherapy toxicity endometrial"
+              ],
+              "queries_failed": [
+                {
+                  "term": "electronic brachytherapy endometrial",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 16,
+              "fetched_at": "2026-10-24T08:02:28.725Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 144
+              }
+            ]
+          },
+          {
+            "name": "PORTEC-3",
+            "tldr": "5y FFS 75.5% vs 68.6% (HR 0.71, p=0.022) with CRT over pelvic RT alone; co-primary 5y OS 81.8% vs 76.7% not met (HR 0.76, p=0.11).",
+            "details": [
+              "🔍 Open-label randomised phase 3, 103 centres, GCIG; N=660 analysed (330 vs 330), median f/u 60.2 mo",
+              "🔍 High-risk endometrial cancer, FIGO 2009 stage I-III: EEC grade 3 with deep MI and/or LVSI, EEC stage II-III, or serous/clear cell",
+              "💊 RT alone: 48.6 Gy in 1.8 Gy fractions, 5 days/wk",
+              "💊 CRT: cisplatin 50 mg/m² x2 during RT, then 4 cycles carboplatin AUC5 + paclitaxel 175 mg/m²",
+              "🔍 Vaginal brachy boost in 47% (46% CRT vs 48% RT), mainly for cervical involvement; balanced by arm",
+              {
+                "text": "📊 Co-primary endpoints, stage subgroups, toxicity (CRT vs RT alone)",
                 "table": {
                   "columns": [
                     "Endpoint",
                     "CRT",
                     "RT alone",
-                    "HR (95% CI)",
-                    "p"
+                    "Effect"
                   ],
                   "rows": [
                     [
-                      "OS, all pts",
-                      "81.8%",
-                      "76.7%",
-                      "0.76 (0.54-1.06)",
-                      "0.109"
+                      "5y OS",
+                      "81.8% (77.5–86.2)",
+                      "76.7% (72.1–81.6)",
+                      "HR 0.76 (0.54–1.06), p=0.11"
                     ],
                     [
-                      "FFS, all pts",
-                      "75.5%",
-                      "68.6%",
-                      "0.71 (0.53-0.95)",
-                      "0.022"
+                      "5y FFS",
+                      "75.5% (70.3–79.9)",
+                      "68.6% (63.1–73.4)",
+                      "HR 0.71 (0.53–0.95), p=0.022"
                     ],
                     [
-                      "OS, stage III",
+                      "Stage III 5y OS",
                       "78.7%",
                       "69.8%",
-                      "0.71 (0.45-1.11)",
-                      "0.13"
+                      "HR 0.71 (0.45–1.11), adjusted p=0.074"
                     ],
                     [
-                      "FFS, stage III",
+                      "Stage III 5y FFS",
                       "69.3%",
                       "58.0%",
-                      "0.66 (0.45-0.97)",
-                      "0.031"
+                      "HR 0.66 (0.45–0.97), adjusted p=0.014"
                     ],
                     [
-                      "FFS, stage I-II",
+                      "Stage I–II 5y FFS",
                       "80.8%",
                       "76.6%",
-                      "0.85 (0.54-1.33)",
-                      "0.47"
+                      "HR 0.85 (0.54–1.33), p=0.47"
+                    ],
+                    [
+                      "G3+ AEs during treatment",
+                      "198 (60%)",
+                      "41 (12%)",
+                      "p<0.0001"
+                    ],
+                    [
+                      "G2+ neuropathy at 3y",
+                      "20 (8%)",
+                      "1 (1%)",
+                      "p<0.0001"
                     ]
                   ]
                 }
               },
-              "📊 Pelvic control 91% with RT alone",
-              "⚠️ G3+ AEs during treatment 60% CRT vs 12% RT (p<0.0001)",
-              "⚠️ G2+ neuropathy persisting at 3y: 8% vs 1% (p<0.0001)",
-              "⚠️ OS underpowered: 136 OS events, 69% of required; time-based final analysis",
-              "⚠️ Stage III FFS gain is a subgroup read, hypothesis-generating",
-              "🔗 Consistent with pooled NSGO-EC-9501/EORTC-55991 + MaNGO Iliade (PFS 78% vs 69%, p=0.01)"
+              "📊 Pelvic control 91% with RT alone; chemo not needed for locoregional control",
+              "📊 Stage III: 11% absolute FFS gain, exceeding the 10% design target",
+              "⚠️ OS underpowered: 136 events, 69% of required; time-based final analysis",
+              "⚠️ Chemo completion: all 4 cycles carboplatin 79%, paclitaxel 71%; discontinued in 18%",
+              "🔗 vs NSGO-EC-9501/EORTC-55991 + ManGO Iliade pooled (n=534): PFS 78% vs 69%, OS trend 82% vs 75%",
+              "🔗 vs GOG-258 (abstract): chemo alone vs CRT, no OS/RFS difference but more vaginal and pelvic/para-aortic recurrence without RT"
             ],
             "figures": [],
             "nct": "NCT00411138",
-            "doi": "10.1016/S1470-2045(18)30079-2",
+            "doi": "10.1016/s1470-2045(18)30079-2",
             "tweet_ids": [
               1000000145
             ],
             "slug": "portec-3",
             "verdict": {
               "soc_implication": "confirmatory",
-              "rationale": "Randomised phase 3 hit co-primary FFS but not OS, with OS events short of target. Aligns with pooled NSGO/EORTC/Iliade direction; toxicity cost tempers adoption below stage III.",
+              "rationale": "Randomised phase 3 met co-primary FFS but missed OS with only 69% of required OS events; direction matches pooled NSGO-EC-9501/ManGO data. Toxicity cost tempers adoption.",
               "audience": "High-risk endometrial cancer, FIGO 2009 stage I-III, post-hysterectomy"
             },
-            "significance": "Pelvic RT alone already held pelvic control at 91%, so the chemo gain is a distant-failure question, not a local one. The FFS gain concentrates in stage III (69.3% vs 58.0%, HR 0.66), while stage I-II FFS HR 0.85 was ns, supporting RT alone below stage III.",
-            "monday_clinic": "In stage III high-risk endometrial cancer after surgery, this supports counselling on concurrent plus adjuvant chemo with pelvic RT for FFS; it does not establish an OS gain, nor a meaningful benefit in stage I-II disease.",
+            "significance": "Pelvic control was 91% with RT alone, so chemotherapy is not buying locoregional control here; 48.6 Gy pelvic EBRT (plus brachy boost in 47%, balanced by arm) stays the backbone in both arms. The RT question left open is whether pelvic RT can be dropped once chemo is given, which GOG-258 tests and its abstract suggests costs vaginal and nodal control.",
+            "monday_clinic": "In stage III high-risk endometrial cancer, this supports discussing concurrent cisplatin plus adjuvant carboplatin/paclitaxel with pelvic RT for failure-free survival; in stage I-II disease the FFS estimate (HR 0.85, p=0.47) does not clearly justify the added toxicity.",
             "primary_endpoint": {
-              "name": "Overall survival (co-primary with FFS)",
+              "name": "Overall survival (co-primary with failure-free survival)",
               "klass": "overall-survival",
               "stat_value": "HR 0.76",
-              "stat_detail": "95% CI 0.54-1.06, p=0.109, ns; co-primary FFS HR 0.71, p=0.022"
+              "stat_detail": "95% CI 0.54–1.06, p=0.11, OS not met; co-primary FFS HR 0.71, p=0.022"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**Open-label randomised phase 3**, 1:1, 103 centres across six GCIG groups. Biased-coin minimisation stratified by centre, lymphadenectomy, stage and histology. **Median follow-up 60.2 mo**."
+                "body": "Open-label, international, **randomised phase 3** at 103 centres across six GCIG groups; 1:1 by biased-coin minimisation, stratified by centre, lymphadenectomy, stage and histology. 686 enrolled, **660 in the ITT analysis**; median follow-up **60.2 mo**."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**High-risk endometrial cancer, FIGO 2009**: endometrioid grade 3 stage I with deep invasion and/or LVSI, endometrioid stage II-III, or serous/clear cell stage I-III. Median age 62; stage III in 46% CRT vs 43% RT."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "**Pelvic EBRT 48.6 Gy in 1.8 Gy fractions** both arms; 329 (100%) CRT and 322 (98%) RT pts received 45.0-50.4 Gy. Vaginal brachy boost in 47%, balanced across arms."
+                "body": "**High-risk endometrial cancer, FIGO 2009**: stage IA EEC grade 3 with LVSI, IB EEC grade 3, EEC stage II or III, or **serous / clear cell stage IA (with invasion) to III**. WHO PS 0-2, no upper age limit; median age 62, stage III in 46% vs 43%."
               },
               {
                 "label": "Regimen",
-                "body": "CRT arm added **cisplatin 50 mg/m² x2 concurrent**, then **carboplatin AUC5 + paclitaxel 175 mg/m² x4**. Both cisplatin cycles completed by 92%; all four carboplatin cycles by 79%, paclitaxel by 71%."
+                "body": "Experimental arm added **cisplatin 50 mg/m² x2 concurrent**, then **4 cycles carboplatin AUC5 + paclitaxel 175 mg/m²**. Both cisplatin cycles completed by 92%; all 4 carboplatin and paclitaxel cycles by 79% and 71%."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Pelvic EBRT **48.6 Gy in 1.8 Gy fractions** in both arms; 45.0-50.4 Gy delivered in 100% vs 98%. **Vaginal brachy boost** for cervical invasion, given in 46% vs 48%."
               },
               {
                 "label": "Endpoints",
-                "body": "**Co-primary: overall survival and failure-free survival**, ITT, Cox adjusted for stratification factors."
+                "body": "**Co-primary: overall survival and failure-free survival**, ITT, Cox-adjusted for stratification factors."
               },
               {
                 "label": "Safety",
-                "body": "**G3+ AEs during treatment 60% vs 12%** (p<0.0001). G2+ neuropathy persisted at 3y in **8% vs 1%**."
+                "body": "**G3+ AEs during treatment 60% vs 12%** (p<0.0001). **G2+ neuropathy persisted at 3y in 8% vs 1%**."
               },
               {
                 "label": "vs leading data",
-                "body": "Direction matches the pooled **NSGO-EC-9501/EORTC-55991 + MaNGO Iliade** analysis (PFS 78% vs 69%, OS trend 82% vs 75%). RT-alone pelvic control of 91% echoes **GOG-249**, where chemo plus vaginal brachy did not beat pelvic EBRT and pelvic/para-aortic failures rose."
+                "body": "Direction matches the pooled **NSGO-EC-9501/EORTC-55991 + ManGO Iliade** analysis (PFS 78% vs 69%, OS trend 82% vs 75%), here in a larger trial with concurrent plus adjuvant chemo. **GOG-249** found chemo + VBT no better than pelvic EBRT in stage I-II with more pelvic and para-aortic recurrence; the **GOG-258** abstract reported no OS/RFS gain for CRT over chemo alone but more vaginal and nodal failures without RT."
               },
               {
                 "label": "Applies to",
-                "body": "Represents surgically staged or hysterectomised high-risk endometrial cancer, FIGO 2009 stage I-III, fit for platinum. Does not represent stage IV disease or pts unfit for combined chemo."
+                "body": "Represents high-risk endometrial cancer, FIGO 2009 stage I-III after hysterectomy, fit for platinum doublet, with stage III carrying the FFS gain. Does not represent stage IV disease or settings comparing CRT against chemotherapy alone."
               },
               {
                 "label": "Limitations",
-                "body": "Event rates ran below design assumptions, so OS reached **69% of required events** and the 5% OS gap was smaller than the trial was powered to detect. Stage and histology benefit estimates rest on subgroups with limited events."
+                "body": "Final analysis was **time-based**, with OS events at **69% of the number required**, so a 5% OS difference was below what the trial could detect. RT plan QA outside ANZGOG was still pending, and the stage and age subgroup reads are exploratory."
               },
               {
                 "label": "Discussion",
-                "body": "Chemo buys distant control, not pelvic control, at a real toxicity cost. Authors judge the stage I-II FFS gain **not worth the toxicity**, and the stage III 11% absolute FFS gain clinically relevant; OS remains unsettled pending longer follow-up."
+                "body": "CRT buys **FFS, not OS, at 5y**, at the price of a fivefold G3+ toxicity rate and persistent neuropathy. The authors read the stage I-II FFS gain as **not outweighing toxicity**, so the combined regimen fits individual counselling, mainly in stage III."
               }
             ],
-            "interpretation": "The cleanest way to read PORTEC-3 is as a trial about distant failure in a population where pelvic RT already does its job. Pelvic control was 91% with radiotherapy alone, so there was little local headroom for chemotherapy to claim, and the FFS improvement (HR 0.71) has to come predominantly from fewer distant events. That framing matters for how a radiation oncologist uses it: the trial does not argue that RT is insufficient locally; it argues that a subset of high-risk pts carries enough systemic risk that adding platinum-taxane changes their failure-free trajectory.\n\nThe OS result should be read for what it is rather than as a negative. The trial accrued fully, but event rates were lower than assumed at design, and the time-based final analysis captured 136 OS events, 69% of the required number. A 5% OS difference with an upper CI bound of 1.06 is compatible with a modest real benefit that this analysis could not resolve. Equally, it is compatible with no benefit, and a reader should not borrow confidence from the FFS result to fill that gap. The authors' own call for continued follow-up is the honest position.\n\nAgainst prior data, the result is consistent rather than surprising. The pooled NSGO-EC-9501/EORTC-55991 and MaNGO Iliade analysis, using sequential platinum chemotherapy with pelvic RT, showed the same direction on PFS and a similar OS trend, in a population with only about 20% stage III disease. RTOG 9708, the phase 2 schedule PORTEC-3 adopted, reported 4-year OS of 85%, in the same range as the 82% seen here. GOG-249 is the useful counterweight: in stage I-II high-intermediate and high-risk disease, replacing pelvic EBRT with chemo plus vaginal brachy offered no superiority and more pelvic and para-aortic failure. Read together, those trials suggest pelvic RT is the anchor for locoregional control and chemotherapy is an addition whose value scales with systemic risk. GOG-258, comparing this CRT schedule with chemo alone, was only presented at the time, but its reported excess of vaginal and pelvic or para-aortic recurrence without RT points the same way.\n\nThe stage split is where decisions actually get made, and also where confidence should be most guarded. Stage III pts gained FFS 69.3% vs 58.0% (HR 0.66), while stage I-II FFS was 80.8% vs 76.6% with a CI spanning 1. Stage was a stratification factor, which strengthens the subgroup somewhat, but the trial was not powered within strata. The age signal, larger benefit at 70 and older, is more fragile still, and the authors themselves raise selection of fitter older women.\n\nToxicity is not a footnote here. G3+ AEs ran 60% vs 12%, and persistent neuropathy at 3 years was 8% vs 1%. For stage I-II pts with high baseline FFS, that cost is hard to justify on this evidence. For stage III, the absolute FFS gain exceeds the 10% the trial was designed around. What would make the stage III read wrong is an OS that never separates with longer follow-up, or a molecular stratification showing the benefit is confined to a subset that stage alone only approximates.",
+            "interpretation": "The trial asked what systemic therapy adds on top of a fixed pelvic RT backbone, and the answer at five years is a failure-free survival gain without a confirmed survival gain. That framing matters for an RT reader. Pelvic RT was given in both arms, pelvic control was already 91% with radiotherapy alone, and the brachytherapy boost was balanced between groups, so nothing in this trial suggests chemotherapy improves locoregional control. Whatever chemotherapy contributes, it contributes beyond the pelvis, and the high proportion of deaths from endometrial cancer in both arms points to systemic failure as the unresolved problem.\n\nThe OS result should be read as underpowered rather than as a clean negative. Event rates ran lower than planned, the final analysis was triggered by time rather than events, and only 69% of the required OS events had accrued. A hazard ratio of 0.76 with an upper bound of 1.06 is compatible with a real but modest survival benefit and also with none. The unadjusted and adjusted estimates differ (FFS HR 0.76 unadjusted, p=0.067, versus 0.71 adjusted, p=0.022), which is a reminder that the co-primary that did clear its bar did so narrowly and depended on the prespecified Cox adjustment. The authors themselves call for continued follow-up, and that is the honest read.\n\nAgainst prior randomised data the result is consistent rather than surprising. The pooled NSGO-EC-9501/EORTC-55991 and ManGO Iliade analysis showed the same pattern, a progression-free gain and a survival trend, with sequential chemotherapy in a cohort carrying fewer stage III patients. PORTEC-3 reproduces that signal at larger scale with a concurrent-then-adjuvant schedule derived from RTOG 9708. What it does not do is settle the question GOG-258 asks: whether radiotherapy remains necessary once a platinum doublet is given. The GOG-249 experience in stage I-II, where replacing pelvic EBRT with chemotherapy plus vaginal brachytherapy increased pelvic and para-aortic recurrence, and the GOG-258 abstract reporting more vaginal and nodal failures with chemotherapy alone, both argue that the pelvic field is doing real work and that omission would trade locoregional control for convenience.\n\nThe stage split is where the decision sits. Stage III pts had the largest absolute FFS gain, which the authors note exceeded the 10% difference the trial was designed around, while the stage I-II FFS estimate had a confidence interval spanning one. Read with a G3+ toxicity rate of 60% versus 12% and neuropathy persisting at three years in 8%, the stage I-II benefit is hard to defend for routine use. The older-age and serous-histology signals are interesting, particularly given the authors' caution about selection of fitter older women, but they come from exploratory subgroups and should not drive treatment on their own.\n\nFor the trial to be wrong in its practical message, the FFS gain would have to be an artefact of the stratification adjustment or of imbalance in a subgroup, and the consistent direction across prior pooled data makes that less likely. The more plausible risk is overgeneralisation: applying a stage III-weighted benefit to every high-risk pt, including stage I-II disease where the toxicity cost clearly dominates.",
             "relevant_specialties": [
               "radonc",
               "medonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Pelvic control was 91% with 48.6 Gy pelvic EBRT alone, so chemo does not add local value. Stage I-II FFS HR 0.85 (p=0.47) supports RT alone there; stage III is where adding systemic therapy earns its toxicity.",
-              "medonc": "Concurrent cisplatin plus 4 cycles carboplatin/paclitaxel improved FFS (HR 0.71) at a cost of G3+ AEs 60% vs 12% and persistent G2+ neuropathy 8% vs 1% at 3y. Only 79% completed all carboplatin cycles; stage III carries the absolute benefit."
+              "radonc": "Pelvic control was 91% with RT alone, so chemo adds nothing locoregionally and 48.6 Gy pelvic EBRT plus indicated brachy boost stays the backbone. The RT decision this trial leaves open is omission of pelvic RT once chemo is given, where GOG-249 and the GOG-258 abstract both show more pelvic and nodal failure without it.",
+              "medonc": "The regimen is demanding: all 4 carboplatin and paclitaxel cycles were completed by 79% and 71%, G3+ AEs ran 60% vs 12%, and G2+ neuropathy persisted at 3y in 8%. The FFS gain concentrates in stage III, and the authors flag a larger benefit in women over 70 and at least as much benefit in serous or clear cell histology."
             },
             "open_questions": [
-              "Does OS separate with longer follow-up?",
-              "Chemo alone vs CRT in stage III disease",
-              "Benefit in serous and clear cell histology"
+              "Does the OS difference emerge with longer follow-up?",
+              "Is pelvic RT still needed in stage III when chemotherapy is given?",
+              "Can stage I-II pts be spared chemotherapy toxicity safely?"
             ],
             "consort": {
               "enrolled": 686,
@@ -222,45 +383,121 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* 1)Age ≥18 years,\n\n  2\\) Patients with stage I-IVA (FIGO2009) (excluded endometrial epithelial carcinoma confined to the endometrial layer), which have received initial diagnosis and comprehensive staging surgery (based on total uterine and double salpingectomy. Lymph nodes…",
-                "answers_question": "Chemo alone vs CRT in stage III disease",
-                "relevance_phrase": "chemo alone vs CRT, p53-mutant stage I-IVA post-op"
+                "answers_question": "Is pelvic RT still needed in stage III when chemotherapy is given?",
+                "relevance_phrase": "randomizes chemo alone vs CRT, p53abn stage I-IVA"
               },
               {
-                "nct": "NCT05655260",
-                "brief_title": "PErsonalized TReatment for Endometrial Carcinoma",
+                "nct": "NCT05179447",
+                "brief_title": "PROfiling Based Endometrial Cancer Adjuvant Therapy",
                 "overall_status": "RECRUITING",
                 "phase": [
                   "NA"
                 ],
-                "enrollment_count": 300,
-                "primary_completion_date": "2028-12",
-                "brief_summary": "The goal of this clinical trial is to compare the efficacy of adjuvant therapies in women with stage I-II molecular integrated high-intermediate or high-risk endometrial carcinoma. Specifically, the invesigators want to compare:\n\n* Chemotherapy vs. chemoradiotherapy in p53 abn subtype and nonendometrioid carcinomas.\n* Vaginal brachytherapy vs. whole pelvic radiotherapy in the MMR-D molecular subgroup.\n* Vaginal brachytherapy vs. whole pelvic radiotherapy in the NSMP molecular subgroup.",
+                "enrollment_count": 590,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "This is a prospective, multicenter, randomized phase III trial among women with endometrioid adenocarcinoma with high-intermediate and intermediate risk features to investigate the role of integrated genomic-pathologic classification to determine if participants should receive no adjuvant therapy, vaginal brachytherapy, external beam radiotherapy or chemo-radiation therapy based on molecular features as compared to standard radiation therapy.",
                 "conditions": [
-                  "Endometrial Adenocarcinoma"
+                  "Endometrial Cancer Stage I",
+                  "Endometrial Cancer Stage II"
                 ],
                 "interventions": [
                   {
-                    "name": "Comparison of chemotherapy vs. chemoradiotherapy",
+                    "name": "Vaginal brachytherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "External beam radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Observation",
                     "type": "OTHER"
                   },
                   {
-                    "name": "Comparison of VBT vs. WPRT",
-                    "type": "OTHER"
+                    "name": "Chemoradiation therapy",
+                    "type": "COMBINATION_PRODUCT"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age 18 to 100 years\n* WHO performance status 0 to 2\n* Stage I-II molecular integrated high-intermediate or high-risk endometrial carcinoma\n\nExclusion Criteria:\n\n* Age \\<18 years or \\>100 years\n* WHO performance status \\>2\n* Uterine sarcoma\n* A history of malignancy within 5…",
-                "answers_question": "Benefit in serous and clear cell histology",
-                "relevance_phrase": "chemo vs CRT in nonendometrioid stage I-II"
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Surgery consisting of a total abdominal or laparoscopic hysterectomy, bilateral salpingectomy, pelvic lymphadenectomy or sentinel lymph node mapping and dissection, with or without para-aortic lymphadenectomy, oophorectomy\n2. Histologically confirmed endometrioid type…",
+                "answers_question": "Can stage I-II pts be spared chemotherapy toxicity safely?",
+                "relevance_phrase": "molecular profile assigns CRT vs RT, stage I-II"
+              },
+              {
+                "nct": "NCT05255653",
+                "brief_title": "Refining Adjuvant Treatment IN Endometrial Cancer Based On Molecular Features",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 316,
+                "primary_completion_date": "2030-01",
+                "brief_summary": "RAINBO MMRd-GREEN is an international, multicenter, phase III randomised trial wherein adjuvant pelvic external beam radiotherapy combined with and followed by durvalumab for one year is compared to adjuvant pelvic external beam radiotherapy with or without chemotherapy.",
+                "conditions": [
+                  "Endometrial Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Pelvic external beam radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Chemotherapy",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Durvalumab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Vaginal brachytherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Participants of the four RAINBO trials should be eligible according to the inclusion and exclusion criteria of both the overarching RAINBO trials program and the clinical trial that they are assigned to based on the molecular profile.\n\nInclusion Criteria of the overarching RAINBO program:\n\n*…",
+                "answers_question": "Can stage I-II pts be spared chemotherapy toxicity safely?",
+                "relevance_phrase": "RT + durvalumab vs RT ± chemo in MMRd EC"
+              },
+              {
+                "nct": "NCT07831902",
+                "brief_title": "Refining Adjuvant Treatment IN Endometrial Cancer Based On Molecular Features (RAINBO) - NSMP-ORANGE Trial: Comparing Radiotherapy With Oral Progestin Tablets vs. the Current Standard Care, Radiotherapy and Chemotherapy, in Patients With NSMP Endometrial Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 600,
+                "primary_completion_date": "2030-12",
+                "brief_summary": "RAINBO NSMP-ORANGE aims to investigate if adjuvant radiotherapy with oral progestin tablets is as effective as radiotherapy with chemotherapy, whilst reducing toxicity and thus improving quality of life, in patients with high-risk NSMP endometrial cancer. Patients will be randomised to radiotherapy with chemotherapy (standard of care), or radiotherapy followed by oral progestin tablets.",
+                "conditions": [
+                  "Endometrial Cancer",
+                  "Uterine Neoplasms"
+                ],
+                "interventions": [
+                  {
+                    "name": "medroxyprogesterone acetate tablets OR megestrol acetate",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Cisplatin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Carboplatin + Paclitaxel",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Written informed consent and consent for data sharing for the overarching RAINBO programme\n2. Histologically confirmed diagnosis of endometrial cancer (EC) of the following histotypes: endometrioid endometrial carcinoma, serous endometrial carcinoma, uterine clear cell…",
+                "answers_question": "Can stage I-II pts be spared chemotherapy toxicity safely?",
+                "relevance_phrase": "RT + progestin vs RT + chemo, high-risk NSMP"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
                 "endometrial cancer chemoradiotherapy",
-                "serous endometrial adjuvant"
+                "endometrial cancer adjuvant radiotherapy"
               ],
               "queries_failed": [],
-              "candidates_returned": 18,
-              "fetched_at": "2026-10-23T08:07:40.670Z",
+              "candidates_returned": 29,
+              "fetched_at": "2026-10-24T08:02:57.226Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -271,257 +508,48 @@
             ]
           },
           {
-            "name": "Axxent electronic brachytherapy, postoperative endometrial cancer",
-            "tldr": "eBT cut bladder V35% 15.2% vs 28.2% and rectal V35% 16.7% vs 32% vs replanned Ir-192, with 1 acute G2 event in 94 pts.",
+            "name": "HDR vaginal brachytherapy cylinder dosimetry",
+            "tldr": "Surface SD 6% vs 18% with surface vs 0.5-cm depth prescription (2-cm cylinder). Omitting dome optimization points gave hot spots >150% and cold spots <60%.",
             "details": [
-              "🔍 Single-centre series, N=94, Sept 2015 to Oct 2017, Axxent 50 kVp eBT via vaginal cylinder",
               {
-                "text": "🔍 RT regimens",
+                "text": "🔍 Treatment-planning physics study (Henry Ford, Plato BPS 14.2.4); no patients, no clinical endpoints",
+                "source_tier": "figure"
+              },
+              {
+                "text": "🔍 Single-channel CT/MR and radiographic cylinders, 2.0-4.0 cm diameter, active length 3-8 cm",
+                "source_tier": "figure"
+              },
+              {
+                "text": "🔍 Compared surface (P0) vs 0.5-cm depth (P5) prescription, each with and without curved-end optimization points (NEP)",
+                "source_tier": "figure"
+              },
+              "📊 Surface SD 6% (P0) vs 18% (P5), 2-cm cylinder, 0.8-cm tip space",
+              "📊 Without dome points: extreme hot (>150%) and cold (<60%) spots",
+              {
+                "text": "📊 NEP failure modes by tip space (2-cm cylinder)",
                 "subdetails": [
-                  "eBT exclusive: 37 pts, 25 Gy in 5 sessions (stage IA plus 7 IB1)",
-                  "EBRT + eBT: 57 pts, whole pelvis 23 × 2 Gy, then eBT 15 Gy in 3 sessions",
-                  "Prescribed at 5 mm from applicator; PTV = active length + 5 mm",
-                  "Cylinders 2.5 to 3.5 cm diameter; eBT twice weekly"
-                ]
-              },
-              "🔍 Each eBT plan replanned a posteriori for Ir-192 and Co-60: 282 plans, TG-43, no heterogeneity correction",
-              {
-                "text": "📐 Mean OAR dose, eBT vs replanned Ir-192 HDR",
-                "table": {
-                  "columns": [
-                    "OAR metric",
-                    "Axxent eBT",
-                    "Ir-192 HDR"
-                  ],
-                  "rows": [
-                    [
-                      "Bladder D2cc (% prescribed)",
-                      "63.8%",
-                      "70.1%"
-                    ],
-                    [
-                      "Bladder V50%",
-                      "7.2%",
-                      "12.7%"
-                    ],
-                    [
-                      "Bladder V35%",
-                      "15.2%",
-                      "28.2%"
-                    ],
-                    [
-                      "Rectum D2cc (% prescribed)",
-                      "61.2%",
-                      "68.4%"
-                    ],
-                    [
-                      "Rectum V50%",
-                      "7.9%",
-                      "14.3%"
-                    ],
-                    [
-                      "Rectum V35%",
-                      "16.7%",
-                      "32%"
-                    ]
-                  ]
-                }
-              },
-              "📊 Co-60 plan OAR doses similar to Ir-192",
-              "📊 PTV V150/V200 higher with eBT; gap narrows as cylinder size increases",
-              "📊 Acute toxicity: only 1 event above G1 (G2, RTOG) across 94 pts",
-              {
-                "text": "📊 Toxicity at 1 month (RTOG), all 94 pts",
-                "table": {
-                  "columns": [
-                    "Organ",
-                    "G0",
-                    "G1"
-                  ],
-                  "rows": [
-                    [
-                      "Vaginal",
-                      "94.7%",
-                      "5.3%"
-                    ],
-                    [
-                      "Rectal",
-                      "98.9%",
-                      "1.1%"
-                    ],
-                    [
-                      "Urinary",
-                      "97.9%",
-                      "2.1%"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📊 No recurrence in 31 pts past 12 mo (median f/u 19 mo, range 12-25)",
+                  "0.8-cm tip: MD at depth down ~10%, apex cold spots 50-65%",
+                  "0.5-cm tip, surface Rx: MD up ~10%, apex surface hot spots 140-170%",
+                  "0.5-cm tip, P5NEP: target MD on depth, but surface SD 25%"
+                ],
                 "source_tier": "figure"
               },
-              "⚠️ No RBE correction applied; cited 50 kV RBE vs Ir-192 is 1.29 to 1.85 at 5 mm",
-              "⚠️ Comparator plans recalculated, never delivered; no clinical HDR control cohort",
-              "⚠️ Late vaginal toxicity (stenosis) not reported; f/u 14 mo (4-25)",
+              "📊 Shorter tip space raises dosimetric uncertainty >30%",
+              "📐 Surface-dose magnification M ≈ 1.00 + 0.64/L + 1.23/S (cm); matched plans within 2%",
               {
-                "text": "⚠️ Internal inconsistencies: 30 vs 31 pts with 12-mo f/u; average energy 26 vs 29.6 keV",
-                "source_tier": "figure"
-              }
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1017/S1460396918000353",
-            "tweet_ids": [
-              1000000144
-            ],
-            "slug": "endometrial-electronic-brachytherapy-axxent",
-            "verdict": {
-              "soc_implication": "early-signal",
-              "rationale": "Single-centre uncontrolled series, N=94, 14-mo f/u; OAR comparison is replanned physical dose without RBE correction, and cuff control rests on 31 pts past 12 mo.",
-              "audience": "Postoperative endometrial cancer, FIGO IA-IVA, adjuvant vaginal cuff brachy"
-            },
-            "significance": "The OAR savings are TG-43 physical dose with no RBE correction, while PTV V150/V200 rose with eBT, most with the smallest cylinder. Against a cited 50 kV RBE of 1.29 to 1.85 vs Ir-192 at 5 mm, the biologic mucosal dose is unknown, which matters most for 2.5 cm cylinders and the 25 Gy/5 fx exclusive schedule.",
-            "monday_clinic": "In a centre without an HDR afterloader treating postoperative endometrial cancer with vaginal cuff brachytherapy, this supports 50 kV eBT as feasible on acute toxicity; it does not establish equivalent cuff control or late vaginal toxicity vs Ir-192 HDR.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Single-centre series of **94 pts** treated Sept 2015 to Oct 2017 with Axxent eBT. Each delivered plan was **replanned a posteriori** for Ir-192 and Co-60 (282 plans) under TG-43 for a dosimetric comparison; toxicity scored by RTOG."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Postoperative endometrial cancer, FIGO IA through IVA; mean age 65.9 (33-84). **33 pts (35%)** received chemotherapy before RT."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "**Exclusive eBT 25 Gy in 5 sessions** (37 pts) or **whole-pelvis EBRT 23 × 2 Gy then eBT 15 Gy in 3 sessions** (57 pts). Dose prescribed at 5 mm from cylinders of 2.5 to 3.5 cm; **no RBE adjustment** for the 50 kVp beam."
-              },
-              {
-                "label": "Endpoints",
-                "body": "Bladder, rectum and sigmoid D2cc, V50% and V35%; PTV V150/V200; acute, 1-month and 12-month RTOG toxicity. Recurrence reported descriptively."
-              },
-              {
-                "label": "Safety",
-                "body": "Only **1 acute event above G1** (G2). At 1 month, vaginal G0 94.7% and G1 5.3%, with G2 cases resolved."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Adjuvant vaginal cuff HDR with Ir-192 is the reference technique, and PORTEC-2 is the trial that set VBT as the adjuvant standard for high-intermediate risk disease. The source cites a multicentre eBT series with bladder V50% 11.5 ± 9.7% and rectum 17.4 ± 10.9%, same direction as here."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents postoperative endometrial cancer receiving vaginal cuff cylinder brachytherapy alone or as a boost after whole-pelvis EBRT. Does not represent late toxicity outcomes, RBE-adjusted eBT prescriptions, or cervix applications."
-              },
-              {
-                "label": "Limitations",
-                "body": "**TG-43 without heterogeneity correction** understates the tissue-composition effect at 50 kV, where the authors themselves cite Monte-Carlo recommendations. Reporting is internally inconsistent on follow-up (mean vs median 14 mo; 30 vs 31 pts past 12 mo) and source energy."
-              },
-              {
-                "label": "Discussion",
-                "body": "The steeper falloff of a 50 kV source predictably lowers distal OAR dose while raising the mucosal hot spot; the open question is whether that hot spot, carrying higher RBE, costs late vaginal toxicity. **Acute toxicity alone cannot answer it**, and cuff recurrence is too rare to judge at this follow-up."
-              }
-            ],
-            "interpretation": "The dosimetric finding here is close to a physical certainty rather than a discovery. A 50 kVp source deposits dose with a much steeper gradient than Ir-192, so when both plans are normalised to the same depth 5 mm from the cylinder surface, the low-energy plan will deliver less dose to bladder and rectum a few centimetres away and more dose to the vaginal mucosa sitting against the applicator. The paper shows exactly that pattern: lower D2cc, V50% and V35% for every OAR, and higher PTV V150 and V200, with the hot-spot excess shrinking as the cylinder diameter grows. The question a brachytherapist actually needs answered is not whether the OAR numbers fall, but whether the mucosal trade is clinically free.\n\nOn that question the series is weaker than its conclusions suggest. Prescriptions were not adjusted for relative biological effectiveness, and the authors themselves cite estimates of 1.29 to 1.85 relative to Ir-192 at 5 mm, alongside Rava et al., whose BED modelling at an RBE of 1.5 implied higher mucosal dose. If those estimates are anywhere near right, the delivered biologic dose at the cuff surface exceeds the HDR equivalent, and the OAR comparison, computed in physical dose under TG-43 without heterogeneity correction, flatters eBT. The low acute and 1-month toxicity is reassuring but not discriminating: vaginal cuff HDR is itself a low-toxicity procedure acutely, and the endpoint that would expose an excess mucosal dose is late, namely stenosis, shortening and dryness, which is not reported.\n\nThe efficacy signal is thinner still. No recurrences among the roughly 30 pts followed beyond a year says little in a population where vaginal cuff failure after adjuvant brachytherapy is uncommon to begin with. The cohort is also heterogeneous, mixing exclusive brachytherapy for early-stage disease with boosts after whole-pelvis EBRT and chemotherapy in a third of pts, so any cuff control observation is diluted across very different risk groups. PORTEC-2 is what made vaginal brachytherapy the adjuvant standard for high-intermediate risk disease, and that standard was built on conventional HDR sources; transferring it to a 50 kV source is a claim of biologic equivalence the present data cannot carry.\n\nWhere the result does have practical value is as a feasibility statement for departments without an HDR afterloader or with constrained shielding: the workflow runs, sessions take minutes, and acute toxicity is acceptable. For a centre that already owns Ir-192 HDR, nothing here argues for switching. The decision the data would need to move is whether a 2.5 cm cylinder treated to 25 Gy in 5 fractions with an unadjusted 50 kV prescription is safe for the vaginal mucosa at three to five years, and that requires a prospective cohort with late toxicity scored by validated vaginal instruments, ideally with RBE-informed dose and Monte-Carlo dosimetry. Until then, eBT is an alternative of necessity rather than of equivalence.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The OAR savings are TG-43 physical dose with no RBE correction, while PTV V150/V200 rose with eBT, most with the smallest cylinder. Against a cited RBE of 1.29 to 1.85 vs Ir-192 at 5 mm, biologic mucosal dose is unknown, most relevant for 2.5 cm cylinders and 25 Gy/5 fx exclusive treatment."
-            },
-            "open_questions": [
-              "Late vaginal toxicity with unadjusted 50 kV eBT prescriptions",
-              "Vaginal cuff control vs Ir-192 HDR with mature follow-up",
-              "RBE-adjusted dose prescription for 50 kV eBT"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": "curative",
-            "methodology": null,
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "electronic brachytherapy endometrial",
-                "vaginal brachytherapy endometrial"
-              ],
-              "queries_failed": [
-                {
-                  "term": "electronic brachytherapy endometrial",
-                  "reason": "empty"
-                }
-              ],
-              "candidates_returned": 20,
-              "fetched_at": "2026-10-23T08:07:50.762Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 144
-              }
-            ]
-          },
-          {
-            "name": "HDR vaginal brachytherapy cylinder dosimetry (depth, size, length, tip space)",
-            "tldr": "Planning study: dropping optimization points at the cylinder dome gave hot (>150%) and cold (<60%) spots, and shorter tip space raised dosimetric uncertainty >30%.",
-            "details": [
-              {
-                "text": "🔍 Dosimetric planning study (Plato BPS 14.2.4), no patient outcomes; single institution (Henry Ford)",
+                "text": "📐 Worked example: 7 Gy at 0.5 cm, 3-cm cylinder, 5-cm length → 10.8 Gy to surface (M = 1.54)",
                 "source_tier": "figure"
               },
               {
-                "text": "🔍 Cylinders 2.0, 2.5, 3.0, 3.5 and 4.0 cm diameter; activated lengths 3 to 8 cm",
+                "text": "🔗 Context: ABS survey cited, >90% of users prescribe to 0.5 cm; >one tenth omit dome points",
                 "source_tier": "figure"
               },
+              "⚠️ The conclusion that surface Rx is optimal is a dosimetric argument; no toxicity or vaginal-control data were collected",
               {
-                "text": "🔍 Compared surface (P0) vs 0.5-cm depth (P5) prescription, each with and without dome optimization points (NEP)",
+                "text": "⚠️ Single vendor TPS and applicators, 2007-era point-based optimization; transfer to modern 3D planning not tested",
                 "source_tier": "figure"
               },
-              {
-                "text": "🔍 Tip space: radiographic thin-metal-tube cylinder ~0.5 cm; CT/MR plastic-tube cylinder 0.6 to 0.8 cm on radiograph",
-                "source_tier": "figure"
-              },
-              {
-                "text": "📊 Surface vs 0.5-cm depth prescription, surface SD: 6% vs 18% (2-cm cylinder, 0.8-cm tip space)",
-                "source_tier": "figure"
-              },
-              {
-                "text": "📊 No-end-point (NEP) plans, 2-cm cylinder, by tip space",
-                "table": {
-                  "columns": [
-                    "Tip space",
-                    "Given dose (MD)",
-                    "Apex"
-                  ],
-                  "rows": [
-                    [
-                      "0.8 cm (P0NEP and P5NEP)",
-                      "Decreased by about 10%",
-                      "Cold spots 50-65% of Rx"
-                    ],
-                    [
-                      "0.5 cm (P0NEP)",
-                      "Increased by about 10%",
-                      "Hot spots 140-170% of Rx at surface"
-                    ],
-                    [
-                      "0.5 cm (P5NEP)",
-                      "Desired MD at depth",
-                      "Surface SD 25%"
-                    ]
-                  ]
-                },
-                "source_tier": "figure"
-              },
-              "📐 Surface conversion factor: M ≈ 1.00 + 0.64 (cm)/L + 1.23 (cm)/S, regression agreement within 2%",
-              {
-                "text": "📐 Worked example: 7 Gy at 0.5 cm, 5-cm length, 3-cm cylinder → M = 1.54 → 10.8 Gy/fx at surface",
-                "source_tier": "figure"
-              },
-              "⚠️ M regression built from only two treatment lengths × two cylinder sizes",
-              "⚠️ Toxicity benefit of surface Rx inferred from dose, not measured; no clinical endpoints",
-              "🔗 Authors frame surface-dose reduction against Sorbe randomized dose-fractionation trial (mucosal atrophy, bleeding, shortening)"
+              "⚠️ The regression for M comes from 2 lengths × 2 diameters; extrapolation beyond that grid is unvalidated"
             ],
             "figures": [],
             "nct": null,
@@ -532,60 +560,60 @@
             "slug": "hdr-vaginal-brachytherapy-cylinder-dosimetry",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Dosimetric planning study with no patient outcomes; the claimed optimal surface prescription and toxicity benefit are inferred from point doses, not tested clinically.",
+              "rationale": "Planning-system dosimetry with no patients or outcomes. 'Surface prescription is optimal' rests on mucosal dose uniformity, a surrogate never tied to toxicity or vaginal control here.",
               "audience": "Post-hysterectomy endometrial cancer, adjuvant HDR vaginal cuff brachytherapy"
             },
-            "significance": "The dome is where plans fail: omitting optimization points at the curved end swung given dose about 10% in either direction depending on tip space, with apex spots of 50-65% or 140-170%. The M formula (M ≈ 1.00 + 0.64/L + 1.23/S) gives a geometry-specific surface dose matching a 0.5-cm depth Rx, informing the surface-vs-depth prescription choice.",
-            "monday_clinic": null,
+            "significance": "The actionable physics: the dome needs optimization points. Without them the apex runs cold (50-65%) or hot (140-170%) depending on tip space, and the 0.5-cm depth prescription hides surface SD up to 18%. If you switch to a surface prescription, M = 1.00 + 0.64/L + 1.23/S gives the surface dose that keeps the 0.5-cm dose unchanged.",
+            "monday_clinic": "For post-hysterectomy endometrial pts on single-channel cylinder VBT, this supports checking that apex and dome points are in the optimization and reporting both surface and 0.5-cm doses. It gives no outcome evidence for changing an established 0.5-cm depth prescription.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Single-institution **dosimetric planning study** in Plato BPS 14.2.4; no patients treated or followed. Dose uniformity measured as **mean dose (MD) and SD** across dose points spaced evenly around the dome and along the cylinder at each depth."
+                "body": "A **treatment-planning study** with no patients. Plato BPS 14.2.4 plans were built on Nucletron radiographic cylinders (tip space ~0.5 cm) and CT/MR-compatible cylinders (tip space 0.6-0.8 cm). Dose uniformity at each depth was measured as the mean dose (MD) and SD across dose points spaced evenly around the dome and along the cylinder."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Single-channel HDR vaginal cylinders **2.0 to 4.0 cm** diameter, activated lengths **3 to 8 cm**. Plans prescribed to the **surface (P0)** or **0.5-cm depth (P5)**, with or without optimization points at the curved end; illustrative Rx 7 Gy × 3."
+                "body": "Cylinders were **2.0, 2.5, 3.0, 3.5 and 4.0 cm** in diameter, with active lengths of **3 to 8 cm** (upper third to the whole vagina). Prescription was to the **surface (P0)** or to **0.5-cm depth (P5)**, with or without optimization points on the curved end (NEP). The worked illustration used 7 Gy × 3 fractions."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary metrics:** MD and SD at surface and 0.5-cm depth. Dose fall-off beyond the treatment depth defined as the ratio of MD at 0.75 cm to MD at 0.5 cm."
+                "body": "**Primary measures:** MD and SD at the surface and at 0.5-cm depth. Dose fall-off was the ratio of MD at 0.75 cm to MD at 0.5 cm."
               },
               {
                 "label": "Results",
-                "body": "Surface Rx gave more uniform mucosal dose (**SD 6% vs 18%** at the surface, 2-cm cylinder, 0.8-cm tip space). Shorter tip space raised dosimetric uncertainty **>30%**; plans without dome points produced **hot spots >150% and cold spots <60%**."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents single-channel cylinder HDR VBT planned on point-based optimization with a known tip space. Does not represent multichannel applicators or clinical toxicity outcomes."
+                "body": "Surface prescription gave **surface SD 6% vs 18%** with P5 (2-cm cylinder, 0.8-cm tip), with **almost the same fall-off** beyond 0.5 cm. NEP plans produced **hot spots >150% and cold spots <60%**. A shorter tip space raised dosimetric uncertainty **>30%**."
               },
               {
                 "label": "vs leading data",
-                "body": "ABS guidance (Nag 2000) already asks for dome optimization points and reporting at both surface and 0.5 cm; this study quantifies what happens when that is skipped. The authors tie surface-dose reduction to the **Sorbe randomized trial**, where the higher dose per fraction increased mucosal atrophy, bleeding and vaginal shortening."
+                "body": "The paper frames its result against the ABS 2000 guidance (dome optimization points, report doses at both surface and 0.5 cm) and an ABS survey in which **>90%** prescribe to 0.5 cm. It also cites Sorbe's randomized 2.5 vs 5.0 Gy × 6 trial, in which higher dose increased atrophy, bleeding and shortening."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents single-channel cylinder HDR VBT planned with point-based optimization around the dome. Does not represent multichannel applicators, image-guided volumetric planning, or any clinical toxicity or control endpoint."
               },
               {
                 "label": "Limitations",
-                "body": "The M formula rests on **two lengths × two cylinder sizes**, then extrapolates. Results are specific to one planning system's optimizer and to the vendor tip-space geometry measured here."
+                "body": "The M regression was fit on only **two lengths × two diameters**, using one vendor's applicators and TPS. The claim that a lower surface dose reduces atrophy and shortening is extrapolated from other trials, not measured."
               },
               {
                 "label": "Discussion",
-                "body": "The robust finding is procedural: **dome points must be in the plan**, and tip space has to be known before insertion. The bigger claim, that surface prescription is the **optimal** approach, swaps a mucosal-dose argument for a clinical one that has not been tested."
+                "body": "A 0.5-cm depth prescription delivers its intended depth dose only when dome points are included, and the surface dose it gives varies with cylinder size and tip space. Prescribing to the surface with a geometry-scaled dose fixes the surface number. Whether that changes toxicity remains open."
               }
             ],
-            "interpretation": "The paper makes two kinds of claim, and they deserve different levels of trust. The first is a planning-quality claim: a single-channel cylinder plan that ignores the hemispherical dome gives an unpredictable dose at the apex, the site of highest cuff-recurrence concern. That claim is about as secure as a dosimetric result can be. Unlike a clinical question it does not depend on sampling or follow-up, and the direction of the error flips with tip space. With a 0.8-cm tip space the apex ran cold and the given dose fell by about 10%; with a 0.5-cm tip space a surface prescription ran hot at the apex and the given dose rose by about 10%. A planner who leaves out dome points therefore cannot even predict which way the plan is wrong. That is the strongest practical argument in the paper, and it is consistent with what ABS guidance already asked for. It also explains why the authors want the vendor to supply exact applicator geometry and want tip space checked radiographically before treatment.\n\nThe second claim is clinical: that prescribing to the surface at a higher dose per fraction is the optimal approach. The data here cannot settle that. The authors show the surface prescription gives a more uniform mucosal dose (surface SD 6% vs 18% in the 2-cm, 0.8-cm tip-space case) with similar coverage and fall-off at 0.5 cm. The step from uniform mucosal dose to fewer complications is borrowed, mainly from the Sorbe randomized dose-fractionation trial, which compared doses per fraction rather than prescription points. Mucosal hot spots are a reasonable mechanism for atrophy, bleeding and shortening, but no patient was treated here, and no dose-toxicity relationship was fitted.\n\nThe conversion factor is the part most likely to be used at the console, so its derivation matters. M ≈ 1.00 + 0.64/L + 1.23/S comes from a regression on two treatment lengths and two cylinder sizes, then applied across the 2-4 cm and 3-8 cm range. The stated agreement within 2% is reassuring for the geometries tested. Outside them it is an extrapolation, and it assumes the same optimizer behaviour and tip space. The worked example (7 Gy at 0.5 cm becoming 10.8 Gy at the surface for a 3-cm, 5-cm-length cylinder) shows how steep the conversion is. Many programs that think of their dose as 'the same' under either convention are actually delivering different mucosal doses. Anyone switching convention mid-program should check the mapping in their own planning system, not adopt the coefficients wholesale.\n\nThe study also predates image-guided planning becoming routine for vaginal cuff treatment, and it uses point-based optimization in a single commercial system. The procedural lesson carries over to modern practice: dome points matter, tip space matters, and dose should be reported at both surface and depth. What is still open is whether surface prescription actually lowers late vaginal toxicity at matched depth dose. That would take a prospective comparison with vaginal toxicity as a measured endpoint. Until then the paper is a strong argument for disciplined planning and a hypothesis about prescription convention.",
+            "interpretation": "This paper is best read as a planning-hygiene argument rather than evidence for a particular prescription convention. Its most defensible finding is the negative one. When the optimizer is given no points on the cylinder dome, the apex dose stops being predictable, and the direction of the error depends on hardware. With the 0.8-cm tip space of the CT/MR-compatible tube, the apex ran cold (50-65%) and the depth mean fell about 10%. With the 0.5-cm tip space of the thin metal tube, the apex surface ran hot (140-170%). The cuff apex is where recurrence risk concentrates, so an omission that silently underdoses it in one applicator and overdoses it in another is a real QA problem. The survey the authors cite says more than one tenth of users were making that omission.\n\nThe headline recommendation, prescribing to the surface at a higher dose, is weaker. The authors show that surface prescription flattens mucosal dose (surface SD 6% vs 18% in the 2-cm case) while preserving the 0.5-cm mean and fall-off. They then reason that a lower and more uniform surface dose should reduce atrophy, bleeding and shortening. That last step borrows its clinical footing from Sorbe's randomized dose comparison, which tested dose per fraction rather than prescription point. Nothing in this dataset links surface SD to a toxicity outcome. The recommendation may be right, but here it is a hypothesis built on a surrogate.\n\nThe magnification factor M = 1.00 + 0.64/L + 1.23/S is useful arithmetic for anyone converting between conventions, and the paper's own example (7 Gy at 0.5 cm becoming 10.8 Gy at the surface for a 3-cm cylinder and 5-cm length) shows how far the two prescriptions sit apart. It also shows how easily a surface prescription copied from the literature can underdose depth when the cylinder is large. The regression was fit on a small geometric grid with a single planning system. A reader should check it against their own TPS before trusting it outside 3-5 cm lengths.\n\nTwo things would have to be true for the practical conclusion to fail. First, modern volumetric or library-based plans might already have closed the dome-point gap. Second, surface inhomogeneity at these magnitudes might not drive late vaginal toxicity once dose per fraction is held constant. Neither question is addressed here. The durable takeaway is procedural: put points on the dome, know your tip space, and report surface and 0.5-cm doses together, whatever point you prescribe to.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The dome is where plans fail: omitting curved-end optimization points swung given dose about 10% either way depending on tip space, with apex spots of 50-65% or 140-170%. The M formula translates a 0.5-cm depth Rx into a geometry-specific surface dose, informing the prescription-point convention."
+              "radonc": "The actionable physics: the dome needs optimization points. Without them the apex runs cold (50-65%) or hot (140-170%) depending on tip space, and the 0.5-cm depth prescription hides surface SD up to 18%. M = 1.00 + 0.64/L + 1.23/S converts a depth dose to its surface equivalent if you switch conventions."
             },
             "open_questions": [
-              "Does surface prescription reduce late vaginal toxicity at matched depth dose?",
-              "Does the M conversion factor hold in modern image-guided planning systems?"
+              "Does surface prescription reduce vaginal atrophy or shortening clinically?",
+              "Does the M factor hold on modern 3D image-guided planning?"
             ],
             "consort": null,
             "modality": "radiation",
-            "intent": null,
+            "intent": "curative",
             "methodology": null,
             "significance_perspective": "Radiation oncology",
             "related_trials": null,
@@ -595,7 +623,7 @@
               ],
               "queries_failed": [],
               "candidates_returned": 16,
-              "fetched_at": "2026-10-23T08:08:43.700Z",
+              "fetched_at": "2026-10-24T08:03:22.312Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [
@@ -609,20 +637,191 @@
         "open_questions": null
       },
       {
+        "disease_site": "head-neck",
+        "intro": "Traditional pathologic risk tiers discriminate poorly in resected HPV+ OPSCC (C-index 0.58).",
+        "studies": [
+          {
+            "name": "Composite pathologic risk stratification, resected HPV+ oropharyngeal cancer",
+            "tldr": "Traditional pathologic risk tiers discriminate poorly in resected HPV+ OPSCC (C-index 0.58); a points-based composite reaches 0.67 and moves high-risk share from 45.1% to 6.6%.",
+            "details": [
+              "🔍 NCDB retrospective cohort, dx 2010-2013, upfront surgery + neck dissection with LN yield ≥15",
+              "🔍 HPV+ OPSCC n=2302; HPV-unassociated HNSCC n=13 022 as comparison cohort",
+              {
+                "text": "📊 Traditional pathologic risk tiers, 5-y OS by cohort",
+                "table": {
+                  "columns": [
+                    "Traditional tier",
+                    "HPV+ OPSCC",
+                    "HPV-unassociated HNSCC"
+                  ],
+                  "rows": [
+                    [
+                      "Low",
+                      "93.2%",
+                      "76.2%"
+                    ],
+                    [
+                      "Intermediate",
+                      "88.9%",
+                      "54.5%"
+                    ],
+                    [
+                      "High",
+                      "83.7%",
+                      "40.9%"
+                    ],
+                    [
+                      "C-index",
+                      "0.58",
+                      "0.68"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📊 HPV+ OPSCC reclassification, traditional vs composite",
+                "table": {
+                  "columns": [
+                    "Risk group",
+                    "Traditional",
+                    "Composite"
+                  ],
+                  "rows": [
+                    [
+                      "Low risk",
+                      "24.5% (564/2302)",
+                      "75.3% (1733/2302)"
+                    ],
+                    [
+                      "High risk",
+                      "45.1% (1038/2302)",
+                      "6.6% (151/2302)"
+                    ]
+                  ]
+                }
+              },
+              "📐 Composite C-index 0.67 with 3 tiers, 0.73 using individual risk points",
+              {
+                "text": "🔍 Composite point assignment (HPV+ OPSCC)",
+                "subdetails": [
+                  "1 point: LVI, microscopically positive margins, microscopic ENE",
+                  "2 points: T3, 2-4 metastatic LNs, grossly positive margins, macroscopic ENE",
+                  "3 points: T4, ≥5 metastatic LNs",
+                  "Tiers: low 0-3, intermediate 4-5, high ≥6 points"
+                ]
+              },
+              "📊 HPV+ multivariate: only T stage, LVI, number of LN mets and ENE associated with mortality",
+              "📊 HPV+: LN size, level IV-V LNs, bilateral LNs and margins not associated with mortality",
+              "⚠️ OS is the only endpoint; NCDB carries no locoregional recurrence or patterns of failure",
+              "⚠️ PNI, close margins and smoking not captured in NCDB, so absent from the model",
+              "⚠️ Model derived and scored in the same cohort; no external validation described in source",
+              "⚠️ Margins still earn points despite no multivariate mortality association in HPV+",
+              "⚠️ Source gives traditional high-risk share two ways: 46.1% (1061/2302) and 45.1% (1038/2302)",
+              "🔗 ICON-S staging built on definitive CRT; only 2% surgical, so no pathologic features tested",
+              "⚠️ Prognostic, not predictive: OS models adjusted for adjuvant RT/CRT, so no test of RT omission"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1001/jamaoto.2019.0820",
+            "tweet_ids": [
+              1000000146
+            ],
+            "slug": "hpv-opscc-composite-pathologic-risk",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Registry retrospective, OS-only, model scored in its own derivation cohort without external validation; cannot show reclassified pts tolerate less adjuvant RT/CRT.",
+              "audience": "Surgically resected HPV+ OPSCC, LN yield ≥15, AJCC 7th T1-4 N0-3 M0"
+            },
+            "significance": "The composite down-weights margins and ENE against T4 and ≥5 nodes, so most traditional high-risk pts become low risk (high-risk share 45.1% to 6.6%). That is the adjuvant CRT escalation trigger. NCDB has OS but no locoregional failure, so it cannot say whether reclassified microscopic-ENE or margin-positive pts keep in-field control with less RT or no chemo.",
+            "monday_clinic": "In resected HPV+ OPSCC with microscopic ENE or a microscopically positive margin but T1-2 disease and fewer than 5 nodes, this questions reading the case as automatically high risk for CRT escalation; it does not extend to T4 or ≥5-node disease, or to HPV-unassociated HNSCC.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**Retrospective NCDB cohort**, dx 2010-2013, analyzed 2018-2019. Univariate + multivariate Cox for OS; points assigned to features in proportion to effect size, then the composite was selected on C-index, AIC and clinical judgement."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**Upfront surgery + adequate neck dissection (LN yield ≥15)**, non-metastatic T1-4 N0-3 M0 (AJCC 7th). HPV+ OPSCC n=2302 vs HPV-unassociated HNSCC n=13 022; OPSCC without HPV testing and surgery + chemo alone excluded."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary: 5-y OS** (KM, log-rank) and **discrimination by C-index**. Multivariate models adjusted for age, sex, race, comorbidity, insurance, adjuvant RT and/or CRT, and hospital type."
+              },
+              {
+                "label": "Results",
+                "body": "In HPV+ OPSCC only **T stage, LVI, number of LN mets and ENE** tracked with mortality; **margins, LN size, level IV-V and bilateral nodes did not**. Composite C-index **0.67** (3 tiers) vs **0.58** traditional."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The traditional tiers being tested come from NCCN, ASCO, **ECOG 3311** and **PATHOS** definitions, the de-escalation trials that use pathology to allocate adjuvant RT vs CRT. **ICON-S** refined clinical staging for HPV+ disease but was built on definitive CRT with only 2% surgical pts, so it could not weigh pathologic features."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents surgically resected, adequately neck-dissected HPV+ OPSCC staged by AJCC 7th edition. Does not represent HPV-unassociated HNSCC, pts with LN yield below 15, or decisions hinging on PNI or close margins, which the model never saw."
+              },
+              {
+                "label": "Limitations",
+                "body": "Points include **margins despite no multivariate association**, a judgement call that inflates their weight. The source states the traditional high-risk share inconsistently (46.1% and 45.1%), and HPV testing method is not described."
+              },
+              {
+                "label": "Discussion",
+                "body": "Traditional HNSCC pathologic tiers are **weakly prognostic** in HPV+ OPSCC, and nodal burden plus T4 matter more than ENE or margins. Whether the reclassified majority can safely receive **less adjuvant therapy** is untested here and belongs to the next deintensification trials."
+              }
+            ],
+            "interpretation": "The core finding is less about the new score than about the failure of the old one. Applied to resected HPV+ OPSCC, the pathologic risk tiers inherited from HPV-unassociated disease separate 5-y OS only from 93.2% to 83.7%, with a C-index of 0.58, barely above chance. The same tiers in HPV-unassociated HNSCC span 76.2% to 40.9% (C-index 0.68). That contrast is the useful signal for a radiation oncologist: the features that trigger adjuvant CRT, ENE and positive margins above all, were calibrated on a disease with a very different natural history, and in this registry they carry less mortality information in HPV+ pts than T4 or a high nodal count.\n\nThis sits alongside the reasoning behind ECOG 3311 and PATHOS, which both use pathology to allocate adjuvant intensity after transoral surgery, and it extends what ICON-S could not test, since ICON-S was built on pts treated with definitive CRT and had almost no surgical cases. If the composite is right, the trial-eligible high-risk population is far smaller than current definitions imply: 6.6% rather than 45.1% of this cohort.\n\nSeveral design choices should lower confidence in that conclusion. First, the endpoint is OS. HPV+ OPSCC deaths are infrequent and partly non-cancer, and NCDB carries no locoregional recurrence, no in-field versus out-of-field failure, and no distant metastasis. The adjuvant RT decision is about locoregional control, and a feature can matter for local failure (a positive margin, say) while barely moving OS, because salvage exists or because events are rare. Second, the multivariate models adjust for adjuvant RT and CRT. A feature like ENE may look weak precisely because those pts received chemo; the model describes prognosis under the treatment they actually got, not prognosis if treatment were withdrawn. That makes it a prognostic tool, not evidence that downgraded pts can skip RT or chemo. Third, the points were chosen partly on clinical judgement and on optimizing C-index in the same data used to report it, with no external validation described, so the 0.67 and 0.73 figures are likely optimistic. Margins were assigned points despite showing no multivariate association, which shows the score is part model, part opinion.\n\nCoding also limits transfer. PNI and close margins, both in the traditional intermediate tier, are not in NCDB, and staging is AJCC 7th edition, which nodal-heavy HPV+ disease has since outgrown. The source also reports the traditional high-risk proportion two different ways, a small but real reproducibility flag.\n\nWhat this does settle is narrower and still worth keeping: in a large surgical cohort, nodal number and advanced T stage, not ENE extent or margin status, were the pathologic features that tracked survival in HPV+ OPSCC. For anyone designing or enrolling in surgical deintensification trials, that argues for stratifying on nodal burden and T4, and for treating microscopic ENE or a microscopically positive margin as weaker evidence for escalation than current algorithms assume. It would be wrong if prospective data with locoregional endpoints showed reclassified pts failing in field once adjuvant intensity is reduced.",
+            "relevant_specialties": [
+              "radonc",
+              "surgonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The CRT-escalation triggers, ENE and positive margins, carry little OS weight in HPV+ disease here, while T4 and ≥5 nodes dominate. Without locoregional endpoints and with adjuvant RT/CRT adjusted out, it frames but cannot license reduced adjuvant RT or chemo omission.",
+              "surgonc": "Pathologic staging after transoral surgery and neck dissection (LN yield ≥15) is the input: nodal count and T stage drive prognosis, while margin status and LN size, level or laterality do not track mortality. That changes which specimen findings carry weight when counseling on adjuvant needs."
+            },
+            "open_questions": [
+              "Does composite low-risk status predict safe omission of adjuvant RT?",
+              "External validation with locoregional recurrence endpoints",
+              "Does microscopic ENE alone justify adding concurrent chemo?"
+            ],
+            "consort": null,
+            "modality": null,
+            "intent": "curative",
+            "methodology": "retrospective",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "HPV oropharyngeal adjuvant deintensification",
+                "oropharyngeal extranodal extension chemoradiation"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 8,
+              "fetched_at": "2026-10-24T08:02:57.490Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 146
+              }
+            ]
+          }
+        ],
+        "open_questions": null
+      },
+      {
         "disease_site": "oligo-mets",
         "intro": null,
         "studies": [
           {
-            "name": "Gomez LCT vs maintenance/observation, oligometastatic NSCLC (long-term OS)",
-            "tldr": "mOS 41.2 vs 17.0 mo (P = .017) and mPFS 14.2 vs 4.4 mo (P = .022) favoring LCT in oligometastatic NSCLC without progression after first-line therapy.",
+            "name": "Gomez LCT oligometastatic NSCLC (long-term results)",
+            "tldr": "mOS 41.2 vs 17.0 mo (P=.017) and mPFS 14.2 vs 4.4 mo favoring LCT over maintenance/observation in oligometastatic NSCLC after front-line therapy.",
             "details": [
-              "🔍 Randomized phase II, 3 institutions, 1:1, not masked. 49 randomized of 74 enrolled",
-              "🔍 DSMB closed the trial early for PFS benefit. It was powered for 94 randomized pts",
-              "🔍 Stage IV NSCLC, ≤3 mets, no progression ≥3 mo after front-line systemic therapy",
-              "💊 Front-line therapy: ≥4 cycles platinum doublet, or ≥3 mo EGFR TKI / crizotinib for EGFR/ALK",
-              "🔍 LCT: RT or surgery to all active sites, chosen by MDT. Concurrent chemoRT allowed for primary/nodes",
+              "🔍 Randomized phase II, 3 institutions, 1:1 LCT vs maintenance therapy or observation (MT/O), unmasked",
+              "🔍 Stage IV NSCLC, ≤3 metastases, no progression at ≥3 mo after front-line systemic therapy",
+              "🔍 LCT = RT, surgery or both to all active sites; concurrent chemoRT allowed to primary and nodes",
               {
-                "text": "📊 Efficacy, LCT vs MT/O (median f/u 38.8 mo)",
+                "text": "📊 Outcomes by arm (ITT, median f/u 38.8 mo)",
                 "table": {
                   "columns": [
                     "Endpoint",
@@ -632,13 +831,13 @@
                   ],
                   "rows": [
                     [
-                      "mPFS (1° EP)",
+                      "Median PFS (1° EP)",
                       "14.2 mo (7.4-23.1)",
                       "4.4 mo (2.2-8.3)",
                       ".022"
                     ],
                     [
-                      "mOS",
+                      "Median OS",
                       "41.2 mo (18.9-NR)",
                       "17.0 mo (10.1-39.8)",
                       ".017"
@@ -650,7 +849,7 @@
                       ".034"
                     ],
                     [
-                      "Median time to new lesions",
+                      "Time to new lesions",
                       "14.2 mo (5.7-24.3)",
                       "6.0 mo (4.4-8.3)",
                       "0.11"
@@ -664,54 +863,53 @@
                   ]
                 }
               },
-              "📐 Multivariable OS HR for LCT 0.46 (95% CI 0.21-0.99), P = .048, adjusted for met number + EGFR/ALK",
-              "📊 No additional G≥3 toxicity beyond what was previously reported",
-              "📊 OS benefit held despite crossover: 9 of 20 MT/O progressors received LCT to all lesions",
-              "⚠️ Significance threshold P<.10 (one-sided 10% type I error), so the bar is looser than a phase III",
-              "⚠️ Stopped early for benefit at N=49, so the effect size is likely inflated",
-              "⚠️ Opened 2012: no immunotherapy. Maintenance regimens were heterogeneous",
-              "⚠️ RT dose/fractionation and the RT vs surgery split are not reported in the source"
+              "📐 Multivariable Cox (arm, met number, EGFR/ALK): LCT OS HR 0.46 (95% CI 0.21-0.99), P=.048",
+              "📊 Crossover: 9 of 20 MT/O progressors got LCT to all lesions; their mOS 17 mo (7.8-NR)",
+              "⚠️ RT dose/fractionation not reported in source text (Appendix Table A1)",
+              "⚠️ DSMB closed accrual at 49 of 94 planned; early stops for benefit tend to overstate effect",
+              "⚠️ Significance threshold P<.10; OS was a secondary endpoint",
+              "⚠️ Pre-IO era (opened 2012); front-line and maintenance regimens heterogeneous"
             ],
             "figures": [],
             "nct": null,
-            "doi": "10.1200/jco.19.00201",
+            "doi": "10.1200/JCO.19.00201",
             "tweet_ids": [
               1000000147
             ],
             "slug": "gomez-lct-oligomet-nsclc",
             "verdict": {
               "soc_implication": "early-signal",
-              "rationale": "Randomized phase II stopped early at N=49 of a planned 94, one-sided alpha 0.10, with OS as a secondary endpoint. Phase III confirmation (NRG-LU002) is still needed.",
+              "rationale": "Randomised phase II closed early for PFS benefit at 49 of 94 planned pts; OS is secondary and tested at P<.10. Needs phase III confirmation (e.g. NRG-LU002).",
               "audience": "Stage IV NSCLC, ≤3 mets, no progression after front-line systemic therapy"
             },
-            "significance": "Survival after progression ran 37.6 vs 9.4 mo, and only 15 of 39 progressors (41%) received LCT at progression. Holding RT for progression therefore loses a large share of pts who can no longer get consolidation, often from polymetastatic progression (n=7 in MT/O). This argues for consolidating at the post-induction window rather than deferring.",
-            "monday_clinic": "In stage IV NSCLC with ≤3 mets that has not progressed after ≥4 cycles of platinum doublet or ≥3 mo of first-line TKI, this supports consolidative RT or surgery to all sites over maintenance alone. It does not extend to >3 mets or to disease progressing on front-line therapy.",
+            "significance": "The OS gap tracks survival after progression, 37.6 vs 9.4 mo: only 15 of 39 progressors (41%) got LCT at progression, and in the MT/O arm 7 were blocked by polymetastatic progression. That argues for consolidating every site while disease is still oligometastatic, not holding RT for progression. Dose and fractionation are not in source text.",
+            "monday_clinic": "In stage IV NSCLC with ≤3 metastases and no progression after front-line platinum doublet, EGFR TKI or crizotinib, this supports consolidating all sites over maintenance alone; it does not extend to IO-treated pts, >3 metastases, or disease progressing on first-line therapy.",
             "primary_endpoint": {
               "name": "Progression-free survival",
               "klass": "surrogate",
               "stat_value": "14.2 vs 4.4 mo",
-              "stat_detail": "median PFS, P = .022 (α .10); median f/u 38.8 mo"
+              "stat_detail": "median PFS, 95% CI 7.4-23.1 vs 2.2-8.3, P = .022"
             },
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**Randomized phase II**, 1:1, 3 institutions (MD Anderson, London Health Sciences, Colorado), not masked. Randomization was balanced dynamically on five prognostic factors instead of stratified. **Closed early by DSMB** after 49 of 74 enrolled pts were randomized. Median follow-up 38.8 mo."
+                "body": "**Randomized phase II**, 1:1, 3 institutions (MD Anderson, London Health Sciences Center, University of Colorado); unmasked. **Closed early by DSMB** after 49 of 74 enrolled pts were randomized (94 planned). Median follow-up **38.8 mo** (28.3-61.4)."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**Stage IV NSCLC (AJCC 7th), ≤3 metastases** excluding the primary, ECOG ≤2, **no progression after standard front-line therapy**: ≥4 cycles platinum doublet, or ≥3 mo erlotinib/EGFR TKI or crizotinib for EGFR/ALK. Adenocarcinoma made up 80% of pts and 94% had synchronous disease. EGFR/ALK n=8."
+                "body": "**Stage IV NSCLC, ≤3 metastases** (primary not counted), ECOG ≤2, **no progression after front-line therapy**: ≥4 cycles platinum doublet, or ≥3 mo EGFR TKI or crizotinib. Randomization dynamically balanced on met number, response, CNS mets, N stage and EGFR/ALK status."
               },
               {
                 "label": "Radiotherapy",
-                "body": "LCT was **RT or surgery to all active disease sites**, modality chosen by a multidisciplinary team. Concurrent chemoRT was allowed for the primary and regional nodes. **Dose, fractionation and the RT vs surgery split are not reported in the source.**"
+                "body": "LCT was RT, surgery or both to **all active disease sites**, modality chosen by MDT; concurrent chemoRT allowed for primary and regional nodes. **Dose and fractionation not reported in source text** (Appendix Table A1)."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary:** PFS from randomization. **Secondary:** OS, toxicity, time to new lesions. Imaging was indexed to the enrollment date in both arms, so LCT did not delay scans. P<.10 was deemed significant."
+                "body": "**Primary:** PFS from randomization. **Secondary:** OS, toxicity, time to new lesions. Powered (90%) for PFS 4 to 7 mo, HR 0.57; P<.10 deemed significant."
               },
               {
                 "label": "Results",
-                "body": "Arm-level efficacy is in the table above. The OS benefit persisted in a multivariable model, **HR 0.46 (0.21-0.99), P = .048**. In an exploratory analysis, initial LCT (HR 0.30, 0.12-0.75) and late LCT (HR 0.44, 0.18-1.06) both correlated with OS."
+                "body": "PFS, OS and survival-after-progression gains in the arm table above. Late LCT at progression correlated with OS in a multivariable model, HR 0.44 (0.18-1.06), P=.064; initial LCT HR 0.30 (0.12-0.75)."
               },
               {
                 "label": "Safety",
@@ -719,36 +917,34 @@
               },
               {
                 "label": "vs leading data",
-                "body": "This is the source's first randomized OS signal for LCT in lung cancer. It sits alongside SABR-COMET and the UT Southwestern phase II, whose enrolled populations shaped the ≤3-met definition the authors propose. NRG-LU002 is the phase III test of the question."
+                "body": "The authors state no prior randomized trial had shown an **OS benefit from LCT in lung cancer**. They align their proposed oligometastatic definition (0-3 metastases, unconstrained by molecular profile) with most pts enrolled on **SABR-COMET** and the **UT Southwestern** randomized phase II trial, and point to **NRG-LU002** as the phase III test."
               },
               {
                 "label": "Applies to",
-                "body": "Represents oligometastatic (≤3 mets) NSCLC stable or responding after platinum doublet or first-line EGFR/ALK TKI. Does not represent immunotherapy-treated pts, >3 mets, or disease progressing on front-line therapy."
+                "body": "Represents stage IV NSCLC with ≤3 metastases that did not progress after platinum doublet or first-line EGFR/ALK TKI. Does not represent IO-treated pts, higher metastatic burden, or disease progressing on front-line therapy."
               },
               {
                 "label": "Limitations",
-                "body": "Early stopping for benefit tends to overstate the effect size. Maintenance regimens were heterogeneous, so an LCT x systemic-therapy interaction cannot be detected. The **EGFR/ALK subgroup (n=8)** is too small to interpret."
+                "body": "Unmasked with heterogeneous physician-chosen maintenance. Post-progression and late-LCT analyses are exploratory, post-randomization, and exclude 3 MT/O pts who crossed over before progression. **EGFR/ALK cohort n=8**, too small to read."
               },
               {
                 "label": "Discussion",
-                "body": "The OS benefit appears despite crossover, which points to **timing** rather than receipt of LCT: consolidating before progression beats waiting, because many pts become polymetastatic and lose eligibility. **Whether this holds with IO maintenance is unsettled.**"
+                "body": "The OS gain is carried by **survival after progression**, consistent with a window in which all sites are still treatable. Whether the effect survives IO maintenance and a full-size trial is unsettled."
               }
             ],
-            "interpretation": "The trial's lasting contribution is not the PFS result, which was already published and is close to what one expects when all visible disease is treated locally. It is the overall survival separation, observed in a design that let control-arm pts cross over to local therapy at progression. Crossover usually dilutes an OS difference. That a gap of 41.2 vs 17.0 mo median OS persisted suggests the benefit is tied to when consolidation happens, not just whether it ever happens. The survival-after-progression data support this. Pts originally assigned to LCT lived 37.6 mo after progression vs 9.4 mo in the MT/O arm, and fewer than half of progressing pts could receive comprehensive local therapy at that point, mostly because they had become polymetastatic. For the radiation oncologist, the window after first-line induction looks like the moment when ablating every site is still feasible, and the opportunity may close.\n\nMethodology should temper confidence in the magnitude more than in the direction. The trial randomized 49 pts against a planned 94 and stopped on a DSMB efficacy look. Truncated trials systematically overestimate effect sizes, and the design used a one-sided 10% type I error, a phase II threshold that is not a confirmatory standard. OS was a secondary endpoint with wide intervals (LCT 18.9 mo to not reached). Assignment was unmasked, although indexing imaging to enrollment in both arms removed one common source of PFS bias in local-therapy trials. The adjusted HR of 0.46 with an upper bound of 0.99 sits just inside the conventional line, so modest prognostic imbalance in a trial this size could move it.\n\nIn context, the result aligns with the randomized phase II literature that made consolidation a recognized option, including SABR-COMET and the UT Southwestern trial. The authors explicitly lean on those trials to support a ≤3-metastasis definition that is not restricted by molecular profile. The magnitude in a less selected population is probably smaller. These pts had already shown biology favorable enough to remain stable on first-line therapy for at least three months, and most had synchronous disease and adenocarcinoma histology.\n\nThe largest transferability gap is immunotherapy. The trial opened in 2012, its control arm received chemotherapy-era maintenance, and the median OS in the MT/O arm reflects that era. Against a modern IO backbone the control arm would likely live longer, and the absolute gain from consolidation could shrink, or it could interact with IO in either direction. Nothing here addresses that. The trial also does not report RT dose or the split between surgery and radiation, so it informs whether to consolidate, not how.\n\nThe result would be wrong if early stopping caught a random high or if dynamic balancing left residual confounding on unmeasured burden. NRG-LU002 is the test that resolves both. Until then, this is the strongest randomized argument for treating the post-induction window as the decision point, applied to the population the trial actually enrolled.",
+            "interpretation": "Before this update, the case for local consolidation in oligometastatic NSCLC rested on retrospective series, single-arm prospective work, and PFS signals from small randomized trials; the authors note that no randomized trial had yet shown an OS benefit from LCT in lung cancer. Converting a PFS result into an OS difference, mOS 41.2 vs 17.0 mo, is why this trial became a reference point alongside SABR-COMET and the UT Southwestern study. It also fixed the eligibility template much later work borrowed: three or fewer metastases, no progression after front-line systemic therapy.\n\nThe magnitude deserves skepticism proportional to how the trial ended. The DSMB closed accrual at 49 of a planned 94 after an interim look favored LCT, and trials stopped early for benefit tend to overstate effect size because stopping selects for a favorable random excursion. OS was secondary, tested at a P<.10 threshold, and the intervals are wide: the LCT arm's lower bound is 18.9 mo while the MT/O upper bound reaches 39.8 mo. Only 29 deaths inform the comparison. The multivariable OS HR 0.46 (0.21-0.99) holds after adjusting for metastasis count and EGFR/ALK status, but an upper bound that close to 1 reads as a direction more than a size.\n\nThe more informative signal is where the OS gap came from. Survival after progression was 37.6 vs 9.4 mo, while the share receiving late LCT did not differ by arm (P=.39). In the MT/O arm, seven progressors could not receive LCT because progression was polymetastatic. The reading the data most plainly support is a window argument: consolidation is feasible while disease is limited, and deferring it to progression lets a fraction of pts lose eligibility. The late-LCT association, HR 0.44 (0.18-1.06), fits that story, but it is a post-randomization comparison with selection built in, since pts fit and limited enough to get late LCT are prognostically favored.\n\nFor RT practice the gap is technique. LCT pooled surgery, RT and chemoRT to primary and nodes at MDT discretion, and dose and fractionation are not in the source text. The trial answers whether to treat all sites, not how much dose, or whether ablative stereotactic dosing outperforms conventional fractionation. The control arm was itself heterogeneous, physician-chosen maintenance or observation, unmasked.\n\nWhat would make it wrong: the effect is an early-stopping artifact, or it does not persist on an immunotherapy backbone, which the trial (opened 2012) never included. Longer control-arm survival on IO maintenance would compress any absolute gain and could change where the consolidation window sits. The EGFR/ALK subset (n=8) cannot support a molecular claim either way. The authors frame their own subset analyses as provocative rather than paradigm-defining and call for phase III confirmation, NRG-LU002 among them. Until then the data support LCT within this trial's eligibility, not extrapolation to higher burden or IO-treated disease.",
             "relevant_specialties": [
               "radonc",
-              "medonc",
-              "surgonc"
+              "medonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Only 41% of progressors could receive LCT at progression, and survival after progression was 37.6 vs 9.4 mo, so the post-induction window is the RT decision point. Dose and fractionation are not reported in the source, so the trial informs whether to consolidate, not the prescription.",
-              "medonc": "Maintenance or observation alone after platinum doublet or first-line TKI gave mOS 17.0 vs 41.2 mo with LCT. That argues for referring stable ≤3-met pts for consolidation before progression. The control backbone predates immunotherapy, so the effect on top of IO maintenance is unknown.",
-              "surgonc": "Surgery was an allowed LCT modality, chosen by the MDT, with the same intent of treating all active sites. The source does not report how many pts were resected or any surgical outcomes, so the data support consolidation as a strategy without separating resection from RT."
+              "radonc": "The OS gap tracks survival after progression, 37.6 vs 9.4 mo, and 7 MT/O progressors lost LCT eligibility to polymetastatic progression. That argues for consolidating every site while still oligometastatic rather than reserving RT for progression; dose and fractionation are not in source text.",
+              "medonc": "Maintenance or observation was the comparator, and adding LCT gave mOS 41.2 vs 17.0 mo on a pre-IO backbone of platinum doublet, EGFR TKI or crizotinib. Whether the gap persists with IO maintenance, absent from this trial, is the open regimen question."
             },
             "open_questions": [
-              "Does the LCT OS benefit hold with immunotherapy maintenance?",
-              "Phase III confirmation of OS benefit (NRG-LU002)",
-              "LCT added to modern EGFR TKIs such as osimertinib"
+              "Does the OS benefit hold with IO-era maintenance?",
+              "Does LCT add OS in EGFR/ALK-driven oligometastatic NSCLC?",
+              "Does a phase III trial confirm the OS benefit?"
             ],
             "consort": {
               "enrolled": 74,
@@ -775,27 +971,49 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT07842471",
-                "brief_title": "Local Consolidative Therapy Versus Maintenance Immunotherapy After First-Line Chemoimmunotherapy in Metastatic NSCLC",
-                "overall_status": "NOT_YET_RECRUITING",
+                "nct": "NCT03391869",
+                "brief_title": "Nivolumab and Ipilimumab With or Without Local Consolidation Therapy in Treating Patients With Stage IV Non-Small Cell Lung Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
-                  "PHASE2"
+                  "PHASE3"
                 ],
-                "enrollment_count": 117,
-                "primary_completion_date": "2029-12",
-                "brief_summary": "This study explores the difference in progression-free survival (PFS) between local consolidative therapy (LCT arm) targeting residual lesions and continued systemic therapy (non-LCT arm) in patients with metastatic NSCLC who have achieved at least partial response (PR) following first-line chemoimmunotherapy. In this process, a multidisciplinary team (MDT) comprising surgical oncology, radiation oncology, and medical oncology will be integrated to administer local treatment…",
+                "enrollment_count": 339,
+                "primary_completion_date": "2027-03",
+                "brief_summary": "This phase III trial studies how well nivolumab and ipilimumab works with or without local consolidation therapy in treating patients with stage IV non-small cell lung cancer. Immunotherapy with monoclonal antibodies, such as nivolumab and ipilimumab, may help the body's immune system attack the cancer, and may interfere with the ability of tumor cells to grow and spread. Local consolidation therapy, such as surgery or radiation therapy, may improve survival outcomes in patients with non-small…",
                 "conditions": [
-                  "NSCLC (Non-small Cell Lung Carcinoma)"
+                  "Lung Adenocarcinoma",
+                  "Lung Non-Small Cell Carcinoma",
+                  "Stage IV Lung Cancer AJCC v8"
                 ],
                 "interventions": [
                   {
-                    "name": "Immediate Local Consolidative Therapy (LCT)",
+                    "name": "Ipilimumab",
+                    "type": "BIOLOGICAL"
+                  },
+                  {
+                    "name": "Local Consolidation Therapy",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Nivolumab",
+                    "type": "BIOLOGICAL"
+                  },
+                  {
+                    "name": "Quality-of-Life Assessment",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Therapeutic Conventional Surgery",
                     "type": "PROCEDURE"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Voluntary participation in the study with signed informed consent;\n2. Age ≥18 years, both male and female;\n3. Eastern Cooperative Oncology Group (ECOG) performance status score of 0-1;\n4. Estimated life expectancy ≥12 months;\n5. Histologically/cytologically confirmed…",
-                "answers_question": "Does the LCT OS benefit hold with immunotherapy maintenance?",
-                "relevance_phrase": "phase 2 LCT vs continued IO after 1L chemo-IO response"
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically or cytologically confirmed non-small cell lung cancer; if a diagnostic biopsy is available, a pre-treatment biopsy is not required. Patients with a suspected lung cancer may be consented, but pathology must be confirmed prior to initiating treatment on study.…",
+                "answers_question": "Does the OS benefit hold with IO-era maintenance?",
+                "relevance_phrase": "phase III nivo/ipi ± LCT, stage IV NSCLC"
               },
               {
                 "nct": "NCT06840782",
@@ -821,8 +1039,64 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Histologically proven advanced synchronous oligometastatic stage IV NSCLC.\n* NSCLC patients eligible first line immunotherapy-based SoC according to the European Marketing Authorization.\n* PDL1 status available.\n* Metastases eligible to RLT according to the local…",
-                "answers_question": "Does the LCT OS benefit hold with immunotherapy maintenance?",
-                "relevance_phrase": "phase 3 radical local tx added to 1L IO-based SoC"
+                "answers_question": "Does the OS benefit hold with IO-era maintenance?",
+                "relevance_phrase": "phase III 1L IO-based SoC ± local ablative tx"
+              },
+              {
+                "nct": "NCT05277844",
+                "brief_title": "Local Consolidative Radiation Therapy Plus TKI Versus TKI Alone in Driver Mutated OM-NSCLC",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 106,
+                "primary_completion_date": "2026-11",
+                "brief_summary": "A Phase II randomized controlled trial of TKI Alone versus TKI and Local Consolidative Radiation Therapy in oncogene driver mutated oligo metastatic Non-small cell lung cancer patients.",
+                "conditions": [
+                  "Oligometastatic Disease",
+                  "Non-small Cell Lung Cancer",
+                  "Driver Mutation"
+                ],
+                "interventions": [
+                  {
+                    "name": "Local Consolidative Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "TKI",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients with pathologically proven diagnosis of NSCLC\n2. Patients with positive oncogene driver mutation (EGFR or ALK/ROS)\n3. Patients who have received at least 2-4 months of TKI therapy without progression\n4. Patients with 1-5 sites of metastatic disease not including the…",
+                "answers_question": "Does LCT add OS in EGFR/ALK-driven oligometastatic NSCLC?",
+                "relevance_phrase": "randomized TKI ± LCRT, EGFR/ALK/ROS oligomet"
+              },
+              {
+                "nct": "NCT07738172",
+                "brief_title": "Osimertinib With or Without Primary Lung Tumor Resection for EGFR-Mutant Oligometastatic Non-Small Cell Lung Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 154,
+                "primary_completion_date": "2031-08",
+                "brief_summary": "Osimertinib is a standard first-line treatment for patients with metastatic non-small cell lung cancer harboring an epidermal growth factor receptor exon 19 deletion or exon 21 L858R mutation. Although osimertinib can provide effective disease control, most patients eventually experience disease progression, and the primary lung tumor may remain an important site of treatment resistance.\n\nThis multicenter, randomized, open-label phase III trial will evaluate whether surgical removal of the…",
+                "conditions": [
+                  "Lung Neoplasms, Non-Small Cell Lung Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Primary Tumor Resection",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Osimertinib",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "This study consists of 2 screening phases:\n\nPart 1 screening (before osimertinib induction):\n\nPatients must meet the baseline eligibility criteria, including stage IV NSCLC, EGFR sensitizing mutation (exon 19 deletion or L858R), resectable dominant primary lung lesion, and adequate performance…",
+                "answers_question": "Does LCT add OS in EGFR/ALK-driven oligometastatic NSCLC?",
+                "relevance_phrase": "phase III osimertinib ± primary resection, EGFR"
               },
               {
                 "nct": "NCT05278052",
@@ -849,289 +1123,25 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Age \\> 18 years\n2. Patients with ECOG performance status of 0-2\n3. Patients with pathologically proven diagnosis of NSCLC\n4. Patients with 1-5 sites of metastatic disease not including the primary tumor and regional nodes (less than or equal to 3 metastatic lesions in one…",
-                "answers_question": "Phase III confirmation of OS benefit (NRG-LU002)",
-                "relevance_phrase": "phase 3 LCRT + maintenance vs maintenance, 1-5 mets"
-              },
-              {
-                "nct": "NCT03410043",
-                "brief_title": "Osimertinib, Surgery, and Radiation Therapy in Treating Patients With Stage IIIB or IV Non-small Cell Lung Cancer With EGFR Mutations, NORTHSTAR Study",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 173,
-                "primary_completion_date": "2027-04",
-                "brief_summary": "This phase II trial studies how well osimertinib, surgery, and radiation therapy work in treating patients with stage IIIB or IV non-small cell lung cancer with EGFR mutations. Osimertinib may stop the growth of tumor cells by blocking some of the enzymes needed for cell growth. Radiation therapy uses high energy x-rays to kill tumor cells and shrink tumors. Giving osimertinib, surgery, and radiation therapy may work better at treating non-small cell lung cancer with EGFR mutations.",
-                "conditions": [
-                  "Lung Non-Small Cell Carcinoma",
-                  "Recurrent Lung Non-Small Cell Carcinoma",
-                  "Stage IIIB Lung Cancer AJCC v8",
-                  "Stage IV Lung Cancer AJCC v8",
-                  "Stage IVA Lung Cancer AJCC v8",
-                  "Stage IVB Lung Cancer AJCC v8"
-                ],
-                "interventions": [
-                  {
-                    "name": "Osimertinib",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Therapeutic Conventional Surgery",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically or cytologically confirmed non-small cell lung cancer\n* Stage IIIB/IV or recurrent non-small cell lung cancer which is not amenable to curative intent therapy\n* Patients must have one of the following:\n\n  * NSCLC which harbors EGFR exon 19 deletion or L858R…",
-                "answers_question": "LCT added to modern EGFR TKIs such as osimertinib",
-                "relevance_phrase": "phase 2 osimertinib ± surgery/RT, EGFR stage IIIB/IV"
-              },
-              {
-                "nct": "NCT07738172",
-                "brief_title": "Osimertinib With or Without Primary Lung Tumor Resection for EGFR-Mutant Oligometastatic Non-Small Cell Lung Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 154,
-                "primary_completion_date": "2031-08",
-                "brief_summary": "Osimertinib is a standard first-line treatment for patients with metastatic non-small cell lung cancer harboring an epidermal growth factor receptor exon 19 deletion or exon 21 L858R mutation. Although osimertinib can provide effective disease control, most patients eventually experience disease progression, and the primary lung tumor may remain an important site of treatment resistance.\n\nThis multicenter, randomized, open-label phase III trial will evaluate whether surgical removal of the…",
-                "conditions": [
-                  "Lung Neoplasms, Non-Small Cell Lung Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Primary Tumor Resection",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Osimertinib",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "This study consists of 2 screening phases:\n\nPart 1 screening (before osimertinib induction):\n\nPatients must meet the baseline eligibility criteria, including stage IV NSCLC, EGFR sensitizing mutation (exon 19 deletion or L858R), resectable dominant primary lung lesion, and adequate performance…",
-                "answers_question": "LCT added to modern EGFR TKIs such as osimertinib",
-                "relevance_phrase": "phase 3 osimertinib ± primary tumor resection, EGFR+"
+                "answers_question": "Does a phase III trial confirm the OS benefit?",
+                "relevance_phrase": "phase III maintenance ± LCRT, 1-5 mets"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
                 "oligometastatic NSCLC immunotherapy radiotherapy",
-                "oligometastatic NSCLC consolidative",
-                "osimertinib local consolidative therapy"
+                "osimertinib oligometastatic consolidative",
+                "oligometastatic NSCLC consolidative radiotherapy"
               ],
               "queries_failed": [],
-              "candidates_returned": 19,
-              "fetched_at": "2026-10-23T08:07:43.113Z",
+              "candidates_returned": 18,
+              "fetched_at": "2026-10-24T08:03:03.609Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {
                 "type": "paper",
                 "id": 147
-              }
-            ]
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "head-neck",
-        "intro": "In resected HPV+ OPSCC (NCDB), margins and nodal size/laterality lose prognostic weight, and those features are the classic triggers for adjuvant RT/CRT.",
-        "studies": [
-          {
-            "name": "Composite pathologic risk stratification, resected HPV+ oropharyngeal cancer",
-            "tldr": "Composite point score raised C-index from 0.58 to 0.67 in resected HPV+ OPSCC; low-risk share rose from 24.5% to 75.3% (NCDB, n=2302).",
-            "details": [
-              "🔍 Retrospective NCDB cohort, dx 2010-2013, primary surgery plus neck dissection with LN yield ≥15",
-              "🔍 2302 HPV+ OPSCC; 13 022 HPV-unassociated HNSCC as the contrast cohort",
-              "📊 Traditional (NCCN/ASCO/ECOG 3311/PATHOS-derived) risk C-index 0.58 in HPV+ OPSCC vs 0.68 in HPV-unassociated HNSCC",
-              {
-                "text": "🔍 Composite score: adverse points per pathologic feature (low 0-3, intermediate 4-5, high ≥6 points)",
-                "table": {
-                  "columns": [
-                    "Adverse points",
-                    "Features"
-                  ],
-                  "rows": [
-                    [
-                      "0",
-                      "T1-2 · tonsil or BOT · 0-1 metastatic LNs · any LN size · level IV or V LNs · bilateral LN · differentiation"
-                    ],
-                    [
-                      "1",
-                      "LVI · microscopically positive margins · microscopic ENE"
-                    ],
-                    [
-                      "2",
-                      "T3 · 2-4 metastatic LNs · grossly positive margins · macroscopic ENE"
-                    ],
-                    [
-                      "3",
-                      "T4 · ≥5 metastatic LNs"
-                    ]
-                  ]
-                }
-              },
-              "📊 Composite C-index 0.67 with 3 risk groups, 0.73 using individual points",
-              {
-                "text": "📊 Reclassification in HPV+ OPSCC, traditional → composite",
-                "subdetails": [
-                  "Low risk: 24.5% (564/2302) → 75.3% (1733/2302)",
-                  "High risk: 45.1% (1038/2302) → 6.6% (151/2302)"
-                ]
-              },
-              "📊 HPV+ multivariable: only T stage, LVI, number of metastatic LNs and ENE tracked with mortality",
-              "📊 Not prognostic in HPV+: surgical margins, LN size, level IV-V nodes, bilateral/contralateral nodes",
-              "⚠️ Cox models adjusted for adjuvant RT/CRT, which margins and ENE themselves triggered; treated risk can look benign",
-              "⚠️ OS is the only endpoint; NCDB carries no locoregional recurrence, PNI, close margins or smoking",
-              "⚠️ Score derived and scored in the same cohort; no external validation reported in source",
-              "⚠️ High-risk traditional share reported as 46.1% (n=1061) in Results but 45.1% (n=1038) in Discussion"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1001/jamaoto.2019.0820",
-            "tweet_ids": [
-              1000000146
-            ],
-            "slug": "hpv-opscc-composite-pathologic-risk",
-            "verdict": {
-              "soc_implication": "methodologically-limited",
-              "rationale": "Registry-derived prognostic score, OS-only, no external validation; feature HRs adjusted for the adjuvant therapy those same features prompted, so de-escalation cannot be inferred.",
-              "audience": "Resected HPV+ OPSCC with neck dissection (≥15 nodes), AJCC 7th"
-            },
-            "significance": "The score demotes the classic CRT triggers: margin status lost prognostic weight in HPV+ disease on multivariable analysis, and microscopic ENE earns one point, so a T1-2 tumour with microscopic ENE can still sit low-risk. That points at adjuvant RT/CRT de-escalation, but those HRs were measured after the adjuvant therapy the features prompted.",
-            "monday_clinic": "In resected HPV+ OPSCC with microscopic ENE or a microscopically positive margin, this questions whether those features carry the prognostic weight that drives adjuvant CRT, as a hypothesis only; it does not extend to HPV-unassociated HNSCC or replace ECOG 3311/PATHOS trial risk definitions.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "**Retrospective NCDB cohort**, diagnoses 2010-2013, analysed 2018-2019. Points assigned to features in proportion to univariate and multivariable Cox effect size, then the composite chosen by **C-index, AIC and clinical judgement**."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Nonmetastatic HNSCC (T1-4, N0-3, M0) with **definitive primary surgery and neck dissection yielding ≥15 nodes**. **2302 HPV+ OPSCC** vs 13 022 HPV-unassociated HNSCC; untested OPSCC and surgery plus chemo alone excluded."
-              },
-              {
-                "label": "Endpoints",
-                "body": "**Primary: 5-year OS** (Kaplan-Meier, log-rank) and discrimination by **concordance index**. Multivariable models adjusted for age, sex, race, comorbidity, insurance, adjuvant RT/CRT and hospital type."
-              },
-              {
-                "label": "Results",
-                "body": "Traditional stratification discriminated poorly in HPV+ OPSCC (**C-index 0.58** vs 0.68 in HPV-unassociated). Composite reached **0.67** (3 groups) and **0.73** (points), moving low-risk from **24.5% to 75.3%** and high-risk from **45.1% to 6.6%**."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Traditional definitions here derive from NCCN, ASCO, **ECOG 3311** and **PATHOS**, which differ on ENE extent and nodal count thresholds. **ICON-S** refined HPV+ staging but only 2% of its pts were surgical, so it could not test pathologic features."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents surgically resected HPV+ OPSCC with adequate neck dissection, staged AJCC 7th. Does not represent HPV-unassociated HNSCC, pts managed with definitive CRT, or features NCDB lacks (PNI, close margins, smoking)."
-              },
-              {
-                "label": "Limitations",
-                "body": "**Adjustment for adjuvant RT/CRT** means margins and ENE are scored after the therapy they triggered, biasing them toward null. **OS only**: no locoregional control, the endpoint an adjuvant RT decision actually turns on. High-risk share is reported inconsistently (46.1% vs 45.1%)."
-              },
-              {
-                "label": "Discussion",
-                "body": "The score reframes HPV+ pathologic risk around **tumour burden (T stage, nodal count)** rather than margins and ENE extent. It is a **hypothesis for deintensification trials**, not a basis for omitting adjuvant therapy, until tested on recurrence in an independent cohort."
-              }
-            ],
-            "interpretation": "The core finding is that the pathologic risk grammar built for HPV-unassociated head and neck cancer barely discriminates survival once the tumour is HPV-associated. A C-index of 0.58 is close to a coin flip, and the contrast with 0.68 in the HPV-unassociated cohort, scored with the same rules in the same registry, makes the point cleanly. That part of the paper is the most defensible, because it does not depend on the new score at all: it is a direct test of the existing framework, and it agrees with the surgical series the authors cite showing diminished weight for margins, ENE and LVI in HPV+ disease.\n\nThe composite score itself deserves less confidence than its headline suggests. It was derived and evaluated on the same 2302 patients, selected partly on C-index and AIC, so 0.67 and 0.73 are apparent performance and will shrink in an independent cohort. More importantly for a radiation oncologist, the multivariable models adjusted for adjuvant RT and CRT. In this era, a positive margin or ENE was the reason a patient received CRT. Measuring the prognostic weight of those features after conditioning on the treatment they triggered estimates their residual risk once treated, not their untreated risk. A margin that looks non-prognostic may simply be a margin that chemoradiation neutralised. That is the opposite of the question a de-escalation decision asks, which is what happens if the treatment is withheld.\n\nThe endpoint compounds this. NCDB records death, not recurrence, and HPV+ OPSCC carries high salvage rates and long post-recurrence survival. Adjuvant RT is justified primarily by locoregional control, and an OS-only analysis in a disease with good salvage is poorly equipped to detect the locoregional cost of a weaker adjuvant plan. The absence of perineural invasion, close margins and smoking from the model also matters, since smoking in particular modifies HPV+ prognosis and was not available to adjust for.\n\nAgainst the trials that frame current practice, the score is closest in spirit to PATHOS and ECOG 3311, which already moved toward risk-adapted adjuvant intensity after transoral surgery, and to ICON-S, which re-weighted HPV+ staging for nonsurgical patients. Its distinct contribution is shifting the weight toward tumour and nodal burden: T3-4 and nodal count carry the most points, while microscopic ENE and microscopically positive margins carry one each. Under that scheme a tumour with LVI, microscopic ENE and a microscopically positive margin still falls inside the low-risk band, a patient most radiation oncologists would currently treat with CRT. The reclassification from 45.1% high-risk to 6.6% is therefore not a refinement but a large reallocation, and its safety rests entirely on the treatment-confounded HRs above.\n\nThe right reading is that this paper supports designing trials that randomise adjuvant intensity within composite-defined low-risk groups, with locoregional recurrence as the endpoint. It does not support omitting or de-intensifying adjuvant CRT for ENE or margin status in routine practice. For it to be wrong, an untreated or lightly treated cohort would need to show that microscopic ENE and positive margins do carry meaningful locoregional risk, which is precisely what the adjustment here cannot exclude.",
-            "relevant_specialties": [
-              "radonc",
-              "surgonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Margins lost prognostic weight in HPV+ disease and microscopic ENE earns one point, so classic CRT triggers can land low-risk. That points toward adjuvant RT/CRT de-escalation, but HRs were adjusted for the adjuvant therapy those features prompted, and OS cannot capture locoregional cost.",
-              "surgonc": "After transoral resection with ≥15-node dissection, nodal count and T stage carried prognostic weight while margin status, LN size, level IV-V and bilateral nodes did not on multivariable analysis. Adequate nodal yield is the entry condition, so the score is only applicable after a complete neck dissection."
-            },
-            "open_questions": [
-              "Does composite low-risk status hold for locoregional recurrence, not just OS?",
-              "Safety of de-intensified adjuvant therapy for microscopic ENE in composite low-risk pts",
-              "External validation in an independent, AJCC 8th-staged surgical cohort"
-            ],
-            "consort": null,
-            "modality": null,
-            "intent": "curative",
-            "methodology": "retrospective",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT02215265",
-                "brief_title": "Post-operative Adjuvant Treatment for HPV-positive Tumours (PATHOS)",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 1269,
-                "primary_completion_date": "2027-10",
-                "brief_summary": "The main objectives of the PATHOS study are:\n\nTo assess whether swallowing function can be improved following transoral resection of HPV-positive OPSCC, by reducing the intensity of adjuvant treatment protocols. The aim is to personalise treatment, based on disease biology (HPV status and pathology findings), to optimise patient outcomes.\n\nTo demonstrate the non-inferiority of reducing the intensity of adjuvant treatment protocols in terms of overall survival in the reduced intensity treatment…",
-                "conditions": [
-                  "Human Papillomavirus (HPV)-Positive Oropharyngeal Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Cisplatin",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Postoperative radiotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed or suspected squamous cell carcinoma of the oropharynx.\n* UICC/AJCC TNM 7th edition stage T1-T3, N0-N2b (or UICC TNM 8th edition stage T1-T3, N0-N1) disease.\n* Multidisciplinary team (MDT) decision to treat with primary transoral resection and neck…",
-                "answers_question": "Safety of de-intensified adjuvant therapy for microscopic ENE in composite low-risk pts",
-                "relevance_phrase": "phase 3 pathology-adapted reduced adjuvant after TORS"
-              },
-              {
-                "nct": "NCT03396718",
-                "brief_title": "De-escalation of Adjuvant Radio (Chemo) Therapy for HPV-positive Head-neck Squamous Cell Carcinomas",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 304,
-                "primary_completion_date": "2029-11",
-                "brief_summary": "In patients with squamous cell carcinoma of the oral cavity, the oropharynx and larynx with local advanced tumors (pathologic stage T3 = pT3) and or lymph node involvement (pN+) postoperative radio - or radiochemotherapy is the standard of care. Postoperative radiochemotherapy is indicated in patients with multiple lymph node metastasis, lymph node metastasis with extracapsular spread and / or residual tumor (R1-Status) after resection. Oropharyngeal cancer caused by HPV (human papillomavirus…",
-                "conditions": [
-                  "Head-and-neck Squamous Cell Carcinoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "De-escalation radio(chemo)therapy - Level 1",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "De-escalation radio(chemo)therapy - Level 2",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Standard radio(chemotherapy)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Condition after surgical removal of a squamous cell carcinoma of the oropharynx and adequate lymph node dissection\n* Indication for adjuvant radiotherapy or radiochemotherapy in the interdisciplinary tumor board\n* Good general state (ECOG performance status 0 or 1)\n* Adequate…",
-                "answers_question": "Safety of de-intensified adjuvant therapy for microscopic ENE in composite low-risk pts",
-                "relevance_phrase": "post-op RT/CRT de-escalation levels vs standard, HPV+"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "oropharyngeal adjuvant de-escalation",
-                "transoral surgery oropharyngeal radiotherapy"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 29,
-              "fetched_at": "2026-10-23T08:07:50.904Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 146
               }
             ]
           }
