@@ -14,7 +14,8 @@
 // Fail-soft (exit 0) so the cron pipeline never aborts on a notify failure.
 import 'dotenv/config';
 import { sendMessage } from '../src/lib/telegram-ingest.ts';
-import { formatChannelPost, type ChannelArtifact } from '../src/lib/channel-post.ts';
+import { formatChannelPost, withoutDripStudies, type ChannelArtifact } from '../src/lib/channel-post.ts';
+import { openDb, isLocalDripPaper } from '../src/lib/db.ts';
 import { waitForDeployedDate } from '../src/lib/deploy-ready.ts';
 import {
   parseNotifyArgs,
@@ -36,7 +37,15 @@ async function main(): Promise<void> {
     LABEL,
   );
   if (!artifact) return;
-  const text = formatChannelPost(artifact, siteUrl);
+  // Drip papers (ingest:local) reach the curator by DM only, never the channel.
+  const db = openDb();
+  const { artifact: forChannel, dropped } = withoutDripStudies(artifact, (id) => isLocalDripPaper(db, id));
+  if (forChannel.digest.sites.every((s) => s.studies.length === 0)) {
+    console.log(`notify:channel: ${args.date} is all local-drip papers (${dropped}) — DM only, no channel post`);
+    return;
+  }
+  if (dropped > 0) console.log(`notify:channel: leaving ${dropped} local-drip stud(ies) out of the ${args.date} post`);
+  const text = formatChannelPost(forChannel, siteUrl);
 
   if (args.dryRun) {
     console.log('--- dry run ---');

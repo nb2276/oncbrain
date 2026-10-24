@@ -2,6 +2,23 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.62.1] - 2026-10-19
+
+### Changed
+- **Drip papers are announced by curator DM only.** A study built only from
+  `ingest:local` PDFs (the downloaded reference library) is old literature
+  being back-filled, not news, so `notify:channel` leaves it out of the
+  reader post; a date that is all drip papers gets no channel post at all.
+  A study with any other source (a tweet, a Telegram paper, a slide) still
+  posts. `notify:curator` is unchanged.
+
+### Fixed
+- **The 1am push failed on 2026-10-18 and 10-19** with `bun: command not
+  found`: the gstack pre-push hook runs `bun`, which was not on the launchd
+  PATH. RT-CHARM (10-17) and the first two drip nights were built but stranded
+  locally until pushed by hand. `~/.bun/bin` is now on the cron PATH, and the
+  failure message points at git's error instead of guessing "auth?".
+
 ## [0.62.0] - 2026-10-17
 
 ### Changed
