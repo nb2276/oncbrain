@@ -1473,6 +1473,9 @@ const REVIEW_TITLE =
 // says nothing about any one PDF in it.
 export function partContentType(info: DripPaperInfo): ContentType {
   if (/\bpresentation\b|\bslide deck\b/i.test(info.note ?? '')) return 'presentation';
+  // A meta-analysis or pooled analysis reports its own estimate: a study card,
+  // however its title words the review part ("systematic literature review").
+  if (/\bmeta-?analys[ie]s\b|\bpooled analys[ie]s\b|\bindividual patient data\b/i.test(info.title)) return 'study_report';
   return REVIEW_TITLE.test(info.title) ? 'review' : 'study_report';
 }
 

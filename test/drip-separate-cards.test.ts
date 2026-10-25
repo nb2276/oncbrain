@@ -43,9 +43,10 @@ describe('splitDripClusters', () => {
       [P(1), info('Practice review of skin brachytherapy dose schedules')],
       [P(2), info('Recurrence after RT: a retrospective review of 120 patients')],
       [P(3), info('SBRT for ultra-central lung tumors: a systematic review and meta-analysis')],
+      [P(4), info('Systematic literature review and meta-analysis of hypofractionation')],
     ]);
-    const out = splitDripClusters([cluster([P(1), P(2), P(3)], { content_type: 'study_report' })], d);
-    expect(out.map((c) => c.content_type)).toEqual(['review', 'study_report', 'study_report']);
+    const out = splitDripClusters([cluster([P(1), P(2), P(3), P(4)], { content_type: 'study_report' })], d);
+    expect(out.map((c) => c.content_type)).toEqual(['review', 'study_report', 'study_report', 'study_report']);
   });
 
   it('files each split paper under its own site', () => {
