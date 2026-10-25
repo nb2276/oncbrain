@@ -223,7 +223,6 @@ describe('acronym + year prose for every flagship meeting (v0.62.5)', () => {
       'ASCO 2024 guideline update on PMRT',
       'per the ASCO 2023 Guidelines',
       'ESMO 2024 Clinical Practice Guidelines',
-      'ESMO 2024: Clinical Practice Guidelines',
       'AACR 2026 Cancer Progress Report',
       'ESMO 2023 Magnitude of Clinical Benefit Scale',
       'ASCO 2024 provisional clinical opinion',
@@ -233,5 +232,29 @@ describe('acronym + year prose for every flagship meeting (v0.62.5)', () => {
       'AUA/ASTRO 2024 guideline',
       'ash 2025 volcanic',
     ]) expect(slug(t), t).toBeNull();
+  });
+});
+
+describe('v0.62.5 review round 2', () => {
+  const slug = (t: string) => detectConference(t, { defaultYear: 2026 })?.slug ?? null;
+  it('en-dash societies and spaced or slashed year ranges are not the meeting', () => {
+    expect(slug('GEC–ESTRO 2026 working group')).toBeNull();
+    expect(slug('ASCO 2024 – 2025 update')).toBeNull();
+    expect(slug('ASCO 2024 / 2025 guideline')).toBeNull();
+  });
+  it('within one meeting, its earliest phrase is what the tie-break compares', () => {
+    expect(slug('ASCO GU 2026 PEACE-1 update vs ESMO Congress 2025 data; Genitourinary Cancers Symposium 2026')).toBe('ascogu-2026');
+  });
+});
+
+describe('v0.62.5 review round 2 (adversarial)', () => {
+  const slug = (t: string) => detectConference(t, { defaultYear: 2026 })?.slug ?? null;
+  it('a colon-branded headline keeps its meeting even when the title is a guideline or report (paper 94)', () => {
+    expect(slug('ASTRO 2026: International Consensus Guideline on Management of Genitourinary Adverse Events')).toBe('astro-2026');
+    expect(slug('ASCO 2026: Final Report of the X trial')).toBe('asco-2026');
+  });
+  it('a review thread listing trials under different meetings abstains', () => {
+    expect(slug('• ASCO 2024: KEYNOTE-689 EFS\n• ESMO 2025: NIVOPOSTOP')).toBeNull();
+    expect(slug('1/ ASCO 2025 NIVOPOSTOP, then ASTRO 2026 RTOG')).toBeNull();
   });
 });

@@ -13,11 +13,16 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   start of a line, or "ESMO 2025:"), because mid-sentence it is usually a
   citation of another trial's meeting ("Positive phase III ASCO 2025,
   NIVOPOSTOP" on the slide of a 2026 review). All seven are guarded against a
-  guideline/report/scale word just after the year, a year range, and a joined
-  society name (GEC-ESTRO, AUA/ASTRO); ASH is case-sensitive.
+  guideline/report/scale word just after the year, a year range (spaced,
+  slashed or dashed), and a joined society name (GEC-ESTRO, GEC–ESTRO,
+  AUA/ASTRO); ASH is case-sensitive. A colon is branding and beats the
+  guideline guard: "ASTRO 2026: International Consensus Guideline…" was
+  presented there. A review thread that brands two different meetings
+  ("• ASCO 2024: KEYNOTE-689 / • ESMO 2025: NIVOPOSTOP") gets no meeting.
 - **The earliest meeting mentioned wins a prose conflict.** Ties between text
   mentions went to whichever meeting is listed first in the registry, so
   "ASTRO 2026 oral; cf. CheckMate 77T at ESMO 2023" could tag ESMO 2023.
+  Within one meeting, its earliest phrase is the one compared.
 - Measured on all 246 sources, every text surface including slide OCR: 2
   detections change (ROADS, an "ESMO 2025:" UroToday report), both newly
   tagged and correct. Detection runs at ingest, so published tags don't move.
