@@ -77,7 +77,8 @@ import {
 } from '../src/lib/self-consistency.ts';
 import { ingestApprovedResolutions, crossDateResolvedPapers } from '../src/lib/review-trial-ingest.ts';
 import { fetchPubMedPaper, type PubMedPaper } from '../src/lib/pubmed-client.ts';
-import { listResolutions } from '../src/lib/db.ts';
+import { listResolutions, isLocalDripPaper } from '../src/lib/db.ts';
+import type Database from 'better-sqlite3';
 
 // v0.17 (T6): on each review study, attach discussed_trial_links — a map from a
 // discussed-trial acronym (normalized) to the slug of the same-date study that
@@ -282,10 +283,13 @@ function toDigestInput(bookmarks: Bookmark[]): DigestInputTweet[] {
     }));
 }
 
-function papersToDigestInput(papers: Paper[]): DigestInputPaper[] {
+function papersToDigestInput(papers: Paper[], db?: Database.Database): DigestInputPaper[] {
   return papers.map((p) => ({
     source_type: 'paper' as const,
     id: p.id,
+    local_drip: db ? isLocalDripPaper(db, p.id) : false,
+    // data/obsidian/papers/<site>/<file>.pdf: the site enrichment filed it under.
+    drip_site: p.pdf_path?.match(/^data\/obsidian\/papers\/([a-z0-9-]+)\//)?.[1] ?? null,
     pmid: p.pmid,
     title: p.title,
     authors: parseJsonStringArray(p.authors_json, 'name'),
@@ -711,7 +715,7 @@ export async function buildOneDate(
   );
 
   const tweetInputs = toDigestInput(bookmarks);
-  const paperInputs = papersToDigestInput(allPapers);
+  const paperInputs = papersToDigestInput(allPapers, db);
   const slideInputs = slidesToDigestInput(slidesForDate);
   const inputs: DigestInputItem[] = [...tweetInputs, ...paperInputs, ...slideInputs];
   // Dry-run must NOT write: the committed data/digests/<date>.json and the

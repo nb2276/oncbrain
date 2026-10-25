@@ -2,6 +2,29 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.62.4] - 2026-10-25
+
+### Fixed
+- **Each library PDF gets its own card.** Phase 1 grouped the five skin
+  brachytherapy papers released on 2026-10-25 into one "surface mould and flap
+  series" card. Grouping is right for several tweets about one trial and wrong
+  for PDFs added one by one from the curator's library, each its own study, and
+  the drip releases same-topic papers together because it follows folder order.
+  After Phase 1, a card holding two or more `ingest:local` papers keeps the
+  first (with any tweet, slide or Telegram paper that came with it) and every
+  other drip paper becomes its own card (`splitDripClusters`). Each card is
+  named from its own title, filed under the site enrichment gave that paper
+  (drip nights mix sites), and typed per paper: Phase 1 calls a pile of
+  studies a "review", and inheriting that would strip each study's verdict,
+  NCT and DOI. A cluster that also holds tweets or Telegram papers is left
+  whole, since nothing says which paper they belong to. Slugs stay within the
+  64-character limit when a collision suffix is added.
+- **Known limitation:** a split paper's type (study report / review / talk)
+  comes from its curator note and title words, not a model call. A
+  meta-analysis, retrospective review or systematic review stays a study card;
+  an unusual title can still be misread. It only applies when Phase 1 merged
+  library papers, which the split then undoes.
+
 ## [0.62.3] - 2026-10-25
 
 ### Fixed

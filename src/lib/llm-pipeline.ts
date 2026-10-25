@@ -23,6 +23,7 @@
 // the existing sites[] structure is unchanged, so Astro pages and Obsidian
 // export continue to work without conditional logic.
 
+import { deriveSlug } from './slug.ts';
 import { stripUngroundedPrimaryClaims } from './primary-claim.ts';
 import { consortIsCoherent } from './consort.ts';
 import { readFileSync } from 'node:fs';
@@ -102,6 +103,10 @@ export type DigestInputTweet = {
 export type DigestInputPaper = {
   source_type: 'paper';
   id: number; // papers.id
+  // v0.62.4: a PDF from the curator's local library (ingest:local drip). Each
+  // is its own document, so Phase 1 may never merge two of them into one card.
+  local_drip?: boolean;
+  drip_site?: string | null; // its own disease site from enrichment (vault folder)
   pmid: string | null; // v0.8: DOI-only papers have no PMID
   title: string;
   authors?: string[] | null;
@@ -976,6 +981,18 @@ export async function buildDigest(
   if (clusters.length === 0) {
     throw new DigestParseError('Phase 1 produced no clusters. Cannot continue.');
   }
+  // v0.62.4: separate drip papers are separate cards (see splitDripClusters).
+  const dripInfo = new Map<number, DripPaperInfo>();
+  for (const it of items) {
+    if (it.source_type === 'paper' && it.local_drip) {
+      dripInfo.set(paperIdToSyntheticTweetId(it.id), { title: it.title, note: it.note ?? null, site: it.drip_site ?? null });
+    }
+  }
+  const split = splitDripClusters(clusters, dripInfo);
+  if (split.length !== clusters.length) {
+    console.log(`  [phase 1] split ${split.length - clusters.length} merged library paper(s) into their own cards`);
+    clusters = split;
+  }
   detectClusterCollisions(clusters, tweets);
 
   // Phase 2: agents in parallel, bounded concurrency. Track drops.
@@ -1422,6 +1439,106 @@ async function runGroupingPhase(
     'grouping',
   );
   return value;
+}
+
+/**
+ * v0.62.4: one card per library PDF. Phase 1 grouped five skin-brachytherapy
+ * papers from the same drip night into a single "surface mould and flap
+ * series" card. Grouping is right for tweets about one trial; it is wrong for
+ * PDFs the curator added one by one, each its own study. A cluster holding two
+ * or more drip papers keeps the first (with any tweets, slides or Telegram
+ * papers that came with it), and every other drip paper becomes its own
+ * cluster, named from its title, in the same disease site.
+ *
+ * What the aggregate cluster said about itself does not carry over blindly:
+ * - content_type is decided per paper (partContentType). Phase 1 calls a pile
+ *   of distinct studies a "review", and Phase 2 treats content_type as final,
+ *   so inheriting it would strip each study report's verdict, NCT and DOI.
+ * - the card left holding a single drip paper is renamed from that paper; the
+ *   series name would otherwise head a one-PDF card.
+ */
+// site: the paper's own disease site from enrichment (its vault folder), so a
+// paper split out of a cluster Phase 1 filed under another site lands right.
+export type DripPaperInfo = { title: string; note: string | null; site?: string | null };
+
+// Narrow on purpose: guidelines and consensus statements publish as study
+// cards with a "consensus" verdict, which a review card would strip. A
+// "retrospective review", "chart review" or "systematic review" (a meta-analysis,
+// which publishes as a study card) is a research design, not a review
+// article.
+const REVIEW_TITLE =
+  /\b(?<!retrospective\s)(?<!systematic\s)(?<!chart\s)(?<!records?\s)(?<!case\s)review\b|\b(?:editorial|perspective|overview|commentary|personal view)\b/i;
+
+// Typed from the paper's own signals only: what Phase 1 called the merged pile
+// says nothing about any one PDF in it.
+export function partContentType(info: DripPaperInfo): ContentType {
+  if (/\bpresentation\b|\bslide deck\b/i.test(info.note ?? '')) return 'presentation';
+  // A meta-analysis or pooled analysis reports its own estimate: a study card,
+  // however its title words the review part ("systematic literature review").
+  if (/\bmeta-?analys[ie]s\b|\bpooled analys[ie]s\b|\bindividual patient data\b/i.test(info.title)) return 'study_report';
+  return REVIEW_TITLE.test(info.title) ? 'review' : 'study_report';
+}
+
+const siteFor = (info: DripPaperInfo, fallback: string): string =>
+  info.site && isValidDiseaseSiteSlug(info.site) ? info.site : fallback;
+
+const SLUG_MAX = 64;
+function uniqueSlug(title: string, taken: Set<string>): string {
+  const base = deriveSlug(title) || 'paper';
+  let slug = base;
+  for (let n = 2; taken.has(slug); n++) {
+    const suffix = `-${n}`;
+    slug = `${base.slice(0, SLUG_MAX - suffix.length).replace(/-+$/, '')}${suffix}`;
+  }
+  taken.add(slug);
+  return slug;
+}
+
+export function splitDripClusters(clusters: StudyCluster[], drip: Map<number, DripPaperInfo>): StudyCluster[] {
+  const taken = new Set(clusters.map((c) => c.slug));
+  const out: StudyCluster[] = [];
+  for (const c of clusters) {
+    const dripIds = c.tweet_ids.filter((id) => drip.has(id));
+    if (dripIds.length < 2) {
+      out.push(c);
+      continue;
+    }
+    // Tweets, slides or Telegram papers in the cluster belong to ONE of the
+    // drip papers, and Phase 1's order does not say which. Splitting would hang
+    // them on an arbitrary card (and a Telegram copy of paper B on paper A's
+    // card), so a mixed cluster is left whole.
+    if (dripIds.length !== c.tweet_ids.length) {
+      console.warn(`  [phase 1] ${c.slug}: ${dripIds.length} library papers grouped with other sources; left as one card`);
+      out.push(c);
+      continue;
+    }
+    // An all-drip cluster: every paper, the first included, becomes its own
+    // card named from its title. The cluster's old slug is released for reuse.
+    taken.delete(c.slug);
+    const first = dripIds[0]!;
+    const firstInfo = drip.get(first)!;
+    const firstTitle = firstInfo.title.trim() || 'Untitled paper';
+    out.push({
+      ...c,
+      slug: uniqueSlug(firstTitle, taken),
+      name: firstTitle,
+      disease_site: siteFor(firstInfo, c.disease_site),
+      tweet_ids: [first],
+      content_type: partContentType(firstInfo),
+    });
+    for (const id of dripIds.slice(1)) {
+      const info = drip.get(id)!;
+      const title = info.title.trim() || 'Untitled paper';
+      out.push({
+        slug: uniqueSlug(title, taken),
+        name: title,
+        disease_site: siteFor(info, c.disease_site),
+        tweet_ids: [id],
+        content_type: partContentType(info),
+      });
+    }
+  }
+  return out;
 }
 
 export function parseGroupingResponse(raw: string, tweets: DigestInputTweet[]): StudyCluster[] {
