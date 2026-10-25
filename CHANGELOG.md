@@ -2,6 +2,19 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.62.4] - 2026-10-25
+
+### Fixed
+- **Each library PDF gets its own card.** Phase 1 grouped the five skin
+  brachytherapy papers released on 2026-10-25 into one "surface mould and flap
+  series" card. Grouping is right for several tweets about one trial and wrong
+  for PDFs added one by one from the curator's library, each its own study, and
+  the drip releases same-topic papers together because it follows folder order.
+  After Phase 1, a card holding two or more `ingest:local` papers keeps the
+  first (with any tweet, slide or Telegram paper that came with it) and every
+  other drip paper becomes its own card, named from its title, in the same
+  disease site (`splitDripClusters`).
+
 ## [0.62.3] - 2026-10-25
 
 ### Fixed
