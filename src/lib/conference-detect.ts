@@ -42,6 +42,16 @@ type Series = {
   // Distinctive phrases that name THIS meeting. A match counts only when a 20xx
   // year sits within PROSE_WINDOW chars of it.
   prose: RegExp[];
+  // v0.62.5: the bare "ASCO 2026" form, year in capture group 1. Guarded
+  // against a nearby guideline/report word, a year range and a joined society
+  // (GEC-ESTRO).
+  acronymYear?: RegExp;
+  // When true, the acronymYear form counts only as BRANDING: at the start of a
+  // line (after emoji/symbols) or followed by a colon ("ESMO 2025: ...",
+  // "🚨 ASCO 2026 Final Results"). Mid-sentence it is a citation of another
+  // trial's meeting ("Positive phase III ASCO 2025, NIVOPOSTOP"). ASTRO and
+  // ESTRO keep their pre-v0.62.5 unrestricted form.
+  brandingOnly?: boolean;
 };
 
 // Registry. Flagship annual meetings carry host signals; the ASCO subspecialty
@@ -54,7 +64,9 @@ const SERIES: Series[] = [
     acronym: 'ASCO',
     hashtags: [/#ASCO(20\d\d|\d{2})\b/i],
     hosts: ['meetings.asco.org', 'meetinglibrary.asco.org', 'conferences.asco.org', 'abstracts.asco.org'],
-    prose: [/\bASCO\s+Annual\s+Meeting\b/i, /(?<![-/(])\bASCO\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/i],
+    prose: [/\bASCO\s+Annual\s+Meeting\b/i],
+    acronymYear: /(?<![-/])\bASCO\s+(20[1-3]\d)\b(?![–-]\d)(?![:;,.–—-]?\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|guideline\s+updates?|recommendations?|endorsements?|consensus|statements?|reports?|opinions?|scales?|frameworks?|magnitude)\b)/i,
+    brandingOnly: true,
   },
   {
     key: 'ascogu',
@@ -78,7 +90,9 @@ const SERIES: Series[] = [
     acronym: 'ESMO',
     hashtags: [/#ESMO(20\d\d|\d{2})\b/i],
     hosts: ['oncologypro.esmo.org'],
-    prose: [/\bESMO\s+(?:Congress|Annual\s+Meeting)\b/i, /(?<![-/(])\bESMO\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/i],
+    prose: [/\bESMO\s+(?:Congress|Annual\s+Meeting)\b/i],
+    acronymYear: /(?<![-/])\bESMO\s+(20[1-3]\d)\b(?![–-]\d)(?![:;,.–—-]?\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|guideline\s+updates?|recommendations?|endorsements?|consensus|statements?|reports?|opinions?|scales?|frameworks?|magnitude)\b)/i,
+    brandingOnly: true,
   },
   {
     key: 'astro',
@@ -91,7 +105,8 @@ const SERIES: Series[] = [
     // than "ASTRO Annual Meeting", so match the acronym+year form too. The
     // required whitespace + trailing year keeps "AUA/ASTRO guidelines" (year, if
     // any, sits BEFORE the acronym) from mis-tagging.
-    prose: [/\bASTRO\s+Annual\s+Meeting\b/i, /(?<![-/(])\bASTRO\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/i],
+    prose: [/\bASTRO\s+Annual\s+Meeting\b/i],
+    acronymYear: /(?<![-/])\bASTRO\s+(20[1-3]\d)\b(?![–-]\d)(?![:;,.–—-]?\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|guideline\s+updates?|recommendations?|endorsements?|consensus|statements?|reports?|opinions?|scales?|frameworks?|magnitude)\b)/i,
   },
   {
     key: 'estro',
@@ -105,7 +120,8 @@ const SERIES: Series[] = [
     // source text. The acronym+year form catches it; the required whitespace +
     // year keeps GEC-ESTRO / ESMO-ESTRO / "(ESTRO) guidelines" (no adjacent
     // year) from mis-tagging as the congress.
-    prose: [/\bESTRO\s+Congress\b/i, /(?<![-/(])\bESTRO\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/i],
+    prose: [/\bESTRO\s+Congress\b/i],
+    acronymYear: /(?<![-/])\bESTRO\s+(20[1-3]\d)\b(?![–-]\d)(?![:;,.–—-]?\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|guideline\s+updates?|recommendations?|endorsements?|consensus|statements?|reports?|opinions?|scales?|frameworks?|magnitude)\b)/i,
   },
   {
     key: 'aacr',
@@ -113,7 +129,9 @@ const SERIES: Series[] = [
     acronym: 'AACR',
     hashtags: [/#AACR(20\d\d|\d{2})\b/i],
     hosts: ['meetings.aacr.org'],
-    prose: [/\bAACR\s+Annual\s+Meeting\b/i, /(?<![-/(])\bAACR\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/i],
+    prose: [/\bAACR\s+Annual\s+Meeting\b/i],
+    acronymYear: /(?<![-/])\bAACR\s+(20[1-3]\d)\b(?![–-]\d)(?![:;,.–—-]?\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|guideline\s+updates?|recommendations?|endorsements?|consensus|statements?|reports?|opinions?|scales?|frameworks?|magnitude)\b)/i,
+    brandingOnly: true,
   },
   {
     key: 'ash',
@@ -122,7 +140,9 @@ const SERIES: Series[] = [
     hashtags: [/#ASH(20\d\d|\d{2})\b/i],
     hosts: ['ash.confex.com'],
     // Case-SENSITIVE acronym+year: lowercase "ash" is an ordinary word.
-    prose: [/\bASH\s+Annual\s+Meeting\b/i, /\bASH\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/],
+    prose: [/\bASH\s+Annual\s+Meeting\b/i],
+    acronymYear: /(?<![-/])\bASH\s+(20[1-3]\d)\b(?![–-]\d)(?![:;,.–—-]?\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|guideline\s+updates?|recommendations?|endorsements?|consensus|statements?|reports?|opinions?|scales?|frameworks?|magnitude)\b)/,
+    brandingOnly: true,
   },
   {
     key: 'sabcs',
@@ -130,7 +150,9 @@ const SERIES: Series[] = [
     acronym: 'SABCS',
     hashtags: [/#SABCS(20\d\d|\d{2})\b/i],
     hosts: ['sabcs.org'],
-    prose: [/\bSan\s+Antonio\s+Breast\s+Cancer\s+Symposium\b/i, /\bSABCS\s+20[1-3]\d\b/i],
+    prose: [/\bSan\s+Antonio\s+Breast\s+Cancer\s+Symposium\b/i],
+    acronymYear: /(?<![-/])\bSABCS\s+(20[1-3]\d)\b(?![–-]\d)(?![:;,.–—-]?\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|guideline\s+updates?|recommendations?|endorsements?|consensus|statements?|reports?|opinions?|scales?|frameworks?|magnitude)\b)/i,
+    brandingOnly: true,
   },
 ];
 
@@ -205,7 +227,7 @@ function hostYear(s: Series, urls: Array<{ url: string; host: string }>, default
   return null;
 }
 
-function proseYear(s: Series, text: string): number | null {
+function proseYear(s: Series, text: string): { year: number; at: number } | null {
   for (const re of s.prose) {
     const m = re.exec(text);
     if (!m) continue;
@@ -226,7 +248,24 @@ function proseYear(s: Series, text: string): number | null {
         bestYear = Number(ym[1]);
       }
     }
-    if (bestYear != null) return bestYear;
+    if (bestYear != null) return { year: bestYear, at: phraseStart };
+  }
+  return null;
+}
+
+/** The earliest acceptable "ASCO 2026"-style mention of this meeting. */
+function acronymYearHit(s: Series, text: string): { year: number; at: number } | null {
+  if (!s.acronymYear) return null;
+  const flags = s.acronymYear.flags.includes('g') ? s.acronymYear.flags : s.acronymYear.flags + 'g';
+  for (const m of text.matchAll(new RegExp(s.acronymYear.source, flags))) {
+    const at = m.index ?? 0;
+    if (s.brandingOnly) {
+      const lineStart = text.lastIndexOf('\n', at - 1) + 1;
+      const leading = !/[A-Za-z]/.test(text.slice(lineStart, at));
+      const colon = /^\s*:/.test(text.slice(at + m[0].length));
+      if (!leading && !colon) continue;
+    }
+    return { year: Number(m[1]), at };
   }
   return null;
 }
@@ -255,22 +294,26 @@ export function detectConference(
     }
   }
 
-  // Collect every signal, then pick the highest-priority one. Registry order
-  // breaks priority ties (we only replace on a STRICTLY greater priority), which
-  // is why a specific subspecialty hashtag, listed first, wins over a flagship.
-  const candidates: Array<{ hit: ConferenceHit; priority: number }> = [];
+  // Collect every signal, then pick the highest-priority one. A hashtag or host
+  // tie keeps registry order (replace only on STRICTLY greater priority). A
+  // PROSE tie goes to the EARLIEST mention: a source names its own meeting
+  // first ("ASTRO 2026 oral; cf. CheckMate 77T at ESMO 2023"), and registry
+  // order would hand it to whichever cited meeting is listed first.
+  const candidates: Array<{ hit: ConferenceHit; priority: number; at: number }> = [];
   for (const s of SERIES) {
     const ht = hashtagYear(s, text);
-    if (ht != null) candidates.push({ hit: makeHit(s, ht), priority: PRIORITY.hashtag });
+    if (ht != null) candidates.push({ hit: makeHit(s, ht), priority: PRIORITY.hashtag, at: 0 });
     const ho = hostYear(s, urls, opts.defaultYear);
-    if (ho != null) candidates.push({ hit: makeHit(s, ho), priority: PRIORITY.host });
+    if (ho != null) candidates.push({ hit: makeHit(s, ho), priority: PRIORITY.host, at: 0 });
     const pr = proseYear(s, text);
-    if (pr != null) candidates.push({ hit: makeHit(s, pr), priority: PRIORITY.prose });
+    const ay = acronymYearHit(s, text);
+    const firstProse = pr && ay ? (ay.at < pr.at ? ay : pr) : (pr ?? ay);
+    if (firstProse) candidates.push({ hit: makeHit(s, firstProse.year), priority: PRIORITY.prose, at: firstProse.at });
   }
   if (candidates.length === 0) return null;
   let best = candidates[0]!;
   for (const c of candidates) {
-    if (c.priority > best.priority) best = c;
+    if (c.priority > best.priority || (c.priority === best.priority && c.priority === PRIORITY.prose && c.at < best.at)) best = c;
   }
   return best.hit;
 }

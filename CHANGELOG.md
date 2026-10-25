@@ -9,13 +9,20 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   recognised the plain "acronym + year" form; ASCO, ESMO, AACR, SABCS and ASH
   needed a hashtag or the full meeting name, so the ROADS tweet ("ASCO 2026
   Final Results") arrived untagged and lost its ASCO tag once meetings became
-  per-study (v0.62.2). The form is guarded for all seven: a guideline word
-  within two words of the year ("ESMO 2024 Clinical Practice Guidelines"), a
-  joined society name (GEC-ESTRO, ESMO-ESTRO, AUA/ASTRO) and a parenthetical
-  citation ("NIVOPOSTOP (ASCO 2025)") are not the meeting. ASH is
-  case-sensitive. Measured on all 246 sources: 3 detections change, all newly
-  tagged and all correct; nothing loses a tag. Detection runs at ingest, so
-  existing tags are unchanged.
+  per-study (v0.62.2). For those five the form counts only as branding (at the
+  start of a line, or "ESMO 2025:"), because mid-sentence it is usually a
+  citation of another trial's meeting ("Positive phase III ASCO 2025,
+  NIVOPOSTOP" on the slide of a 2026 review). All seven are guarded against a
+  guideline/report/scale word just after the year, a year range, and a joined
+  society name (GEC-ESTRO, AUA/ASTRO); ASH is case-sensitive.
+- **The earliest meeting mentioned wins a prose conflict.** Ties between text
+  mentions went to whichever meeting is listed first in the registry, so
+  "ASTRO 2026 oral; cf. CheckMate 77T at ESMO 2023" could tag ESMO 2023.
+- Measured on all 246 sources, every text surface including slide OCR: 2
+  detections change (ROADS, an "ESMO 2025:" UroToday report), both newly
+  tagged and correct. Detection runs at ingest, so published tags don't move.
+  A source-year rule was tried and rejected: it stripped five UroToday ASTRO
+  2024/2025 reports sent months after the meeting.
 
 ## [0.62.4] - 2026-10-25
 

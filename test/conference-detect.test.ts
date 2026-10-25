@@ -201,23 +201,36 @@ describe('detectConferenceFromTexts', () => {
 
 describe('acronym + year prose for every flagship meeting (v0.62.5)', () => {
   const slug = (t: string) => detectConference(t, { defaultYear: 2026 })?.slug ?? null;
-  it('names the meeting', () => {
+  it('names the meeting when the source brands itself with it', () => {
     expect(slug('🚨🚨 ASCO 2026 Final Results Randomized trial')).toBe('asco-2026'); // ROADS: missed before
     expect(slug('ESMO 2025: Randomized Phase III Trial of ADT')).toBe('esmo-2025');
     expect(slug('AACR 2026 plenary')).toBe('aacr-2026');
     expect(slug('SABCS 2025 GS1-01')).toBe('sabcs-2025');
     expect(slug('ASH 2025 abstract 1')).toBe('ash-2025');
-    expect(slug('ASCO 2025 annual meeting')).toBe('asco-2025');
+    expect(slug('ASCO 2025 OS update presented')).toBe('asco-2025');
+    expect(slug('Late-breaking data presented at ASTRO 2025 in San Francisco')).toBe('astro-2025'); // ASTRO unchanged
   });
-  it('a guideline, a joined society name, or a parenthetical citation is not the meeting', () => {
+  it('a citation of another trial\'s meeting is not this source\'s meeting', () => {
+    expect(slug('KEYNOTE-689 vs NIVOPOSTOP\nPositive phase III ASCO 2025, NIVOPOSTOP')).toBeNull(); // slide OCR of a 2026 review
+    expect(slug('2/ NIVOPOSTOP (ASCO 2025)\nPost-op nivo')).toBeNull();
+  });
+  it('the earliest prose mention wins a conflict (a source names its own meeting first)', () => {
+    expect(slug('ASTRO 2026 oral; cf. CheckMate 77T at ESMO 2023')).toBe('astro-2026');
+    expect(slug('ASCO Genitourinary Cancers Symposium 2026 … Prior: ASCO 2025 PEACE-1')).toBe('ascogu-2026');
+  });
+  it('a guideline, report, scale, year range or joined society name is not the meeting', () => {
     for (const t of [
       'ASCO 2024 guideline update on PMRT',
       'per the ASCO 2023 Guidelines',
       'ESMO 2024 Clinical Practice Guidelines',
+      'ESMO 2024: Clinical Practice Guidelines',
+      'AACR 2026 Cancer Progress Report',
+      'ESMO 2023 Magnitude of Clinical Benefit Scale',
+      'ASCO 2024 provisional clinical opinion',
+      'ASCO 2024–2025 guideline',
       'ESMO-ESTRO 2026 consensus',
       'GEC-ESTRO 2018 recommendations',
       'AUA/ASTRO 2024 guideline',
-      '2/ NIVOPOSTOP (ASCO 2025)\nPost-op nivo',
       'ash 2025 volcanic',
     ]) expect(slug(t), t).toBeNull();
   });
