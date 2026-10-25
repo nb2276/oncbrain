@@ -58,8 +58,10 @@ export function studyDataTags(
   ) {
     tokens.push(`verdict:${verdictSlug}`);
   }
-  if (conferenceSlug && conferenceSlug.length > 0) {
-    tokens.push(`meeting:${conferenceSlug}`);
+  // v0.62.2: the study's own meeting; the day's only for pre-v0.62.2 artifacts.
+  const meetingSlug = study.meeting !== undefined ? (study.meeting?.slug ?? null) : conferenceSlug;
+  if (meetingSlug && meetingSlug.length > 0) {
+    tokens.push(`meeting:${meetingSlug}`);
   }
   if (diseaseSite && diseaseSite.length > 0) {
     tokens.push(`site:${diseaseSite}`);

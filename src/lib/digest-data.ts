@@ -44,6 +44,9 @@ export type DigestSourceRef =
   | { type: 'slide'; id: number };
 
 export type DigestStudy = {
+  // v0.62.2: the meeting this study's own sources carry (stamped at build);
+  // absent on older artifacts, which fall back to the day's conference.
+  meeting?: { slug: string; name: string } | null;
   name: string;
   tldr: string;
   details: DigestDetail[];

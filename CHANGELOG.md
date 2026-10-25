@@ -2,6 +2,26 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.62.2] - 2026-10-25
+
+### Fixed
+- **A card's meeting tag now comes from its own sources, not the day.** Every
+  card on a date inherited the day's conference (the one conference any of its
+  sources carried), so on 2026-10-24 five #ESMO26 tweets tagged all nine cards
+  "ESMO Congress 2026": four decades-old drip papers and an untagged PEACE-1
+  tweet showed an ESMO chip and were filed under the ESMO tag. Each study is
+  now stamped at build with the one meeting its sources carry (none if they
+  carry none or several), and the chips, filter tags, tag index and the study
+  page's crumb use it. The day page header still names the day's conference.
+- `build/backfill-meetings.ts` stamped the existing 71 digests from the DB (no
+  LLM; only the new field). 28 cards changed: drip papers and journal papers
+  on conference days lose a meeting they never had, several mis-dated tags are
+  corrected (an ESTRO contouring guideline was tagged ASTRO 2025, the
+  organs-at-risk paper ASCO GU 2022), and cards on 2026-05-31, a day with two
+  ASCO years and therefore no day conference, gain ASCO 2026. Known gap: a
+  tweet the ingest-time detector never tagged (ROADS, 05-30, "ASCO 2026" in
+  the text) loses its meeting; re-tag the source to restore it.
+
 ## [0.62.1] - 2026-10-19
 
 ### Changed

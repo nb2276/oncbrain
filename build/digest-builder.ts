@@ -16,6 +16,7 @@
 //
 // The Astro build then reads these JSON files to produce static digest pages.
 
+import { stampStudyMeetings } from '../src/lib/study-meeting.ts';
 import 'dotenv/config';
 import {
   openDb,
@@ -943,6 +944,8 @@ export async function buildOneDate(
   // so a live study can never be shadowed by a redirect to itself.
   const liveSlugs = new Set(digest.sites.flatMap((site) => site.studies.map((x) => x.slug)));
   const aliases = retiredSlugs.filter((x) => !liveSlugs.has(x));
+  // v0.62.2: each study's meeting comes from its own sources, not the day.
+  stampStudyMeetings(db, digest);
   const artifact = buildArtifact(date, confMeta, bookmarks, allPapers, slidesForDate, digest, crossDateIds, aliases);
 
   // A REBUILD MUST NOT PUBLISH A DELETION. Overwriting the artifact is how a

@@ -15,6 +15,7 @@
 // incomplete landing pages + RSS feeds + API endpoints downstream. Better
 // to fail loudly pre-deploy than ship navigation gaps.
 
+import { studyMeeting } from './study-meeting.ts';
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import type {
@@ -171,7 +172,8 @@ export function deriveStudyTags(
     methodology:
       study.methodology && isValidMethodology(study.methodology) ? study.methodology : null,
     verdict: study.verdict?.soc_implication ?? null,
-    meeting: digestConferenceSlug ?? null,
+    // v0.62.2: the study's own meeting; the day's only for pre-v0.62.2 artifacts.
+    meeting: study.meeting !== undefined ? (study.meeting?.slug ?? null) : (digestConferenceSlug ?? null),
     disease_site: diseaseSite,
   };
 }
@@ -750,8 +752,9 @@ export function studyTagChips(
     const slug = study.verdict.soc_implication;
     out.push({ slug, label: VERDICT_META[slug].label });
   }
-  if (conference) {
-    out.push({ slug: conference.slug, label: conference.name });
+  const meeting = studyMeeting(study, conference);
+  if (meeting) {
+    out.push({ slug: meeting.slug, label: meeting.name });
   }
   // Defensive dedup by slug — same rationale as studyTagSlugs.
   const seen = new Set<string>();
