@@ -16,6 +16,7 @@ import {
 import { getDiseaseSite } from '../../lib/disease-sites.ts';
 import { linkifyCitations } from '../../lib/extract.ts';
 import { studyDataTags } from '../../lib/study-data-tags.ts';
+import { studyMeeting } from '../../lib/study-meeting.ts';
 import {
   buildSiblingPreviews,
   buildTrialHistory,
@@ -89,6 +90,8 @@ const description = entry
     entry.study.tldr ||
     `${meta!.label} study from ${entry.date}.`
   : 'This study moved.';
+// v0.62.2: the crumb names the study's own meeting, not the day's.
+const crumbMeeting = entry ? studyMeeting(entry.study, entry.conference) : null;
 ---
 
 {
@@ -126,7 +129,7 @@ const description = entry
 >
   <nav class="crumb">
     <a href="/">← all dates</a>
-    {entry!.conference && <a href={`/conferences/${entry!.conference.slug}/`}>{entry!.conference.name}</a>}
+    {crumbMeeting && <a href={`/conferences/${crumbMeeting.slug}/`}>{crumbMeeting.name}</a>}
     <a href={`/${entry!.date}/`}>{entry!.date}</a>
     <a href={`/sites/${entry!.disease_site}/`}>
       <span class="crumb-emoji" aria-hidden="true">{meta!.emoji}</span>{meta!.label}
