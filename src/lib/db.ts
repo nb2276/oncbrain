@@ -1861,3 +1861,18 @@ export function releaseLocalIngest(
     return out;
   })();
 }
+
+/** v0.62.1: true when a paper came in through the ingest:local drip (its inbox item carries a local_path). */
+export function isLocalDripPaper(db: Database.Database, paperId: number): boolean {
+  const row = db
+    .prepare(
+      `SELECT i.attachments_json AS a FROM papers p JOIN inbox_items i ON i.id = p.inbox_item_id WHERE p.id = ?`,
+    )
+    .get(paperId) as { a: string | null } | undefined;
+  if (!row?.a) return false;
+  try {
+    return typeof (JSON.parse(row.a) as { local_path?: unknown }).local_path === 'string';
+  } catch {
+    return false;
+  }
+}
