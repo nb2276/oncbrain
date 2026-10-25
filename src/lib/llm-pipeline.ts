@@ -1462,12 +1462,17 @@ async function runGroupingPhase(
 export type DripPaperInfo = { title: string; note: string | null; site?: string | null };
 
 // Narrow on purpose: guidelines and consensus statements publish as study
-// cards with a "consensus" verdict, which a review card would strip.
-const REVIEW_TITLE = /\b(?:review|editorial|perspective|overview|commentary|personal view)\b/i;
+// cards with a "consensus" verdict, which a review card would strip. A
+// "retrospective review", "chart review" or "systematic review" (a meta-analysis,
+// which publishes as a study card) is a research design, not a review
+// article.
+const REVIEW_TITLE =
+  /\b(?<!retrospective\s)(?<!systematic\s)(?<!chart\s)(?<!records?\s)(?<!case\s)review\b|\b(?:editorial|perspective|overview|commentary|personal view)\b/i;
 
-export function partContentType(parent: ContentType, info: DripPaperInfo): ContentType {
+// Typed from the paper's own signals only: what Phase 1 called the merged pile
+// says nothing about any one PDF in it.
+export function partContentType(info: DripPaperInfo): ContentType {
   if (/\bpresentation\b|\bslide deck\b/i.test(info.note ?? '')) return 'presentation';
-  if (parent === 'study_report') return 'study_report';
   return REVIEW_TITLE.test(info.title) ? 'review' : 'study_report';
 }
 
@@ -1516,7 +1521,7 @@ export function splitDripClusters(clusters: StudyCluster[], drip: Map<number, Dr
       name: firstTitle,
       disease_site: siteFor(firstInfo, c.disease_site),
       tweet_ids: [first],
-      content_type: partContentType(c.content_type, firstInfo),
+      content_type: partContentType(firstInfo),
     });
     for (const id of dripIds.slice(1)) {
       const info = drip.get(id)!;
@@ -1526,7 +1531,7 @@ export function splitDripClusters(clusters: StudyCluster[], drip: Map<number, Dr
         name: title,
         disease_site: siteFor(info, c.disease_site),
         tweet_ids: [id],
-        content_type: partContentType(c.content_type, info),
+        content_type: partContentType(info),
       });
     }
   }

@@ -38,6 +38,16 @@ describe('splitDripClusters', () => {
     expect(out.map((c) => c.content_type)).toEqual(['study_report', 'review', 'presentation', 'study_report']);
   });
 
+  it('types each paper from its own title, never the parent label', () => {
+    const d = new Map([
+      [P(1), info('Practice review of skin brachytherapy dose schedules')],
+      [P(2), info('Recurrence after RT: a retrospective review of 120 patients')],
+      [P(3), info('SBRT for ultra-central lung tumors: a systematic review and meta-analysis')],
+    ]);
+    const out = splitDripClusters([cluster([P(1), P(2), P(3)], { content_type: 'study_report' })], d);
+    expect(out.map((c) => c.content_type)).toEqual(['review', 'study_report', 'study_report']);
+  });
+
   it('files each split paper under its own site', () => {
     const d = new Map([[P(1), info('Breast paper', { site: 'breast' })], [P(2), info('Prostate paper', { site: 'prostate' })]]);
     const out = splitDripClusters([cluster([P(1), P(2)], { disease_site: 'breast' })], d);
