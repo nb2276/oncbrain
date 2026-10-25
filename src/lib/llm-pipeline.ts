@@ -23,6 +23,7 @@
 // the existing sites[] structure is unchanged, so Astro pages and Obsidian
 // export continue to work without conditional logic.
 
+import { stripUngroundedPrimaryClaims } from './primary-claim.ts';
 import { consortIsCoherent } from './consort.ts';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -1303,6 +1304,12 @@ export async function buildDigest(
         .join('\n');
       if (!src.trim()) continue;
       withheld.push(...withholdUngroundedComparators(study, src));
+      // v0.62.3: "1° EP" / "primary endpoint" only when the sources say which
+      // endpoint was primary; otherwise drop the label, keep the content.
+      const relabeled = stripUngroundedPrimaryClaims(study as Parameters<typeof stripUngroundedPrimaryClaims>[0], src);
+      if (relabeled.length > 0) {
+        console.warn(`  [grounding] ${study.slug ?? study.name}: removed an unsourced "primary" label (${relabeled.join(', ')})`);
+      }
       if (study.discussed_trials && study.discussed_trials.length > 0) {
         const { kept, dropped: unsourced } = groundedTrialNames(study.discussed_trials, src);
         if (unsourced.length > 0) {
