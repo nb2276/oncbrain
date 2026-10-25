@@ -258,3 +258,16 @@ describe('v0.62.5 review round 2 (adversarial)', () => {
     expect(slug('1/ ASCO 2025 NIVOPOSTOP, then ASTRO 2026 RTOG')).toBeNull();
   });
 });
+
+describe('v0.62.5 review round 3', () => {
+  const slug = (t: string) => detectConference(t, { defaultYear: 2026 })?.slug ?? null;
+  it('ASH: uppercase acronym required, guideline guard case-insensitive', () => {
+    expect(slug('ASH 2025 Clinical Practice Guidelines')).toBeNull();
+    expect(slug('ash 2025 volcanic')).toBeNull();
+    expect(slug('ASH 2025 abstract 1')).toBe('ash-2025');
+  });
+  it('a later colon citation does not erase the meeting a source leads with', () => {
+    expect(slug('ASTRO 2026 oral; cf. ESMO 2023: trial data')).toBe('astro-2026');
+    expect(slug('ASCO Genitourinary Cancers Symposium 2026; Prior: ASCO 2025: PEACE-1')).toBe('ascogu-2026');
+  });
+});

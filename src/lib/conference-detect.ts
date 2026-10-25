@@ -52,6 +52,9 @@ type Series = {
   // trial's meeting ("Positive phase III ASCO 2025, NIVOPOSTOP"). ASTRO and
   // ESTRO keep their pre-v0.62.5 unrestricted form.
   brandingOnly?: boolean;
+  // Require the acronym itself in uppercase while the rest of the regex (the
+  // guideline guards) stays case-insensitive. JS has no inline case flag.
+  acronymUpper?: boolean;
 };
 
 // Registry. Flagship annual meetings carry host signals; the ASCO subspecialty
@@ -141,7 +144,9 @@ const SERIES: Series[] = [
     hosts: ['ash.confex.com'],
     // Case-SENSITIVE acronym+year: lowercase "ash" is an ordinary word.
     prose: [/\bASH\s+Annual\s+Meeting\b/i],
-    acronymYear: /(?<![-/–—])\bASH\s+(20[1-3]\d)\b(?!\s*[-–—/]\s*20\d\d)(?![;,.–—-]?\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|guideline\s+updates?|recommendations?|endorsements?|consensus|statements?|reports?|opinions?|scales?|frameworks?|magnitude)\b)/,
+    acronymYear: /(?<![-/–—])\bASH\s+(20[1-3]\d)\b(?!\s*[-–—/]\s*20\d\d)(?![;,.–—-]?\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|guideline\s+updates?|recommendations?|endorsements?|consensus|statements?|reports?|opinions?|scales?|frameworks?|magnitude)\b)/i,
+    // The acronym must be uppercase ("ash" is a word); the guards stay case-insensitive.
+    acronymUpper: true,
     brandingOnly: true,
   },
   {
@@ -263,6 +268,7 @@ function acronymYearHit(s: Series, text: string): { year: number; at: number } |
   const flags = s.acronymYear.flags.includes('g') ? s.acronymYear.flags : s.acronymYear.flags + 'g';
   for (const m of text.matchAll(new RegExp(s.acronymYear.source, flags))) {
     const at = m.index ?? 0;
+    if (s.acronymUpper && text.slice(at, at + s.acronym.length) !== s.acronym.toUpperCase()) continue;
     if (s.brandingOnly) {
       const lineStart = text.lastIndexOf('\n', at - 1) + 1;
       const leading = !/[A-Za-z]/.test(text.slice(lineStart, at));
@@ -326,9 +332,12 @@ export function detectConference(
   // / • ESMO 2025: NIVOPOSTOP"). When only prose speaks and a branding-form
   // mention competes with a DIFFERENT meeting, nothing says which is this
   // source's own: abstain, as study-meeting.ts does across sources.
+  // Only when the list LEADS with a branded item: a source that names its own
+  // meeting first ("ASTRO 2026 oral; cf. ESMO 2023: ...") keeps it.
   if (candidates.every((c) => c.priority === PRIORITY.prose)) {
     const slugs = new Set(candidates.map((c) => c.hit.slug));
-    if (slugs.size > 1 && candidates.some((c) => c.branding)) return null;
+    const earliest = candidates.reduce((a, b) => (b.at < a.at ? b : a));
+    if (slugs.size > 1 && earliest.branding) return null;
   }
   let best = candidates[0]!;
   for (const c of candidates) {
