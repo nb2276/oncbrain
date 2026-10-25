@@ -19,6 +19,11 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   NCT and DOI. A cluster that also holds tweets or Telegram papers is left
   whole, since nothing says which paper they belong to. Slugs stay within the
   64-character limit when a collision suffix is added.
+- **Known limitation:** a split paper's type (study report / review / talk)
+  comes from its curator note and title words, not a model call. A
+  meta-analysis, retrospective review or systematic review stays a study card;
+  an unusual title can still be misread. It only applies when Phase 1 merged
+  library papers, which the split then undoes.
 
 ## [0.62.3] - 2026-10-25
 
