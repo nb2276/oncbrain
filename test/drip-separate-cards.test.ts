@@ -6,41 +6,60 @@ import { splitDripClusters, buildDigest, paperIdToSyntheticTweetId } from '../sr
 const P = paperIdToSyntheticTweetId;
 
 describe('splitDripClusters', () => {
+  const info = (title: string, extra: { note?: string; site?: string } = {}) => ({ title, note: extra.note ?? null, site: extra.site ?? null });
   const drip = new Map([
-    [P(1), 'Surface mould brachytherapy: the BC Cancer experience'],
-    [P(2), 'CT-based flap brachytherapy for facial NMSC'],
-    [P(3), 'Skin surface brachytherapy dose survey'],
+    [P(1), info('Surface mould brachytherapy: the BC Cancer experience', { site: 'skin' })],
+    [P(2), info('CT-based flap brachytherapy for facial NMSC', { site: 'skin' })],
+    [P(3), info('Skin surface brachytherapy dose survey', { site: 'skin' })],
   ]);
-  const cluster = (ids: number[], slug = 'hdr-skin-brachy') => ({
-    slug,
-    name: 'HDR skin brachytherapy series',
-    disease_site: 'skin',
+  const cluster = (ids: number[], extra: Partial<{ slug: string; content_type: 'study_report' | 'review' | 'presentation'; disease_site: string }> = {}) => ({
+    slug: extra.slug ?? 'hdr-skin-brachy-series',
+    name: 'HDR skin brachytherapy: surface mould and flap series',
+    disease_site: extra.disease_site ?? 'skin',
     tweet_ids: ids,
-    content_type: 'study_report' as const,
+    content_type: extra.content_type ?? ('study_report' as const),
   });
 
-  it('splits a cluster of drip papers into one cluster each', () => {
+  it('splits an all-drip cluster into one card per paper, each named from its own title', () => {
     const out = splitDripClusters([cluster([P(1), P(2), P(3)])], drip);
     expect(out.map((c) => c.tweet_ids)).toEqual([[P(1)], [P(2)], [P(3)]]);
-    expect(out[1]!.name).toBe('CT-based flap brachytherapy for facial NMSC');
-    expect(out.every((c) => c.disease_site === 'skin')).toBe(true);
+    expect(out.map((c) => c.name)).toEqual([...drip.values()].map((d) => d.title)); // no "series" name left
     expect(new Set(out.map((c) => c.slug)).size).toBe(3);
   });
 
-  it('keeps tweets and Telegram papers with the first drip paper', () => {
-    const out = splitDripClusters([cluster([42, P(1), P(9), P(2)])], drip);
-    expect(out.map((c) => c.tweet_ids)).toEqual([[42, P(1), P(9)], [P(2)]]);
+  it('a merged "review" becomes study reports; a review-titled paper stays a review; a talk is a talk', () => {
+    const d = new Map([
+      [P(1), info('Surface mould series: the BC experience')],
+      [P(2), info('Skin brachytherapy: a review of the literature')],
+      [P(3), info('Skin brachy talk', { note: 'Slide deck from a talk (presentation), not a study report.' })],
+      [P(4), info('GEC-ESTRO ACROP recommendations in skin brachytherapy')],
+    ]);
+    const out = splitDripClusters([cluster([P(1), P(2), P(3), P(4)], { content_type: 'review' })], d);
+    expect(out.map((c) => c.content_type)).toEqual(['study_report', 'review', 'presentation', 'study_report']);
+  });
+
+  it('files each split paper under its own site', () => {
+    const d = new Map([[P(1), info('Breast paper', { site: 'breast' })], [P(2), info('Prostate paper', { site: 'prostate' })]]);
+    const out = splitDripClusters([cluster([P(1), P(2)], { disease_site: 'breast' })], d);
+    expect(out.map((c) => c.disease_site)).toEqual(['breast', 'prostate']);
+  });
+
+  it('leaves a cluster mixing drip papers with tweets or Telegram papers whole', () => {
+    const c = cluster([42, P(1), P(9), P(2)]);
+    expect(splitDripClusters([c], drip)).toEqual([c]);
   });
 
   it('leaves clusters with zero or one drip paper alone', () => {
-    const cs = [cluster([42, P(9)], 'a'), cluster([P(1), 43], 'b')];
+    const cs = [cluster([42, P(9)], { slug: 'a' }), cluster([P(1), 43], { slug: 'b' })];
     expect(splitDripClusters(cs, drip)).toEqual(cs);
   });
 
-  it('never reuses a slug already on the date', () => {
-    const titles = new Map([[P(1), 'Same title'], [P(2), 'Same title']]);
-    const out = splitDripClusters([cluster([P(1), P(2)], 'same-title')], titles);
-    expect(out.map((c) => c.slug)).toEqual(['same-title', 'same-title-2']);
+  it('a collision suffix never pushes a slug past 64 characters', () => {
+    const long = 'A'.repeat(10) + ' ' + 'word '.repeat(20);
+    const d = new Map([[P(1), info(long)], [P(2), info(long)]]);
+    const out = splitDripClusters([cluster([P(1), P(2)])], d);
+    expect(out.every((c) => /^[a-z0-9][a-z0-9-]{0,63}$/.test(c.slug))).toBe(true);
+    expect(new Set(out.map((c) => c.slug)).size).toBe(2);
   });
 });
 

@@ -12,8 +12,13 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   the drip releases same-topic papers together because it follows folder order.
   After Phase 1, a card holding two or more `ingest:local` papers keeps the
   first (with any tweet, slide or Telegram paper that came with it) and every
-  other drip paper becomes its own card, named from its title, in the same
-  disease site (`splitDripClusters`).
+  other drip paper becomes its own card (`splitDripClusters`). Each card is
+  named from its own title, filed under the site enrichment gave that paper
+  (drip nights mix sites), and typed per paper: Phase 1 calls a pile of
+  studies a "review", and inheriting that would strip each study's verdict,
+  NCT and DOI. A cluster that also holds tweets or Telegram papers is left
+  whole, since nothing says which paper they belong to. Slugs stay within the
+  64-character limit when a collision suffix is added.
 
 ## [0.62.3] - 2026-10-25
 

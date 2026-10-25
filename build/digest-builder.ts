@@ -288,6 +288,8 @@ function papersToDigestInput(papers: Paper[], db?: Database.Database): DigestInp
     source_type: 'paper' as const,
     id: p.id,
     local_drip: db ? isLocalDripPaper(db, p.id) : false,
+    // data/obsidian/papers/<site>/<file>.pdf: the site enrichment filed it under.
+    drip_site: p.pdf_path?.match(/^data\/obsidian\/papers\/([a-z0-9-]+)\//)?.[1] ?? null,
     pmid: p.pmid,
     title: p.title,
     authors: parseJsonStringArray(p.authors_json, 'name'),
