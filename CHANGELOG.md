@@ -2,6 +2,21 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.62.5] - 2026-10-25
+
+### Fixed
+- **"ASCO 2026" in a tweet now tags the meeting.** Only ASTRO and ESTRO
+  recognised the plain "acronym + year" form; ASCO, ESMO, AACR, SABCS and ASH
+  needed a hashtag or the full meeting name, so the ROADS tweet ("ASCO 2026
+  Final Results") arrived untagged and lost its ASCO tag once meetings became
+  per-study (v0.62.2). The form is guarded for all seven: a guideline word
+  within two words of the year ("ESMO 2024 Clinical Practice Guidelines"), a
+  joined society name (GEC-ESTRO, ESMO-ESTRO, AUA/ASTRO) and a parenthetical
+  citation ("NIVOPOSTOP (ASCO 2025)") are not the meeting. ASH is
+  case-sensitive. Measured on all 246 sources: 3 detections change, all newly
+  tagged and all correct; nothing loses a tag. Detection runs at ingest, so
+  existing tags are unchanged.
+
 ## [0.62.4] - 2026-10-25
 
 ### Fixed

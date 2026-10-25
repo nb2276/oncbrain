@@ -54,7 +54,7 @@ const SERIES: Series[] = [
     acronym: 'ASCO',
     hashtags: [/#ASCO(20\d\d|\d{2})\b/i],
     hosts: ['meetings.asco.org', 'meetinglibrary.asco.org', 'conferences.asco.org', 'abstracts.asco.org'],
-    prose: [/\bASCO\s+Annual\s+Meeting\b/i],
+    prose: [/\bASCO\s+Annual\s+Meeting\b/i, /(?<![-/(])\bASCO\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/i],
   },
   {
     key: 'ascogu',
@@ -78,7 +78,7 @@ const SERIES: Series[] = [
     acronym: 'ESMO',
     hashtags: [/#ESMO(20\d\d|\d{2})\b/i],
     hosts: ['oncologypro.esmo.org'],
-    prose: [/\bESMO\s+(?:Congress|Annual\s+Meeting)\b/i],
+    prose: [/\bESMO\s+(?:Congress|Annual\s+Meeting)\b/i, /(?<![-/(])\bESMO\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/i],
   },
   {
     key: 'astro',
@@ -91,7 +91,7 @@ const SERIES: Series[] = [
     // than "ASTRO Annual Meeting", so match the acronym+year form too. The
     // required whitespace + trailing year keeps "AUA/ASTRO guidelines" (year, if
     // any, sits BEFORE the acronym) from mis-tagging.
-    prose: [/\bASTRO\s+Annual\s+Meeting\b/i, /\bASTRO\s+20[1-3]\d\b/i],
+    prose: [/\bASTRO\s+Annual\s+Meeting\b/i, /(?<![-/(])\bASTRO\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/i],
   },
   {
     key: 'estro',
@@ -105,7 +105,7 @@ const SERIES: Series[] = [
     // source text. The acronym+year form catches it; the required whitespace +
     // year keeps GEC-ESTRO / ESMO-ESTRO / "(ESTRO) guidelines" (no adjacent
     // year) from mis-tagging as the congress.
-    prose: [/\bESTRO\s+Congress\b/i, /\bESTRO\s+20[1-3]\d\b/i],
+    prose: [/\bESTRO\s+Congress\b/i, /(?<![-/(])\bESTRO\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/i],
   },
   {
     key: 'aacr',
@@ -113,7 +113,7 @@ const SERIES: Series[] = [
     acronym: 'AACR',
     hashtags: [/#AACR(20\d\d|\d{2})\b/i],
     hosts: ['meetings.aacr.org'],
-    prose: [/\bAACR\s+Annual\s+Meeting\b/i],
+    prose: [/\bAACR\s+Annual\s+Meeting\b/i, /(?<![-/(])\bAACR\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/i],
   },
   {
     key: 'ash',
@@ -121,7 +121,8 @@ const SERIES: Series[] = [
     acronym: 'ASH',
     hashtags: [/#ASH(20\d\d|\d{2})\b/i],
     hosts: ['ash.confex.com'],
-    prose: [/\bASH\s+Annual\s+Meeting\b/i],
+    // Case-SENSITIVE acronym+year: lowercase "ash" is an ordinary word.
+    prose: [/\bASH\s+Annual\s+Meeting\b/i, /\bASH\s+20[1-3]\d\b(?!\s+(?:[\w-]+\s+){0,2}?(?:guidelines?|updates?|recommendations?|endorsements?|consensus|statements?))/],
   },
   {
     key: 'sabcs',
@@ -129,7 +130,7 @@ const SERIES: Series[] = [
     acronym: 'SABCS',
     hashtags: [/#SABCS(20\d\d|\d{2})\b/i],
     hosts: ['sabcs.org'],
-    prose: [/\bSan\s+Antonio\s+Breast\s+Cancer\s+Symposium\b/i],
+    prose: [/\bSan\s+Antonio\s+Breast\s+Cancer\s+Symposium\b/i, /\bSABCS\s+20[1-3]\d\b/i],
   },
 ];
 

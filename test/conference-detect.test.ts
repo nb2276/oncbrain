@@ -198,3 +198,27 @@ describe('detectConferenceFromTexts', () => {
     expect(detectConferenceFromTexts([null, 'just a note', undefined])).toBeNull();
   });
 });
+
+describe('acronym + year prose for every flagship meeting (v0.62.5)', () => {
+  const slug = (t: string) => detectConference(t, { defaultYear: 2026 })?.slug ?? null;
+  it('names the meeting', () => {
+    expect(slug('🚨🚨 ASCO 2026 Final Results Randomized trial')).toBe('asco-2026'); // ROADS: missed before
+    expect(slug('ESMO 2025: Randomized Phase III Trial of ADT')).toBe('esmo-2025');
+    expect(slug('AACR 2026 plenary')).toBe('aacr-2026');
+    expect(slug('SABCS 2025 GS1-01')).toBe('sabcs-2025');
+    expect(slug('ASH 2025 abstract 1')).toBe('ash-2025');
+    expect(slug('ASCO 2025 annual meeting')).toBe('asco-2025');
+  });
+  it('a guideline, a joined society name, or a parenthetical citation is not the meeting', () => {
+    for (const t of [
+      'ASCO 2024 guideline update on PMRT',
+      'per the ASCO 2023 Guidelines',
+      'ESMO 2024 Clinical Practice Guidelines',
+      'ESMO-ESTRO 2026 consensus',
+      'GEC-ESTRO 2018 recommendations',
+      'AUA/ASTRO 2024 guideline',
+      '2/ NIVOPOSTOP (ASCO 2025)\nPost-op nivo',
+      'ash 2025 volcanic',
+    ]) expect(slug(t), t).toBeNull();
+  });
+});
