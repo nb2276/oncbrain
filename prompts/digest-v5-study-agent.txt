@@ -238,6 +238,10 @@ Hard rules for `primary_endpoint`:
 - ABSTAIN → null for reviews, single-arm / observational studies, meta-analyses
   with no single stated primary, or abstract-only sources with no primary endpoint.
   A guessed primary is worse than none.
+- "PRIMARY" IS A DESIGN CLAIM. Write "1° EP", "primary endpoint" or "Primary:"
+  ANYWHERE on the card (details, sections, prose) only when the source states
+  which endpoint was primary. A tweet reporting "rPFS HR 0.55" has not said rPFS
+  was primary; name the endpoint without the label.
 - Report HONESTLY: if the primary was NOT met, `stat_detail` says so (e.g.
   "HR 1.55, ns" / "did not meet OS"). Never cherry-pick a positive secondary.
 
@@ -395,7 +399,7 @@ Rules for `significance_by_specialty`:
   "name": "{{STUDY_NAME}}",
   "tldr": "1 sentence ≤25 words, headline number first. Do NOT restate the trial name — it is shown directly above the TL;DR. e.g.: 'mPFS 14.2 vs 9.8mo HR 0.62 favoring Lu-PSMA in 2L mCRPC.'",
   "details": [
-    "📊 1° EP: ...",
+    "📊 <headline endpoint>: ...",
     "📐 HR 0.62 (95% CI 0.48-0.79), p<0.001",
     "🔍 phase III open-label, N=831, stratified by prior taxane",
     {

@@ -2,6 +2,25 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.62.3] - 2026-10-25
+
+### Fixed
+- **A card calls an endpoint "primary" only when its source does.** The Phase 2
+  output template opened every card with a `📊 1° EP: ...` bullet, so the model
+  labelled the headline endpoint "primary" whether or not the source said which
+  endpoint the trial was powered on. The eval judge capped three straight runs
+  at 5.0 for it (ARANOTE: "1° EP rPFS" from a tweet that only reports rPFS),
+  and 11 published cards carried the same unsourced claim (TALAPRO-3,
+  OptiTROP-Lung05, EORTC 22033, ...). The template slot is now neutral, the
+  prompt says "primary" is a design claim that needs a source, and a build-time
+  check (`src/lib/primary-claim.ts`, inside `buildDigest`, so the eval runs it
+  too) removes an unsourced label while keeping the content and numbers. A
+  sentence saying the primary is unstated ("no stated primary endpoint", "not
+  clear whether rPFS was primary") is the model being honest and is left alone.
+- `build/backfill-primary-labels.ts` relabelled the 11 published cards; only
+  the label words changed.
+- Eval: 8.4 and 8.2 PASS (from 5.0, 5.0, 5.0), no hallucinations flagged.
+
 ## [0.62.2] - 2026-10-25
 
 ### Fixed
