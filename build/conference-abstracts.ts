@@ -180,7 +180,8 @@ function syntheticMsgId(url: string, doi: string | null, date: string): number {
 /** Re-queue failed cacheOnly-portal links whose abstract is now cached. */
 function retryUncachedFailures(db: ReturnType<typeof openDb>): number {
   const rows = db
-    .prepare("SELECT id, raw_target FROM inbox_items WHERE enrichment_status = 'failed_permanent' AND type = 'paper'")
+    // Only failures caused by the missing cache, not a card that parsed and failed.
+    .prepare("SELECT id, raw_target FROM inbox_items WHERE enrichment_status = 'failed_permanent' AND type = 'paper' AND enrichment_error LIKE '%isn''t fetched yet%'")
     .all() as Array<{ id: number; raw_target: string }>;
   let n = 0;
   for (const r of rows) {
@@ -254,7 +255,7 @@ function fetchThroughBrowser(args: Args): void {
   const db = openDb();
   // A link forwarded before its abstract was cached failed permanently ("not
   // fetched yet"). Now that it is cached, put it back in the queue.
-  const retried = retryUncachedFailures(db);
+  const retried = args.dryRun ? 0 : retryUncachedFailures(db);
   if (retried) console.log(`  re-queued ${retried} forwarded link(s) that had failed for want of this cache`);
   if (!args.stage) {
     console.log(`conf:abstracts --fetch — ${saved.length} saved. Stage them with --stage, or forward the links.`);
