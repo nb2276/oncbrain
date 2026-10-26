@@ -2,6 +2,31 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.63.0] - 2026-10-25
+
+### Added
+- **ESMO abstracts.** ESMO's presentation site (cslide.ctimeetingtech.com)
+  answers a server fetch with an AWS bot challenge, so the pipeline cannot read
+  it the way it reads ASTRO's portal. The curator's own browser can:
+  `npm run conf:abstracts -- --meeting=esmo --fetch --numbers=<file|list>`
+  drives it through Aside, reads each abstract's card once and saves it to
+  `data/.cache/conference-abstracts/esmo<year>/<number>.json`. The new ESMO
+  adapter is cache-only: enrichment parses that file and never touches the
+  site, so the 1am run doesn't need a browser. An abstract is keyed by meeting
+  and number (the same abstract under the oral and poster listings is one
+  paper), filed on the day it was presented, tagged "ESMO Congress <year>",
+  and keeps Background / Methods / Results / Conclusions / trial ID while
+  dropping funding and disclosures. A forwarded ESMO link with nothing cached
+  fails with the command to run. Published like the ASTRO portal abstracts
+  (the v0.60 curator decision).
+- **The drip takes URLs, with a priority and a file date.** `--stage` queues
+  fetched abstracts on the ingest:local drip: late-breakers and orals first,
+  then posters, then ePosters / trials in progress, all ahead of the PDF
+  library. A queued item can carry its own file date, so trade-press coverage
+  files on the day its abstract was presented and clusters with it.
+- "Clinical trial identification" (ESMO's label for a trial's own NCT) is a
+  registration cue; no existing source uses the phrase.
+
 ## [0.62.5] - 2026-10-25
 
 ### Fixed

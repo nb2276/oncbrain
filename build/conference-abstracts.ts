@@ -10,6 +10,12 @@
 //       nothing is ingested. The curator confirms by replying to the bot with
 //       exactly "<abstract link> <doi>", which ingests the abstract with its
 //       DOI and retires the watch.
+//   npm run conf:abstracts -- --meeting=esmo --fetch --numbers=<file|2613O,LBA4,...> [--edition=esmo2026] [--stage] [--priority=N]
+//       v0.63, cacheOnly portals (ESMO): the site blocks server fetches, so the
+//       curator's browser (Aside) reads each abstract once and saves it to
+//       data/.cache/conference-abstracts/. --stage queues each saved abstract
+//       on the ingest:local drip: LBAs/orals 3, posters 2, ePosters/TiP 1 by
+//       default (the PDF library is 0), or one --priority for all.
 //   npm run conf:abstracts -- --ingest --url=<abstract link> [--doi=<doi>] [--date=YYYY-MM-DD] [--quiet] [--dry-run]
 //       Queue one confirmed abstract into the inbox (then `npm run enrich:inbox`).
 //       --quiet skips only the per-item "Got it" reply (a bulk backfill), never
@@ -23,15 +29,18 @@
 
 import 'dotenv/config';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { openDb, listDoiWatch, saveInboxItem, getCuratorChatId } from '../src/lib/db.ts';
+import { openDb, listDoiWatch, saveInboxItem, getCuratorChatId, enqueueLocalIngest } from '../src/lib/db.ts';
+import { execFileSync } from 'node:child_process';
+import { abstractPriority, buildAsideScript, listingUrl, listingsFor, parseAsideOutput, toCached } from '../src/lib/esmo-fetch.ts';
 import { ssrfSafeFetchText } from '../src/lib/ssrf-fetch.ts';
 import { sendMessage } from '../src/lib/telegram-ingest.ts';
 import { normalizeDoi } from '../src/lib/doi.ts';
 import {
   ADAPTERS,
   adapterForUrl,
+  esmoCacheKey,
   planNotifications,
   rankListingMatches,
   watchedForMeeting,
@@ -61,10 +70,15 @@ type Args = {
   url?: string;
   doi?: string;
   date?: string;
+  fetch: boolean;
+  stage: boolean;
+  numbers?: string;
+  edition?: string;
+  priority: number | null; // null: by abstract type (abstractPriority)
 };
 
 function parseArgs(argv: string[]): Args {
-  const a: Args = { index: false, match: false, notify: false, ingest: false, dryRun: false, quiet: false, meeting: 'astro' };
+  const a: Args = { index: false, match: false, notify: false, ingest: false, dryRun: false, quiet: false, meeting: 'astro', fetch: false, stage: false, priority: null };
   for (const arg of argv) {
     if (arg === '--index') a.index = true;
     else if (arg === '--match') a.match = true;
@@ -76,6 +90,11 @@ function parseArgs(argv: string[]): Args {
     else if (arg.startsWith('--url=')) a.url = arg.slice(6);
     else if (arg.startsWith('--doi=')) a.doi = arg.slice(6);
     else if (arg.startsWith('--date=')) a.date = arg.slice(7);
+    else if (arg === '--fetch') a.fetch = true;
+    else if (arg === '--stage') a.stage = true;
+    else if (arg.startsWith('--numbers=')) a.numbers = arg.slice(10);
+    else if (arg.startsWith('--edition=')) a.edition = arg.slice(10);
+    else if (arg.startsWith('--priority=')) a.priority = Number.parseInt(arg.slice(11), 10) || 0;
   }
   return a;
 }
@@ -157,10 +176,76 @@ function syntheticMsgId(url: string, doi: string | null, date: string): number {
   return -(1 + (h.readUInt32BE(0) % 2_000_000_000));
 }
 
+const FETCH_BATCH = 6; // one aside repl script per batch, inside its 120 s budget
+
+function readNumbers(spec: string): string[] {
+  const raw = existsSync(spec) ? readFileSync(spec, 'utf8') : spec;
+  return [...new Set(raw.split(/[\s,]+/).map((x) => x.trim()).filter(Boolean))];
+}
+
+/** v0.63: read cacheOnly-portal abstracts through the curator's browser. */
+function fetchThroughBrowser(args: Args): void {
+  if (!args.numbers) throw new Error('--fetch needs --numbers=<file or comma list>');
+  const edition = args.edition ?? `esmo${new Date().getFullYear()}`;
+  if (!/^esmo\d{4}$/.test(edition)) throw new Error(`--edition must look like esmo2026, got ${edition}`);
+  const numbers = readNumbers(args.numbers);
+  const todo = numbers.filter((n) => {
+    const key = esmoCacheKey(new URL(listingUrl(edition, 'confcal', n)));
+    return key && !existsSync(resolve(process.cwd(), `data/.cache/conference-abstracts/${key}.json`));
+  });
+  console.log(`conf:abstracts --fetch — ${numbers.length} number(s), ${numbers.length - todo.length} already cached, fetching ${todo.length}`);
+  const saved: string[] = [];
+  const missing: string[] = [];
+  for (let i = 0; i < todo.length && !args.dryRun; i += FETCH_BATCH) {
+    const batch = todo.slice(i, i + FETCH_BATCH);
+    let out = '';
+    try {
+      out = execFileSync('aside', ['repl', buildAsideScript(edition, batch)], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 170_000 });
+    } catch (err) {
+      out = String((err as { stdout?: string }).stdout ?? '');
+      console.warn(`  batch ${batch.join(',')}: aside failed (${(err as Error).message.split('\n')[0]})`);
+    }
+    const parsed = parseAsideOutput(out);
+    for (const raw of parsed.cards) {
+      const key = esmoCacheKey(new URL(raw.url));
+      if (!key) continue;
+      writeJson(resolve(process.cwd(), `data/.cache/conference-abstracts/${key}.json`), toCached(raw));
+      saved.push(raw.number);
+    }
+    missing.push(...parsed.missing, ...batch.filter((n) => !parsed.cards.some((c) => c.number === n) && !parsed.missing.includes(n) && !parsed.completed));
+    console.log(`  ${Math.min(i + FETCH_BATCH, todo.length)}/${todo.length}: saved ${parsed.cards.map((c) => c.number).join(', ') || '-'}${parsed.missing.length ? `; not found ${parsed.missing.join(', ')}` : ''}`);
+  }
+  if (missing.length) console.log(`  not found on the site (no abstract card): ${missing.join(', ')}`);
+  if (!args.stage) {
+    console.log(`conf:abstracts --fetch — ${saved.length} saved. Stage them with --stage, or forward the links.`);
+    return;
+  }
+  const db = openDb();
+  let staged = 0;
+  for (const n of numbers) {
+    const url = listingUrl(edition, listingsFor(n)[0]!, n);
+    const key = esmoCacheKey(new URL(url));
+    const cached = key ? resolve(process.cwd(), `data/.cache/conference-abstracts/${key}.json`) : '';
+    if (!cached || !existsSync(cached)) continue;
+    const canonical = (JSON.parse(readFileSync(cached, 'utf8')) as { url?: string }).url ?? url;
+    if (args.dryRun) {
+      console.log(`  [dry-run] would stage ${n} → ${canonical}`);
+      continue;
+    }
+    if (enqueueLocalIngest(db, { path: canonical, kind: 'url', priority: args.priority ?? abstractPriority(n) }).created) staged++;
+  }
+  console.log(`conf:abstracts --fetch — ${saved.length} saved, ${staged} staged on the drip (priority ${args.priority ?? 'by abstract type'})`);
+}
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const adapter = ADAPTERS.find((a) => a.id === args.meeting);
   if (!adapter) throw new Error(`unknown meeting "${args.meeting}" (known: ${ADAPTERS.map((a) => a.id).join(', ')})`);
+  if (args.fetch) {
+    if (!adapter.cacheOnly) throw new Error(`--fetch is for browser-only portals (${ADAPTERS.filter((a) => a.cacheOnly).map((a) => a.id).join(', ')})`);
+    fetchThroughBrowser(args);
+    return;
+  }
 
   if (args.ingest) {
     if (!args.url || !adapterForUrl(args.url)) throw new Error('--ingest needs --url=<a portal abstract link>');

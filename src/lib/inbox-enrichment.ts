@@ -12,6 +12,7 @@
 
 import {
   adapterForUrl,
+  abstractCachePath,
   conferenceAbstractHash,
   pairedPortalDoi,
   NotAnAbstractError,
@@ -995,7 +996,19 @@ async function resolveConferenceAbstract(
   note: string | null,
 ): Promise<NewPaper> {
   let html: string;
-  try {
+  if (adapter.cacheOnly) {
+    // v0.63: the portal blocks server fetches; read what the curator's browser
+    // saved (conf:abstracts --fetch). Missing = not fetched yet, which no retry
+    // tonight will fix.
+    const rel = abstractCachePath(url);
+    try {
+      html = readFileSync(resolvePath(process.cwd(), rel ?? ''), 'utf8');
+    } catch {
+      throw new MetaNotFoundError(
+        `that ${adapter.id.toUpperCase()} abstract isn't fetched yet — run: npm run conf:abstracts -- --meeting=${adapter.id} --fetch --numbers=<abstract number>`,
+      );
+    }
+  } else try {
     html = await ssrfSafeFetchText(url, { allowedHostSuffixes: [adapter.host] });
   } catch (err) {
     const msg = (err as Error).message;
@@ -1042,7 +1055,7 @@ async function resolveConferenceAbstract(
     source_url: url,
     title: a.title,
     authors_json: JSON.stringify(a.authors.map((name) => ({ name }))),
-    journal: a.meeting ? `${a.meeting} Annual Meeting` : 'Conference abstract',
+    journal: adapter.journal ? adapter.journal(a.meeting) : a.meeting ? `${a.meeting} Annual Meeting` : 'Conference abstract',
     pub_date: a.presented_on,
     abstract: `${header}\n\n${a.abstract}`,
     bookmark_date,

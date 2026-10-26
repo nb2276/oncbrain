@@ -2,7 +2,7 @@
 
 Curated, AI-summarized digest of oncology meeting research and published studies. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets), alongside newly published journal papers. One oncologist curates the sources; an AI pipeline summarizes each study with comparative-literature context and a standard-of-care verdict.
 
-**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.62.5
+**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.63.0
 
 ## Architecture
 
@@ -91,7 +91,13 @@ npm run conf:abstracts -- --match            # rank portal abstracts against eve
 npm run conf:abstracts -- --ingest --url=<portal abstract link> --doi=<doi> [--date=YYYY-MM-DD] [--quiet]
 ```
 
-The nightly cron runs `--match --notify`: for each watched DOI with a likely portal match it DMs you once, with the exact line to reply with (`<abstract link> <doi>`). Nothing is ingested until you reply. That reply ingests the abstract with its DOI, files it on its presentation date, and retires the watch. Forwarding a portal abstract link on its own works too. Only ASTRO's portal has an adapter so far; adding another meeting is one adapter entry in `src/lib/conference-abstract.ts`.
+The nightly cron runs `--match --notify`: for each watched DOI with a likely portal match it DMs you once, with the exact line to reply with (`<abstract link> <doi>`). Nothing is ingested until you reply. That reply ingests the abstract with its DOI, files it on its presentation date, and retires the watch. Forwarding a portal abstract link on its own works too. ASTRO's portal and ESMO's presentation site have adapters. ESMO blocks server fetches, so its abstracts are read once through your browser (Aside) and ingested from a local cache:
+
+```bash
+npm run conf:abstracts -- --meeting=esmo --fetch --numbers=numbers.txt --stage   # Aside reads each abstract; --stage queues them on the nightly drip
+```
+
+Adding another meeting is one adapter entry in `src/lib/conference-abstract.ts`.
 
 ### Path C: local PDFs (no Telegram)
 
@@ -247,7 +253,7 @@ npm run test:watch # watch mode
 npx astro check    # type check (0 errors expected)
 ```
 
-2705 tests across 138 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, meeting-portal abstracts and confirm-only matching, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, reader-selectable specialty relevance plus its per-specialty "why it matters", the v0.33-v0.36 effect-size marks (parser, geometry, corpus ruler, and the satori share-card renderer), and the v0.53-v0.55 trial-lineage and grounding work (the update/new-card/duplicate decision table, its authorization gate, comparator grounding, and the identity rules that decide when one card may replace another).
+2717 tests across 139 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, meeting-portal abstracts and confirm-only matching, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, reader-selectable specialty relevance plus its per-specialty "why it matters", the v0.33-v0.36 effect-size marks (parser, geometry, corpus ruler, and the satori share-card renderer), and the v0.53-v0.55 trial-lineage and grounding work (the update/new-card/duplicate decision table, its authorization gate, comparator grounding, and the identity rules that decide when one card may replace another).
 
 A vitest `globalSetup` builds `dist/` once before collection when it's missing or older than any build input (`src/`, `public/`, `data/digests/`, `data/overrides/`, the Astro config, `package.json`), so the dist-reading tests pass cold, after a branch switch, and after a new digest lands.
 

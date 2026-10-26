@@ -48,7 +48,18 @@ export type ConferenceAdapter = {
   /** Listing paths that together enumerate the meeting's abstracts. */
   listingPaths: string[];
   isAbstractUrl(url: URL): boolean;
+  /** Parse the fetched page, or for a cacheOnly adapter the cached JSON. */
   parse(html: string, url: string): ConferenceAbstract;
+  /**
+   * v0.63: the portal blocks server fetches (a bot challenge), so the abstract
+   * is read from data/.cache/conference-abstracts/<cacheKey>, written once by
+   * the curator's browser (conf:abstracts --fetch). Enrichment never fetches.
+   */
+  cacheOnly?: boolean;
+  /** Stable identity within the host (default: the URL path's trailing numeric id). */
+  identity?(url: URL): string;
+  /** papers.journal for an abstract (default: "<meeting> Annual Meeting"). */
+  journal?(meeting: string | null): string;
   /** Highest page number a listing's first page links to. */
   lastListingPage(html: string): number;
   parseListing(html: string): ListingEntry[];
@@ -189,7 +200,91 @@ const ASTRO: ConferenceAdapter = {
   },
 };
 
-export const ADAPTERS: ConferenceAdapter[] = [ASTRO];
+// ---- ESMO (cslide.ctimeetingtech.com) ------------------------------------
+//
+// ESMO's presentation site answers a server fetch with an AWS WAF JavaScript
+// challenge, never the abstract, so this adapter is cacheOnly: the curator's
+// browser (Aside) renders each listing once and conf:abstracts --fetch saves
+// the card as JSON (EsmoCached). One listing URL per abstract number:
+//   https://cslide.ctimeetingtech.com/esmo2026/attendee/confcal/presentation/list?q=2613O
+// (confcal = orals/LBAs, confcal_1 = posters, confcal_2 = ePosters).
+
+export type EsmoCached = {
+  number: string;
+  title: string;
+  session: string | null;
+  /** ISO date of the session. */
+  date: string | null;
+  speaker: string | null;
+  sections: Array<{ label: string; text: string }>;
+  url: string;
+};
+
+const ESMO_PATH = /^\/(esmo(\d{4}))\/attendee\/confcal(?:_\d)?\/presentation\/list\/?$/i;
+const ESMO_NUMBER = /^(?:LBA\d{1,3}|CN\d{1,3}|\d{1,5}(?:O|RO|P|eP|MO|TiP|PD|YO|IN))$/i;
+// Sections the published abstract keeps; legal entity, funding and author
+// disclosures are not abstract content.
+const ESMO_KEEP = /^(background|methods|results|conclusions?|clinical trial identification)$/i;
+
+export function esmoNumber(u: URL): string | null {
+  const q = (u.searchParams.get('q') ?? '').trim();
+  return ESMO_NUMBER.test(q) ? q.toUpperCase().replace(/EP$/, 'eP').replace(/TIP$/, 'TiP') : null;
+}
+
+export function esmoCacheKey(u: URL): string | null {
+  const m = u.pathname.match(ESMO_PATH);
+  const n = esmoNumber(u);
+  return m && n ? `${m[1]!.toLowerCase()}/${n}` : null;
+}
+
+const ESMO: ConferenceAdapter = {
+  id: 'esmo',
+  host: 'cslide.ctimeetingtech.com',
+  doiPrefix: '10.1016/j.annonc.',
+  listingPaths: [],
+  cacheOnly: true,
+  isAbstractUrl: (u) => esmoCacheKey(u) !== null,
+  identity: (u) => esmoCacheKey(u)!,
+  journal: (meeting) => meeting ?? 'ESMO Congress',
+  parse(raw, url) {
+    let c: EsmoCached;
+    try {
+      c = JSON.parse(raw) as EsmoCached;
+    } catch {
+      throw new NotAnAbstractError('cached ESMO abstract is not valid JSON');
+    }
+    const year = new URL(url).pathname.match(ESMO_PATH)?.[2] ?? null;
+    const kept = (c.sections ?? []).filter((x) => ESMO_KEEP.test(x.label.trim()) && x.text.trim());
+    const abstract = kept.map((x) => `${x.label.trim()}: ${x.text.replace(/\s+/g, ' ').trim()}`).join('\n');
+    if (!c.title || abstract.length < 200 || abstract.length > 8000) {
+      throw new NotAnAbstractError('cached ESMO card has no abstract body (an invited talk or discussant slot?)');
+    }
+    const own = ownRegistrations(abstract);
+    return {
+      title: c.title.replace(/^\s*[A-Za-z0-9]+\s+-\s+/, '').trim(),
+      number: c.number,
+      session: c.session,
+      presented_on: c.date && /^\d{4}-\d{2}-\d{2}$/.test(c.date) ? c.date : null,
+      meeting: year ? `ESMO Congress ${year}` : 'ESMO Congress',
+      presenter: c.speaker,
+      authors: c.speaker ? [c.speaker.replace(/\s*\(.*\)\s*$/, '')] : [],
+      abstract,
+      nct: own.length === 1 ? own[0]! : null,
+    };
+  },
+  lastListingPage: () => 1,
+  parseListing: () => [],
+};
+
+export const ADAPTERS: ConferenceAdapter[] = [ASTRO, ESMO];
+
+/** Where a cacheOnly adapter's abstract lives (repo-relative), or null. */
+export function abstractCachePath(raw: string): string | null {
+  const a = adapterForUrl(raw);
+  if (!a?.cacheOnly) return null;
+  const key = esmoCacheKey(new URL(raw));
+  return key ? `data/.cache/conference-abstracts/${key}.json` : null;
+}
 
 export function adapterForUrl(raw: string): ConferenceAdapter | null {
   let u: URL;
@@ -215,7 +310,8 @@ export function isConferenceAbstractUrl(raw: string): boolean {
  */
 export function conferenceAbstractHash(raw: string): string {
   const u = new URL(raw);
-  const id = u.pathname.replace(/\/$/, '').match(/-(\d+)$/)?.[1] ?? u.pathname;
+  const adapter = adapterForUrl(raw);
+  const id = adapter?.identity?.(u) ?? u.pathname.replace(/\/$/, '').match(/-(\d+)$/)?.[1] ?? u.pathname;
   return createHash('sha256').update(`conf-abstract:${u.hostname.toLowerCase()}#${id}`).digest('hex');
 }
 
