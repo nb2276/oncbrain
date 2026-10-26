@@ -221,14 +221,14 @@ export type EsmoCached = {
 };
 
 const ESMO_PATH = /^\/(esmo(\d{4}))\/attendee\/confcal(?:_\d)?\/presentation\/list\/?$/i;
-const ESMO_NUMBER = /^(?:LBA\d{1,3}|CN\d{1,3}|\d{1,5}(?:O|RO|P|eP|MO|TiP|PD|YO|IN))$/i;
+const ESMO_NUMBER = /^(?:LBA\d{1,3}|CN\d{1,3}|\d{1,5}(?:O|RO|P|eP|MO|TiP|eTiP|PD|YO|IN))$/i;
 // Sections the published abstract keeps; legal entity, funding and author
 // disclosures are not abstract content.
-const ESMO_KEEP = /^(background|methods|results|conclusions?|clinical trial identification)$/i;
+const ESMO_KEEP = /^(background|methods|trial design|results|conclusions?|clinical trial identification)$/i;
 
 export function esmoNumber(u: URL): string | null {
   const q = (u.searchParams.get('q') ?? '').trim();
-  return ESMO_NUMBER.test(q) ? q.toUpperCase().replace(/EP$/, 'eP').replace(/TIP$/, 'TiP') : null;
+  return ESMO_NUMBER.test(q) ? q.toUpperCase().replace(/ETIP$/, 'eTiP').replace(/TIP$/, 'TiP').replace(/EP$/, 'eP') : null;
 }
 
 export function esmoCacheKey(u: URL): string | null {

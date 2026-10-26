@@ -189,6 +189,8 @@ function fetchThroughBrowser(args: Args): void {
   const edition = args.edition ?? `esmo${new Date().getFullYear()}`;
   if (!/^esmo\d{4}$/.test(edition)) throw new Error(`--edition must look like esmo2026, got ${edition}`);
   const numbers = readNumbers(args.numbers);
+  const rejected = numbers.filter((n) => !esmoCacheKey(new URL(listingUrl(edition, 'confcal', n))));
+  if (rejected.length) console.log(`  not an ESMO abstract number, skipped: ${rejected.join(', ')}`);
   const todo = numbers.filter((n) => {
     const key = esmoCacheKey(new URL(listingUrl(edition, 'confcal', n)));
     return key && !existsSync(resolve(process.cwd(), `data/.cache/conference-abstracts/${key}.json`));
@@ -196,6 +198,8 @@ function fetchThroughBrowser(args: Args): void {
   console.log(`conf:abstracts --fetch — ${numbers.length} number(s), ${numbers.length - todo.length} already cached, fetching ${todo.length}`);
   const saved: string[] = [];
   const missing: string[] = [];
+  const noAbstract: string[] = [];
+  const unfetched: string[] = [];
   for (let i = 0; i < todo.length && !args.dryRun; i += FETCH_BATCH) {
     const batch = todo.slice(i, i + FETCH_BATCH);
     let out = '';
@@ -209,13 +213,28 @@ function fetchThroughBrowser(args: Args): void {
     for (const raw of parsed.cards) {
       const key = esmoCacheKey(new URL(raw.url));
       if (!key) continue;
-      writeJson(resolve(process.cwd(), `data/.cache/conference-abstracts/${key}.json`), toCached(raw));
+      const cached = toCached(raw);
+      // Cache only what the adapter will accept: a card with no abstract body
+      // (an invited talk, a discussant slot) would be skipped by every later
+      // --fetch and fail at enrichment.
+      try {
+        adapterForUrl(raw.url)!.parse(JSON.stringify(cached), raw.url);
+      } catch (err) {
+        noAbstract.push(`${raw.number} (${(err as Error).message})`);
+        continue;
+      }
+      writeJson(resolve(process.cwd(), `data/.cache/conference-abstracts/${key}.json`), cached);
       saved.push(raw.number);
     }
-    missing.push(...parsed.missing, ...batch.filter((n) => !parsed.cards.some((c) => c.number === n) && !parsed.missing.includes(n) && !parsed.completed));
-    console.log(`  ${Math.min(i + FETCH_BATCH, todo.length)}/${todo.length}: saved ${parsed.cards.map((c) => c.number).join(', ') || '-'}${parsed.missing.length ? `; not found ${parsed.missing.join(', ')}` : ''}`);
+    missing.push(...parsed.missing);
+    // Not reported at all (the browser run died, or a line was truncated): not
+    // fetched, which is different from "not on the site". A re-run retries it.
+    unfetched.push(...batch.filter((n) => !parsed.cards.some((c) => c.number === n) && !parsed.missing.includes(n)));
+    console.log(`  ${Math.min(i + FETCH_BATCH, todo.length)}/${todo.length}${parsed.missing.length ? `; not found ${parsed.missing.join(', ')}` : ''}`);
   }
-  if (missing.length) console.log(`  not found on the site (no abstract card): ${missing.join(', ')}`);
+  if (missing.length) console.log(`  not found on the site: ${missing.join(', ')}`);
+  if (noAbstract.length) console.log(`  found but no abstract body, not cached: ${noAbstract.join('; ')}`);
+  if (unfetched.length) console.log(`  not fetched (re-run to retry): ${unfetched.join(', ')}`);
   if (!args.stage) {
     console.log(`conf:abstracts --fetch — ${saved.length} saved. Stage them with --stage, or forward the links.`);
     return;
@@ -227,6 +246,8 @@ function fetchThroughBrowser(args: Args): void {
     const key = esmoCacheKey(new URL(url));
     const cached = key ? resolve(process.cwd(), `data/.cache/conference-abstracts/${key}.json`) : '';
     if (!cached || !existsSync(cached)) continue;
+    // No file date: a drip release files on its release night (see
+    // resolveConferenceAbstract), so a batch never rebuilds a past meeting day.
     const canonical = (JSON.parse(readFileSync(cached, 'utf8')) as { url?: string }).url ?? url;
     if (args.dryRun) {
       console.log(`  [dry-run] would stage ${n} → ${canonical}`);

@@ -43,6 +43,8 @@ describe('ESMO URLs', () => {
     expect(conferenceAbstractHash(URL_2613O.replace('2613O', '2613o'))).toBe(conferenceAbstractHash(URL_2613O));
     expect(conferenceAbstractHash(URL_2613O.replace('2613O', '2614O'))).not.toBe(conferenceAbstractHash(URL_2613O));
     expect(esmoCacheKey(new URL(URL_2613O.replace('2613O', '2756EP')))).toBe('esmo2026/2756eP');
+    expect(esmoCacheKey(new URL(URL_2613O.replace('2613O', '1234etip')))).toBe('esmo2026/1234eTiP');
+    expect(esmoCacheKey(new URL(URL_2613O.replace('2613O', '1343TIP')))).toBe('esmo2026/1343TiP');
     expect(abstractCachePath(URL_2613O)).toBe('data/.cache/conference-abstracts/esmo2026/2613O.json');
   });
 });
@@ -62,6 +64,18 @@ describe('ESMO cache parse', () => {
     expect(a.abstract).not.toMatch(/Disclosure|Funding|Legal entity/);
     expect(esmo.journal!(a.meeting)).toBe('ESMO Congress 2026');
   });
+  it('a trial-in-progress keeps its Trial design section', () => {
+    const tip = JSON.stringify({
+      ...JSON.parse(FIXTURE),
+      number: '1343TiP',
+      sections: [
+        { label: 'Background', text: 'b'.repeat(150) },
+        { label: 'Trial design', text: 'Randomised 1:1 to SBRT or observation; primary endpoint PFS. ' + 't'.repeat(150) },
+      ],
+    });
+    expect(esmo.parse(tip, URL_2613O).abstract).toMatch(/\nTrial design: Randomised 1:1/);
+  });
+
   it('refuses a card with no abstract body (an invited talk)', () => {
     const talk = JSON.stringify({ ...JSON.parse(FIXTURE), sections: [] });
     expect(() => esmo.parse(talk, URL_2613O)).toThrow(NotAnAbstractError);
@@ -117,9 +131,17 @@ describe('drip queue: URLs, priority, file date', () => {
     const inbox = listInboxItemsForEnrichment(db);
     const lba = inbox.find((i) => i.raw_target === 'https://x/lba')!;
     expect(lba.bookmark_date).toBe('2026-10-24'); // file date wins
-    expect(JSON.parse(lba.attachments_json!)).toEqual({ quiet: true }); // no local_path: not a library PDF
+    expect(JSON.parse(lba.attachments_json!)).toEqual({ quiet: true, drip: true }); // no local_path: not a library PDF
     expect(inbox.find((i) => i.raw_target === 'https://x/poster')!.bookmark_date).toBe('2026-10-26');
   });
+  it('re-staging a waiting item updates its priority', () => {
+    const db = openDb(':memory:');
+    enqueueLocalIngest(db, { path: 'https://x/a', kind: 'url', priority: 1 });
+    enqueueLocalIngest(db, { path: 'https://x/b', kind: 'url', priority: 2 });
+    enqueueLocalIngest(db, { path: 'https://x/a', kind: 'url', priority: 3 });
+    expect(releaseLocalIngest(db, { limit: 1, date: '2026-10-26', chatId: 1 }).map((r) => r.path)).toEqual(['https://x/a']);
+  });
+
   it('rejects a malformed file date', () => {
     expect(() => enqueueLocalIngest(openDb(':memory:'), { path: 'u', kind: 'url', fileDate: '24/10/2026' })).toThrow();
   });
@@ -134,7 +156,7 @@ describe('a cached ESMO abstract through enrichment', () => {
   });
   afterEach(() => rmSync(dirname(cache), { recursive: true, force: true }));
 
-  it('ingests from the cache (no network), files on the presentation date, tags ESMO', async () => {
+  it('a drip release ingests from the cache (no network), files on its RELEASE night, tags ESMO', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
     mkdirSync(dirname(cache), { recursive: true });
     writeFileSync(cache, FIXTURE.replace('"date": "2026-10-25"', '"date": "2037-10-25"'));
@@ -146,12 +168,24 @@ describe('a cached ESMO abstract through enrichment', () => {
     expect(r.enriched).toBe(1);
     expect(fetchSpy).not.toHaveBeenCalled();
     const p = db.prepare('SELECT bookmark_date, journal, conference_slug, fetched_via, abstract FROM papers').get() as Record<string, string>;
-    expect(p.bookmark_date).toBe('2037-10-25');
+    // Never backdated: a nightly batch on a past meeting day would rebuild the whole day.
+    expect(p.bookmark_date).toBe('2037-10-30');
     expect(p.journal).toBe('ESMO Congress 2037');
     expect(p.conference_slug).toBe('esmo-2037');
     expect(p.fetched_via).toBe('conference_abstract');
     expect(p.abstract).toMatch(/^ESMO Congress 2037 abstract 2613O · Proffered paper 1/);
     fetchSpy.mockRestore();
+  });
+
+  it('a forwarded ESMO link (not a drip release) still files on its presentation date', async () => {
+    mkdirSync(dirname(cache), { recursive: true });
+    writeFileSync(cache, FIXTURE.replace('"date": "2026-10-25"', '"date": "2037-10-25"'));
+    const db = openDb(':memory:');
+    const { saveInboxItem } = await import('../src/lib/db.ts');
+    saveInboxItem(db, { type: 'paper', raw_target: url, raw_message_text: url, telegram_msg_id: 5, bookmark_date: '2037-10-30' });
+    const { runEnrichmentLoop } = await import('../src/lib/inbox-enrichment.ts');
+    await runEnrichmentLoop(db, listInboxItemsForEnrichment(db));
+    expect((db.prepare('SELECT bookmark_date FROM papers').get() as { bookmark_date: string }).bookmark_date).toBe('2037-10-25');
   });
 
   it('a link with nothing cached fails with the command to run', async () => {

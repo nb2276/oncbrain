@@ -102,6 +102,9 @@ function collectPdfs(paths: string[]): string[] {
   return out;
 }
 
+// A URL item prints as itself; a path relative to the repo.
+const shown = (p: string) => (/^https?:\/\//.test(p) ? p : relative(process.cwd(), p));
+
 const today = () => new Date().toLocaleDateString('en-CA');
 
 function main(): void {
@@ -113,7 +116,7 @@ function main(): void {
     const pending = rows.filter((r) => r.released_at === null);
     for (const r of rows) {
       const state = r.released_date ? `released ${r.released_date} → inbox #${r.inbox_item_id}` : 'staged';
-      console.log(`  #${r.id} [${r.kind}] ${state}  ${relative(process.cwd(), r.path)}`);
+      console.log(`  #${r.id} [${r.kind}] ${state}  ${shown(r.path)}`);
     }
     console.log(`ingest:local — ${rows.length} staged in total, ${pending.length} waiting`);
     return;
@@ -123,12 +126,12 @@ function main(): void {
     const date = args.date ?? today();
     if (args.dryRun) {
       const waiting = listLocalIngest(db).filter((r) => r.released_at === null).slice(0, args.limit);
-      for (const r of waiting) console.log(`  [dry-run] would release ${relative(process.cwd(), r.path)}`);
+      for (const r of waiting) console.log(`  [dry-run] would release ${shown(r.path)}`);
       console.log(`ingest:local --release — would release up to ${args.limit} for ${date}; nothing written`);
       return;
     }
     const released = releaseLocalIngest(db, { limit: args.limit, date, chatId: getCuratorChatId(db) });
-    for (const r of released) console.log(`  released ${relative(process.cwd(), r.path)} → inbox #${r.inbox_item_id}`);
+    for (const r of released) console.log(`  released ${shown(r.path)} → inbox #${r.inbox_item_id}`);
     const left = listLocalIngest(db).filter((r) => r.released_at === null).length;
     console.log(`ingest:local --release — ${released.length} released for ${date}, ${left} still staged`);
     return;

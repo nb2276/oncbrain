@@ -1814,6 +1814,10 @@ export function enqueueLocalIngest(
     .prepare('INSERT OR IGNORE INTO local_ingest_queue (path, kind, note, queued_at, priority, file_date) VALUES (?, ?, ?, ?, ?, ?)')
     .run(entry.path, entry.kind, entry.note ?? null, Date.now(), entry.priority ?? 0, entry.fileDate ?? null);
   if (r.changes > 0) return { id: Number(r.lastInsertRowid), created: true };
+  // Re-staging an item still waiting updates its priority (a released one is history).
+  if (entry.priority != null) {
+    db.prepare('UPDATE local_ingest_queue SET priority = ? WHERE path = ? AND released_at IS NULL').run(entry.priority, entry.path);
+  }
   const row = db.prepare('SELECT id FROM local_ingest_queue WHERE path = ?').get(entry.path) as { id: number };
   return { id: row.id, created: false };
 }
@@ -1870,9 +1874,10 @@ export function releaseLocalIngest(
         // an ordinary paper link: the enrichment loop resolves it like a
         // forwarded one.
         attachments_json:
+          // drip: true marks every queue release (DM-only, see isDripPaper).
           row.kind === 'url'
-            ? JSON.stringify({ quiet: true })
-            : JSON.stringify({ kind: 'pdf', local_path: row.path, quiet: true, figure_structured: false }),
+            ? JSON.stringify({ quiet: true, drip: true })
+            : JSON.stringify({ kind: 'pdf', local_path: row.path, quiet: true, figure_structured: false, drip: true }),
         telegram_msg_id: LOCAL_INGEST_MSG_ID_BASE - row.id,
         telegram_chat_id: opts.chatId,
         bookmark_date: row.file_date ?? opts.date,
@@ -1889,7 +1894,30 @@ export function releaseLocalIngest(
   })();
 }
 
-/** v0.62.1: true when a paper came in through the ingest:local drip (its inbox item carries a local_path). */
+/**
+ * v0.63: true for anything the drip queue released (a library PDF, a cached
+ * meeting abstract, a trade-press article): announced to the curator by DM
+ * only. Released weeks after the fact, none of it is the day's news.
+ */
+export function isDripPaper(db: Database.Database, paperId: number): boolean {
+  const row = db
+    .prepare('SELECT i.attachments_json AS a FROM papers p JOIN inbox_items i ON i.id = p.inbox_item_id WHERE p.id = ?')
+    .get(paperId) as { a: string | null } | undefined;
+  if (!row?.a) return false;
+  try {
+    const a = JSON.parse(row.a) as { local_path?: unknown; drip?: unknown };
+    return a.drip === true || typeof a.local_path === 'string';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * v0.62.1: true when a paper is a library PDF from the ingest:local drip (its
+ * inbox item carries a local_path). Narrower than isDripPaper on purpose: only
+ * library PDFs are split one card per paper; a meeting abstract and its
+ * trade-press coverage should stay one card.
+ */
 export function isLocalDripPaper(db: Database.Database, paperId: number): boolean {
   const row = db
     .prepare(

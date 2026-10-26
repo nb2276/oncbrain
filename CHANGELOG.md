@@ -19,11 +19,18 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   dropping funding and disclosures. A forwarded ESMO link with nothing cached
   fails with the command to run. Published like the ASTRO portal abstracts
   (the v0.60 curator decision).
-- **The drip takes URLs, with a priority and a file date.** `--stage` queues
-  fetched abstracts on the ingest:local drip: late-breakers and orals first,
-  then posters, then ePosters / trials in progress, all ahead of the PDF
-  library. A queued item can carry its own file date, so trade-press coverage
-  files on the day its abstract was presented and clusters with it.
+- **The drip takes URLs, with a priority.** `--stage` queues fetched
+  abstracts on the ingest:local drip: late-breakers and orals first, then
+  posters, then ePosters / trials in progress, all ahead of the PDF library.
+  Re-staging a waiting item updates its priority. A drip release files on its
+  **release night**, never backdated to the presentation day: backdating a
+  nightly batch onto already-published meeting days would rebuild the whole
+  day each night (one ESMO day alone holds ~30 abstracts, past the claude-cli
+  session limit). A forwarded ESMO link still files on its presentation date.
+  Every drip release (library PDF, abstract or trade-press article) is
+  announced by curator DM only (`isDripPaper`); only library PDFs are split
+  one card per paper, so an abstract and its coverage can share a card.
+  Trials in progress keep their "Trial design" section.
 - "Clinical trial identification" (ESMO's label for a trial's own NCT) is a
   registration cue; no existing source uses the phrase.
 

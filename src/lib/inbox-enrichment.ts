@@ -462,6 +462,14 @@ function localPdfSource(item: InboxItem): { path: string | null; refused: boolea
   }
 }
 
+function isDripRelease(item: InboxItem): boolean {
+  try {
+    return (JSON.parse(item.attachments_json ?? '{}') as { drip?: unknown }).drip === true;
+  } catch {
+    return false;
+  }
+}
+
 function isPdfInboxItem(item: InboxItem): boolean {
   if (!item.attachments_json) return false;
   try {
@@ -1043,8 +1051,12 @@ async function resolveConferenceAbstract(
   const days = a.presented_on
     ? (Date.parse(item.bookmark_date) - Date.parse(a.presented_on)) / 86_400_000
     : NaN;
+  // A drip release files on its release night, never backdated: backdating a
+  // nightly batch onto already-published meeting days queued a rebuild of the
+  // whole day each night, and one ESMO day alone holds ~30 abstracts, past the
+  // claude-cli session limit (v0.63 review).
   const bookmark_date =
-    a.presented_on && days >= 0 && days <= PRESENTED_DATE_WINDOW_DAYS ? a.presented_on : item.bookmark_date;
+    !isDripRelease(item) && a.presented_on && days >= 0 && days <= PRESENTED_DATE_WINDOW_DAYS ? a.presented_on : item.bookmark_date;
   // The confirm reply is a command, not a note: nothing of it is the curator's voice.
   const curator_note = pairing
     ? null
