@@ -1,18 +1,226 @@
 {
   "date": "2026-10-25",
-  "conference": null,
-  "generated_at": 1792950403778,
+  "conference": {
+    "slug": "esmo-2026",
+    "name": "ESMO Congress 2026"
+  },
+  "generated_at": 1793002434698,
   "digest": {
-    "top_line": "Guix HDR custom surface molds: 5-yr actuarial LC 98% (99% primary, 87% recurrent) for facial BCC/SCC, N=136, the most mature of today's skin brachy series.",
-    "tldr": "All five studies cover HDR surface/mould brachy for skin cancer, mostly face and head and neck, with high LC across series: 92% at 1 yr (Gogineni), 84.9% at 2 yr (Casey), 98% at 5 yr (Guix). Follow-up is short outside Guix, and the ABS survey shows no consensus on margins, dose or dosimetric constraints.",
+    "top_line": "SARON: consolidation RT to all sites after induction SACT in synchronous oligometastatic driver-negative NSCLC, mOS 31.0 vs 28.0 mo, HR 0.99 (0.63-1.55); PFS improved, magnitude unreported.",
+    "tldr": "SARON adds a null OS readout to LCT on a chemo backbone. It randomised after induction, so it doesn't test upfront RT. Skin: four uncontrolled single-institution HDR mould/flap series (LC 84.9-98% where reported), and an ABS survey shows no dosimetric consensus. Bladder: reTURBT in ypT0 pts declining RC, 24-mo EFS 87.6%, in a self-selected cohort.",
     "sites": [
       {
         "disease_site": "skin",
-        "intro": "Single-institution HDR surface/mould series plus an ABS practice survey; none has a randomised comparator vs surgery or EBRT.",
+        "intro": "HDR surface brachy for facial and pinna BCC/SCC: high LC across retrospective and prospective single-institution series, heterogeneous dose/fractionation, no randomised comparator vs EBRT or surgery.",
         "studies": [
           {
-            "name": "Fractionated HDR brachytherapy moulds for carcinoma of the pinna (Allan)",
-            "tldr": "13 superficial pinna carcinomas, HDR mould 45 Gy/8 fx over 5 days: complete resolution in all, no recurrence or late toxicity at minimum 18 mo f/u.",
+            "name": "HDR brachytherapy with custom-made surface molds for facial skin carcinomas",
+            "tldr": "5y actuarial LC 98% overall (99% primary, 87% recurrent) in 136 facial BCC/SCC treated with HDR Ir-192 surface molds, no severe late complications.",
+            "details": [
+              "🔍 Prospective single-institution series (Barcelona), 136 consecutive facial BCC/SCC, treated 1992-1997",
+              "🔍 Min f/u 12 mo; median f/u not reported in source",
+              {
+                "text": "🔍 Population",
+                "subdetails": [
+                  "102 BCC (75%), 34 SCC (25%)",
+                  "73 primary (54%), 63 recurrent after prior surgery/electroresection/Mohs (46%)",
+                  "Mean age 67 (range 23-91); 84 women (62%)",
+                  "Gross tumor in place for all but small lesions; margins positive in 128",
+                  "29 (21%) ≤2 cm, 93 (69%) 2-5 cm, 14 (10%) >5 cm",
+                  "No nodal or distant mets at diagnosis"
+                ],
+                "source_tier": "figure"
+              },
+              {
+                "text": "💊 RT technique",
+                "subdetails": [
+                  "HDR Ir-192 (Microselectron); 117 custom PMMA molds, 19 Brock applicators",
+                  "Mold: 5 mm PMMA bolus layer, 3-7 parallel catheters 5-10 mm apart",
+                  "6000-6500 cGy in 33-36 fx of 180 cGy, prescribed at 5 mm depth",
+                  "Lesions ≥4 cm: boost 1800 cGy/10 fx after 3-wk rest, total 7500-8000 cGy",
+                  "5 mm lead sheet in mold near the eye; TLD + autoradiograph QA before treatment"
+                ],
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 Local control by group",
+                "table": {
+                  "columns": [
+                    "Group",
+                    "N",
+                    "Local recurrences",
+                    "5y actuarial LC"
+                  ],
+                  "rows": [
+                    [
+                      "All pts",
+                      "136",
+                      "3",
+                      "98%"
+                    ],
+                    [
+                      "Primary tumors",
+                      "73",
+                      "1",
+                      "99%"
+                    ],
+                    [
+                      "Recurrent tumors",
+                      "63",
+                      "2",
+                      "87%"
+                    ],
+                    [
+                      "Previously untreated >4 cm",
+                      "16",
+                      "1",
+                      "91%"
+                    ]
+                  ]
+                },
+                "source_tier": "figure"
+              },
+              "📊 All pts complete responders; no regional or distant metastases",
+              "📐 Dose variation at 5 mm depth within 5% of prescription; TLD agreed with plan within 5%",
+              {
+                "text": "📊 Good/excellent cosmesis by timepoint (SOMA-LENT)",
+                "table": {
+                  "columns": [
+                    "Timepoint",
+                    "Good/excellent cosmesis"
+                  ],
+                  "rows": [
+                    [
+                      "2 wk",
+                      "38%"
+                    ],
+                    [
+                      "3 mo",
+                      "92%"
+                    ],
+                    [
+                      "6 mo",
+                      "98%"
+                    ]
+                  ]
+                },
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 Acute: erythema G1 in 117, G2 in 19; G1 ulceration at 6 wk in 14 (10%), all healed by 4 mo",
+                "source_tier": "figure"
+              },
+              "📊 No severe late complications; unfavorable cosmesis confined to recurrent tumors >4 cm",
+              {
+                "text": "🔗 Authors' cited comparators (from source)",
+                "subdetails": [
+                  "Lovett 1990 EBRT series (339 pts): LC 95% superficial X-ray, 77% electrons, 66% megavoltage photons",
+                  "Lovett: overall complication rate 5.8% (18/310), incl. soft tissue and bone necrosis",
+                  "Daly Ir-192 interstitial implants (165 pts): LC 96%, severe late effects 18%",
+                  "Ashby 1989 wax/paraffin radon molds (642 pts): LC 96.8%"
+                ],
+                "source_tier": "figure"
+              },
+              "⚠️ No comparator arm; cross-series comparisons are era- and selection-confounded",
+              "⚠️ Recurrent-tumor 87% LC reported at 5y in Results but at 4y in Discussion",
+              "⚠️ Lesion size reporting internally inconsistent (mean 3.8 cm, stated range 3.8-8.0 cm)",
+              {
+                "text": "⚠️ 33-36 daily fractions (~7 wk) is a heavy treatment burden for an elderly skin population",
+                "source_tier": "figure"
+              }
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/s0360-3016(99)00547-7",
+            "tweet_ids": [
+              1000000156
+            ],
+            "slug": "guix-hdr-skin-molds-face",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Single-arm single-institution series without a comparator; follow-up minimum only 12 mo with median unreported; comparisons rest on historic EBRT and implant series.",
+              "audience": "Facial BCC/SCC, primary or post-surgical recurrence, node-negative"
+            },
+            "significance": "The RT read is geometry plus fractionation: a custom PMMA mold held dose at 5 mm depth within 5% of prescription over curved facial surfaces, with 180 cGy fractions to 6000-6500 cGy and no severe late effects. Whether that conformality keeps its late-toxicity profile with fewer, larger fractions was not tested here.",
+            "monday_clinic": "In node-negative BCC/SCC on curved facial skin (nose, eyelid, ear) where an electron or orthovoltage field fits poorly, this supports HDR surface-mold brachytherapy as a conformal RT option; it does not inform hypofractionated mold schedules or deeply invasive lesions.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**Prospective single-institution series**, 136 consecutive pts treated 1992-1997 in Barcelona. **Minimum follow-up 12 mo**; median follow-up not reported."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Pathologically confirmed **facial BCC (102) or SCC (34)**, **73 primary and 63 recurrent** after prior local therapy. Gross tumor left in place in most; margins positive in 128. No nodal or distant disease on CT head/neck and chest X-ray."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "HDR Ir-192 via **117 custom PMMA molds** (3-7 parallel catheters, 5 mm bolus layer) or 19 Brock applicators. **6000-6500 cGy in 33-36 fx of 180 cGy** at 5 mm depth; lesions ≥4 cm boosted **1800 cGy/10 fx** after a 3-wk rest to 7500-8000 cGy. Eye shielded with a 5 mm lead sheet in the mold."
+              },
+              {
+                "label": "Results",
+                "body": "All pts complete responders; **3 local recurrences** (1/73 primary, 2/63 recurrent). **5y actuarial LC 98%** overall, **99% primary**, **87% recurrent**; no regional or distant failure."
+              },
+              {
+                "label": "Safety",
+                "body": "Erythema G1 in 117 and G2 in 19; 14 (10%) had G1 ulceration at 6 wk, all healed by 4 mo. Good/excellent cosmesis **98% at 6 mo**; **no severe late complications**."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Primary-tumor LC of **99%** sits alongside the **95%** superficial X-ray result in the Lovett EBRT series and above Lovett's **77%** with electrons. Daly's Ir-192 interstitial implants reached **96%** LC but with **18%** severe late effects, the toxicity gap the mold approach is designed to close."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents node-negative facial BCC/SCC, including lesions on curved surfaces and post-surgical recurrences. Does not represent hypofractionated HDR schedules, nodal disease, or high-risk SCC defined by depth of invasion (not measured)."
+              },
+              {
+                "label": "Limitations",
+                "body": "Dose per fraction (180 cGy) far from modern short-course skin brachy, so the late-effect profile may not transfer. Recurrent-tumor LC timepoint reported inconsistently (5y vs 4y), and cosmesis was graded by the treating team."
+              },
+              {
+                "label": "Discussion",
+                "body": "The contribution is technical: a reproducible, afterloaded surface applicator that conforms to non-flat facial anatomy with a sharp edge gradient. It shows high control with conventional fractionation but does not settle how it compares head-to-head with superficial X-ray, electrons, or Mohs."
+              }
+            ],
+            "interpretation": "This is a technique paper wearing the clothes of an outcomes paper, and it should be read that way. The clinically interesting claim is not that radiotherapy controls facial basal and squamous cell carcinoma; that was established long before this series. The claim is that a custom-built acrylic mold, carrying afterloading catheters over an impression of the patient's own face, can deliver a homogeneous dose at 5 mm depth across curved anatomy (nose, eyelid, ear, preauricular skin) with a sharp falloff at the applicator edge. The dosimetric evidence for that claim is direct and checkable: variation at depth within 5% of prescription, and thermoluminescent readings that matched the plan within 5%. That is the part of the paper most likely to transfer.\n\nThe control figures, 99% at five years for primaries and 87% for recurrences, look excellent, but their footing is softer than they appear. The cohort is single-institution, without a comparator, and follow-up is described only by a 12-month minimum; the at-risk counts at five years are a minority of the starting cohort. The recurrent-tumor control rate is attributed to five years in the Results and four years in the Discussion, and the reported lesion size distribution is internally inconsistent. None of this makes the result wrong, but it means the headline numbers should be held loosely and the comparisons to other series even more loosely.\n\nThe comparisons the authors draw are to Lovett's external-beam series, where superficial X-rays reached 95% and electrons only 77%, and to Daly's interstitial iridium implants, which matched on control at 96% but at the cost of 18% severe late effects. The more defensible reading is that the mold approach plausibly combines implant-level conformality with the noninvasive, low-toxicity profile of superficial X-rays, especially on surfaces where an electron or orthovoltage field cannot sit flat. The cross-series comparison cannot prove superiority: different eras, different case mixes, and different definitions of control.\n\nThe fractionation is the biggest barrier to transfer. Thirty-three to thirty-six fractions of 180 cGy, plus a boost after a three-week break for larger lesions, is a seven-week-plus commitment for a population whose mean age was 67. The authors attribute the absence of severe late complications to the small fraction size, contrasting it with the 300 to 400 cGy fractions in Lovett's series. That explanation is reasonable but untested here, and it cuts against the direction contemporary skin brachytherapy has taken toward short courses. A reader should not assume the late-cosmesis profile carries over to hypofractionated mold treatment; this series simply did not test that.\n\nWhat would make the result wrong? Selection toward lesions likely to do well, unmeasured depth of invasion (the paper states it was not determined), and team-assessed cosmesis could all inflate both control and cosmetic outcomes. What the paper does settle is feasibility: a mold could be made in three working days with two patient visits, sessions took 3 to 8 minutes, and no treatment was interrupted by applicator failure. For a radiation oncologist weighing how to treat a lesion on a curved facial surface, it supports surface-mold HDR as a geometrically sound option; the dose schedule to pair with it is a question this series leaves open.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "A custom PMMA mold held dose at 5 mm depth within 5% of prescription over curved facial anatomy with a sharp edge gradient, giving 99% 5y LC in primaries and no severe late effects at 180 cGy per fraction. It supports molds for non-flat sites; transfer to short-course schedules is untested."
+            },
+            "open_questions": [
+              "Does late cosmesis hold with hypofractionated HDR mold schedules?",
+              "Head-to-head vs superficial X-ray or electrons on curved facial sites",
+              "Durability of control beyond 5 years in recurrent lesions"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": null,
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "HDR brachytherapy skin cancer",
+                "basal cell carcinoma radiotherapy"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 23,
+              "fetched_at": "2026-10-26T08:11:02.243Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 156
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "Fractionated HDR brachytherapy moulds for carcinoma of the pinna",
+            "tldr": "13 pts with superficial pinna carcinoma treated with HDR moulds, 45 Gy/8 fx: complete resolution in all, no recurrences at minimum 18 mo f/u.",
             "details": [
               "🔍 Single-institution series (Christie Hospital), 13 pts treated up to July 1996",
               {
@@ -25,24 +233,27 @@
               },
               "🔍 Lesions confined to pinna skin; dermal ultrasound confirmed no cartilage invasion in all but one",
               {
-                "text": "💊 RT technique: HDR microselectron, single stepping iridium source",
-                "subdetails": [
-                  "Single-plane moulds: 45 Gy surface dose in 8 fx over 5 days",
-                  "Twice-daily on 3 middle days, minimum 6 h interfraction interval",
-                  "Ultrasound-measured full tumour thickness placed inside the 80% isodose surface",
-                  "Sandwich mould (full-thickness pinna, 10 mm plane separation): dose reduced to 42.5 Gy"
-                ],
+                "text": "💊 Single-plane moulds: 45 Gy surface dose in 8 fx over 5 days, HDR microselectron Ir stepping source",
+                "source_tier": "figure"
+              },
+              "🔍 Schedule: 1 fx Mon and Fri, 2 fx/day (≥6 h gap) on the three days between",
+              {
+                "text": "🔍 Mould height chosen so ultrasound-measured tumour depth sits inside the 80% isodose",
                 "source_tier": "figure"
               },
               {
-                "text": "📐 Dose falls to 80% of surface at 1.5-3.5 mm depth depending on source height; gradient ~10% per mm",
+                "text": "📐 80% isodose falls at 1.5 to 3.5 mm depending on source height; gradient about 10% per mm",
                 "source_tier": "figure"
               },
-              "📊 Acute reaction: moderate erythema confined to high-dose area, settled by 6-wk first follow-up",
-              "📊 Complete tumour resolution in all pts; no recurrences, no late complications at minimum 18 mo",
-              "⚠️ Highly selected small series; no comparator arm, no formal toxicity grading reported in source",
-              "⚠️ BED comparison vs other regimens via LQ model; Table 2 row association uncertain in source extraction",
-              "⚠️ Minimum 18 mo f/u is short for late cartilage necrosis and BCC recurrence"
+              {
+                "text": "💊 One double-plane sandwich mould (full-thickness pinna, 10 mm plane separation): dose reduced to 42.5 Gy",
+                "source_tier": "figure"
+              },
+              "📊 Complete tumour resolution in all pts; no recurrences, no late RT complications at minimum 18 mo",
+              "📊 Acute reaction: moderate erythema confined to high-dose area, settled by first f/u visit at 6 wk",
+              "⚠️ No actuarial LC, no cosmesis scoring tool, no per-pt f/u reported",
+              "⚠️ Highly selected small cohort; authors state comparison with other modalities is difficult",
+              "⚠️ BED comparison table (Table 2) values cannot be tied to rows in extracted source"
             ],
             "figures": [],
             "nct": null,
@@ -53,57 +264,60 @@
             "slug": "skin-brachytherapy-hdr-mold-series",
             "verdict": {
               "soc_implication": "early-signal",
-              "rationale": "Single-institution series of 13 highly selected pts, no comparator, short minimum follow-up, ungraded toxicity. Technique description more than outcome evidence.",
-              "audience": "Superficial BCC/SCC of the pinna, cartilage not invaded"
+              "rationale": "Single-institution case series of 13 selected pts, no comparator, 18 mo minimum f/u too short for late cartilage effects; outcomes descriptive only.",
+              "audience": "Superficial BCC/SCC of the pinna, no cartilage invasion"
             },
-            "significance": "The transferable parameter is ultrasound-guided depth prescription: tumour thickness measured to sub-mm (0.84 mm in one case) set the source-to-skin height (5 vs 10 mm) so the 80% isodose covered tumour while sparing cartilage. That steep ~10%/mm gradient is the argument for a mould over electrons when lesions are thinner than a 4 MeV beam's 12 mm 90% depth.",
-            "monday_clinic": "In a small superficial pinna BCC or SCC with cartilage intact on imaging, this supports a custom HDR surface mould as a cartilage-sparing RT option; it does not inform cartilage-invading or full-thickness disease, where the sandwich-mould experience is a single case.",
+            "significance": "The transferable parameter is ultrasound-guided mould height: measuring tumour depth (0.84 mm in one case) lets the 80% isodose cover disease while leaving cartilage outside, which electrons cannot do for lesions thinner than 12 mm. Full-thickness cases needed a sandwich mould at reduced dose (42.5 Gy), so cartilage sparing is the selection criterion.",
+            "monday_clinic": "In superficial BCC or SCC confined to pinna skin without cartilage invasion on ultrasound, this supports an HDR surface mould as a cartilage-sparing RT option; it does not address lesions requiring full-thickness pinna irradiation.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Single-institution case series and technique report from the Christie Hospital, **13 pts** treated up to July 1996. Design not stated as prospective."
+                "body": "Retrospective single-institution series of **13 pts** treated at the Christie Hospital up to July 1996. Technique description with three illustrative cases."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Superficial cancers of the pinna **not invading cartilage** (9 BCC, 3 SCC, 1 intraepidermal). Dermal ultrasound confirmed cartilage intact in all but one."
+                "body": "9 BCC, 3 SCC, 1 intraepidermal carcinoma. **Lesion confined to pinna skin**; dermal ultrasound confirmed **cartilage not invaded** in all but one."
               },
               {
                 "label": "Radiotherapy",
-                "body": "HDR microselectron moulds, **45 Gy in 8 fx over 5 days** for single-plane moulds, prescribed so the full ultrasound-measured tumour depth sits within the **80% isodose**. One full-thickness case used a sandwich mould at **42.5 Gy**; tungsten shielding was added for source heights above 5 mm when needed."
+                "body": "HDR microselectron with single stepping iridium source via custom vacuum-formed mould. **45 Gy in 8 fx over 5 days** prescribed to the surface, mould height set so tumour depth lies within the **80% isodose**. Sandwich mould case reduced to **42.5 Gy**."
               },
               {
                 "label": "Results",
-                "body": "**Complete tumour resolution in all pts**, no recurrences and **no late radiation complications** over a minimum 18 mo follow-up. Acute moderate erythema stayed confined to the high-dose area and settled by the 6-wk visit."
+                "body": "**Complete tumour resolution in all pts**, barely perceptible scar. **No recurrences and no late complications** over minimum 18 mo f/u."
+              },
+              {
+                "label": "Safety",
+                "body": "Moderate cutaneous erythema limited to the high-dose area, settled by the 6 wk visit. No discernible reaction on the contralateral pinna skin."
               },
               {
                 "label": "vs leading data",
-                "body": "The authors position moulds against electrons (unsuitable for lesions thinner than the 12 mm 90% depth of 4 MeV, risking cartilage necrosis), 30 kVp X-rays (hard to make uniform on curved surfaces, bone photoelectric risk) and surgery (amputation or graft, admission). No comparative outcome data are presented."
+                "body": "Authors position moulds against electrons (poor fall-off for thin lesions, cartilage necrosis risk), 30 kVp X-rays (dose inhomogeneity on curved surfaces, limited availability) and surgery (amputation or excision with graft). No head-to-head data."
               },
               {
                 "label": "Applies to",
-                "body": "Represents small superficial pinna carcinomas with cartilage intact, measurable by dermal ultrasound. Does not represent cartilage-invading or bulky full-thickness disease."
+                "body": "Represents small superficial pinna carcinomas with intact cartilage on ultrasound. Does not represent cartilage-invading or deeply infiltrative lesions."
               },
               {
                 "label": "Limitations",
-                "body": "No formal toxicity grading or cosmesis scale; cosmesis was described as excellent by the treating team. The higher late-tissue BED is justified by small volume rather than by measured late outcomes."
+                "body": "Outcomes reported as a blanket statement without per-pt f/u, actuarial LC, or a validated cosmesis scale. Late cartilage toxicity can emerge beyond 18 mo, and the LQ-based BED rationale assumes complete repair between fractions."
               },
               {
                 "label": "Discussion",
-                "body": "The contribution is a **depth-tailored prescription**: ultrasound thickness sets source height, and the steep surface gradient lets dose fall off before cartilage. Whether that holds for larger lesions or longer follow-up is not settled here."
+                "body": "The contribution is technique, not efficacy: ultrasound depth measurement plus tunable source height makes the plan conformal to sub-millimetre tumour thickness. Whether a higher late-tissue BED is tolerated because of the small volume is asserted, not shown."
               }
             ],
-            "interpretation": "This is best read as a technique paper with a small outcome audit attached, not as efficacy evidence. Its durable idea is that the prescription depth for a superficial ear lesion should be measured rather than assumed. By putting transdermal ultrasound in front of mould design, the authors turn tumour thickness into the variable that sets source-to-skin height, and with it the depth of the 80% isodose. In the worked examples, a lesion penetrating 0.84 mm was treated at a 5 mm height, while a thicker BCC reaching the cartilage surface used 10 mm. The cartilage is either partly or wholly outside the high-dose volume, which is the whole point on a structure the authors describe as poorly tolerant of high dose.\n\nThe argument against the alternatives is physical rather than clinical. Electrons are set aside because a pinna lesion is often thinner than 3 mm and laterally as small as 10 mm, well inside the build-up and penumbra behaviour of a low-energy beam. Kilovoltage at 30 kVp has the right depth dose but, in the authors' account, is hard to deliver uniformly over a curved surface and carries a bone risk from photoelectric absorption. Surgery is criticised on cosmesis and the need for admission. None of these comparisons is tested; they are reasons to choose the technique, not evidence that it outperforms the others. A modern reader would add that orthovoltage, electronic brachytherapy and conformal external beam with bolus have all changed since this was written, so the competitive frame is dated.\n\nThe outcome claims deserve calibrated confidence. Thirteen pts, described by the authors as highly selected, with complete resolution, no recurrence and no late complications at a minimum 18 months, is consistent with what one expects from small superficial BCC treated with an adequate dose, and it does not discriminate this technique from others. BCC recurrence and cartilage necrosis are both late events, so the minimum follow-up is the binding limitation. Toxicity was not graded on a named scale and cosmesis was judged by the treating team.\n\nThe fractionation choice rests on an LQ-model BED comparison that, by the authors' own reasoning, accepts a higher late-tissue BED than conventional fractionated regimens on the grounds that the irradiated volume is tiny. That is a reasonable volume argument but it is the exact assumption that longer follow-up would test. The single sandwich-mould case, where full-thickness irradiation was unavoidable and dose was lowered to 42.5 Gy, is where that assumption is weakest and the data thinnest.\n\nWhat the paper leaves a practising radiation oncologist with is a workflow: image the depth, choose the height, keep cartilage outside the 80% surface, and fractionate HDR over a few days. That workflow transfers. The efficacy and late-toxicity numbers do not carry enough weight to choose this over other well-established superficial techniques.",
+            "interpretation": "This paper is best read as a technique report with an outcome footnote rather than as efficacy evidence. Its real argument is physical. Thin cutaneous lesions on the pinna sit directly over avascular cartilage, and the modality chosen has to drop off steeply within a few millimetres. The authors make a coherent case that electrons cannot do this for small fields or thin lesions, that low-energy kilovoltage beams have become hard to source and dose evenly over a curved ear, and that a mould built at a chosen source-to-skin height lets the planner place the 80% isodose just beyond the measured tumour depth. Pairing this with transdermal ultrasound, validated against excised specimens in a separate small group, is what turns the mould from a historical Manchester-system device into a conformal tool.\n\nThe clinical outcome claims deserve much less weight. Thirteen selected pts, all with superficial disease and intact cartilage, is a population in which almost any competent local therapy would control the tumour. Complete resolution and no recurrence at a minimum of 18 months is reassuring but not discriminating, and the paper offers no per-patient follow-up distribution, no actuarial local control, and no structured cosmesis assessment. The excellent cosmesis is an investigator impression.\n\nThe fractionation choice is the part a modern reader should examine most carefully. Moving from low dose rate to HDR, the authors picked 45 Gy in 8 fractions, twice daily on the middle days, and justify it with an LQ comparison against familiar regimens. They concede the late-tissue BED is higher than conventional schedules and argue the tiny irradiated volume makes this acceptable. That is plausible, but late cartilage and skin effects are exactly the events an 18-month window is too short to capture. The one sandwich case, where full-thickness irradiation was unavoidable, received a reduced dose, which reflects the authors' own concern about cartilage tolerance.\n\nWhat the paper changes is narrow: it supports offering a surface mould, or by extension a modern applicator approach with depth-guided prescription, to pts with superficial pinna BCC or SCC who are poor candidates for excision or graft. It does not settle durable control, late toxicity, or how the technique compares with surgery or electrons in matched pts. It would be wrong if late cartilage necrosis or deformity emerged after the reported window, or if the uniformly good outcomes reflected selection rather than technique.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The transferable parameter is ultrasound-guided depth prescription: measured tumour thickness set source height (5 vs 10 mm) so the 80% isodose covered tumour and spared cartilage. The ~10%/mm surface gradient is the case for a mould over electrons on lesions thinner than 3 mm."
+              "radonc": "The transferable parameter is ultrasound-guided mould height: measuring tumour depth (0.84 mm in one case) lets the 80% isodose cover disease while leaving cartilage outside, which electrons cannot do for lesions thinner than 12 mm. Full-thickness cases needed a sandwich mould at reduced dose (42.5 Gy)."
             },
             "open_questions": [
-              "Late cartilage toxicity beyond 18 months with higher late-tissue BED",
-              "Outcomes vs electronic brachytherapy or orthovoltage for pinna lesions",
-              "Safety of full-thickness sandwich moulds in larger series"
+              "Late cartilage toxicity beyond 18 months",
+              "Local control vs surgery or electrons in matched pts"
             ],
             "consort": null,
             "modality": "radiation",
@@ -113,11 +327,12 @@
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "skin cancer brachytherapy"
+                "skin brachytherapy basal cell",
+                "brachytherapy surgery skin cancer"
               ],
               "queries_failed": [],
-              "candidates_returned": 20,
-              "fetched_at": "2026-10-25T17:45:02.875Z",
+              "candidates_returned": 15,
+              "fetched_at": "2026-10-26T08:11:01.168Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [
@@ -129,34 +344,30 @@
             "meeting": null
           },
           {
-            "name": "Skin surface brachytherapy practice patterns survey (Likhacheva)",
-            "tldr": "16 ABS respondents: margins 3-15mm (median 5mm), doses 30 Gy/5fx to 64 Gy/32fx (EQD2 40-65 Gy), no consensus on dosimetric constraints.",
+            "name": "Skin surface brachytherapy practice-pattern survey",
+            "tldr": "16 ABS respondents: gross-disease margin 3-15mm (median 5mm), doses 30 Gy/5fx to 64 Gy/32fx (EQD2 40-65 Gy), no consensus on dosimetric constraints.",
             "details": [
-              "🔍 30-question electronic survey of ABS clinician members; 16 complete returns from ~400 invitations",
-              "🔍 Practices: private, hospital, academic; aggregate experience 8 to 1800 cases",
-              "📊 60% routinely estimate lesion depth by ultrasound before treatment",
-              "📊 Median max prescription depth 5 mm (range 1 to 8 mm)",
-              "📊 Margin on gross disease: range 3-15mm, median 5mm",
+              "🔍 30-question electronic survey of American Brachytherapy Society clinician members",
+              "🔍 ~400 invitations, 16 fully completed surveys returned; 1 incomplete survey excluded",
+              "🔍 Aggregate experience ranged 8 to 1800 cases; >100-case subgroup analyzed separately",
+              "📊 Answers did not differ between experienced and less experienced respondents (p=0.1539)",
               {
-                "text": "📊 CTV margin adjustment",
+                "text": "🔍 Planning parameters reported (BCC / cSCC)",
                 "subdetails": [
-                  "Wider margin by histology: 70% of respondents",
-                  "Squamous histology cited by 41%",
-                  "Diffuse/morpheaform/aggressive BCC cited by 18%",
-                  "Recurrent disease cited by 6%",
-                  "Adjusted by lesion size: 65%"
+                  "Lesion depth estimated by ultrasound pretreatment: 60%",
+                  "Max depth of prescription: median 5 mm (range 1 to 8 mm)",
+                  "Gross-disease margin: range 3-15mm, median 5mm",
+                  "Catheters placed 5 to 10 mm from skin surface by most; none directly on skin",
+                  "Wider CTV margin by histology: 70%; by lesion size: 65%"
                 ]
               },
-              "📊 Hypofractionation preferred; 30 Gy/5fx to 64 Gy/32fx across scenarios (EQD2 40 Gy-65 Gy)",
-              "📊 Pretibial skin: 10 respondents (63%) used 2-3 Gy/fx; daily hypofractionated schedules avoided",
-              "📊 Size cut point for gentler fractionation: median 3 cm, range 2-5 cm",
               {
                 "text": "📐 Dosimetric parameters endorsed for plan evaluation",
                 "table": {
                   "columns": [
                     "Parameter",
                     "All respondents",
-                    ">100 career cases"
+                    ">100 cases in career"
                   ],
                   "rows": [
                     [
@@ -188,29 +399,16 @@
                       "D95",
                       "2 (13%)",
                       "1 (11%)"
-                    ],
-                    [
-                      "D100",
-                      "2 (13%)",
-                      "2 (22%)"
-                    ],
-                    [
-                      "V200",
-                      "2 (13%)",
-                      "2 (22%)"
-                    ],
-                    [
-                      "V120",
-                      "1 (6%)",
-                      "1 (11%)"
                     ]
                   ]
                 }
               },
-              "📐 Max allowable skin dose 125-150% (median 135%) of Rx; CTV coverage 90-100% (median 95%)",
+              "📐 Max allowable skin dose 125-150% (median 135%); CTV coverage 90-100% (median 95%)",
+              "💊 Pretibial skin: 10 respondents (63%) used 2-3 Gy per fraction",
+              "📊 Fractionation cut point by lesion diameter: median 3 cm, range 2-5 cm",
               "⚠️ Eight respondents reported severe acute/late toxicity on lower extremity, especially pretibial skin",
-              "⚠️ Common exclusions: tumor depth >3 mm, perineural invasion, prior RT",
-              "⚠️ n=16 from ~400 invited; self-selected responders, no outcome data, safety claim rests on recall"
+              "⚠️ Avoidance triggers cited: tumor depth over 3 mm, perineural invasion, prior RT",
+              "⚠️ 16 of ~400 responded; self-selected, no outcomes data behind the 'safe' conclusion"
             ],
             "figures": [],
             "nct": null,
@@ -221,61 +419,61 @@
             "slug": "skin-brachy-practice-survey",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Small self-selected survey (16 of ~400 invited) with no outcome measurement; the 'convenient and safe' conclusion is not testable from practice-pattern recall.",
+              "rationale": "Practice survey of 16 self-selected respondents; no efficacy or toxicity endpoints measured, so the authors' 'convenient and safe' conclusion is not testable from this design.",
               "audience": "BCC and cSCC treated with skin surface brachytherapy"
             },
-            "significance": "The usable signal is the pretibial outlier: eight respondents recalled severe toxicity on lower-extremity skin, and 63% de-escalated to 2-3 Gy/fx there. Nose lesions tolerated large fractions with little hesitation, so site, not histology, is where fractionation practice converges. The 3-15mm margin spread shows there is no shared CTV standard to benchmark against.",
-            "monday_clinic": "In a pretibial BCC or cSCC considered for surface brachytherapy, this supports gentler fractionation as community practice; it does not inform schedule choice for facial lesions on outcome grounds.",
+            "significance": "The transferable read is pretibial dosing: 10 respondents (63%) dropped to 2-3 Gy per fraction there, and eight reported severe toxicity on the lower extremity. With max skin dose ranging 125-150% and fractionation cut points spanning 2-5 cm, a reader building a skin HDR program has a variance map, not a constraint set.",
+            "monday_clinic": "For a BCC or cSCC on the pretibial skin, this survey supports treating site as a reason for gentler fractionation; it does not inform lesions deeper than 3 mm or with perineural invasion, which respondents steered away from brachytherapy.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**30-question electronic survey** of American Brachytherapy Society clinician members. **16 complete returns** from approximately 400 invitations; one incomplete survey excluded. Responses also analyzed separately for practitioners with **>100 career cases**."
+                "body": "30-question electronic survey sent to ~400 **American Brachytherapy Society** clinician members. **16** fully completed surveys analyzed; one incomplete survey excluded. Nearly all US respondents, one from Spain."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Respondents nearly all US-based, one from Spain, split across private, hospital and academic practice. Aggregate experience ranged **8 to 1800 cases**. Survey addressed skin surface brachytherapy for **cSCC and BCC**."
+                "body": "Radiation oncologists using skin surface brachytherapy for **cSCC and BCC**. Practice settings spanned academic, hospital-based and private; aggregate experience ranged **8 to 1800 cases**."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Shielded applicators most common, custom molds for large or curved areas; catheters placed 5 to 10 mm from skin, never directly on it. **Hypofractionation preferred**, with clinical-scenario doses from **30 Gy/5fx to 64 Gy/32fx (EQD2 40 Gy-65 Gy)**. Fractions increased for larger targets, with a size cut point of **median 3 cm (range 2-5 cm)**."
+                "body": "Hypofractionation preferred; clinical-scenario doses ranged **30 Gy in 5 fractions to 64 Gy in 32 fractions (EQD2 40 Gy-65 Gy)**. Median max prescription depth **5 mm**; shielded applicators most common, custom molds for large or curved areas. Respondents avoided daily schedules when hypofractionating."
               },
               {
                 "label": "Results",
-                "body": "Margin on gross disease **3-15mm, median 5mm**; 70% widened margins by histology and 65% by size. Max skin dose limit **125-150% (median 135%)**, CTV coverage **90-100% (median 95%)**. No difference between experienced and less experienced responders (p=0.1539)."
+                "body": "Margin on gross disease **3-15mm, median 5mm**. Max skin dose **125-150% (median 135%)** of prescription; CTV coverage **90-100% (median 95%)**. **No consensus on dosimetric constraints**."
               },
               {
                 "label": "Safety",
-                "body": "Eight respondents described **severe acute and late toxicity on the lower extremity, especially pretibial skin**. Three referred pts with non-healing in-field ulcers for hyperbaric oxygen. For pretibial targets, **10 respondents (63%) used 2-3 Gy per fraction**."
+                "body": "Eight respondents described **severe acute and late toxicity on the lower extremity**, especially pretibial skin. Three referred non-healing in-field ulcers for hyperbaric oxygen."
               },
               {
                 "label": "vs leading data",
-                "body": "No prospective comparison is offered; respondents suggested **NCCN low-risk vs high-risk BCC/SCC definitions** for margin decisions. The authors call for prospective trials and expert consensus guidelines to reduce practice variation."
+                "body": "The cited prior literature (Guix custom-mold HDR, Paravati electronic brachytherapy, van Hezewijk hypofractionated electrons) reports single-series outcomes. This survey adds no outcomes; it documents how widely dose, margin and constraints vary across practices using the technique."
               },
               {
                 "label": "Applies to",
-                "body": "Represents dose, margin and planning habits of a small group of ABS brachytherapists treating BCC and cSCC. Does not represent outcome or toxicity rates, which were not measured."
+                "body": "Represents dosing and planning habits of ABS-member radiation oncologists treating BCC and cSCC with surface brachytherapy. Does not represent dermatology-delivered superficial RT, deep or perineural lesions, or measured clinical outcomes."
               },
               {
                 "label": "Limitations",
-                "body": "Toxicity reported as anecdote, without denominators or grading. Clinical scenarios did not specify histology, so BCC vs cSCC dose selection cannot be separated."
+                "body": "Several key tables carry ambiguous row-value pairing in the source, and the scenario table (Table 4) was not captured. Toxicity is anecdotal recall with no denominators."
               },
               {
                 "label": "Discussion",
-                "body": "Practice converges on **hypofractionation and pretibial de-escalation** and diverges on margins and plan-evaluation metrics. Volumetric metrics (D2cc, D1cc, D0.1cc) were endorsed by no respondent, so a dosimetric constraint set remains undefined."
+                "body": "The useful output is the spread itself: margins, skin-dose ceilings and the lesion-size threshold for gentler fractionation all vary several-fold. Prospective trials and expert consensus are what the authors call for, and this survey cannot substitute for either."
               }
             ],
-            "interpretation": "This paper is a census of habits, not a test of them, and its value depends on reading it that way. Sixteen practitioners out of roughly 400 invited is a small, self-selected sample, and the people who answer a skin brachytherapy survey are plausibly those most invested in the technique. That bias runs in a predictable direction: toward enthusiasm about convenience and safety. The authors' conclusion that skin brachytherapy can be convenient and safe should therefore be held loosely, because nothing in the design measures safety. Toxicity entered the dataset as recalled cases, without a denominator, a grading scale, or follow-up time.\n\nWhat the survey does establish, with reasonable confidence, is where practice converges and where it does not. Convergence sits on two points. Hypofractionation is the default, and pretibial skin is treated differently: 10 respondents used 2-3 Gy per fraction there, and eight separately recalled severe toxicity on the lower extremity. That pattern is consistent with what radiation oncologists already believe about poorly vascularized lower-leg skin, and it is the one finding a reader could carry into practice as a shared community norm rather than one institution's preference. The almost uniform comfort with large fractions on a small nasal lesion is the mirror image.\n\nDivergence is larger and arguably more informative. Gross-disease margins span 3 to 15mm. Plan evaluation is inconsistent: max skin surface dose is the most endorsed parameter, but minimum CTV dose was used by only half, and no respondent used D2cc, D1cc or D0.1cc. Many applicator users calculate to a single depth and look at no dose distribution at all. That means the field has no common dosimetric language with which to report outcomes, which in turn makes pooling retrospective series across institutions difficult. The suggestion to borrow NCCN low-risk and high-risk definitions for margins is a pragmatic workaround, not a validated rule.\n\nThe experience-stratified analysis showing no difference between practitioners above and below 100 career cases (p=0.1539) is underpowered to detect anything, so it should not be read as reassurance that technique is learned quickly.\n\nThe decision this informs is narrow. For a radiation oncologist starting or auditing a skin brachytherapy program, it offers a reference range for margins, depth and fractionation, and a clear warning about pretibial targets. It does not tell anyone which schedule controls tumor better or produces better cosmesis, and it predates any prospective comparison against EBRT or electronic brachytherapy. For it to be wrong in its central claim of safety, the unreported denominators would only need to be modest.",
+            "interpretation": "This paper is best read as a census of variation rather than evidence about the technique. Sixteen completed surveys from roughly 400 invitations is a small, self-selected sample, and the people who answer a voluntary ABS questionnaire about skin brachytherapy are plausibly those most invested in it. That selection cuts in a predictable direction: it likely overstates comfort with large fraction sizes and understates the frequency of abandonment after a bad outcome. The authors' conclusion that skin brachytherapy can be convenient and safe does not follow from the design, because no outcome was measured; safety here is the absence of reported catastrophe in recall, alongside eight respondents who did recall severe lower-extremity toxicity.\n\nWhat the survey does establish is that there was no shared dosimetric language among users. Max skin dose ceilings of 125-150% of prescription, CTV coverage targets of 90-100%, and no respondent using D2cc, D1cc or D0.1cc means two programs can call the same plan acceptable or unacceptable. Some respondents planned only with applicator depth calculations, which is reasonable for flat shielded cones but leaves no common metric for comparing toxicity across centers. Any future outcomes series pooled across institutions inherits that heterogeneity.\n\nAgainst the single-institution outcome series the authors cite, including custom-mold HDR for facial carcinomas and electronic brachytherapy reports, this survey sits one level lower in the evidence chain. Those series at least tie a schedule to a result. Here the dose range, 30 Gy in 5 fractions to 64 Gy in 32 fractions with EQD2 40 Gy-65 Gy, spans regimens that are not radiobiologically interchangeable for late skin effects, and the paper cannot say which end of that range buys better cosmesis or control.\n\nThe pretibial signal is the one finding with face validity for practice. Nearly unanimous de-escalation to 2-3 Gy per fraction on pretibial skin, plus the concentration of recalled severe toxicity there, matches the clinical intuition that poorly vascularized, edema-prone lower-leg skin tolerates large fractions badly. The non-healing ulcer case driven by post-treatment edema from systemic causes is a reminder that host factors, not just dose, determine the lower-extremity outcome.\n\nThe survey does not settle margin selection, the depth limit for surface brachytherapy beyond the respondents' 3 mm avoidance threshold, or whether brachytherapy's shorter course offsets any cosmetic cost relative to electrons or orthovoltage. Several respondents pointed to NCCN low- and high-risk definitions to set margins, which is the most portable takeaway: anchor margin decisions to histologic risk rather than to applicator convenience. For a program writing its own protocol, the value is knowing that the published practice range is wide enough that local constraints must be defined and audited internally.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Pretibial skin is where practice converges: 63% used 2-3 Gy/fx and eight respondents recalled severe lower-extremity toxicity. Margins (3-15mm) and plan-evaluation metrics vary widely, so there is no shared dosimetric standard to audit a skin brachytherapy program against."
+              "radonc": "The transferable read is pretibial dosing: 10 respondents (63%) dropped to 2-3 Gy per fraction there, and eight reported severe lower-extremity toxicity. Max skin dose 125-150% and fractionation cut points of 2-5 cm mean a skin HDR program must set and audit its own constraints."
             },
             "open_questions": [
-              "Which skin brachytherapy fractionation optimizes control and cosmesis?",
-              "Standard dosimetric constraints for surface applicators and molds",
-              "Safe dose per fraction for pretibial lesions"
+              "Which dosimetric constraints predict late skin toxicity?",
+              "Optimal fractionation for pretibial and lower-extremity lesions",
+              "Brachytherapy vs electrons or orthovoltage for cosmesis"
             ],
             "consort": null,
             "modality": "radiation",
@@ -285,12 +483,17 @@
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "skin cancer brachytherapy",
-                "basal cell carcinoma radiotherapy"
+                "skin brachytherapy basal cell",
+                "nonmelanoma skin cancer brachytherapy"
               ],
-              "queries_failed": [],
-              "candidates_returned": 39,
-              "fetched_at": "2026-10-25T17:45:10.927Z",
+              "queries_failed": [
+                {
+                  "term": "nonmelanoma skin cancer brachytherapy",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 3,
+              "fetched_at": "2026-10-26T08:13:00.808Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [
@@ -302,68 +505,97 @@
             "meeting": null
           },
           {
-            "name": "CT-based flap brachytherapy for facial NMSC (Gogineni)",
-            "tldr": "1-yr KM local control 92% after 40 Gy/8 fx twice-weekly HDR flap brachy for T1 facial BCC/SCC; 49/53 lesions good/excellent cosmesis.",
+            "name": "CT-based flap brachytherapy for facial non-melanoma skin cancers",
+            "tldr": "1-yr KM local control 92% after HDR flap brachy 40 Gy/8 fx twice weekly for T1 facial BCC/SCC; no chronic G≥3 toxicity.",
             "details": [
               {
-                "text": "🔍 Retrospective review, 50 pts / 53 lesions, treated Jan 2007 to Dec 2018",
+                "text": "🔍 Single-institution retrospective review, 2007-2018; 50 pts, 53 lesions",
                 "source_tier": "figure"
               },
+              "🔍 Pts selected mostly for inability to tolerate or refusal of surgery",
               {
-                "text": "🔍 T1 (AJCC 8th) BCC or SCC, biopsy-confirmed; all NCCN high-risk (area H, or area M ≥10 mm)",
-                "source_tier": "figure"
-              },
-              "🔍 Selected case-by-case by multidisciplinary dermatology clinic, mostly surgery intolerance or refusal",
-              {
-                "text": "🔍 Cohort",
+                "text": "🔍 Population",
                 "subdetails": [
+                  "Histologically confirmed BCC 35 (66%) or SCC 18 (34%), AJCC 8th T1",
                   "Median age 80 (73-101)",
-                  "BCC 35 (66%), SCC 18 (34%)",
-                  "Area H 40 (75%), nose 17 (32%)",
-                  "Median size 18 mm, median thickness 5 mm",
-                  "48 (91%) primary, 5 (9%) recurrent"
+                  "Median tumor size 18 mm (5-20), thickness 5 mm (3-7)",
+                  "Area H 40 (75%), nose most common site 17 (32%)",
+                  "48 (91%) primary, 5 (9%) recurrent (3 post-op, 2 post-PDT)"
                 ],
                 "source_tier": "figure"
               },
               {
-                "text": "💊 Technique",
+                "text": "💊 RT technique",
                 "subdetails": [
-                  "40 Gy/8 fx twice weekly, BED 60 Gy (α/β 10), Ir-192 HDR",
-                  "CTV = visible tumor + 5 mm; PTV = CTV, no added margin",
-                  "Catheter flap: channels 5 mm from surface, 10 mm apart, fixed in thermoplastic mask",
-                  "5 mm spacer intranasal, under eyelid, or gingivolabial sulcus",
-                  "Median PTV 1.7 cc, D90 92%, V100 85%"
+                  "40 Gy/8 fx twice weekly (BED 60 Gy, α/β 10), Ir-192 HDR",
+                  "CTV = visible tumor + 5 mm, no PTV margin",
+                  "Catheter flap: channels 5 mm from surface, 10 mm apart; thermoplastic mask fixation",
+                  "5 mm intranasal / under-eyelid / gingivolabial spacer for OAR sparing"
                 ],
                 "source_tier": "figure"
               },
               {
-                "text": "📊 1-yr KM LC 92%; 4 local recurrences (2 nasal SCC, 1 eyelid BCC, 1 lip BCC)",
+                "text": "📐 Median PTV 1.7 cc (95% CI 0.9-2.3), D90 92% (82-99), V100 85% (80-92)",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 1-yr KM local control 92%; 4 local recurrences (2 nasal SCC, 1 eyelid BCC, 1 lip BCC)",
+                "source_tier": "figure"
+              },
+              {
+                "text": "📊 Good/excellent cosmesis with complete remission in 49 lesions (92%)",
                 "source_tier": "figure"
               },
               {
                 "text": "📊 Toxicity",
-                "subdetails": [
-                  "Acute G1 60%, G2 35%, G3 5%; all after the 5th fraction",
-                  "All 8 eyelid/periorbital pts: G1 conjunctivitis, resolved with antibiotic/steroid drops",
-                  "Chronic G1 10% at 6 mo; G1 4% and G2 4% at 12 mo",
-                  "No chronic G≥3, no treatment-related hospitalization"
-                ],
+                "table": {
+                  "columns": [
+                    "Toxicity",
+                    "n (%)"
+                  ],
+                  "rows": [
+                    [
+                      "Acute G1 (erythema)",
+                      "32 (60%)"
+                    ],
+                    [
+                      "Acute G2",
+                      "19 (35%)"
+                    ],
+                    [
+                      "Acute G3 (moist desquamation)",
+                      "3 (5%)"
+                    ],
+                    [
+                      "Chronic G1 at 6 mo",
+                      "5 (10%)"
+                    ],
+                    [
+                      "Chronic G1 hypopigmentation at 12 mo",
+                      "2 (4%)"
+                    ],
+                    [
+                      "Chronic G2 telangiectasia at 12 mo",
+                      "2 (4%)"
+                    ]
+                  ]
+                },
+                "source_tier": "figure"
+              },
+              "📊 All 8 eyelid/periorbital pts developed G1 conjunctivitis, resolved with 2-day antibiotic/steroid drops",
+              {
+                "text": "⚠️ Median f/u 15 mo (range 6-27): too short for BCC late recurrence or late skin effects",
                 "source_tier": "figure"
               },
               {
-                "text": "⚠️ Median f/u 15 mo (6-27), too short to read out late BCC recurrence or late toxicity",
+                "text": "⚠️ Median V100 85% sits below the stated goal of ≥95% PTV coverage",
                 "source_tier": "figure"
               },
-              "⚠️ Toxicity is reported inconsistently: abstract calls the 5% acute events G2 (Results says G3); Discussion reports no chronic G≥2, though 4% had chronic G2",
+              "⚠️ Internal inconsistencies: abstract calls the 3 acute events G2, Results G3; Discussion claims no chronic G≥2 despite 2 G2 telangiectasias",
               {
-                "text": "⚠️ Toxicity percentages track the 53 lesions, but the text labels them as pts",
+                "text": "🔗 Within the 87%-100% LC range of prior retrospective HDR surface-mold series cited by the authors",
                 "source_tier": "figure"
-              },
-              {
-                "text": "🔗 Other HDR surface-mold series in the paper report LC 87-100%",
-                "source_tier": "figure"
-              },
-              "🔗 The one cited face-BCC RCT (surgery vs RT, mostly interstitial BT) showed 4-yr failure 7.5% vs 0.7% favoring surgery"
+              }
             ],
             "figures": [],
             "nct": null,
@@ -374,94 +606,78 @@
             "slug": "ct-flap-brachy-nmsc-face",
             "verdict": {
               "soc_implication": "early-signal",
-              "rationale": "Retrospective single-arm series, 53 lesions, 15-mo median f/u; no comparator vs Mohs or EBRT. Consistent with prior HDR mold series.",
-              "audience": "T1 facial BCC/SCC, NCCN high-risk, surgery declined or not tolerated"
+              "rationale": "Single-arm retrospective series, surgery-unfit/refusing pts, 15-mo median f/u; no comparator vs Mohs or EBRT. Consistent with prior HDR surface-mold series.",
+              "audience": "T1 facial BCC/SCC (area H/M), elderly, surgery-unfit or refusing"
             },
-            "significance": "The transferable detail is the planning: CT-simulated flap in a glued thermoplastic mask, CTV tumor + 5 mm with no PTV margin, and a 5 mm spacer intranasally or under the eyelid. That combination delivered median D90 92% on 1.7 cc targets over nose, eyelid and ear. All 4 recurrences were in area H, 2 of them nasal SCC.",
-            "monday_clinic": "In an elderly pt with T1 area-H BCC or SCC who declines or cannot tolerate Mohs, this supports twice-weekly HDR flap brachy as a short-course definitive option; it does not address pts fit for and accepting surgery, or lesions beyond T1.",
+            "significance": "The dosimetry is the transferable part: median V100 85% and D90 92% with catheters 5 mm off the skin, against tumors up to 7 mm thick, so deep-margin coverage is the weak point. Three of 4 recurrences were nose, eyelid and lip, the irregular sites the flap is meant to solve.",
+            "monday_clinic": "In an elderly pt with T1 BCC or SCC of the nose, eyelid or temple who declines or cannot tolerate Mohs, this supports CT-planned flap HDR 40 Gy/8 fx as a reasonable option; it does not address pts fit for surgery or lesions thicker than 7 mm.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**Retrospective review** of 50 pts with 53 facial NMSC lesions treated Jan 2007 to Dec 2018. LC estimated by **Kaplan-Meier**, response by clinical exam. Median f/u **15 mo** (range 6-27)."
+                "body": "Single-institution **retrospective** review, January 2007 to December 2018. **50 pts, 53 lesions**, minimum 6 mo follow-up, median follow-up **15 mo** (range 6-27). LC by Kaplan-Meier."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Biopsy-confirmed BCC or SCC, **T1 (AJCC 8th)**, f/u ≥6 mo; all NCCN high-risk by location. Median age 80; **75% area H**, nose most common (32%). Selected mainly for **surgery intolerance or refusal**."
+                "body": "Histologically confirmed **BCC or SCC, AJCC 8th T1**, all NCCN high-risk by area H or area M location. Median age 80; selected by a multidisciplinary dermatology clinic, mostly for **inability to tolerate or refusal of surgery**."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**40 Gy/8 fx twice weekly** HDR (BED 60 Gy, α/β 10) via silicone catheter flap, CT-planned in BrachyVision. **CTV = tumor + 5 mm, PTV = CTV**; prescription to cover ≥95% PTV within Emami-derived BED constraints. Median D90 92%, V100 85%."
+                "body": "**40 Gy in 8 fractions twice weekly** (BED 60 Gy, α/β 10) via Ir-192 HDR catheter flap, CT-planned in BrachyVision. **CTV = visible tumor + 5 mm**, PTV = CTV with no margin; 5 mm spacers protected the nasal mucosa, globe and gingiva."
               },
               {
                 "label": "Results",
-                "body": "**1-yr LC 92%**; 4 local recurrences, all in area H (2 nasal SCC, 1 eyelid BCC, 1 lip BCC). **49 lesions (92%)** had good/excellent cosmesis with complete remission."
+                "body": "**1-yr LC 92%**, 4 local recurrences, 3 in nose/eyelid/lip. **49 lesions (92%)** had good/excellent cosmesis with complete remission."
               },
               {
                 "label": "Safety",
-                "body": "Acute G1 60%, G2 35%, G3 5%, all after fx 5. Every eyelid/periorbital pt had G1 conjunctivitis. At 12 mo, chronic G1 4% and G2 telangiectasia 4%; **no chronic G≥3**."
+                "body": "Acute G1 60%, G2 35%, G3 5%, all after fraction 5. Chronic G2 telangiectasia in **2 pts (4%)** at 12 mo, **no chronic G≥3**, no toxicity-related hospitalization."
               },
               {
                 "label": "vs leading data",
-                "body": "LC sits within the **87-100%** range of other HDR surface-mold series the authors cite. The one cited face-BCC randomized trial favored surgery (4-yr failure 7.5% vs 0.7%), though RT there was mostly interstitial BT."
+                "body": "Local control falls inside the **87%-100%** range of prior retrospective HDR surface-mold series. The only randomized surgery-vs-RT trial in facial BCC cited by the authors found 4-yr failure **7.5% vs 0.7%** favoring surgery, though RT there was mostly interstitial brachy, not surface HDR."
               },
               {
                 "label": "Applies to",
-                "body": "Represents elderly pts with T1 high-risk facial BCC/SCC who are not surgical candidates or decline surgery. Does not represent surgery-eligible pts, deeply infiltrating tumors, or lesions beyond T1."
+                "body": "Represents elderly pts with T1 facial BCC/SCC ≤7 mm thick who are poor surgical candidates or decline surgery. Does not represent surgery-fit pts, deeply infiltrating or T2+ tumors, or perineural disease."
               },
               {
                 "label": "Limitations",
-                "body": "Grade assignments disagree across the abstract, results and discussion. Toxicity percentages use the **lesion denominator** while being labeled as pts. Depth was assessed **clinically by palpation**, which matters for a prescription fixed at 5 mm from the flap surface. BCC and SCC were dosed identically."
+                "body": "Median V100 85% falls short of the ≥95% PTV coverage goal, and depth was assessed mostly by palpation. Abstract and body disagree on acute toxicity grade, and the Discussion understates chronic G2 events."
               },
               {
                 "label": "Discussion",
-                "body": "The data support flap HDR as a feasible definitive option where Mohs is declined, delivering **8 visits** with acceptable cosmesis. Two questions stay open: durability beyond 1-2 yr, and whether nasal SCC needs a different dose or margin."
+                "body": "The flap's value is conformity on irregular surfaces where surface molds and electrons struggle, yet recurrences clustered in exactly those sites. BCC and SCC got identical dose and margins, consistent with NCCN, the 2020 ASTRO guideline and the 2019 ABS consensus, so histology-specific dosing is still untested."
               }
             ],
-            "interpretation": "The question this series answers is narrow: can a CT-planned catheter flap deliver a homogeneous, conformal HDR dose over the most irregular surfaces of the face, in an elderly population that has declined or cannot tolerate surgery, without unacceptable toxicity? On that question the answer looks favorable. Three-quarters of lesions sat in area H, a third on the nose, and the plans still reached a median D90 of 92% on targets of around 1.7 cc. That technical point is the real contribution, because the stated weakness of electron or orthovoltage EBRT on the nose, eyelid and ear is dose inhomogeneity over curved, small fields, and surface molds can lose skin contact on those same contours. The flap, glued into a thermoplastic mask, plus a 5 mm spacer for nasal, eyelid and lip lesions, is a reproducible setup another department could copy.\n\nThe efficacy claim needs more caution. A 1-yr Kaplan-Meier LC of 92% fits the 87-100% range the authors cite from other HDR mold series, but those series are also retrospective, and agreement among uncontrolled cohorts is weak corroboration. The cited randomized comparison in facial BCC showed more failures with RT than surgery at 4 yr, 7.5% vs 0.7%. RT in that trial was mostly interstitial brachytherapy, so it does not test this technique directly, but it is the only randomized anchor, and it points against RT where surgery is an option. With a median of 15 mo and a maximum of 27 mo, this cohort cannot yet show the late BCC recurrences that drive differences at 4-5 yr.\n\nThe pattern of failure deserves attention. All four recurrences were in area H, and two were nasal SCC, in a cohort where SCC made up a third of lesions. The authors dosed BCC and SCC identically, following NCCN, ASTRO and ABS guidance that does not separate by histology. A small series cannot settle whether nasal SCC needs a wider margin or more dose, but this is the subgroup to watch in larger datasets. Depth was assessed by palpation, and the median thickness was 5 mm under a prescription that depends on depth, so underdosing at depth is a plausible mechanism for failure in thicker central-face SCC.\n\nThe reporting has internal inconsistencies that lower confidence in the toxicity figures. The abstract and results disagree on whether the 5% acute events were grade 2 or 3. The discussion claims no chronic grade ≥2 toxicity while the results report grade 2 telangiectasia in 4%. Percentages track lesions while the text calls them patients. None of this changes the overall impression that late toxicity was mild, but a reader should not quote these exact numbers as settled.\n\nFor practice, this supports twice-weekly flap HDR as a short-course definitive option for elderly patients with T1 high-risk facial NMSC who will not have Mohs. It does not support offering RT over surgery to a fit patient, and it leaves open durability beyond about two years and histology-specific dosing.",
+            "interpretation": "This series belongs to a familiar genre: a single-institution, retrospective account of a brachytherapy technique applied to elderly pts who either could not tolerate or would not accept Mohs surgery. Its 1-yr local control of 92% sits comfortably inside the 87% to 100% range the authors cite from earlier HDR surface-mold series, so the result is best read as a technical confirmation that a CT-planned catheter flap performs like other surface applicators, not as evidence that it performs better. The comparison that actually defines the field is the randomized trial of surgery vs RT in facial BCC that the authors themselves cite, where 4-yr failure was 7.5% with RT vs 0.7% with surgery. Nothing here challenges that ordering for a pt who can have surgery, and the authors do not claim it does.\n\nThe more instructive content is dosimetric. The flap places its source channels 5 mm from the skin, the CTV adds a 5 mm margin with no PTV expansion, and median tumor thickness was 5 mm with a range up to 7 mm. Against that geometry, the median V100 of 85% and D90 of 92% mean that a typical plan left part of the target below prescription, despite a stated goal of covering at least 95% of the PTV. Depth was assessed largely by palpation, with pathologic depth used only when available. For a reader deciding whether to adopt a flap technique, the open issue is the deep margin of thicker lesions, and this series cannot resolve it because recurrences were few and follow-up short.\n\nThe pattern of failure is worth more than its four events suggest. Two nasal SCCs, an eyelid BCC and a lip BCC recurred, all in the irregular, high-curvature anatomy the flap is meant to handle better than a rigid mold or an electron field. That is not proof of a technique-specific weakness, since these are also the highest-risk sites in any series, but it argues against assuming the flap has solved conformity on the nose and lip.\n\nFollow-up is the decisive limitation for interpreting both efficacy and toxicity. A median of 15 months, with some lesions observed for only 6, is short for BCC, whose recurrences can declare late, and short for late skin effects after a hypofractionated schedule. The authors lean on Gauden et al., with 66-month median follow-up, to argue that chronic toxicity stabilizes in the first one to two years, which is plausible but borrowed rather than shown. The toxicity reporting also contains internal inconsistencies: the abstract lists the three acute events as grade 2 while the results call them grade 3, and the discussion states there were no chronic grade 2 or higher toxicities while the results report two pts with grade 2 telangiectasia at 12 months. Neither changes the overall picture of a tolerable schedule, but both lower confidence in the precision of the toxicity numbers.\n\nWhat would make this wrong is a late recurrence curve that diverges from the 1-yr estimate, or deep-margin failures in thicker tumors once larger numbers accumulate. The decision it supports is narrow: for a surgery-unfit pt with a thin T1 facial lesion, 40 Gy in 8 twice-weekly HDR fractions via a flap is a reasonable, convenient option with acceptable acute effects. Whether BCC and SCC should receive different dose or margins, and how surface HDR compares with EBRT or Mohs head to head, remain open.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The transferable detail is the planning: CT-simulated flap in a glued thermoplastic mask, CTV tumor + 5 mm with no PTV margin, and a 5 mm spacer intranasally or under the eyelid. That combination delivered median D90 92% on 1.7 cc targets over nose, eyelid and ear. All 4 recurrences were in area H, 2 of them nasal SCC."
+              "radonc": "The dosimetry is the transferable part: median V100 85% and D90 92% with catheters 5 mm off the skin, against tumors up to 7 mm thick, so deep-margin coverage is the weak point. Three of 4 recurrences were nose, eyelid and lip, the irregular sites the flap is meant to solve."
             },
             "open_questions": [
-              "Local control and late toxicity beyond 2 years of follow-up",
-              "HDR flap brachytherapy vs Mohs for area-H NMSC",
-              "Histology-specific dose or margin for nasal SCC"
+              "Durability of local control and late cosmesis beyond 2 years",
+              "Histology-specific dose or margin for BCC vs SCC",
+              "Surface HDR brachytherapy vs Mohs or EBRT head to head"
             ],
             "consort": null,
             "modality": "radiation",
             "intent": "curative",
             "methodology": "retrospective",
             "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT07801690",
-                "brief_title": "Brachytherapy (Interventional Radiotherapy) for Squamous Cell Carcinomas of the Nasal Vestibule: Optimization of Dose and Technique",
-                "overall_status": "NOT_YET_RECRUITING",
-                "phase": null,
-                "enrollment_count": 300,
-                "primary_completion_date": "2029-10",
-                "brief_summary": "Rationale: Primary brachytherapy (also known as Interventional Radiotherapy, IRT) achieves high cure rates in cancer of the nasal vestibule (CNV) while preserving nasal aesthetics and function. In our recently published nationwide multicenter study, brachytherapy (BT) increased nose preservation probability from 61 to 82 % compared to external beam radiotherapy (EBRT). Although late toxicity was more common following BT, it was predominantly CTCAE grade 1-2 and deemed acceptable given the…",
-                "conditions": [
-                  "Carcinoma Nasal Vestibule"
-                ],
-                "interventions": [],
-                "eligibility_brief": "Inclusion criteria:\n\n* Aged 18 years or older\n* Rome stage 1-4 / Wang Stage T1 -T3\n* Staging of the neck by ultrasound/FNAC and/or (FDG-PET)CT and/or MRI is performed\n* Brachytherapy with curative intent as sole treatment for the primary tumor\n* Suitable to undergo brachy procedure, based on…",
-                "answers_question": "Histology-specific dose or margin for nasal SCC",
-                "relevance_phrase": "nasal vestibule SCC brachy, dose + technique optimization"
-              }
-            ],
+            "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
                 "brachytherapy skin cancer",
-                "squamous cell carcinoma skin radiation"
+                "brachytherapy basal cell carcinoma",
+                "Mohs surgery radiation skin cancer"
               ],
               "queries_failed": [],
-              "candidates_returned": 38,
-              "fetched_at": "2026-10-25T17:45:19.536Z",
-              "rerank_outcome": "picked_N"
+              "candidates_returned": 23,
+              "fetched_at": "2026-10-26T08:13:04.180Z",
+              "rerank_outcome": "abstained"
             },
             "source_ids": [
               {
@@ -472,258 +688,118 @@
             "meeting": null
           },
           {
-            "name": "HDR brachytherapy with custom surface molds for facial skin carcinomas (Guix)",
-            "tldr": "5-yr actuarial LC 98% overall (99% primary, 87% recurrent) with HDR Ir-192 custom PMMA surface molds for facial BCC/SCC, N=136.",
+            "name": "Surface mould brachytherapy for skin cancers: British Columbia Cancer experience",
+            "tldr": "2-yr LC 84.9%, CR 96.8%, no G3+ toxicity with CT-planned Ir-192 HDR surface mould in 65 mostly head-and-neck skin lesions.",
             "details": [
               {
-                "text": "📊 Local control by presentation",
+                "text": "🔍 Single-institution retrospective review, 2010-2017, 65 lesions in 59 pts",
+                "source_tier": "figure"
+              },
+              "🔍 Median age 82 (range 45-97); median f/u 8 mo",
+              {
+                "text": "🔍 Histology: BCC 54% (n=35), SCC 31% (n=20); also melanoma, lentigo maligna, Merkel, cutaneous NHL, 1 keloid",
+                "source_tier": "figure"
+              },
+              "🔍 7 lesions treated with palliative intent, included in analysis",
+              {
+                "text": "📊 Outcomes (whole cohort)",
                 "table": {
                   "columns": [
-                    "Cohort",
-                    "N",
-                    "Local recurrences",
-                    "5-yr actuarial LC"
+                    "Endpoint",
+                    "Estimate"
                   ],
                   "rows": [
                     [
-                      "All pts",
-                      "136",
-                      "3",
-                      "98%"
+                      "2-yr local control",
+                      "84.9%"
                     ],
                     [
-                      "Primary tumors",
-                      "73",
-                      "1",
-                      "99%"
+                      "2-yr PFS",
+                      "71.5%"
                     ],
                     [
-                      "Recurrent after prior surgery",
-                      "63",
-                      "2",
-                      "87%"
+                      "2-yr OS",
+                      "77.6%"
+                    ],
+                    [
+                      "Complete response (2-4 mo)",
+                      "96.8% (61 lesions)"
+                    ],
+                    [
+                      "Local recurrence",
+                      "5 pts"
                     ]
                   ]
                 },
                 "source_tier": "figure"
               },
-              "🔍 Prospective single-institution series, 136 consecutive facial BCC/SCC, treated 1992-1997",
-              "🔍 Gross tumor left in place in most pts; margins positive in 128",
               {
-                "text": "🔍 Dose: 6000-6500 cGy in 33-36 fx of 180 cGy, prescribed at 5 mm depth",
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔍 Lesions ≥4 cm: boost 1800 cGy/10 fx after 3-wk rest, total 7500-8000 cGy",
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔍 Ir-192 HDR via 117 custom PMMA molds and 19 Brock applicators",
-                "source_tier": "figure"
-              },
-              "📊 Mold dose at surface and 5 mm depth within 5% of prescription; TLD agreed within 5%",
-              {
-                "text": "📊 Cosmesis good/excellent in 98% at 6 mo; no severe late complications reported",
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔗 vs Lovett EBRT series: superficial X-ray LC 95% (180/189), electrons 77% (44/57)",
-                "source_tier": "figure"
-              },
-              "⚠️ Min f/u 12 mo; only 32 primary and 29 recurrent pts at risk at 5 yr",
-              {
-                "text": "⚠️ Internal inconsistencies in the source",
+                "text": "🔍 RT technique: Ir-192 HDR, custom Aquaplast + superflab mould, catheters ~1 cm apart",
                 "subdetails": [
-                  "Boost 1800 cGy in Methods vs 1500 cGy in Fig 5 legend",
-                  "Recurrent-tumor LC 87% given at 5 yr in Results, at 4 yr in Discussion",
-                  "Diameter reported as average 3.8 cm, ranging 3.8 to 8.0 cm"
-                ],
-                "source_tier": "figure"
-              }
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1016/s0360-3016(99)00547-7",
-            "tweet_ids": [
-              1000000156
-            ],
-            "slug": "guix-hdr-skin-molds-face",
-            "verdict": {
-              "soc_implication": "early-signal",
-              "rationale": "Single-arm institutional series with no comparator vs Mohs or EBRT; only 3 events, thin 5-yr risk set, cosmesis formally scored only to 12 mo.",
-              "audience": "Facial BCC/SCC, primary or recurrent after surgery, node-negative, M0"
-            },
-            "significance": "What transfers is the physics: optimized dwell times on a face-conformal PMMA mold held surface and 5 mm dose within 5% of prescription on curved sites, with a lead insert to spare the eye. That favors mold HDR over electrons on nose, eyelid and ear. The protracted 180 cGy/fx schedule is the part that dates.",
-            "monday_clinic": "In a facial BCC or SCC on a curved site such as the nose or eyelid, already planned for definitive RT, this supports a custom-mold HDR surface technique for dose conformity; it does not address RT vs Mohs, and control was lower in tumors recurrent after surgery.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Prospective single-institution series of **136 consecutive pts**, treated March 1992 to February 1997, followed to March 1998 with a **minimum follow-up of 12 mo**. LC estimated by Kaplan-Meier. Cosmesis and toxicity were scored on SOMA-LENT at end of treatment, 6 mo and 12 mo."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Pathologically confirmed **BCC (102) or SCC (34) of the face**. **73 primary, 63 recurrent after previous surgery.** Average age 67. Margins positive in 128. No nodal or distant disease at diagnosis."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "HDR Ir-192 via **117 custom PMMA molds** (3-7 parallel catheters, 5-10 mm apart, 5 mm bolus layer) or 19 Brock applicators. **6000-6500 cGy in 33-36 fx of 180 cGy at 5 mm depth.** Lesions ≥4 cm got an **1800 cGy/10 fx boost** after a 3-wk rest, to 7500-8000 cGy total."
-              },
-              {
-                "label": "Safety",
-                "body": "All pts had G1-2 erythema at completion. **Ulceration at 6 wk in 14 pts (10%)**, mostly in boosted ≥4 cm lesions, and all healed by month 4. **No severe late complications.** Unfavorable long-term cosmesis was limited to recurrent tumors >4 cm."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Primary-tumor LC of **99%** is comparable to the superficial X-ray arm of Lovett's EBRT series (**95%**) and above its electron result (**77%**). Daly's Ir-192 implants reached **96%** LC but with severe long-term effects in **18%**."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents node-negative facial BCC/SCC treated definitively with gross disease in place, including recurrences after surgery. Does not represent nodal or metastatic disease, non-facial sites, or hypofractionated HDR surface schedules."
-              },
-              {
-                "label": "Limitations",
-                "body": "The source contradicts itself in places: **boost 1800 vs 1500 cGy**, and recurrent-tumor LC is given at 5 yr in one place and 4 yr in another. Depth of invasion was not determined, and with **3 events** no risk-factor analysis was possible."
-              },
-              {
-                "label": "Discussion",
-                "body": "The authors credit the absence of severe late effects to **180 cGy/fx** vs Lovett's **300-400 cGy**, but technique and selection confound that comparison. The dosimetric case for molds on curved surfaces is stronger than the comparative LC claim."
-              }
-            ],
-            "interpretation": "The number a radiation oncologist should weigh is 99% actuarial local control at 5 years in previously untreated facial BCC and SCC, alongside 87% in tumors that had already recurred after surgery, with 3 local failures across 136 pts. Set against the external-beam series the authors lean on, Lovett's, the primary-tumor result sits alongside that series' superficial X-ray control of 95% and well above its electron result of 77%. Daly's iridium implant series reached 96%. The honest read is that a surface mold delivered through an HDR afterloader matches the best orthovoltage control rather than beating it. With 3 events, the series cannot distinguish 95 from 99, and a reader should not treat the gap as real.\n\nThe population is a fairer test than many skin RT series, because gross tumor was left in place in nearly everyone and margins were positive in 128 pts. This is definitive treatment of macroscopic disease, not adjuvant cleanup. Against that, the follow-up is shallow. The minimum is 12 months, and by 5 years only 32 primary and 29 recurrent pts remained at risk, so the 5-year actuarial figures rest on a thin tail. The recurrences that did occur fell at 17 and 23 months, inside the observed window, but late skin effects such as fibrosis, atrophy and telangiectasia evolve over years, and formal SOMA-LENT scoring stopped at 12 months. The claim of no severe late toxicity is therefore a medium-term claim. The paper is also internally inconsistent: the boost is 1800 cGy in the methods and 1500 cGy in a figure legend, recurrent-tumor control is placed at 5 years in the results and 4 years in the discussion, and the lesion diameter range starts at its own mean. None of this overturns the result, but it argues for reading the specific numbers loosely.\n\nThe schedule is where transferability breaks. A course of 33-36 fractions at 180 cGy, extended to 7500-8000 cGy with a boost after a 3-week break for lesions of 4 cm or more, is long for an often elderly skin cancer population, and current HDR surface practice has moved toward hypofractionation. The authors attribute their lack of severe late effects to the low dose per fraction compared with Lovett's 300-400 cGy. That is biologically plausible, but technique, era and case mix are confounded with fraction size here, and the series cannot isolate it.\n\nWhat does transfer is the physical argument. Optimized dwell weights on a mold cast from the pt's own face kept dose at the surface and at 5 mm depth within 5% of prescription across curved anatomy, with a sharp edge gradient, TLD verification within 5%, and an embedded lead sheet to spare the globe. Electron and orthovoltage beams struggle with the non-flat nose, eyelid and ear, which together with the cheek made up much of this cohort. The decision this paper informs is technique selection for a facial lesion already headed to RT, not whether to choose RT over Mohs, which it never tested. The case for molds would be wrong if a comparative series on curved sites showed electrons with bolus achieving equivalent uniformity and control. The lower control and worse cosmesis in large recurrent tumors are the clearest signal that early referral matters more than technique.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Mold HDR held surface and 5 mm dose within 5% of prescription on curved facial anatomy, with a lead insert for the eye, which favors it over electrons on nose, eyelid and ear. LC was 99% in primary tumors but 87% in recurrent ones. The 180 cGy/fx schedule is the part that does not transfer to current hypofractionated practice."
-            },
-            "open_questions": [
-              "Hypofractionated mold HDR vs conventional 180 cGy fractions for late cosmesis",
-              "Mold HDR brachytherapy vs Mohs surgery for facial BCC/SCC",
-              "Predictors of local failure in tumors recurrent after surgery"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": "curative",
-            "methodology": null,
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "skin cancer brachytherapy",
-                "basal cell carcinoma brachytherapy"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 20,
-              "fetched_at": "2026-10-25T17:45:37.039Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 156
-              }
-            ],
-            "meeting": null
-          },
-          {
-            "name": "Surface mould brachytherapy for skin cancers, BC Cancer experience (Casey)",
-            "tldr": "2-yr LC 84.9%, CR 96.8%, no G3+ toxicity with HDR Ir-192 surface mould in elderly, mostly head and neck skin cancer pts; median f/u 8 mo.",
-            "details": [
-              {
-                "text": "🔍 Retrospective single-institution review, 2010-2017: 59 pts, 65 lesions",
-                "source_tier": "figure"
-              },
-              {
-                "text": "🔍 BCC 54% (n=35), SCC 31% (n=20); also melanoma, LM, Merkel, cutaneous NHL, 1 keloid",
-                "source_tier": "figure"
-              },
-              "🔍 Median age 82 (range 45-97); 7 lesions treated with palliative intent, included in analysis",
-              {
-                "text": "🔍 Technique: Ir-192 HDR, CT-planned individualized Aquaplast + superflab mould",
-                "subdetails": [
-                  "Catheters typically spaced 1 cm apart",
-                  "Target wired clinically, CTV contoured on CT; no PTV expansion",
-                  "Prescribed at 0.5 cm depth, intent 90% dose covering wired target",
-                  "Most common 40 Gy/10 fx (48.2%, n=28); range 15 Gy/3 to 60 Gy/30"
+                  "Most common: 40 Gy/10 fx (48.2%, n=28); range 15 Gy/3 to 60 Gy/30 fx",
+                  "Prescribed at 0.5 cm depth; intent 90% dose covering wired target",
+                  "CTV from radio-opaque wire, no PTV expansion",
+                  "Median target volume 12.85 cc (range 0.63-130.1 cc)"
                 ],
                 "source_tier": "figure"
               },
               {
-                "text": "📐 Dosimetry (medians)",
+                "text": "📐 Achieved dosimetry (medians)",
                 "subdetails": [
-                  "Target volume 12.85 cc (range 0.63-130.1 cc)",
-                  "Skin surface dose 126.5%",
+                  "Surface dose 126.5%",
                   "V90 92.3%, V95 84.6%, V100 73.7%",
                   "Median dose to target volume 108.9%"
                 ],
                 "source_tier": "figure"
               },
-              "📊 CR 96.8% (61 lesions); PR in 2, 2 not assessable at 2-4 mo",
               {
-                "text": "📊 2-yr OS 77.6%, 2-yr PFS 71.5%; 2 of 20 deaths from the skin primary",
-                "source_tier": "figure"
-              },
-              "📊 Local recurrence in 5 pts: 3 BCC of the nose, 1 forehead SCC, 1 palliative lesion",
-              {
-                "text": "📊 2-yr LC by subgroup (univariate, all NS on log-rank)",
+                "text": "📊 Univariate 2-yr LC by dosimetry and histology (log-rank, none significant)",
                 "table": {
                   "columns": [
                     "Variable",
                     "Group",
-                    "2-yr LC (%)"
+                    "2-yr LC (%)",
+                    "p"
                   ],
                   "rows": [
                     [
                       "V90",
-                      "<95%",
-                      "76.9"
+                      "<95% vs >95%",
+                      "76.9 vs 88.9",
+                      "0.85"
                     ],
                     [
-                      "V90",
-                      ">95%",
-                      "88.9"
-                    ],
-                    [
-                      "Median dose to TV",
-                      "<100%",
-                      "75"
-                    ],
-                    [
-                      "Median dose to TV",
-                      ">100%",
-                      "88.2"
+                      "Median target dose",
+                      "<100% vs >100%",
+                      "75 vs 88.2",
+                      "0.94"
                     ],
                     [
                       "Histology",
-                      "BCC",
-                      "70"
-                    ],
-                    [
-                      "Histology",
-                      "SCC",
-                      "88.2"
+                      "BCC vs SCC",
+                      "70 vs 88.2",
+                      "0.94"
                     ]
                   ]
                 },
                 "source_tier": "figure"
               },
               {
-                "text": "📊 Toxicity (CTCAE v4.03): no G3-5 acute or late",
+                "text": "📊 Toxicity (CTCAE v4.03), no G3-5 acute or late",
                 "subdetails": [
-                  "Acute G2: dermatitis 32% (n=21), ulceration 8% (n=5)",
-                  "Late G2: one necrosis (2%), appeared ~10 mo post-treatment",
-                  "Late G1: hypopigmentation 15.4% (n=10), fibrosis 8% (n=5)"
+                  "Acute G2 dermatitis 21 (32%), G2 ulceration 5 (8%)",
+                  "Acute G1 dermatitis 38 (59%), pruritus 27 (41%)",
+                  "Late G2 necrosis 1 (2%), at ~10 mo",
+                  "Late G1 hypopigmentation 10 (15%), fibrosis 5 (8%)"
                 ],
                 "source_tier": "figure"
               },
+              "⚠️ 2-yr actuarial estimates rest on a median 8 mo f/u; late toxicity likely undercounted",
+              "⚠️ BCC LC 70% vs SCC 88.2% runs against expectation; 3 of 5 recurrences were nasal BCC",
               {
-                "text": "🔗 vs Gauden et al. (in source): 236 lesions, 36 Gy/12 fx, LC 98% at median f/u 7 mo",
+                "text": "🔗 vs Gauden et al: 36 Gy/12 fx, 236 lesions, LC 98% at median 7 mo f/u",
                 "source_tier": "figure"
-              },
-              "⚠️ 2-yr actuarial LC and OS rest on median f/u of 8 mo (range 4.1-11.9)",
-              "⚠️ Internal inconsistencies: median age 83 vs 82; f/u eight vs nine mo; sex counts sum to 65",
-              "⚠️ Toxicity graded retrospectively from records and photos; no cosmesis outcome reported in source"
+              }
             ],
             "figures": [],
             "nct": null,
@@ -733,62 +809,62 @@
             ],
             "slug": "bc-cancer-surface-mould-brachy",
             "verdict": {
-              "soc_implication": "methodologically-limited",
-              "rationale": "Retrospective single-institution series, no comparator, mixed histologies and palliative lesions pooled; 2-yr LC is extrapolated from 8-mo median follow-up.",
-              "audience": "Elderly pts with superficial skin cancer, mostly head and neck BCC/SCC"
+              "soc_implication": "early-signal",
+              "rationale": "Retrospective single-institution series, n=59, mixed histology and intent; 2-yr estimates drawn from a median 8 mo follow-up with no comparator arm.",
+              "audience": "Elderly pts with superficial skin cancers (mostly H&N BCC/SCC)"
             },
-            "significance": "The coverage detail is the RT read: wired target with no PTV, prescribed at 0.5 cm, median V100 only 73.7%, and 2-yr LC 76.9% when V90 <95% vs 88.9% above (NS). Three of five recurrences were nasal BCC, so target-margin and coverage choices on the nose are the parameter to tighten.",
-            "monday_clinic": "In an elderly pt with a superficial head and neck BCC or SCC who is not a surgical candidate, this supports HDR surface mould as a low-toxicity option; it does not address lesions deeper than 5 mm or pts fit for Mohs.",
+            "significance": "The planning detail is the transferable part: prescription at 0.5 cm with no PTV left median V100 at 73.7% and surface dose 126.5%. LC was 88.9% with V90 >95% vs 76.9% below (p=0.85), a hint that coverage matters, but too few events to set a V90 target.",
+            "monday_clinic": "In elderly, surgically unsuitable pts with superficial head-and-neck BCC or SCC, this supports CT-planned surface mould HDR as a non-invasive option; it does not extend to lesions deeper than 5 mm, which the authors steer toward interstitial techniques.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**Retrospective** single-institution review at BC Cancer, Jan 2010 to Dec 2017, **59 pts / 65 lesions**. Median follow-up 8 mo (range 4.1-11.9). Univariate log-rank analysis of LC by dose-volume and tumor factors."
+                "body": "Retrospective review of all Ir-192 HDR surface mould cases at one BC Cancer center, **2010-2017**, **65 lesions in 59 pts**. Median follow-up **8 months**."
               },
               {
                 "label": "Population & inclusion",
-                "body": "All skin tumors treated with Ir-192 HDR surface mould; **BCC 54%, SCC 31%**, plus melanoma, lentigo maligna, Merkel, cutaneous NHL and one post-resection keloid. Median age 82 (range 45-97), mostly head and neck sites; 7 lesions palliative intent."
+                "body": "Median age **82** (45-97). **BCC 54%**, **SCC 31%**, plus melanoma, lentigo maligna, Merkel cell, cutaneous NHL and one keloid. Mostly head and neck (forehead/temple, nose, scalp, cheek/lip); **7 lesions palliative-intent**."
               },
               {
                 "label": "Radiotherapy",
-                "body": "CT-planned individualized mould, catheters ~1 cm apart, **prescribed at 0.5 cm depth** with intent 90% dose covering the wired target; **no PTV expansion**. Most common **40 Gy/10 fx** (48.2%); range 15 Gy/3 to 60 Gy/30. Median surface dose 126.5%, V90 92.3%, V100 73.7%."
+                "body": "Individualized Aquaplast + superflab mould, catheters ~1 cm apart, CT-based planning in BrachyVision. Most common **40 Gy/10 fx** (48.2%); range 15 Gy/3 to 60 Gy/30 fx. Prescribed at **0.5 cm depth**, CTV from clinical wire with **no PTV expansion**."
               },
               {
                 "label": "Results",
-                "body": "**2-yr LC 84.9%**, CR 96.8%, 2-yr PFS 71.5%, 2-yr OS 77.6%. Local recurrence in 5 pts. No dose-volume or histology factor reached statistical significance for LC."
+                "body": "**2-yr LC 84.9%**, 2-yr PFS 71.5%, 2-yr OS 77.6%; **CR 96.8%** at 2-4 mo. Of 20 deaths, only two were from the skin malignancy. No dosimetric or histologic factor reached significance on univariate analysis."
               },
               {
                 "label": "Safety",
-                "body": "**No G3-5 acute or late toxicity.** Acute G2 dermatitis 32% and ulceration 8%; one late G2 necrosis (2%) at ~10 mo. Late G1 mostly hypopigmentation 15.4% and fibrosis 8%."
+                "body": "**No G3-5 acute or late toxicity.** Acute G2 dermatitis 32% and ulceration 8%; one late G2 necrosis (2%) appearing around 10 months."
               },
               {
                 "label": "vs leading data",
-                "body": "Source places this against Gauden et al. (36 Gy/12 fx, **LC 98%** at median f/u 7 mo), other brachy series at **83.3% to 100%**, EBRT LC 87-100% and Mohs 95-99%. GEC-ESTRO grades the technique B because the base is small and retrospective."
+                "body": "The authors place their LC within the brachytherapy literature range of 83.3% to 100% and against EBRT LC of 87-100% and Mohs at 95-99%. Gauden et al. reported LC 98% with 36 Gy/12 fx, but at similarly short follow-up and largely in a post-resection margin-positive setting. GEC-ESTRO grades the technique B."
               },
               {
                 "label": "Applies to",
-                "body": "Represents elderly, often comorbid pts with superficial head and neck skin cancer treated where surgery is unsuitable. Does not represent lesions deeper than 5 mm, surgically fit pts, or long-term late toxicity and cosmesis."
+                "body": "Represents elderly, often comorbid pts with superficial head-and-neck skin cancers for whom surgery is not suitable. Does not represent lesions deeper than 5 mm or younger pts fit for Mohs."
               },
               {
                 "label": "Limitations",
-                "body": "Histologies with very different biology (keloid, lymphoma, melanoma, Merkel) and palliative lesions are pooled into one LC estimate. Toxicity was graded from records and photos; cosmesis not reported. Internal discrepancies in age, follow-up and sex counts."
+                "body": "Histology and intent are pooled (keloid, lymphoma, melanoma, palliative lesions). Toxicity was graded retrospectively from records and photographs, and cosmesis was not scored. Internal inconsistencies (median age 82 vs 83, follow-up 8 vs 9 mo, sex counts summing to 65 of 59 pts) lower confidence in the tabulated data."
               },
               {
                 "label": "Discussion",
-                "body": "LC sits at the low end of the brachy literature, and the BCC subgroup (**70%**) underperformed SCC (**88.2%**), the reverse of usual expectation. With V100 73.7% and no PTV, under-coverage at the lateral or deep edge is a plausible contributor the series cannot resolve."
+                "body": "The series shows the technique is deliverable and tolerable in a very old cohort, which is the realistic use case. It does not settle the durability of control, the right prescription depth or margin, or whether coverage metrics predict recurrence."
               }
             ],
-            "interpretation": "The case for surface mould brachytherapy in skin cancer has always been an argument about selection rather than efficacy. Surgery, and Mohs in particular at 95-99% local control in the figures this paper cites, sets the bar; radiotherapy earns its place in pts whose age, comorbidity, or tumor location makes resection a poor trade. This series is squarely in that space: a median age of 82, a cohort in which 20 pts had died at analysis mostly of unrelated causes, and a stated rationale that the modality was chosen because these were elderly pts. Read that way, the headline that matters most is the toxicity profile. No grade 3 or higher event, acute or late, in a frail population is the result most likely to hold up, and it is the one most relevant to the decision a radiation oncologist actually faces with an 85-year-old and a nasal lesion.\n\nThe control figures deserve more caution. A 2-yr local control of 84.9% sits below Gauden et al.'s 98% and near the bottom of the 83.3% to 100% range the authors quote for other brachytherapy series. Two features of this dataset push in opposite directions. First, the 2-yr estimates are actuarial projections from a median follow-up of 8 mo, so the true 2-yr figure could be lower once late recurrences accrue, particularly for BCC, which tends to recur slowly. Second, the cohort pools palliative lesions, lymphoma, melanoma and Merkel cell carcinoma with the BCC and SCC that make up the clinical question, which should depress control relative to a clean NMSC series. The authors report no difference with palliative cases excluded, but the sample is too small for that reassurance to carry much weight.\n\nThe more instructive signal is in the dosimetry. The plan prescribed to 0.5 cm, used no PTV margin on a wired clinical target, and achieved a median V100 of 73.7%. Lesions with V90 below 95% had 2-yr LC of 76.9% against 88.9% above that threshold, and BCC fared worse than SCC (70% vs 88.2%), with three of the five recurrences being BCC of the nose. None of this reached statistical significance, and with five events it could not have. Still, the pattern is coherent: a technique whose dose falls off steeply with depth, applied without margin to a histology known for subclinical extension, on a curved nasal surface where mould fit is hardest. That is a hypothesis about target definition, not a verdict on the modality, and it lines up with the debate the authors cite between prescribing to the wired CTV and adding a margin for setup and misalignment.\n\nWhat would make the reassuring reading wrong is longer follow-up. Late necrosis appeared at about 10 mo, already near the edge of the observation window, and cosmesis, the outcome that most often justifies choosing brachytherapy over surgery on the face, is not reported. A reader should take from this series that surface mould HDR is tolerable in very elderly pts and that coverage and margin on nasal BCC merit scrutiny, not that its control matches surgery or EBRT.",
+            "interpretation": "This series does what most single-center skin brachytherapy reports do. It shows that a CT-planned, custom mould HDR approach can be delivered to a very old, comorbid population without grade 3 toxicity, and that early response is near universal. What it cannot show is long-term local control. The headline 2-yr LC of 84.9% is an actuarial projection from a cohort followed for a median of 8 months, in which a third of pts died, mostly of unrelated causes. With that much censoring, the 2-yr figure should be read as a statement about the first year rather than a durable control estimate, and the late toxicity profile, including the single grade 2 necrosis appearing around month 10, is almost certainly incomplete.\n\nAgainst the comparators the authors cite, the result is plausible but not reassuring on its own terms. They frame their LC as consistent with brachytherapy reports ranging from 83.3% to 100% and EBRT reports of 87-100%, while Mohs sits at 95-99%. Their figure falls at the bottom of each range. The Gauden series they lean on reported LC 98% with 36 Gy/12 fx, but at a comparably short follow-up and in a setting dominated by post-resection margin-positive disease, which is a more favorable target than gross tumor in an elderly pt. Cross-series comparison here is weak in both directions, and the authors acknowledge that this literature is small and retrospective, which is why GEC-ESTRO grades the technique B.\n\nThe more useful content for a planning radiation oncologist is the dosimetry. Prescribing at 0.5 cm with no PTV margin and a 90% coverage intent produced a median V100 of 73.7% and V90 of 92.3%, with a surface dose of 126.5%. The univariate split, LC 88.9% when V90 exceeded 95% vs 76.9% below, points in the direction one would expect, and the same is true for median target dose above vs below 100%. None of these reached significance, and with five local recurrences the analysis had essentially no power, so the right reading is that coverage may matter and this dataset cannot tell how much. Whether a modest CTV-to-PTV margin, which the authors note is controversial in brachytherapy, would close that gap is the practical question the data raise.\n\nThe histology split cuts against expectation: BCC LC 70% vs SCC 88.2%, with three of the five recurrences being nasal BCC. That is more likely a small-numbers artifact or a reflection of nasal geometry and mould conformity than a biologic signal, but it is a reason not to assume BCC is the easy case for this technique on the nose.\n\nThe decision this informs is narrow. For a frail pt with a superficial head-and-neck BCC or SCC who is not a Mohs candidate, surface mould HDR is a tolerable, non-invasive option with high early response. It does not establish equivalence with surgery or EBRT, and it says nothing about lesions deeper than 5 mm. Pooled histologies, mixed intent and visible internal inconsistencies in the reported demographics and follow-up should temper how much weight any single number carries.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "With no PTV and median V100 73.7%, LC tracked coverage numerically (76.9% vs 88.9% by V90 95% cut, NS). Nasal BCC carried 3 of 5 recurrences, which argues for margin and coverage scrutiny there when choosing surface mould prescription depth and target definition."
+              "radonc": "Prescription at 0.5 cm with no PTV gave median V100 73.7% and surface dose 126.5%. LC 88.9% with V90 >95% vs 76.9% below (p=0.85) suggests coverage matters, but five recurrences cannot define a V90 target or justify a margin."
             },
             "open_questions": [
-              "Does LC hold beyond 2 years with mature follow-up?",
-              "Does a PTV margin or V90 ≥95% improve LC for nasal BCC?",
-              "Cosmetic outcomes vs electrons or EBRT in elderly pts"
+              "Durability of local control beyond one year of follow-up",
+              "Does V90 coverage above 95% predict local control?",
+              "Role of a PTV margin in surface mould brachytherapy"
             ],
             "consort": null,
             "modality": "radiation",
@@ -798,13 +874,17 @@
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "skin cancer brachytherapy",
-                "basal cell carcinoma brachytherapy",
-                "skin cancer radiotherapy cosmesis"
+                "brachytherapy skin cancer",
+                "HDR brachytherapy basal cell"
               ],
-              "queries_failed": [],
-              "candidates_returned": 39,
-              "fetched_at": "2026-10-25T17:46:22.973Z",
+              "queries_failed": [
+                {
+                  "term": "HDR brachytherapy basal cell",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 20,
+              "fetched_at": "2026-10-26T08:13:26.811Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [
@@ -817,16 +897,561 @@
           }
         ],
         "open_questions": null
+      },
+      {
+        "disease_site": "oligo-mets",
+        "intro": "Randomised OS null for consolidative RT in induction-responsive synchronous oligomet NSCLC; PFS signal unquantified in source.",
+        "studies": [
+          {
+            "name": "SARON",
+            "tldr": "mOS 31.0 vs 28.0 mo, HR 0.99 (0.63-1.55), adding consolidation RT to SACT in synchronous oligometastatic driver-negative NSCLC; PFS improved, magnitude not given.",
+            "details": [
+              "📊 PFS improved with consolidation RT; no effect size reported in source",
+              "📊 No significant difference in QoL or AEs (per presenter tweet); no rates reported in source",
+              "🔍 Randomised phase II, 1:1, minimisation-stratified",
+              {
+                "text": "🔍 Stratification factors",
+                "subdetails": [
+                  "Histology",
+                  "N-stage",
+                  "Number of metastases",
+                  "Brain metastases",
+                  "SACT",
+                  "Recruiting site"
+                ]
+              },
+              "🔍 N=200 registered → 6-8 wk induction SACT → N=134 randomised",
+              {
+                "text": "🔍 Eligibility",
+                "subdetails": [
+                  "NSCLC without driver mutation",
+                  "Primary (+/- nodes) suitable for radical RT or SABR",
+                  "1-5 synchronous mets in up to 3 organs, treatable by SABR/SRS",
+                  "Brain mets allowed only with ≥1 extracranial met",
+                  "PS 0-1, PET-CT and brain CT/MRI staged",
+                  "Randomised only if CR/PR/SD and PS 0-2 after induction; PD or PS ≥3 withdrawn"
+                ]
+              },
+              "🔍 RT arm: conventional RT or SABR to primary (+/- nodes) plus SABR/SRS to all mets",
+              "⚠️ RT dose/fractionation not reported in source",
+              "⚠️ Primary endpoint not identified in source; PFS magnitude absent",
+              "⚠️ Schema lists N=134 randomised; OS at-risk table shows 70 per arm at time 0. Unresolved in source",
+              "⚠️ Randomisation after induction selects non-progressors; does not test upfront RT",
+              "🔗 vs Gomez (Lancet Oncol 2016), Iyengar (JAMA Oncol 2018): prior LCT benefit on chemo backbone; SARON OS null",
+              "🔗 Consistent with Elamin (ESMO 2025), Iyengar (ASCO 2024): no LCT benefit for oligo-persistent disease on chemo-IO"
+            ],
+            "figures": [
+              {
+                "url": "https://pbs.twimg.com/media/HVd0giWXIAAirRH.jpg",
+                "caption": {
+                  "columns": [
+                    "Arm",
+                    "mOS",
+                    "HR (95% CI)",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "SACT (control)",
+                      "28.0 months",
+                      "0.99 (0.63-1.55)",
+                      "0.95"
+                    ],
+                    [
+                      "SACT+RT",
+                      "31.0 months",
+                      "",
+                      ""
+                    ]
+                  ]
+                }
+              },
+              {
+                "url": "https://pbs.twimg.com/media/HVd0giYWEAAC9az.jpg",
+                "caption": "Randomised phase II schema: N=200 registration, N=134 randomised 1:1 after 6-8 weeks induction SACT."
+              }
+            ],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              94
+            ],
+            "slug": "saron",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Randomised phase II, but source names no primary endpoint and gives no PFS magnitude; the only quantified result is a null OS with a wide CI.",
+              "audience": "Synchronous 1-5 met driver-negative NSCLC, no PD after induction SACT"
+            },
+            "significance": "The PFS gain from consolidation RT did not carry into OS (HR 0.99, 95% CI 0.63-1.55), and QoL and AEs did not differ. RT here was comprehensive: primary (+/- nodes) by conventional RT or SABR plus SABR/SRS to every met. That frames the consolidation decision for non-progressors after induction as disease control at no measured toxicity cost, not survival.",
+            "monday_clinic": "In de novo synchronous oligometastatic driver-negative NSCLC with CR/PR/SD after induction SACT, this supports consolidation RT for progression control but does not establish an OS gain; it does not extend to pts progressing on induction or to EGFR-mutated disease.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**Randomised phase II**, 1:1 by minimisation, stratified by histology, N-stage, met number, brain mets, SACT and site. **N=200** registered, **N=134** randomised; follow-up for 3 years or until death."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**De novo synchronous oligometastatic NSCLC without driver mutation**: 1-5 mets in up to 3 organs, PS 0-1, PET-CT and brain CT/MRI staged. Brain mets allowed only with at least one extracranial met. Randomised only with **CR/PR/SD and PS 0-2 after 6-8 weeks induction SACT**."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Conventional RT or SABR to the primary (+/- nodes) plus **SABR/SRS to all metastases**, delivered within a window of up to 4-6 further weeks of induction SACT. Dose and fractionation not reported in source."
+              },
+              {
+                "label": "Endpoints",
+                "body": "PFS, OS, QoL and AEs reported. Which endpoint was primary is not stated in source."
+              },
+              {
+                "label": "Results",
+                "body": "PFS improved with RT (no effect size in source). OS **HR 0.99 (95% CI 0.63-1.55), p=0.95**; mOS 31.0 vs 28.0 mo."
+              },
+              {
+                "label": "Safety",
+                "body": "**No significant difference in AEs or QoL** per presenter; no rates in source."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Gomez (Lancet Oncol 2016) and Iyengar (JAMA Oncol 2018) supported LCT after chemotherapy, while Elamin (ESMO 2025) and Iyengar (ASCO 2024) found no LCT benefit in oligo-persistent disease on chemo-IO. SARON's **OS-null** result sits with the latter."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents de novo synchronous oligometastatic driver-negative NSCLC without progression after induction SACT. Does not represent EGFR-mutated disease on TKI, progressors on induction, or pts with more than 5 mets or 3 organs."
+              },
+              {
+                "label": "Limitations",
+                "body": "The schema lists 134 randomised but the OS at-risk table shows 70 per arm, unresolved in source. Maintenance SACT was permitted, and its use by arm is not reported."
+              },
+              {
+                "label": "Discussion",
+                "body": "Comprehensive RT bought PFS without measured toxicity or QoL cost, but **no OS benefit** at this sample size. The CI is wide enough that a moderate OS effect in either direction is not excluded."
+              }
+            ],
+            "interpretation": "SARON lands in a literature that has been drifting away from the early optimism about local consolidative therapy in oligometastatic NSCLC. The trial's own background slide lays out the arc: Gomez (Lancet Oncol 2016) and Iyengar (JAMA Oncol 2018) supported consolidation after chemotherapy, the EGFR-mutated TKI trials (Wang, JNCI 2023; Sun, JCO 2024) extended that to targeted therapy, and the more recent chemo-immunotherapy era data (Iyengar, ASCO 2024; Elamin, ESMO 2025) found no benefit in oligo-persistent disease. SARON asks the cleanest version of the question for the largest group, de novo synchronous driver-negative disease, and its answer on survival is null: HR 0.99 with mOS 31.0 vs 28.0 months.\n\nThe PFS-positive, OS-null pattern is familiar and has two readings. One is that consolidation RT delays progression at sites a subsequent line would have controlled anyway, so it moves the timing of failure without changing its endpoint. The other is that SARON could not see an OS effect that exists. The confidence interval, 0.63 to 1.55, cannot exclude a meaningful benefit or meaningful harm, and that width is what a randomised phase II produces for survival. The honest summary is that OS is undetermined rather than disproven, while the absence of any signal at all should temper expectations.\n\nThe design choices matter for how far the result travels. Randomisation happened after 6 to 8 weeks of induction SACT and only for pts with CR, PR or SD, so the trial tests consolidation in a population already selected for systemic sensitivity. That is the right population for the clinical question most radiation oncologists face, but it says nothing about upfront local therapy or about pts who progress on induction. Maintenance SACT was allowed, and without per-arm data on maintenance use and subsequent lines, the OS comparison is exposed to post-progression treatment differences. The source also leaves a numerical inconsistency: the schema lists 134 randomised, while the OS at-risk table starts at 70 per arm. That needs to be resolved in the full report before the numbers are cited.\n\nWhat the trial does seem to establish is that comprehensive RT to the primary and all metastases did not cost QoL or add measurable toxicity, according to the presenter. That reframes the decision. Consolidation RT in this setting becomes a disease-control intervention with an apparently acceptable cost, reasonable to discuss when local progression would itself be morbid, rather than a survival intervention to offer every eligible pt. Two things would change the read: a PFS magnitude large enough to matter clinically, which the source does not give, and longer follow-up or pooled data showing late OS separation. Until the full PFS data and the endpoint are reported, the trial is better taken as evidence against a large OS effect than as a settled verdict on consolidation.",
+            "relevant_specialties": [
+              "radonc",
+              "medonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Comprehensive RT (primary +/- nodes by conventional RT or SABR, plus SABR/SRS to all mets) improved PFS without a QoL or AE penalty but left OS unchanged (HR 0.99). Consolidation for non-progressors after induction is a disease-control decision, not a survival one.",
+              "medonc": "In pts who respond or stabilise on induction SACT, adding RT did not change OS (mOS 31.0 vs 28.0 mo). The systemic backbone and maintenance remain the survival lever, and per-arm subsequent therapy is not reported in source."
+            },
+            "open_questions": [
+              "Does the PFS gain translate to OS with longer follow-up?",
+              "Role of consolidation RT on a chemo-immunotherapy backbone",
+              "Which oligometastatic subsets benefit (met number, brain mets)?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "phase-2-trial",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05278052",
+                "brief_title": "Standard Maintenance Therapy (SMT) vs Local Consolidative Radiation Therapy and SMT in OM-NSCLC",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 190,
+                "primary_completion_date": "2026-04",
+                "brief_summary": "Standard Maintenance Therapy versus Local Consolidative Radiation Therapy and standard maintenance therapy in 1-5 sites of OligoMetastatic Non-small cell lung cancer (NSCLC): A Phase III Randomized Controlled Trial",
+                "conditions": [
+                  "Oligometastatic Disease",
+                  "Metastatic Non Small Cell Lung Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Local consolidative radiation therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Standard maintenance therapy as decided by the treating medical oncologist",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Age \\> 18 years\n2. Patients with ECOG performance status of 0-2\n3. Patients with pathologically proven diagnosis of NSCLC\n4. Patients with 1-5 sites of metastatic disease not including the primary tumor and regional nodes (less than or equal to 3 metastatic lesions in one…",
+                "answers_question": "Does the PFS gain translate to OS with longer follow-up?",
+                "relevance_phrase": "phase 3 LCRT + maintenance vs maintenance, 1-5 mets"
+              },
+              {
+                "nct": "NCT07842471",
+                "brief_title": "Local Consolidative Therapy Versus Maintenance Immunotherapy After First-Line Chemoimmunotherapy in Metastatic NSCLC",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 117,
+                "primary_completion_date": "2029-12",
+                "brief_summary": "This study explores the difference in progression-free survival (PFS) between local consolidative therapy (LCT arm) targeting residual lesions and continued systemic therapy (non-LCT arm) in patients with metastatic NSCLC who have achieved at least partial response (PR) following first-line chemoimmunotherapy. In this process, a multidisciplinary team (MDT) comprising surgical oncology, radiation oncology, and medical oncology will be integrated to administer local treatment…",
+                "conditions": [
+                  "NSCLC (Non-small Cell Lung Carcinoma)"
+                ],
+                "interventions": [
+                  {
+                    "name": "Immediate Local Consolidative Therapy (LCT)",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Voluntary participation in the study with signed informed consent;\n2. Age ≥18 years, both male and female;\n3. Eastern Cooperative Oncology Group (ECOG) performance status score of 0-1;\n4. Estimated life expectancy ≥12 months;\n5. Histologically/cytologically confirmed…",
+                "answers_question": "Role of consolidation RT on a chemo-immunotherapy backbone",
+                "relevance_phrase": "LCT vs maintenance IO after 1L chemo-IO PR"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "consolidative radiotherapy oligometastatic NSCLC",
+                "SABR immunotherapy oligometastatic NSCLC"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 6,
+              "fetched_at": "2026-10-26T08:11:18.028Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "tweet",
+                "id": 94
+              }
+            ],
+            "meeting": {
+              "slug": "esmo-2026",
+              "name": "ESMO Congress 2026"
+            }
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "bladder",
+        "intro": "Bladder preservation via reTURBT after neoadjuvant IO/ADC regimens. In pts who decline RC, residual disease at reTURBT separates the good outcomes from the poor ones.",
+        "studies": [
+          {
+            "name": "Bladder preservation after neoadjuvant/perioperative therapy in MIBC (reTURBT cohort)",
+            "tldr": "ypT0Nx at reTURBT after neoadjuvant therapy: 24-mo EFS 87.6%, OS 96.7% in MIBC pts declining RC (n=54); non-pCR pts fared far worse.",
+            "details": [
+              "🔍 Pooled from PURE-01, SURE-01, SURE-02, NURE-Combo; N=279 enrolled 02/2017-07/2025",
+              "🔍 MIBC cT2-4N0M0, pure/predominant (≥50%) urothelial carcinoma",
+              {
+                "text": "💊 Neoadjuvant or perioperative regimens across parent trials",
+                "subdetails": [
+                  "PURE-01: pembrolizumab",
+                  "SURE-01: sacituzumab govitecan",
+                  "SURE-02: SG + pembrolizumab",
+                  "NURE-Combo: nivolumab + nab-paclitaxel"
+                ]
+              },
+              "🔍 Restaging with CT + multiparametric bladder MRI",
+              {
+                "text": "🔍 Post-therapy disposition",
+                "subdetails": [
+                  "Radical cystectomy n=213 (76.4%)",
+                  "Declined RC → reTURBT n=54 (19.3%)",
+                  "No surgery n=12 (4.3%)"
+                ]
+              },
+              "🔍 reTURBT arm required negative imaging, biopsy and cytology",
+              "🔍 Deferred RC or chemo-RT reserved for residual tumor or recurrence",
+              "📊 Schema lists reTURBT 30/54 (56%) vs RC 43/213 (20%); endpoint not labeled in source text",
+              "📊 19% of reTURBT pts recurred; 13% developed distant recurrence",
+              "⚠️ Self-selected cohort: pts declined RC, so the RC comparison is not randomized",
+              "⚠️ pCR-stratum HRs vs RC carry CIs spanning 1; not powered to show equivalence",
+              "⚠️ Residual disease at reTURBT tracks with much worse EFS and OS than RC non-pCR (Fig 2)",
+              "⚠️ Follow-up reported to 24-36 mo only; late bladder recurrences not yet captured"
+            ],
+            "figures": [
+              {
+                "url": "https://pbs.twimg.com/media/HVdUEL2bkAAEPaV.jpg",
+                "caption": {
+                  "columns": [
+                    "Group",
+                    "24-mo EFS",
+                    "24-mo OS"
+                  ],
+                  "rows": [
+                    [
+                      "reTURBT pCR",
+                      "87.6%",
+                      "96.7%"
+                    ],
+                    [
+                      "reTURBT vs RC, pCR (HR)",
+                      "1.96 (0.53-7.27)",
+                      "0.90 (0.10-8.40)"
+                    ],
+                    [
+                      "reTURBT non-pCR",
+                      "19.3%",
+                      "50.4%"
+                    ],
+                    [
+                      "RC non-pCR",
+                      "67.8%",
+                      "82.5%"
+                    ]
+                  ]
+                }
+              },
+              {
+                "url": "https://pbs.twimg.com/media/HVdUDqWakAApQDF.jpg",
+                "caption": "reTURBT group (N=53): 36-mo EFS 66.7% (95% CI 54.5-81.7); MFS 65.9% (50.9-85.4); 36-mo OS 82.7% (95% CI 72.4-94.6)."
+              },
+              {
+                "url": "https://pbs.twimg.com/media/HVdT_7XawAA1nwf.jpg",
+                "caption": "N = 279 enrolled 02/2017-07/2025: RC n = 213 (76.4%), reTURBT n = 54 (19.3%), no surgery n = 12 (4.3%)."
+              }
+            ],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              93
+            ],
+            "slug": "mibc-bladder-preservation-returbt",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Pts self-selected by declining RC; RC comparison non-randomized, pCR-stratum HR CIs span 1, reTURBT n=54 pooled across four heterogeneous phase 2 regimens.",
+              "audience": "MIBC cT2-4N0M0 urothelial, post-neoadjuvant IO/ADC, declining RC"
+            },
+            "significance": "Chemo-RT here was only salvage for residual tumor or recurrence, so this tests a bladder-sparing route that skips upfront RT. The split is stark: non-pCR at reTURBT gave 24-mo OS 50.4% vs 82.5% after RC, so residual disease at reTURBT is the point where definitive local therapy (RC or chemoRT) should be on the table.",
+            "monday_clinic": "In an MIBC pt with ypT0 at reTURBT plus negative MRI and cytology after IO-based neoadjuvant therapy who declines RC, this supports surveillance as a discussable option; it does not extend to pts with any residual disease at reTURBT.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Pooled cohort from four neoadjuvant/perioperative trials (PURE-01, SURE-01, SURE-02, NURE-Combo), **N=279** enrolled 02/2017-07/2025. Bladder preservation was pt choice, not a randomized allocation."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**MIBC cT2-4N0M0**, pure/predominant (≥50%) urothelial carcinoma. The reTURBT group (**n=54**) declined RC and required **negative imaging, biopsy and cytology**."
+              },
+              {
+                "label": "Regimen",
+                "body": "Pembrolizumab, sacituzumab govitecan, SG + pembrolizumab, or nivolumab + nab-paclitaxel, restaged with CT + multiparametric bladder MRI. Adjuvant/maintenance per protocol; **deferred RC or chemo-RT only for residual tumor or recurrence**."
+              },
+              {
+                "label": "Results",
+                "body": "Whole reTURBT group: **36-mo EFS 66.7%**, **36-mo OS 82.7%**; 19% recurred, 13% distantly. Outcomes split sharply by response at reTURBT (Fig 2)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The comparator is the trials' own RC cohort, not a randomized arm. Trimodality therapy, the established bladder-sparing alternative, was not a planned arm here; chemo-RT appears only as salvage."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents MIBC pts with ypT0 at reTURBT after neoadjuvant IO- or ADC-based therapy who decline RC. Does not represent pts with residual disease at reTURBT, node-positive disease, or non-urothelial-predominant histology."
+              },
+              {
+                "label": "Limitations",
+                "body": "Four different regimens pooled into one small cohort. The tweet's comparison claim is truncated, and the **30/54 (56%) vs 43/213 (20%)** schema figure carries no endpoint label in the source."
+              },
+              {
+                "label": "Discussion",
+                "body": "The pCR stratum looks good, but HRs vs RC of **1.96 (0.53-7.27)** for EFS and **0.90 (0.10-8.40)** for OS are too imprecise to call equivalence. Non-pCR at reTURBT is the clear failure mode and argues for definitive local therapy rather than continued surveillance."
+              }
+            ],
+            "interpretation": "The question this cohort asks is narrower than it first looks. It does not test bladder preservation as a strategy against cystectomy. It describes what happened to the fifth of trial pts who, after neoadjuvant or perioperative systemic therapy, chose not to have their bladder removed and were restaged with reTURBT, MRI and cytology. That choice is the central methodological fact. Pts who decline RC differ from those who accept it in ways no restaging protocol captures: comorbidity, preference, perhaps a clinician's read of an exceptional response. Every comparison with the RC cohort inherits that selection, and the direction of the bias is hard to predict.\n\nWithin that frame, the useful signal is the split by response at reTURBT rather than the pooled numbers. Pts with no residual disease had 24-mo EFS 87.6% and OS 96.7%, and their HRs against RC pCR pts were 1.96 for EFS and 0.90 for OS, with intervals from 0.53 to 7.27 and 0.10 to 8.40. Those intervals are wide enough to fit real harm or real equivalence. The point estimate for EFS leans toward more events without the bladder out, which is expected: an intact bladder can grow new urothelial tumors, and some of those events are salvageable. A reader should not take the OS estimate as evidence of no survival cost. At this sample size it cannot exclude one.\n\nThe non-pCR stratum is more decisive. Residual disease at reTURBT went with 24-mo EFS 19.3% and OS 50.4%, against 67.8% and 82.5% for non-pCR pts who had RC. Even allowing for selection, that gap is large enough to treat residual disease at reTURBT as a firm stop signal for surveillance. For a radiation oncologist, this is where the cohort touches practice: chemo-RT was used here only as salvage for residual tumor or recurrence, never as planned consolidation. Whether planned chemoradiation after an incomplete response to modern IO- or ADC-based neoadjuvant therapy would close that gap is untested here, and it is the more interesting trial.\n\nTrimodality therapy remains the bladder-sparing approach with the longer evidence base, and this cohort does not compete with it directly; it proposes a route that omits RT altogether for the best responders. That is plausible biologically, but four different regimens are pooled, follow-up runs only to 36 mo, and the reported recurrence rate of 19% includes 13% distant. For the result to be wrong in the direction that matters, late bladder recurrences after 36 mo would need to convert to metastatic disease at rates the current follow-up cannot see. Prospective selection criteria, ideally with a molecular marker added to imaging and cytology, are what would turn this from a description of self-selected responders into a usable pathway.",
+            "relevant_specialties": [
+              "radonc",
+              "medonc",
+              "surgonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Chemo-RT was used only as salvage for residual tumor or recurrence, so this tests bladder sparing without upfront RT. Non-pCR at reTURBT gave 24-mo OS 50.4% vs 82.5% after RC, marking residual disease as the point where definitive local therapy, including chemoRT, belongs.",
+              "medonc": "Response at reTURBT after pembrolizumab-, SG- or nivolumab-based neoadjuvant therapy separated outcomes sharply: 24-mo EFS 87.6% with ypT0 vs 19.3% with residual disease. Depth of response to the systemic regimen, not the regimen label, drove eligibility for surveillance.",
+              "surgonc": "ypT0 at reTURBT pts who declined RC had 24-mo OS 96.7%, but EFS HR 1.96 (0.53-7.27) vs RC pCR is too imprecise to call equivalence. Residual disease at reTURBT tracked with far worse outcomes than RC, keeping cystectomy the default for incomplete responders."
+            },
+            "open_questions": [
+              "Durability of ypT0 at reTURBT beyond 36 months without cystectomy",
+              "Would planned chemoRT rescue non-pCR pts at reTURBT?",
+              "Can ctDNA or MRI better select pts for surveillance?"
+            ],
+            "consort": null,
+            "modality": "combined",
+            "intent": "curative",
+            "methodology": null,
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT06237920",
+                "brief_title": "Stage II-IIIa Urothelial Cancer Randomizing Pre-operative Nivolumab With or Without Relatlimab",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 90,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "This is a non-blinded phase 2 trial in Stage II-IIIa urothelial cancer randomizing pre-operative nivolumab with or without relatlimab to assess whether bladder preservation after dual immunotherapy would be a viable treatment option for patients responding to treatment",
+                "conditions": [
+                  "Urologic Neoplasms",
+                  "Urogenital Neoplasms",
+                  "Neoplasms by Site",
+                  "Neoplasms",
+                  "Female Urogenital Diseases",
+                  "Female Urogenital Diseases and Pregnancy Complications",
+                  "Urogenital Diseases",
+                  "Urinary Bladder Diseases",
+                  "Male Urogenital Diseases",
+                  "Urinary Bladder Neoplasm",
+                  "Antineoplastics Toxicity"
+                ],
+                "interventions": [
+                  {
+                    "name": "Nivolumab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Relatlimab",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Willing and able to provide informed consent\n* Age ≥ 18 years\n* Resectable muscle-invasive UC of the bladder, defined as cT2-4aN0M0 OR cT1-4aN1M0. In cT1N1 patients, lymph node positivity would need to be cytologically or histologically confirmed.\n* Surgical resection…",
+                "answers_question": "Durability of ypT0 at reTURBT beyond 36 months without cystectomy",
+                "relevance_phrase": "bladder preservation in responders to nivo±relatlimab"
+              },
+              {
+                "nct": "NCT04506554",
+                "brief_title": "A Study of Risk Enabled Therapy After Neoadjuvant Immunochemotherapy for Bladder Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 81,
+                "primary_completion_date": "2027-05",
+                "brief_summary": "Neoadjuvant accelerated methotrexate/vinblastine/adriamycin/cisplatin (AMVAC) in combination with nivolumab is under evaluation for the treatment of muscle invasive bladder cancer (MIBC). Patients with pre-specified tumor mutations and complete clinical response with neoadjuvant therapy will preserve their bladders and go on active surveillance.",
+                "conditions": [
+                  "Muscle-Invasive Bladder Carcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "AMVAC + Nivolumab",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Male or female patients ≥18 years\n* Primary urothelial or predominantly urothelial carcinoma of the bladder confirmed from pathology report. Patients with some component of variant histology mixed with predominant urothelial carcinoma will be allowed. Upper tract urothelial…",
+                "answers_question": "Durability of ypT0 at reTURBT beyond 36 months without cystectomy",
+                "relevance_phrase": "cCR after AMVAC+nivo then active surveillance"
+              },
+              {
+                "nct": "NCT07821177",
+                "brief_title": "Bladder Preservation or Cystectomy for MIBC",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "EARLY_PHASE1"
+                ],
+                "enrollment_count": 20,
+                "primary_completion_date": "2027-09",
+                "brief_summary": "In this research study, investigators will assess whether it is feasible to use information from the genes of a tumor combined with evaluation of the tumor response to systemic therapy to determine if bladder sparing chemoradiation can be used or if surgery to remove the bladder, or radical cystectomy, is needed.",
+                "conditions": [
+                  "Muscle-Invasive Bladder Carcinoma",
+                  "Bladder Cancer",
+                  "Urothelial Carcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Gemzar",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Cisplatin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Adrucil",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Mitomycin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Radical Cystectomy",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patient must have signed written informed consent indicating understanding of the purpose of the study and willingness to participate prior to any protocol-related procedures, including screening evaluation.\n* Participants must have histologically confirmed cT2-cT4aN0M0…",
+                "answers_question": "Would planned chemoRT rescue non-pCR pts at reTURBT?",
+                "relevance_phrase": "systemic tx response + genomics assign chemoRT vs RC"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "bladder preservation immunotherapy",
+                "muscle invasive bladder chemoradiotherapy",
+                "ctDNA bladder preservation"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 41,
+              "fetched_at": "2026-10-26T08:11:18.099Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "tweet",
+                "id": 93
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
       }
     ],
     "meta": {
-      "clusters_total": 5,
-      "studies_analyzed": 5,
+      "clusters_total": 7,
+      "studies_analyzed": 7,
       "dropped": [],
       "ocr_available": true
     }
   },
-  "bookmarks": [],
+  "bookmarks": [
+    {
+      "id": 94,
+      "url": "https://x.com/gerryhanna/status/2114286665627795943",
+      "bookmark_date": "2026-10-25",
+      "author_handle": "@gerryhanna",
+      "author_name": "Gerry Hanna",
+      "text": "Presenting the UK’s SARON study Dr @fifimcdrmh to a full hall at #ESMO26\n\nIn patients with de novo oligometastatic mutation driver negative #NSCLC , consolidation radiotherapy to the primary and metastases improved PFS but no OS\n\nNo significant difference in QOL or AEs\n\nHuge… pic.twitter.com/EmWoQXHalE",
+      "html": "<blockquote class=\"twitter-tweet\"><p lang=\"en\" dir=\"ltr\">Presenting the UK’s SARON study Dr <a href=\"https://x.com/fifimcdrmh?ref_src=twsrc%5Etfw\">@fifimcdrmh</a> to a full hall at <a href=\"https://x.com/hashtag/ESMO26?src=hash&amp;ref_src=twsrc%5Etfw\">#ESMO26</a><br><br>In patients with de novo oligometastatic mutation driver negative <a href=\"https://x.com/hashtag/NSCLC?src=hash&amp;ref_src=twsrc%5Etfw\">#NSCLC</a> , consolidation radiotherapy to the primary and metastases improved PFS but no OS<br><br>No significant difference in QOL or AEs<br><br>Huge… <a href=\"https://t.co/EmWoQXHalE\">pic.twitter.com/EmWoQXHalE</a></p>&mdash; Gerry Hanna (@gerryhanna) <a href=\"https://x.com/gerryhanna/status/2114286665627795943?ref_src=twsrc%5Etfw\">October 25, 2026</a></blockquote>\n\n",
+      "image_urls": [
+        "https://pbs.twimg.com/media/HVd0giVWwAAldUi.jpg",
+        "https://pbs.twimg.com/media/HVd0gieWwAAxsIP.jpg",
+        "https://pbs.twimg.com/media/HVd0giYWEAAC9az.jpg",
+        "https://pbs.twimg.com/media/HVd0giWXIAAirRH.jpg"
+      ],
+      "image_ocr_texts": [
+        "Background and Rationale\nSArON\nLocal consolidative therapy (LCT) with radiotherapy or surgery\nimproves outcomes in patients with oligo-metastatic / oligo-persistent\nNSCLC treated with chemotherapy 1-2\nLCT with radiotherapy improves outcomes in patients\nwith synchronous oligo-metastatic, oligo-organ & poly-metastatic\nEGFR mutated NSCLC treated with TKI 3-5\nLCT with radiotherapy or surgery is not associated with improved\noutcomes in patients with oligo-persistent NSCLC treated with\nchemotherapy & immunotherapy 6-7\n'Gomez et al Lancet Oncol 2016; -yengar et al JAMA Oncol 2018; Wang et al UNCI 2023: Sun et al JCO 2024:\n•Elamin et al ESMO 2025; \"yengar et al ASCO 2024: Altan et al WCLC 2026\nDo patients with synchronous\noligometastatic, actionable genomic\nalteration (AGA)-negative, NSCLC benefit\nfrom the addition of consolidation\nradiotherapy to chemotherapy and or\nimmunotherapy?\n23-27 OCTOBER 2026",
+        "CANCER\nRESEARCH\nCancer\nTrials\nCentre\nPaN ESMD congress\nStereotactic Ablative Radiotherapy for\nPrimary results of SADON Sone Able aditorey encor\nA randomised-controlled trial of consolidation radiotherapy for synchronous\noligometastatic non-small cell lung cancer\nFiona McDonald, Nicholas Counsell, Shahreen Ahmad, Merina Ahmed, Philip Atherton, Andrew Bates, Charles Comins, John Conibear, Corinne Faivre-Finn, Kevin\nFranks, Gerard G. Hanna, Stephen Harrow, Matthew Hatton, Ka Man Mak, Philip Mayles, Rushil Patel, Clive Peedell, Tony Pope, Martin Forster, David Landau\nDr Fiona McDonald, Consultant Thoracic Oncologist\nRoyal Marsden Hospital, London, UK\nOctober 2026\nFPN: 26130\n\"UCL\nRTTOA\nCaten\nThoracic\nOncology\nBTOG\nGros\naMOR",
+        "A ESMD Congress\nTrial Design: Randomised Phase II\nSArON\nNSCLC without\ndriver mutation\nPrimary tumour (+/-\nnodes) suitable for\nradical RT or SABR\n1-5 synchronous\nmetastases in up to 3\norgans* treatable by\nSABR / SRS\nPS 0-1, PET-CT and\nbrain CT/MRI staged\n*Brain metastases can be\nincluded if at least one extra-\ncranial metastasis is also present\nN=200\nRegistration\n6-8 weeks\ninduction\nsystemic anti-\ncancer therapy\n(SACT)\nN=134\nR\nInvestigational arm\nMax of further\n4-6 weeks of\ninduction SACT\nFollow-up\nConventional RT or\nSABR to primary\ntumour (+/- nodes) +\nSABR / SRS to\nmetastases\nPS ≥3 or PD\nPS 0-2\nCT scan:\nCR/PR/SD\nRandomisation (R) using\nminimisation stratified by:\nhistology, N-stage,\nnumber of metastases,\nbrain metastases, SACT &\nrecruiting site\n1:1\nFollow-up for\n3 years or until\ndeath +/-\nmaintenance\nSACT\nMax of further\n4-6 weeks of\ninduction SACT\nControl arm\nWithdrawal\nRT = radiotherapy\nSABR = stereotactic ablative radiotherapy\nSRS = stereotactic radiosurgery\nPS = performance status\nCR = complete response\nPR = partial response\nSD = stable disease\nPD = progressive disease",
+        "MESMO Congress\nSArON\nOverall Survival\nOverall Survival\n100\n80-\n60-\n40-\n20-\n0.\n0\nmOS 28.0 months in SACT arm\nmOS 31.0 months in SACT+RT arm\nHR=0.99 (95%CI: 0.63-1.55), p=0.95\n# at risk\nControl:\nInvestigational:\n70\n70\n12\n24\n36\n48\n60\n72\nTime from Randomisation (Months)\n51\n55\n38\n33\n15\n21\n4\n0\n2\n0\n2\n0\n84\n0"
+      ],
+      "note": null,
+      "fetched_via": "oembed",
+      "conference_slug": "esmo-2026"
+    },
+    {
+      "id": 93,
+      "url": "https://x.com/rksayyid/status/2114250985459908697",
+      "bookmark_date": "2026-10-25",
+      "author_handle": "@RKSayyid",
+      "author_name": "Rashid K. Sayyid",
+      "text": "Bladder preservation after neoadjuvant/perioperative therapy in 🇮🇹 MIBC pts who declined RC and underwent reTURBT (n=54)\n📌Negative imaging, biopsy & cytology\n\n🔹19% recurred; 13% developed distant recurrence\n🔹 ypT0Nx at reTURBT → 24-mo EFS 88%; MFS & OS >95%, comparable with… pic.twitter.com/2I402Cwxa9",
+      "html": "<blockquote class=\"twitter-tweet\"><p lang=\"en\" dir=\"ltr\">Bladder preservation after neoadjuvant/perioperative therapy in 🇮🇹 MIBC pts who declined RC and underwent reTURBT (n=54)<br>📌Negative imaging, biopsy &amp; cytology<br><br>🔹19% recurred; 13% developed distant recurrence<br>🔹 ypT0Nx at reTURBT → 24-mo EFS 88%; MFS &amp; OS &gt;95%, comparable with… <a href=\"https://t.co/2I402Cwxa9\">pic.twitter.com/2I402Cwxa9</a></p>&mdash; Rashid K. Sayyid (@RKSayyid) <a href=\"https://x.com/RKSayyid/status/2114250985459908697?ref_src=twsrc%5Etfw\">October 25, 2026</a></blockquote>\n\n",
+      "image_urls": [
+        "https://pbs.twimg.com/media/HVdT_7XawAA1nwf.jpg",
+        "https://pbs.twimg.com/media/HVdUDqWakAApQDF.jpg",
+        "https://pbs.twimg.com/media/HVdUEL2bkAAEPaV.jpg"
+      ],
+      "image_ocr_texts": [
+        "PURE-01\nPembrolizumab\nSURE-01\nSacituzumab govitecan\nSURE-02\nSG + pembrolizumab\nNURE-Combo\nNivolumab + nab-\npadlitaxel\nMIBC cT2-4NOM0 • pure/predominant (≥50%) urothelial carcinoma\nNeoadjuvant or perioperative therapy • restaging with CT + multiparametric bladder MRI\nN = 279 - enrolled 02/2017-07/2025\nRadical cystectomy\nn = 213(76.4%)\nDeclined RC: reTURBT\nn = 54(19.3%)\nNo surgery*\nn = 12(4.3%)\nAdjuvant / maintenance therapy per protocol\nreTURBT 30/54 (56%) vs RC 43/213 (20%)\nDeferred RC or chemo-RT only\nfor residual tumor / recurrence",
+        "Figure 1A EFS, reTURBT group (N= 53)\n+ TURST oNy\nFigure 1B\nOS, reTURBT group (N= 53)\n+ TURT\nE0.75-\n5 0.50-\n802s\n0.25\n0.00-\nTime from Terapy (months)\nTime from therapy (months!\nNumber at risk\nNumber at risk\n12\n30\nTime from therapy (months)\nTime from therapy (montho)\nCumulative number of censoring\nCumulative number of censoring\nTime from therapy (monthe)\n36-mo EFS 66.7% (95% Cl 54.5-81.7): MFS 65.9% (50.9-85.4)\n36-mo OS 82.7% (95% Cl 72.4-94.6)\nTime trom therapy (month\n30\n36",
+        "Figure 2A EFS by pathological response\n- TURETORO — TURSTRO → RCICA - ACROpCA\nFigure 2B OS by pathological response\n- TURATAGRO — TURETRO - RCICE → RCMPOR\n1.00-\nEvere-free survival (%)\n0.75\n0.50\n100-\nTime mom therapy (months)\nTime from therapy (months)\n128\n137\nTime from therapy (months)\n131\nTime from therapy (months)\nCumulative number of censoring\nCumulative number of censoring\nTime from therapy (monts\n24-mo EFS, reTURBT vs RC: pCR 87.6% vs HR 1.96 (0.53-7.27); non-\npCR 19.3% vs 67.8%\nTime tram tempy (morts\n24-mo OS, reTURBT vs RC: pCR 96.7%, HR 0.90 (0.10-8.40); non-pCR\n50.4% vs 82.5%\nTURBT no RD/RD: ypTONx/ residual disease at reTURBT; RC pCR: ypTONO. Log-rank px0.001 across the four groups for EFS, MFS and OS."
+      ],
+      "note": null,
+      "fetched_via": "oembed",
+      "conference_slug": null
+    }
+  ],
   "papers": [
     {
       "id": 156,
