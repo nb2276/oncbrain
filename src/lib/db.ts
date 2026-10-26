@@ -411,6 +411,7 @@ export function openDb(path: string = process.env.DB_PATH || './oncbrain.db'): D
   migratePapersAddFigureOcr(db);
   migratePapersAddFigureStructured(db);
   migrateAddSourceFacetColumns(db);
+  migrateLocalIngestQueue(db);
   // content_hash column is guaranteed to exist now (fresh SCHEMA or migration);
   // create its partial unique index here rather than in SCHEMA so an old-shape
   // DB doesn't error on the missing column before the migration runs.
@@ -597,6 +598,20 @@ function migratePapersAllowDoiOnly(db: Database.Database, dbPath: string): void 
     `);
   });
   tx();
+}
+
+// v0.63: the drip queue also takes URLs (a meeting abstract, a trade-press
+// article), with a priority (news ahead of the reference library) and an
+// optional file date (a trade article files on the day its abstract was
+// presented, so the two cluster into one card).
+function migrateLocalIngestQueue(db: Database.Database): void {
+  const cols = db.prepare('PRAGMA table_info(local_ingest_queue)').all() as { name: string }[];
+  if (!cols.some((c) => c.name === 'priority')) {
+    db.exec('ALTER TABLE local_ingest_queue ADD COLUMN priority INTEGER NOT NULL DEFAULT 0');
+  }
+  if (!cols.some((c) => c.name === 'file_date')) {
+    db.exec('ALTER TABLE local_ingest_queue ADD COLUMN file_date TEXT');
+  }
 }
 
 // Non-destructive ALTER for v0.2.0: existing oncbrain.db files predate the
@@ -1771,7 +1786,9 @@ export function reopenStaleResolutions(
 
 // --- v0.61: local PDF drip ---------------------------------------------------
 
-export type LocalIngestKind = 'paper' | 'talk';
+// paper/talk: a local PDF (path). url: a web source (a cached meeting abstract
+// or a trade-press article), released as an ordinary paper-link inbox item.
+export type LocalIngestKind = 'paper' | 'talk' | 'url';
 export type LocalIngestEntry = {
   id: number;
   path: string;
@@ -1781,23 +1798,31 @@ export type LocalIngestEntry = {
   released_at: number | null;
   released_date: string | null;
   inbox_item_id: number | null;
+  priority: number;
+  file_date: string | null;
 };
 
 /** Stage a local PDF. Idempotent on path; returns the row id, and whether it was new. */
 export function enqueueLocalIngest(
   db: Database.Database,
-  entry: { path: string; kind: LocalIngestKind; note?: string | null },
+  // reprioritize: on a re-stage, overwrite the waiting row's priority (only
+  // when the caller chose one; a default must not undo a hand-set priority).
+  entry: { path: string; kind: LocalIngestKind; note?: string | null; priority?: number; reprioritize?: boolean },
 ): { id: number; created: boolean } {
   const r = db
-    .prepare('INSERT OR IGNORE INTO local_ingest_queue (path, kind, note, queued_at) VALUES (?, ?, ?, ?)')
-    .run(entry.path, entry.kind, entry.note ?? null, Date.now());
+    .prepare('INSERT OR IGNORE INTO local_ingest_queue (path, kind, note, queued_at, priority) VALUES (?, ?, ?, ?, ?)')
+    .run(entry.path, entry.kind, entry.note ?? null, Date.now(), entry.priority ?? 0);
   if (r.changes > 0) return { id: Number(r.lastInsertRowid), created: true };
+  // Re-staging an item still waiting can update its priority (a released one is history).
+  if (entry.reprioritize && entry.priority != null) {
+    db.prepare('UPDATE local_ingest_queue SET priority = ? WHERE path = ? AND released_at IS NULL').run(entry.priority, entry.path);
+  }
   const row = db.prepare('SELECT id FROM local_ingest_queue WHERE path = ?').get(entry.path) as { id: number };
   return { id: row.id, created: false };
 }
 
 export function listLocalIngest(db: Database.Database): LocalIngestEntry[] {
-  return db.prepare('SELECT * FROM local_ingest_queue ORDER BY id').all() as LocalIngestEntry[];
+  return db.prepare('SELECT * FROM local_ingest_queue ORDER BY priority DESC, id').all() as LocalIngestEntry[];
 }
 
 // Local PDF items get a negative synthetic Telegram id like other CLI-queued
@@ -1821,7 +1846,7 @@ export function releaseLocalIngest(
     let rows: LocalIngestEntry[];
     if (opts.ids) {
       const wanted = new Set(opts.ids);
-      rows = (db.prepare('SELECT * FROM local_ingest_queue WHERE released_at IS NULL ORDER BY id').all() as LocalIngestEntry[]).filter(
+      rows = (db.prepare('SELECT * FROM local_ingest_queue WHERE released_at IS NULL ORDER BY priority DESC, id').all() as LocalIngestEntry[]).filter(
         (r) => wanted.has(r.id),
       );
     } else {
@@ -1833,7 +1858,7 @@ export function releaseLocalIngest(
       const room = Math.max(0, opts.limit - already);
       if (room === 0) return [];
       rows = db
-        .prepare('SELECT * FROM local_ingest_queue WHERE released_at IS NULL ORDER BY id LIMIT ?')
+        .prepare('SELECT * FROM local_ingest_queue WHERE released_at IS NULL ORDER BY priority DESC, id LIMIT ?')
         .all(room) as LocalIngestEntry[];
     }
     const out: LocalIngestEntry[] = [];
@@ -1843,11 +1868,20 @@ export function releaseLocalIngest(
         raw_target: row.path,
         raw_message_text: row.note,
         // quiet: no per-item "Got it" DM for a drip; the prior-coverage nudge
-        // still fires. figure_structured:false keeps the drip off the Opus
-        // figure-reconcile calls (raw Vision figure OCR still runs).
-        attachments_json: JSON.stringify({ kind: 'pdf', local_path: row.path, quiet: true, figure_structured: false }),
+        // still fires. figure_structured:false keeps a PDF drip off the Opus
+        // figure-reconcile calls (raw Vision figure OCR still runs). A URL is
+        // an ordinary paper link: the enrichment loop resolves it like a
+        // forwarded one.
+        attachments_json:
+          // drip: true marks every queue release (DM-only, see isDripPaper).
+          row.kind === 'url'
+            ? JSON.stringify({ quiet: true, drip: true })
+            : JSON.stringify({ kind: 'pdf', local_path: row.path, quiet: true, figure_structured: false, drip: true }),
         telegram_msg_id: LOCAL_INGEST_MSG_ID_BASE - row.id,
         telegram_chat_id: opts.chatId,
+        // Always the release date. (The file_date column, from the first v0.63
+        // draft, is deliberately ignored: dating a release into the past
+        // queues a rebuild of that whole day.)
         bookmark_date: opts.date,
       });
       db.prepare('UPDATE local_ingest_queue SET released_at = ?, released_date = ?, inbox_item_id = ? WHERE id = ?').run(
@@ -1862,7 +1896,30 @@ export function releaseLocalIngest(
   })();
 }
 
-/** v0.62.1: true when a paper came in through the ingest:local drip (its inbox item carries a local_path). */
+/**
+ * v0.63: true for anything the drip queue released (a library PDF, a cached
+ * meeting abstract, a trade-press article): announced to the curator by DM
+ * only. Released weeks after the fact, none of it is the day's news.
+ */
+export function isDripPaper(db: Database.Database, paperId: number): boolean {
+  const row = db
+    .prepare('SELECT i.attachments_json AS a FROM papers p JOIN inbox_items i ON i.id = p.inbox_item_id WHERE p.id = ?')
+    .get(paperId) as { a: string | null } | undefined;
+  if (!row?.a) return false;
+  try {
+    const a = JSON.parse(row.a) as { local_path?: unknown; drip?: unknown };
+    return a.drip === true || typeof a.local_path === 'string';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * v0.62.1: true when a paper is a library PDF from the ingest:local drip (its
+ * inbox item carries a local_path). Narrower than isDripPaper on purpose: only
+ * library PDFs are split one card per paper; a meeting abstract and its
+ * trade-press coverage should stay one card.
+ */
 export function isLocalDripPaper(db: Database.Database, paperId: number): boolean {
   const row = db
     .prepare(

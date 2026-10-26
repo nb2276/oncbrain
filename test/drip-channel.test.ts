@@ -1,7 +1,7 @@
 // v0.62.1: local-drip papers (ingest:local) are announced by curator DM only,
 // never in the channel post. A study with any non-drip source still posts.
 import { describe, it, expect } from 'vitest';
-import { openDb, saveInboxItem, enqueueLocalIngest, releaseLocalIngest, isLocalDripPaper } from '../src/lib/db.ts';
+import { openDb, saveInboxItem, enqueueLocalIngest, releaseLocalIngest, isLocalDripPaper, isDripPaper } from '../src/lib/db.ts';
 import { withoutDripStudies, formatChannelPost } from '../src/lib/channel-post.ts';
 
 const artifact = (studies: Array<{ name: string; source_ids: Array<{ type: string; id: number }> }>) => ({
@@ -53,5 +53,20 @@ describe('isLocalDripPaper', () => {
     expect(isLocalDripPaper(db, dripPaper)).toBe(true);
     expect(isLocalDripPaper(db, tgPaper)).toBe(false);
     expect(isLocalDripPaper(db, 999)).toBe(false);
+  });
+});
+
+describe('isDripPaper (v0.63)', () => {
+  it('covers every drip release, URL items included; isLocalDripPaper stays PDF-only', () => {
+    const db = openDb(':memory:');
+    enqueueLocalIngest(db, { path: '/p/a.pdf', kind: 'paper' });
+    enqueueLocalIngest(db, { path: 'https://x/esmo', kind: 'url' });
+    const released = releaseLocalIngest(db, { limit: 5, date: '2026-10-26', chatId: 1 });
+    const tg = saveInboxItem(db, { type: 'paper', raw_target: 'https://doi.org/10.1/y', telegram_msg_id: 9, bookmark_date: '2026-10-26' });
+    const ins = db.prepare("INSERT INTO papers (content_hash, title, bookmark_date, inbox_item_id, fetched_via, created_at) VALUES (?, 't', '2026-10-26', ?, 'pdf', 0)");
+    const [pdf, url] = released.map((r) => Number(ins.run(`h${r.id}`, r.inbox_item_id).lastInsertRowid));
+    const telegram = Number(ins.run('ht', tg.id).lastInsertRowid);
+    expect([isDripPaper(db, pdf!), isDripPaper(db, url!), isDripPaper(db, telegram)]).toEqual([true, true, false]);
+    expect([isLocalDripPaper(db, pdf!), isLocalDripPaper(db, url!)]).toEqual([true, false]);
   });
 });

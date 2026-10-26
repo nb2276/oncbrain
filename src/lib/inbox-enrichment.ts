@@ -12,6 +12,7 @@
 
 import {
   adapterForUrl,
+  abstractCachePath,
   conferenceAbstractHash,
   pairedPortalDoi,
   NotAnAbstractError,
@@ -458,6 +459,14 @@ function localPdfSource(item: InboxItem): { path: string | null; refused: boolea
     return { path: abs, refused: false, figureStructured };
   } catch {
     return { path: null, refused: false, figureStructured: true };
+  }
+}
+
+function isDripRelease(item: InboxItem): boolean {
+  try {
+    return (JSON.parse(item.attachments_json ?? '{}') as { drip?: unknown }).drip === true;
+  } catch {
+    return false;
   }
 }
 
@@ -995,7 +1004,19 @@ async function resolveConferenceAbstract(
   note: string | null,
 ): Promise<NewPaper> {
   let html: string;
-  try {
+  if (adapter.cacheOnly) {
+    // v0.63: the portal blocks server fetches; read what the curator's browser
+    // saved (conf:abstracts --fetch). Missing = not fetched yet, which no retry
+    // tonight will fix.
+    const rel = abstractCachePath(url);
+    try {
+      html = readFileSync(resolvePath(process.cwd(), rel ?? ''), 'utf8');
+    } catch {
+      throw new MetaNotFoundError(
+        `that ${adapter.id.toUpperCase()} abstract isn't fetched yet — run: npm run conf:abstracts -- --meeting=${adapter.id} --fetch --numbers=<abstract number>`,
+      );
+    }
+  } else try {
     html = await ssrfSafeFetchText(url, { allowedHostSuffixes: [adapter.host] });
   } catch (err) {
     const msg = (err as Error).message;
@@ -1030,8 +1051,12 @@ async function resolveConferenceAbstract(
   const days = a.presented_on
     ? (Date.parse(item.bookmark_date) - Date.parse(a.presented_on)) / 86_400_000
     : NaN;
+  // A drip release files on its release night, never backdated: backdating a
+  // nightly batch onto already-published meeting days queued a rebuild of the
+  // whole day each night, and one ESMO day alone holds ~30 abstracts, past the
+  // claude-cli session limit (v0.63 review).
   const bookmark_date =
-    a.presented_on && days >= 0 && days <= PRESENTED_DATE_WINDOW_DAYS ? a.presented_on : item.bookmark_date;
+    !isDripRelease(item) && a.presented_on && days >= 0 && days <= PRESENTED_DATE_WINDOW_DAYS ? a.presented_on : item.bookmark_date;
   // The confirm reply is a command, not a note: nothing of it is the curator's voice.
   const curator_note = pairing
     ? null
@@ -1042,7 +1067,7 @@ async function resolveConferenceAbstract(
     source_url: url,
     title: a.title,
     authors_json: JSON.stringify(a.authors.map((name) => ({ name }))),
-    journal: a.meeting ? `${a.meeting} Annual Meeting` : 'Conference abstract',
+    journal: adapter.journal ? adapter.journal(a.meeting) : a.meeting ? `${a.meeting} Annual Meeting` : 'Conference abstract',
     pub_date: a.presented_on,
     abstract: `${header}\n\n${a.abstract}`,
     bookmark_date,
