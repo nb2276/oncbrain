@@ -88,6 +88,8 @@ describe('esmo-fetch helpers', () => {
     expect(parseEsmoDate('Sun, 25.10.2026')).toBe('2026-10-25');
     expect(parseEsmoDate(null)).toBeNull();
     expect(listingsFor('2756eP')[0]).toBe('confcal_2');
+    expect(listingsFor('1137eTiP')[0]).toBe('confcal_2');
+    expect(listingsFor('1343TiP')[0]).toBe('confcal_1');
     expect(listingsFor('1546P')[0]).toBe('confcal_1');
     expect(listingsFor('2613O')[0]).toBe('confcal');
     expect(listingsFor('LBA4')).toEqual(['confcal', 'confcal_1', 'confcal_2']);
@@ -121,16 +123,16 @@ describe('esmo-fetch helpers', () => {
 });
 
 describe('drip queue: URLs, priority, file date', () => {
-  it('releases by priority, then staging order; a URL becomes a plain paper link', () => {
+  it('releases by priority, then staging order, dated the release night; a URL becomes a plain paper link', () => {
     const db = openDb(':memory:');
     enqueueLocalIngest(db, { path: '/p/old.pdf', kind: 'paper' });
     enqueueLocalIngest(db, { path: 'https://x/poster', kind: 'url', priority: 2 });
-    enqueueLocalIngest(db, { path: 'https://x/lba', kind: 'url', priority: 3, fileDate: '2026-10-24' });
+    enqueueLocalIngest(db, { path: 'https://x/lba', kind: 'url', priority: 3 });
     const out = releaseLocalIngest(db, { limit: 2, date: '2026-10-26', chatId: 1 });
     expect(out.map((r) => r.path)).toEqual(['https://x/lba', 'https://x/poster']);
     const inbox = listInboxItemsForEnrichment(db);
     const lba = inbox.find((i) => i.raw_target === 'https://x/lba')!;
-    expect(lba.bookmark_date).toBe('2026-10-24'); // file date wins
+    expect(lba.bookmark_date).toBe('2026-10-26');
     expect(JSON.parse(lba.attachments_json!)).toEqual({ quiet: true, drip: true }); // no local_path: not a library PDF
     expect(inbox.find((i) => i.raw_target === 'https://x/poster')!.bookmark_date).toBe('2026-10-26');
   });
@@ -138,13 +140,11 @@ describe('drip queue: URLs, priority, file date', () => {
     const db = openDb(':memory:');
     enqueueLocalIngest(db, { path: 'https://x/a', kind: 'url', priority: 1 });
     enqueueLocalIngest(db, { path: 'https://x/b', kind: 'url', priority: 2 });
-    enqueueLocalIngest(db, { path: 'https://x/a', kind: 'url', priority: 3 });
+    enqueueLocalIngest(db, { path: 'https://x/a', kind: 'url', priority: 3, reprioritize: true });
+    enqueueLocalIngest(db, { path: 'https://x/b', kind: 'url', priority: 1 }); // a default never undoes it
     expect(releaseLocalIngest(db, { limit: 1, date: '2026-10-26', chatId: 1 }).map((r) => r.path)).toEqual(['https://x/a']);
   });
 
-  it('rejects a malformed file date', () => {
-    expect(() => enqueueLocalIngest(openDb(':memory:'), { path: 'u', kind: 'url', fileDate: '24/10/2026' })).toThrow();
-  });
 });
 
 describe('a cached ESMO abstract through enrichment', () => {

@@ -22,7 +22,7 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
 - **The drip takes URLs, with a priority.** `--stage` queues fetched
   abstracts on the ingest:local drip: late-breakers and orals first, then
   posters, then ePosters / trials in progress, all ahead of the PDF library.
-  Re-staging a waiting item updates its priority. A drip release files on its
+  Re-staging with an explicit --priority updates a waiting item. A drip release files on its
   **release night**, never backdated to the presentation day: backdating a
   nightly batch onto already-published meeting days would rebuild the whole
   day each night (one ESMO day alone holds ~30 abstracts, past the claude-cli

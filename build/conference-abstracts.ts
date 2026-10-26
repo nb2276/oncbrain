@@ -40,6 +40,7 @@ import { normalizeDoi } from '../src/lib/doi.ts';
 import {
   ADAPTERS,
   adapterForUrl,
+  abstractCachePath,
   esmoCacheKey,
   planNotifications,
   rankListingMatches,
@@ -176,6 +177,21 @@ function syntheticMsgId(url: string, doi: string | null, date: string): number {
   return -(1 + (h.readUInt32BE(0) % 2_000_000_000));
 }
 
+/** Re-queue failed cacheOnly-portal links whose abstract is now cached. */
+function retryUncachedFailures(db: ReturnType<typeof openDb>): number {
+  const rows = db
+    .prepare("SELECT id, raw_target FROM inbox_items WHERE enrichment_status = 'failed_permanent' AND type = 'paper'")
+    .all() as Array<{ id: number; raw_target: string }>;
+  let n = 0;
+  for (const r of rows) {
+    const rel = abstractCachePath(r.raw_target);
+    if (!rel || !existsSync(resolve(process.cwd(), rel))) continue;
+    db.prepare("UPDATE inbox_items SET enrichment_status = 'pending', enrichment_attempts = 0, enrichment_error = NULL WHERE id = ?").run(r.id);
+    n++;
+  }
+  return n;
+}
+
 const FETCH_BATCH = 6; // one aside repl script per batch, inside its 120 s budget
 
 function readNumbers(spec: string): string[] {
@@ -235,11 +251,15 @@ function fetchThroughBrowser(args: Args): void {
   if (missing.length) console.log(`  not found on the site: ${missing.join(', ')}`);
   if (noAbstract.length) console.log(`  found but no abstract body, not cached: ${noAbstract.join('; ')}`);
   if (unfetched.length) console.log(`  not fetched (re-run to retry): ${unfetched.join(', ')}`);
+  const db = openDb();
+  // A link forwarded before its abstract was cached failed permanently ("not
+  // fetched yet"). Now that it is cached, put it back in the queue.
+  const retried = retryUncachedFailures(db);
+  if (retried) console.log(`  re-queued ${retried} forwarded link(s) that had failed for want of this cache`);
   if (!args.stage) {
     console.log(`conf:abstracts --fetch — ${saved.length} saved. Stage them with --stage, or forward the links.`);
     return;
   }
-  const db = openDb();
   let staged = 0;
   for (const n of numbers) {
     const url = listingUrl(edition, listingsFor(n)[0]!, n);
@@ -253,7 +273,7 @@ function fetchThroughBrowser(args: Args): void {
       console.log(`  [dry-run] would stage ${n} → ${canonical}`);
       continue;
     }
-    if (enqueueLocalIngest(db, { path: canonical, kind: 'url', priority: args.priority ?? abstractPriority(n) }).created) staged++;
+    if (enqueueLocalIngest(db, { path: canonical, kind: 'url', priority: args.priority ?? abstractPriority(n), reprioritize: args.priority != null }).created) staged++;
   }
   console.log(`conf:abstracts --fetch — ${saved.length} saved, ${staged} staged on the drip (priority ${args.priority ?? 'by abstract type'})`);
 }

@@ -1805,17 +1805,16 @@ export type LocalIngestEntry = {
 /** Stage a local PDF. Idempotent on path; returns the row id, and whether it was new. */
 export function enqueueLocalIngest(
   db: Database.Database,
-  entry: { path: string; kind: LocalIngestKind; note?: string | null; priority?: number; fileDate?: string | null },
+  // reprioritize: on a re-stage, overwrite the waiting row's priority (only
+  // when the caller chose one; a default must not undo a hand-set priority).
+  entry: { path: string; kind: LocalIngestKind; note?: string | null; priority?: number; reprioritize?: boolean },
 ): { id: number; created: boolean } {
-  if (entry.fileDate != null && !/^\d{4}-\d{2}-\d{2}$/.test(entry.fileDate)) {
-    throw new Error(`fileDate must be YYYY-MM-DD, got: ${entry.fileDate}`);
-  }
   const r = db
-    .prepare('INSERT OR IGNORE INTO local_ingest_queue (path, kind, note, queued_at, priority, file_date) VALUES (?, ?, ?, ?, ?, ?)')
-    .run(entry.path, entry.kind, entry.note ?? null, Date.now(), entry.priority ?? 0, entry.fileDate ?? null);
+    .prepare('INSERT OR IGNORE INTO local_ingest_queue (path, kind, note, queued_at, priority) VALUES (?, ?, ?, ?, ?)')
+    .run(entry.path, entry.kind, entry.note ?? null, Date.now(), entry.priority ?? 0);
   if (r.changes > 0) return { id: Number(r.lastInsertRowid), created: true };
-  // Re-staging an item still waiting updates its priority (a released one is history).
-  if (entry.priority != null) {
+  // Re-staging an item still waiting can update its priority (a released one is history).
+  if (entry.reprioritize && entry.priority != null) {
     db.prepare('UPDATE local_ingest_queue SET priority = ? WHERE path = ? AND released_at IS NULL').run(entry.priority, entry.path);
   }
   const row = db.prepare('SELECT id FROM local_ingest_queue WHERE path = ?').get(entry.path) as { id: number };
@@ -1880,7 +1879,10 @@ export function releaseLocalIngest(
             : JSON.stringify({ kind: 'pdf', local_path: row.path, quiet: true, figure_structured: false, drip: true }),
         telegram_msg_id: LOCAL_INGEST_MSG_ID_BASE - row.id,
         telegram_chat_id: opts.chatId,
-        bookmark_date: row.file_date ?? opts.date,
+        // Always the release date. (The file_date column, from the first v0.63
+        // draft, is deliberately ignored: dating a release into the past
+        // queues a rebuild of that whole day.)
+        bookmark_date: opts.date,
       });
       db.prepare('UPDATE local_ingest_queue SET released_at = ?, released_date = ?, inbox_item_id = ? WHERE id = ?').run(
         Date.now(),

@@ -29,7 +29,7 @@ export function parseEsmoDate(raw: string | null | undefined): string | null {
  */
 export function listingsFor(number: string): string[] {
   const n = number.toUpperCase();
-  const first = /EP$/.test(n) ? 'confcal_2' : /(?:\d|TI)P$/.test(n) ? 'confcal_1' : 'confcal';
+  const first = /(?:EP|ETIP)$/.test(n) ? 'confcal_2' : /(?:\d|TI)P$/.test(n) ? 'confcal_1' : 'confcal';
   return [first, ...['confcal', 'confcal_1', 'confcal_2'].filter((c) => c !== first)];
 }
 
