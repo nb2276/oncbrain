@@ -7,18 +7,28 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
 ### Fixed
 - **A day is labelled with a meeting only when the meeting is most of it.**
   One #ESMO26 tweet (SARON) labelled all of 2026-10-25 "ESMO Congress 2026":
-  page title, header badge, share preview, the ESMO conference page and the
-  Obsidian note, above five skin-brachytherapy library papers. The day label
-  now needs more than half of the day's sources to carry the meeting, with
-  every tagged source agreeing; library PDFs from the drip don't count either
-  way. Each card's own meeting chip was already per-study (v0.62.2).
-  Measured on every published date: 5 lose a label, all mislabels (06-04,
-  07-08, 07-09, 08-10, 10-25); none gains or switches.
-  `build/backfill-day-conference.ts` relabelled them (only the `conference`
-  field changes).
+  page title, header badge, share preview and Obsidian note, above five
+  skin-brachytherapy library papers. Now every tagged source must agree, and
+  the meeting must hold a majority of all the day's sources, or, setting
+  library PDFs from the drip aside, a majority of the rest with at least two
+  tagged sources. Library papers can't lend a lone tweet a majority or outvote
+  a real meeting day; a one-source day keeps its source's meeting. Measured on
+  every published date: 5 lose a label, all mislabels (06-04, 07-08, 07-09,
+  08-10, 10-25); none gains or switches. `build/backfill-day-conference.ts`
+  relabelled them (only the `conference` field changes).
+- **Every meeting a card links to has its pages.** Conference pages, meeting
+  tag labels and the tag namespace now read each card's own meeting as well as
+  the day label (`meetingsOf`), so a meeting chip on an unlabelled day (an
+  ASTRO 2024 card on 07-09) no longer links to a page that was never built.
+  This also restores `/conferences/asco-2025/`, dead before this release.
+- `build:day --conf=<slug>` selects every date with a source from that
+  meeting, not only the days it labels.
 - **A relabelled date no longer keeps a stale twin note.** The Obsidian note is
   named after the day label, and a rebuild that changed the label left the old
-  file behind (07-08, 07-09 and 10-25 each had two). The writer now removes it.
+  file behind (eight dates had two). The writer now removes it, but only a file
+  whose own frontmatter marks it as this pipeline's digest for that date:
+  data/obsidian is the curator's vault, and a hand-made note can share the
+  date prefix.
 
 ## [0.63.0] - 2026-10-25
 

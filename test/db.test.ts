@@ -9,6 +9,7 @@ import {
   listBookmarkDates,
   listAllSourceDates,
   dominantConferenceForDate,
+  datesWithConference,
   saveInboxItem,
   deleteBookmark,
   updateBookmarkFetched,
@@ -559,18 +560,40 @@ describe('db', () => {
     });
 
     it('library PDFs from the ingest:local drip neither label nor outvote a meeting day', () => {
-      saveBookmark(db, { url: 'https://x.com/a/status/11', bookmark_date: '2026-10-24', conference_slug: 'esmo-2026' });
-      for (let i = 0; i < 4; i++) {
-        const item = saveInboxItem(db, {
-          type: 'paper',
-          raw_target: `/p/${i}.pdf`,
-          attachments_json: JSON.stringify({ kind: 'pdf', local_path: `/p/${i}.pdf`, drip: true }),
-          telegram_msg_id: -1000 - i,
-          bookmark_date: '2026-10-24',
-        });
-        savePaper(db, { content_hash: `lib${i}`, title: `Library ${i}`, bookmark_date: '2026-10-24', inbox_item_id: item.id });
-      }
+      const library = (date: string, n: number) => {
+        for (let i = 0; i < n; i++) {
+          const item = saveInboxItem(db, {
+            type: 'paper',
+            raw_target: `/p/${date}-${i}.pdf`,
+            attachments_json: JSON.stringify({ kind: 'pdf', local_path: `/p/${date}-${i}.pdf`, drip: true }),
+            telegram_msg_id: -Number(date.replace(/-/g, '')) - i,
+            bookmark_date: date,
+          });
+          savePaper(db, { content_hash: `lib-${date}-${i}`, title: `Library ${i}`, bookmark_date: date, inbox_item_id: item.id });
+        }
+      };
+      // 2026-10-25: one #ESMO26 tweet among five library papers is not an ESMO day.
+      saveBookmark(db, { url: 'https://x.com/a/status/11', bookmark_date: '2026-10-25', conference_slug: 'esmo-2026' });
+      library('2026-10-25', 5);
+      expect(dominantConferenceForDate(db, '2026-10-25')).toBeNull();
+      // 2026-10-24: five ESMO tweets, one untagged, four library papers is.
+      for (let i = 0; i < 5; i++) saveBookmark(db, { url: `https://x.com/a/status/2${i}`, bookmark_date: '2026-10-24', conference_slug: 'esmo-2026' });
+      saveBookmark(db, { url: 'https://x.com/a/status/30', bookmark_date: '2026-10-24' });
+      library('2026-10-24', 4);
       expect(dominantConferenceForDate(db, '2026-10-24')).toBe('esmo-2026');
+    });
+
+    it('a one-source day keeps its source\'s meeting', () => {
+      savePaper(db, { doi: '10.1056/astro9', title: 'ASTRO 2025 report', bookmark_date: '2026-06-29', conference_slug: 'astro-2025' });
+      expect(dominantConferenceForDate(db, '2026-06-29')).toBe('astro-2025');
+    });
+
+    it('datesWithConference finds every date a meeting touches, labelled or not', () => {
+      saveBookmark(db, { url: 'https://x.com/a/status/40', bookmark_date: '2026-06-04', conference_slug: 'asco-2026' });
+      saveBookmark(db, { url: 'https://x.com/a/status/41', bookmark_date: '2026-06-04' });
+      saveBookmark(db, { url: 'https://x.com/a/status/42', bookmark_date: '2026-06-04' });
+      expect(dominantConferenceForDate(db, '2026-06-04')).toBeNull();
+      expect(datesWithConference(db, 'asco-2026')).toEqual(['2026-06-04']);
     });
 
     it('papers whose inbox item has non-library attachments still count (SQL NULL trap)', () => {

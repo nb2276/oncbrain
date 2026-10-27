@@ -29,6 +29,7 @@ import {
   updateBookmarkFetched,
   updateBookmarkOcrTexts,
   dominantConferenceForDate,
+  datesWithConference,
   getConference,
   todayIso,
   type Bookmark,
@@ -607,7 +608,14 @@ function writeArtifact(args: Args, artifact: DigestArtifact): { json: string; ob
   if (!existsSync(dirname(obsidianPath))) mkdirSync(dirname(obsidianPath), { recursive: true });
   writeFileAtomic(obsidianPath, renderObsidian(artifact, { publicSiteUrl: process.env.PUBLIC_SITE_URL }));
   // A changed day label renames the note; remove the old name's stale twin.
-  for (const f of staleObsidianNotes(readdirSync(dirname(obsidianPath)), artifact.date, obsidianName)) {
+  const readNote = (f: string) => {
+    try {
+      return readFileSync(resolve(dirname(obsidianPath), f), 'utf8');
+    } catch {
+      return null;
+    }
+  };
+  for (const f of staleObsidianNotes(readdirSync(dirname(obsidianPath)), artifact.date, obsidianName, readNote)) {
     unlinkSync(resolve(dirname(obsidianPath), f));
   }
 
@@ -1355,15 +1363,16 @@ function pickDatesToBuild(db: ReturnType<typeof openDb>, args: Args): string[] {
   if (args.backfill) {
     const dates = listAllSourceDates(db);
     if (args.conferenceSlug) {
-      return dates.filter((d) => dominantConferenceForDate(db, d) === args.conferenceSlug);
+      // A meeting's dates: any source tagged with it, not only days it labels.
+      const withConf = new Set(datesWithConference(db, args.conferenceSlug));
+      return dates.filter((d) => withConf.has(d));
     }
     return dates;
   }
   if (args.conferenceSlug && !args.date) {
     // Build every date for this conference.
-    return listBookmarkDates(db).filter(
-      (d) => dominantConferenceForDate(db, d) === args.conferenceSlug,
-    );
+    const withConf = new Set(datesWithConference(db, args.conferenceSlug));
+    return listBookmarkDates(db).filter((d) => withConf.has(d));
   }
   return [args.date ?? todayIso()];
 }

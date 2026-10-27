@@ -322,8 +322,15 @@ describe('obsidian note names (v0.63.1)', () => {
     const { obsidianNoteName, staleObsidianNotes } = await import('../src/lib/obsidian-export.ts');
     expect(obsidianNoteName('2026-10-25', 'esmo-2026')).toBe('2026-10-25-esmo-2026.md');
     expect(obsidianNoteName('2026-10-25', null)).toBe('2026-10-25.md');
-    const files = ['2026-10-25-esmo-2026.md', '2026-10-25.md', '2026-10-24-esmo-2026.md', '2026-10-25-esmo-2026.md.bak', 'papers'];
-    expect(staleObsidianNotes(files, '2026-10-25', '2026-10-25.md')).toEqual(['2026-10-25-esmo-2026.md']);
-    expect(staleObsidianNotes(files, '2026-10-25', '2026-10-25-esmo-2026.md')).toEqual(['2026-10-25.md']);
+    const notes: Record<string, string> = {
+      '2026-10-25-esmo-2026.md': '---\ndate: 2026-10-25\nconference: ESMO Congress 2026\ntags:\n  - oncology/digest\n---\n',
+      '2026-10-25.md': '---\ndate: 2026-10-25\ntags:\n  - oncology/digest\n---\n',
+      '2026-10-25-tumor-board.md': '---\ndate: 2026-10-25\ntags:\n  - meeting-notes\n---\nmy notes', // the curator's own
+      '2026-10-24-esmo-2026.md': '---\ndate: 2026-10-24\ntags:\n  - oncology/digest\n---\n', // another date
+    };
+    const files = [...Object.keys(notes), '2026-10-25-esmo-2026.md.bak', 'papers'];
+    const read = (f: string) => notes[f] ?? null;
+    expect(staleObsidianNotes(files, '2026-10-25', '2026-10-25.md', read)).toEqual(['2026-10-25-esmo-2026.md']);
+    expect(staleObsidianNotes(files, '2026-10-25', '2026-10-25-esmo-2026.md', read)).toEqual(['2026-10-25.md']);
   });
 });

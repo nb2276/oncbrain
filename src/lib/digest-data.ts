@@ -1,6 +1,7 @@
 // Read digest artifacts written by build/digest-builder.ts.
 // Astro pages use this at build time to enumerate paths and render content.
 
+import { meetingsOf } from './study-meeting.ts';
 import {
   parseEffectSize,
   corpusDomains,
@@ -738,12 +739,12 @@ export function listRecentStudies(limit: number): RecentStudy[] {
 export function listConferenceSummaries(): ConferenceSummary[] {
   const byConf = new Map<string, ConferenceSummary>();
   for (const a of listDigests()) {
-    if (!a.conference) continue;
-    const key = a.conference.slug;
-    if (!byConf.has(key)) {
-      byConf.set(key, { slug: key, name: a.conference.name, dates: [] });
+    // v0.63.1: day labels AND per-card meetings, so a card's meeting chip on a
+    // day with no label still has a conference page to link to.
+    for (const [key, name] of meetingsOf(a)) {
+      if (!byConf.has(key)) byConf.set(key, { slug: key, name, dates: [] });
+      byConf.get(key)!.dates.push(a.date);
     }
-    byConf.get(key)!.dates.push(a.date);
   }
   return Array.from(byConf.values()).map((c) => ({
     ...c,

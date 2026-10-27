@@ -15,7 +15,7 @@
 // incomplete landing pages + RSS feeds + API endpoints downstream. Better
 // to fail loudly pre-deploy than ship navigation gaps.
 
-import { studyMeeting } from './study-meeting.ts';
+import { studyMeeting, meetingsOf } from './study-meeting.ts';
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import type {
@@ -415,7 +415,7 @@ export function computeSiblings(digests: readonly DigestArtifact[]): SiblingMap 
 export function collectMeetingSlugs(digests: readonly DigestArtifact[]): string[] {
   const seen = new Set<string>();
   for (const d of digests) {
-    if (d.conference?.slug) seen.add(d.conference.slug);
+    for (const slug of meetingsOf(d).keys()) seen.add(slug);
   }
   return Array.from(seen);
 }
@@ -684,6 +684,10 @@ export function resolveTagDisplay(
   for (const occ of occurrences) {
     if (occ.conference && occ.conference.slug === slug) {
       return { namespace: 'meeting', label: occ.conference.name, emoji: null };
+    }
+    // v0.63.1: the card's own meeting, for a day with no (or another) label.
+    if (occ.study.meeting && occ.study.meeting.slug === slug) {
+      return { namespace: 'meeting', label: occ.study.meeting.name, emoji: null };
     }
   }
 
@@ -1131,8 +1135,9 @@ export function buildTagActivity(
     } else {
       // Meeting fallback: recover conference name from any digest carrying it.
       for (const d of dateDesc) {
-        if (d.conference?.slug === slug) {
-          label = d.conference.name;
+        const name = meetingsOf(d).get(slug);
+        if (name) {
+          label = name;
           break;
         }
       }

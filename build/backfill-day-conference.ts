@@ -16,20 +16,35 @@ const digestDir = join(process.cwd(), 'data/digests');
 const noteDir = join(process.cwd(), 'data/obsidian');
 const db = openDb();
 let changed = 0;
+let swept = 0;
+const readNote = (f: string) => {
+  try {
+    return readFileSync(join(noteDir, f), 'utf8');
+  } catch {
+    return null;
+  }
+};
 for (const f of readdirSync(digestDir).filter((x) => x.endsWith('.json')).sort()) {
   const path = join(digestDir, f);
   const artifact = JSON.parse(readFileSync(path, 'utf8'));
   const before: string | null = artifact.conference?.slug ?? null;
   const after = dominantConferenceForDate(db, artifact.date);
-  if (before === after) continue;
-  changed++;
-  console.log(`  ${artifact.date}: ${before ?? '-'} -> ${after ?? '-'}`);
-  if (dryRun) continue;
-  const conf = after ? getConference(db, after) : undefined;
-  artifact.conference = conf ? { slug: conf.slug, name: conf.name } : null;
-  writeFileAtomic(path, JSON.stringify(artifact, null, 2) + '\n');
-  const name = obsidianNoteName(artifact.date, artifact.conference?.slug);
-  writeFileAtomic(join(noteDir, name), renderObsidian(artifact, { publicSiteUrl: process.env.PUBLIC_SITE_URL }));
-  for (const stale of staleObsidianNotes(readdirSync(noteDir), artifact.date, name)) unlinkSync(join(noteDir, stale));
+  if (before !== after) {
+    changed++;
+    console.log(`  ${artifact.date}: ${before ?? '-'} -> ${after ?? '-'}`);
+    if (!dryRun) {
+      const conf = after ? getConference(db, after) : undefined;
+      artifact.conference = conf ? { slug: conf.slug, name: conf.name } : null;
+      writeFileAtomic(path, JSON.stringify(artifact, null, 2) + '\n');
+      writeFileAtomic(join(noteDir, obsidianNoteName(artifact.date, artifact.conference?.slug)), renderObsidian(artifact, { publicSiteUrl: process.env.PUBLIC_SITE_URL }));
+    }
+  }
+  // Every date, relabelled or not: earlier label changes left twins behind.
+  const keep = obsidianNoteName(artifact.date, (dryRun ? (after ? { slug: after } : null) : artifact.conference)?.slug);
+  for (const stale of staleObsidianNotes(readdirSync(noteDir), artifact.date, keep, readNote)) {
+    swept++;
+    console.log(`  remove stale note ${stale} (keeping ${keep})`);
+    if (!dryRun) unlinkSync(join(noteDir, stale));
+  }
 }
-console.log(`backfill-day-conference — ${changed} date(s) ${dryRun ? 'would be' : ''} relabelled`);
+console.log(`backfill-day-conference — ${changed} date(s) relabelled, ${swept} stale note(s) removed${dryRun ? ' [dry-run]' : ''}`);
