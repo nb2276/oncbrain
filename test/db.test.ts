@@ -9,6 +9,8 @@ import {
   listBookmarkDates,
   listAllSourceDates,
   dominantConferenceForDate,
+  datesWithConference,
+  saveInboxItem,
   deleteBookmark,
   updateBookmarkFetched,
   upsertConference,
@@ -541,10 +543,84 @@ describe('db', () => {
       expect(dominantConferenceForDate(db, '2026-05-30')).toBe('esmo-2025');
     });
 
-    it('still resolves when an untagged tweet shares the day with a tagged paper', () => {
+    // v0.63.1: the meeting must be carried by MORE THAN HALF of the day's
+    // sources. One tagged source among untagged ones no longer labels the day
+    // (one #ESMO26 tweet labelled five skin-brachytherapy papers "ESMO").
+    it('one tagged source among untagged ones does not label the day', () => {
       saveBookmark(db, { url: 'https://x.com/a/status/9', bookmark_date: '2026-05-30' });
       savePaper(db, { doi: '10.1056/p2', title: 'B paper', bookmark_date: '2026-05-30', conference_slug: 'asco-2026' });
+      expect(dominantConferenceForDate(db, '2026-05-30')).toBeNull();
+    });
+
+    it('a majority labels the day despite an untagged source', () => {
+      saveBookmark(db, { url: 'https://x.com/a/status/9', bookmark_date: '2026-05-30' });
+      saveBookmark(db, { url: 'https://x.com/a/status/10', bookmark_date: '2026-05-30', conference_slug: 'asco-2026' });
+      savePaper(db, { doi: '10.1056/p2', title: 'B paper', bookmark_date: '2026-05-30', conference_slug: 'asco-2026' });
       expect(dominantConferenceForDate(db, '2026-05-30')).toBe('asco-2026');
+    });
+
+    it('library PDFs from the ingest:local drip neither label nor outvote a meeting day', () => {
+      const library = (date: string, n: number) => {
+        for (let i = 0; i < n; i++) {
+          const item = saveInboxItem(db, {
+            type: 'paper',
+            raw_target: `/p/${date}-${i}.pdf`,
+            attachments_json: JSON.stringify({ kind: 'pdf', local_path: `/p/${date}-${i}.pdf`, drip: true }),
+            telegram_msg_id: -Number(date.replace(/-/g, '')) - i,
+            bookmark_date: date,
+          });
+          savePaper(db, { content_hash: `lib-${date}-${i}`, title: `Library ${i}`, bookmark_date: date, inbox_item_id: item.id });
+        }
+      };
+      // 2026-10-25: one #ESMO26 tweet among five library papers is not an ESMO day.
+      saveBookmark(db, { url: 'https://x.com/a/status/11', bookmark_date: '2026-10-25', conference_slug: 'esmo-2026' });
+      library('2026-10-25', 5);
+      expect(dominantConferenceForDate(db, '2026-10-25')).toBeNull();
+      // 2026-10-24: five ESMO tweets, one untagged, four library papers is.
+      for (let i = 0; i < 5; i++) saveBookmark(db, { url: `https://x.com/a/status/2${i}`, bookmark_date: '2026-10-24', conference_slug: 'esmo-2026' });
+      saveBookmark(db, { url: 'https://x.com/a/status/30', bookmark_date: '2026-10-24' });
+      library('2026-10-24', 4);
+      expect(dominantConferenceForDate(db, '2026-10-24')).toBe('esmo-2026');
+    });
+
+    it('library papers that name a meeting neither label nor veto a day', () => {
+      const lib = (date: string, i: number, slug: string) => {
+        const item = saveInboxItem(db, { type: 'paper', raw_target: `/q/${date}-${i}.pdf`, attachments_json: JSON.stringify({ kind: 'pdf', local_path: `/q/${date}-${i}.pdf` }), telegram_msg_id: -900 - i - Number(date.slice(8)), bookmark_date: date });
+        savePaper(db, { content_hash: `q-${date}-${i}`, title: 'x', bookmark_date: date, inbox_item_id: item.id, conference_slug: slug });
+      };
+      lib('2026-11-01', 0, 'astro-2025');
+      lib('2026-11-01', 1, 'astro-2025');
+      expect(dominantConferenceForDate(db, '2026-11-01')).toBeNull(); // two tagged library papers alone
+      for (let i = 0; i < 3; i++) saveBookmark(db, { url: `https://x.com/a/status/5${i}`, bookmark_date: '2026-11-02', conference_slug: 'esmo-2026' });
+      lib('2026-11-02', 2, 'astro-2025');
+      expect(dominantConferenceForDate(db, '2026-11-02')).toBe('esmo-2026'); // a stray library tag doesn't veto
+    });
+
+    it('a one-source day keeps its source\'s meeting', () => {
+      savePaper(db, { doi: '10.1056/astro9', title: 'ASTRO 2025 report', bookmark_date: '2026-06-29', conference_slug: 'astro-2025' });
+      expect(dominantConferenceForDate(db, '2026-06-29')).toBe('astro-2025');
+    });
+
+    it('datesWithConference finds every date a meeting touches, labelled or not', () => {
+      saveBookmark(db, { url: 'https://x.com/a/status/40', bookmark_date: '2026-06-04', conference_slug: 'asco-2026' });
+      saveBookmark(db, { url: 'https://x.com/a/status/41', bookmark_date: '2026-06-04' });
+      saveBookmark(db, { url: 'https://x.com/a/status/42', bookmark_date: '2026-06-04' });
+      expect(dominantConferenceForDate(db, '2026-06-04')).toBeNull();
+      expect(datesWithConference(db, 'asco-2026')).toEqual(['2026-06-04']);
+    });
+
+    it('papers whose inbox item has non-library attachments still count (SQL NULL trap)', () => {
+      // A Telegram PDF ({kind:'pdf'}) and an ESMO drip item ({drip:true}) carry
+      // attachments without local_path; json_type() is NULL for them.
+      const tg = saveInboxItem(db, { type: 'paper', raw_target: 'file-id', attachments_json: JSON.stringify({ kind: 'pdf', file_name: 'x.pdf' }), telegram_msg_id: 77, bookmark_date: '2026-07-08' });
+      const esmo = saveInboxItem(db, { type: 'paper', raw_target: 'https://e', attachments_json: JSON.stringify({ quiet: true, drip: true }), telegram_msg_id: -2000, bookmark_date: '2026-07-08' });
+      savePaper(db, { content_hash: 'tg1', title: 'Untagged PDF', bookmark_date: '2026-07-08', inbox_item_id: tg.id });
+      savePaper(db, { content_hash: 'tg2', title: 'Untagged PDF 2', bookmark_date: '2026-07-08', inbox_item_id: tg.id });
+      savePaper(db, { content_hash: 'es1', title: 'Drip abstract', bookmark_date: '2026-07-08', inbox_item_id: esmo.id });
+      savePaper(db, { doi: '10.1056/astro1', title: 'ASTRO report', bookmark_date: '2026-07-08', conference_slug: 'astro-2025' });
+      // 1 tagged of 4 counted. With the NULL trap the three attachment-carrying
+      // rows vanished and the lone tag read as 1 of 1.
+      expect(dominantConferenceForDate(db, '2026-07-08')).toBeNull();
     });
 
     it('returns null when tagged sources span conferences across source types', () => {

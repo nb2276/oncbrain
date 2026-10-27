@@ -2,7 +2,7 @@
 
 Curated, AI-summarized digest of oncology meeting research and published studies. Continual cadence with prominence during major meetings (ASCO, ESMO, ASTRO, AACR, plus subspecialty meets), alongside newly published journal papers. One oncologist curates the sources; an AI pipeline summarizes each study with comparative-literature context and a standard-of-care verdict.
 
-**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.63.0
+**Live:** https://oncbrain.oncologytoolkit.com · **Source:** [github.com/nb2276/oncbrain](https://github.com/nb2276/oncbrain) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md) · **Current version:** 0.63.1
 
 ## Architecture
 
@@ -253,7 +253,7 @@ npm run test:watch # watch mode
 npx astro check    # type check (0 errors expected)
 ```
 
-2720 tests across 139 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, meeting-portal abstracts and confirm-only matching, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, reader-selectable specialty relevance plus its per-specialty "why it matters", the v0.33-v0.36 effect-size marks (parser, geometry, corpus ruler, and the satori share-card renderer), and the v0.53-v0.55 trial-lineage and grounding work (the update/new-card/duplicate decision table, its authorization gate, comparator grounding, and the identity rules that decide when one card may replace another).
+2730 tests across 139 files: DB + schema migrations, ingestion (Telegram, PubMed, Crossref, trade-press article extraction, meeting-portal abstracts and confirm-only matching, PDF text + OCR), the three-phase LLM pipeline (incl. prompt caching + extended thinking), SSRF / DOI / paper-URL / HTML-meta helpers, conference auto-detect, Obsidian export, RSS + JSON API output, NCT + acronym cross-day dedup (coverage index, duplicate detector, drop-command), citation extraction, the v0.10 tag system, the v0.13 trials-to-watch + trade-press ingestion, the v0.30 endpoint-forward card, reader-selectable specialty relevance plus its per-specialty "why it matters", the v0.33-v0.36 effect-size marks (parser, geometry, corpus ruler, and the satori share-card renderer), and the v0.53-v0.55 trial-lineage and grounding work (the update/new-card/duplicate decision table, its authorization gate, comparator grounding, and the identity rules that decide when one card may replace another).
 
 A vitest `globalSetup` builds `dist/` once before collection when it's missing or older than any build input (`src/`, `public/`, `data/digests/`, `data/overrides/`, the Astro config, `package.json`), so the dist-reading tests pass cold, after a branch switch, and after a new digest lands.
 
@@ -273,7 +273,7 @@ Two things worth knowing before you read a score. The cap means a single unsuppo
 
 ## Conferences (optional)
 
-Conferences are an optional tag on bookmarks. When all bookmarks for a date share one conference, the published digest displays that conference's badge. Bot-ingested sources are tagged automatically from meeting hashtags, meeting hosts (including the ASTRO abstract portal) and year-bearing prose; add conferences by hand via `http://localhost:3001/conferences` (admin form).
+Conferences are an optional tag on bookmarks. When more than half of a date's sources carry one conference (and none carries another), the published digest displays that conference's badge; each card also shows its own meeting. Bot-ingested sources are tagged automatically from meeting hashtags, meeting hosts (including the ASTRO abstract portal) and year-bearing prose; add conferences by hand via `http://localhost:3001/conferences` (admin form).
 
 ## Takedown requests
 

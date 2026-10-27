@@ -783,25 +783,61 @@ export function listAllSourceDates(db: Database.Database): string[] {
   return rows.map((r) => r.d);
 }
 
-// For a given date, which conference (if any) do its tagged sources agree on?
-// Used by the digest builder to attach a conference badge when the day is
-// unambiguously about one meeting. Considers ALL source types (tweets, papers,
-// slides) so a paper/slide-only conference day still gets a badge — conference
-// auto-detect (v0.14.9) stamps the slug across all three. Returns null when the
-// day's tagged sources span multiple conferences, or none is tagged. Untagged
-// sources are ignored (a single tagged source is enough).
+// For a given date, which conference (if any) is the day ABOUT? Drives the
+// day-level label: the page title and badge, the Obsidian note name and the
+// conference context the LLM phases get. (Each card's own meeting chip is
+// per-study, study-meeting.ts; conference/tag listings read both, meetingsOf.)
+//
+// v0.63.1: every tagged source must agree on one meeting, and it must hold
+//   - a majority of ALL the day's sources, or
+//   - setting library PDFs from the ingest:local drip aside, a majority of the
+//     rest AND at least two tagged sources.
+// It used to be "any tagged source, untagged ignored", so one #ESMO26 tweet on
+// 2026-10-25 labelled five skin-brachytherapy library papers "ESMO Congress
+// 2026". Library papers are never meeting coverage, so they can neither lend a
+// lone tweet a majority (1 ESMO tweet + 5 library papers: no label) nor outvote
+// a real meeting day (5 ESMO tweets + 1 untagged + 4 library papers: ESMO). A
+// one-source day stays labelled by its source (a lone ASTRO report). Measured
+// on every published date: 5 lose a mislabel, none gains or switches.
 export function dominantConferenceForDate(db: Database.Database, date: string): string | null {
   const rows = db
     .prepare(
-      `SELECT conference_slug FROM bookmarks     WHERE bookmark_date = ? AND conference_slug IS NOT NULL
-       UNION
-       SELECT conference_slug FROM papers        WHERE bookmark_date = ? AND conference_slug IS NOT NULL
-       UNION
-       SELECT conference_slug FROM slide_uploads WHERE bookmark_date = ? AND conference_slug IS NOT NULL`,
+      `SELECT conference_slug AS c, 0 AS lib FROM bookmarks WHERE bookmark_date = ?
+       UNION ALL
+       SELECT p.conference_slug AS c,
+              -- coalesce: json_type() is NULL when there is no local_path; a
+              -- NULL comparison would silently drop the row (a Telegram PDF).
+              coalesce(CASE WHEN json_valid(i.attachments_json)
+                            THEN json_type(i.attachments_json, '$.local_path') END, '') = 'text' AS lib
+         FROM papers p LEFT JOIN inbox_items i ON i.id = p.inbox_item_id
+        WHERE p.bookmark_date = ?
+       UNION ALL
+       SELECT conference_slug AS c, 0 AS lib FROM slide_uploads WHERE bookmark_date = ?`,
     )
-    .all(date, date, date) as { conference_slug: string }[];
-  if (rows.length !== 1) return null;
-  return rows[0]!.conference_slug;
+    .all(date, date, date) as { c: string | null; lib: number }[];
+  // Library papers neither vote nor veto: a stray tag on one is not coverage.
+  const tagged = new Set(rows.filter((r) => !r.lib).map((r) => r.c).filter((c): c is string => !!c));
+  if (tagged.size !== 1) return null;
+  const slug = [...tagged][0]!;
+  // Library papers never vote: one that happens to name a meeting is still
+  // not coverage of it.
+  const votes = rows.filter((r) => r.c === slug && !r.lib).length;
+  const nonLibrary = rows.filter((r) => !r.lib).length;
+  return votes * 2 > rows.length || (votes >= 2 && votes * 2 > nonLibrary) ? slug : null;
+}
+
+/** v0.63.1: every date with a source tagged `slug` (build:day --conf). Not the day label. */
+export function datesWithConference(db: Database.Database, slug: string): string[] {
+  return (
+    db
+      .prepare(
+        `SELECT bookmark_date AS d FROM bookmarks WHERE conference_slug = ?
+         UNION SELECT bookmark_date FROM papers WHERE conference_slug = ?
+         UNION SELECT bookmark_date FROM slide_uploads WHERE conference_slug = ?
+         ORDER BY d`,
+      )
+      .all(slug, slug, slug) as { d: string }[]
+  ).map((r) => r.d);
 }
 
 export function deleteBookmark(db: Database.Database, id: number): boolean {

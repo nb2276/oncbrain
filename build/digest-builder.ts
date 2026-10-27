@@ -22,13 +22,13 @@ import {
   openDb,
   queueRebuild,
   listBookmarks,
-  listBookmarkDates,
   listAllSourceDates,
   listPapers,
   listSlideUploads,
   updateBookmarkFetched,
   updateBookmarkOcrTexts,
   dominantConferenceForDate,
+  datesWithConference,
   getConference,
   todayIso,
   type Bookmark,
@@ -49,7 +49,7 @@ import {
   type EnrichRelatedTrialsDeps,
   type DigestStudy,
 } from '../src/lib/llm-pipeline.ts';
-import { renderObsidian } from '../src/lib/obsidian-export.ts';
+import { renderObsidian, obsidianNoteName, staleObsidianNotes } from '../src/lib/obsidian-export.ts';
 import { archiveTweetImages, isMediaArchiveEnabled } from '../src/lib/tweet-media-archive.ts';
 import { markFigureSourcedDetails } from '../src/lib/source-tier.ts';
 import { lostPublishedStudies, publishRegressionMessage } from '../src/lib/publish-regression.ts';
@@ -167,7 +167,7 @@ import {
   isOcrEntryFresh,
   type OcrEntry,
 } from '../src/lib/vision-ocr.ts';
-import { mkdirSync, existsSync, realpathSync, readdirSync, readFileSync } from 'node:fs';
+import { mkdirSync, existsSync, realpathSync, readdirSync, readFileSync, unlinkSync } from 'node:fs';
 import { writeFileAtomic } from '../src/lib/atomic-write.ts';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -602,12 +602,21 @@ function writeArtifact(args: Args, artifact: DigestArtifact): { json: string; ob
   // state that makes lineage treat a returning trial as brand new.
   writeFileAtomic(jsonPath, JSON.stringify(artifact, null, 2) + '\n');
 
-  const obsidianName = artifact.conference
-    ? `${artifact.date}-${artifact.conference.slug}.md`
-    : `${artifact.date}.md`;
+  const obsidianName = obsidianNoteName(artifact.date, artifact.conference?.slug);
   const obsidianPath = resolve(args.obsidianDir, obsidianName);
   if (!existsSync(dirname(obsidianPath))) mkdirSync(dirname(obsidianPath), { recursive: true });
   writeFileAtomic(obsidianPath, renderObsidian(artifact, { publicSiteUrl: process.env.PUBLIC_SITE_URL }));
+  // A changed day label renames the note; remove the old name's stale twin.
+  const readNote = (f: string) => {
+    try {
+      return readFileSync(resolve(dirname(obsidianPath), f), 'utf8');
+    } catch {
+      return null;
+    }
+  };
+  for (const f of staleObsidianNotes(readdirSync(dirname(obsidianPath)), artifact.date, obsidianName, readNote)) {
+    unlinkSync(resolve(dirname(obsidianPath), f));
+  }
 
   return { json: jsonPath, obsidian: obsidianPath };
 }
@@ -1353,15 +1362,17 @@ function pickDatesToBuild(db: ReturnType<typeof openDb>, args: Args): string[] {
   if (args.backfill) {
     const dates = listAllSourceDates(db);
     if (args.conferenceSlug) {
-      return dates.filter((d) => dominantConferenceForDate(db, d) === args.conferenceSlug);
+      // A meeting's dates: any source tagged with it, not only days it labels.
+      const withConf = new Set(datesWithConference(db, args.conferenceSlug));
+      return dates.filter((d) => withConf.has(d));
     }
     return dates;
   }
   if (args.conferenceSlug && !args.date) {
     // Build every date for this conference.
-    return listBookmarkDates(db).filter(
-      (d) => dominantConferenceForDate(db, d) === args.conferenceSlug,
-    );
+    // Every date with a source from the meeting, papers and slides included
+    // (a paper-only meeting day has no bookmark).
+    return datesWithConference(db, args.conferenceSlug);
   }
   return [args.date ?? todayIso()];
 }

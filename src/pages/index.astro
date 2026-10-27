@@ -16,7 +16,9 @@ import {
 } from '../lib/tag-index.ts';
 
 const digests = listDigests();
-const conferences = listConferenceSummaries();
+// Homepage chips: meetings that label at least one day (a stray card's meeting
+// still has its page, reached from the card).
+const conferences = listConferenceSummaries().filter((c) => c.dates.length > 0);
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'onc brain';
 // Latest digest takes over the hero spot — that's what a returning reader cares
 // about most. First-time framing lives on /about.

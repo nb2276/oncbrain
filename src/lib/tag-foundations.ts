@@ -22,6 +22,7 @@
 // re-walking the corpus per page render — first call reads + computes,
 // every subsequent call within the build returns the memoized value.
 
+import { studyMeeting } from './study-meeting.ts';
 import { readdirSync, existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { DigestArtifact } from './digest-data.ts';
@@ -269,8 +270,11 @@ export function buildFilterRailOptions(
         VERDICT_META[verdictSlug as keyof typeof VERDICT_META].label,
       );
     }
-    if (conferenceSlug) {
-      bump(meeting, conferenceSlug, conferenceLabel ?? conferenceSlug);
+    // v0.63.1: the card's own meeting (a SARON card on an unlabelled day still
+    // offers its ESMO filter); the day label only for pre-v0.62.2 artifacts.
+    const m = studyMeeting(study, conferenceSlug ? { slug: conferenceSlug, name: conferenceLabel ?? conferenceSlug } : null);
+    if (m) {
+      bump(meeting, m.slug, m.name);
     }
   }
 

@@ -10,7 +10,7 @@ export async function getStaticPaths() {
 }
 
 interface Props {
-  conf: { slug: string; name: string; dates: string[] };
+  conf: { slug: string; name: string; dates: string[]; alsoPresented: Array<{ date: string; slug: string; name: string }> };
 }
 
 const { conf } = Astro.props as Props;
@@ -22,7 +22,7 @@ const { conf } = Astro.props as Props;
   </p>
   <h2 style="margin:0.5rem 0 0;font-size:1.4rem">{conf.name}</h2>
   <p style="margin:0.25rem 0 0;color:var(--fg-muted);font-size:0.95rem">
-    {conf.dates.length} day{conf.dates.length === 1 ? '' : 's'} of digests
+    {conf.dates.length} day{conf.dates.length === 1 ? '' : 's'} of digests{conf.alsoPresented.length > 0 && ` · ${conf.alsoPresented.length} more ${conf.alsoPresented.length === 1 ? 'study' : 'studies'} on other days`}
   </p>
 
   <ul style="list-style:none;padding:0;margin:1.5rem 0 0;display:flex;flex-direction:column;gap:0.5rem">
@@ -35,4 +35,19 @@ const { conf } = Astro.props as Props;
       </li>
     ))}
   </ul>
+  {conf.alsoPresented.length > 0 && (
+    <>
+      <h3 style="margin:1.5rem 0 0.5rem;font-size:1rem">Also from {conf.name}, on other days</h3>
+      <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem">
+        {conf.alsoPresented.map((s) => (
+          <li>
+            <a
+              href={`/${s.date}/#${s.slug}`}
+              style="display:block;padding:0.75rem 1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px"
+            >{s.name} <span style="color:var(--fg-muted)">· {s.date}</span></a>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
 </Base>

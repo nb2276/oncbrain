@@ -53,3 +53,22 @@ export function studyMeeting(
 ): StudyMeeting | null {
   return study.meeting !== undefined ? study.meeting : (day ?? null);
 }
+
+/**
+ * v0.63.1: every meeting a digest touches, slug → display name: its day label
+ * plus each card's own meeting. A day can lose its label (fewer than half its
+ * sources from the meeting) while one of its cards keeps the meeting chip, so
+ * any surface that lists meetings (conference pages, tag labels, the meeting
+ * namespace) must read both, or the chip links to a page that was never built.
+ */
+export function meetingsOf(digest: {
+  conference?: StudyMeeting | null;
+  digest: { sites: Array<{ studies: Array<{ meeting?: StudyMeeting | null }> }> };
+}): Map<string, string> {
+  const out = new Map<string, string>();
+  if (digest.conference?.slug) out.set(digest.conference.slug, digest.conference.name);
+  for (const site of digest.digest.sites) {
+    for (const st of site.studies) if (st.meeting?.slug && !out.has(st.meeting.slug)) out.set(st.meeting.slug, st.meeting.name);
+  }
+  return out;
+}

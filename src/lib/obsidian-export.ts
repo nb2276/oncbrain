@@ -486,3 +486,32 @@ function quote(s: string): string {
   }
   return s;
 }
+
+/** The note's file name for a date: `<date>-<conference>.md`, or `<date>.md`. */
+export function obsidianNoteName(date: string, conferenceSlug: string | null | undefined): string {
+  return conferenceSlug ? `${date}-${conferenceSlug}.md` : `${date}.md`;
+}
+
+/**
+ * v0.63.1: the OTHER generated notes for this date in `files`. A date has one
+ * note, named after its day label; when the label changes on a rebuild the old
+ * name would otherwise linger as a stale twin of the same digest.
+ *
+ * data/obsidian is the curator's real vault, so a name match is not enough: a
+ * hand-made "2026-10-25-tumor-board.md" fits the pattern. A file counts only
+ * when its own frontmatter says it is this pipeline's digest for this date
+ * (`date: <date>` and the `oncology/digest` tag renderObsidian writes).
+ */
+export function staleObsidianNotes(
+  files: string[],
+  date: string,
+  keep: string,
+  read: (file: string) => string | null,
+): string[] {
+  const named = new RegExp(`^${date.replace(/[^0-9-]/g, '')}(?:-[a-z0-9-]+)?\\.md$`);
+  return files.filter((f) => {
+    if (f === keep || !named.test(f)) return false;
+    const head = (read(f) ?? '').slice(0, 600);
+    return /^---\n/.test(head) && head.includes(`\ndate: ${date}\n`) && /\n {2}- oncology\/digest\n/.test(head);
+  });
+}

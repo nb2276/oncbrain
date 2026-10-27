@@ -70,3 +70,36 @@ describe('the tag surfaces use the study meeting', () => {
     expect(deriveStudyTags(base, 'thoracic', 'esmo-2026').meeting).toBe('esmo-2026');
   });
 });
+
+describe('meetingsOf + the meeting surfaces (v0.63.1)', () => {
+  const ASTRO24 = { slug: 'astro-2024', name: 'ASTRO Annual Meeting 2024' };
+  const digest = (conference: typeof ESMO | null, meetings: Array<typeof ESMO | null>) => ({
+    conference,
+    digest: { sites: [{ studies: meetings.map((meeting) => ({ name: 'x', meeting })) }] },
+  });
+  it('lists the day label and every card meeting', async () => {
+    const { meetingsOf } = await import('../src/lib/study-meeting.ts');
+    expect([...meetingsOf(digest(null, [ASTRO24, null])).entries()]).toEqual([['astro-2024', 'ASTRO Annual Meeting 2024']]);
+    expect([...meetingsOf(digest(ESMO, [ESMO, ASTRO24])).keys()]).toEqual(['esmo-2026', 'astro-2024']);
+  });
+  it('a card meeting on an unlabelled day still resolves as a meeting tag', async () => {
+    const { resolveTagDisplay, collectMeetingSlugs } = await import('../src/lib/tag-index.ts');
+    const study = { name: 'SBRT', tldr: 'x', details: [], nct: null, tweet_ids: [], meeting: ASTRO24 } as unknown as DigestStudy;
+    const occ = { date: '2026-07-09', conference: null, diseaseSite: 'prostate', resolvedSlug: 'sbrt', study, bookmarks: [] };
+    expect(resolveTagDisplay('astro-2024', [occ as never])).toEqual({ namespace: 'meeting', label: 'ASTRO Annual Meeting 2024', emoji: null });
+    expect(collectMeetingSlugs([{ date: '2026-07-09', ...digest(null, [ASTRO24]) } as never])).toEqual(['astro-2024']);
+  });
+});
+
+describe('filter rail meetings (v0.63.1)', () => {
+  it('a card meeting on an unlabelled day offers its meeting filter', async () => {
+    const { buildFilterRailOptions } = await import('../src/lib/tag-foundations.ts');
+    const study = { name: 'SARON', tldr: 'x', details: [], nct: null, tweet_ids: [], meeting: ESMO } as unknown as DigestStudy;
+    const lib = { name: 'Skin brachy', tldr: 'x', details: [], nct: null, tweet_ids: [], meeting: null } as unknown as DigestStudy;
+    const opts = buildFilterRailOptions([
+      { study, diseaseSite: 'thoracic', conferenceSlug: null, conferenceLabel: null },
+      { study: lib, diseaseSite: 'skin', conferenceSlug: null, conferenceLabel: null },
+    ] as never);
+    expect(opts.meeting).toEqual([{ slug: 'esmo-2026', label: 'ESMO Congress 2026', count: 1 }]);
+  });
+});
