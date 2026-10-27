@@ -783,25 +783,39 @@ export function listAllSourceDates(db: Database.Database): string[] {
   return rows.map((r) => r.d);
 }
 
-// For a given date, which conference (if any) do its tagged sources agree on?
-// Used by the digest builder to attach a conference badge when the day is
-// unambiguously about one meeting. Considers ALL source types (tweets, papers,
-// slides) so a paper/slide-only conference day still gets a badge — conference
-// auto-detect (v0.14.9) stamps the slug across all three. Returns null when the
-// day's tagged sources span multiple conferences, or none is tagged. Untagged
-// sources are ignored (a single tagged source is enough).
+// For a given date, which conference (if any) is the day ABOUT? Drives the
+// day-level label: the page title and badge, the /conferences/<slug>/ listing,
+// the Obsidian note name and the conference context the LLM phases get.
+// (Each card's own meeting chip is per-study, study-meeting.ts.)
+//
+// v0.63.1: a meeting labels the day only when it is carried by MORE THAN HALF
+// of the day's sources, and every tagged source agrees on it. It used to be
+// "any tagged source, untagged ignored", so one #ESMO26 tweet on 2026-10-25
+// labelled five skin-brachytherapy library papers "ESMO Congress 2026".
+// Library PDFs from the ingest:local drip don't count either way: they are
+// never meeting coverage, and a drip night would otherwise outvote a real
+// meeting day. Measured on the corpus: 5 dates lose a label, all of them
+// mislabels (one tagged source among journal papers); none gains or switches.
 export function dominantConferenceForDate(db: Database.Database, date: string): string | null {
   const rows = db
     .prepare(
-      `SELECT conference_slug FROM bookmarks     WHERE bookmark_date = ? AND conference_slug IS NOT NULL
-       UNION
-       SELECT conference_slug FROM papers        WHERE bookmark_date = ? AND conference_slug IS NOT NULL
-       UNION
-       SELECT conference_slug FROM slide_uploads WHERE bookmark_date = ? AND conference_slug IS NOT NULL`,
+      `SELECT conference_slug AS c FROM bookmarks     WHERE bookmark_date = ?
+       UNION ALL
+       SELECT p.conference_slug AS c FROM papers p
+         LEFT JOIN inbox_items i ON i.id = p.inbox_item_id
+        WHERE p.bookmark_date = ?
+          -- coalesce: json_type() is NULL when there is no local_path, and a
+          -- NULL inside NOT(...) drops the row (a Telegram PDF, an ESMO drip item).
+          AND coalesce(CASE WHEN json_valid(i.attachments_json)
+                            THEN json_type(i.attachments_json, '$.local_path') END, '') <> 'text'
+       UNION ALL
+       SELECT conference_slug AS c FROM slide_uploads WHERE bookmark_date = ?`,
     )
-    .all(date, date, date) as { conference_slug: string }[];
-  if (rows.length !== 1) return null;
-  return rows[0]!.conference_slug;
+    .all(date, date, date) as { c: string | null }[];
+  const tagged = new Set(rows.map((r) => r.c).filter((c): c is string => !!c));
+  if (tagged.size !== 1) return null;
+  const slug = [...tagged][0]!;
+  return rows.filter((r) => r.c === slug).length * 2 > rows.length ? slug : null;
 }
 
 export function deleteBookmark(db: Database.Database, id: number): boolean {

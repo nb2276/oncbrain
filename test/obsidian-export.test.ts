@@ -316,3 +316,14 @@ describe('wikilinkify', () => {
     expect(wikilinkify('nct04567890')).toBe('[[NCT04567890]]');
   });
 });
+
+describe('obsidian note names (v0.63.1)', () => {
+  it('names a note after its day label and finds the stale twin', async () => {
+    const { obsidianNoteName, staleObsidianNotes } = await import('../src/lib/obsidian-export.ts');
+    expect(obsidianNoteName('2026-10-25', 'esmo-2026')).toBe('2026-10-25-esmo-2026.md');
+    expect(obsidianNoteName('2026-10-25', null)).toBe('2026-10-25.md');
+    const files = ['2026-10-25-esmo-2026.md', '2026-10-25.md', '2026-10-24-esmo-2026.md', '2026-10-25-esmo-2026.md.bak', 'papers'];
+    expect(staleObsidianNotes(files, '2026-10-25', '2026-10-25.md')).toEqual(['2026-10-25-esmo-2026.md']);
+    expect(staleObsidianNotes(files, '2026-10-25', '2026-10-25-esmo-2026.md')).toEqual(['2026-10-25.md']);
+  });
+});

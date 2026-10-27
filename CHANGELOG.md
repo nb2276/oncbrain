@@ -2,6 +2,24 @@
 
 All notable changes to oncbrain are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.63.1] - 2026-10-26
+
+### Fixed
+- **A day is labelled with a meeting only when the meeting is most of it.**
+  One #ESMO26 tweet (SARON) labelled all of 2026-10-25 "ESMO Congress 2026":
+  page title, header badge, share preview, the ESMO conference page and the
+  Obsidian note, above five skin-brachytherapy library papers. The day label
+  now needs more than half of the day's sources to carry the meeting, with
+  every tagged source agreeing; library PDFs from the drip don't count either
+  way. Each card's own meeting chip was already per-study (v0.62.2).
+  Measured on every published date: 5 lose a label, all mislabels (06-04,
+  07-08, 07-09, 08-10, 10-25); none gains or switches.
+  `build/backfill-day-conference.ts` relabelled them (only the `conference`
+  field changes).
+- **A relabelled date no longer keeps a stale twin note.** The Obsidian note is
+  named after the day label, and a rebuild that changed the label left the old
+  file behind (07-08, 07-09 and 10-25 each had two). The writer now removes it.
+
 ## [0.63.0] - 2026-10-25
 
 ### Added

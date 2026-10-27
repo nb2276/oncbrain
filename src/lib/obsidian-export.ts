@@ -486,3 +486,18 @@ function quote(s: string): string {
   }
   return s;
 }
+
+/** The note's file name for a date: `<date>-<conference>.md`, or `<date>.md`. */
+export function obsidianNoteName(date: string, conferenceSlug: string | null | undefined): string {
+  return conferenceSlug ? `${date}-${conferenceSlug}.md` : `${date}.md`;
+}
+
+/**
+ * v0.63.1: the OTHER notes for this date in `files`. A date has one note, named
+ * after its day label; when the label changes on a rebuild the old name would
+ * otherwise linger as a stale twin of the same digest.
+ */
+export function staleObsidianNotes(files: string[], date: string, keep: string): string[] {
+  const mine = new RegExp(`^${date.replace(/[^0-9-]/g, '')}(?:-[a-z0-9-]+)?\\.md$`);
+  return files.filter((f) => f !== keep && mine.test(f));
+}
