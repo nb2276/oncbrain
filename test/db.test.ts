@@ -583,6 +583,19 @@ describe('db', () => {
       expect(dominantConferenceForDate(db, '2026-10-24')).toBe('esmo-2026');
     });
 
+    it('library papers that name a meeting neither label nor veto a day', () => {
+      const lib = (date: string, i: number, slug: string) => {
+        const item = saveInboxItem(db, { type: 'paper', raw_target: `/q/${date}-${i}.pdf`, attachments_json: JSON.stringify({ kind: 'pdf', local_path: `/q/${date}-${i}.pdf` }), telegram_msg_id: -900 - i - Number(date.slice(8)), bookmark_date: date });
+        savePaper(db, { content_hash: `q-${date}-${i}`, title: 'x', bookmark_date: date, inbox_item_id: item.id, conference_slug: slug });
+      };
+      lib('2026-11-01', 0, 'astro-2025');
+      lib('2026-11-01', 1, 'astro-2025');
+      expect(dominantConferenceForDate(db, '2026-11-01')).toBeNull(); // two tagged library papers alone
+      for (let i = 0; i < 3; i++) saveBookmark(db, { url: `https://x.com/a/status/5${i}`, bookmark_date: '2026-11-02', conference_slug: 'esmo-2026' });
+      lib('2026-11-02', 2, 'astro-2025');
+      expect(dominantConferenceForDate(db, '2026-11-02')).toBe('esmo-2026'); // a stray library tag doesn't veto
+    });
+
     it('a one-source day keeps its source\'s meeting', () => {
       savePaper(db, { doi: '10.1056/astro9', title: 'ASTRO 2025 report', bookmark_date: '2026-06-29', conference_slug: 'astro-2025' });
       expect(dominantConferenceForDate(db, '2026-06-29')).toBe('astro-2025');

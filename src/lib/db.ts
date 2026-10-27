@@ -815,10 +815,13 @@ export function dominantConferenceForDate(db: Database.Database, date: string): 
        SELECT conference_slug AS c, 0 AS lib FROM slide_uploads WHERE bookmark_date = ?`,
     )
     .all(date, date, date) as { c: string | null; lib: number }[];
-  const tagged = new Set(rows.map((r) => r.c).filter((c): c is string => !!c));
+  // Library papers neither vote nor veto: a stray tag on one is not coverage.
+  const tagged = new Set(rows.filter((r) => !r.lib).map((r) => r.c).filter((c): c is string => !!c));
   if (tagged.size !== 1) return null;
   const slug = [...tagged][0]!;
-  const votes = rows.filter((r) => r.c === slug).length;
+  // Library papers never vote: one that happens to name a meeting is still
+  // not coverage of it.
+  const votes = rows.filter((r) => r.c === slug && !r.lib).length;
   const nonLibrary = rows.filter((r) => !r.lib).length;
   return votes * 2 > rows.length || (votes >= 2 && votes * 2 > nonLibrary) ? slug : null;
 }

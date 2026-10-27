@@ -1,6 +1,7 @@
 // Read digest artifacts written by build/digest-builder.ts.
 // Astro pages use this at build time to enumerate paths and render content.
 
+import { deriveSlug } from './slug.ts';
 import { meetingsOf } from './study-meeting.ts';
 import {
   parseEffectSize,
@@ -556,7 +557,10 @@ export function getDigest(date: string): DigestArtifact | null {
 export type ConferenceSummary = {
   slug: string;
   name: string;
-  dates: string[]; // YYYY-MM-DD, newest first
+  dates: string[]; // YYYY-MM-DD, newest first: days the meeting LABELS
+  // v0.63.1: cards from this meeting on days it doesn't label (a SARON tweet
+  // among library papers), linked to the card itself, never the whole day.
+  alsoPresented: Array<{ date: string; slug: string; name: string }>;
 };
 
 // Aggregation by disease site: every study from every digest that's tagged with
@@ -739,15 +743,26 @@ export function listRecentStudies(limit: number): RecentStudy[] {
 export function listConferenceSummaries(): ConferenceSummary[] {
   const byConf = new Map<string, ConferenceSummary>();
   for (const a of listDigests()) {
-    // v0.63.1: day labels AND per-card meetings, so a card's meeting chip on a
-    // day with no label still has a conference page to link to.
+    // v0.63.1: a page per meeting any card carries (so a card's meeting chip
+    // always links somewhere), but its "days" are only the days it labels;
+    // a card on another day is listed on its own.
     for (const [key, name] of meetingsOf(a)) {
-      if (!byConf.has(key)) byConf.set(key, { slug: key, name, dates: [] });
-      byConf.get(key)!.dates.push(a.date);
+      if (!byConf.has(key)) byConf.set(key, { slug: key, name, dates: [], alsoPresented: [] });
+      const conf = byConf.get(key)!;
+      if (a.conference?.slug === key) {
+        conf.dates.push(a.date);
+        continue;
+      }
+      for (const site of a.digest.sites) {
+        for (const st of site.studies) {
+          if (st.meeting?.slug === key) conf.alsoPresented.push({ date: a.date, slug: st.slug ?? deriveSlug(st.name), name: st.name });
+        }
+      }
     }
   }
   return Array.from(byConf.values()).map((c) => ({
     ...c,
     dates: c.dates.sort((a, b) => (a < b ? 1 : -1)),
+    alsoPresented: c.alsoPresented.sort((a, b) => (a.date < b.date ? 1 : -1)),
   }));
 }

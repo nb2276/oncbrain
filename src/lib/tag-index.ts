@@ -415,7 +415,11 @@ export function computeSiblings(digests: readonly DigestArtifact[]): SiblingMap 
 export function collectMeetingSlugs(digests: readonly DigestArtifact[]): string[] {
   const seen = new Set<string>();
   for (const d of digests) {
-    for (const slug of meetingsOf(d).keys()) seen.add(slug);
+    // A day label goes in as-is: a malformed one should fail the build-time
+    // slug check, as it always has. A card's own meeting (v0.63.1) is skipped
+    // when malformed, so one bad card can't take the whole site build down.
+    if (d.conference?.slug) seen.add(d.conference.slug);
+    for (const slug of meetingsOf(d).keys()) if (/^[a-z0-9-]+$/.test(slug)) seen.add(slug);
   }
   return Array.from(seen);
 }

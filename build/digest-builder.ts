@@ -22,7 +22,6 @@ import {
   openDb,
   queueRebuild,
   listBookmarks,
-  listBookmarkDates,
   listAllSourceDates,
   listPapers,
   listSlideUploads,
@@ -1371,8 +1370,9 @@ function pickDatesToBuild(db: ReturnType<typeof openDb>, args: Args): string[] {
   }
   if (args.conferenceSlug && !args.date) {
     // Build every date for this conference.
-    const withConf = new Set(datesWithConference(db, args.conferenceSlug));
-    return listBookmarkDates(db).filter((d) => withConf.has(d));
+    // Every date with a source from the meeting, papers and slides included
+    // (a paper-only meeting day has no bookmark).
+    return datesWithConference(db, args.conferenceSlug);
   }
   return [args.date ?? todayIso()];
 }
