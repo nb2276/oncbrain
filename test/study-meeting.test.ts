@@ -90,3 +90,16 @@ describe('meetingsOf + the meeting surfaces (v0.63.1)', () => {
     expect(collectMeetingSlugs([{ date: '2026-07-09', ...digest(null, [ASTRO24]) } as never])).toEqual(['astro-2024']);
   });
 });
+
+describe('filter rail meetings (v0.63.1)', () => {
+  it('a card meeting on an unlabelled day offers its meeting filter', async () => {
+    const { buildFilterRailOptions } = await import('../src/lib/tag-foundations.ts');
+    const study = { name: 'SARON', tldr: 'x', details: [], nct: null, tweet_ids: [], meeting: ESMO } as unknown as DigestStudy;
+    const lib = { name: 'Skin brachy', tldr: 'x', details: [], nct: null, tweet_ids: [], meeting: null } as unknown as DigestStudy;
+    const opts = buildFilterRailOptions([
+      { study, diseaseSite: 'thoracic', conferenceSlug: null, conferenceLabel: null },
+      { study: lib, diseaseSite: 'skin', conferenceSlug: null, conferenceLabel: null },
+    ] as never);
+    expect(opts.meeting).toEqual([{ slug: 'esmo-2026', label: 'ESMO Congress 2026', count: 1 }]);
+  });
+});

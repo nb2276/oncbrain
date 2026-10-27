@@ -24,7 +24,9 @@ All notable changes to oncbrain are documented here. Format follows [Keep a Chan
   This also restores `/conferences/asco-2025/`, dead before this release. A
   conference page's "days" are still only the days it labels; a card from the
   meeting on another day is listed separately and linked to the card itself
-  (SARON on 10-25), and the homepage chips count labelled days only.
+  (SARON on 10-25, by the date page's own resolved anchor), and the homepage
+  chips count labelled days only. The tag filter rail offers each card's own
+  meeting, so 10-25 still has an ESMO filter for SARON.
 - `build:day --conf=<slug>` selects every date with a source from that
   meeting (papers and slides included), not only the days it labels.
 - **A relabelled date no longer keeps a stale twin note.** The Obsidian note is

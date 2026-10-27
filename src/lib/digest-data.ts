@@ -1,7 +1,6 @@
 // Read digest artifacts written by build/digest-builder.ts.
 // Astro pages use this at build time to enumerate paths and render content.
 
-import { deriveSlug } from './slug.ts';
 import { meetingsOf } from './study-meeting.ts';
 import {
   parseEffectSize,
@@ -753,11 +752,13 @@ export function listConferenceSummaries(): ConferenceSummary[] {
         conf.dates.push(a.date);
         continue;
       }
-      for (const site of a.digest.sites) {
-        for (const st of site.studies) {
-          if (st.meeting?.slug === key) conf.alsoPresented.push({ date: a.date, slug: st.slug ?? deriveSlug(st.name), name: st.name });
-        }
-      }
+      // The date page's own anchors: slugs resolved across the whole date, so
+      // a second card sharing a slug links to its "-2" anchor, not the first.
+      const studies = a.digest.sites.flatMap((site) => site.studies);
+      const anchors = assignSlugsForDate(studies);
+      studies.forEach((st, i) => {
+        if (st.meeting?.slug === key) conf.alsoPresented.push({ date: a.date, slug: anchors[i]!, name: st.name });
+      });
     }
   }
   return Array.from(byConf.values()).map((c) => ({
