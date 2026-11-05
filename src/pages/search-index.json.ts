@@ -1,8 +1,9 @@
 // Build-time search index for the home-page live search.
 //
 // One entry per study across all published dates. Loaded lazily by the
-// SearchBox component on first keystroke or input focus. Substring filter
-// on the client; no external search library.
+// SearchBox component on first keystroke or input focus. Each entry carries
+// the card's full text (`body`) so a search reaches past the title and TL;DR;
+// matching + ranking live in src/lib/search.ts. No external search library.
 //
 // URL: /search-index.json
 
@@ -10,18 +11,10 @@ import type { APIRoute } from 'astro';
 import { listDigests, stripStudyNamePrefix } from '../lib/digest-data.ts';
 import { getDiseaseSite } from '../lib/disease-sites.ts';
 import { assignSlugsForDate } from '../lib/slug-resolve.ts';
+import { studySearchBody, type SearchEntry } from '../lib/search.ts';
+import { studyMeeting } from '../lib/study-meeting.ts';
 
-export type SearchEntry = {
-  date: string;
-  site: string;
-  site_label: string;
-  site_emoji: string;
-  site_rationale: string;
-  name: string;
-  slug: string;
-  tldr: string;
-  nct: string | null;
-};
+export type { SearchEntry };
 
 // Cap tldr in the index to bound per-keystroke filter cost and DOM render
 // size. The full tldr remains on the [date] page; this is search-only.
@@ -52,6 +45,7 @@ export const GET: APIRoute = () => {
           slug: resolvedSlugs[i++]!,
           tldr: trimTldr(stripStudyNamePrefix(study.tldr, study.name)),
           nct: study.nct,
+          body: studySearchBody(study, studyMeeting(study, artifact.conference)?.name),
         });
       }
     }

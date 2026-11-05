@@ -2,9 +2,11 @@
 // Live search on the home page.
 //
 // Loads /search-index.json lazily (on input focus or first keystroke) so
-// the 95% of visits that don't search pay no extra bytes. Filter is a
-// case-insensitive substring match across name + tldr + nct + site label;
-// results sort newest-date first.
+// the 95% of visits that don't search pay no extra bytes. Every query word
+// must appear somewhere on the card (name, TL;DR, NCT, site, or the card's
+// full text), in any order; name hits rank first, then newest-date first.
+// A match found only deep in the card shows a highlighted excerpt.
+// Matching rules: src/lib/search.ts.
 //
 // Anchor target: /<date>/#<slug> — [date].astro emits id={study.slug}.
 ---
@@ -16,7 +18,7 @@
     <input
       id="study-search"
       type="search"
-      placeholder="Search studies, trials, NCT…"
+      placeholder="Search trials, drugs, endpoints, NCT…"
       autocomplete="off"
       autocapitalize="off"
       spellcheck="false"
@@ -172,20 +174,32 @@
     line-height: 1.4;
     margin-top: 0.2rem;
   }
+  /* Excerpt shown when a query word is found only deep in the card (bullets,
+     analysis sections, why-it-matters), so the reader sees WHY it matched. */
+  .search-list :global(.result-snippet) {
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-top: 0.3rem;
+    padding-left: 0.5rem;
+    border-left: 2px solid var(--border);
+  }
+  .search-list :global(mark) {
+    background: var(--accent-bg);
+    color: var(--fg);
+    font-weight: 600;
+    border-radius: 2px;
+    padding: 0 1px;
+  }
 </style>
 
 <script>
-  type SearchEntry = {
-    date: string;
-    site: string;
-    site_label: string;
-    site_emoji: string;
-    site_rationale: string;
-    name: string;
-    slug: string;
-    tldr: string;
-    nct: string | null;
-  };
+  import {
+    highlightParts,
+    queryTokens,
+    searchEntries,
+    type SearchEntry,
+  } from '../lib/search.ts';
 
   const MAX_RESULTS = 20;
   const DEBOUNCE_MS = 80;
@@ -209,6 +223,7 @@
       typeof e.name === 'string' &&
       typeof e.slug === 'string' &&
       typeof e.tldr === 'string' &&
+      typeof e.body === 'string' &&
       (e.nct === null || typeof e.nct === 'string')
     );
   }
@@ -254,20 +269,15 @@
     return SAFE_ANCHOR.test(s) ? s : encodeURIComponent(s);
   }
 
-  function filter(query: string, entries: SearchEntry[]): SearchEntry[] {
-    const q = query.trim().toLowerCase();
-    if (q.length === 0) return [];
-    return entries.filter((e) => {
-      if (e.name.toLowerCase().includes(q)) return true;
-      if (e.tldr.toLowerCase().includes(q)) return true;
-      if (e.nct && e.nct.toLowerCase().includes(q)) return true;
-      if (e.site_label.toLowerCase().includes(q)) return true;
-      return false;
-    });
+  function highlight(text: string, tokens: string[]): string {
+    return highlightParts(text, tokens)
+      .map((p) => (p.hit ? `<mark>${escapeHtml(p.text)}</mark>` : escapeHtml(p.text)))
+      .join('');
   }
 
   function render(query: string, all: SearchEntry[]): void {
-    const results = filter(query, all);
+    const results = searchEntries(query, all);
+    const tokens = queryTokens(query);
     const status = document.querySelector('.search-status') as HTMLElement | null;
     const list = document.querySelector('.search-list') as HTMLElement | null;
     const container = document.querySelector('.search-results') as HTMLElement | null;
@@ -283,7 +293,7 @@
     container.dataset.state = 'active';
 
     if (results.length === 0) {
-      status.textContent = `No studies match "${query}". Try a trial name, NCT, or disease site.`;
+      status.textContent = `No studies match "${query}". Try a trial name, NCT, drug, endpoint, or disease site.`;
       list.innerHTML = '';
       return;
     }
@@ -299,7 +309,7 @@
     // The emoji comes from disease-sites.ts (trusted constant), but uniform
     // escaping protects against future drift if that source is ever widened.
     list.innerHTML = shown
-      .map((e) => {
+      .map(({ entry: e, snippet }) => {
         const href = `/${anchorEscape(e.date)}/#${anchorEscape(e.slug)}`;
         return `
         <li>
@@ -310,8 +320,9 @@
               <span aria-hidden="true">·</span>
               <span>${escapeHtml(e.date)}</span>
             </div>
-            <div class="result-name">${escapeHtml(e.name)}</div>
-            <div class="result-tldr">${escapeHtml(e.tldr)}</div>
+            <div class="result-name">${highlight(e.name, tokens)}</div>
+            <div class="result-tldr">${highlight(e.tldr, tokens)}</div>
+            ${snippet ? `<div class="result-snippet">${highlight(snippet, tokens)}</div>` : ''}
           </a>
         </li>
       `;

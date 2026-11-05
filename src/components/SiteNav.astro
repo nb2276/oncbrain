@@ -141,9 +141,14 @@ const navEmpty = navSites.filter((s) => s.count === 0);
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 0.5rem;
     }
-    .nav-row > li { display: flex; }
+    /* min-width: 0 on the cell AND the chip: grid and flex items default to
+       min-width: auto (their content width), so a long label ("Myeloma /
+       Plasma Cell") pushed its cell past the column and the page scrolled
+       sideways at 390px. With both at 0 the label's ellipsis below engages. */
+    .nav-row > li { display: flex; min-width: 0; }
     .nav-chip {
       flex: 1;
+      min-width: 0;
       min-height: 44px;
       padding: 0.45rem 0.8rem;
       font-size: 0.82rem;
