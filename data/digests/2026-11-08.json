@@ -1,0 +1,1332 @@
+{
+  "date": "2026-11-08",
+  "conference": null,
+  "generated_at": 1794128927539,
+  "digest": {
+    "top_line": "PMRT ASTRO-ASCO-SSO guideline: PMRT recommended for pN1 (Strong/High) and post-NST cT4/cN2-3 or ypN+, conditional for ypN0 after cT1-3N1/cT3N0, moderate hypofx preferred.",
+    "tldr": "Breast carried the day: two joint guidelines set PMRT indications by pN and post-NST ypN status and keep RT open to BRCA1/2 carriers, with intact-breast RT contraindicated only for germline TP53. HyTEC models anchor vestibular schwannoma SRS (12 Gy x1 → 3-5y TCP 91.2% or 95.6%) and adrenal SBRT (1-yr LC >95% at BED10 116.4 Gy).",
+    "sites": [
+      {
+        "disease_site": "cns",
+        "intro": "HyTEC TCP modeling for vestibular schwannoma SRS alongside a LINAC planning comparison of DCA variants vs VMAT.",
+        "studies": [
+          {
+            "name": "SRS for Vestibular Schwannomas: TCP Analyses (HyTEC)",
+            "tldr": "Pooled model of 35 series and 5162 pts: 12 Gy single-fraction predicts 3-5y TCP of 91.2% (LQ) or 95.6% (LQ-L). No outcome data below 11 Gy.",
+            "details": [
+              "🔍 HyTEC pooled TCP model: tumor control data from 35 publications, 5162 pts",
+              "🔍 3y control taken from 21 articles (60%), 5y from 14 (40%)",
+              "📊 3-5y control >90% to 95% in 89% of reviewed studies. Only 4 studies, typically smaller, reported 80% to 90%",
+              {
+                "text": "📊 Model-predicted 3-5y TCP by regimen (TCP at 0 Gy set to 30%)",
+                "table": {
+                  "columns": [
+                    "Regimen",
+                    "LQ (α/β 12.4)",
+                    "LQ-L (α/β 2.97)"
+                  ],
+                  "rows": [
+                    [
+                      "10 Gy x1",
+                      "85.0%",
+                      "89.7%"
+                    ],
+                    [
+                      "11 Gy x1",
+                      "88.4%",
+                      "93.1%"
+                    ],
+                    [
+                      "12 Gy x1",
+                      "91.2%",
+                      "95.6%"
+                    ],
+                    [
+                      "13 Gy x1",
+                      "93.5%",
+                      "97.33%"
+                    ],
+                    [
+                      "18 Gy/3 fx",
+                      "93.6%",
+                      "94.0%"
+                    ],
+                    [
+                      "25 Gy/5 fx",
+                      "97.2%",
+                      "96.9%"
+                    ]
+                  ]
+                }
+              },
+              "📐 α/β 12.4 Gy (95% CI 9.0-19.3) with LQ vs 2.97 Gy (95% CI 1.72-4.27) with LQ-L",
+              "📐 LQ-L gave a marginally better fit with tighter CIs. Both fits P < .0001",
+              "⚠️ No outcome data below 11 Gy single-fraction equivalent, so lower-dose TCP is extrapolation",
+              "⚠️ Only 46% of articles gave KM estimates. The rest used crude control at median f/u",
+              "⚠️ Prescription dose assumed to be the minimum GTV dose. PTV margin and dose heterogeneity ignored",
+              "⚠️ NF2 excluded. NF2 TCP is approximately 75% at 5y per a cited systematic review",
+              "⚠️ Few series have f/u beyond 10y, so durability is unconfirmed",
+              {
+                "text": "🔍 Recommended reporting standards for future VS series",
+                "subdetails": [
+                  "KM analysis, not crude incidence, with censor marks and number at risk",
+                  "Conformity, gradient and homogeneity indices plus complete DVH values",
+                  "Stated failure definition separating post-SRS swelling from true progression",
+                  "Reason for salvage: clinical progression vs imaging enlargement vs both"
+                ]
+              }
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.ijrobp.2020.11.019",
+            "tweet_ids": [
+              1000000222
+            ],
+            "slug": "vestibular-schwannoma-srs-tcp",
+            "verdict": {
+              "soc_implication": "confirmatory",
+              "rationale": "Dose-response model fit to pooled, mostly retrospective series with heterogeneous control definitions. It supports current prescriptions but adds no randomized or prospective dose-comparative data.",
+              "audience": "Sporadic vestibular schwannoma, SRS or fSRS, non-NF2"
+            },
+            "significance": "The two models disagree on α/β (12.4 vs 2.97 Gy), which changes how fSRS ranks: LQ puts 18 Gy/3fx (93.6%) above 12 Gy x1 (91.2%), while LQ-L puts it below (94.0% vs 95.6%). Calling fractionation 'equivalent' therefore depends on the model chosen. Single-fraction dose reduction below 11 Gy has no outcome data behind it.",
+            "monday_clinic": "In a sporadic VS being planned for SRS or fSRS, this supports the common 12-13 Gy/1fx, 18-21 Gy/3fx and 25 Gy/5fx prescriptions as all sitting high on the control curve. It does not extend to NF2-related tumors or salvage after prior resection.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "HyTEC literature review and **pooled TCP model**: 35 publications, **5162 pts**. A 3-parameter Poisson model with α/β as a free parameter, fit by maximum likelihood under both LQ and LQ-L dose conversion."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Sporadic VS treated with SRS or fSRS. **NF2 pts excluded**, and the authors tried to exclude progression after prior resection. Pediatric pts and repeat SRS were not analyzed."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "The most common prescriptions were **12 to 13 Gy in 1 fraction, 18 to 21 Gy in 3 fractions, or 25 Gy in 5 fractions**. Gamma Knife, CyberKnife and linac series were pooled. The prescription was treated as the minimum GTV dose and the sole determinant of TCP."
+              },
+              {
+                "label": "Endpoints",
+                "body": "3- to 5-year tumor control, using 5y when reported, otherwise 3y. Where both were given they were typically within 0%-3% of each other."
+              },
+              {
+                "label": "Results",
+                "body": "LQ: EQD2 of 13, 19, 25 and 33 Gy predicted TCP of **80%, 90%, 95% and 98%**. LQ-L: EQD2 of 18, 26, 35 and 45 Gy for the same levels. Per-regimen TCP is in the table above."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The source cites prior comparative work that found SRS and fractionated stereotactic RT **\"equally effective\"**, with no NTCP differences in hearing preservation, trigeminal toxicity or facial nerve toxicity. This model is consistent with that: every fSRS regimen modeled sits high on the curve."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents sporadic, non-NF2 VS treated with single-fraction SRS or 3- to 5-fraction fSRS at standard doses. Does not represent NF2-related tumors, salvage after resection, pediatric pts or single-fraction doses below 11 Gy."
+              },
+              {
+                "label": "Limitations",
+                "body": "**Only 26% of reports gave conformity indices**, and none reported Dxx/Vxx, so dosimetry was reduced to the prescription. TCP at 0 Gy was **assumed at 30%**. There were too few data to model TCP by tumor volume."
+              },
+              {
+                "label": "Discussion",
+                "body": "The curve is flat across standard prescriptions, so it cannot separate 12 from 13 Gy, or single-fraction from fSRS, on control alone. Toxicity and logistics should drive that choice. Whether control holds beyond 10y is still open."
+              }
+            ],
+            "interpretation": "The value of this report is less in any single number than in what it says about the dose range where VS radiosurgery is actually practiced. Every common prescription sits on the shoulder of the curve. Under either model, moving from 12 to 13 Gy in one fraction, or from single-fraction to 18 Gy in 3 or 25 Gy in 5, moves predicted 3-5y control by a few percentage points at most. A curve this flat says that tumor control should not be what decides between regimens. Cranial nerve outcomes, tumor volume, brainstem proximity and patient logistics are the real levers, and this paper cannot address any of them.\n\nThe disagreement between the two dose-conversion models matters more than its placement in the methods suggests. LQ returns an α/β of 12.4 Gy, which is implausibly tumor-like for a slow-growing schwannoma. LQ-L returns 2.97 Gy, which matches radiobiological intuition and fits marginally better. The choice changes which regimen looks stronger. Under LQ, 18 Gy in 3 fractions outperforms 12 Gy single-fraction. Under LQ-L it slightly underperforms. A reader who cites this paper to argue that fSRS matches or beats SRS on control should know that the ranking depends on a model assumption, not on observed data that discriminate between regimens.\n\nSeveral methodological choices bias the predictions, and the reader should know which way each one pushes. Assuming 30% nonprogression at 0 Gy is presented as conservative: a lower value would make SRS look more effective. Using crude control at median follow-up where Kaplan-Meier estimates were absent, which was the case in more than half the articles, tends to overstate control, because late failures beyond the median go uncounted. Treating the prescription as the minimum GTV dose discards real coverage differences across Gamma Knife, CyberKnife and linac series. The heterogeneity of failure definitions (radiologic progression, symptomatic progression, need for salvage) means the pooled endpoint is not one endpoint. Most of these push the apparent control rate up, not down.\n\nThe point most relevant to current practice is the lower bound. Dose de-escalation in VS radiosurgery has been driven by efforts to preserve hearing and facial nerve function. This model has no outcome data below the equivalent of 11 Gy in one fraction. The predicted 85.0% (LQ) or 89.7% (LQ-L) at 10 Gy is extrapolation with wide confidence bands, not evidence that 10 Gy is adequate. Anyone considering going below 11 Gy for hearing preservation is outside the data this model was built on.\n\nWhat would make the conclusions wrong is late failure. Few series extend beyond 10 years, and the untreated natural history the authors cite shows growth in more than 95% of tumors by 10 years. If a meaningful fraction of controlled tumors regrow in the second decade, a 3-5y TCP overstates long-term control at every dose. The reporting standards in Table 2 are the most durable contribution here. Without KM curves, at-risk numbers and complete dosimetry from future series, the next version of this model will have the same limitations.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The LQ vs LQ-L split on α/β (12.4 vs 2.97 Gy) changes the fSRS ranking: 18 Gy/3fx predicts 93.6% vs 91.2% for 12 Gy x1 under LQ, but 94.0% vs 95.6% under LQ-L. Single-fraction prescriptions below 11 Gy have no outcome data behind them."
+            },
+            "open_questions": [
+              "Tumor control durability beyond 10 years after SRS",
+              "Control at single-fraction doses below 11 Gy",
+              "Volume-dependent TCP for larger schwannomas"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "meta-analysis",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "vestibular schwannoma radiosurgery",
+                "vestibular schwannoma hypofractionated stereotactic"
+              ],
+              "queries_failed": [
+                {
+                  "term": "vestibular schwannoma hypofractionated stereotactic",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 4,
+              "fetched_at": "2026-11-08T09:07:26.324Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 222
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "LINAC SRS Technique Comparison: DCA vs VMAT",
+            "tldr": "Paddick CI 0.78 VMAT vs 0.75 DCA+SSO+VDR vs 0.6 plain DCA across 11 replanned cases. VMAT needed 41 ± 17% more MU than DCA+SSO+VDR.",
+            "details": [
+              "🔍 Retrospective planning study: 11 brain cases, 4 plans per case, paired t-tests",
+              {
+                "text": "🔍 Case mix and prescription",
+                "subdetails": [
+                  "7 solitary mets, 2 meningioma, 1 acoustic schwannoma, 1 pituitary adenoma",
+                  "9 SRS, 2 SRT; total dose 18 to 30Gy",
+                  "PTV 0.93 to 22.5 cc (median 4.99cc); PTV = GTV + 2 mm"
+                ]
+              },
+              {
+                "text": "🔍 Planning platform",
+                "subdetails": [
+                  "Elekta Versa HD, Agility MLC with 5 mm leaves, 6 FFF",
+                  "Monaco 5.11.03, Monte Carlo, 0.3 cm grid",
+                  "All DCA variants noncoplanar; VMAT coplanar, single full or partial arc"
+                ]
+              },
+              {
+                "text": "📊 Mean plan metrics by technique",
+                "table": {
+                  "columns": [
+                    "Metric",
+                    "DCA",
+                    "DCA+SSO",
+                    "DCA+SSO+VDR",
+                    "VMAT",
+                    "p (DCA vs SSO / SSO vs VDR / VDR vs VMAT)"
+                  ],
+                  "rows": [
+                    [
+                      "Paddick CI",
+                      "0.6",
+                      "0.69",
+                      "0.75",
+                      "0.78",
+                      "0.0004 / 0.015 / 0.03"
+                    ],
+                    [
+                      "RTOG HI",
+                      "1.17",
+                      "1.22",
+                      "1.26",
+                      "1.28",
+                      "0.008 / 0.04 / 0.06"
+                    ],
+                    [
+                      "Paddick GI",
+                      "1.35",
+                      "1.21",
+                      "1.20",
+                      "1.17",
+                      "0.03 / 0.33 / 0.29"
+                    ],
+                    [
+                      "MU",
+                      "2507",
+                      "2724",
+                      "2818",
+                      "4040",
+                      "0.001 / 0.20 / 0.0007"
+                    ],
+                    [
+                      "Brain V12Gy (cc)",
+                      "16.75",
+                      "14.13",
+                      "11.75",
+                      "11.14",
+                      "0.10 / 0.01 / 0.38"
+                    ]
+                  ]
+                }
+              },
+              "📊 VMAT V12Gy lower than every DCA variant in 9 of 11 pts",
+              "⚠️ VMAT vs DCA+SSO+VDR: only CI (p=0.03) and MU (p=0.0007) differ; GI, HI, V12Gy did not",
+              "⚠️ Geometry confounded with technique: noncoplanar DCA vs coplanar VMAT, so modulation effect is not isolated",
+              "⚠️ 5 mm leaf MLC is coarse for sub-cc targets; transfer to finer-leaf platforms untested",
+              "⚠️ Only adjacent pairs tested, no multiplicity correction; no delivery QA or measured beam-on time reported"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1055/s-0042-1751117",
+            "tweet_ids": [
+              1000000220
+            ],
+            "slug": "srs-linac-dca-vmat-dosimetry",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Dosimetric surrogates only, N=11 mixed histologies; beam geometry confounded with technique and VMAT's edge over DCA+SSO+VDR rests on CI alone.",
+              "audience": "LINAC-based single-target cranial SRS/SRT, Elekta Agility 5 mm MLC"
+            },
+            "significance": "Against the optimized DCA+SSO+VDR variant, VMAT's dosimetric advantage shrinks to CI 0.78 vs 0.75 (p=0.03); GI (p=0.29) and V12Gy 11.14 vs 11.75 cc (p=0.38) did not differ, at the cost of MU 4040 vs 2818. On an Elekta 5 mm-leaf platform, SSO+VDR, not VMAT, captures most of the gain over plain DCA.",
+            "monday_clinic": null,
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**Retrospective dosimetric replanning** of 11 brain cases, each planned four ways (DCA, DCA+SSO, DCA+SSO+VDR, VMAT). Paired t-tests between adjacent techniques, p<0.05 significant."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "7 solitary metastases, 2 meningiomas, 1 acoustic schwannoma, 1 pituitary adenoma. PTV 0.93 to 22.5 cc, **median 4.99cc**."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "9 SRS and 2 SRT, **18 to 30Gy** total. PTV = GTV + **2 mm**; objective 95% of PTV covered by 95% of prescription. Elekta Versa HD, Agility **5 mm** leaves, 6 FFF, Monaco Monte Carlo. DCA plans **noncoplanar** (couch angles ≥30 degrees apart); VMAT **coplanar** single arc."
+              },
+              {
+                "label": "Endpoints",
+                "body": "Paddick CI, RTOG HI, Paddick GI, MU as a treatment-time proxy, and healthy-brain V12Gy (brain minus PTV)."
+              },
+              {
+                "label": "Results",
+                "body": "Each DCA refinement improved CI stepwise; VMAT edged DCA+SSO+VDR on **CI only (p=0.03)**, with **no difference in GI (p=0.29) or V12Gy (p=0.38)** and higher MU (p=0.0007). DCA gave the most homogeneous dose (HI 1.17)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Authors report CI direction matching Jessica et al and Lagerwaard et al (VMAT over DCA), and GI matching Chang et al. Chang et al reported VMAT needing higher MU than DCA **by a factor of 2.37**, larger than the gap here against SSO+VDR."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents single-lesion LINAC SRS/SRT planning on an Elekta Agility 5 mm MLC with Monaco. Does not represent multiple-metastasis single-isocenter plans, noncoplanar VMAT, cone-based or finer-leaf MLC platforms."
+              },
+              {
+                "label": "Limitations",
+                "body": "Coplanar VMAT vs noncoplanar DCA means **geometry and modulation are not separable**. No delivery QA, measured beam-on time, or setup-error sensitivity analysis, despite the authors raising both. Mixed benign and malignant targets across a wide volume range in N=11."
+              },
+              {
+                "label": "Discussion",
+                "body": "The defensible read is that SSO+VDR closes most of the DCA-to-VMAT gap; the authors' own claim that VMAT has shorter total treatment time rests on FFF dose rate and avoided couch entries, not a measured time."
+              }
+            ],
+            "interpretation": "The paper's headline, that coplanar VMAT is the preferred LINAC SRS technique, is stronger than its own table supports. The stepwise structure of the comparison is the useful part: plain DCA to DCA+SSO to DCA+SSO+VDR to VMAT, each tested against its neighbour. Read that way, most of the conformity and gradient improvement is captured by segment shape optimization and variable dose rate, still within a forward-planned, noncoplanar arc framework. The final step to VMAT moves the Paddick CI from 0.75 to 0.78 (p=0.03) and nothing else that a radiosurgeon would weigh: gradient index and healthy-brain V12Gy are statistically indistinguishable (p=0.29 and p=0.38), homogeneity trends worse, and MU climbs to 4040 from 2818.\n\nThe design choice that most limits the conclusion is that technique and beam geometry travel together. Every DCA plan is noncoplanar and every VMAT plan is a single coplanar arc. Noncoplanar geometry is generally what buys gradient in cranial SRS, so a coplanar VMAT plan matching an optimized noncoplanar DCA plan on GI is interesting, but the study cannot say whether modulation or arc arrangement drives any of the differences. A noncoplanar VMAT arm, which most current LINAC SRS workflows would consider, is absent, so the comparison a reader actually faces in planning is not tested.\n\nPlatform matters for transfer. The Agility MLC here has 5 mm leaves, and the smallest targets were under 1 cc. Coarse leaves penalize forward-planned conformal shapes more than inversely optimized ones, which may flatter VMAT on CI for the smallest lesions; the authors show a CI by PTV volume correlation figure but the source text does not report the slope. Centres on finer-leaf MLCs, cones, or dedicated platforms should not assume the same ordering.\n\nStatistically, eleven paired cases spanning metastases, meningiomas, a schwannoma and a pituitary adenoma, 18 to 30Gy, SRS and SRT, is a heterogeneous sample for detecting small index differences. Only adjacent pairs were tested, without multiplicity correction, so VMAT was never directly compared against plain DCA, and the p=0.03 CI result would not survive a conservative correction across the fifteen comparisons in the table.\n\nThe treatment-time argument is also unresolved. MU is used as the time proxy, yet the conclusion states VMAT delivery was faster overall because of FFF dose rate and fewer couch rotations; no beam-on or room time was measured. The authors also flag that a steeper VMAT gradient is more sensitive to setup error and that VMAT carries heavier QA demands, but neither was quantified.\n\nWhat would make the paper wrong is plausible: a noncoplanar VMAT arm or a finer MLC could widen the VMAT lead, while setup-error modelling could erase it. Practically, the result supports DCA+SSO+VDR as a defensible single-lesion SRS technique on this platform, and gives no dosimetric reason to abandon it for coplanar VMAT on V12Gy grounds.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Against the optimized DCA+SSO+VDR variant, coplanar VMAT gains only CI 0.78 vs 0.75 (p=0.03), with no difference in GI or brain V12Gy (11.14 vs 11.75 cc, p=0.38) and MU 4040 vs 2818. On a 5 mm-leaf Elekta platform, SSO+VDR captures most of the improvement over plain DCA."
+            },
+            "open_questions": [
+              "Does noncoplanar VMAT outperform optimized noncoplanar DCA?",
+              "Do dosimetric gains translate to lower radionecrosis rates?",
+              "How sensitive are VMAT gradients to setup error versus DCA?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "retrospective",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "radiosurgery VMAT brain",
+                "radiosurgery radionecrosis brain metastases"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 17,
+              "fetched_at": "2026-11-08T09:08:26.093Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 220
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "breast",
+        "intro": "Two joint ASTRO/ASCO/SSO guidelines: PMRT indications and volumes, plus RT safety by germline mutation status (TP53 the lone contraindication to intact-breast RT).",
+        "studies": [
+          {
+            "name": "Hereditary Breast Cancer ASCO-ASTRO-SSO Guideline",
+            "tldr": "RT not withheld for mutation status (strong rec), except germline TP53, where intact-breast RT is contraindicated; BCT stays open to BRCA1/2 carriers.",
+            "details": [
+              "🔍 Joint ASCO/ASTRO/SSO panel: systematic review plus formal consensus process",
+              "🔍 58 articles underpin local therapy recs; 6 RCTs underpin systemic recs",
+              "🔍 28 studies addressed RT in germline mutation carriers",
+              {
+                "text": "📊 Radiotherapy recommendations by germline status",
+                "table": {
+                  "columns": [
+                    "Rec",
+                    "Population",
+                    "Recommendation",
+                    "Evidence",
+                    "Strength"
+                  ],
+                  "rows": [
+                    [
+                      "6.1",
+                      "BRCA1/2 or moderate-penetrance gene",
+                      "RT not withheld for mutation status after BCT or when PMRT considered",
+                      "Intermediate",
+                      "Strong"
+                    ],
+                    [
+                      "6.2",
+                      "ATM carriers",
+                      "Offer RT when clinically indicated; discuss with those considering BCT",
+                      "Low",
+                      "Moderate"
+                    ],
+                    [
+                      "6.3",
+                      "Germline TP53 carriers",
+                      "Intact-breast RT contraindicated; mastectomy; PMRT only with significant LRR risk",
+                      "Low",
+                      "Moderate"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📊 Management grid: BRCA1/2 vs moderate-penetrance genes (PALB2, CHEK2, ATM)",
+                "table": {
+                  "columns": [
+                    "Decision",
+                    "BRCA1/2",
+                    "Moderate-penetrance"
+                  ],
+                  "rows": [
+                    [
+                      "BCT for index cancer",
+                      "Not precluded; discuss CBC and ipsilateral new primary risk",
+                      "Offer when BCT appropriate"
+                    ],
+                    [
+                      "CRRM",
+                      "Discuss; lowers CBC, no proven survival gain",
+                      "Not based predominantly on mutation status"
+                    ],
+                    [
+                      "Nipple-sparing mastectomy",
+                      "Reasonable in selected pts",
+                      "Reasonable in selected pts"
+                    ],
+                    [
+                      "Surveillance without bilateral mastectomy",
+                      "Annual mammogram + MRI",
+                      "Annual mammogram + MRI"
+                    ],
+                    [
+                      "Metastatic chemo",
+                      "Platinum preferred over taxane if platinum-naive",
+                      "No platinum efficacy data"
+                    ],
+                    [
+                      "PARPi, metastatic HER2-negative",
+                      "Olaparib or talazoparib, 1L to 3L",
+                      "No supporting data"
+                    ],
+                    [
+                      "(Neo)adjuvant",
+                      "No routine platinum add-on; PARPi not recommended",
+                      "No data"
+                    ]
+                  ]
+                }
+              },
+              "📐 Round 1 agreement 72% to 98% (mean 90%), 47 to 49 respondents per rec",
+              "📐 1 of 17 recs missed the 75% threshold (moderate-gene CRRM); revised version reached 90% (n=50)",
+              "⚠️ Abstract and Table 2 say BRCA1/2 CRRM 'should be discussed'; Bottom Line Rec 4.1 says 'should be offered'",
+              "⚠️ RT safety recs are consensus on intermediate or low evidence; ATM data called limited and inconsistent",
+              "🔗 Platinum preference rests on TNT, which included only 11 BRCA carriers with ER-positive disease",
+              "🔗 PARPi recs anchor on OlympiAD and EMBRACA; OlympiA adjuvant results were pending at writing"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1200/jco.20.00299",
+            "tweet_ids": [
+              1000000224
+            ],
+            "slug": "hereditary-breast-cancer-asco-astro-sso-guideline",
+            "verdict": {
+              "soc_implication": "consensus",
+              "rationale": "Formal-consensus guideline; RT recs rest on intermediate to low evidence from nonrandomised series. Agreement figures measure panel opinion, not outcomes.",
+              "audience": "Breast cancer with germline BRCA1/2, PALB2, CHEK2, ATM or TP53 mutation"
+            },
+            "significance": "The panel graded the RT recommendations unevenly. Not withholding RT for BRCA1/2 or moderate-penetrance status is a strong rec on intermediate evidence, but the ATM rec rests on low evidence, so a toxicity concern is a counseling topic, not a reason to omit RT. TP53 is the only exclusion, and even there PMRT stays available with significant LRR risk.",
+            "monday_clinic": "In a newly diagnosed BRCA1/2 or ATM carrier otherwise eligible for breast conservation, this supports keeping BCT plus indicated RT on the table; it does not extend to germline TP53 carriers, for whom intact-breast RT is contraindicated.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Joint **ASCO/ASTRO/SSO** expert panel; systematic review plus **formal consensus** with two voting rounds. 58 articles for local therapy, 6 RCTs (published 2017 to 2018) for systemic therapy."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Women with breast cancer carrying **germline BRCA1/2, PALB2, CHEK2 or ATM** mutations, early or advanced stage; TP53 addressed for RT. Panel states management should be largely the same for men."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**RT should not be withheld because of mutation status** after BCT or when PMRT is considered (Rec 6.1, strong). ATM carriers: offer RT when indicated (6.2). **Germline TP53: intact-breast RT contraindicated**, PMRT only with significant LRR risk (6.3)."
+              },
+              {
+                "label": "Regimen",
+                "body": "Metastatic BRCA carriers: **platinum preferred over taxane** if platinum-naive; **olaparib or talazoparib** as an alternative to chemo in metastatic HER2-negative disease, 1L to 3L. No routine platinum added to anthracycline/taxane (neo)adjuvant chemo; **no PARPi in nonmetastatic disease**."
+              },
+              {
+                "label": "Results",
+                "body": "Round 1 agreement ranged **72% to 98%**, mean 90%. One of 17 recs (moderate-gene CRRM) failed the 75% threshold and passed at **90%** after revision."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Systemic recs lean on TNT for platinum and OlympiAD/EMBRACA for PARPi. TNT included only 11 BRCA carriers with ER-positive disease, so the platinum preference extrapolates thinly to ER-positive carriers."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents germline BRCA1/2 and moderate-penetrance (PALB2, CHEK2, ATM) carriers with breast cancer weighing BCT, RT, CRRM or systemic options. Does not represent somatic-only BRCA tumors, where PARPi efficacy data are absent."
+              },
+              {
+                "label": "Limitations",
+                "body": "Rec 4.1 wording ('offered') diverges from Table 2 and the abstract ('discussed') for BRCA1/2 CRRM. ATM pathogenicity is unsettled for most missense variants, which confounds the RT toxicity literature the panel reviewed."
+              },
+              {
+                "label": "Discussion",
+                "body": "The RT message is permissive: genotype is not a reason to omit indicated RT outside TP53. The adjuvant PARPi stance (Rec 10) predates the OlympiA readout and is the rec most likely to have aged."
+              }
+            ],
+            "interpretation": "For a radiation oncologist, this guideline does one thing above all else. It takes germline status off the list of reasons to withhold indicated RT, with one exclusion. Rec 6.1 is graded strong on intermediate evidence, which is an unusual pairing. The panel is more confident in its conclusion than in the data behind it. The logic is asymmetric. The reviewed literature showed no signal of excess toxicity or contralateral events from RT in BRCA1/2 carriers, while omitting indicated RT has a known cost. The burden of proof falls on whoever wants to omit RT. That framing is defensible, but readers should see it for what it is: absence of evidence of harm, drawn from 28 mostly observational studies, not a randomised demonstration of safety.\n\nThe ATM recommendation is where the evidence is thinnest, and the panel says so. Biallelic ATM loss confers radiosensitivity, and case reports of toxicity in heterozygous carriers exist. One reviewed study found more contralateral cancers in carriers of rare predicted-deleterious ATM variants who received RT. The panel discounted that study for two reasons: other studies were inconsistent with it, and it is unclear which included variants are pathogenic. That second point matters beyond this guideline. Most ATM variants are missense, so any series that pools them mixes true mutations with benign variants and dilutes or distorts a real effect in both directions. Until variant-level data exist, the honest position is the one the panel took: offer RT, and discuss the uncertainty with ATM carriers who are considering BCT.\n\nTP53 is handled differently, and correctly so. Intact-breast RT is contraindicated and mastectomy is recommended. The panel still leaves room for PMRT when locoregional risk is significant, which avoids turning a sound concern about radiation-induced malignancy in Li-Fraumeni into an absolute ban that could undertreat node-positive disease.\n\nOn local therapy more broadly, the guideline separates control of the index cancer from future-cancer risk. Local control after BCT in BRCA1/2 carriers is described as similar to that in noncarriers, so the BCT versus mastectomy discussion is really about the risk of contralateral and new ipsilateral primaries, with age as the strongest predictor. That reframing keeps the RT plan from being contaminated by a surgical decision driven by prevention. One internal inconsistency deserves attention. The abstract and Table 2 say BRCA1/2 CRRM should be discussed, while Rec 4.1 says it should be offered. These carry different implications for consent.\n\nThe systemic recommendations have aged faster than the local ones. The adjuvant PARP inhibitor stance was written while OlympiA was pending, and the platinum preference generalises from a TNT subset with few ER-positive carriers. The RT recommendations depend less on any single pending trial, which is why they are likely to hold up better.",
+            "relevant_specialties": [
+              "radonc",
+              "medonc",
+              "surgonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Indicated RT after BCT or mastectomy is not withheld for BRCA1/2 or moderate-penetrance status (strong rec). ATM toxicity concern rests on low evidence and calls for counseling, not omission. Germline TP53 is the lone contraindication for intact-breast RT, with PMRT kept for significant LRR risk.",
+              "medonc": "In metastatic HER2-negative disease with germline BRCA1/2, olaparib or talazoparib is offered 1L to 3L, and platinum is preferred over taxane if platinum-naive. No routine platinum is added to (neo)adjuvant anthracycline/taxane, and the no-adjuvant-PARPi stance predates OlympiA. Moderate-penetrance carriers have no PARPi or platinum data.",
+              "surgonc": "BCT is not precluded in BRCA1/2 carriers and should be offered to moderate-penetrance carriers. The BCT versus mastectomy talk centers on contralateral and new ipsilateral primary risk, with age the strongest predictor. Nipple-sparing mastectomy is reasonable in selected carriers; TP53 carriers go to mastectomy."
+            },
+            "open_questions": [
+              "Does heterozygous ATM status raise RT toxicity or contralateral risk?",
+              "Do PARP inhibitors work in PALB2, CHEK2 or ATM carriers?",
+              "Platinum vs anthracycline neoadjuvant chemo in BRCA carriers"
+            ],
+            "consort": null,
+            "modality": null,
+            "intent": null,
+            "methodology": "consensus-guideline",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05232006",
+                "brief_title": "PARP-inhibitor on Advanced Metastatic Breast Cancer in Germline PALB2 Mutations Carriers",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 12,
+                "primary_completion_date": "2024-09",
+                "brief_summary": "The study aims at exploring the potential benefit of a PARP-inhibitor, Niraparib, in metastatic breast cancer developing in germline-PALB2 mutations carriers. This study is designed as a multicentre one-arm two-stage phase 2 clinical trial",
+                "conditions": [
+                  "Metastatic Breast Cancer in Germline-PALB2 Mutations Carriers"
+                ],
+                "interventions": [
+                  {
+                    "name": "Niraparib",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Adult patients over 18 years\n* PALB2 germline heterozygous mutation carrier, wild type BRCA1\\&2 (breast cancer 1\\&2) affected with metastatic breast cancer in first metastatic treatment line or beyond\n* Histologically or cytologically confirmed breast cancer with evidence of…",
+                "answers_question": "Do PARP inhibitors work in PALB2, CHEK2 or ATM carriers?",
+                "relevance_phrase": "single-arm niraparib in germline PALB2 MBC, BRCA wt"
+              },
+              {
+                "nct": "NCT03344965",
+                "brief_title": "Olaparib In Metastatic Breast Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 114,
+                "primary_completion_date": "2025-07",
+                "brief_summary": "This research study is for patients with metastatic breast cancer.\n\n* Metastatic means that the cancer has spread beyond the breast. In addition, through genetic testing of the blood or tumor, an altered gene has been found that suggests the tumor may not be able to repair its genetic material (DNA) when it becomes damaged.\n* This aspect of the cancer may cause it to be more sensitive - that is, more effectively killed by certain types of drugs such as the study agent being evaluated in this…",
+                "conditions": [
+                  "Metastatic Breast Cancer",
+                  "Invasive Breast Cancer",
+                  "Somatic Mutation Breast Cancer (BRCA1)",
+                  "Somatic Mutation Breast Cancer (BRCA2)",
+                  "CHEK2 Gene Mutation",
+                  "ATM Gene Mutation",
+                  "PALB2 Gene Mutation",
+                  "RAD51 Gene Mutation",
+                  "BRIP1 Gene Mutation",
+                  "NBN Gene Mutation"
+                ],
+                "interventions": [
+                  {
+                    "name": "Olaparib",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients must have histologically confirmed invasive breast cancer with stage IV disease, either biopsy proven or with unequivocal evidence of metastatic disease by physical examination or radiological study.\n* Cohorts 1 and 2: Documented germline (Cohort 1) or somatic…",
+                "answers_question": "Do PARP inhibitors work in PALB2, CHEK2 or ATM carriers?",
+                "relevance_phrase": "olaparib in MBC with CHEK2, ATM or PALB2 mutations"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "ATM breast radiotherapy",
+                "PALB2 breast PARP",
+                "BRCA breast neoadjuvant platinum"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 15,
+              "fetched_at": "2026-11-08T09:07:30.505Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 224
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "PMRT ASTRO-ASCO-SSO Guideline",
+            "tldr": "PMRT recommended for pN1 (Strong/High) and post-NST cT4/cN2-3 or ypN+; conditional for ypN0 after cT1-3N1/cT3N0; moderate hypofractionation preferred.",
+            "details": [
+              "🔍 ASTRO-ASCO-SSO task force, four KQs: upfront-surgery indications, post-NST indications, volumes/fractionation, technique",
+              "🔍 Systematic review, MEDLINE + Embase Jan 2005 to Oct 2023, updated through Oct 15, 2024; 110 records included",
+              {
+                "text": "📊 KQ1: PMRT after upfront mastectomy",
+                "table": {
+                  "columns": [
+                    "Scenario",
+                    "Recommendation",
+                    "Strength",
+                    "QoE"
+                  ],
+                  "rows": [
+                    [
+                      "pN1",
+                      "PMRT recommended",
+                      "Strong",
+                      "High"
+                    ],
+                    [
+                      "Any pT4",
+                      "PMRT recommended, even without other risk factors",
+                      "Strong",
+                      "High"
+                    ],
+                    [
+                      "pT3N0",
+                      "PMRT conditionally recommended",
+                      "Conditional",
+                      "High"
+                    ],
+                    [
+                      "pT1-2N0",
+                      "PMRT not recommended",
+                      "Strong",
+                      "Low"
+                    ],
+                    [
+                      "Positive margins, no other indication",
+                      "Chest wall/reconstructed breast alone",
+                      "Conditional",
+                      "Expert opinion"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📊 pN1 omission may be appropriate: pN1mic or low-burden pN1a after ALND with favorable features",
+                "subdetails": [
+                  "pT1-2 disease",
+                  "Low-to-intermediate grade HR+/HER2-",
+                  "Postmenopausal",
+                  "No LVI",
+                  "Low 21-gene recurrence score"
+                ]
+              },
+              {
+                "text": "📊 KQ2: PMRT after neoadjuvant systemic therapy",
+                "table": {
+                  "columns": [
+                    "Scenario",
+                    "Recommendation",
+                    "Strength",
+                    "QoE"
+                  ],
+                  "rows": [
+                    [
+                      "Initial cT4 or cN2-3",
+                      "PMRT regardless of pathologic response",
+                      "Strong",
+                      "Moderate"
+                    ],
+                    [
+                      "ypN1",
+                      "PMRT recommended",
+                      "Strong",
+                      "Moderate"
+                    ],
+                    [
+                      "cT1-3N1 or cT3N0 → ypN0",
+                      "PMRT conditionally recommended",
+                      "Conditional",
+                      "Moderate"
+                    ],
+                    [
+                      "cT1-2N0 → ypN0",
+                      "PMRT not recommended",
+                      "Strong",
+                      "Moderate"
+                    ],
+                    [
+                      "Positive margins after NST",
+                      "PMRT recommended",
+                      "Strong",
+                      "Expert opinion"
+                    ]
+                  ]
+                }
+              },
+              "📊 ypN0 after cT1-3N1/cT3N0: PMRT may be omitted at ypT0N0",
+              "📊 Young age, LVI, high residual breast burden flagged as features favoring PMRT in ypN0",
+              {
+                "text": "📊 KQ3: volumes, fractionation, boost",
+                "table": {
+                  "columns": [
+                    "Scenario",
+                    "Recommendation",
+                    "Strength",
+                    "QoE"
+                  ],
+                  "rows": [
+                    [
+                      "Any PMRT",
+                      "Chest wall/reconstructed breast + axillary, supra/infraclavicular, IMNs",
+                      "Strong",
+                      "High"
+                    ],
+                    [
+                      "No reconstruction",
+                      "Moderate hypofractionation",
+                      "Strong",
+                      "High"
+                    ],
+                    [
+                      "Reconstruction",
+                      "Moderate hypofx (preferred) or conventional",
+                      "Strong",
+                      "Moderate (hypofx)"
+                    ],
+                    [
+                      "T4 or close/positive margins",
+                      "Chest wall/scar boost",
+                      "Conditional",
+                      "Low"
+                    ],
+                    [
+                      "Nodal disease not surgically addressed",
+                      "Nodal boost",
+                      "Strong",
+                      "Expert opinion"
+                    ]
+                  ]
+                }
+              },
+              "📊 Chest wall alone allowed in select pts (eg, pT3N0); IMN coverage individualized by location, size, nodal extent",
+              {
+                "text": "🔍 KQ4 technique",
+                "subdetails": [
+                  "CT-based volumetric planning with 3D-CRT recommended",
+                  "IMRT when 3D-CRT cannot meet treatment goals",
+                  "DIBH recommended for normal tissue sparing",
+                  "Bolus for skin involvement, positive superficial margins and/or LVI",
+                  "Routine tissue-equivalent bolus not recommended"
+                ]
+              },
+              "⚠️ pT1-2N0 'not recommended' carries Strong strength on Low QoE",
+              "⚠️ EBCTCG base limited to trials initiated by 1995; predates HER2-directed therapy and IO",
+              "🔗 ypN0 evidence cites ACOSOG Z1071 analyses, NSABP B-51/RTOG 1304 abstract, RAPCHEM registry"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1200/JCO-25-01747",
+            "tweet_ids": [
+              1000000223
+            ],
+            "slug": "pmrt-astro-asco-sso-guideline",
+            "verdict": {
+              "soc_implication": "consensus",
+              "rationale": "Joint ASTRO-ASCO-SSO guideline from a 104-study systematic review; output is graded recommendations, not a measured outcome. Reframes indications around NST response.",
+              "audience": "Adults with breast cancer undergoing mastectomy, upfront or after NST"
+            },
+            "significance": "The pN1 omission remark is written for pts after ALND, so it does not directly cover the SLNB-only axilla now common in practice. Moderate hypofractionation is preferred with or without reconstruction, and IMN coverage is individualized by tumor location, size and nodal extent, which moves fractionation and nodal-volume defaults for most PMRT cases.",
+            "monday_clinic": "In cT1-3N1 or cT3N0 disease converting to ypN0 after NST, this frames PMRT as a shared decision, with omission reasonable at ypT0N0; it does not extend to initial cT4 or cN2-3, where PMRT stands regardless of response.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Multidisciplinary ASTRO-ASCO-SSO task force answering **four key questions** via systematic review and a predefined consensus methodology. Inclusion required **≥50 pts** for RCTs/meta-analyses and **≥100** for nonrandomized or retrospective studies; retrospective studies excluded for KQ1. Reviewed by 17 peer reviewers plus public comment."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Adults (≥18 years) with breast cancer undergoing mastectomy, upfront or after NST. **Out of scope:** inflammatory breast cancer, DCIS after mastectomy, locoregional recurrence, reirradiation, oligometastatic or palliative disease, phyllodes and breast sarcoma."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "PMRT defined as chest wall/reconstructed breast plus ipsilateral regional nodes, including IMNs. **Moderate hypofractionation preferred**; conventional fractionation acceptable in rare cases, and an equal option with reconstruction. CT-based 3D-CRT, IMRT when 3D-CRT falls short, DIBH, bolus only for skin involvement, positive superficial margins or LVI."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The pN1 recommendation rests on the **EBCTCG meta-analysis**, which the panel notes was limited to trials initiated by 1995 and predates HER2-directed therapy and immunotherapy. The ypN0 recommendation draws on ACOSOG Z1071 analyses, the NSABP B-51/RTOG 1304 primary-outcomes abstract, and the RAPCHEM registry."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents adults undergoing mastectomy for invasive breast cancer with curative intent, upfront or after NST. Does not represent inflammatory disease, recurrent disease, reirradiation, or oligometastatic/palliative settings."
+              },
+              {
+                "label": "Limitations",
+                "body": "**pT1-2N0 omission is graded Strong on Low evidence**, and its exception list (TNBC, high grade, LVI, young age, central/medial tumors) is unquantified. The ypN0 Moderate grade leans on pooled secondary analyses, retrospective series and a registry. Large registry database studies were excluded throughout."
+              },
+              {
+                "label": "Discussion",
+                "body": "The operative content sits in the implementation remarks, not the headline grades: **pN1 omission** for favorable pN1mic/low-burden pN1a, **ypT0N0 omission**, and **chest wall alone** for select pT3N0. What stays unsettled is RT for the cN1 → ypN0 pt, the only Conditional call in the post-NST table."
+              }
+            ],
+            "interpretation": "The structural change here is that the PMRT decision is now organized around response to neoadjuvant systemic therapy as much as around pathology after upfront surgery, and the panel grades those two pathways differently. The upfront recommendations draw on randomized trials and the EBCTCG meta-analysis and mostly carry High quality of evidence. The post-NST recommendations top out at Moderate, and the one that matters most in daily practice, the cT1-3N1 or cT3N0 pt who converts to ypN0, is the only Conditional call in that table. That grade looks honest. The evidence behind it is mostly pooled secondary analyses of systemic-therapy trials, retrospective series such as KROG 12-05, and the RAPCHEM registry, with the NSABP B-51/RTOG 1304 primary-outcomes abstract cited next to them. A reader should treat the ypN0 recommendation as a framework for shared decision-making, not a resolved question.\n\nThe pN1 recommendation shows the gap between a grade and its implementation remarks. It is Strong with High evidence, yet the remark allows omission for pN1mic or low-burden pN1a with favorable features. The panel itself says the EBCTCG base was limited to trials initiated by 1995 and did not use current systemic regimens, which it credits with added locoregional control and DFS benefit. So the grade reflects the older trials, and the remark is where modern de-escalation sits. There is a catch: the remark is written for pts after ALND. The guideline also cites the shift toward sentinel node biopsy and targeted axillary dissection, so the population the remark explicitly covers is shrinking. For a pN1a pt staged by SLNB alone, the document does not speak directly, and that is where tumor-board disagreement will concentrate.\n\nThe pT1-2N0 recommendation is Strong on Low evidence. ASTRO's grading system allows this; its own table states that a lower quality of evidence does not make a recommendation conditional. The practical meaning is that omission is the default, with an exception list (triple-negative, high grade, LVI, young age, central or medial tumors) that names no threshold or combination. Readers should not mistake the Strong label for strong data.\n\nOn volumes and dose, the guideline is more decisive. Treating the chest wall or reconstructed breast with regional lymphatics, IMNs included, is Strong with High evidence, but IMN coverage is left to tumor location, size and nodal extent. That keeps the main IMN judgment with the treating physician. Moderate hypofractionation is preferred both without reconstruction (High) and with reconstruction (Moderate). For a practice still defaulting to conventional fractionation after implant or autologous reconstruction, this is the recommendation most likely to change routine planning. Routine bolus is not recommended, and bolus is limited to skin involvement, positive superficial margins or LVI. That should cut skin toxicity in centres that bolus by habit.\n\nWhat the guideline does not settle: the boost recommendations for T4 or close/positive margins are Conditional on Low evidence, and the nodal boost for nodal disease not surgically addressed rests on expert opinion. Inflammatory disease, recurrence and reirradiation are out of scope. The literature search closed in October 2024, so any later maturation of the ypN0 trials will need to be weighed against the Conditional grade rather than read as contradicting a firm position.",
+            "relevant_specialties": [
+              "radonc",
+              "surgonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Moderate hypofractionation is preferred with or without reconstruction, and IMN coverage is individualized by tumor location, size and nodal extent. The pN1 omission remark is written for pts after ALND, so it does not directly cover the SLNB-only axilla.",
+              "surgonc": "Axillary staging feeds RT eligibility: the pN1 omission remark is written for pts after ALND, and nodal disease not surgically addressed draws a nodal boost recommendation. Positive margins after NST carry a Strong PMRT recommendation, and reconstruction does not preclude moderate hypofractionation."
+            },
+            "open_questions": [
+              "PMRT omission in cN1 converting to ypN0 after NST",
+              "Hypofractionated PMRT toxicity with reconstruction",
+              "IMN irradiation benefit in the modern systemic era"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "consensus-guideline",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT07724769",
+                "brief_title": "De-escalation of RNI in Breast Cancer Patients With pN0 After Neoadjuvant Therapy",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 100,
+                "primary_completion_date": "2028-06",
+                "brief_summary": "Prospective Comparative Study of Response-Adapted De-escalation of Regional Nodal Irradiation in Initially Node Positive Breast Cancer Patients with Pathological Nodal Complete Response After Neoadjuvant Therapy",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Adjuvant Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Female patients \\>= 18 years old.\n* Histologically confirmed invasive breast cancer, cT1-3 N1M0 according to the 8th AJCC edition.\n* Biopsy-proven cN1 disease at diagnosis.\n* Completion of standard neoadjuvant systemic therapy.\n* Surgical treatment of breast and axilla.\n*…",
+                "answers_question": "PMRT omission in cN1 converting to ypN0 after NST",
+                "relevance_phrase": "RNI de-escalation in biopsy-proven cN1 → ypN0 after NST"
+              },
+              {
+                "nct": "NCT07084519",
+                "brief_title": "Hypofractionated vs Conventional RT After Prosthetic Breast Reconstruction",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 506,
+                "primary_completion_date": "2029-03",
+                "brief_summary": "This study investigates the safety and efficacy of hypofractionated radiotherapy (HFRT) versus conventional fractionated radiotherapy (CFRT) in breast cancer patients undergoing total mastectomy with prosthetic reconstruction.\n\nStudy Design Population: Patients with high-risk breast cancer after mastectomy and immediate implant reconstruction.\n\nIntervention:\n\nHFRT Arm: 43.5 Gy in 15 fractions (2.9 Gy/fraction, 3 weeks). Control Arm: CFRT (50 Gy in 25 fractions, 2 Gy/fraction, 5 weeks).…",
+                "conditions": [
+                  "Breast Cancer",
+                  "Breast Reconstruction",
+                  "Radiation Oncology"
+                ],
+                "interventions": [
+                  {
+                    "name": "hypofractionated radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "conventional fractionated radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Female, aged 18-75 years\n* Karnofsky Performance Status ≥60\n* Histopathologically confirmed invasive breast adenocarcinoma\n* Total mastectomy \\[with or without nipple-areolar complex preservation\\] + axillary dissection/sentinel lymph node biopsy + implant/expander placement…",
+                "answers_question": "Hypofractionated PMRT toxicity with reconstruction",
+                "relevance_phrase": "phase 3 43.5/15 vs 50/25 after prosthetic reconstruction"
+              },
+              {
+                "nct": "NCT07835139",
+                "brief_title": "Hypofractionated vs. Conventionally Fractionated Postmastectomy Radiotherapy After Implant-Based Reconstruction",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 534,
+                "primary_completion_date": "2033-10",
+                "brief_summary": "This is a prospective, randomized controlled, non-inferiority clinical trial designed to compare the outcomes of hypofractionated radiotherapy versus conventionally fractionated radiotherapy following mastectomy and implant-based breast reconstruction. The primary objective is to evaluate whether hypofractionated radiotherapy is non-inferior to conventionally fractionated radiotherapy regarding the rate of unplanned reoperation.",
+                "conditions": [
+                  "Breast Cancer",
+                  "Implant Breast Reconstruction"
+                ],
+                "interventions": [
+                  {
+                    "name": "ConvRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "HypoRT",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Female patients aged ≥ 18 years.\n* Pathologically confirmed unilateral primary invasive breast cancer.\n* Underwent skin-sparing (SSM) or nipple-sparing mastectomy (NSM) with axillary staging (sentinel lymph node biopsy or axillary lymph node dissection).\n* Underwent 1-stage…",
+                "answers_question": "Hypofractionated PMRT toxicity with reconstruction",
+                "relevance_phrase": "hypo vs conv PMRT post-implant; NI unplanned reoperation"
+              },
+              {
+                "nct": "NCT07915739",
+                "brief_title": "Internal Mammary Node Irradiation After Neoadjuvant Systemic Therapy for Breast Cancer",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 1760,
+                "primary_completion_date": "2032-07",
+                "brief_summary": "This multicenter randomized controlled trial evaluates whether internal mammary node irradiation (IMNI) improves oncologic outcomes in patients with breast cancer who have residual pathologically positive lymph nodes after neoadjuvant systemic therapy.\n\nEligible participants will be randomly assigned in a 1:1 ratio to receive locoregional radiotherapy either with or without irradiation of the internal mammary lymph nodes. The primary outcome is disease-free survival. Secondary outcomes include…",
+                "conditions": [
+                  "Breast Neoplasms"
+                ],
+                "interventions": [
+                  {
+                    "name": "Locoregional Radiotherapy With Internal Mammary Node Irradiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Locoregional Radiotherapy Without Internal Mammary Node Irradiation",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed breast cancer with pathologically proven lymph node positivity after neoadjuvant systemic therapy.\n* Received neoadjuvant chemotherapy and/or targeted therapy and/or immunotherapy before surgery.\n* Underwent either breast-conserving surgery or…",
+                "answers_question": "IMN irradiation benefit in the modern systemic era",
+                "relevance_phrase": "phase 3 ± IMNI in ypN+ after NST; DFS primary"
+              },
+              {
+                "nct": "NCT06559696",
+                "brief_title": "Internal Mammary Lymph Nodes Irradiation in High-risk Breast Cancer After Neoadjuvant Chemotherapy",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 722,
+                "primary_completion_date": "2032-07",
+                "brief_summary": "The aim of this study is to explore the impact of internal mammary nodal irradiation on disease-free survival in high-risk breast cancer patients (ypN+or supra/subclavicular lymph node positive) after neoadjuvant chemotherapy.",
+                "conditions": [
+                  "Breast Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "internal mammary nodal irradiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "No internal mammary node irradiation",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed invasive breast cancer\n* Underwent neoadjuvant chemotherapy\n* Eastern Cooperative Oncology Group Performance Status Scale 0-2\n* ypN+ after neoadjuvant chemotherapy or supraclavicular/subclavicular lymph node metastasis before system therapy\n* No…",
+                "answers_question": "IMN irradiation benefit in the modern systemic era",
+                "relevance_phrase": "phase 3 IMNI vs none, ypN+ post-NAC; DFS primary"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "breast ypN0 regional nodal irradiation",
+                "hypofractionated postmastectomy radiation reconstruction",
+                "internal mammary node irradiation breast"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 27,
+              "fetched_at": "2026-11-08T09:07:54.605Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 223
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "oligo-mets",
+        "intro": null,
+        "studies": [
+          {
+            "name": "Adrenal SBRT Tumor Control Probability Modeling (HyTEC)",
+            "tldr": "Poisson TCP fit to pooled adrenal SBRT series: 1-yr LC >95% at BED10 116.4 Gy (EQD2 ≈97 Gy), fit P<.0001.",
+            "details": [
+              "📊 1-yr LC >95% modeled at BED10 116.4 Gy (EQD2 ≈97 Gy)",
+              {
+                "text": "📐 Poisson dose-response fits, 1-yr endpoints (EQD2, α/β 10 Gy)",
+                "table": {
+                  "columns": [
+                    "Parameter",
+                    "Local control",
+                    "Overall survival"
+                  ],
+                  "rows": [
+                    [
+                      "D50 (Gy EQD2)",
+                      "34.6 (95% CI 27.1-45.4)",
+                      "44.7 (95% CI 33.5-60.6)"
+                    ],
+                    [
+                      "γ50",
+                      "0.4996 (95% CI 0.248-0.814)",
+                      "0.4546 (95% CI 0.157-0.796)"
+                    ],
+                    [
+                      "Fit χ2",
+                      "57.5, P<.0001",
+                      "44.7, P<.001"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "💊 Schedules cited against the LC target",
+                "table": {
+                  "columns": [
+                    "Schedule",
+                    "BED10"
+                  ],
+                  "rows": [
+                    [
+                      "45 Gy / 3 fx",
+                      "112.5 Gy"
+                    ],
+                    [
+                      "55 Gy / 5 fx",
+                      "115.5 Gy"
+                    ],
+                    [
+                      "Casamassima: 36 Gy / 3 fx to 70% IDL",
+                      "just over 139 Gy at isocenter"
+                    ]
+                  ]
+                }
+              },
+              "🔍 Pooled small, mostly single-institution retrospective series: 6-49 lesions (6-48 pts) each",
+              "🔍 Series median dose 40 Gy, median 5 fx (range 1-27)",
+              "📐 Dose per study = median prescription adjusted for IDL; no DVH data",
+              "📊 Crude 1-yr LC ranged 44% to 100% across series",
+              "🔗 Later meta-analysis predicted 1-yr LC 92.9% at BED10 100 Gy, within this model's CI",
+              "⚠️ No LC correlation with PTV margin (0-10 mm) or IDL (70-100%); IDL not statistically tested",
+              "⚠️ OS fit CIs wide; OS reflects factors beyond adrenal dose",
+              "⚠️ Reirradiation: only 2 pts in one series; model not applicable"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.ijrobp.2020.05.062",
+            "tweet_ids": [
+              1000000221
+            ],
+            "slug": "adrenal-sbrt-tcp",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Dose-response fit to small retrospective series using study-level median prescriptions, not patient DVHs; no prospective validation, so the BED10 116.4 Gy target is model-derived.",
+              "audience": "Adrenal metastases treated with SBRT, no prior adrenal RT"
+            },
+            "significance": "The 95% LC point sits at BED10 116.4 Gy (EQD2 ≈97 Gy), reachable with 45 Gy/3 fx (112.5) or 55 Gy/5 fx (115.5); NRG-BR001 already prescribes 45 Gy/3 fx. Dose inputs were IDL-corrected median prescriptions, not GTV DVHs, and every series used motion management, so the target transfers only with ITV, compression, breath-hold or gating in place.",
+            "monday_clinic": "For a previously unirradiated adrenal metastasis where adjacent OAR tolerances allow, this supports planning above the 40 Gy/5 fx series median toward the modeled LC target; it does not extend to adrenal reirradiation or to choosing SBRT over adrenalectomy.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "HyTEC literature review plus dose-response model. PubMed search Jan 2007 to Mar 2017 returned 250 results; included series ranged **6 to 49 lesions** (6-48 pts). 1-yr LC fit to a **Poisson TCP model** by maximum likelihood, CIs by profile likelihood."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Adrenal metastases, lung the dominant primary, plus kidney, liver, melanoma and others. Mostly single-institution retrospective series. **All but 1 series excluded prior adrenal RT.**"
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Median dose **40 Gy** (mean 37.2 Gy), median **5 fx** (range 1-27), prescribed to the 70% to 100% IDL. PTV margins 0 to 10 mm. All series reported motion management: 4DCT/ITV, compression, breath-hold, gating or CyberKnife tracking."
+              },
+              {
+                "label": "Endpoints",
+                "body": "Modeled endpoints were **1-yr LC** and **1-yr OS**. LC was RECIST-based in most series; 3 used PET/CT progression."
+              },
+              {
+                "label": "Results",
+                "body": "LC fit P<.0001; **1-yr LC >95% at BED10 116.4 Gy** (EQD2 ≈97 Gy). OS also showed a dose-response (P<.001) with wide CIs."
+              },
+              {
+                "label": "vs leading data",
+                "body": "A later meta-analysis (39 studies) predicted 1-yr LC of **70.5%, 84.8% and 92.9%** at BED10 60, 80 and 100 Gy, within this model's CI. Direction matches the BED10 ≥100 Gy LC association reported for SBRT in early-stage NSCLC. NRG-BR001 (phase 1) prescribes 45 Gy/3 fx."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents previously unirradiated adrenal metastases treated with SBRT under motion management. Does not represent adrenal reirradiation or the SBRT vs adrenalectomy decision."
+              },
+              {
+                "label": "Limitations",
+                "body": "Competing distant-death risk in small cohorts degrades the 1-yr LC estimates. Neither PTV margin nor IDL could be tied to LC, so the model gives no margin guidance. Circle-weighted study points, not patient-level data."
+              },
+              {
+                "label": "Discussion",
+                "body": "Durability is the open issue: two later series at **BED10 85.5 and 72 Gy** lost LC at 2 and 3 years, suggesting dose affects durability. The OAR feasibility of reaching BED10 116.4 Gy near bowel and stomach is left to the planner."
+              }
+            ],
+            "interpretation": "The useful output here is a number adrenal SBRT practice lacked: a modeled dose at which 1-year local control clears 95%, placed at BED10 116.4 Gy. The series it pools prescribed across a wide range (median 40 Gy, 1 to 27 fractions) and reported 1-year LC anywhere from 44% to 100%, with no way to tell how much of that spread was dose and how much was selection. The Poisson fit says a real share of it tracks with dose, and the authors read a dose response for both LC and OS despite the heterogeneity.\n\nThe direction fits what the field already believed from SBRT in early-stage NSCLC, where BED10 at or above 100 Gy has been tied to better LC. The later meta-analysis the paper cites, built on 39 studies, predicts 92.9% 1-year LC at BED10 100 Gy, inside this model's confidence band. That agreement reassures about the fit but is not independent validation: both analyses draw largely on the same retrospective literature.\n\nThe methodological choice that should most temper confidence is the dose input. Without DVHs, each study contributes one point, its median prescription corrected for IDL when the IDL was reported. Within-study dose heterogeneity collapses, and an IDL-corrected prescription is a coverage estimate rather than a true minimum or mean GTV dose. The Casamassima series shows how wide that gap can be: 36 Gy in 3 fractions to the 70% IDL corresponds to BED10 just over 139 Gy at isocenter, with BED10 79.2 to 139 Gy across the PTV. A model with that much uncertainty on its x-axis can place the curve's midpoint reasonably, but its upper tail, where the 95% target sits, is the least constrained region of the fit.\n\nTwo further caveats shape transfer. Every included series used motion management, so the target presumes ITV, compression, breath-hold or gating; it says nothing about delivery without accounting for the craniocaudal excursion adrenal tumors show. And the endpoint is 1-year LC in small cohorts with heavy competing mortality, which censors late failures. The observation that two later series at BED10 85.5 and 72 Gy lost control at 2 and 3 years hints that the dose needed for durable control may be higher than the dose needed for 1-year control, which would push the target up, not down.\n\nWhat the report leaves untouched is the surgery question. Adrenalectomy cohorts in the cited comparison carried more isolated adrenal disease and fewer lung primaries, so the reported surgical advantage is confounded, and no randomized comparison exists. It also offers no OAR-constrained feasibility data: whether 45 Gy in 3 fractions or 55 Gy in 5 can be delivered beside bowel, stomach and kidney is the planner's problem. NRG-BR001, prescribing 45 Gy in 3 fractions, is the nearest prospective test of the dose this model favors, and its LC data are what would confirm or move the target.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The 95% LC point sits at BED10 116.4 Gy (EQD2 ≈97 Gy), reachable with 45 Gy/3 fx (112.5) or 55 Gy/5 fx (115.5). Inputs were IDL-corrected median prescriptions, not DVHs, and every series used motion management, so the target transfers only with ITV, compression, breath-hold or gating."
+            },
+            "open_questions": [
+              "Durability of LC beyond 1 year at BED10 116.4 Gy",
+              "SBRT vs adrenalectomy for adrenal oligometastases",
+              "Optimal PTV margin and motion management for adrenal SBRT"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "meta-analysis",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT04115254",
+                "brief_title": "Stereotactic Magnetic Resonance Guided Radiation Therapy",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 397,
+                "primary_completion_date": "2028-06",
+                "brief_summary": "This is a master prospective Phase I-II trial evaluating feasibility and efficacy of stereotactic magnetic resonance (MR) guided adaptive radiation therapy (SMART) in patients with cancer.\n\n* The phase 1 study will evaluate the feasibility and safety of delivering SMART in patients with cancer.\n* Phase 2 will evaluate efficacy of SMART with specific reference to tumor control and improvement in patient reported outcome measures",
+                "conditions": [
+                  "Pancreas Cancer",
+                  "Lung Cancer",
+                  "Renal Cancer",
+                  "Adrenal Metastases",
+                  "Prostate Cancer",
+                  "Liver Metastases",
+                  "Oligoprogressive Nodal Metastases",
+                  "Metachronous Nodal Metastases",
+                  "Synchronous Nodal Metastases",
+                  "Mesothelioma",
+                  "Spine Metastases",
+                  "Brain Metastases",
+                  "Borderline Resectable Pancreatic Carcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "MR-guided Linac",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Participants must have a confirmed malignancy requiring stereotactic body radiation therapy. See specific disease site cohorts for more details.\n* Tumor size ≤ 7cm\n* Age 18 years of older.\n* ECOG performance status ≤2 (Karnofsky ≥60%, see Appendix A)\n* Ability to understand…",
+                "answers_question": "Durability of LC beyond 1 year at BED10 116.4 Gy",
+                "relevance_phrase": "MR-guided SBRT, adrenal met cohort, tumor control endpoint"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "adrenal metastasis stereotactic radiotherapy",
+                "adrenal metastases adrenalectomy"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 18,
+              "fetched_at": "2026-11-08T09:07:50.961Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 221
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      }
+    ],
+    "meta": {
+      "clusters_total": 5,
+      "studies_analyzed": 5,
+      "dropped": [],
+      "ocr_available": true
+    }
+  },
+  "bookmarks": [],
+  "papers": [
+    {
+      "id": 224,
+      "pmid": null,
+      "doi": "10.1200/jco.20.00299",
+      "pmc_id": null,
+      "title": "Management of Hereditary Breast Cancer: American Society of Clinical Oncology, American Society for Radiation Oncology, and Society of Surgical Oncology Guideline",
+      "authors": [
+        "Tung, Nadine M.",
+        "Boughey, Judy C.",
+        "Pierce, Lori J.",
+        "Robson, Mark E.",
+        "Bedrosian, Isabelle",
+        "Dietz, Jill R.",
+        "Dragun, Anthony",
+        "Gelpi, Judith Balmana",
+        "Hofstatter, Erin W.",
+        "Isaacs, Claudine J.",
+        "Jatoi, Ismail",
+        "Kennedy, Elaine",
+        "Litton, Jennifer K.",
+        "Mayr, Nina A.",
+        "Qamar, Rubina D.",
+        "Trombetta, Mark G.",
+        "Harvey, Brittany E.",
+        "Somerfield, Mark R.",
+        "Zakalik, Dana"
+      ],
+      "journal": "Journal of Clinical Oncology",
+      "pub_date": "2020-06-20",
+      "abstract": "PURPOSE To develop recommendations for management of patients with breast cancer (BC) with germline mutations in BC susceptibility genes. METHODS The American Society of Clinical Oncology, American Society for Radiation Oncology, and Society of Surgical Oncology convened an Expert Panel to develop recommendations based on a systematic review of the literature and a formal consensus process. RESULTS Fifty-eight articles met eligibility criteria and formed the evidentiary basis for the local therapy recommendations; six randomized controlled trials of systemic therapy met eligibility criteria. RECOMMENDATIONS Patients with newly diagnosed BC and BRCA1/ 2 mutations may be considered for breast-conserving therapy (BCT), with local control of the index cancer similar to that of noncarriers. The significant risk of a contralateral BC (CBC), especially in young women, and the higher risk of new cancers in the ipsilateral breast warrant discussion of bilateral mastectomy. Patients with mutations in moderate-risk genes should be offered BCT. For women with mutations in BRCA1/ 2 or moderate-penetrance genes who are eligible for mastectomy, nipple-sparing mastectomy is a reasonable approach. There is no evidence of increased toxicity or CBC events from radiation exposure in BRCA1/ 2 carriers. Radiation therapy should not be withheld in ATM carriers. For patients with germline TP53 mutations, mastectomy is advised; radiation therapy is contraindicated except in those with significant risk of locoregional recurrence. Platinum agents are recommended versus taxanes to treat advanced BC in BRCA carriers. In the adjuvant/neoadjuvant setting, data do not support the routine addition of platinum to anthracycline- and taxane-based chemotherapy. Poly (ADP-ribose) polymerase (PARP) inhibitors (olaparib and talazoparib) are preferable to nonplatinum single-agent chemotherapy for treatment of advanced BC in BRCA1/ 2 carriers. Data are insufficient to recommend PARP inhibitor use in the early setting or in moderate-penetrance carriers. Additional information available at www.asco.org/breast-cancer-guidelines .",
+      "pdf_path": "data/obsidian/papers/breast/2020-tung-management-hereditary-breast-cancer-american-society.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    },
+    {
+      "id": 223,
+      "pmid": null,
+      "doi": "10.1200/jco-25-01747",
+      "pmc_id": null,
+      "title": "Postmastectomy Radiation Therapy: An ASTRO-ASCO-SSO Clinical Practice Guideline",
+      "authors": [
+        "Jimenez, Rachel B.",
+        "Abdou, Yara",
+        "Anderson, Penny",
+        "Barry, Parul",
+        "Bradfield, Lisa",
+        "Bradley, Julie A.",
+        "Heras, Lourdes D.",
+        "Khan, Atif",
+        "Matsen, Cindy",
+        "Rabinovitch, Rachel",
+        "Reyna, Chantal",
+        "Salerno, Kilian E.",
+        "Schellhorn, Sarah E.",
+        "Schofield, Deborah",
+        "Taparra, Kekoa",
+        "Washington, Iman",
+        "Wright, Jean L.",
+        "Zeidan, Youssef H.",
+        "Zellars, Richard C.",
+        "Horst, Kathleen C."
+      ],
+      "journal": "Journal of Clinical Oncology",
+      "pub_date": "2025-10-20",
+      "abstract": "ASCO Guidelines provide recommendations with comprehensive review and analyses of the relevant literature for each recommendation, following the guideline development process as outlined in the ASCO Guidelines Methodology Manual . ASCO Guidelines follow the ASCO Conflict of Interest Policy for Clinical Practice Guidelines . Clinical Practice Guidelines and other guidance (“Guidance”) provided by ASCO is not a comprehensive or definitive guide to treatment options. It is intended for voluntary use by clinicians and should be used in conjunction with independent professional judgment. Guidance may not be applicable to all patients, interventions, diseases or stages of diseases. Guidance is based on review and analysis of relevant literature, and is not intended as a statement of the standard of care. ASCO does not endorse third-party drugs, devices, services, or therapies and assumes no responsibility for any harm arising from or related to the use of this information. See complete ASCO and ASTRO disclaimers in Appendix 1 (online only) for more. PURPOSE This guideline provides recommendations on use of postmastectomy radiation therapy (PMRT) in breast cancer treatment. Updated recommendations detail indications for PMRT in the upfront surgical setting and after neoadjuvant systemic therapy, and provide guidance on appropriate target volumes, dosing, and treatment techniques. METHODS A multidisciplinary American Society for Radiation Oncology–ASCO–Society of Surgical Oncology task force addressed four key radiation therapy (RT) questions in patients with breast cancer who undergo mastectomy: (1) indications for PMRT after upfront surgery, (2) indications for PMRT after neoadjuvant systemic therapy followed by surgery, (3) appropriate PMRT volumes and dose-fractionation regimens, and (4) treatment techniques. Recommendations were based on a systematic review and created using a predefined consensus-building methodology for quality of evidence grading and strength of recommendation. RECOMMENDATIONS After upfront mastectomy, PMRT is indicated for most patients with node-positive breast cancer and select patients with node-negative disease. PMRT is also recommended after neoadjuvant systemic therapy for patients presenting with locally advanced disease and for those with residual nodal disease at the time of surgery. PMRT is conditionally recommended for patients with cT1-3N1 or cT3N0 breast cancer with pathologically negative nodes after neoadjuvant systemic therapy (ypN0). When PMRT is delivered, treatment to the ipsilateral chest wall or reconstructed breast and regional lymphatics is recommended, with moderate hypofractionation preferred, but with conventional fractionation approaches acceptable in rare cases. Computed tomography–based volumetric treatment planning with 3-dimensional conformal RT is recommended, with intensity-modulated RT advised when three-dimensional conformal RT is unable to achieve treatment goals. Deep inspiration breath-hold techniques are also recommended for normal tissue sparing. For patients with skin involvement, positive superficial margins, and/or lymphovascular invasion, use of a bolus is recommended, but routine use of tissue-equivalent bolus is not recommended. Additional information is available at www.asco.org/breast-cancer-guidelines .",
+      "pdf_path": "data/obsidian/papers/breast/2025-jimenez-postmastectomy-radiation-therapy-astro-asco-sso-clinical.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    },
+    {
+      "id": 222,
+      "pmid": null,
+      "doi": "10.1016/j.ijrobp.2020.11.019",
+      "pmc_id": null,
+      "title": "Stereotactic Radiosurgery for Vestibular Schwannomas: Tumor Control Probability Analyses and Recommended Reporting Standards",
+      "authors": [
+        "Soltys, Scott G.",
+        "Milano, Michael T.",
+        "Xue, Jinyu",
+        "Tomé, Wolfgang A.",
+        "Yorke, Ellen",
+        "Sheehan, Jason",
+        "Ding, George X.",
+        "Kirkpatrick, John P.",
+        "Ma, Lijun",
+        "Sahgal, Arjun",
+        "Solberg, Timothy",
+        "Adler, John",
+        "Grimm, Jimm",
+        "El Naqa, Issam"
+      ],
+      "journal": "International Journal of Radiation Oncology*Biology*Physics",
+      "pub_date": "2021-05",
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/cns/2021-soltys-stereotactic-radiosurgery-vestibular-schwannomas-tumor.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    },
+    {
+      "id": 221,
+      "pmid": null,
+      "doi": "10.1016/j.ijrobp.2020.05.062",
+      "pmc_id": null,
+      "title": "Modeling of Tumor Control Probability in Stereotactic Body Radiation Therapy for Adrenal Tumors",
+      "authors": [
+        "Stumpf, Priscilla K.",
+        "Yorke, Ellen D.",
+        "El Naqa, Issam",
+        "Cuneo, Kyle C.",
+        "Grimm, Jimm",
+        "Goodman, Karyn A."
+      ],
+      "journal": "International Journal of Radiation Oncology*Biology*Physics",
+      "pub_date": "2021-05",
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/oligo-mets/2021-stumpf-modeling-tumor-control-probability-stereotactic-body.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    },
+    {
+      "id": 220,
+      "pmid": null,
+      "doi": "10.1055/s-0042-1751117",
+      "pmc_id": null,
+      "title": "The Optimal Choice of Technique for Stereotactic Radiosurgery—A LINAC-Based Dosimetric Study between DCA, DCA-SSO, DCA-SSO-VDR, and VMAT",
+      "authors": [
+        "Venugopal, Ramya",
+        "S., Sowmya Narayanan",
+        "Tiwari, Richa",
+        "Narayanan, Geeta S.",
+        "Vishwanathan, Bhaskar"
+      ],
+      "journal": "Asian Journal of Oncology",
+      "pub_date": "2022-07-14",
+      "abstract": "Abstract Introduction Advanced radiation therapy delivery techniques require greater understanding of various planning sequences and methods. The aim of this study is to determine a class solution that finds the best possible technique to deliver for stereotactic radiosurgery between dynamic conformal arc (DCA) techniques using various options such as DCA, DCA + SSO (segment shape optimization), and DCA + SSO + VDR (variable dose rate) using noncoplanar beam arrangement and volumetric modulated arc therapy (VMAT) using coplanar beams. Materials and Methods In this dosimetric study, 11 brain cases were retrospectively planned for various techniques and analyzed for the Paddick conformity index (CI), Radiation Therapy Oncology Group homogeneity index (HI), Paddick gradient index (GI), treatment time in terms of monitor units (MU) and normal brain dose (V12Gy). The paired t-test was performed to know the statistical significance between the techniques. Results In terms of CI, GI, and control of the normal brain dose, the VMAT plan was superior to other techniques. But, HI was found to be better with DCA. Above all, VMAT delivered higher MU than any other technique. The p-values between DCA + SSO and DCA, DCA + SSO + VDR and DCA + SSO, and VMAT and DCA + SSO + VDR are as follows: CI: 0.0004, 0.015, and 0.03; GI: 0.03, 0.33, and 0.29; HI: 0.008, 0.04, and 0.06; V12 Gy of normal brain: 0.1, 0.01, 0.38. VMAT requires approximately 41 ± 17% more MU than DCA + SSO + VDR. Conclusion VMAT using coplanar beams is preferable among all the techniques, considering the dosimetric parameters studied. If VMAT is not available in the facility, DCA + SSO + VDR technique using non coplanar beams can be used to deliver SRS treatment.",
+      "pdf_path": "data/obsidian/papers/cns/2022-venugopal-optimal-choice-technique-stereotactic-radiosurgery-linac.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    }
+  ]
+}

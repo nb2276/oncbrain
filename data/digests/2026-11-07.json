@@ -1,25 +1,1048 @@
 {
   "date": "2026-11-07",
   "conference": null,
-  "generated_at": 1794042506580,
+  "generated_at": 1794128774730,
   "digest": {
-    "top_line": "Dose-adapted single-isocenter SRS for 4 to 10 brain mets (prospective): 22/40 outlived DS-GPA prediction, 1-yr local failure 5%, no G3-5 toxicity.",
-    "tldr": "A CNS-only day on linac single-isocenter SRS for multiple brain mets. The one prospective cohort shows 1-yr local failure 5% with no G3-5 toxicity. Four planning or retrospective studies favor HyperArc and non-coplanar VMAT on gradient and V12Gy, and a simulated 1 mm GTV-PTV margin restored coverage lost to residual setup error.",
+    "top_line": "Dose-adapted single-isocenter SRS for 4-10 BM: 22 of 40 pts outlived DS-GPA prediction (bar was 17), 1-yr local failure 5%, no G3-5 AEs.",
+    "tldr": "All-CNS day on SRS technique for brain mets. The prospective dose-adapted SIMT trial (4-10 BM) cleared its DS-GPA survival bar with 1-yr local failure 5%; retrospective Minniti and HyperArc series report 1-yr LC 89% and 90.1%. The planning comparisons trade V12Gy against low-dose spill and report dosimetric surrogates only.",
     "sites": [
       {
         "disease_site": "cns",
-        "intro": "All five studies address single-isocenter linac SRS technique. Only one is prospective, and the rest rely on dosimetric surrogates or retrospective local control.",
+        "intro": "Five SRS technique studies for BM; only the dose-adapted SIMT trial is prospective, and the planning comparisons carry no clinical endpoints.",
         "studies": [
           {
-            "name": "Manual to automated (HyperArc) VMAT SRS transition",
-            "tldr": "Paddick GI 5.42 vs 7.09 (P<.001), time in room 10.5 vs 11.4 min, RTOG CI unchanged; HyperArc 1-yr LC 90.1% across 377 mets.",
+            "name": "DCAT vs CoVMAT vs NcVMAT for single brain metastasis (planning study)",
+            "tldr": "Non-coplanar VMAT gave the lowest normal-brain V12Gy (9.4 vs 11.6 DCAT vs 15.1 cm3 coplanar VMAT) for 2-3 cm single BM SRS plans.",
             "details": [
-              "🔍 Single-institution retrospective: 693 single-isocenter VMAT SRS plans, HyperArc vs the prior 15 months of manual VMAT",
-              "🔍 HyperArc: 23-pt 2017 pilot + 350 pts over 15 months; mVMAT: 320 pts treated just before adoption",
-              "💊 GTV with no margin (PTV=GTV); 18-20 Gy x1, or 30 Gy/5 fx if any target >2-3 cm or deep",
-              "🔍 10 MV FFF on Edge with HD120 MLC; HyperArc used 2-4 arcs, Encompass open mask, 6DOF couch",
+              "🔍 Planning study, 15 pts with single BM, longest diameter 2-3 cm, single institution (Kyoto)",
+              "🔍 Each pt re-planned 3 ways: DCAT, coplanar VMAT (1 arc), non-coplanar VMAT (1 coplanar + 2 couch arcs)",
               {
-                "text": "📊 HyperArc vs mVMAT: plan quality, QA and workflow (medians)",
+                "text": "🔍 Planning parameters (identical across arms)",
+                "subdetails": [
+                  "20 Gy x 1 to PTV, normalized to D99.5%",
+                  "PTV = GTV + 1mm; median PTV 6.4 cm3 (range 3.7-16.2)",
+                  "6 MV TrueBeam STx; Eclipse 15.6, AcurosXB, 1mm grid",
+                  "VMAT plans used a ring contour + Normal Tissue Objective"
+                ]
+              },
+              {
+                "text": "📊 Normal-brain irradiated volume (cm3, mean ± SD)",
+                "table": {
+                  "columns": [
+                    "Index",
+                    "DCAT",
+                    "CoVMAT",
+                    "NcVMAT",
+                    "p NcVMAT vs DCAT"
+                  ],
+                  "rows": [
+                    [
+                      "V20Gy",
+                      "2.44 ± 1.78",
+                      "2.48 ± 1.87",
+                      "1.64 ± 1.13",
+                      "<0.05"
+                    ],
+                    [
+                      "V15Gy",
+                      "7.22 ± 4.08",
+                      "8.52 ± 4.89",
+                      "5.95 ± 3.10",
+                      "<0.05"
+                    ],
+                    [
+                      "V12Gy",
+                      "11.6 ± 6.5",
+                      "15.1 ± 8.2",
+                      "9.4 ± 4.9",
+                      "<0.05"
+                    ],
+                    [
+                      "V10Gy",
+                      "16.8 ± 9.0",
+                      "22.7 ± 12.0",
+                      "13.9 ± 6.8",
+                      "<0.05"
+                    ],
+                    [
+                      "V5Gy",
+                      "49.2 ± 28.4",
+                      "96.8 ± 55.4",
+                      "42.9 ± 20.3",
+                      "<0.05"
+                    ]
+                  ]
+                }
+              },
+              "📊 RTOG-CI and Paddick CI better with NcVMAT vs DCAT; GTV D98% higher with NcVMAT vs both",
+              "⚠️ Coplanar-only VMAT was worse than DCAT on V15Gy through V5Gy; low-dose spill was the largest at V5Gy",
+              "📐 Beam-on time longer for both VMAT techniques vs DCAT; MUs lower with CoVMAT",
+              "⚠️ Dosimetric surrogate only: no local control, radionecrosis, or neurocognitive outcome measured",
+              "🔗 Molinier et al. compared the same 3 techniques across mixed intracranial lesions but with different TPS/algorithms; here one TPS used throughout"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1093/jrr/rrab092",
+            "tweet_ids": [
+              1000000215
+            ],
+            "slug": "dcat-vs-covmat-vs-ncvmat-single-brain-met",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Single-institution planning study, N=15; V12Gy and conformity are dosimetric surrogates, with no clinical radionecrosis or local control endpoint.",
+              "audience": "Single brain metastasis, 2-3 cm, LINAC single-fraction SRS"
+            },
+            "significance": "Coplanar-only VMAT, the default at many LINAC centers, was the worst of the three for normal brain, with V12Gy 15.1 vs 11.6 cm3 for DCAT and V5Gy 96.8 vs 49.2 cm3. The gain from VMAT comes from the couch arcs, not modulation alone, which bears on technique choice for 2-3 cm lesions where V12Gy drives radionecrosis risk.",
+            "monday_clinic": "For a 2-3 cm single brain metastasis planned for single-fraction LINAC SRS, this supports non-coplanar VMAT over a coplanar-only arc on normal-brain V12Gy; it does not address multiple metastases, fractionated SRS, or clinical radionecrosis rates.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Single-institution **planning study**: each of **15 pts** re-planned with DCAT, CoVMAT, and NcVMAT in the same TPS. Two-way ANOVA with Bonferroni post-hoc for target indices; repeated-measures ANOVA with Holm post-hoc for normal-brain doses."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Pts treated April 2016 to October 2017 for a **single brain metastasis, longest diameter 2-3 cm**. Median PTV 6.4 cm3 (range 3.7-16.2)."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**20 Gy in 1 fraction** to PTV (GTV + 1mm), normalized to D99.5%, PTV D2% set near 142% of prescription. 6 MV TrueBeam STx; DCAT and NcVMAT shared one coplanar arc plus couch arcs at 60 and 300 degrees."
+              },
+              {
+                "label": "Endpoints",
+                "body": "RTOG-CI, Paddick CI, PTV and GTV dose indices, normal-brain V20Gy to V5Gy, MUs, and beam-on time. No clinical endpoints."
+              },
+              {
+                "label": "Results",
+                "body": "NcVMAT gave **lower V20Gy, V15Gy, V12Gy, V10Gy and V5Gy** than both comparators, plus better CIs and GTV D98% than DCAT. Beam-on time was longer for both VMAT plans than for DCAT."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Molinier et al. is the only prior direct three-way comparison, but it pooled primary brain tumors and single and multiple mets, with different TPS, algorithms, and prescriptions. Vogelbaum et al. is cited for higher local recurrence and radionecrosis above 2.0 cm, which is why this lesion size was chosen."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents single 2-3 cm brain metastases planned for single-fraction LINAC SRS with a 1mm PTV margin. Does not represent multiple metastases, single-isocenter multi-target plans, fractionated SRS, or Gamma Knife."
+              },
+              {
+                "label": "Limitations",
+                "body": "Plans optimized by the investigators in one TPS, so planner skill and the ring-contour approach may not transfer. Large SDs on low-dose volumes, and longer beam-on with non-coplanar arcs raises intrafraction motion questions that were not measured."
+              },
+              {
+                "label": "Discussion",
+                "body": "The case for non-coplanar VMAT rests on **V12Gy as a radionecrosis surrogate** and on lowering low and intermediate dose for long survivors who may need repeat SRS. Whether these volume differences change clinical radionecrosis rates is not tested."
+              }
+            ],
+            "interpretation": "The most useful finding here is not that non-coplanar VMAT won, but that coplanar-only VMAT lost to the older technique. Many centers moved from DCAT to VMAT and kept the delivery coplanar for speed and simpler couch workflow. In this dataset that trade gave up normal-brain sparing compared with DCAT at every level from V15Gy down to V5Gy, and the low-dose bath (V5Gy 96.8 vs 49.2 cm3) was the largest gap. Inverse optimization alone did not make up for losing the couch arcs. When the couch arcs went back in, VMAT pulled ahead of DCAT on every normal-brain metric and on conformity. So the geometry of the arcs explains most of the effect, and modulation adds a smaller increment on top.\n\nThe clinical argument depends entirely on V12Gy as a stand-in for radionecrosis risk, which the authors present as an accepted predictor while noting that thresholds vary by modality, lesion type, and size. Lesions of 2-3 cm are where that surrogate matters most, since this is the size band in which Vogelbaum and colleagues reported higher local recurrence and radionecrosis than for smaller lesions. The NcVMAT advantage (V12Gy 9.4 vs 11.6 cm3 for DCAT) is real on paper, but the SDs are wide and no outcome was measured. Whether a difference of this size moves the risk of symptomatic necrosis is the open question, and a planning study cannot answer it.\n\nSeveral design choices should temper confidence. The plans were made by the study team in one TPS with one algorithm. That removes the cross-system confounding that weakened Molinier's earlier comparison, but it means the result reflects this group's planning practice, including a ring contour and Normal Tissue Objective that a different planner might use differently. Prescription and normalization were matched, yet DCAT was shaped by hand-edited MLCs to hit a D2% target, so DCAT quality is also operator-dependent. With 15 pts, single lesions, and a 1mm margin, the result does not cover multi-target single-isocenter plans, larger margins, or fractionated SRS, which many centers now use at 2-3 cm.\n\nThe cost side is beam-on time: both VMAT plans took longer than DCAT, and non-coplanar arcs add couch moves. On a frameless mask workflow, longer delivery means more chance of intrafraction motion, and a 1mm margin leaves little room for it. That cost was not measured here.\n\nFor practice, the defensible read is narrow. If a center plans VMAT for a solitary 2-3 cm metastasis, the data argue against dropping the non-coplanar arcs, and they give no support for coplanar VMAT over DCAT. Showing NcVMAT is clinically better would take outcome data on radionecrosis and local control, ideally across several planners and systems.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Coplanar-only VMAT gave more normal-brain dose than DCAT (V12Gy 15.1 vs 11.6 cm3), and adding couch arcs reversed it (9.4 cm3). For 2-3 cm single-lesion SRS, the non-coplanar geometry, not modulation alone, drives the V12Gy gain."
+            },
+            "open_questions": [
+              "Does lower V12Gy with NcVMAT reduce clinical radionecrosis?",
+              "Does the advantage hold for multiple metastases or fractionated SRS?",
+              "Does longer beam-on time add intrafraction motion error?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": null,
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "radiosurgery radionecrosis brain metastases",
+                "fractionated radiosurgery brain metastases"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 28,
+              "fetched_at": "2026-11-08T09:04:40.875Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 215
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "Elements MME vs RapidArc single-isocenter SRS plan quality",
+            "tldr": "RapidArc VMAT gave lower V12Gy (19.2 vs 23.7 cm3) and better conformity; Elements MME gave lower V5Gy and mean brain dose (2.57 vs 2.76 Gy).",
+            "details": [
+              "🔍 Two-institution treatment planning study: 30 pts, each replanned with both techniques (60 plans)",
+              "🔍 4 to 10 brain mets per pt (217 targets, median 7.5); total PTV median 7.05 cm3",
+              "🔍 Each center planned its own technique: TJU Elements MME v1.5, UAB Eclipse RapidArc 13.6",
+              {
+                "text": "📐 Technique parameters",
+                "subdetails": [
+                  "Rx 14 to 24 Gy single fraction, normalized to D99% = Rx",
+                  "MME: 4 to 9 noncoplanar DCAs, 6 MV FFF, pencil-beam calc",
+                  "RA: 2 to 4 noncoplanar VMAT arcs, 10 MV FFF, AAA calc",
+                  "Both HD120 MLC, 1 mm dose grid, DVH analysis in third-party MIM"
+                ]
+              },
+              {
+                "text": "📊 Plan metrics, medians (paired Wilcoxon)",
+                "table": {
+                  "columns": [
+                    "Metric",
+                    "Elements MME",
+                    "RapidArc",
+                    "P"
+                  ],
+                  "rows": [
+                    [
+                      "RTOG CI (per target)",
+                      "1.38",
+                      "1.23",
+                      "<.0001"
+                    ],
+                    [
+                      "Paddick CI (per target)",
+                      "0.70",
+                      "0.77",
+                      "<.0001"
+                    ],
+                    [
+                      "V12Gy (cm3)",
+                      "23.7",
+                      "19.2",
+                      "<.0001"
+                    ],
+                    [
+                      "V8Gy (cm3)",
+                      "53.6",
+                      "44.1",
+                      ".024"
+                    ],
+                    [
+                      "V5Gy (cm3)",
+                      "141.4",
+                      "142.8",
+                      ".009"
+                    ],
+                    [
+                      "Mean brain dose (Gy)",
+                      "2.57",
+                      "2.76",
+                      "<.0001"
+                    ]
+                  ]
+                }
+              },
+              "📊 RA lower V12Gy in 26 of 30 cases; MME lower V5Gy in 25 of 30",
+              "📊 Exceptions to the V12Gy pattern were all small total PTV (<2.1 cm3); there MME won V12Gy in 4 of 6",
+              "📊 Brain DVHs cross near 6 Gy: RA favorable above, MME favorable below",
+              "📊 Mean coverage 97.5% MME vs 96.9% RA (P=.007)",
+              "💊 Delivery: MME 7.3 arcs, 6871 MU, est. beam-on 6 to 9 min; RA 3.8 arcs, 10225 MU, est. 3 to 4 min",
+              "🔗 vs Gevaert (10 pts, 40 mets): Paddick CI 0.65/0.67 there vs 0.70/0.77 here, suggesting under-optimized plans in that series",
+              "🔗 vs Narayanasamy (8 pts, 40 targets): found the techniques comparable, likely underpowered",
+              "⚠️ Beam energy (6 vs 10 MV FFF) and planning institution are confounded with technique",
+              "⚠️ Dosimetric surrogates only; no radionecrosis, control or cognitive outcomes",
+              "⚠️ Abstract and Results disagree on RA median RTOG CI (1.21 vs 1.23)",
+              "⚠️ Several authors hold Varian research support or consulting ties"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.adro.2019.10.007",
+            "tweet_ids": [
+              1000000218
+            ],
+            "slug": "elements-mme-vs-rapidarc-smm-srs",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Dosimetric surrogates only, no clinical endpoints; beam energy and planning institution confounded with technique; software versions predate HyperArc.",
+              "audience": "4 to 10 brain mets, single-isocenter linac SRS, 14 to 24 Gy x1"
+            },
+            "significance": "The V12Gy advantage for RapidArc depends on total target volume: every case where MME matched or beat it had total PTV under 2.1 cm3, and above that threshold the V12 ratio averaged 1.24. V12Gy is the metric tied to radionecrosis, so for multi-met SRS the planning platform matters most in larger-volume cases.",
+            "monday_clinic": "In pts with 4 to 10 brain mets and total PTV above 2.1 cm3 planned for single-isocenter linac SRS, this supports VMAT when V12Gy is the binding constraint; it does not apply to HyperArc, >10 targets, or centers without expert VMAT planning.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Two-institution **treatment planning comparison**: 15 previously treated pts from each center were replanned at the other center with the other technique, giving **30 pts, 60 plans**. Metrics extracted in third-party software (MIM) to remove TPS-dependent DVH differences."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**4 to 10 brain metastases** per pt, 217 targets, median 7.5. Individual target volume 0.014 to 17.73 cm3; total PTV 0.49 to 27.32 cm3, median 7.05 cm3."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "**14 to 24 Gy single fraction**, prescriptions unchanged between plans, normalized so 99% of target volume received Rx. MME: 4 to 9 noncoplanar DCAs, **6 MV FFF**. RA: one 360 axial arc plus up to three noncoplanar half arcs, **10 MV FFF**, UAB three-ring tuning-structure method."
+              },
+              {
+                "label": "Endpoints",
+                "body": "RTOG and Paddick CI per target; V12Gy, V8Gy, V5Gy and mean brain dose per plan; arcs, MU and estimated beam-on time. Paired 2-tailed Wilcoxon at .05."
+              },
+              {
+                "label": "Results",
+                "body": "Both platforms met clinical goals in all cases. **RA favored above roughly 6 Gy** (conformity, V12Gy, V8Gy), **MME favored below** (V5Gy, mean brain dose), with the MME low-dose edge largest at small total PTV."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Larger than prior head-to-head series: Gevaert (10 pts, 40 mets) and Narayanasamy (8 pts, 40 targets). Gevaert's Paddick CI of 0.65 and 0.67 vs **0.70 and 0.77** here suggests earlier comparisons understated both platforms, MME partly from the v1.0 to v1.5 optimizer change."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents 4 to 10 brain mets planned with single-isocenter linac SRS by experienced planners on MME v1.5 or Eclipse 13.6. Does not represent HyperArc, later MME versions, >10 targets, fractionated SRS, or less experienced VMAT planners."
+              },
+              {
+                "label": "Limitations",
+                "body": "Treatment time could not be measured directly in a replanning study. Hotspot and maximum target dose were not compared. RA plan quality reflects one expert planner, and the authors note VMAT quality depends on the planner."
+              },
+              {
+                "label": "Discussion",
+                "body": "The trade is **moderate-dose spill vs low-dose spill**. V8 to V12Gy has retrospective links to radionecrosis, while low-dose spill has none yet, though the authors argue cumulative low dose may matter for cognition after repeat SRS or later WBRT."
+              }
+            ],
+            "interpretation": "The practical question here is narrower than the abstract suggests. Both platforms produced clinically acceptable plans in all 30 cases, so the study is not choosing between an adequate and an inadequate tool. It is describing a dose-level trade. RapidArc wins wherever dose is moderate to high (conformity, V12Gy, V8Gy) and Elements MME wins below roughly 6 Gy (V5Gy, mean brain dose). Which side of that trade matters depends on which toxicity a reader believes in. V8Gy to V12Gy has retrospective associations with radionecrosis, while low-dose spill has no established toxicity correlate. On current evidence the RapidArc advantage sits on the better-validated metric, and the MME advantage rests on a cognitive hypothesis the authors raise but do not test.\n\nThe size of the differences matters as much as their direction. V5Gy medians of 141.4 and 142.8 cm3 are almost identical. The P value of .009 comes from consistent per-case pairing (MME lower in 25 of 30), not from a meaningful gap in typical volume. Mean brain dose of 2.57 vs 2.76 Gy is the same story. The V12Gy gap of 23.7 vs 19.2 cm3, holding in 26 of 30 cases, is the difference most likely to carry clinical weight. The volume dependence is the most useful finding for planning: every case where MME matched or beat RapidArc on V12Gy had total PTV under 2.1 cm3, and above that threshold the V12 ratio averaged 1.24. A reader with a small-volume, many-target case loses little with MME. A reader with larger total volume has a dosimetric reason to prefer VMAT.\n\nThree design features should limit how far this transfers. First, technique is confounded with beam energy (6 vs 10 MV FFF), dose algorithm (pencil beam vs AAA) and institution. The authors suspect the energy difference affects penumbra and low-dose volume most for small targets, which is exactly where MME looked best. Part of the small-PTV MME advantage may therefore be a beam effect rather than a technique effect. Second, RapidArc quality is planner-dependent, and every VMAT plan came from one expert using a refined in-house method with more than 1000 cases behind it. MME, being template-driven, is easier to reproduce. A center without that VMAT experience should expect its own RapidArc plans to fall short of these, which narrows or reverses the V12Gy edge. The authors' own contrast with Gevaert's Paddick CI of 0.67 for RA makes this point. Third, the software is dated: MME v1.5 and Eclipse 13.6 without automated collimator selection for island blocking. HyperArc is named as the next comparison, so today's VMAT versus today's MME is not answered here.\n\nDelivery efficiency also cuts in RapidArc's favor despite higher MU (10225 vs 6871), because it uses fewer arcs and couch positions, with estimated beam-on of 3 to 4 vs 6 to 9 minutes. These are estimates from a replanning study, not measured treatment times. Vendor ties appear on one side of the comparison, which makes the authors' willingness to report MME advantages somewhat reassuring, but they still warrant noting.\n\nWhat would make this wrong is a link between low-dose brain spill and cognition in long survivors receiving serial radiosurgery. If such a link were shown, the MME advantage would gain weight. Until then, the result supports platform choice by total target volume and planner expertise rather than a single winner.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "RapidArc's V12Gy advantage holds above 2.1 cm3 total PTV (V12 ratio mean 1.24) and disappears below it, where MME won V12Gy in 4 of 6 cases. Because V12Gy tracks radionecrosis risk, total target volume and VMAT planner expertise should guide the platform choice for multi-met SRS."
+            },
+            "open_questions": [
+              "Does lower V12Gy with VMAT translate into less radionecrosis?",
+              "Does cumulative low-dose brain spill affect cognition after repeat SRS?",
+              "How do HyperArc and newer MME versions compare?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": null,
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT06466720",
+                "brief_title": "Measuring and Mapping Cognitive Decline After Brain Radiosurgery",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": null,
+                "enrollment_count": 80,
+                "primary_completion_date": "2026-06",
+                "brief_summary": "Background Stereotactic Radiosurgery (SRS) is a localised radiotherapy treatment for patients with brain metastases or other benign tumours in the brain, like meningiomas. The Investigators do not currently know if, or how much, SRS affects brain function. Patients with brain tumours do not get tested routinely for their brain function.\n\nUnderstanding short- and long-term side-effects is important for SRS. Brain metastases patients have short life expectancies (6-months to 1-year). However,…",
+                "conditions": [
+                  "Brain Metastases",
+                  "Meningiomas",
+                  "Stereotactic Radiosurgery",
+                  "Cognitive Decline",
+                  "Quality of Life",
+                  "SRS"
+                ],
+                "interventions": [
+                  {
+                    "name": "Neurocognitive testing",
+                    "type": "BEHAVIORAL"
+                  },
+                  {
+                    "name": "Quality of Life questionnaire",
+                    "type": "BEHAVIORAL"
+                  },
+                  {
+                    "name": "Stereotactic radiosurgery",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion criteria Prospective Cohort\n\nPatients will be eligible for inclusion only if ALL of the following criteria apply:\n\n* Age: above 18 years, no upper limit\n* Diagnosis of brain metastases or meningioma, where the treatment is going to be stereotactic radiosurgery\n* Karnofsky Performance…",
+                "answers_question": "Does cumulative low-dose brain spill affect cognition after repeat SRS?",
+                "relevance_phrase": "prospective neurocognitive testing after SRS"
+              },
+              {
+                "nct": "NCT04343157",
+                "brief_title": "UCSD Image-Guided Cognitive-Sparing Radiosurgery for Intracranial Lesions",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 90,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "In this proposal, the investigators introduce advanced diffusion and volumetric imaging techniques along with innovative, automated image parcellation methods to identify critical brain regions, incorporate into cognitive-sparing SRS for intracranial lesions, and analyze biomarkers of radiation response. This work will advance the investigators' understanding of neurocognitive changes after brain SRS and help create interventions that preserve cognitive-function in patients with intracranial…",
+                "conditions": [
+                  "Brain Metastases, Adult",
+                  "Neurocognitive Function",
+                  "Cancer",
+                  "Meningioma of Brain",
+                  "Arteriovenous Malformations, Cerebral"
+                ],
+                "interventions": [
+                  {
+                    "name": "Cognitive Sparing Brain Stereotactic Radiosurgery (SRS)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients 18 years or older\n2. Eligible for intracranial SRS: Limited brain metastases targets geometrically feasible for SRS (intact or resected tumor bed), meningioma, or cerebral AVM\n3. Eastern cooperative Oncology Group (ECOG) performance status 0-2 (score of 0, no…",
+                "answers_question": "Does cumulative low-dose brain spill affect cognition after repeat SRS?",
+                "relevance_phrase": "cognitive-sparing SRS of mapped critical brain regions"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "radiosurgery brain metastases radionecrosis",
+                "radiosurgery brain metastases cognition",
+                "HyperArc brain metastases"
+              ],
+              "queries_failed": [
+                {
+                  "term": "HyperArc brain metastases",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 29,
+              "fetched_at": "2026-11-08T09:04:51.073Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 218
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "Single-isocenter SRS for multiple brain mets with automated planning (Minniti)",
+            "tldr": "1-yr LC 89%, 1-yr OS 68%, no G3-4 toxicity after single-isocenter DCA SRS for 4-10 BM; a 1-mm GTV-to-PTV margin kept dose coverage on every lesion.",
+            "details": [
+              "🔍 Retrospective, 2 Italian centers, 31 consecutive pts, 204 BM <3 cm, Oct 2016 to Sep 2018",
+              "🔍 Median clinical f/u 11 mo (range 4-26); 13 (42%) pts alive at data cutoff",
+              "💊 Systemic therapy given at the time of SRS in 9 pts (IO n=4, targeted n=5)",
+              {
+                "text": "📐 Technique",
+                "subdetails": [
+                  "Brainlab Elements Multiple Brain Mets SRS v1.5, automated inverse-optimized DCA",
+                  "10 noncoplanar DCA beams at 5 preset couch positions, isocenter at center of mass of all targets",
+                  "20-22 Gy for lesions <2 cm; 16-18 Gy for ≥2 cm or near brainstem/chiasm",
+                  "PTV = GTV + 1 mm (n=176) or 2 mm (n=28)",
+                  "Frameless mask, ExacTrac 6D kV, tolerance 0.5 mm / 0.5°",
+                  "Median conformity index 1.32, gradient index 3.94"
+                ]
+              },
+              {
+                "text": "📊 Local control and survival (KM)",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "1-yr",
+                    "2-yr"
+                  ],
+                  "rows": [
+                    [
+                      "LC, per patient",
+                      "89%",
+                      "77%"
+                    ],
+                    [
+                      "LC, per lesion",
+                      "94%",
+                      "86%"
+                    ],
+                    [
+                      "OS",
+                      "68%",
+                      "40%"
+                    ]
+                  ]
+                }
+              },
+              "📊 Median OS 16.1 mo; distant brain failure median 8 mo, 1-yr rate 38%",
+              "📊 Salvage after brain progression: further SRS in 15 pts, WBRT in 3",
+              {
+                "text": "📊 Coverage loss (V95 <95%) from residual setup error",
+                "subdetails": [
+                  "Mean 3D residual error 0.34 mm (range 0.1-0.53)",
+                  "28 targets lost coverage; 7 lesions <39 mm vs 21 lesions ≥39 mm from isocenter (P=.0001)",
+                  "20 lesions <0.40 cm3 vs 8 lesions ≥0.40 cc (P=.015)",
+                  "1-mm margin restored coverage for all lesions; 0-mm simulation left 18 lesions compromised"
+                ]
+              },
+              "📊 Intrafraction: 10 positionings in 7 (22%) pts out of tolerance, max 0.8° and 0.7 mm",
+              "📊 Uncorrected intrafraction shifts cost GTV coverage in 21 (28%) of 74 lesions; 1-mm margin held all but 2",
+              {
+                "text": "📊 Safety",
+                "subdetails": [
+                  "No G3-4 acute or late toxicity",
+                  "Radionecrosis in 5 (16.1%) pts at median 10 mo, G2 motor deficit in 2",
+                  "Per-lesion radionecrosis risk 11% at 12 mo",
+                  "Individual V12Gy >10 cm3 correlated with radionecrosis (P=.01); lesion number and cumulative volume did not"
+                ]
+              },
+              {
+                "text": "📐 Simulated PTV for a spherical lesion by GTV-to-PTV margin (paper's Table 4)",
+                "table": {
+                  "columns": [
+                    "Lesion diameter",
+                    "0 mm",
+                    "1 mm",
+                    "2 mm",
+                    "3 mm"
+                  ],
+                  "rows": [
+                    [
+                      "0.5 cm",
+                      "0.07 cm3",
+                      "0.18 cm3",
+                      "0.38 cm3",
+                      "0.7 cm3"
+                    ],
+                    [
+                      "1 cm",
+                      "0.52 cm3",
+                      "0.9 cm3",
+                      "1.43 cm3",
+                      "2.21 cm3"
+                    ],
+                    [
+                      "1.5 cm",
+                      "1.76 cm3",
+                      "2.57 cm3",
+                      "3.59 cm3",
+                      "4.85 cm3"
+                    ],
+                    [
+                      "2 cm",
+                      "4.18 cm3",
+                      "5.57 cm3",
+                      "7.23 cm3",
+                      "9.2 cm3"
+                    ]
+                  ]
+                }
+              },
+              "🔗 vs Korytko gamma knife series (cited in paper): RN 55.3% for V12Gy >10 cm3 vs 22.5% below, 198 tumors",
+              {
+                "text": "⚠️ Internal inconsistencies in the paper",
+                "subdetails": [
+                  "Abstract: 14 pts with 4-6 and 17 with 7-10 BM; Results: 20 with 4-7 and 11 with 8-10",
+                  "Coverage loss in 28 PTVs: abstract says 10 pts, Results say 12 pts"
+                ]
+              },
+              "⚠️ No neurocognitive testing; KPS was the only functional measure",
+              "⚠️ Margin findings depend on 6D intrafraction imaging; they may not transfer to setups without it"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.adro.2020.06.008",
+            "tweet_ids": [
+              1000000216
+            ],
+            "slug": "automated-si-srs-multiple-brain-mets-margins",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Retrospective 31-pt two-center series, median f/u 11 mo, no comparator against multi-isocenter or single-target SRS; margin conclusions rest on offline dosimetric reconstruction.",
+              "audience": "4-10 brain mets <3 cm, frameless linac SRS, adults"
+            },
+            "significance": "Uncorrected intrafraction shifts dropped GTV coverage in 21 (28%) of 74 lesions, so the 1-mm GTV-to-PTV margin is only valid alongside 6D intrafraction imaging and correction. Coverage loss clustered in lesions <0.40 cm3 and ≥39 mm from isocenter, which is where the margin decision matters most.",
+            "monday_clinic": "In a pt with 4 to 10 BM <3 cm and modest cumulative volume, this supports single-isocenter linac SRS as an option to per-lesion isocenters; it does not extend to >10 lesions or cumulative tumor volumes beyond the <15 cm3 treated here.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Retrospective series of **31 consecutive pts** with **204 BM** at two Italian centers, Oct 2016 to Sep 2018. Median clinical f/u **11 mo** (range 4-26)."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Adults with **4 to 10 BM <3 cm**. Median age 60; histologies lung 14, melanoma 8, breast 5, kidney 3, ovary 1. Median total GTV 3.8 cm3 (range 1.4-9.9)."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Single-isocenter DCA SRS planned with Brainlab Elements Multiple Brain Mets SRS v1.5, **20-22 Gy** for lesions <2 cm and **16-18 Gy** for ≥2 cm or near critical structures. PTV = GTV + **1 mm** (n=176) or 2 mm (n=28), with ExacTrac 6D setup and intrafraction correction at 0.5 mm / 0.5° tolerance."
+              },
+              {
+                "label": "Endpoints",
+                "body": "Local control, OS and distant brain failure by KM from SRS; toxicity by CTCAE v5. Dosimetric endpoints were V95 and D95 after CBCT-based reconstruction of residual isocenter error."
+              },
+              {
+                "label": "Results",
+                "body": "Coverage loss (V95 <95%) hit **28 targets** and tracked with distance from isocenter (P=.0001) and small volume (P=.015). A **1-mm margin restored coverage for all lesions**; with 0 mm, 18 lesions remained compromised."
+              },
+              {
+                "label": "Safety",
+                "body": "**No G3-4 toxicity.** Radionecrosis in 5 (16.1%) pts, G2 motor deficit in 2; per-lesion risk 11% at 12 mo, driven by **V12Gy >10 cm3** (P=.01)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Authors place the 89% 1-yr LC alongside published single-target and single-isocenter SRS series for up to 10 BM. Plan quality (CI 1.32, GI 3.94) is described as in line with DCA and VMAT reports, including Ruggeri's Brainlab vs HyperArc comparison."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents adults with 4-10 BM <3 cm and cumulative tumor volume <15 cm3, treated frameless with 6D intrafraction monitoring. Does not represent >10 BM, lesions ≥3 cm, or delivery without intrafraction imaging and correction."
+              },
+              {
+                "label": "Limitations",
+                "body": "The paper is internally inconsistent on lesion-count strata and on how many pts had coverage loss. Margin adequacy was judged dosimetrically on offline CBCT fusion, not against lesion-level local failure, and no neurocognitive testing was done."
+              },
+              {
+                "label": "Discussion",
+                "body": "The data support a 1-mm margin as a middle ground between coverage and the V12Gy growth that larger margins bring. Whether that holds without 6D correction, or how hippocampal and normal-brain dose affect cognition, is left open."
+              }
+            ],
+            "interpretation": "The question this series addresses is narrower than its title suggests. Single-isocenter multi-target SRS already has a dosimetric literature showing plan quality comparable to one isocenter per lesion. What has been missing is evidence that small rotational errors at a shared isocenter do not quietly underdose the lesions farthest from it. Roper's VMAT simulation, cited by the authors, found little coverage loss at 0.5° but meaningful loss at 2°, and that has pushed some groups toward larger margins. Minniti's group measured the residual error their system actually achieves, reconstructed its dosimetric consequence lesion by lesion, and asked what margin absorbs it. That is the useful contribution, and it should be read as a technique-validation study with clinical outcomes attached, not as an outcomes study.\n\nThe central finding cuts in two directions. Under ExacTrac 6D correction the mean 3D residual error was 0.34 mm, and a 1-mm margin preserved coverage for every lesion, while a 0-mm simulation left 18 lesions underdosed. So zero-margin single-isocenter delivery is not supported here, even with good imaging. But the intrafraction analysis is the real caveat: when out-of-tolerance shifts were left uncorrected, GTV coverage fell in 21 of 74 lesions. The 1-mm margin is therefore a property of the whole workflow, not of the planning software. A center without repeated intrafraction imaging should not borrow it.\n\nThe pattern of failure in coverage matches the geometry. Loss concentrated in small lesions far from isocenter, under 0.40 cm3 and at or beyond 39 mm. This is the subgroup where margin choice and isocenter placement both matter, and where a planner might reasonably add margin selectively rather than uniformly. Table 4 makes the cost concrete: a 1-mm expansion on a 1-cm sphere takes the volume from 0.52 to 0.9 cm3. Given that V12Gy above 10 cm3 predicted radionecrosis here (P=.01), and that the Korytko gamma knife data quoted by the authors put radionecrosis at 55.3% above that threshold, the case for keeping the margin minimal is dosimetric and clinical at once.\n\nThe clinical outcomes are reassuring but cannot carry much weight. With 31 pts, a median follow-up of 11 mo and 13 pts alive at cutoff, the 2-yr estimates rest on few patients at risk. Local control was assessed against a historical benchmark, not a concurrent multi-isocenter cohort. The dosimetric endpoint, V95 on offline CBCT fusion, was never linked to which lesions actually failed, so the paper cannot show that the underdosed lesions recurred more often. The radionecrosis rate of 16.1% of pts is not trivial for a cohort whose cumulative volumes were modest, and KPS is a coarse substitute for neurocognitive testing in a technique whose main selling point over WBRT is cognitive preservation.\n\nThe abstract and results also disagree on the lesion-count strata and on how many patients had coverage loss. That does not change the margin conclusion, but it lowers confidence in the reporting overall. What would make the 1-mm recommendation wrong is a lesion-level local-failure analysis showing excess recurrence in small distal targets, or a cohort treated without 6D correction. Neither is tested here.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Uncorrected intrafraction shifts dropped GTV coverage in 21 (28%) of 74 lesions, so the 1-mm margin only holds alongside 6D intrafraction correction. Coverage loss clustered in lesions <0.40 cm3 and ≥39 mm from isocenter, the targets where margin and isocenter placement decide the plan."
+            },
+            "open_questions": [
+              "Neurocognitive outcome with formal testing after single-isocenter SRS",
+              "Does the 1-mm margin hold without 6D intrafraction correction?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "palliative",
+            "methodology": "retrospective",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT06466720",
+                "brief_title": "Measuring and Mapping Cognitive Decline After Brain Radiosurgery",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": null,
+                "enrollment_count": 80,
+                "primary_completion_date": "2026-06",
+                "brief_summary": "Background Stereotactic Radiosurgery (SRS) is a localised radiotherapy treatment for patients with brain metastases or other benign tumours in the brain, like meningiomas. The Investigators do not currently know if, or how much, SRS affects brain function. Patients with brain tumours do not get tested routinely for their brain function.\n\nUnderstanding short- and long-term side-effects is important for SRS. Brain metastases patients have short life expectancies (6-months to 1-year). However,…",
+                "conditions": [
+                  "Brain Metastases",
+                  "Meningiomas",
+                  "Stereotactic Radiosurgery",
+                  "Cognitive Decline",
+                  "Quality of Life",
+                  "SRS"
+                ],
+                "interventions": [
+                  {
+                    "name": "Neurocognitive testing",
+                    "type": "BEHAVIORAL"
+                  },
+                  {
+                    "name": "Quality of Life questionnaire",
+                    "type": "BEHAVIORAL"
+                  },
+                  {
+                    "name": "Stereotactic radiosurgery",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion criteria Prospective Cohort\n\nPatients will be eligible for inclusion only if ALL of the following criteria apply:\n\n* Age: above 18 years, no upper limit\n* Diagnosis of brain metastases or meningioma, where the treatment is going to be stereotactic radiosurgery\n* Karnofsky Performance…",
+                "answers_question": "Neurocognitive outcome with formal testing after single-isocenter SRS",
+                "relevance_phrase": "prospective neurocognitive testing after brain SRS"
+              },
+              {
+                "nct": "NCT03606421",
+                "brief_title": "CBF and NCF Changes With Brain Radiation",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": null,
+                "enrollment_count": 110,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "This study will be a dual-arm prospective longitudinal cohort study for patients with brain metastases, at least one of which is appropriate for radiotherapy, to explore brain and cognitive changes following SRS or WBRT and evaluate the feasibility of a novel MRI protocol to identify potential radiological biomarkers of NCF decline.\n\nPatients diagnosed with brain mets will be assigned to either Arm A or Arm B, depending on their treatment plan. Patients in Arm A will be treated with SRS.…",
+                "conditions": [
+                  "Neurocognitive Dysfunction",
+                  "Brain Metastases"
+                ],
+                "interventions": [
+                  {
+                    "name": "SRS and neurocognitive assessments",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "WBRT and neurocognitive assessments",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients with brain metastases will be included in this study. Patients with known malignancies but without brain metastases, or patients with primary brain tumors are not eligible for enrollment.\n* MRI confirmed 1-10 lesions. Each lesion must not be intended for resection.\n*…",
+                "answers_question": "Neurocognitive outcome with formal testing after single-isocenter SRS",
+                "relevance_phrase": "prospective SRS cohort, 1-10 BM, serial NCF testing"
+              },
+              {
+                "nct": "NCT07505979",
+                "brief_title": "SMART Trial: Cognitive Sparing Brain Radiotherapy for Multiple Brain Metastases",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 90,
+                "primary_completion_date": "2029-04",
+                "brief_summary": "The goal of this phase II randomized trial is to determine if Stereotactic Radiosurgery (SRS) or Cognitive Sparing WBRT (CS-WBRT) better preserves neurocognitive function than standard Hippocampal Avoidance WBRT (HA-WBRT) in patients with multiple brain metastases ( $\\\\ge6$ lesions).\n\nThe main questions it aims to answer are:\n\n* Which treatment best preserves cognitive function (memory and executive tasks) at 6 months post-intervention?\n* Can sparing the left hippocampus and corpus callosum…",
+                "conditions": [
+                  "Brain Metastases From Solid Tumors"
+                ],
+                "interventions": [
+                  {
+                    "name": "SRS",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "CS-WBRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "HA-WBRT",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients with a histologic diagnosis of non-hematopoietic malignancy and radiographic evidence of brain metastases\n2. Patients with brain metastasis outside a 5-mm margin around either hippocampus or corpus callosum on gadolinium contrast-enhanced MRI obtained within 30 days…",
+                "answers_question": "Neurocognitive outcome with formal testing after single-isocenter SRS",
+                "relevance_phrase": "rand ph2 SRS vs CS-WBRT vs HA-WBRT, ≥6 BM, 6-mo NCF"
+              },
+              {
+                "nct": "NCT06857006",
+                "brief_title": "Trial of Differential Margins in Single Isocenter Radiosurgery of Brain Metastases",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 180,
+                "primary_completion_date": "2028-06",
+                "brief_summary": "Radiosurgery is the use of a focal high dose of radiation therapy to ablate or kill a tumor. This trial will enroll patients with brain metastases 4 cm or less in greatest diameter and will compare 0mm margin to a 2mm margin for treatment.",
+                "conditions": [
+                  "Brain Metastases"
+                ],
+                "interventions": [
+                  {
+                    "name": "brain metastases radiosurgery",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Stated willingness to comply with all study procedures and availability for the duration of the study\n2. Male or female, aged 19 and older\n3. Brain metastases diagnosis not requiring retreatment to the same tumor\n4. For females of reproductive potential should undergo…",
+                "answers_question": "Does the 1-mm margin hold without 6D intrafraction correction?",
+                "relevance_phrase": "randomised 0mm vs 2mm margin, single-isocenter SRS"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "radiosurgery brain metastases cognition",
+                "single isocenter radiosurgery"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 20,
+              "fetched_at": "2026-11-08T09:05:01.281Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 216
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "Dose-adapted single-isocenter multitarget SRS for 4-10 brain mets",
+            "tldr": "mOS 8.1 mo, 1-yr OS 35.7%; 22 of 40 pts outlived DS-GPA prediction (bar was 17), 1-yr local failure 5%, no G3-5 AEs.",
+            "details": [
+              "📊 mOS 8.1 mo, 6-mo OS 57.3%, 1-yr OS 35.7% from protocol SRS",
+              "📐 DS-GPA predicted mOS 5.5 mo, 1-yr 20% for this cohort",
+              "📐 22 of 40 pts outlived DS-GPA prediction; prespecified noninferiority bar was 17",
+              "🔍 Prospective single-arm, N=40, Durham NC, accrued Feb 2017 to Aug 2019, median f/u 15.2 mo",
+              {
+                "text": "📊 Per-lesion outcomes by fractionation",
+                "table": {
+                  "columns": [
+                    "Measure",
+                    "Single fraction",
+                    "5 fractions"
+                  ],
+                  "rows": [
+                    [
+                      "Pts / lesions",
+                      "24 / 125",
+                      "16 / 79"
+                    ],
+                    [
+                      "Prescription",
+                      "20 Gy (<2 cm) or 18 Gy (2 to <3 cm)",
+                      "25 Gy/5 fx"
+                    ],
+                    [
+                      "Local control",
+                      "93% (8 of 119 failed, no dose adjustment)",
+                      "98% (2 of 79 failed)"
+                    ],
+                    [
+                      "Radionecrosis",
+                      "3.4% (4 of 119)",
+                      "1.3% (1 of 79)"
+                    ]
+                  ]
+                }
+              },
+              "📊 1-yr local failure 5% (2.6%, 8.7%): 10 of 204 lesions, in 4 of 32 pts",
+              "📊 Distant brain failure cumulative incidence 20% at 6 mo, 35.8% at 12 mo",
+              {
+                "text": "📊 Safety and neuro outcomes",
+                "subdetails": [
+                  "G1-2 SIMT-related AEs in 73%, no G3-5",
+                  "Headache 50%, fatigue 45%, nausea 25%, alopecia 20%",
+                  "Radionecrosis in 5 lesions (4 pts), 1-yr rate 1.5%",
+                  "Neurologic death 20%",
+                  "MMSE, Trail Making, HVLT, FACT-Br unchanged at 3 mo"
+                ]
+              },
+              "🔍 Median beam-on 8 min; median table time 31.5 min/d",
+              "⚠️ Benchmark is DS-GPA predicted survival, not a randomized WBRT or multi-isocenter arm",
+              "⚠️ 11 pts had prior SRS/WBRT, while DS-GPA times survival from first brain met diagnosis",
+              "⚠️ Discussion cites 58% 6-mo distant brain failure; Results report 20%",
+              "⚠️ Funded by Varian Medical Systems"
+            ],
+            "figures": [],
+            "nct": "NCT02886572",
+            "doi": "10.1016/j.adro.2021.100760",
+            "tweet_ids": [
+              1000000217
+            ],
+            "slug": "dose-adapted-si-srs-4-10-brain-mets",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Prospective but single-arm, N=40, benchmarked against DS-GPA predicted survival rather than a randomized WBRT or multi-isocenter comparator; vendor-funded.",
+              "audience": "4-10 brain mets, non-SCLC histologies, KPS ≥70, largest lesion ≤4 cm"
+            },
+            "significance": "The transferable piece is the switch rule: if single-fraction brain V12Gy exceeded 20 mL or any lesion was in the brainstem, every lesion got 25 Gy/5 fx. Those 79 lesions had 98% LC and 1.3% radionecrosis, vs 93% and 3.4% with single fraction (P=NS). Aggregate volume, not lesion count, decides whether to fractionate.",
+            "monday_clinic": "In pts with 4-10 brain mets, KPS ≥70 and lesions ≤4 cm, this gives prospective support for SRS alone in place of WBRT; it does not extend to SCLC, leptomeningeal disease, more than 10 mets, or pts who cannot get MRI every 3 mo.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Prospective **single-arm** trial, N=40, Feb 2017 to Aug 2019, NCT02886572. Noninferiority was defined as **≥17 of 40 pts** outliving their original DS-GPA predicted survival (90% power, one-sided exact test, alpha .10)."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**4-10 untreated brain mets**, age ≥18, **KPS ≥70**, life expectancy >3 mo, DS-GPA ≥0.5, largest lesion ≤4 cm, >2 mm from the optic apparatus. SCLC, germ cell, lymphoma, leukemia, myeloma and leptomeningeal disease were excluded. Median age 61, KPS 90, 6 mets; NSCLC 50%, breast 27.5%."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Single-isocenter VMAT, 1 mm PTV margin, frameless mask, 6DoF couch. PTV <2 cm **20 Gy**, 2 to <3 cm **18 Gy**; PTV >3 cm, brainstem involvement, or brain V12Gy >20 mL moved all lesions to **25 Gy/5 fx**. Median V12Gy 11.7 mL (1 fx), V24Gy 3.5 mL (5 fx); median total hippocampal dose 2.4 Gy."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary:** overall survival. Secondary: local recurrence, distant brain failure, neurologic death, AEs, steroid use; neurocognition and QoL were exploratory."
+              },
+              {
+                "label": "Results",
+                "body": "**mOS 8.1 mo**, 1-yr OS 35.7%; **22 pts** outlived DS-GPA prediction. **1-yr local failure 5%**; distant brain failure 35.8% at 12 mo. Of the 19 pts with distant failure, 15 got salvage (11 SRS, 4 WBRT)."
+              },
+              {
+                "label": "Safety",
+                "body": "**No G3-5** SIMT-related AEs; G1-2 in 73%, headache most common. Radionecrosis in 5 lesions in 4 pts, 2 of whom needed surgery. All 12 pts on steroids before SIMT came off them."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The authors place median survival in prior multi-met SRS trials at 6.2 to 8.6 mo, so 8.1 mo sits in that range. The randomized SRS vs WBRT question for higher met counts is still open in NCT03550391 (5-15 mets, HA-WBRT), NCT03075072 (5-20) and NCT01592968 (4-15)."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents pts with 4-10 mets, good performance status, and lesions up to 4 cm, including brainstem lesions. Does not represent SCLC, leptomeningeal disease, more than 10 mets, or KPS <70."
+              },
+              {
+                "label": "Limitations",
+                "body": "11 pts had prior SRS/WBRT, which skews a benchmark that times survival from first brain met diagnosis. Neurocog compliance collapsed after 6 mo (18 deaths before 6 mo), and the paper reports two different 6-mo distant failure figures (20% vs 58%)."
+              },
+              {
+                "label": "Discussion",
+                "body": "This trial supports the feasibility and safety of a volume-adapted single-isocenter workflow more than any survival claim. Whether SRS alone beats HA-WBRT on neurocognition at 4-10 mets is left to the randomized trials."
+              }
+            ],
+            "interpretation": "The survival endpoint is what this trial is built around, and it is the weakest part. Showing that 22 of 40 pts outlived their DS-GPA estimate, against a prespecified bar of 17, shows that single-isocenter treatment did not obviously harm anyone, measured against a prognostic model built on an older era. The authors say themselves that the original DS-GPA, not the molecular revisions, was used because molecular data were usually missing. In a 2017 to 2019 cohort on modern systemic therapy, many pts would be expected to outlive an older model. The 11 pts with prior brain RT make it worse: their clock started at protocol SRS while the model's starts at first brain met diagnosis. So the noninferiority result says little about whether SRS alone matches WBRT at 4-10 mets. The trial was not designed to answer that question.\n\nThe useful content is the dose-adaptation rule. Many centers already treat 4-10 mets with a single isocenter. The open question is when to give up on single fraction. Here the trigger was mechanical: brain V12Gy over 20 mL, any brainstem lesion, or a PTV over 3 cm moved every lesion to 25 Gy/5 fx. Those 79 lesions had 98% local control and 1.3% radionecrosis, against 93% and 3.4% for undiluted single fraction, with the LC difference not significant. The fractionated group also carried larger treatment volumes. Volume-driven fractionation does not appear to cost local control, but the event counts are too small to compare the arms, and the paper says there were too few events to model local failure or necrosis properly.\n\nIn practice, the targeting accuracy finding counts for more than it seems. Median longest inter-target distance was 12.0 cm, a setting where rotational error at a single isocenter could erode margins. A 1 mm PTV margin and 1-yr local failure of 5% suggest the 6DoF-corrected linac workflow held up. This only applies to a comparable delivery chain.\n\nDistant brain failure is where readers should be careful. The Results give 6- and 12-mo cumulative incidence of 20% and 35.8% (competing-risk method), but the Discussion cites 58% at 6 mo. The competing-risk figure is the one to use, but the inconsistency should lower confidence in the rest of the reporting. Neurocognitive preservation is reported only for the subset still testing at 3 mo, after a cohort where 18 pts died before 6 mo, so selection toward fitter survivors is likely.\n\nThe result would be wrong if the DS-GPA overestimated mortality enough that any reasonable treatment cleared the bar, or if pts who stopped testing were the ones losing cognition. The randomized trials the authors list, including the HA-WBRT comparison at 5-15 mets, are where the SRS-alone decision gets settled. Until then this is a reasonable dosing template, not evidence that SRS alone matches whole-brain treatment.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The volume trigger is the transferable rule: brain V12Gy >20 mL or a brainstem lesion moved all lesions to 25 Gy/5 fx, with 98% vs 93% per-lesion LC and 1.3% vs 3.4% radionecrosis against single fraction. Fractionation depends on aggregate volume, not met count."
+            },
+            "open_questions": [
+              "SRS alone vs hippocampal-avoidant WBRT at 5-15 mets",
+              "Single-fraction vs hypofractionated SRS for large aggregate volume",
+              "Neurocognitive durability beyond 6 months"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "palliative",
+            "methodology": null,
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT03075072",
+                "brief_title": "Hippocampal Sparing Whole Brain Radiation Versus Stereotactic Radiation in Patients With 5-20 Brain Metastases: A Phase III, Randomized Trial",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 196,
+                "primary_completion_date": "2024-11",
+                "brief_summary": "This research study is studying two different types of radiation as treatment for brain metastases (tumors in the brain that spread from a cancer that originated elsewhere in the body)",
+                "conditions": [
+                  "Brain Metastases"
+                ],
+                "interventions": [
+                  {
+                    "name": "Whole brain radiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Stereotactic radiation (SRS)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Participants must have a biopsy proven solid malignancy with untreated (by radiation) intracranial lesions radiographically consistent with or pathologically proven to be brain metastases. Patients who have undergone prior systemic therapy are eligible\n* Five-twenty…",
+                "answers_question": "SRS alone vs hippocampal-avoidant WBRT at 5-15 mets",
+                "relevance_phrase": "phase 3 randomised HA-WBRT vs SRS, 5-20 mets"
+              },
+              {
+                "nct": "NCT03550391",
+                "brief_title": "Stereotactic Radiosurgery Compared With Hippocampal-Avoidant Whole Brain Radiotherapy (HA-WBRT) Plus Memantine for 5 or More Brain Metastases",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 206,
+                "primary_completion_date": "2027-06",
+                "brief_summary": "Stereotactic radiosurgery (SRS) is a commonly used treatment for brain tumors. It is a one-day (or in some cases two day), out-patient procedure during which a high dose of radiation is delivered to small spots in the brain while excluding the surrounding normal brain.\n\nWhole brain radiation therapy with hippocampal avoidance (HA-WBRT) is when radiation therapy is given to the whole brain, while trying to decrease the amount of radiation that is delivered to the area of the hippocampus. The…",
+                "conditions": [
+                  "Brain Metastases"
+                ],
+                "interventions": [
+                  {
+                    "name": "Memantine",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Hippocampal-avoidant (HA-WBRT) Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Stereotactic Radiosurgery (SRS)",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients must have 5 or more brain metastases as counted on a T1 contrast enhanced MRI obtained ≤ 30 days from randomization (maximum 15 brain metastases).\n* Patients must have a pathological diagnosis (cytological or histological) of a non-hematopoietic malignancy.\n* The…",
+                "answers_question": "SRS alone vs hippocampal-avoidant WBRT at 5-15 mets",
+                "relevance_phrase": "phase 3 SRS vs HA-WBRT+memantine, 5-15 mets"
+              },
+              {
+                "nct": "NCT07505979",
+                "brief_title": "SMART Trial: Cognitive Sparing Brain Radiotherapy for Multiple Brain Metastases",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 90,
+                "primary_completion_date": "2029-04",
+                "brief_summary": "The goal of this phase II randomized trial is to determine if Stereotactic Radiosurgery (SRS) or Cognitive Sparing WBRT (CS-WBRT) better preserves neurocognitive function than standard Hippocampal Avoidance WBRT (HA-WBRT) in patients with multiple brain metastases ( $\\\\ge6$ lesions).\n\nThe main questions it aims to answer are:\n\n* Which treatment best preserves cognitive function (memory and executive tasks) at 6 months post-intervention?\n* Can sparing the left hippocampus and corpus callosum…",
+                "conditions": [
+                  "Brain Metastases From Solid Tumors"
+                ],
+                "interventions": [
+                  {
+                    "name": "SRS",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "CS-WBRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "HA-WBRT",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients with a histologic diagnosis of non-hematopoietic malignancy and radiographic evidence of brain metastases\n2. Patients with brain metastasis outside a 5-mm margin around either hippocampus or corpus callosum on gadolinium contrast-enhanced MRI obtained within 30 days…",
+                "answers_question": "SRS alone vs hippocampal-avoidant WBRT at 5-15 mets",
+                "relevance_phrase": "randomised SRS vs HA-WBRT vs CS-WBRT, ≥6 mets"
+              },
+              {
+                "nct": "NCT05102747",
+                "brief_title": "Stereotactic Radiotherapy in Oligometastatic Brain Disease: a Randomised Phase III Study Comparing Hypofractionated Stereotactic Radiation Therapy (3*10 Gy) to the Historical Single-dose Radiosurgery (1*20 to 25 Gy) With Medico-economic Evaluation.",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 504,
+                "primary_completion_date": "2030-01",
+                "brief_summary": "Brain metastases (BM) are a common systemic cancer manifestation which incidence increases. Therapeutic options include whole-brain radiotherapy (WBRT), surgery, and stereotactic radiosurgery (SRS). The concept of \"oligometastatic\" cerebral disease (oligoBM) has emerged and led to consider alternative approaches. The main challenge is to preserve neurological function and independence the longest as possible.\n\nStereotactic radiotherapy (SRT) has emerged as an alternative treatment modality for…",
+                "conditions": [
+                  "Brain Metastasis",
+                  "Oligoprogression"
+                ],
+                "interventions": [
+                  {
+                    "name": "Hypofractionated SRT (stereotactic radiotherapy)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Historical single-dose SRS (stereotactic radiosurgery)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients aged ≥ 18 years\n* WHO performance status 0 or 1;\n* Patient eligible for SRT after a multidisciplinary committee decision; Patient with BMs from radioresistant cancer (renal cell carcinoma, sarcoma, melanoma) is eligible\n* Patient having up to 5 BM of solid tumours…",
+                "answers_question": "Single-fraction vs hypofractionated SRS for large aggregate volume",
+                "relevance_phrase": "randomised 3x10 Gy SRT vs single-dose SRS, ≤5 BM"
+              },
+              {
+                "nct": "NCT06466720",
+                "brief_title": "Measuring and Mapping Cognitive Decline After Brain Radiosurgery",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": null,
+                "enrollment_count": 80,
+                "primary_completion_date": "2026-06",
+                "brief_summary": "Background Stereotactic Radiosurgery (SRS) is a localised radiotherapy treatment for patients with brain metastases or other benign tumours in the brain, like meningiomas. The Investigators do not currently know if, or how much, SRS affects brain function. Patients with brain tumours do not get tested routinely for their brain function.\n\nUnderstanding short- and long-term side-effects is important for SRS. Brain metastases patients have short life expectancies (6-months to 1-year). However,…",
+                "conditions": [
+                  "Brain Metastases",
+                  "Meningiomas",
+                  "Stereotactic Radiosurgery",
+                  "Cognitive Decline",
+                  "Quality of Life",
+                  "SRS"
+                ],
+                "interventions": [
+                  {
+                    "name": "Neurocognitive testing",
+                    "type": "BEHAVIORAL"
+                  },
+                  {
+                    "name": "Quality of Life questionnaire",
+                    "type": "BEHAVIORAL"
+                  },
+                  {
+                    "name": "Stereotactic radiosurgery",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion criteria Prospective Cohort\n\nPatients will be eligible for inclusion only if ALL of the following criteria apply:\n\n* Age: above 18 years, no upper limit\n* Diagnosis of brain metastases or meningioma, where the treatment is going to be stereotactic radiosurgery\n* Karnofsky Performance…",
+                "answers_question": "Neurocognitive durability beyond 6 months",
+                "relevance_phrase": "serial cognitive testing post-SRS, short and long term"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "brain metastases radiosurgery hippocampal avoidance",
+                "brain metastases hypofractionated radiosurgery",
+                "brain metastases radiosurgery neurocognitive"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 31,
+              "fetched_at": "2026-11-08T09:05:06.892Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 217
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "HyperArc vs manual VMAT SRS: automated planning and delivery",
+            "tldr": "Paddick GI 5.42 vs 7.09 (P<.001) favoring automated HyperArc over expert manual VMAT SRS; conformity equal; 1-yr LC 90.1% in HyperArc brain mets.",
+            "details": [
+              "🔍 Single-institution retrospective comparison: 693 single-isocenter VMAT SRS pts, HyperArc vs historical manual VMAT (mVMAT) cohort",
+              "🔍 PTV=GTV, no margin, for both techniques; single isocenter for multiple targets",
+              "🔍 Brain mets dosing: 18-20 Gy x1, or 30 Gy/5fx if any lesion >2-3 cm or deep",
+              {
+                "text": "📊 Plan quality, QA and workflow, HyperArc vs mVMAT (medians unless stated)",
                 "table": {
                   "columns": [
                     "Metric",
@@ -59,22 +1082,10 @@
                       ".04"
                     ],
                     [
-                      "Median no. of arcs",
-                      "3",
-                      "2",
-                      "<.001"
-                    ],
-                    [
-                      "TG-218 tolerance (gamma ≥95%, 3%/2 mm)",
+                      "Gamma ≥95% at 3%/2 mm (TG-218 tolerance)",
                       "97%",
                       "94%",
                       ".024"
-                    ],
-                    [
-                      "TG-218 action limit (gamma ≥90%)",
-                      "100%",
-                      "98%",
-                      ".072"
                     ],
                     [
                       "Planning time",
@@ -87,23 +1098,50 @@
                       "10.5 min",
                       "11.4 min",
                       "<.001"
+                    ],
+                    [
+                      "Median number of arcs",
+                      "3",
+                      "2",
+                      "<.001"
                     ]
                   ]
                 }
               },
               {
-                "text": "📐 Gradient gain holds at matched table-angle count",
-                "subdetails": [
-                  "2 table angles (88 vs 261 plans): Paddick GI 3.68 vs 4.67, P<.001",
-                  "4 table angles (66 vs 58 plans): Paddick GI 7.53 vs 9.58, P<.001"
-                ]
+                "text": "📐 Gradient index advantage holds at matched table-angle count",
+                "table": {
+                  "columns": [
+                    "Table angles",
+                    "Plans (HyperArc / mVMAT)",
+                    "Paddick GI HyperArc",
+                    "Paddick GI mVMAT",
+                    "P"
+                  ],
+                  "rows": [
+                    [
+                      "2",
+                      "88 / 261",
+                      "3.68",
+                      "4.67",
+                      "<.001"
+                    ],
+                    [
+                      "4",
+                      "66 / 58",
+                      "7.53",
+                      "9.58",
+                      "<.001"
+                    ]
+                  ]
+                }
               },
-              "📊 Clinical cohort (HyperArc only): 107 pts, 377 mets; 1-yr LC 90.1%, 47 tumors at risk",
-              "📊 Grade 3 seizures in 3 pts; no grade 4 or 5 events at median clinical f/u 7 mo",
+              "📊 HyperArc clinical cohort: 107 pts, 377 mets, 1-yr LC 90.1% with 47 tumors at risk",
+              "📊 G3 seizures in 3 pts after median clinical f/u 7 mo; no G4/5 events",
+              "⚠️ LC cohort is HyperArc-only; no mVMAT clinical comparator, so 'no compromise' in LC is not tested",
               "⚠️ Median imaging f/u 5 mo; 1-yr LC rests on 47 tumors at risk",
-              "⚠️ Different Eclipse versions (15.5 vs 13.6) confound technique vs software era",
-              "⚠️ Planning-time parity reflects 9 yrs of in-house mVMAT expertise; efficiency for novice planners is asserted, not measured",
-              "⚠️ Several authors report Varian grants, fees or patents"
+              "⚠️ Confound: HyperArc on Eclipse 15.5 vs mVMAT on Eclipse 13.6, sequential eras",
+              "⚠️ Multiple authors report Varian grants, fees or patents"
             ],
             "figures": [],
             "nct": null,
@@ -114,61 +1152,65 @@
             "slug": "hyperarc-vs-manual-vmat-srs-transition",
             "verdict": {
               "soc_implication": "early-signal",
-              "rationale": "Retrospective historical-control dosimetric comparison; clinical outcomes single-arm HyperArc only with 5-mo median imaging f/u and toxicity scored by chart review.",
-              "audience": "Brain metastases treated with single-isocenter linac SRS, no PTV margin"
+              "rationale": "Retrospective single-center historical comparison on dosimetric surrogates; LC from a HyperArc-only cohort with 5-mo median imaging f/u and no manual-VMAT clinical comparator.",
+              "audience": "Brain mets (incl. multiple targets) treated with single-isocenter linac SRS"
             },
-            "significance": "The gradient advantage is not just more arcs: at 2 table angles Paddick GI was 3.68 vs 4.67 (P<.001), and conformity was unchanged. Zero-margin single-isocenter multitarget delivery still gave 1-yr LC 90.1%, which supports keeping PTV=GTV when localization and intrafraction motion are tightly managed.",
-            "monday_clinic": "For multiple brain mets planned single-isocenter with PTV=GTV, this supports automated HyperArc as plan-quality parity with an expert manual VMAT program; it does not address targets far from isocenter, benign or vascular indications, or late radionecrosis.",
+            "significance": "The gradient advantage survives matching arc number: Paddick GI 3.68 vs 4.67 with 2 table angles and 7.53 vs 9.58 with 4, so extra noncoplanar arcs do not explain it. With PTV=GTV single-isocenter delivery and 1-yr LC 90.1%, this supports automated planning for multi-target SRS where planner experience is the bottleneck.",
+            "monday_clinic": "In pts with multiple brain mets planned for single-isocenter linac SRS with no PTV margin, this supports automated planning matching an expert planner's conformity; it does not address benign or vascular targets, or comparison with Gamma Knife.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**Single-institution retrospective** comparison of 693 single-isocenter VMAT SRS plans: HyperArc (23-pt pilot + 350 pts) vs **320 consecutive prior mVMAT pts** as historical control. Clinical outcomes evaluated **only in the HyperArc cohort**."
+                "body": "Single-institution retrospective comparison of **693 pts** with single-isocenter VMAT SRS: 23 pilot + 350 HyperArc pts vs **320 consecutive manual VMAT pts** from the 15 months before adoption. Clinical LC and toxicity were assessed in a **HyperArc-only subgroup of 107 pts / 377 mets**."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Plan cohort mixed metastatic and benign/vascular targets; 59.9% single-target, 12.0% with 6 to 22 targets. Clinical cohort: **107 pts with 377 brain mets**, median age 58, mostly NSCLC, breast and melanoma."
+                "body": "Of 693 plans, 59.9% had a single target and 12.0% had 6 to 22 targets; target-size distributions did not differ between techniques (P>.99). Most common histologies in the clinical cohort were lung cancer, breast cancer and melanoma."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**No margin on GTV.** 18-20 Gy in 1 fx, or **30 Gy/5 fx** when any target exceeded 2-3 cm or involved deep structures. 10 MV FFF, HD120 MLC, CBCT with 6DOF correction."
+                "body": "**PTV=GTV, no margin**, single isocenter, 10 MV FFF on an Edge linac with HD120 MLC, open-mask immobilization. Brain mets got **18-20 Gy x1**, or **30 Gy/5fx** if any lesion exceeded 2-3 cm or involved deep structures; HyperArc used 2 to 4 arcs."
               },
               {
                 "label": "Endpoints",
-                "body": "Per-target conformity, gradient and falloff indices, mean brain dose, film PSQA against TG-218, planning and delivery times. Clinical: lesion-level LC (no 25% diameter increase) and grade 3+ CTCAE v5 toxicity."
+                "body": "Per-target RTOG and Paddick conformity, Paddick gradient, falloff index, bridging, mean normal-brain dose, modulation factor, film-based PSQA, and timestamp-derived planning, imaging and delivery times. LC defined as no 25% diameter increase on MRI, scored per lesion; toxicity per CTCAE v5."
               },
               {
                 "label": "Results",
-                "body": "Conformity equivalent; **gradient and falloff favor HyperArc**; mean brain dose 4.6% vs 5.1%. **1-yr LC 90.1%**, 3 grade 3 seizures, no grade 4/5."
+                "body": "Conformity was equivalent and the **gradient index was lower with HyperArc**; arm-level values are in the detail table. Isodose bridging at the 50% level occurred in 10.8% vs 13.1% of targets."
+              },
+              {
+                "label": "Safety",
+                "body": "**G3 seizures in 3 pts**, no G4/5 events, after median clinical f/u of 7 mo; toxicity was scored retrospectively from chart review."
               },
               {
                 "label": "vs leading data",
-                "body": "Builds on the Clark 2012 class solution and the Thomas 2014 low-dose-spill penalty that matched Gamma Knife plans. Here the automated tool reaches that expert-solution level without nested tuning structures."
+                "body": "Manual plans followed the published Clark et al single-isocenter class solution with the Thomas et al low-dose-spill penalty, which this group had previously reported as comparable to clinical Gamma Knife plans. **No Gamma Knife arm here**, so the benchmark is an expert in-house manual linac technique, not GK."
               },
               {
                 "label": "Applies to",
-                "body": "Represents single-isocenter linac SRS for brain mets with PTV=GTV at a center experienced in VMAT SRS. Does not represent benign or vascular targets, or a clinical head-to-head against manual VMAT."
+                "body": "Represents brain mets, including multi-target cases, treated with single-isocenter linac SRS and no PTV margin at an experienced center. Does not represent benign or vascular targets (no clinical data reported) or comparison with Gamma Knife or multi-isocenter approaches."
               },
               {
                 "label": "Limitations",
-                "body": "Software version differs between eras (Eclipse 15.5 vs 13.6). Planning time measured from structure-set timestamps as a surrogate. LC depends on 47 tumors at risk at 1 year."
+                "body": "Techniques ran on different Eclipse versions (15.5 vs 13.6) in consecutive eras, so software and learning effects confound the gradient difference. Planning time was a timestamp surrogate in a clinic with 9 years of manual experience, and several authors have Varian financial ties."
               },
               {
                 "label": "Discussion",
-                "body": "The case for automation is **standardization**, not a dosimetric leap: an expert manual program already sits near the ceiling. What remains unsettled is rotational-error underdosing of off-isocenter targets with zero margin, and which plan-quality metric actually tracks clinical outcome."
+                "body": "The case for automation here is **standardization**: equal conformity, a modestly steeper gradient, and slightly shorter room time. The clinical value of a lower gradient index, and the rotational-error risk for targets far from isocenter with no margin, remain open."
               }
             ],
-            "interpretation": "The useful framing here is that the comparator is not average manual VMAT but a mature in-house class solution with nine years of planner experience behind it. Against that ceiling, an automated optimizer matched conformity (RTOG 1.14 vs 1.13) and improved gradient and falloff. That is a stronger statement than most planning comparisons, which pit a vendor tool against a handful of replanned cases, and it is the paper's main strength: 693 clinical plans pulled computationally from a DICOM-RT database rather than curated examples.\n\nThe gradient finding deserves the most attention because it is the one that could plausibly matter clinically, through low-dose spill and radionecrosis risk, and because it has an obvious confounder. HyperArc plans used more arcs (median 3 vs 2). The authors addressed this by stratifying on table-angle count, and the gradient advantage persisted at both 2 and 4 angles (3.68 vs 4.67 and 7.53 vs 9.58). That moves confidence toward a true optimizer effect, though the two eras also ran different Eclipse versions, so software generation and technique cannot be fully separated. The mean brain dose difference (4.6% vs 5.1%) is small and its distribution did not differ, so it should not be read as a dose-sparing result.\n\nThe clinical data are a different kind of evidence and should be weighted accordingly. LC of 90.1% at 1 year comes from a HyperArc-only cohort with median imaging follow-up of 5 months and 47 tumors at risk at the 1-year mark. There is no manual-VMAT clinical arm, so the paper cannot say automation changed outcomes; it can only say outcomes were not obviously compromised. The authors frame it as congruent with historical series, which is the right ceiling for this claim. Toxicity was scored retrospectively from chart review, and 7 months of clinical follow-up is too short to capture radionecrosis, which is the late effect a gradient improvement would be expected to influence.\n\nThe most practice-relevant methodological choice is zero PTV margin with a single isocenter for targets anywhere in the brain. The authors are candid that rotational misalignment could underdose distant targets and that other groups have added margin or split isocenters instead. The reported LC supports their approach under their IGRT conditions (6DOF couch, CBCT, short delivery), but the paper does not report LC by distance from isocenter, so it cannot settle that debate.\n\nOn efficiency, delivery and in-room time fell, while planning time did not. The claim that a less experienced planner would plan faster is plausible but untested here, since the planners were experts. Readers should also weigh that several authors report Varian financial relationships. Net: a credible demonstration that automated single-isocenter SRS reaches expert-level plan quality, with a clinical signal too immature to separate the technique from the institution.",
+            "interpretation": "This paper is best read as a standardization argument rather than a superiority claim. The manual comparator is not a weak straw man: it is an in-house single-isocenter class solution built on the Clark et al nested-tuning-structure approach and refined with an explicit low-dose brain spill penalty, run by a clinic with 9 years of experience. Matching that on conformity (RTOG 1.14 vs 1.13) while posting a lower Paddick gradient index (5.42 vs 7.09) says the automated optimizer reaches expert-level plans without the months of planner training that manual multi-target SRS usually needs. That is the transferable finding, and it matters more at centers without such a planner than at this one.\n\nThe gradient result deserves the most scrutiny because it is the only plan-quality metric that clearly moved. The obvious objection is that HyperArc plans used more arcs (median 3 vs 2), and more noncoplanar entry naturally steepens falloff. The authors address this directly: stratifying by table-angle count, the difference persists at 2 angles (3.68 vs 4.67) and at 4 angles (7.53 vs 9.58). That stratification is the strongest piece of evidence in the paper. What it cannot remove is the era confound: HyperArc plans ran on Eclipse 15.5 and manual plans on 13.6, so some of the gradient gain may belong to the platform rather than the automated objective. The mean brain dose difference (4.6% vs 5.1%) is small, and the distributions did not differ, so a reader should not convert the gradient gain into a claim about radionecrosis or neurocognition. No such endpoint was measured.\n\nThe clinical data are the weakest part and should be weighted accordingly. Local control of 90.1% at 1 year comes only from HyperArc-treated mets, with a median imaging follow-up of 5 months and 47 tumors at risk at the 1-year mark. There is no manual-VMAT clinical arm, so the conclusion that a no-margin single-isocenter approach did not compromise outcomes is a statement of consistency with historical expectation, not a comparison. Three grade 3 seizures with no grade 4 or 5 events is reassuring for an early cohort but is retrospectively scored from charts.\n\nThe question the paper flags but cannot answer is geometric. Treating many targets anywhere in the brain from one isocenter with zero margin relies on tight rotational alignment, and small rotations translate into larger displacements for distant lesions. This group manages that with 6-degree-of-freedom couch correction and short delivery times; other centers add margin or split isocenters. Before generalizing, a reader would want lesion-level local control stratified by distance from isocenter, longer follow-up, and toxicity outcomes tied to the gradient metrics. The workflow gains (room time 10.5 vs 11.4 minutes) are real but modest, and planning time did not differ in expert hands, which leaves the less-experienced-planner benefit as a reasonable inference rather than something this study demonstrated.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Gradient improvement persists at matched table-angle counts (Paddick GI 3.68 vs 4.67 at 2 angles), so it reflects the optimizer, not arc number alone. Zero-margin single-isocenter delivery with 1-yr LC 90.1% supports PTV=GTV under tight IGRT, though off-isocenter rotational error remains unaddressed."
+              "radonc": "The gradient advantage persists at matched table-angle count (Paddick GI 3.68 vs 4.67 at 2 angles), so it is not just extra arcs. With PTV=GTV single-isocenter delivery and 1-yr LC 90.1%, this supports automated planning for multi-target SRS where planner experience limits plan quality."
             },
             "open_questions": [
-              "Underdosing of off-isocenter targets from rotational error with zero margin",
-              "Which plan-quality metric predicts LC and radionecrosis",
-              "Durability of LC and late toxicity beyond 1 year"
+              "Does the lower gradient index translate into less radionecrosis?",
+              "Rotational-error underdosing risk for distant targets with single isocenter, no margin",
+              "Automated linac SRS vs Gamma Knife on clinical outcomes"
             ],
             "consort": null,
             "modality": "radiation",
@@ -196,8 +1238,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Stated willingness to comply with all study procedures and availability for the duration of the study\n2. Male or female, aged 19 and older\n3. Brain metastases diagnosis not requiring retreatment to the same tumor\n4. For females of reproductive potential should undergo…",
-                "answers_question": "Underdosing of off-isocenter targets from rotational error with zero margin",
-                "relevance_phrase": "randomized 0mm vs 2mm margin, single-isocenter SRS"
+                "answers_question": "Rotational-error underdosing risk for distant targets with single isocenter, no margin",
+                "relevance_phrase": "0mm vs 2mm margin, single-isocenter SRS, brain mets"
               },
               {
                 "nct": "NCT02747303",
@@ -219,1036 +1261,25 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Adult patients (≥ 18 years old) with an ECOG Performance Status 0-2 and a life expectancy of 3 months or more.\n* Histologically confirmed systemic malignancy with gadolinium contrast-enhanced MRI scan demonstrating 1-5 intraparenchymal brain metastases.\n* Well-circumscribed,…",
-                "answers_question": "Underdosing of off-isocenter targets from rotational error with zero margin",
-                "relevance_phrase": "randomized PTV margin omission, PFS endpoint"
+                "answers_question": "Rotational-error underdosing risk for distant targets with single isocenter, no margin",
+                "relevance_phrase": "randomized PTV margin vs none, PFS endpoint"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
+                "radiosurgery brain metastases radionecrosis",
                 "single isocenter radiosurgery brain metastases",
-                "radiosurgery brain metastases radionecrosis"
+                "gamma knife linac radiosurgery"
               ],
               "queries_failed": [],
-              "candidates_returned": 15,
-              "fetched_at": "2026-11-07T09:07:08.973Z",
+              "candidates_returned": 21,
+              "fetched_at": "2026-11-08T09:05:47.962Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {
                 "type": "paper",
                 "id": 219
-              }
-            ],
-            "meeting": null
-          },
-          {
-            "name": "Dose-adapted single-isocenter SRS for 4 to 10 brain mets (prospective)",
-            "tldr": "mOS 8.1 mo, 1-yr OS 35.7%; 22/40 outlived DS-GPA prediction (≥17 needed for non-inferiority), 1-yr local failure 5%, no G3-5 toxicity.",
-            "details": [
-              "🔍 Prospective single-arm, N=40, single institution (Durham, NC), accrued Feb 2017 to Aug 2019",
-              "🔍 1° EP OS, benchmarked against DS-GPA-predicted survival; non-inferiority if ≥17/40 outlived prediction",
-              "📊 22 pts outlived DS-GPA-predicted survival from protocol SRS, clearing the 17-pt threshold",
-              "📊 mOS 8.1 mo (5-12.1), 6-mo OS 57.3%, 1-yr OS 35.7%; median f/u 15.2 mo",
-              {
-                "text": "🔍 Dose-adapted SIMT algorithm (VMAT, 1 mm PTV margin)",
-                "subdetails": [
-                  "PTV <2 cm: 20 Gy x1",
-                  "PTV 2.0 to <3.0 cm: 18 Gy x1",
-                  "PTV >3 cm, any brainstem lesion, or V12Gy >20 mL: 5 Gy x5 to all lesions",
-                  "Eloquent-area lesions could drop to 18 Gy or 16 Gy at MD discretion"
-                ]
-              },
-              {
-                "text": "📊 Per-lesion outcomes by fractionation",
-                "table": {
-                  "columns": [
-                    "Endpoint",
-                    "Single fraction",
-                    "5 fractions"
-                  ],
-                  "rows": [
-                    [
-                      "Local failure, lesions",
-                      "8 of 119 (no dose adjustment)",
-                      "2 of 79"
-                    ],
-                    [
-                      "Local control",
-                      "93%",
-                      "98%"
-                    ],
-                    [
-                      "Radionecrosis per lesion",
-                      "3.4% (4 of 119)",
-                      "1.3% (1 of 79)"
-                    ]
-                  ]
-                }
-              },
-              "📊 1-yr local failure 5% (10 of 204 lesions) in 4 of 32 evaluable pts; 1 NSCLC pt had 5 of the failures",
-              "📊 Distant brain recurrence cumulative incidence 20% at 6 mo, 35.8% at 12 mo; 19 of 40 pts",
-              "📊 AEs in 73%, all G1-2 (headache 50%, fatigue 45%); no G3-5 treatment-related AEs",
-              "📐 Median beam-on 8 min; median brain V12Gy 11.7 mL (1fx), V24Gy 3.5 mL (5fx); median hippocampal dose 2.4 Gy",
-              "⚠️ 8 of 40 pts died before first MRI, so LC/DBF denominators are 32 pts",
-              "⚠️ 11 pts had prior SRS/WBRT; neurocognitive testing attrition steep after 6 mo",
-              "⚠️ Discussion cites 58% 6-mo distant failure, contradicting the 20% 6-mo cumulative incidence in Results",
-              "⚠️ Varian-funded; PIs report Varian funding directly related to the study"
-            ],
-            "figures": [],
-            "nct": "NCT02886572",
-            "doi": "10.1016/j.adro.2021.100760",
-            "tweet_ids": [
-              1000000217
-            ],
-            "slug": "dose-adapted-si-srs-4-10-brain-mets",
-            "verdict": {
-              "soc_implication": "early-signal",
-              "rationale": "Single-arm, N=40, single institution; OS benchmarked against a DS-GPA prediction, not a randomized WBRT or multi-isocenter comparator. Too few events for LC or necrosis modeling.",
-              "audience": "4-10 untreated brain mets, KPS ≥70, excluding SCLC, lymphoma, germ-cell, LMD"
-            },
-            "significance": "The transferable piece is the dose-adaptation rule: switching every lesion to 5 Gy x5 when V12Gy exceeds 20 mL or a brainstem lesion is present gave 98% per-lesion LC with 1.3% necrosis, at aggregate PTV up to 32 mL. That supports hypofractionating the whole plan in high-volume cases instead of de-escalating single-fraction dose.",
-            "monday_clinic": "For a KPS ≥70 pt with 4 to 10 non-SCLC brain mets and aggregate volume pushing single-fraction V12Gy past 20 mL, this supports a single-isocenter 5 Gy x5 plan as a feasible SRS option; it does not address SCLC, leptomeningeal disease, or more than 10 lesions.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Prospective **single-arm** trial, **N=40**, enrolled Feb 2017 to Aug 2019, registered NCT02886572. Median follow-up **15.2 mo**. Funded by Varian Medical Systems."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "**4 to 10 untreated brain mets**, age ≥18, **KPS ≥70**, life expectancy >3 mo, DS-GPA ≥0.5, largest lesion ≤4 cm, >2 mm from optic apparatus; brainstem lesions allowed. Excluded SCLC, germ-cell, lymphoma, leukemia, myeloma, leptomeningeal disease. Median age 61, KPS 90, 6 mets; NSCLC 50%, breast 27.5%; 11 had prior SRS/WBRT."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Single-isocenter VMAT, 1 mm PTV margin. **20 Gy** for PTV <2 cm, **18 Gy** for 2.0 to <3.0 cm; **5 Gy x5 to all lesions** if any PTV >3 cm, any brainstem lesion, or brain V12Gy >20 mL. 24 pts (125 lesions) got 1 fraction, 16 pts (79 lesions) got 5; median beam-on 8 min."
-              },
-              {
-                "label": "Endpoints",
-                "body": "**Primary: OS**, judged non-inferior if ≥17 of 40 pts outlived DS-GPA-predicted survival. Secondary: local recurrence, distant brain recurrence, neurologic death, AEs, QOL, steroid use."
-              },
-              {
-                "label": "Results",
-                "body": "**22 pts outlived prediction**; mOS **8.1 mo**, 1-yr OS **35.7%**. 1-yr local failure **5%** (10 of 204 lesions); distant brain recurrence **35.8%** at 12 mo. Neurologic death 20% of deaths."
-              },
-              {
-                "label": "Safety",
-                "body": "AEs in 73%, **all G1-2**, mostly headache and fatigue; **no G3-5 treatment-related AEs**. Radionecrosis in 5 lesions in 4 pts; 2 pts needed surgery. MMSE, Trail Making, HVLT and FACT-Br unchanged at 3 mo."
-              },
-              {
-                "label": "vs leading data",
-                "body": "mOS of 8.1 mo sits inside the range of prior multi-met SRS series summarized in the paper's Table 4 (medians 5.8 to 14.1 mo), most of them retrospective. The randomized SRS vs WBRT trials for 4 to 20 mets (NCT03550391, NCT03075072, NCT01592968) are the comparators this cannot replace."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents KPS ≥70 pts with 4 to 10 non-SCLC brain mets, lesions ≤4 cm, treated on a linac SIMT platform. Does not represent SCLC, leptomeningeal disease, >10 lesions, or pts expected to live <3 mo."
-              },
-              {
-                "label": "Limitations",
-                "body": "The DS-GPA benchmark uses the original formulation, measures from first brain-met diagnosis, and was applied here from protocol SRS in a cohort where 11 had prior brain RT. LC and DBF exclude the 8 pts who died before first MRI, and the paper's own Discussion gives a 6-mo distant failure figure (58%) that conflicts with its Results (20%)."
-              },
-              {
-                "label": "Discussion",
-                "body": "The OS endpoint mostly shows the technique does not shorten life against a prognostic index; it cannot show SRS beats WBRT. The more usable signal is the per-lesion one: 5-fraction plans held **98% LC** with low necrosis despite larger volumes, which supports hypofractionating high-volume multi-met plans."
-              }
-            ],
-            "interpretation": "This trial asks a narrower question than its title suggests. Its primary endpoint is not whether single-isocenter SRS controls disease better than whole-brain RT, but whether treating 4 to 10 metastases this way shortens survival compared with what a prognostic index predicts. Clearing the bar (22 pts outlived their DS-GPA estimate against a threshold of 17) tells a reader the technique does not appear to cost survival in a selected, KPS-90 cohort. It does not tell them SRS is preferable to WBRT for this number of lesions. That question belongs to the randomized trials the authors name (NCT03550391, NCT03075072, NCT01592968), and this paper should be read as feasibility and safety groundwork alongside them.\n\nThe benchmark itself deserves skepticism. The original DS-GPA estimates survival from first diagnosis of brain metastases, while the primary analysis here starts the clock at protocol SRS, and 11 of 40 pts had already received brain RT. Measuring from a later time point biases toward shorter observed survival, so the comparison is probably conservative for the technique. On the other hand, the cohort was screened for life expectancy over 3 months, DS-GPA of at least 0.5 and KPS of at least 70, so the people enrolled were already the ones most likely to beat a population-level estimate. Those two biases pull in opposite directions, and with 40 pts there is no way to net them out.\n\nThe RT-relevant content sits in the dose-adaptation rule and the per-lesion outcomes. Rather than reducing single-fraction dose to fit a crowded plan, the protocol moved every lesion to 5 Gy x5 once any lesion exceeded 3 cm, any lesion sat in the brainstem, or brain V12Gy passed 20 mL. Those 5-fraction plans lost 2 of 79 lesions locally against 8 of 119 for unadjusted single-fraction lesions, with necrosis of 1.3% versus 3.4%. The groups are not randomized and differ by design (the 5-fraction group carried the larger volumes), so the contrast cannot be read as fractionation causing better control. What it does support is that hypofractionation absorbed the high-volume cases without an obvious penalty in control or necrosis, at aggregate PTVs up to 32 mL. That speaks directly to the Alliance question in resected cavities the authors cite and to the unanswered intact-lesion version of it.\n\nSeveral reporting issues lower confidence in the secondary numbers. The local and distant failure analyses include only the 32 pts who reached a first MRI, so the 8 earliest deaths are not counted in the denominator. The Discussion quotes a 6-month distant failure risk of 58%, which cannot be reconciled with the 20% cumulative incidence at 6 months in Results. Lesion counts by fractionation (119 plus 79) do not sum to the 204 treated lesions. None of these overturns the main message, but together they suggest the secondary endpoints are descriptive, which the authors acknowledge when they note too few events for time-to-event modeling of local failure or necrosis.\n\nThe neurocognitive and QOL stability at 3 months is reassuring and fits the low hippocampal and integral brain doses reported, but testing attrition after 6 months, driven largely by death, means these data cannot speak to the late decline that defines the WBRT trade-off. For practice, the study supports single-isocenter, volume-adapted SRS as a workable option for 4 to 10 lesions in fit pts, and the V12Gy-triggered switch to 5 fractions as a planning rule worth adopting. It leaves the comparative question to the randomized trials.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The transferable piece is the dose-adaptation rule: switching every lesion to 5 Gy x5 when V12Gy exceeds 20 mL or a brainstem lesion is present gave 98% per-lesion LC with 1.3% necrosis, at aggregate PTV up to 32 mL. That supports hypofractionating the whole plan in high-volume cases instead of de-escalating single-fraction dose."
-            },
-            "open_questions": [
-              "SRS vs WBRT for 4 to 15 brain mets: survival and neurocognition",
-              "Single-fraction vs hypofractionated SRS for high aggregate volume intact mets"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": "palliative",
-            "methodology": null,
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT03775330",
-                "brief_title": "Radiosurgery With or Without Whole Brain Radiation for Multiple Metastases",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": null,
-                "enrollment_count": 126,
-                "primary_completion_date": "2026-12",
-                "brief_summary": "This clinical study is a parallel, prospective observational single-centre trial in patients presenting with 5 to 30 brain metastases. Patients to receive either stereotactic radiosurgery (SRS) alone or SRS plus whole brain radiation (WBRT) will be enrolled.",
-                "conditions": [
-                  "Brain Metastases"
-                ],
-                "interventions": [
-                  {
-                    "name": "Stereotactic Radiosurgery (SRS)",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Whole brain radiation (WBRT)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histologic or cytologic diagnosis of non-hematopoietic malignancy (excluding germ cell malignancies and small cell carcinoma).\n* Patients with ≥ 5 but ≤ 30 de novo brain metastases seen on a diagnostic-quality contrast-enhanced MRI obtained within 30 days prior to enrollment…",
-                "answers_question": "SRS vs WBRT for 4 to 15 brain mets: survival and neurocognition",
-                "relevance_phrase": "SRS alone vs SRS+WBRT, 5 to 30 mets, prospective"
-              },
-              {
-                "nct": "NCT07505979",
-                "brief_title": "SMART Trial: Cognitive Sparing Brain Radiotherapy for Multiple Brain Metastases",
-                "overall_status": "NOT_YET_RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 90,
-                "primary_completion_date": "2029-04",
-                "brief_summary": "The goal of this phase II randomized trial is to determine if Stereotactic Radiosurgery (SRS) or Cognitive Sparing WBRT (CS-WBRT) better preserves neurocognitive function than standard Hippocampal Avoidance WBRT (HA-WBRT) in patients with multiple brain metastases ( $\\\\ge6$ lesions).\n\nThe main questions it aims to answer are:\n\n* Which treatment best preserves cognitive function (memory and executive tasks) at 6 months post-intervention?\n* Can sparing the left hippocampus and corpus callosum…",
-                "conditions": [
-                  "Brain Metastases From Solid Tumors"
-                ],
-                "interventions": [
-                  {
-                    "name": "SRS",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "CS-WBRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "HA-WBRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients with a histologic diagnosis of non-hematopoietic malignancy and radiographic evidence of brain metastases\n2. Patients with brain metastasis outside a 5-mm margin around either hippocampus or corpus callosum on gadolinium contrast-enhanced MRI obtained within 30 days…",
-                "answers_question": "SRS vs WBRT for 4 to 15 brain mets: survival and neurocognition",
-                "relevance_phrase": "SRS vs HA-WBRT vs CS-WBRT, ≥6 mets, 6-mo cognition"
-              },
-              {
-                "nct": "NCT05703269",
-                "brief_title": "Comparing Single vs Multiple Dose Radiation for Cancer Patients With Brain Metastasis and Receiving Immunotherapy",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 58,
-                "primary_completion_date": "2028-03",
-                "brief_summary": "This study is designed to see if we can lower the chance of side effects from radiation in patients with breast, kidney, small cell lung cancer, non-small cell lung cancer or melanoma that has spread to the brain and who are also being treated with immunotherapy, specifically immune checkpoint inhibitor (ICI) therapy. This study will compare the usual care treatment of single fraction stereotactic radiosurgery (SSRS) given on one day versus fractionated stereotactic radiosurgery (FSRS), which…",
-                "conditions": [
-                  "NSCLC",
-                  "Renal Cell Carcinoma",
-                  "Breast Carcinoma",
-                  "Melanoma",
-                  "Brain Metastases, Adult",
-                  "Non-small Cell Lung Cancer",
-                  "SCLC",
-                  "Small-cell Lung Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "single fraction stereotactic radiosurgery (SSRS)",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "fractionated stereotactic radiosurgery (FSRS)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* At least one intact brain metastasis or resection cavity ≥ 2 cm in diameter or ≥ 4 cc volume.\n\n  * Patients at initial diagnosis of brain metastases and patients with known brain metastasis treated with systemic therapy alone are eligible.\n  * Patients who have previously…",
-                "answers_question": "Single-fraction vs hypofractionated SRS for high aggregate volume intact mets",
-                "relevance_phrase": "SSRS vs FSRS for mets ≥2 cm or ≥4 cc on ICI"
-              },
-              {
-                "nct": "NCT05102747",
-                "brief_title": "Stereotactic Radiotherapy in Oligometastatic Brain Disease: a Randomised Phase III Study Comparing Hypofractionated Stereotactic Radiation Therapy (3*10 Gy) to the Historical Single-dose Radiosurgery (1*20 to 25 Gy) With Medico-economic Evaluation.",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 504,
-                "primary_completion_date": "2030-01",
-                "brief_summary": "Brain metastases (BM) are a common systemic cancer manifestation which incidence increases. Therapeutic options include whole-brain radiotherapy (WBRT), surgery, and stereotactic radiosurgery (SRS). The concept of \"oligometastatic\" cerebral disease (oligoBM) has emerged and led to consider alternative approaches. The main challenge is to preserve neurological function and independence the longest as possible.\n\nStereotactic radiotherapy (SRT) has emerged as an alternative treatment modality for…",
-                "conditions": [
-                  "Brain Metastasis",
-                  "Oligoprogression"
-                ],
-                "interventions": [
-                  {
-                    "name": "Hypofractionated SRT (stereotactic radiotherapy)",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Historical single-dose SRS (stereotactic radiosurgery)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patients aged ≥ 18 years\n* WHO performance status 0 or 1;\n* Patient eligible for SRT after a multidisciplinary committee decision; Patient with BMs from radioresistant cancer (renal cell carcinoma, sarcoma, melanoma) is eligible\n* Patient having up to 5 BM of solid tumours…",
-                "answers_question": "Single-fraction vs hypofractionated SRS for high aggregate volume intact mets",
-                "relevance_phrase": "randomised 3x10 Gy SRT vs single-dose SRS, ≤5 BM"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "radiosurgery multiple brain metastases",
-                "hypofractionated radiosurgery brain metastases"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 30,
-              "fetched_at": "2026-11-07T09:07:11.945Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 217
-              }
-            ],
-            "meeting": null
-          },
-          {
-            "name": "Interinstitutional plan quality: Elements MME vs RapidArc single-isocenter SRS",
-            "tldr": "RapidArc lowered median V12Gy 19.2 vs 23.7 cc (P<.0001) and improved conformity; MME lowered V5Gy and mean brain dose (2.57 vs 2.76 Gy).",
-            "details": [
-              "🔍 Paired replanning study: 30 pts, 4-10 brain mets (217 targets), each planned on both platforms",
-              "🔍 Each institution replanned the other's 15 cases with its own expert technique (TJU = MME, UAB = RA)",
-              {
-                "text": "💊 Planning parameters by platform",
-                "subdetails": [
-                  "RA (VMAT): 2-4 noncoplanar arcs, 10 MV FFF, Eclipse 13.6, AAA dose calc",
-                  "MME (DCA): 4-9 noncoplanar DCAs, 6 MV FFF, Elements v1.5, pencil-beam dose calc",
-                  "Both: single isocenter, HD120 MLC, 14-24 Gy single fraction, D99% = 100% Rx goal",
-                  "All 60 plans exported to MIM for DVH analysis, removing inter-TPS calculation bias"
-                ]
-              },
-              {
-                "text": "📊 Dosimetric medians, MME vs RA (paired Wilcoxon)",
-                "table": {
-                  "columns": [
-                    "Metric",
-                    "MME (DCA)",
-                    "RA (VMAT)",
-                    "p"
-                  ],
-                  "rows": [
-                    [
-                      "RTOG CI (per target)",
-                      "1.38",
-                      "1.23 (abstract: 1.21)",
-                      "<.0001"
-                    ],
-                    [
-                      "Paddick CI (per target)",
-                      "0.70",
-                      "0.77",
-                      "<.0001"
-                    ],
-                    [
-                      "V12Gy (cc)",
-                      "23.7",
-                      "19.2",
-                      "<.0001"
-                    ],
-                    [
-                      "V8Gy (cc)",
-                      "53.6",
-                      "44.1",
-                      ".024"
-                    ],
-                    [
-                      "V5Gy (cc)",
-                      "141.4",
-                      "142.8",
-                      ".009"
-                    ],
-                    [
-                      "Mean brain dose (Gy)",
-                      "2.57",
-                      "2.76",
-                      "<.0001"
-                    ],
-                    [
-                      "Mean target coverage",
-                      "97.5%",
-                      "96.9%",
-                      ".007"
-                    ]
-                  ]
-                }
-              },
-              "📊 RA gave lower V12Gy in 26 of 30 cases; MME gave lower V5Gy in 25 of 30",
-              "📊 Total PTV <2.1 cc (6 cases): MME favorable for V8, V5, Dmean; V12 favored MME in 4 of 6",
-              "📊 Total PTV >2.1 cc (24 cases): V12 favored RA, Element/VMAT ratio mean 1.24",
-              "📐 Brain DVHs cross near 6 Gy (6.8 Gy in representative case): RA better above, MME better below",
-              "📐 Table 1 means widen the low-dose gap: V5Gy 158.3 vs 174.8 cc, Dmean 2.66 vs 3.03 Gy",
-              "🔍 Delivery: MME 7.3 ± 1.4 arcs, 6871 ± 1392 MU; RA 3.8 ± 0.6 arcs, 10225 ± 3449 MU",
-              "🔍 Estimated beam-on: MME ~6-9 min at 6 MV FFF; RA 3-4 min at 10 MV FFF",
-              "⚠️ Beam energy confound: 6 MV FFF (MME) vs 10 MV FFF (RA), by commissioning, not design",
-              "⚠️ Dosimetric surrogates only; no toxicity, radionecrosis, or cognitive outcomes",
-              "⚠️ Internal inconsistencies: V12 MME median 23.7 in text vs 24.0 in Table 1; RA RTOG CI 1.21 vs 1.23",
-              "⚠️ Software versions dated (Eclipse 13.6, MME 1.5); HyperArc not tested",
-              "⚠️ Several UAB authors report Varian research support or consulting"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1016/j.adro.2019.10.007",
-            "tweet_ids": [
-              1000000218
-            ],
-            "slug": "elements-mme-vs-rapidarc-smm-srs",
-            "verdict": {
-              "soc_implication": "methodologically-limited",
-              "rationale": "Dosimetric planning study with no clinical endpoints; 6 vs 10 MV energy and two dose algorithms confound the platform comparison. Platform and planner effects not separable.",
-              "audience": "4-10 brain metastases, single-isocenter linac SRS, single fraction"
-            },
-            "significance": "The platforms trade dose bands rather than one beating the other. RA lowers the V12Gy/V8Gy band tied to radionecrosis, while MME lowers dose below roughly 6 Gy. The V12 advantage holds only above 2.1 cc total PTV (ratio mean 1.24); below that, MME matched or beat RA on V12 in 4 of 6 cases.",
-            "monday_clinic": "For a pt with 4-10 brain mets and total PTV above 2.1 cc, this favors single-isocenter VMAT for lower V12Gy. With very small total PTV, MME matched or beat RA on V12 in 4 of 6 cases. Low-dose spill differences have no outcome correlation yet.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Paired dosimetric **replanning study** at 2 institutions (TJU, UAB). 15 previously treated pts from each site were replanned by the other site with its own technique. Comparison by **paired 2-tailed Wilcoxon signed-rank**, prespecified α .05."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "**30 pts with 4 to 10 brain metastases**, 217 targets, median 7.5 per case. Individual target volume 0.014 to 17.73 cm3; total PTV 0.49 to 27.32 cm3, median 7.05 cm3."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "**14 to 24 Gy single fraction**, prescriptions unchanged between plans and largely RTOG 9508-based. RA used 2 to 4 noncoplanar VMAT arcs at 10 MV FFF with 3 ring tuning structures. MME used automated noncoplanar DCAs at 6 MV FFF with up to 1 mm MLC margin and island-blocking avoidance."
-              },
-              {
-                "label": "Endpoints",
-                "body": "Per target: RTOG CI, Paddick CI, coverage. Per plan: **V12Gy, V8Gy, V5Gy, mean brain dose**, plus arc, MU, and beam-on estimates."
-              },
-              {
-                "label": "Results",
-                "body": "RA favored conformity and the **V12Gy/V8Gy** band; MME favored **V5Gy and Dmean**. The brain DVHs cross near **6 Gy**, and below 2.1 cc total PTV MME was favorable on most metrics."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Gevaert et al (10 cases, 40 mets) found higher V12Gy and V5Gy for RA. Its Paddick CI of 0.65 ± 0.08 (MME) and 0.67 ± 0.16 (RA) sits below this study's 0.70 and 0.77, which the authors read as plans that were not fully optimized. Narayanasamy et al (8 pts, 40 targets) found the platforms comparable but was likely underpowered."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents 4 to 10 brain mets planned by expert single-isocenter linac teams on Eclipse 13.6 RA or Elements MME v1.5. Does not represent HyperArc, newer MME versions, >10 targets, fractionated SRS, or less experienced VMAT planners."
-              },
-              {
-                "label": "Limitations",
-                "body": "**Different beam energies and dose algorithms** (pencil beam vs AAA) per platform, so platform effects cannot be cleanly separated from energy and algorithm. Each platform had one expert institution, so planner skill is part of the RA result. Hotspots and homogeneity were not compared, and text and Table 1 medians disagree for V12."
-              },
-              {
-                "label": "Discussion",
-                "body": "Both platforms met clinical goals, and the differences are small and dose-band specific. Moderate isodose spill has retrospective links to radionecrosis, while low-dose spill has **no toxicity correlation yet**. It may matter more as pts survive to repeat SRS or WBRT."
-              }
-            ],
-            "interpretation": "The useful frame for this comparison is that neither platform dominates; each wins a different part of the dose-volume curve, and the crossover sits near 6 Gy. That matters because the two bands carry very different levels of evidence. The moderate isodose region (V8 to V12) has a retrospective literature linking it to radionecrosis, so RA's lower V12Gy is the more clinically interpretable advantage. MME's edge sits in the low-dose bath, where the authors themselves acknowledge no toxicity correlation exists. The case for caring about low-dose spill rests on an argument about cumulative dose in long survivors receiving serial salvage courses, which is plausible but untested.\n\nAgainst the two earlier head-to-head comparisons, this one is larger and better powered, and it reverses part of the Gevaert finding that RA also carried more low-dose spill. The authors attribute the earlier results to plans that were not fully optimized. That claim is supported by the Paddick CI gap, but it also reveals the central methodological problem: the result for VMAT depends heavily on who builds the plan. Every RA plan here came from one expert planner using the institution's own published technique. The RA arm is therefore closer to a best-case benchmark than to a typical community VMAT plan, while MME's automated templates are likely more reproducible across centers. A reader at a center without that VMAT expertise should expect RA's conformity and V12 advantage to shrink.\n\nThe second issue is confounding by hardware. MME ran at 6 MV FFF with a pencil-beam calculation, and RA ran at 10 MV FFF with AAA. Exporting all plans to MIM removes DVH-calculation differences, but it cannot remove differences already in each system's dose calculation, especially for very small targets near the field edge. The authors suggest penumbra shape may explain part of MME's low-dose advantage in small-volume cases. That means the volume-dependent finding, where MME is favorable when total PTV is under 2.1 cc, rests on 6 cases and is the result most exposed to this confound.\n\nThe effect sizes also deserve scrutiny before they drive platform decisions. The V5Gy medians differ by about a cubic centimetre despite P=.009, while the Table 1 means show a wider gap, so the distribution is skewed and a few cases drive the difference. Reporting discrepancies between the abstract, text, and table (RA RTOG CI 1.21 vs 1.23; MME V12 median 23.7 vs 24.0) do not change the direction but do lower confidence in the exact values.\n\nWhat this does not settle is whether any of these differences changes outcomes. A prospective cohort linking platform-specific V12 and low-dose volumes to radionecrosis and neurocognition would. So would a replication with modern optimizers (HyperArc, newer Elements) using the shared de-identified dataset the authors offer. Until then, the reasonable reading is that both platforms are adequate. Expert VMAT buys a modest reduction in V12, and automated DCA buys consistency and a lower low-dose bath.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The platforms trade dose bands rather than one beating the other. RA lowers the V12Gy/V8Gy band tied to radionecrosis, while MME lowers dose below roughly 6 Gy. The V12 advantage holds only above 2.1 cc total PTV (ratio mean 1.24); below that, MME matched or beat RA on V12 in 4 of 6 cases."
-            },
-            "open_questions": [
-              "Does low-dose brain spill predict cognitive decline after repeat SRS?",
-              "Does HyperArc or newer Elements shift the dosimetric tradeoff?",
-              "How does non-expert VMAT planning compare with automated MME?"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": "retrospective",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT06466720",
-                "brief_title": "Measuring and Mapping Cognitive Decline After Brain Radiosurgery",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": null,
-                "enrollment_count": 80,
-                "primary_completion_date": "2026-06",
-                "brief_summary": "Background Stereotactic Radiosurgery (SRS) is a localised radiotherapy treatment for patients with brain metastases or other benign tumours in the brain, like meningiomas. The Investigators do not currently know if, or how much, SRS affects brain function. Patients with brain tumours do not get tested routinely for their brain function.\n\nUnderstanding short- and long-term side-effects is important for SRS. Brain metastases patients have short life expectancies (6-months to 1-year). However,…",
-                "conditions": [
-                  "Brain Metastases",
-                  "Meningiomas",
-                  "Stereotactic Radiosurgery",
-                  "Cognitive Decline",
-                  "Quality of Life",
-                  "SRS"
-                ],
-                "interventions": [
-                  {
-                    "name": "Neurocognitive testing",
-                    "type": "BEHAVIORAL"
-                  },
-                  {
-                    "name": "Quality of Life questionnaire",
-                    "type": "BEHAVIORAL"
-                  },
-                  {
-                    "name": "Stereotactic radiosurgery",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion criteria Prospective Cohort\n\nPatients will be eligible for inclusion only if ALL of the following criteria apply:\n\n* Age: above 18 years, no upper limit\n* Diagnosis of brain metastases or meningioma, where the treatment is going to be stereotactic radiosurgery\n* Karnofsky Performance…",
-                "answers_question": "Does low-dose brain spill predict cognitive decline after repeat SRS?",
-                "relevance_phrase": "prospective neurocognitive testing mapped after SRS"
-              },
-              {
-                "nct": "NCT03606421",
-                "brief_title": "CBF and NCF Changes With Brain Radiation",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": null,
-                "enrollment_count": 110,
-                "primary_completion_date": "2026-12",
-                "brief_summary": "This study will be a dual-arm prospective longitudinal cohort study for patients with brain metastases, at least one of which is appropriate for radiotherapy, to explore brain and cognitive changes following SRS or WBRT and evaluate the feasibility of a novel MRI protocol to identify potential radiological biomarkers of NCF decline.\n\nPatients diagnosed with brain mets will be assigned to either Arm A or Arm B, depending on their treatment plan. Patients in Arm A will be treated with SRS.…",
-                "conditions": [
-                  "Neurocognitive Dysfunction",
-                  "Brain Metastases"
-                ],
-                "interventions": [
-                  {
-                    "name": "SRS and neurocognitive assessments",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "WBRT and neurocognitive assessments",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patients with brain metastases will be included in this study. Patients with known malignancies but without brain metastases, or patients with primary brain tumors are not eligible for enrollment.\n* MRI confirmed 1-10 lesions. Each lesion must not be intended for resection.\n*…",
-                "answers_question": "Does low-dose brain spill predict cognitive decline after repeat SRS?",
-                "relevance_phrase": "MRI biomarkers of NCF decline after SRS vs WBRT"
-              },
-              {
-                "nct": "NCT04343157",
-                "brief_title": "UCSD Image-Guided Cognitive-Sparing Radiosurgery for Intracranial Lesions",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 90,
-                "primary_completion_date": "2028-12",
-                "brief_summary": "In this proposal, the investigators introduce advanced diffusion and volumetric imaging techniques along with innovative, automated image parcellation methods to identify critical brain regions, incorporate into cognitive-sparing SRS for intracranial lesions, and analyze biomarkers of radiation response. This work will advance the investigators' understanding of neurocognitive changes after brain SRS and help create interventions that preserve cognitive-function in patients with intracranial…",
-                "conditions": [
-                  "Brain Metastases, Adult",
-                  "Neurocognitive Function",
-                  "Cancer",
-                  "Meningioma of Brain",
-                  "Arteriovenous Malformations, Cerebral"
-                ],
-                "interventions": [
-                  {
-                    "name": "Cognitive Sparing Brain Stereotactic Radiosurgery (SRS)",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients 18 years or older\n2. Eligible for intracranial SRS: Limited brain metastases targets geometrically feasible for SRS (intact or resected tumor bed), meningioma, or cerebral AVM\n3. Eastern cooperative Oncology Group (ECOG) performance status 0-2 (score of 0, no…",
-                "answers_question": "Does low-dose brain spill predict cognitive decline after repeat SRS?",
-                "relevance_phrase": "cognitive-sparing SRS of parcellated critical regions"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "radiosurgery brain metastases cognition",
-                "single isocenter radiosurgery metastases"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 19,
-              "fetched_at": "2026-11-07T09:07:18.591Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 218
-              }
-            ],
-            "meeting": null
-          },
-          {
-            "name": "Automated single-isocenter SRS for multiple brain mets: outcomes and margins",
-            "tldr": "1y LC 89% per pt and 94% per lesion. Residual setup error caused coverage loss (V95 <95%) in 28 targets; simulated 1 mm GTV-PTV margin restored coverage.",
-            "details": [
-              "🔍 Retrospective, 2 Italian centers, 31 consecutive pts, 204 BM <3 cm, 4-10 BM per pt, Oct 2016-Sep 2018",
-              "🔍 Frameless mask, Brainlab Elements Multiple Brain Mets (automated DCA planning), single isocenter, ExacTrac 6D IGRT",
-              {
-                "text": "🔍 RT technique",
-                "subdetails": [
-                  "20-22 Gy single fx for lesions <2 cm; 16-18 Gy for ≥2 cm or near brainstem/chiasm",
-                  "GTV-PTV margin 1 mm (n=176) or 2 mm (n=28)",
-                  "Median CI 1.32, GI 3.94; median distance from isocenter 39 mm",
-                  "Setup tolerance 0.5 mm / 0.5°; mean 3D residual error 0.34 mm (range 0.1-0.53)"
-                ]
-              },
-              {
-                "text": "📊 Clinical outcomes, median f/u 11 mo (range 4-26)",
-                "table": {
-                  "columns": [
-                    "Endpoint",
-                    "1 yr",
-                    "2 yr"
-                  ],
-                  "rows": [
-                    [
-                      "LC, per patient",
-                      "89%",
-                      "77%"
-                    ],
-                    [
-                      "LC, per lesion",
-                      "94%",
-                      "86%"
-                    ],
-                    [
-                      "OS",
-                      "68%",
-                      "40%"
-                    ],
-                    [
-                      "Distant brain failure",
-                      "38%",
-                      "n/r"
-                    ]
-                  ]
-                }
-              },
-              "📊 mOS 16.1 mo; median time to distant brain failure 8 mo; salvage SRS in 15 pts, WBRT in 3",
-              "📊 No G3-4 toxicity. Radiologic necrosis in 5 (16.1%) pts; per-lesion risk 11% at 12 mo",
-              "📐 Individual V12Gy >10 cm3 predicted necrosis (P=.01); lesion number and cumulative volume did not",
-              {
-                "text": "📊 Coverage loss (V95 <95%) from residual isocenter error, 28 targets",
-                "table": {
-                  "columns": [
-                    "Factor",
-                    "Lesions losing coverage",
-                    "P"
-                  ],
-                  "rows": [
-                    [
-                      "Distance <39 mm vs ≥39 mm",
-                      "7 vs 21",
-                      ".0001"
-                    ],
-                    [
-                      "Volume <0.40 cm3 vs ≥0.40 cm3",
-                      "20 vs 8",
-                      ".015"
-                    ]
-                  ]
-                }
-              },
-              "📊 Simulated 0 mm margin: coverage compromised in 18 lesions; 1 mm margin: adequate coverage in all lesions",
-              "📊 Intrafraction: 10 positionings in 7 (22%) pts out of tolerance; uncorrected → GTV coverage loss in 21 (28%) of 74 lesions",
-              "📊 1 mm margin held GTV coverage under intrafraction drift in all but 2 lesions",
-              {
-                "text": "📐 Volume cost of margin, spherical lesion (Table 4)",
-                "table": {
-                  "columns": [
-                    "Diameter",
-                    "0 mm",
-                    "1 mm",
-                    "2 mm",
-                    "3 mm"
-                  ],
-                  "rows": [
-                    [
-                      "0.5 cm",
-                      "0.07 cm3",
-                      "0.18 cm3",
-                      "0.38 cm3",
-                      "0.7 cm3"
-                    ],
-                    [
-                      "1 cm",
-                      "0.52 cm3",
-                      "0.9 cm3",
-                      "1.43 cm3",
-                      "2.21 cm3"
-                    ],
-                    [
-                      "1.5 cm",
-                      "1.76 cm3",
-                      "2.57 cm3",
-                      "3.59 cm3",
-                      "4.85 cm3"
-                    ],
-                    [
-                      "2 cm",
-                      "4.18 cm3",
-                      "5.57 cm3",
-                      "7.23 cm3",
-                      "9.2 cm3"
-                    ]
-                  ]
-                }
-              },
-              "🔗 Roper et al: 0.5° simulated rotation spared coverage; up to 2° lost coverage in more than one-third of cases",
-              "🔗 Korytko et al: V12Gy >10 cm3 necrosis risk 55.3% vs 22.5% below, in 198 GK-treated tumors",
-              "⚠️ Margin sufficiency is dosimetric (CBCT re-computation), not linked to per-lesion LC by margin size",
-              "⚠️ Internal inconsistency: abstract says 14 pts with 4-6 and 17 with 7-10 BM; Table 1 says 20 with 4-7, 11 with 8-10",
-              "⚠️ Coverage-loss pts reported as 10 (abstract) vs 12 (results); intrafraction section says 1 mm held all but 2 lesions",
-              "⚠️ No formal neurocognitive testing; only 9 pts on concurrent systemic therapy, limiting IO/TKI-era transfer"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1016/j.adro.2020.06.008",
-            "tweet_ids": [
-              1000000216
-            ],
-            "slug": "automated-si-srs-multiple-brain-mets-margins",
-            "verdict": {
-              "soc_implication": "early-signal",
-              "rationale": "Retrospective 31-pt series, median f/u 11 mo, no comparator arm; margin conclusion rests on dosimetric re-computation, not lesion-level clinical failure by margin.",
-              "audience": "4-10 brain mets <3 cm, frameless linac SRS, lung/breast/melanoma-dominant"
-            },
-            "significance": "Coverage loss clustered in small lesions far from isocenter: about 90% of V95 <95% misses were lesions <0.4 cm3 at ≥3.9 cm. Uncorrected intrafraction drift cost GTV coverage in 28% of lesions, so the 1 mm margin depends on 6D monitoring with mid-treatment correction.",
-            "monday_clinic": "For a pt with 4-10 small brain mets on a frameless linac with 6D ExacTrac and mid-treatment re-imaging, this supports a 1 mm GTV-PTV margin over 0 mm; it does not address mask setups without intrafraction correction or cumulative volumes ≥15 cm3.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "**Retrospective** two-center series (Rome, Negrar), 31 consecutive pts, 204 BM. Outcomes by Kaplan-Meier from SRS; dosimetric accuracy from offline CBCT fused to planning CT with residual shifts applied."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Age ≥18, **4-10 BM <3 cm**. Median age 60; lung 14, melanoma 8, breast 5. Concurrent systemic therapy in 9 pts (IO 4, targeted 5)."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Single-isocenter DCA via Brainlab Elements, 10 noncoplanar arcs at 5 couch positions. **20-22 Gy** for <2 cm, **16-18 Gy** for ≥2 cm or near critical structures; PTV = GTV + **1 mm** (176 lesions) or 2 mm (28)."
-              },
-              {
-                "label": "Results",
-                "body": "1y/2y LC **89%/77%** per pt, **94%/86%** per lesion; mOS 16.1 mo. Coverage loss (V95 <95%) in 28 targets, driven by distance ≥39 mm (P=.0001) and volume <0.40 cm3 (P=.015)."
-              },
-              {
-                "label": "Safety",
-                "body": "**No G3-4** toxicity. Necrosis in 5 (16.1%) pts, 11% per lesion at 12 mo, 2 with G2 motor deficit; individual **V12Gy >10 cm3** predicted it (P=.01)."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Roper et al showed coverage held at 0.5° simulated rotation but failed in over one-third of plans at 2°; here measured residuals stayed within 0.5 mm / 0.5° tolerance, which is why 1 mm sufficed. Necrosis tracking V12Gy matches the Korytko gamma knife series the authors cite."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents 4-10 small BM treated frameless on a linac with 6D setup and intrafraction correction. Does not represent setups without mid-treatment imaging, lesions ≥3 cm, or pts needing formal neurocognitive endpoints."
-              },
-              {
-                "label": "Limitations",
-                "body": "The paper reports pt counts inconsistently (4-6/7-10 vs 4-7/8-10; 10 vs 12 pts with coverage loss). LC is not stratified by margin or by distance from isocenter, so the clinical consequence of the dosimetric miss is untested."
-              },
-              {
-                "label": "Discussion",
-                "body": "The case for 1 mm is a trade-off: the margin rescues small distal targets while Table 4 shows each added millimetre inflates a 1 cm lesion's volume steeply, feeding V12Gy. That trade-off only holds if intrafraction drift is caught and corrected."
-              }
-            ],
-            "interpretation": "The question this paper answers is narrower than its title suggests. Its clinical outcomes, 89% per-patient and 94% per-lesion local control at one year with no grade 3-4 toxicity, are what one would expect from any competent single-fraction SRS series at 20-22 Gy and add little on their own: 31 patients, a median follow-up of 11 months, no comparator, and survival driven by extracranial control and concurrent systemic therapy. The contribution is the geometric one, and it addresses a specific worry about single-isocenter multi-target treatment: a rotational error at the shared isocenter becomes a translational miss at a distant target, and the miss grows with distance.\n\nRoper et al had framed the problem in simulation, with coverage holding at 0.5° but failing in more than a third of plans at 2°. This series supplies the missing piece, the residual errors actually delivered on a frameless mask with 6D ExacTrac correction. Mean 3D residual was 0.34 mm, and with errors that small the losses concentrated where geometry predicts, in lesions under 0.4 cm3 sitting at or beyond 3.9 cm from isocenter. A 1 mm margin absorbed them in re-computation. The read for a linac SRS program is that the margin decision depends on the error budget your own system achieves, and this paper gives one measured budget rather than a universal answer.\n\nThe intrafraction data carry the more practical warning. Ten positionings in 7 patients drifted out of tolerance, and left uncorrected that drift cost GTV coverage in 28% of the 74 lesions involved; even with 1 mm, 2 lesions stayed short. So the 1 mm conclusion is conditional on mid-treatment imaging and correction. A department running mask-based single-isocenter plans without intrafraction monitoring cannot borrow it.\n\nThe skeptic's case rests on three points. First, adequacy is defined dosimetrically, by V95 on a CBCT-fused re-computation, and the paper never links coverage loss or margin size to lesion-level failure; 11 lesions recurred, and we are not told whether they were the distal small targets. Second, the reporting is internally inconsistent on patient counts by lesion number and on how many patients had coverage loss, which lowers confidence in the denominator behind the subgroup statistics. Third, the 28 lesions planned with 2 mm are folded into the outcomes, so the clinical series is not a clean 1 mm cohort.\n\nThe margin's cost side is the stronger argument. The authors' own volume table shows how quickly an isotropic expansion inflates a small sphere, and necrosis here tracked individual V12Gy above 10 cm3 rather than lesion count or cumulative volume, in line with the Korytko gamma knife experience they cite. That points toward the smallest margin that holds coverage, not toward the 2-3 mm some early single-isocenter planning studies suggested. What would overturn the conclusion is a series with lesion-level local failure mapped against distance and margin showing excess misses in distal small targets at 1 mm, or a center whose residual errors run materially above the 0.5 mm / 0.5° tolerance used here. Until then this is a reasonable, system-specific justification for 1 mm, not evidence that the technique matches per-lesion isocenter SRS on control.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Coverage loss clustered in small lesions far from isocenter: about 90% of V95 <95% misses were lesions <0.4 cm3 at ≥3.9 cm. Uncorrected intrafraction drift cost GTV coverage in 28% of lesions, so the 1 mm margin depends on 6D monitoring with mid-treatment correction."
-            },
-            "open_questions": [
-              "Lesion-level local failure by distance from isocenter and margin size",
-              "Neurocognitive outcome with formal testing after single-isocenter SRS for 5-10 BM",
-              "Is 1 mm sufficient without intrafraction monitoring and correction?"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": "retrospective",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT06857006",
-                "brief_title": "Trial of Differential Margins in Single Isocenter Radiosurgery of Brain Metastases",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 180,
-                "primary_completion_date": "2028-06",
-                "brief_summary": "Radiosurgery is the use of a focal high dose of radiation therapy to ablate or kill a tumor. This trial will enroll patients with brain metastases 4 cm or less in greatest diameter and will compare 0mm margin to a 2mm margin for treatment.",
-                "conditions": [
-                  "Brain Metastases"
-                ],
-                "interventions": [
-                  {
-                    "name": "brain metastases radiosurgery",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Stated willingness to comply with all study procedures and availability for the duration of the study\n2. Male or female, aged 19 and older\n3. Brain metastases diagnosis not requiring retreatment to the same tumor\n4. For females of reproductive potential should undergo…",
-                "answers_question": "Lesion-level local failure by distance from isocenter and margin size",
-                "relevance_phrase": "randomizes 0 vs 2 mm margin in single-isocenter SRS"
-              },
-              {
-                "nct": "NCT03508752",
-                "brief_title": "Neurocognitive Decline in Patients With Brain Metastases",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE1",
-                  "PHASE2"
-                ],
-                "enrollment_count": 80,
-                "primary_completion_date": "2026-06",
-                "brief_summary": "The phase I component of the study is to identify maximal tolerated dose (MTD). The phase II is to evaluate neurocognitive decline.",
-                "conditions": [
-                  "Brain Metastases"
-                ],
-                "interventions": [
-                  {
-                    "name": "Stereotactic Radiosurgery",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Age ≥ 18 years.\n2. ECOG Performance Score of 2 or better/Karnofsky Performance score of 50-60 or better.\n3. Biopsy-proven non-hematopoietic malignancy, except for germ cell cancer. Small cell lung carcinoma is eligible for this study.\n4. Six or more metastases on diagnostic…",
-                "answers_question": "Neurocognitive outcome with formal testing after single-isocenter SRS for 5-10 BM",
-                "relevance_phrase": "SRS for ≥6 BM, ph2 1° EP neurocognitive decline"
-              },
-              {
-                "nct": "NCT03606421",
-                "brief_title": "CBF and NCF Changes With Brain Radiation",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": null,
-                "enrollment_count": 110,
-                "primary_completion_date": "2026-12",
-                "brief_summary": "This study will be a dual-arm prospective longitudinal cohort study for patients with brain metastases, at least one of which is appropriate for radiotherapy, to explore brain and cognitive changes following SRS or WBRT and evaluate the feasibility of a novel MRI protocol to identify potential radiological biomarkers of NCF decline.\n\nPatients diagnosed with brain mets will be assigned to either Arm A or Arm B, depending on their treatment plan. Patients in Arm A will be treated with SRS.…",
-                "conditions": [
-                  "Neurocognitive Dysfunction",
-                  "Brain Metastases"
-                ],
-                "interventions": [
-                  {
-                    "name": "SRS and neurocognitive assessments",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "WBRT and neurocognitive assessments",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patients with brain metastases will be included in this study. Patients with known malignancies but without brain metastases, or patients with primary brain tumors are not eligible for enrollment.\n* MRI confirmed 1-10 lesions. Each lesion must not be intended for resection.\n*…",
-                "answers_question": "Neurocognitive outcome with formal testing after single-isocenter SRS for 5-10 BM",
-                "relevance_phrase": "prospective SRS cohort, 1-10 lesions, serial NCF testing"
-              },
-              {
-                "nct": "NCT07505979",
-                "brief_title": "SMART Trial: Cognitive Sparing Brain Radiotherapy for Multiple Brain Metastases",
-                "overall_status": "NOT_YET_RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 90,
-                "primary_completion_date": "2029-04",
-                "brief_summary": "The goal of this phase II randomized trial is to determine if Stereotactic Radiosurgery (SRS) or Cognitive Sparing WBRT (CS-WBRT) better preserves neurocognitive function than standard Hippocampal Avoidance WBRT (HA-WBRT) in patients with multiple brain metastases ( $\\\\ge6$ lesions).\n\nThe main questions it aims to answer are:\n\n* Which treatment best preserves cognitive function (memory and executive tasks) at 6 months post-intervention?\n* Can sparing the left hippocampus and corpus callosum…",
-                "conditions": [
-                  "Brain Metastases From Solid Tumors"
-                ],
-                "interventions": [
-                  {
-                    "name": "SRS",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "CS-WBRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "HA-WBRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients with a histologic diagnosis of non-hematopoietic malignancy and radiographic evidence of brain metastases\n2. Patients with brain metastasis outside a 5-mm margin around either hippocampus or corpus callosum on gadolinium contrast-enhanced MRI obtained within 30 days…",
-                "answers_question": "Neurocognitive outcome with formal testing after single-isocenter SRS for 5-10 BM",
-                "relevance_phrase": "rand ph2 SRS vs CS-WBRT vs HA-WBRT, ≥6 BM, 6-mo cognition"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "radiosurgery brain metastases neurocognitive",
-                "single isocenter radiosurgery brain metastases"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 21,
-              "fetched_at": "2026-11-07T09:07:15.479Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 216
-              }
-            ],
-            "meeting": null
-          },
-          {
-            "name": "DCAT vs CoVMAT vs NcVMAT for single brain met",
-            "tldr": "Non-coplanar VMAT cut normal-brain V12Gy to 9.4 vs 11.6 (DCAT) vs 15.1 cm3 (coplanar VMAT) for 2-3 cm single brain mets, 20 Gy/1 fx.",
-            "details": [
-              "🔍 Planning study: DCAT, CoVMAT and NcVMAT plans built for each of 15 pts, single institution (Kyoto)",
-              "🔍 Single brain met, longest diameter 2-3 cm; median PTV 6.4 cm3 (range 3.7-16.2)",
-              {
-                "text": "🔍 Planning parameters",
-                "subdetails": [
-                  "20 Gy/1 fx to PTV, normalized to D99.5%",
-                  "PTV = GTV + 1 mm",
-                  "6 MV, TrueBeam STx, Eclipse 15.6 AcurosXB, 1 mm grid",
-                  "PTV D2% set at ~142% of Rx (PTV covered by 70% isodose line)",
-                  "DCAT and NcVMAT: 1 coplanar + 2 non-coplanar arcs; CoVMAT: 1 coplanar arc"
-                ]
-              },
-              {
-                "text": "📊 Normal-brain irradiated volume, cm3 (mean ± SD)",
-                "table": {
-                  "columns": [
-                    "Index",
-                    "DCAT",
-                    "CoVMAT",
-                    "NcVMAT",
-                    "DCAT vs CoVMAT p",
-                    "DCAT vs NcVMAT p",
-                    "CoVMAT vs NcVMAT p"
-                  ],
-                  "rows": [
-                    [
-                      "V20Gy",
-                      "2.44 ± 1.78",
-                      "2.48 ± 1.87",
-                      "1.64 ± 1.13",
-                      "0.88",
-                      "<0.05",
-                      "<0.05"
-                    ],
-                    [
-                      "V15Gy",
-                      "7.22 ± 4.08",
-                      "8.52 ± 4.89",
-                      "5.95 ± 3.10",
-                      "<0.05",
-                      "<0.05",
-                      "<0.05"
-                    ],
-                    [
-                      "V12Gy",
-                      "11.6 ± 6.5",
-                      "15.1 ± 8.2",
-                      "9.4 ± 4.9",
-                      "<0.05",
-                      "<0.05",
-                      "<0.05"
-                    ],
-                    [
-                      "V10Gy",
-                      "16.8 ± 9.0",
-                      "22.7 ± 12.0",
-                      "13.9 ± 6.8",
-                      "<0.05",
-                      "<0.05",
-                      "<0.05"
-                    ],
-                    [
-                      "V5Gy",
-                      "49.2 ± 28.4",
-                      "96.8 ± 55.4",
-                      "42.9 ± 20.3",
-                      "<0.05",
-                      "<0.05",
-                      "<0.05"
-                    ]
-                  ]
-                }
-              },
-              "📊 RTOG-CI and Paddick CI significantly better with NcVMAT than DCAT",
-              "📊 GTV D98% better with NcVMAT than DCAT or CoVMAT",
-              "📊 Coplanar-only VMAT was worst on low-dose spill: V5Gy nearly doubled vs DCAT",
-              "📊 MU higher for DCAT and NcVMAT than CoVMAT; beam-on time longer for both VMAT plans than DCAT",
-              "⚠️ Dosimetric surrogate only: no radionecrosis, local control or neurocognitive outcomes",
-              "⚠️ Single TPS and optimizer; gains may depend on planner skill and Eclipse-specific tools (ring contour, NTO)",
-              "🔗 Molinier et al. is the only prior direct DCAT/CoVMAT/NcVMAT comparison, but used different TPS and algorithms between techniques"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1093/jrr/rrab092",
-            "tweet_ids": [
-              1000000215
-            ],
-            "slug": "dcat-vs-covmat-vs-ncvmat-single-brain-met",
-            "verdict": {
-              "soc_implication": "methodologically-limited",
-              "rationale": "Planning study in 15 pts; dosimetric V12Gy surrogate stands in for radionecrosis, with no clinical outcomes, single TPS and single institution.",
-              "audience": "Single brain met, 2-3 cm, LINAC SRS 20 Gy/1 fx"
-            },
-            "significance": "The coplanar-only VMAT many centers default to was the worst plan for low and intermediate spill (V12Gy 15.1 cm3, V5Gy 96.8 cm3), not merely a wash vs DCAT. For 2-3 cm lesions, where necrosis risk rises, adding non-coplanar arcs is what earns VMAT its advantage, at the cost of longer beam-on time.",
-            "monday_clinic": "In a 2-3 cm single brain met planned for LINAC SRS, this supports non-coplanar over coplanar-only VMAT when normal-brain V12Gy is the constraint; it does not address multiple mets, single-isocenter multi-target plans, or fractionated SRT.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Dosimetric **planning study**: three plans (DCAT, CoVMAT, NcVMAT) per pt for **15 pts** treated April 2016 to October 2017, single institution. Two-way ANOVA with Bonferroni post-hoc for PTV/GTV indices; repeated-measures ANOVA with Holm for normal brain."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "**Single brain metastasis, longest diameter 2-3 cm**, chosen because local control and radionecrosis are worse than for smaller lesions. Median PTV 6.4 cm3 (range 3.7-16.2)."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "**20 Gy/1 fx** to PTV (GTV + 1 mm), normalized to D99.5%, 6 MV on TrueBeam STx, AcurosXB. PTV D2% held near 142% of Rx across techniques so the comparison is at matched heterogeneity."
-              },
-              {
-                "label": "Results",
-                "body": "NcVMAT gave the **best conformity** (RTOG-CI and Paddick CI vs DCAT) and **lowest normal-brain V20 to V5Gy** vs both comparators. CoVMAT had the largest V15Gy through V5Gy and the fewest MU; both VMAT techniques ran longer beam-on than DCAT."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Vogelbaum et al. showed higher local recurrence and radionecrosis for mets >2.0 cm, which is the population chosen here. Molinier et al. compared the same three techniques but across mixed intracranial targets and with different TPS and algorithms, which this study removes as a confounder."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents LINAC SRS planning for a single 2-3 cm brain met at 20 Gy/1 fx on an Eclipse/TrueBeam platform. Does not represent multiple mets, Gamma Knife, fractionated SRT, or other planning systems."
-              },
-              {
-                "label": "Limitations",
-                "body": "V12Gy is a planning surrogate for necrosis; no clinical outcomes were measured. Plan quality for inverse-optimized techniques is operator- and optimizer-dependent, and DCAT plans used manual MLC shaping, so the margin between techniques may not transfer across centers."
-              },
-              {
-                "label": "Discussion",
-                "body": "The useful finding is that coplanar-only VMAT is not an adequate substitute for non-coplanar DCAT on low-dose spill, while non-coplanar VMAT beats both. The cost is beam-on time, relevant for intrafraction motion in frameless SRS."
-              }
-            ],
-            "interpretation": "The practical question this planning study speaks to is not whether VMAT beats DCAT in general, but whether the convenience of a single coplanar VMAT arc gives up anything for a mid-sized brain metastasis. On that point the data are fairly clear. Coplanar-only VMAT produced the largest normal-brain volumes at every level from 15 Gy down to 5 Gy, with V12Gy of 15.1 cm3 against 11.6 cm3 for DCAT and 9.4 cm3 for non-coplanar VMAT. The low-dose bath was the most striking divergence, with V5Gy of 96.8 cm3 for the coplanar plan against 49.2 and 42.9 cm3 for the two non-coplanar techniques. In other words, the arc geometry mattered more than the modulation: modulation layered onto non-coplanar arcs bought a further improvement, but modulation on a single coplanar arc was a step backward from conventional conformal arcs.\n\nThe population was chosen deliberately. Lesions of 2 to 3 cm sit in the zone where Vogelbaum and colleagues reported higher rates of local recurrence and radionecrosis than for lesions of 2 cm or less, so this is where a reduction in V12Gy has the most plausible clinical leverage. The authors lean on V12Gy as a radionecrosis predictor, which is a reasonable working assumption but remains an inference here: no patient in this comparison was treated three ways, and no toxicity or control endpoint was measured. The magnitude of the V12Gy difference between NcVMAT and DCAT is also modest relative to the spread within each arm, as the standard deviations show, so a reader should expect the benefit to vary considerably across individual lesions and to matter most for the larger and less spherical ones.\n\nThe design has one real strength over the prior comparison by Molinier and colleagues: all three techniques were planned in the same TPS with the same dose algorithm, normalization and target heterogeneity, so differences reflect technique rather than software. The flip side is that this is a single-center Eclipse experience, with inverse plans shaped by a ring contour and normal-tissue objective, and DCAT plans shaped by manual MLC adjustment. Inverse-optimized plan quality is notoriously dependent on planner and optimizer, so the size of the NcVMAT advantage may shrink or grow elsewhere. The study also does not address single-isocenter multi-target planning, which is where many centers now use VMAT most, or fractionated stereotactic RT, which is commonly chosen for lesions in this size range.\n\nThe trade-off a clinic must weigh is time. Both VMAT techniques had longer beam-on times than DCAT, and non-coplanar delivery adds couch rotations. In frameless mask-based SRS, longer treatment raises intrafraction motion risk against a 1 mm PTV margin, which could erode some of the dosimetric gain in practice. For a center already delivering non-coplanar arcs, the findings support moving those arcs to VMAT optimization when normal-brain dose is binding, such as a larger lesion or a pt likely to need repeat SRS. For a center delivering single coplanar VMAT arcs to solitary lesions, the data argue that the plan should at least be checked against a non-coplanar alternative.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The coplanar-only VMAT many centers default to was the worst plan for low and intermediate spill (V12Gy 15.1 cm3, V5Gy 96.8 cm3), not merely a wash vs DCAT. For 2-3 cm lesions, where necrosis risk rises, adding non-coplanar arcs is what earns VMAT its advantage, at the cost of longer beam-on time."
-            },
-            "open_questions": [
-              "Does lower planned V12Gy with NcVMAT reduce clinical radionecrosis?",
-              "Does the advantage hold for multiple mets or single-isocenter plans?",
-              "Does longer beam-on time erode the gain in frameless SRS?"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": "palliative",
-            "methodology": null,
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "radiosurgery radionecrosis brain metastases",
-                "VMAT radiosurgery brain metastases"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 17,
-              "fetched_at": "2026-11-07T09:08:08.901Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 215
               }
             ],
             "meeting": null
