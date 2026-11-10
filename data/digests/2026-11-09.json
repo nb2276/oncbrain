@@ -1,25 +1,679 @@
 {
   "date": "2026-11-09",
   "conference": null,
-  "generated_at": 1794215218675,
+  "generated_at": 1794301745260,
   "digest": {
-    "top_line": "ASCO imaging guideline: NGI should be offered when salvage RT is contemplated after RP (evidence high, strong); withhold it when no salvage local therapy is planned.",
-    "tldr": "A guidance-only day, no trial readouts. Prostate carried most: ASCO ties NGI to a salvage RT decision, an ESTRO ACROP Delphi reached consensus on only 14/40 salvage SBRT items, and an RSS case guide covers intact-prostate SBRT. Gyn: ABS HDR compendium keeps a cervix HR-CTV D90 goal of 85-95 Gy EQD210; ESGO/ESTRO/ESP backs universal MMR/MSI testing.",
+    "top_line": "ASCO advanced prostate imaging guideline: NGI should be offered for rising PSA post-RP when salvage RT is contemplated (rec 4.4), its sole high-quality, strong recommendation.",
+    "tldr": "Guidance-heavy day: four consensus documents and a case-based guide, no new trial data. Prostate carried most: ASCO ties next-generation imaging to a live salvage decision, and the ESTRO ACROP Delphi reached consensus on only 14/40 items (35%) for intraprostatic salvage SBRT, leaving dose and fractionation divided. Gyn adds ABS HDR schedules with EQD2 goals and ESGO/ESTRO/ESP universal MMR/MSI testing.",
     "sites": [
       {
+        "disease_site": "prostate",
+        "intro": "All guidance, no trials: imaging selection before salvage, salvage SBRT for intraprostatic relapse after RT, and a 40 Gy/5fx primary SBRT worked example.",
+        "studies": [
+          {
+            "name": "Radiosurgery Society SBRT guide for localized prostate cancer",
+            "tldr": "40 Gy/5fx to prostate + proximal 1cm SV as worked example; large gland and poor baseline IPSS framed as counselling issues, not SBRT contraindications.",
+            "details": [
+              "🔍 Case-based guide endorsed by the Radiosurgery Society (Pract Radiat Oncol 2024); two modified real-world cases, not a trial",
+              "🔍 Scope: dose/fractionation, OAR constraints, dose escalation, rectal spacer, ADT with SBRT, high-risk, large prostate, IBD, MRI guidance",
+              {
+                "text": "💊 Case A: 78yo, unfavorable intermediate-risk, cT1cN0M0, PSA 8.1, 112 mL gland on MRI",
+                "subdetails": [
+                  "Leuprolide started 2 mo pre-SBRT; gland 61 mL on pre-SBRT MRI; 6 mo ADT total",
+                  "Hydrogel spacer, VMAT, every-other-day delivery",
+                  "40Gy/5fx to 100% isodose covering PTV, V105% (42 Gy) < 20-30%",
+                  "Acute GU flare managed with doubled tamsulosin + ibuprofen; IPSS 10 at 1 yr"
+                ]
+              },
+              "💊 Case B: MRI-guided SBRT, 40 Gy/5fx with SIB 42 Gy/5fx to dominant intraprostatic lesion, hip prosthesis",
+              "📐 Prescription practice varies: 100% isodose covering 95-99% of target vs robotic 75-85% isodose (Dmax 130-140%)",
+              "🔗 PACE-B: only 5% of pts had prostate volume ≥80 mL, so large-gland SBRT data are thin",
+              "📊 Large glands: one retrospective series flagged ≥50 mL as predictor of late G2+ GU toxicity; others show favorable toxicity at ≥50-100 mL",
+              "📊 Baseline IPSS ≥15 with prophylactic α1-antagonists: low G3 GU rates in retrospective series",
+              "⚠️ Guide advises against neoadjuvant ADT solely for cytoreduction, yet Case A received it (for UIR disease)",
+              "⚠️ Large-gland, high-IPSS and prior-TURP guidance rests on retrospective series and extrapolation",
+              "⚠️ Excerpt truncated: Case 2 discussion, spacer, ADT and dose-escalation sections not in source text"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              1000000227
+            ],
+            "slug": "rss-prostate-sbrt-case-guide",
+            "significance": "The planning detail is the transferable part: 40 Gy prescribed to the 100% isodose covering PTV with V105% (42 Gy) held under 20-30%, versus robotic practice at the 75-85% isodose. Large glands and baseline IPSS ≥15 are treated as counselling and prophylaxis problems, since PACE-B enrolled only 5% of pts at ≥80 mL.",
+            "monday_clinic": "In localized prostate cancer with a large gland, high baseline IPSS or prior TURP, this guide supports offering SBRT when OAR constraints are achievable, with explicit counselling on transient obstructive flare; it does not support ADT given solely for gland cytoreduction.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Radiotherapy",
+                "body": "Worked example is **40 Gy in 5 fractions** to prostate + proximal 1cm SV, every other day, VMAT with hydrogel spacer. MRI-guided case adds a **42 Gy SIB** to the dominant intraprostatic lesion."
+              },
+              {
+                "label": "vs leading data",
+                "body": "PACE-B underpins SBRT as standard, but only **5%** of its pts had glands ≥80 mL; the authors look to PACE-B subgroup analyses and the MIRAGE randomized trial (MRI guidance) for toxicity questions the guide cannot settle."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents intact-prostate localized disease, including large glands, poor baseline urinary function and prior TURP. Does not represent post-prostatectomy or nodal/pelvic SBRT."
+              },
+              {
+                "label": "Discussion",
+                "body": "Whether the larger GU flare in big glands is **specific to SBRT fractionation** or generic to any RT remains open. Prior-TURP data are mixed, so the guide recommends counselling rather than exclusion."
+              }
+            ],
+            "interpretation": "This is a practice guide, not evidence generation, and its value lies in how it handles the gap between what the randomized data tested and who actually walks into an SBRT clinic. PACE-B established ultrahypofractionation as standard for intact prostate disease, but the guide is candid that the trial population skews away from the hard cases: only 5% of PACE-B pts had glands of 80 mL or more. Everything the authors say about large glands, poor baseline urinary function and prior TURP is therefore extrapolation from retrospective series, and a reader should weigh it as reasoned expert opinion rather than tested policy.\n\nThe large-gland argument is the most consequential. The authors concede that conventionally fractionated, moderately hypofractionated and brachytherapy series all show more GU toxicity in bigger glands, and that one SBRT series identified 50 mL as an independent predictor of late grade 2+ GU toxicity. They then lean on other series showing acceptable toxicity at 50 to 100 mL and conclude that gland size alone should not exclude SBRT if constraints are met. That conclusion is defensible but not proven, and the authors themselves name the unresolved question: whether the flare is worse with SBRT-type fractionation or simply a feature of prostate RT in a big gland. Until PACE-B subgroup data or prospective large-gland cohorts answer it, the honest position is the one they land on, namely informed counselling plus prophylactic α1-antagonists or anti-inflammatories.\n\nThere is an internal tension worth noticing. The text advises against neoadjuvant ADT purely for cytoreduction, yet the illustrative Case A received leuprolide before SBRT and the gland shrank from 112 to 61 mL. The ADT there is justified by unfavorable intermediate-risk disease, but a reader could easily take the case as tacit endorsement of downsizing. The distinction matters for a 78-year-old with cardiac disease and diabetes, where ADT toxicity is not trivial.\n\nThe planning section is the most transferable content. Making explicit that some centres prescribe to the 100% isodose with tight hot-spot limits while robotic users prescribe to a lower isodose with much higher maximum dose is useful, because published SBRT outcomes are not dose-equivalent across these conventions even at the same nominal prescription. Readers comparing their own results to trial data should know which convention generated those data.\n\nThe excerpt available here is truncated before the second case discussion and the sections on spacer, ADT and dose escalation, so judgments on those topics cannot be made from this source.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The planning detail is the transferable part: 40 Gy prescribed to the 100% isodose covering PTV with V105% (42 Gy) held under 20-30%, versus robotic practice at the 75-85% isodose. Large glands and baseline IPSS ≥15 are treated as counselling and prophylaxis problems, since PACE-B enrolled only 5% of pts at ≥80 mL."
+            },
+            "open_questions": [
+              "Is large-gland GU flare specific to SBRT fractionation?",
+              "Prior TURP tolerability after prostate SBRT"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "consensus-guideline",
+            "content_type": "review",
+            "discussed_trials": [
+              "PACE-B",
+              "MIRAGE"
+            ],
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "prostate stereotactic radiotherapy urinary toxicity",
+                "transurethral resection prostate radiotherapy"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 30,
+              "fetched_at": "2026-11-10T09:06:57.673Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 227
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "ESTRO ACROP Delphi: salvage SBRT for intraprostatic relapse",
+            "tldr": "Consensus on 14/40 items (35%) for intraprostatic relapse after RT: focal GTV-based CTV, no concurrent ADT; dose, fractionation, OAR limits unresolved.",
+            "details": [
+              "🔍 3-round Delphi, Jul 22 to Dec 16, 2019; 40 questions across 3 sections",
+              "🔍 Panel: 18 of 33 contacted salvage SBRT authors (54.5%); all completed every round",
+              "🔍 Consensus defined as >80% agreement; major agreement 65-80%; divided <65%",
+              "📊 Consensus on 14/40 (35%); consensus or major agreement on 27/40 (68%)",
+              {
+                "text": "📊 Agreement by questionnaire section",
+                "table": {
+                  "columns": [
+                    "Section",
+                    "Questions",
+                    "Consensus",
+                    "Kendall's W",
+                    "Read"
+                  ],
+                  "rows": [
+                    [
+                      "Patient selection",
+                      "19",
+                      "6/19 (32%)",
+                      "0.17",
+                      "Weak"
+                    ],
+                    [
+                      "Imaging + biopsy",
+                      "7",
+                      "3/7 (43%)",
+                      "0.34",
+                      "Moderate"
+                    ],
+                    [
+                      "Dosimetry (CTV + OARs)",
+                      "14",
+                      "5/14 (36%)",
+                      "0.12",
+                      "Very weak"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "🔍 Item-level positions",
+                "table": {
+                  "columns": [
+                    "Item",
+                    "Agreement level",
+                    "Responders"
+                  ],
+                  "rows": [
+                    [
+                      "Age not a selection criterion",
+                      "Consensus",
+                      ">80%"
+                    ],
+                    [
+                      "ECOG 0-1",
+                      "Consensus",
+                      "94%"
+                    ],
+                    [
+                      "Prior ADT not a contraindication",
+                      "Consensus",
+                      "Not stated"
+                    ],
+                    [
+                      "Metastatic workup before salvage",
+                      "Consensus",
+                      "All experts"
+                    ],
+                    [
+                      "Choline PET for staging",
+                      "Consensus",
+                      "89%"
+                    ],
+                    [
+                      "PSMA-PET for staging",
+                      "Not reached",
+                      "28%"
+                    ],
+                    [
+                      "CTV = mpMRI GTV + adaptive margin",
+                      "Consensus",
+                      "Not stated"
+                    ],
+                    [
+                      "No concomitant ADT",
+                      "Consensus",
+                      "Not stated"
+                    ],
+                    [
+                      "Phoenix definition for follow-up",
+                      "Consensus",
+                      "Not stated"
+                    ],
+                    [
+                      "Primary RT dose informs salvage dose",
+                      "Consensus",
+                      "Not stated"
+                    ],
+                    [
+                      "Prescription to the isodose",
+                      "Major agreement",
+                      "Not stated"
+                    ],
+                    [
+                      "Minimum interval from primary RT: 2 yr",
+                      "Major agreement",
+                      "Not stated"
+                    ],
+                    [
+                      "Salvage dose higher/lower/same vs primary",
+                      "Divided",
+                      "Not stated"
+                    ],
+                    [
+                      "Fractionation schedule",
+                      "Divided",
+                      "Not stated"
+                    ],
+                    [
+                      "Prior late toxicity threshold",
+                      "Divided",
+                      "56% exclude G2+, rest G3+"
+                    ],
+                    [
+                      "Biopsy always required",
+                      "Divided",
+                      "22% yes"
+                    ],
+                    [
+                      "Max T, Gleason, PSA for selection",
+                      "Divided",
+                      "Not stated"
+                    ],
+                    [
+                      "Cumulative OAR dose constraints",
+                      "No agreement",
+                      "Not stated"
+                    ]
+                  ]
+                }
+              },
+              "⚠️ Discussion cites a 5-6 fx schedule to ~35 Gy, yet results list fractionation as divided",
+              "⚠️ Rounds closed before most PSMA-PET detection data were published; dated imaging section",
+              "⚠️ Only 2 respondents outside Europe (both US); 12/18 (67%) at centres treating >2,000 pts/yr",
+              "🔗 vs Uro-GEC-ESTRO salvage BT Delphi: that panel split on target volume; this one agreed on focal GTV-based CTV"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.ctrv.2021.102206",
+            "tweet_ids": [
+              1000000226
+            ],
+            "slug": "estro-acrop-salvage-sbrt-delphi",
+            "verdict": {
+              "soc_implication": "consensus",
+              "rationale": "Expert Delphi of 18 salvage SBRT authors; output is agreement, not outcomes. Dosimetry section weakest (Kendall's W 0.12), so dose guidance is absent.",
+              "audience": "Intraprostatic relapse after primary prostate RT, metastases excluded"
+            },
+            "significance": "The panel converged on the target, not the dose: CTV = mpMRI GTV plus an adaptive margin, prescribed to an isodose. Salvage dose relative to primary, fractionation and cumulative OAR constraints stayed unresolved (dosimetry Kendall's W 0.12), so a re-RT prescription still has to come from the retrospective series and Pasquier's ongoing dose-finding phase I/II.",
+            "monday_clinic": "In a pt with intraprostatic relapse at least 2 yr after primary RT, metastases excluded, ECOG 0-1, prior ADT allowed, this supports focal salvage SBRT without concurrent ADT as an expert-endorsed way to defer ADT; it does not settle eligibility after prior G2 late toxicity, where the panel split.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**ESTRO ACROP Delphi**, 3 rounds run Jul 22 to Dec 16, 2019, **40 questions** in 3 sections (patient selection, imaging/biopsy, dosimetry). **Consensus = >80% agreement**, major agreement 65-80%, divided <65%. An item that reached consensus was dropped from later rounds."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Panel was **18 of 33** contacted authors of salvage SBRT papers (54.5%), and all completed every round. Only 2 practised outside Europe (both US), and **12/18 (67%)** worked at centres treating >2,000 pts/yr. The questionnaire was reviewed by a committee that included an EAU-nominated urologist."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Consensus: **CTV = mpMRI GTV + adaptive margin**, primary RT dose factored into the salvage dose, **no concomitant ADT**, Phoenix definition for follow-up. Major agreement: prescribe to the isodose, **2 yr minimum** from primary RT. **Divided:** salvage dose vs primary, fractionation, cumulative OAR constraints."
+              },
+              {
+                "label": "Results",
+                "body": "**Consensus on 14/40 (35%)**, half of it reached in round 1 (7/14). Consensus or major agreement on 27/40 (68%)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The Uro-GEC-ESTRO salvage brachytherapy Delphi (Kaljouw) split on target volume and required histology. This panel agreed on a **focal GTV-based CTV** but split on biopsy. Italian AIRO PROLAPSE respondents leaned toward concurrent ADT, which this panel rejected, and the MASTER meta-analysis (150 studies) found no significant 5-yr RFS difference between salvage RP and other local modalities."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents men with intraprostatic relapse after primary prostate RT, metastatic disease excluded, ECOG 0-1. Does not represent nodal or distant relapse, post-RP prostate-bed relapse, or a choice between SBRT and salvage RP, HDR BT or ADT."
+              },
+              {
+                "label": "Limitations",
+                "body": "The panel came from salvage SBRT authors, so nobody tested whether the modality itself is right. Rounds closed before most PSMA-PET detection data were published, which likely explains **PSMA-PET at 28%** vs choline PET at 89%. The discussion cites a 5-6 fx schedule to ~35 Gy while the results list fractionation as divided."
+              },
+              {
+                "label": "Discussion",
+                "body": "The panel agreed on selection and target logic and **split on everything that needs outcome data**: dose, fractionation, OAR limits, biopsy. Ongoing protocols diverge on the same points: Bergamin requires a 4-yr interval where Pasquier and Fuller use 2 yr, and Fuller treats the whole gland where the others treat part of it."
+              }
+            ],
+            "interpretation": "Read this document as a map of where salvage SBRT practice had converged by late 2019, and where it had not, drawn by the people who wrote the retrospective series. Its value lies in where agreement fell, not in any single item. The panel converged on questions that can be answered from first principles or imaging logic: exclude metastases first, treat a focal mpMRI-defined target rather than the whole gland, keep ADT out of the re-irradiation course, and wait at least 2 years after the first course. It did not converge on anything that needs outcome data to settle: the salvage dose relative to the primary, the fractionation, and cumulative constraints for rectum, bladder, femoral heads and penile bulb. That split is itself the finding. The dosimetry section had the weakest concordance of the three, which tells a radiation oncologist that a re-irradiation prescription is still an institutional choice.\n\nThe target-volume result is the clearest change from the Uro-GEC-ESTRO brachytherapy Delphi. That panel split between whole-gland, partial and focal treatment, and this one agreed on a GTV plus adaptive margin. The Corkum systematic review, which found no local control or bRFS gain from whole-prostate re-RT and less severe late toxicity with partial re-RT, gives the focal position some outcome footing, though it pools retrospective data. The biopsy question runs the other way. The brachytherapy panel and current guidelines required histology, while this panel and the Italian AIRO survey split on whether imaging is enough. On ADT, the Italian respondents leaned toward concurrent use, so the ESTRO position against it is a real divergence, not a restatement.\n\nThe method should limit how much weight any single item carries. The panel was drawn from authors of salvage SBRT papers, a group already committed to the modality. Nobody was asked whether SBRT should be preferred over salvage prostatectomy, HDR brachytherapy or ADT, and the document cannot answer that. Only 2 respondents practised outside Europe, and 12 of 18 worked at very high-volume centres. The authors say the questions came mainly from clinical experience because the literature was thin, so consensus here measures shared habit as much as evidence. Imaging is the most dated section. The rounds closed before most PSMA-PET detection data appeared, which explains choline PET winning broad support while PSMA-PET drew 28%. A panel convened now would likely answer that item differently, and the biopsy question with it.\n\nThere is also an internal tension. The results describe fractionation as unresolved, while the discussion describes agreement on a 5-6 fraction schedule to about 35 Gy. The defensible reading is that hypofractionated SBRT in that range was common practice among the panellists, not a consensus recommendation.\n\nThe document is more useful for trial design than for an individual decision. The protocols it surveys disagree on exactly the points the panel left open. Bergamin required a longer interval from primary RT than Pasquier and Fuller, and Fuller treated the whole gland where the others treated part of it. The dose-finding phase I/II by Pasquier and colleagues is the study built to answer the question this consensus could not.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The panel converged on the target, not the dose: a focal mpMRI GTV plus adaptive margin, prescribed to an isodose, with no concurrent ADT. Salvage dose, fractionation and cumulative OAR constraints had no consensus (dosimetry Kendall's W 0.12), so re-RT dosing still rests on retrospective series and the ongoing dose-finding phase I/II."
+            },
+            "open_questions": [
+              "Optimal salvage SBRT dose and fractionation after prior prostate RT",
+              "Cumulative OAR dose constraints for prostate re-irradiation",
+              "Can PSMA-PET or mpMRI replace biopsy to confirm intraprostatic relapse?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "consensus-guideline",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "prostate reirradiation SBRT",
+                "PSMA PET prostate recurrence"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 26,
+              "fetched_at": "2026-11-10T09:08:06.223Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 226
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "ASCO guideline: imaging for advanced prostate cancer",
+            "tldr": "NGI offered only when salvage or a change in care is live. 4.4 (salvage RT contemplated after RP) is the sole high-quality, strong recommendation.",
+            "details": [
+              "🔍 ASCO expert panel with SAR, ACR, SNMMI, AUA, ASTRO, SUO; systematic review 2013 to August 2018",
+              "🔍 Evidence base: 35 studies (17 systematic reviews, 18 primary research articles)",
+              "🔍 NGI defined: PSMA (where available), 11C-choline or 18F-fluciclovine PET/CT, PET/MRI, whole-body MRI, 18F-NaF PET/CT",
+              {
+                "text": "🧭 NGI recommendation by clinical scenario (negative conventional imaging unless stated)",
+                "table": {
+                  "columns": [
+                    "Scenario",
+                    "Rec",
+                    "NGI",
+                    "Evidence · strength"
+                  ],
+                  "rows": [
+                    [
+                      "Rising PSA post-RP, not salvage candidate or unwilling",
+                      "4.3",
+                      "Should not be offered",
+                      "Low · moderate"
+                    ],
+                    [
+                      "Rising PSA post-RP, salvage RT contemplated",
+                      "4.4",
+                      "Should be offered",
+                      "High · strong"
+                    ],
+                    [
+                      "Rising PSA post-RT, salvage not planned",
+                      "4.5",
+                      "Should not be offered, except IRB trial",
+                      "Intermediate · moderate"
+                    ],
+                    [
+                      "Rising PSA post-RT, salvage local/regional therapy contemplated",
+                      "4.6",
+                      "Supported; could guide management",
+                      "Intermediate · moderate"
+                    ],
+                    [
+                      "Hormone-sensitive, metastatic on conventional imaging",
+                      "4.7",
+                      "Potential role to clarify burden",
+                      "Intermediate · moderate"
+                    ],
+                    [
+                      "Nonmetastatic CRPC",
+                      "4.8",
+                      "Only if change in care contemplated",
+                      "Weak · moderate"
+                    ],
+                    [
+                      "Metastatic CRPC, PSA progression",
+                      "4.9",
+                      "Conventional imaging; PSA alone not reason to change therapy",
+                      "Intermediate · strong"
+                    ],
+                    [
+                      "Metastatic CRPC, suspected subclinical mets",
+                      "4.10",
+                      "Could be contemplated, especially in a trial",
+                      "Insufficient · weak"
+                    ],
+                    [
+                      "Metastatic CRPC, radiographic progression",
+                      "4.11",
+                      "Not routinely offered",
+                      "Insufficient · moderate"
+                    ]
+                  ]
+                }
+              },
+              "📊 Habl: 68Ga-PSMA PET/CT changed the RT plan in 59%, staging in 43%",
+              "📊 Albisinni: 76% (99 of 131) had a treatment plan change from 68Ga results",
+              "📊 Pooled 68Ga-PSMA detection: 50% at PSA <0.5 vs 95% at PSA >2 ng/mL",
+              "⚠️ Support is mostly detection and management change, not outcome after NGI-directed therapy",
+              "⚠️ Search closed August 2018, before randomized imaging-guided salvage RT data",
+              "⚠️ Recommendations for suspected high-risk / initial staging not in source excerpt"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              1000000225
+            ],
+            "slug": "asco-advanced-prostate-imaging-guideline",
+            "significance": "Only one recommendation is graded high quality and strong: NGI when salvage RT is contemplated after RP (4.4). The same post-RP scenario without salvage candidacy gets 'should not be offered' (4.3). Supporting data are management shifts (Habl: RT plan changed in 59%), so NGI earns its place by redrawing the salvage field, not by finding untreatable disease.",
+            "monday_clinic": "In a man with rising PSA after prostatectomy, negative conventional imaging and a salvage RT plan, this supports NGI before treatment planning; it does not extend to men who are not salvage candidates, where the guideline advises against NGI.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**ASCO guideline** from an expert panel with SAR, ACR, SNMMI, AUA, ASTRO and SUO. Systematic review of literature from **2013 to August 2018**. Recommendations typed as evidence-based, informal consensus or consensus."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Men with advanced prostate cancer: newly diagnosed high-risk, suspected or confirmed metastatic, recurrent, or progressive on treatment. Evidence base **35 studies**: 17 systematic reviews and 18 primary research articles."
+              },
+              {
+                "label": "Results",
+                "body": "Only **4.4** (salvage RT contemplated after RP) is graded **high quality, strong**. NGI in mCRPC with suspected subclinical mets (4.10) rests on **insufficient** evidence, weak strength."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The search predates proPSMA (PSMA PET/CT vs conventional imaging for high-risk staging) and EMPIRE-1 (fluciclovine-guided vs conventional-imaging-guided salvage RT). Both tested with randomization questions this guideline grades on detection and management-change data."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents men with advanced prostate cancer whose local, regional or systemic management could change on NGI. Does not represent men with no salvage or care-change option, where NGI is advised against."
+              },
+              {
+                "label": "Limitations",
+                "body": "NGI is a pooled category: PSMA, choline, fluciclovine, PET/MRI, whole-body MRI and 18F-NaF are listed as **interchangeable options**. The evidence tables mix tracers, PSA strata and reference standards."
+              },
+              {
+                "label": "Discussion",
+                "body": "The organizing rule is **image only when the answer can change treatment**. 4.7 applies it to hormone-sensitive metastatic disease, where NGI may shift intent away from oligometastatic multimodality therapy. The guideline flags this stage-migration consequence but, citing limited prospective data, cannot size it."
+              }
+            ],
+            "interpretation": "This guideline's structure is more useful than any single recommendation in it: it ties imaging intensity to whether the result could change treatment. Next-generation imaging is endorsed where a local or regional salvage decision is live (4.4 after prostatectomy, 4.6 after RT) and withheld where it is not (4.3, 4.5). For a radiation oncologist that position holds together. The scan's value lies in redrawing a salvage field, or in steering a pt away from one that cannot succeed, not in finding disease nobody will treat.\n\nThe weakness is the kind of evidence behind it. The strongest recommendation, 4.4, is graded high quality and strong, yet the evidence tables support it mostly with detection rates, pooled sensitivity and specificity, and change-in-management proportions. Habl reported a changed RT plan in 59% and a stage change in 43% after 68Ga-PSMA PET/CT. Albisinni reported a changed plan in 76% (99 of 131). Those figures show the scan moves decisions. They do not show the moved decisions are better, and a management-change endpoint cannot tell a correct field extension apart from treatment of a false-positive node. The panel concedes the point in 4.5, which states there is little evidence that NGI alters treatment or prognosis in men with no salvage plan.\n\nThe search closed in August 2018, before prospective PSMA-PET accuracy data and before randomized evidence on imaging-guided salvage RT. proPSMA later compared PSMA PET/CT with conventional imaging for high-risk staging, and EMPIRE-1 randomized fluciclovine-guided against conventional-imaging-guided salvage RT. Both test the questions this guideline answered on surrogate grounds. A reader can treat the post-prostatectomy recommendations as pointing the right way, but should not read the evidence grading as reflecting that later work. The tracer list is also dated: choline and 18F-NaF sit beside PSMA as alternatives, a menu a current reader would not treat as interchangeable.\n\nRecommendation 4.7 matters more than its moderate strength suggests. It says NGI in hormone-sensitive metastatic disease could shift intent from multimodality management of oligometastatic disease to systemic therapy alone. That is stage migration with a treatment consequence. A pt who is oligometastatic on conventional imaging may be polymetastatic on PSMA, and metastasis-directed therapy evidence selected on conventional imaging then becomes harder to map onto the pt in front of you. The guideline names this risk without resolving it and cites limited prospective data.\n\nWhat would make the framework wrong: if NGI-detected low-volume disease behaves like the micrometastatic disease conventional imaging always missed, then upstaging can withhold curative-intent salvage from men who would have benefited. The castration-resistant recommendations (4.8, 4.10) leave that open. They defer NGI to trials, or to cases where a change in care is already contemplated, which is the honest position on the data the panel had.",
+            "relevant_specialties": [
+              "radonc",
+              "medonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "4.4 is the RT-facing recommendation, and the only one graded high quality and strong: NGI before contemplated salvage RT after RP. Habl reported a changed RT plan in 59% after 68Ga-PSMA PET/CT, so field design is what NGI changes here.",
+              "medonc": "In hormone-sensitive metastatic disease, 4.7 allows NGI to shift intent from oligometastatic multimodality management to systemic therapy alone, on limited prospective data. In mCRPC, PSA progression alone should not change therapy (4.9), and NGI after radiographic progression is not routine (4.11)."
+            },
+            "open_questions": [
+              "Does NGI-guided salvage RT improve outcomes vs conventional imaging?",
+              "Does NGI upstaging in mHSPC wrongly exclude pts from MDT?",
+              "Role of NGI in nmCRPC management"
+            ],
+            "consort": null,
+            "modality": null,
+            "intent": null,
+            "methodology": "consensus-guideline",
+            "content_type": "review",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT04794777",
+                "brief_title": "Comparing \"Salvage\" Radiotherapy and Individualized PSMA PET/CT Targeted Treatment in With Relapsing Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 450,
+                "primary_completion_date": "2027-10",
+                "brief_summary": "Less than 50% of patients receiving salvage radiation therapy (SRT) to the pelvis as treatment for prostate cancer relapsing after surgery will achieve undetectable Prostate Specific Antigen (PSA) levels. Despite SRT, two-thirds of patients will again develop elevated PSA, 20% will have distant metastases, and 10% will die from prostate cancer within 10 years. The reason for this is probably preexisting distant metastasis and lymph node metastasises which need to better targeted directly.…",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Individualised therapy",
+                    "type": "COMBINATION_PRODUCT"
+                  },
+                  {
+                    "name": "Standard salvage therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients previously treated for prostate cancer with radical prostatectomy and now having a biochemical recurrence (BCR) defined as: PSA \\>0.2 \\<2.0 ng/mL, and increasing measured twice.\n* Multidisciplinary conference (MDK) decision to offer the patient SRT\n* Signed Informed…",
+                "answers_question": "Does NGI-guided salvage RT improve outcomes vs conventional imaging?",
+                "relevance_phrase": "phase 3 standard SRT vs PSMA PET-individualized tx"
+              },
+              {
+                "nct": "NCT04557501",
+                "brief_title": "PSMA PET/CT Guided Intensification of Therapy in Patients at Risk of Advanced Prostate Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 800,
+                "primary_completion_date": "2029-01",
+                "brief_summary": "Through the conduct of a Phase III randomized controlled trial, investigators plan to: 1) determine if PSMA PET/CT guided intensification of radiotherapy or surgery improves cancer outcomes compared to conventional imaging-guided therapy in patients at risk of advanced disease, 2) evaluate its impact on toxicity and quality of life, and 3) measure the cost-effectiveness of the PSMA PET/CT guided approach.\n\nParticipants with high-risk prostate cancer planned for curative-intent standard-of-care…",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "PSMA PET/CT guided intensification of therapy",
+                    "type": "DIAGNOSTIC_TEST"
+                  },
+                  {
+                    "name": "Control Arm",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Histological diagnosis of adenocarcinoma of the prostate planned for curative-intent standard-of-care radiotherapy (primary or salvage post prostatectomy) or radical prostatectomy with lymph node dissection.\n* Age ≥ 18\n* High risk of regional or distant metastases as defined…",
+                "answers_question": "Does NGI-guided salvage RT improve outcomes vs conventional imaging?",
+                "relevance_phrase": "phase 3 PSMA PET-guided vs CI-guided RT, incl salvage"
+              },
+              {
+                "nct": "NCT04619069",
+                "brief_title": "Intermittent Androgen Deprivation Therapy With or Without Stereotactic Body Radiotherapy for Molecularly Identified Hormone Sensitive Oligometastatic Prostate Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE1",
+                  "PHASE2"
+                ],
+                "enrollment_count": 60,
+                "primary_completion_date": "2030-12",
+                "brief_summary": "This study is evaluating whether adding stereotactic radiotherapy (a new, more focused type of radiotherapy) to treat all the tumours that are present will improve outcomes or not compared to drugs alone for patients who are negative on conventional imaging and positive on PSMA PET scan",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "SBRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Hormone therapy",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Age \\> 18 years.\n2. Able to provide informed consent.\n3. Histologic diagnosis of prostate adenocarcinoma.\n4. ECOG performance status 0-1.\n5. Stage IV hormone sensitive, synchronous or metachronous oligometastatic prostate cancer as detected by PSMA PET-CT scan with no…",
+                "answers_question": "Does NGI upstaging in mHSPC wrongly exclude pts from MDT?",
+                "relevance_phrase": "SBRT + ADT vs ADT, CI-negative PSMA-positive oligo HSPC"
+              },
+              {
+                "nct": "NCT04983095",
+                "brief_title": "Metastasis Directed Stereotactic Body Radiotherapy for Oligo Metastatic Hormone Sensitive Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 118,
+                "primary_completion_date": "2031-12",
+                "brief_summary": "The study is an open label, multi-centre, randomized phase III study. The patients will be randomised in a 1:1 ratio to treatment consisting of\n\n* Arm A: MD-SBRT in addition to standard treatment\n* Arm B: Standard treatment\n\nStudy population: Patients with hormone sensitive prostate cancer (HSPC) with oligometastatic disease detected by PSMA-PET/DT. This includes patients with de novo oligometastatic HSPC and recurrent HSPC after primary RT or prostatectomy.\n\nPrimary endpoint: Failure free…",
+                "conditions": [
+                  "Prostate Cancer Metastatic",
+                  "Radiation Therapy",
+                  "Positron-Emission Tomography"
+                ],
+                "interventions": [
+                  {
+                    "name": "stereotactic body radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "androgen deprivation therapy",
+                    "type": "COMBINATION_PRODUCT"
+                  },
+                  {
+                    "name": "Radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically confirmed prostate cancer (ICD-O-3 C61)\n2. WHO/ECOG performance status 0-1\n3. 1-3 skeletal or extra pelvic lymph node metastases detected by PSMA-PET/CT in de novo prostate cancer or PSA-relapse after definitive RT or prostatectomy\n4. Willing and able to…",
+                "answers_question": "Does NGI upstaging in mHSPC wrongly exclude pts from MDT?",
+                "relevance_phrase": "phase 3 MD-SBRT added to SOC, PSMA-detected oligo HSPC"
+              },
+              {
+                "nct": "NCT05849298",
+                "brief_title": "A Phase II Study of AAA617 Alone and AAA617 in Combination With ARPI in Patients With PSMA PET Scan Positive CRPC",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 49,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "The purpose of this study is to evaluate the efficacy and safety of AAA617 alone (Lutetium \\[177Lu\\] vipivotide tetraxetan) and in combination with an Androgen Receptor Pathway Inhibitors (ARPI) in participants with PSMA-positive, castration-resistant prostate cancer and no evidence of metastasis in conventional imaging (CI) (i.e., CT/MRI and bone scans).",
+                "conditions": [
+                  "Prostatic Neoplasm"
+                ],
+                "interventions": [
+                  {
+                    "name": "AAA617",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "AAA517",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Piflufolastat F 18",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ARPI",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "ADT",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Best supportive care",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Key Inclusion criteria\n\n* Participants must be adults ≥ 18 years of age with signed informed consent prior to participation to study\n* Histologically or cytologically confirmed prostate cancer\n* Participants must have ongoing androgen deprivation therapy with a GnRH agonist/antagonist or prior…",
+                "answers_question": "Role of NGI in nmCRPC management",
+                "relevance_phrase": "Lu-PSMA ± ARPI in CI-negative, PSMA PET-positive CRPC"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "PSMA PET salvage radiotherapy",
+                "PSMA oligometastatic prostate radiotherapy",
+                "PSMA PET castration-resistant prostate"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 51,
+              "fetched_at": "2026-11-10T09:08:33.471Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 225
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
         "disease_site": "gyn",
-        "intro": "ABS HDR fractionation reference plus the ESGO/ESTRO/ESP endometrial update; the endometrial source text cuts off before the adjuvant RT grades.",
+        "intro": "Two reference documents: ABS HDR fractionation and dose goals, plus ESGO/ESTRO/ESP molecular testing and Lynch surveillance (its RT recommendations not in source excerpt).",
         "studies": [
           {
             "name": "ESGO/ESTRO/ESP endometrial carcinoma guidelines",
-            "tldr": "Joint European guideline update: universal MMR IHC or MSI testing in all EC (III, B); molecular classification needs all four surrogate tests.",
+            "tldr": "~3% of endometrial carcinomas are Lynch-related; the guideline advises MMR IHC or MSI testing in all EC regardless of histology (III, B) and four-test molecular classification.",
             "details": [
-              "🔍 Joint ESGO/ESTRO/ESP update of the 2014 European consensus on endometrial carcinoma",
-              "🔍 MEDLINE systematic review, Jan 2014 to June 2019, English only",
-              "🔍 Grading uses an adapted IDSA-USPHS system: levels of evidence I-V, grades A-E",
-              "🔍 191 external reviewers scored each recommendation for relevance and feasibility",
+              "🔍 Joint ESGO/ESTRO/ESP update of the 2014 European consensus conference",
+              "🔍 Evidence base: systematic MEDLINE review, Jan 2014 to Jun 2019, English only",
+              "🔍 Grading: adapted IDSA-USPHS system, evidence levels I-V × grades A-E",
+              "🔍 191 external reviewers scored relevance and feasibility; patients reviewed qualitatively",
               {
-                "text": "📊 Key recommendations captured in source, with level and grade",
+                "text": "🧭 Graded recommendations captured in the source excerpt",
                 "table": {
                   "columns": [
                     "Recommendation",
@@ -27,38 +681,38 @@
                   ],
                   "rows": [
                     [
-                      "Multidisciplinary tumor board planning of staging and treatment",
+                      "Multidisciplinary tumor board planning of staging + treatment",
                       "V, A"
                     ],
                     [
-                      "Treatment in a specialized center, esp. high-risk or advanced stage",
+                      "Treatment in a specialized gyn-onc center, esp. high-risk/advanced",
                       "V, A"
                     ],
                     [
-                      "MMR IHC (+ MLH1 promoter methylation) or MSI in all EC, any histology",
+                      "MMR IHC (+ MLH1 promoter methylation if MLH1/PMS2 loss) or MSI in all EC, any histotype",
                       "III, B"
                     ],
                     [
-                      "Genetic counseling if increased Lynch risk",
+                      "Genetic counseling for EC pts at increased Lynch risk",
                       "III, B"
                     ],
                     [
-                      "Lynch endometrial surveillance generally from age 35, tailored",
+                      "Lynch EC surveillance generally from age 35, tailored to mutation + family history",
                       "IV, B"
                     ],
                     [
-                      "Annual TVUS + annual or biennial biopsy until hysterectomy in Lynch carriers",
+                      "Annual TVUS + annual or biennial endometrial biopsy until hysterectomy",
                       "IV, B"
                     ],
                     [
-                      "Hysterectomy + BSO after childbearing, preferably before age 40",
+                      "Hysterectomy + BSO at completion of childbearing, preferably before age 40",
                       "IV, B"
                     ]
                   ]
                 }
               },
               {
-                "text": "📊 Lynch syndrome cumulative incidence at 70 years by gene",
+                "text": "📊 Lynch cumulative cancer incidence at 70 years by mutated gene",
                 "table": {
                   "columns": [
                     "Gene",
@@ -89,11 +743,19 @@
                   ]
                 }
               },
-              "📊 ~3% of all EC and ~10% of MMRd/MSI EC are germline MMR-driven",
-              "🔍 Molecular classification needs all four tests: p53, MSH6, PMS2 IHC plus POLE exonuclease-domain sequencing",
-              "⚠️ A single surrogate test alone is insufficient: ~5% of carcinomas are 'multiple classifiers'",
-              "⚠️ Occult malignancy at prophylactic surgery up to 17% in one retrospective series; counsel before surgery",
-              "⚠️ Source excerpt truncates before the adjuvant treatment recommendations; RT-specific grades not reported in source text"
+              {
+                "text": "🔗 Gene-specific surveillance start ages cited (Ryan et al)",
+                "subdetails": [
+                  "MSH2: from age 30",
+                  "Nontruncating MLH1: from age 35",
+                  "MSH6 and truncating MLH1: from age 40",
+                  "Heterozygous PMS2: gynecological surveillance not warranted"
+                ]
+              },
+              "📊 Occult malignancy at prophylactic surgery in Lynch/HNPCC up to 17% (retrospective, Lachiewicz et al)",
+              "🔍 Molecular classification needs all four tests: p53, MSH6, PMS2 IHC + POLE exonuclease-domain sequencing",
+              "⚠️ Single surrogate test insufficient: multiple classifiers occur in ~5% of carcinomas",
+              "⚠️ Source excerpt truncated before adjuvant treatment section; RT recommendations not captured"
             ],
             "figures": [],
             "nct": null,
@@ -102,45 +764,51 @@
               1000000229
             ],
             "slug": "esgo-estro-esp-endometrial-guidelines",
-            "significance": "The molecular classification is valid only with all four tests (p53, MSH6, PMS2, POLE exonuclease domain), since ~5% of tumors carry multiple classifiers and a single surrogate misassigns them. That classification is reported as prognostic most clearly in high-grade and high-risk tumors, the group where adjuvant decisions are made; the RT recommendations themselves fall outside the captured excerpt.",
-            "monday_clinic": "In any newly diagnosed endometrial carcinoma, whatever the histologic subtype, this supports MMR IHC or MSI testing to triage Lynch referral (III, B); MMRd alone does not identify a germline carrier, since most cases are sporadic.",
+            "significance": "The molecular classification that adjuvant decisions now lean on is valid only when all four tests are run: ~5% of carcinomas are multiple classifiers, and POLEmut requires a pathogenic exonuclease-domain variant. The guideline's adjuvant RT allocations fall past the truncation point of this excerpt, so the excerpt does not show which RT decision each molecular group moves.",
+            "monday_clinic": "In a Lynch syndrome mutation carrier, this supports hysterectomy plus BSO at completion of childbearing, preferably before 40, with counseling on occult cancer at surgery; it does not extend gynecological surveillance to heterozygous PMS2 carriers.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "Joint **ESGO/ESTRO/ESP** guideline updating the 2014 European consensus. MEDLINE review of **Jan 2014 to June 2019**; recommendations graded on an adapted IDSA-USPHS scale (levels I-V, grades A-E), with **191 external reviewers** and patient input."
+                "body": "Joint ESGO/ESTRO/ESP guideline updating the **2014 European consensus conference**. Systematic MEDLINE review of studies published **Jan 2014 to Jun 2019**, English only, with priority to systematic reviews, meta-analyses and RCTs. Recommendations graded by an adapted IDSA-USPHS system (levels I-V, grades A-E), then scored by **191 external reviewers** with patient input."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Women with endometrial carcinoma across risk groups and histotypes, plus **Lynch syndrome mutation carriers** for surveillance and risk-reducing surgery."
               },
               {
                 "label": "Results",
-                "body": "**Universal MMR IHC or MSI** in all EC regardless of histology (III, B), with MLH1 promoter methylation testing when MLH1/PMS2 is lost. Lynch surveillance generally **from age 35** and risk-reducing hysterectomy + BSO **preferably before 40** (IV, B)."
+                "body": "**MMR IHC or MSI in all endometrial carcinomas**, irrespective of histotype (III, B), with MLH1 promoter methylation analysis after MLH1/PMS2 loss. Molecular classification requires **p53, MSH6, PMS2 and POLE together**; POLEmut only with a pathogenic exonuclease-domain variant."
               },
               {
-                "label": "Discussion",
-                "body": "The molecular surrogate algorithm (p53, MSH6, PMS2, POLE) is endorsed only as a **complete panel**, because ~5% of tumors are multiple classifiers. POLEmut status requires a pathogenic variant in the **exonuclease domain**."
+                "label": "vs leading data",
+                "body": "Aligns with ISGyP, which recommends MMR/MSI testing in all endometrial carcinomas irrespective of age, and with the Manchester International Consensus Group. Builds the surrogate classifier on the TCGA molecular groups, citing consistent prognostic relevance in independent cohorts and prospective trials."
               },
               {
                 "label": "Applies to",
-                "body": "Represents women with endometrial carcinoma of any histology and Lynch syndrome mutation carriers. Does not represent heterozygous PMS2 carriers for gynecological surveillance, whose absolute risk the guideline calls very low."
+                "body": "Represents women with endometrial carcinoma of any histotype and Lynch syndrome mutation carriers. Does not represent adjuvant RT or systemic allocation by risk group, which falls outside the captured excerpt."
               },
               {
                 "label": "Limitations",
-                "body": "Literature search stopped at **June 2019** and was English-only. The captured excerpt ends before the adjuvant therapy section, so RT and systemic recommendations are not reported in source text."
+                "body": "Single-database, **English-only** search closing **Jun 2019**, so later evidence is not graded here. Lynch surveillance and surgical-timing items rest on **retrospective (IV)** evidence, and the 17% occult-malignancy figure comes from a single retrospective series."
+              },
+              {
+                "label": "Discussion",
+                "body": "The operational change is that pathology now carries the risk stratification: a four-test panel replaces histology-only grouping, with an explicit rule against running one surrogate in isolation. L1CAM and CTNNB1 remain open candidates for refining low-grade NSMP disease."
               }
             ],
-            "interpretation": null,
+            "interpretation": "The most consequential move in this guideline is structural rather than therapeutic: it puts the TCGA-derived molecular classification into routine diagnostic workup and insists on the full panel. Requiring p53, MSH6 and PMS2 immunohistochemistry together with POLE exonuclease-domain sequencing, and refusing to let any one surrogate stand alone, is a quality rule as much as a biological one. The stated reason is that a combination of positive tests occurs in about 5% of carcinomas, so a lab running p53 alone would misassign a POLE-mutated or MMR-deficient tumor that also carries an abnormal p53 pattern. For anyone who uses molecular group to calibrate adjuvant intensity, the input is only as good as the panel, and this guideline makes incomplete testing a deviation rather than a shortcut.\n\nOn universal MMR testing the document follows ISGyP and the Manchester group rather than leading them. Its own contribution is to tie the test to four separate uses: diagnostic, Lynch pre-screening, prognostic, and predictive for checkpoint inhibitor benefit. That combination is what justifies testing every tumor regardless of age or histotype. Grading the recommendation III, B is honest about the evidence: the case for universal testing rests on cohort data and cost reasoning, not on randomized comparison.\n\nThe Lynch surveillance and risk-reducing surgery recommendations deserve more caution than their confident wording implies. All are graded IV, B. The gene-specific incidence figures make a reasonable case for tailoring, with endometrial risk at 70 years ranging from 24% for PMS2 to 51% for MSH2, and the cited Ryan et al ages track that gradient. Yet the formal recommendation settles on a general start age of 35 with individual adjustment, a compromise between a gene-specific schedule and a simple one. The 17% occult-malignancy ceiling at prophylactic surgery comes from one retrospective series and is best read as an upper bound for counseling, not a prevalence estimate.\n\nThe methodology limits what the document can settle. The literature search covers MEDLINE only, in English, and closes in June 2019, so it cannot grade molecularly directed adjuvant data published after that point. Its authority comes from the breadth of the development panel and the 191-reviewer external round, which measures acceptability and feasibility rather than outcome. That is the right tool for a consensus document, but a reader should treat its grades as a snapshot of 2019 evidence.\n\nFor the radiation oncologist, the captured excerpt stops just as the guideline turns to adjuvant treatment, so the risk-group allocations that move EBRT or vaginal brachytherapy decisions are not visible here. What the excerpt does fix is the upstream rule: whatever adjuvant allocation follows, it presumes the full four-test classification has been done.",
             "relevant_specialties": [
-              "radonc",
               "medonc",
               "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Molecular classification is prognostic mainly in high-grade and high-risk tumors, the adjuvant-decision group, and is valid only with all four tests. The adjuvant RT recommendations themselves are beyond the captured source text.",
-              "medonc": "Universal MMR IHC or MSI testing serves four roles, including prediction of immune checkpoint inhibitor benefit. Lost MLH1/PMS2 requires promoter methylation testing before germline referral, since most MMRd is sporadic.",
-              "surgonc": "Risk-reducing hysterectomy + BSO in Lynch carriers is advised after childbearing, preferably before 40 (IV, B). Occult malignancy at prophylactic surgery reached up to 17% in one retrospective series, so pre-operative counseling and workup carry weight."
+              "medonc": "MMR status is framed as predictive for checkpoint inhibitor utility as well as a Lynch pre-screen, which is part of why the guideline advises MMR IHC or MSI in every endometrial carcinoma (III, B). The four-test molecular panel is the required basis for classification, with no single surrogate accepted.",
+              "surgonc": "Hysterectomy plus BSO in Lynch carriers is advised at completion of childbearing and preferably before age 40 (IV, B), with estrogen replacement after premenopausal BSO. Counseling should cover occult malignancy found at prophylactic surgery, reported up to 17% in one retrospective series."
             },
             "open_questions": [
-              "Role of L1CAM or CTNNB1 in low-grade NSMP endometrioid carcinoma",
-              "Optimal gene-specific surveillance start age in Lynch carriers"
+              "Role of L1CAM and CTNNB1 in low-grade NSMP endometrioid carcinoma",
+              "Gene-specific vs uniform surveillance start age in Lynch carriers"
             ],
             "consort": null,
             "modality": null,
@@ -156,7 +824,7 @@
               ],
               "queries_failed": [],
               "candidates_returned": 7,
-              "fetched_at": "2026-11-09T09:05:47.044Z",
+              "fetched_at": "2026-11-10T09:07:17.499Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [
@@ -168,106 +836,141 @@
             "meeting": null
           },
           {
-            "name": "ABS compendium of gynecologic HDR brachytherapy fractionation",
-            "tldr": "Cervix HR-CTV D90 goal 85-95 Gy EQD210; no single optimal HDR scheme for any site; doses >7 Gy/fx flagged for higher complication risk.",
+            "name": "ABS gynecologic HDR brachytherapy fractionation compendium",
+            "tldr": "Reference HDR schedules with EQD2 for cervix, endometrium and vagina. Cervix HR-CTV D90 goal 85-95 Gy EQD2(10); no cuff regimen ranked above another.",
             "details": [
-              "🔍 ABS Gynecologic Task Force report (2019): literature + prior ABS guidelines + member experience, consensus via conference calls",
-              "🔍 Not a systematic review; recommendations made only where the panel agreed",
-              "⚠️ Higher dose/fx with fewer fractions raises toxicity; >7 Gy/fx needs optimal implant geometry and OAR review",
-              "📊 Cervix EBRT + brachy course to be completed in <7-8 weeks for better local control and survival",
+              "🔍 ABS Gyn Task Force compendium built from prior ABS consensus, the literature and members' clinical experience",
+              "⚠️ No single optimal schedule is endorsed for any site; higher dose/fx with fewer fx is flagged as raising toxicity",
+              "⚠️ Complication signal cited above 7 Gy/fx; prior ABS ceiling was 7.5 Gy/fx with at least 4 fx",
               {
-                "text": "📊 Target dose goals by setting (EQD210 unless stated)",
+                "text": "📐 Intact cervix, tandem-based",
+                "subdetails": [
+                  "Point A schedules after EBRT 25 x 1.8 Gy: HDR 4 x 7, 5 x 6, 6 x 5, 5 x 5.5 Gy",
+                  "Point A doses are pre-optimization starting points for volume-based planning",
+                  "3 x 8 and 2 x 9 Gy also used internationally",
+                  "International trial: better LC with 4 x 7 Gy than with 2 x 9 Gy",
+                  "Complete EBRT + brachy in <7-8 wk",
+                  "Vienna series: hybrid IC/IS needed in ~45% of pts to reach the D90 goal"
+                ]
+              },
+              {
+                "text": "📊 Target dose goals by setting",
                 "table": {
                   "columns": [
                     "Setting",
                     "Target",
-                    "Dose goal"
+                    "Goal"
                   ],
                   "rows": [
                     [
                       "Intact cervix, image-guided",
                       "HR-CTV D90",
-                      "85-95 Gy (90-95 Gy for larger tumors)"
+                      "85-95 Gy EQD2(10); 90-95 for larger tumors"
+                    ],
+                    [
+                      "Cuff brachy alone, postop",
+                      "Vaginal surface",
+                      "60-65 Gy LDR-equivalent (traditional)"
+                    ],
+                    [
+                      "Cuff boost after pelvic EBRT",
+                      "Vaginal surface, EBRT + brachy",
+                      "65-70 Gy; 70-75 Gy if superficial + margin"
+                    ],
+                    [
+                      "Vaginal recurrence, uterine primary",
+                      "Vaginal lesion",
+                      "≥75 Gy EQD2"
                     ],
                     [
                       "Inoperable stage I uterine, HDR alone",
                       "Uterine CTV / GTV",
-                      "48-62.5 Gy / 80-90 Gy"
+                      "48-62.5 / 80-90 Gy EQD2(10)"
                     ],
                     [
                       "Inoperable stage I uterine, EBRT + HDR",
                       "Uterine CTV / GTV",
-                      "65-75 Gy / 80-90 Gy"
+                      "65-75 / 80-90 Gy EQD2(10)"
                     ],
                     [
-                      "Post-op vaginal cuff boost after EBRT",
-                      "Vaginal surface (LDR equivalent)",
-                      "65-70 Gy; 70-75 Gy for superficial positive margins"
-                    ],
-                    [
-                      "Vaginal recurrence of uterine cancer",
-                      "Vaginal lesion",
-                      "at least 75 Gy EQD2 (LDR equivalent)"
+                      "Vaginal interstitial",
+                      "CTV",
+                      "70-75 Gy distal vagina, near vulva or RV septum; 80-85 Gy poor EBRT response"
                     ]
                   ]
                 }
               },
               {
-                "text": "📐 OAR D2cc limits: ABS vs EMBRACE-derived (EQD23)",
+                "text": "📐 OAR D2cc limits: ABS vs EMBRACE-derived",
                 "table": {
                   "columns": [
-                    "OAR",
-                    "ABS limit",
+                    "Structure",
+                    "ABS",
                     "EMBRACE-derived"
                   ],
                   "rows": [
                     [
-                      "Rectum/sigmoid D2cc",
+                      "Rectum D2cc EQD2(3)",
                       "70-75 Gy",
-                      "≤65 Gy (rectum)"
+                      "≤65 Gy"
                     ],
                     [
-                      "Bladder D2cc",
-                      "approximately 80-90 Gy",
+                      "Sigmoid D2cc EQD2(3)",
+                      "70-75 Gy",
+                      "Not stated"
+                    ],
+                    [
+                      "Bladder D2cc EQD2(3)",
+                      "~80-90 Gy",
                       "≤80 Gy"
+                    ],
+                    [
+                      "Rectovaginal point",
+                      "Not stated",
+                      "≥65 Gy EQD2(3) correlated with vaginal stenosis"
                     ]
                   ]
                 }
               },
               {
-                "text": "📊 Vaginal cuff brachy alone: most common schemes in the ABS survey, in rank order",
+                "text": "📊 Postop vaginal cuff brachy alone: most common regimens in the latest practice survey",
                 "table": {
                   "columns": [
-                    "Rank",
                     "Regimen",
-                    "Prescription point"
+                    "Prescription point",
+                    "Survey frequency"
                   ],
                   "rows": [
                     [
-                      "1",
                       "7 Gy x 3",
-                      "0.5 cm depth"
+                      "0.5 cm depth",
+                      "Most common"
                     ],
                     [
-                      "2",
                       "6 Gy x 5",
-                      "Vaginal surface"
+                      "Vaginal surface",
+                      "Second"
                     ],
                     [
-                      "3",
-                      "5.5 Gy x 4 and 5 Gy x 5",
-                      "0.5 cm depth"
+                      "5.5 Gy x 4",
+                      "0.5 cm depth",
+                      "Next most common"
                     ],
                     [
-                      "4",
+                      "5 Gy x 5",
+                      "0.5 cm depth",
+                      "Next most common"
+                    ],
+                    [
                       "7.5 Gy x 5",
-                      "Vaginal surface"
+                      "Vaginal surface",
+                      "Last of those listed"
                     ]
                   ]
                 }
               },
               {
-                "text": "💊 Vaginal cuff HDR after EBRT (ABS Table 4)",
+                "text": "📐 Cuff boost after EBRT (ABS consensus)",
                 "table": {
                   "columns": [
                     "EBRT",
@@ -285,12 +988,19 @@
                   ]
                 }
               },
-              "🔗 Sorbe et al.: the only cited randomized cuff data, 290 pts, 2.5 Gy x 6 vs 5.0 Gy x 6 at 0.5 cm",
-              "⚠️ Sorbe arms had equal outcomes but more vaginal shortening at higher dose/fx; low-risk stage IA G1-2 only",
-              "🔗 Cervix: 3 x 8 Gy and 2 x 9 Gy are listed as alternatives; an international trial favored 4 x 7 Gy over 2 x 9 Gy for LC",
-              "🔍 Interstitial cervix: BID fractions about 6 h apart in one week; Vienna alternative 7 Gy x 4 over two procedures",
-              "⚠️ Hybrid IC/IS was needed in about 45% of Vienna pts to reach the D90 goal",
-              "⚠️ Vaginal stenosis correlated with rectovaginal reference point EQD23 ≥65 Gy (EMBRACE)"
+              {
+                "text": "🔍 Interstitial technique",
+                "subdetails": [
+                  "Vaginal lesions >0.5 cm thick at brachy go interstitial",
+                  "Cervix IC/IS: BID ~6 h apart; 9 fx over 4.5 days with one insertion",
+                  "Vienna: 7 Gy x 4 to HR-CTV over two procedures",
+                  "6 Gy x 6 over two insertions also published with acceptable results",
+                  "Needle loading kept to ≤10-20% of total dwell time"
+                ]
+              },
+              "🔗 Sorbe RCT, n=290: 2.5 vs 5.0 Gy x 6 at 0.5 cm; equal outcomes, more vaginal shortening at the higher dose",
+              "⚠️ Sorbe enrolled low-risk stage IA G1-2 only; its high-dose arm exceeds currently accepted 5 mm-depth doses",
+              "⚠️ A 0.5 cm-depth prescription on a 2.5 cm cylinder needs modification to match 3 cm-cylinder surface dose"
             ],
             "figures": [],
             "nct": null,
@@ -299,46 +1009,45 @@
               1000000228
             ],
             "slug": "abs-gyn-hdr-fractionation-compendium",
-            "significance": "The EMBRACE-derived OAR limits sit below the ABS ones (rectal D2cc ≤65 vs 70-75 Gy, bladder ≤80 vs about 80-90 Gy EQD23), and the panel says lower doses are recommended in practice. For cuff brachy the panel picks no scheme. It flags that 0.5 cm-depth prescriptions need modifying on a 2.5 cm cylinder to keep surface dose acceptable.",
+            "significance": "Point A schedules are now only a starting point. The working goal is HR-CTV D90 85-95 Gy EQD2(10) from EMBRACE, and the EMBRACE-derived limits (rectum D2cc ≤65 Gy, bladder ≤80 Gy) are tighter than the ABS 70-75 / 80-90 Gy. The cited complication signal above 7 Gy/fx limits how freely 3 x 8 or 2 x 9 Gy should be used.",
             "monday_clinic": null,
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**ABS Gynecologic Cancer Task Force** compendium (Brachytherapy 2019). Experts reviewed the literature, the existing ABS guidelines and their own clinical experience, then reached consensus over conference calls. **Not a systematic review.**"
+                "body": "ABS Gynecologic Cancer Task Force **compendium**. Members reviewed the literature and prior ABS consensus, discussed it on conference calls and added their own clinical experience. Recommendations were made **where there was agreement**."
               },
               {
                 "label": "Radiotherapy",
-                "body": "All schemes are given as **EQD210** for tumor and **EQD23** for OAR, so regimens can be summed and compared. Cervix image-guided target: **HR-CTV D90 85-95 Gy EQD210**, starting from the Point A schedules and then optimized. Interstitial needle loading should hold **no more than 10-20% of total dwell time**."
+                "body": "HDR schedules are given for **intact cervix** (Point A and image-guided), **postop endometrial cuff** (alone or after EBRT), **vaginal recurrence**, **medically inoperable stage I uterine** disease, and **vaginal and cervical interstitial** brachy. The paired EQD2 values are there so isoeffective schedules can be estimated."
               },
               {
                 "label": "vs leading data",
-                "body": "The cervix target range and the tighter OAR limits (**rectal D2cc ≤65 Gy, bladder ≤80 Gy**) come from EMBRACE, not the older ABS 2012 Point A guidance. For the cuff, Portec-2 and institutional series supply the schedules, and Sorbe is the only randomized comparison of fractionation."
+                "body": "The cervix target follows **EMBRACE** (HR-CTV D90 **85-95 Gy EQD2(10)**). EMBRACE also supplies the lower rectal and bladder D2cc limits. The cuff section rests on the **Sorbe** randomized trial and on institutional series, including Portec-2."
               },
               {
                 "label": "Applies to",
-                "body": "Represents HDR brachy for intact cervix, post-op endometrial cuff, vaginal cancer or recurrence, and medically inoperable stage I uterine cancer. Does not represent LDR or PDR practice, or risk-adapted dose painting beyond HR-CTV, which the authors leave undetailed."
+                "body": "Represents gyn pts receiving HDR brachytherapy with definitive, neoadjuvant or adjuvant intent for cervix, endometrial or vaginal disease. Does not represent dose-painting target volumes beyond HR-CTV, which the compendium leaves out."
               },
               {
                 "label": "Limitations",
-                "body": "Several of the source tables could not be reliably paired row-to-value here, so specific scheme-to-EQD2 mappings for Point A, interstitial and inoperable uterine schedules are not reproduced. The cervix Point A schedules derive from **2012** ABS guidance and are pre-optimization starting points."
+                "body": "The only randomized cuff evidence is the Sorbe trial in low-risk disease. The older ABS OAR limits are printed **alongside** the lower EMBRACE values without being reconciled. No search strategy or evidence grading is described."
               },
               {
                 "label": "Discussion",
-                "body": "The document is a reference list of what is acceptable, not a ranking. Its practical value is the EQD2 bookkeeping and the explicit caution on **>7 Gy/fx**. It leaves open which cuff scheme is best and how to load newer free-trajectory interstitial applicators."
+                "body": "Its main use is a conversion reference: it puts schedules prescribed to Point A, 0.5 cm depth, the vaginal surface or CTV on one EQD2 scale. It does not settle whether schedules matched on EQD2 differ in control or late toxicity. The authors concede that few data show one schedule beating another."
               }
             ],
-            "interpretation": "The most useful way to read this compendium is as a statement of tolerance rather than of optimality. The panel says plainly that no single fractionation scheme is optimal for any gynecologic site. What it actually does is fence the acceptable space: a set of schedules that converge on similar EQD2 values, plus a warning that pushing dose per fraction above 7 Gy buys convenience at the cost of complication risk unless implant geometry and OAR doses are favorable. For a brachytherapist choosing between a three-fraction and a five-fraction cervix course, that framing is more honest than a single recommended regimen would be, because the comparative evidence is thin.\n\nThe interesting tension sits between the two generations of dose limits the document carries side by side. The ABS constraints of 70-75 Gy EQD23 for rectum and sigmoid D2cc and roughly 80-90 Gy for bladder are presented next to the lower EMBRACE-derived thresholds (rectal ≤65 Gy, bladder ≤80 Gy), and the authors concede that lower OAR doses are recommended in practice on the strength of the European data. Practically, a planner who treats the ABS numbers as the ceiling is working to an older standard than the panel itself endorses. The same applies to target dose. The 85-95 Gy HR-CTV D90 goal is an image-guided, EMBRACE-anchored target, while the Point A schedules are explicitly labeled pre-optimization starting points. Reaching the upper end of that range for bulky disease required hybrid intracavitary and interstitial technique in about 45% of the Vienna experience, which is a resource statement as much as a dosimetric one.\n\nFor the post-hysterectomy cuff, the evidence base is weaker than the table of schedules might suggest. The only randomized fractionation comparison cited (Sorbe, 290 pts, 2.5 Gy x 6 vs 5.0 Gy x 6 to 0.5 cm) enrolled low-risk stage IA grade 1-2 disease, a group in which most current practice would not offer brachytherapy at all, and it found equal outcomes with more vaginal shortening in the higher-dose arm. Everything else rests on institutional series and survey frequency. The most common US scheme, 7 Gy x 3 at 0.5 cm, is therefore a consensus of habit. The point about cylinder diameter is the one most likely to change a plan: a depth prescription that is reasonable on a 3 cm cylinder delivers a materially higher surface dose on a 2.5 cm cylinder, so the prescription should follow the applicator rather than the protocol name.\n\nWhat would make this document wrong is mainly the passage of time. It was written before newer prospective data on reduced-fraction cervix regimens and modern interstitial applicators matured, and the authors themselves say loading patterns for free-trajectory needles are undefined. The international comparison favoring 4 x 7 Gy over 2 x 9 Gy for local control is a reminder that isoeffective EQD2 arithmetic does not guarantee isoeffective outcomes at the extremes of fraction size. Read it as a floor for safe practice and as an EQD2 lookup, and defer to image-guided dose-volume data where the two disagree.",
+            "interpretation": "This document is a reference table set, not an evidence synthesis, and should be read that way. The task force assembled it from earlier ABS consensus statements, the literature and its members' practice, through conference-call discussion. It describes no search strategy, no evidence grading and no formal voting. Its value is that it puts schedules usually quoted in incompatible units (Point A dose, 0.5 cm depth, vaginal surface, CTV) side by side with EQD2 conversions. It does not rank them. For the postoperative cuff the authors decline to recommend any regimen over another.\n\nFor intact cervix, the bigger change is that Point A is demoted. The Point A schedules are offered as an unoptimized starting point, and the actual goal is an HR-CTV D90 of 85-95 Gy EQD2(10) taken from EMBRACE, with the upper end for larger tumors at the time of brachytherapy. That brings the ABS reference in line with image-guided practice. Yet the older ABS organ limits (rectum and sigmoid D2cc 70-75 Gy, bladder 80-90 Gy) still sit next to the lower EMBRACE-derived values (rectum ≤65 Gy, bladder ≤80 Gy). A planner working from the ABS numbers alone accepts more rectal dose than the cohort that set the target goal. Reaching that goal took hybrid intracavitary/interstitial technique in about 45% of pts in the Vienna experience. That is a statement about resources as much as about dose.\n\nThe evidence is thinnest, and the toxicity stakes highest, in the section on fraction size. The text cites a complication signal above 7 Gy per fraction and a former ABS ceiling of 7.5 Gy/fx with at least four fractions. It still lists 3 x 8 Gy as acceptable, based on one trial that reported equivalent tumor and OAR outcomes against a four-fraction 6 Gy/fx regimen. It also allows 2 x 9 Gy for resource-poor settings, even though an international trial showed better local control with 4 x 7 Gy. These are practical concessions, not claims of equivalence. Tumor-side EQD2 arithmetic will not capture the late-effect cost of the larger fractions.\n\nThe postoperative endometrial section rests on one randomized comparison: Sorbe's 290-patient trial of 2.5 vs 5.0 Gy x 6 prescribed to 0.5 cm depth. Outcomes were equal, with more vaginal shortening at the higher dose. The trial enrolled only low-risk stage IA grade 1-2 disease, and its high-dose arm is above what is now accepted at 5 mm depth. Every other cuff schedule in the document is institutional. The practical point most likely to be missed is the cylinder-diameter caveat: a depth prescription built for a 3 cm cylinder has to be modified on a 2.5 cm cylinder to keep the surface dose comparable.\n\nThe compendium leaves open whether schedules matched on EQD2 actually perform alike for local control and late vaginal, rectal and bladder toxicity. It does not try to answer that question.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The EMBRACE-derived OAR limits sit below the ABS ones (rectal D2cc ≤65 vs 70-75 Gy EQD23), and the panel endorses the lower values. For the cuff it names no preferred scheme and flags that depth prescriptions need adjusting on a 2.5 cm cylinder."
+              "radonc": "Point A schedules are now only a starting point. The working goal is HR-CTV D90 85-95 Gy EQD2(10) from EMBRACE, and the EMBRACE-derived limits (rectum D2cc ≤65 Gy, bladder ≤80 Gy) are tighter than the ABS 70-75 / 80-90 Gy. The cited complication signal above 7 Gy/fx limits how freely 3 x 8 or 2 x 9 Gy should be used."
             },
             "open_questions": [
-              "Optimal vaginal cuff HDR fractionation scheme",
-              "Outcomes of 3-fraction vs 4-5 fraction cervix HDR",
-              "Loading patterns for newer interstitial applicators"
+              "Late toxicity of 3 x 8 or 2 x 9 Gy vs 4-5 fraction cervix HDR",
+              "Head-to-head cuff brachytherapy regimens beyond low-risk endometrial cancer"
             ],
             "consort": null,
             "modality": "radiation",
@@ -375,631 +1084,24 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Histologically documented malignancy of the cervix and planned to receive brachytherapy as part of definitive treatment.\n* ECOG performance status of 0-2\n* Age ≥ 18 years old.\n* Ability to understand and the willingness to provide written informed consent.\n\nExclusion…",
-                "answers_question": "Outcomes of 3-fraction vs 4-5 fraction cervix HDR",
-                "relevance_phrase": "phase 2 3-fx vs standard 4-fx HDR, definitive cervix"
+                "answers_question": "Late toxicity of 3 x 8 or 2 x 9 Gy vs 4-5 fraction cervix HDR",
+                "relevance_phrase": "3 vs 4 fraction cervix HDR, nonrandomized feasibility"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "vaginal brachytherapy endometrial",
-                "cervical cancer brachytherapy fractionation"
+                "cervical cancer brachytherapy fractionation",
+                "endometrial vaginal brachytherapy"
               ],
               "queries_failed": [],
-              "candidates_returned": 33,
-              "fetched_at": "2026-11-09T09:06:13.074Z",
+              "candidates_returned": 35,
+              "fetched_at": "2026-11-10T09:07:55.367Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {
                 "type": "paper",
                 "id": 228
-              }
-            ],
-            "meeting": null
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "prostate",
-        "intro": "Three guidance documents, all expert opinion or detection data rather than outcome data: NGI before salvage RT post-RP, the unresolved dose and constraint questions in salvage SBRT, and intact-gland SBRT in large or post-TURP prostates.",
-        "studies": [
-          {
-            "name": "Radiosurgery Society guide to localized prostate SBRT",
-            "tldr": "Case-based RSS guide to intact-prostate SBRT (≤5 fx): large gland, high baseline IPSS and prior TURP are not contraindications if OAR constraints are met.",
-            "details": [
-              "🔍 Expert case-based guide endorsed by the Radiosurgery Society; two modified real-world cases, not a trial",
-              "🔍 Scope: dose/fractionation, OAR constraints, dose escalation, rectal spacer, ADT with SBRT, high-risk, large prostate, IBD, MR guidance",
-              {
-                "text": "🔍 Case A: unfavorable intermediate-risk, cT1cN0M0, PSA 8.1, 112 mL gland on MRI",
-                "subdetails": [
-                  "Neoadjuvant leuprolide 2 mo pre-SBRT → gland 61 mL",
-                  "Hydrogel spacer, 40 Gy/5 fx QOD to prostate + proximal 1 cm SV, VMAT",
-                  "6 mo ADT total; IPSS 8 baseline → 10 at 1 yr, PSA ~0.15 after T recovery"
-                ]
-              },
-              "🔍 Case B: MR-guided 40 Gy/5 fx with SIB 42 Gy/5 fx to DIL; hip prosthesis artifact less on MRI sim",
-              {
-                "text": "📐 SBRT prescription conventions differ across centers",
-                "table": {
-                  "columns": [
-                    "Approach",
-                    "Prescription",
-                    "Hot spot handling"
-                  ],
-                  "rows": [
-                    [
-                      "100% isodose",
-                      "Covers CTV or PTV, goal 95-99% receiving Rx",
-                      "Case A limited V105% (42 Gy) < 20-30%"
-                    ],
-                    [
-                      "Robotic-style",
-                      "75-85% isodose covering PTV",
-                      "Dmax 130-140% of Rx; inhomogeneity deliberately allowed"
-                    ]
-                  ]
-                }
-              },
-              "🔗 Only 5% of PACE-B pts had prostate volume ≥80 mL, so large-gland data are thin",
-              "⚠️ One retrospective series found volume ≥50 mL predicted late and any G2+ GU toxicity; others reported favorable toxicity at ≥50-100 mL",
-              "⚠️ Authors advise against neoadjuvant ADT solely for cytoreduction, yet Case A used it for that gland",
-              "🔗 MIRAGE (NCT04384770) cited as randomized support for MR guidance lowering toxicity",
-              "⚠️ Prior TURP data mixed; PACE-B allowed these pts. Recommendations are expert opinion, source truncated"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": null,
-            "tweet_ids": [
-              1000000227
-            ],
-            "slug": "rss-prostate-sbrt-case-guide",
-            "significance": "The useful RT detail is the prescription spread: 100% isodose with V105% < 20-30% vs 75-85% isodose with Dmax 130-140%, which makes cross-center dose comparisons unreliable. On gland size, PACE-B had only 5% of pts ≥80 mL, so offering SBRT to large glands rests on retrospective data plus spacer and bladder filling.",
-            "monday_clinic": "In a pt with a large prostate, high baseline IPSS or prior TURP, this guide supports offering SBRT with counselling on a harder transient GU flare when OAR constraints are achievable; it does not support neoadjuvant ADT for cytoreduction alone.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Case-based practical guide **endorsed by the Radiosurgery Society**, built on two modified real-world cases. Expert synthesis of existing evidence, not a trial or systematic review."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Both cases **40 Gy in 5 fractions** to prostate + proximal SV; Case B added an MR-guided **SIB of 42 Gy** to the dominant intraprostatic lesion. Case A prescribed to the 100% isodose covering PTV, limiting **V105% (42 Gy) < 20-30%**, with hydrogel spacer and QOD delivery."
-              },
-              {
-                "label": "Discussion",
-                "body": "**Large prostate is not a contraindication** if OAR constraints are met; spacer and bladder filling help, and neoadjuvant ADT purely for cytoreduction is discouraged. Pts with baseline IPSS ≥15 had low G3 GU toxicity with prophylactic α1-antagonists but should be counselled on a harder transient flare."
-              },
-              {
-                "label": "vs leading data",
-                "body": "PACE-B is the reference trial but enrolled few large glands (**5% ≥80 mL**) and allowed prior TURP. MIRAGE (NCT04384770) is cited for MR guidance reducing toxicity."
-              },
-              {
-                "label": "Limitations",
-                "body": "Case A's own neoadjuvant ADT shrank the gland from 112 to 61 mL, so it does not test SBRT on an untreated large gland. Whether large-gland GU risk is specific to SBRT fractionation remains unresolved pending PACE-B subgroup analyses."
-              }
-            ],
-            "interpretation": "This piece is a practical, opinion-based companion to the trials that moved prostate SBRT into standard practice. It is not new evidence. Its value is in naming the decisions where the randomized data run thin and saying, as a society, where the authors would stand. The main example is gland size. PACE-B is the trial most readers lean on, but the guide points out that only 5% of its pts had volumes ≥80 mL, so a radiation oncologist offering SBRT to a 100 mL gland is relying on retrospective series. Those series disagree: one found volume ≥50 mL predicted late and any grade ≥2 GU toxicity, while others reported acceptable toxicity at 50-100 mL with no loss of biochemical control. The guide reads the balance as permissive, conditional on meeting constraints. That is a reasonable judgment, but it is a judgment.\n\nCase A complicates that message. The authors say neoadjuvant ADT should not be used only to shrink the gland, yet the illustrative pt received leuprolide, which took the gland from 112 to 61 mL before SBRT. Unfavorable intermediate-risk disease justifies ADT on oncologic grounds, so the choice can be defended. Still, the case does not show SBRT tolerated by an untreated large gland. A reader looking for reassurance on that exact scenario will not find it here.\n\nThe prescription discussion is probably the most transferable part. Prescribing 40 Gy to the 100% isodose with V105% held under 20-30% is a very different dose distribution from prescribing to the 75-85% isodose with Dmax at 130-140%. Single-institution toxicity and control figures are hard to compare without knowing which convention a center uses, and that applies to any dose-escalation claim, including the 42 Gy SIB shown in Case B.\n\nOn urinary function, the guide rests its position on retrospective series with generous α1-antagonist prophylaxis in pts with IPSS ≥15. The open question it names is the right one: is the large-gland or poor-baseline GU risk specific to five-fraction delivery, or common to prostate RT of any schedule? The authors point to future PACE-B subgroup analyses for the answer. MIRAGE is cited as randomized support for MR guidance reducing toxicity, which makes MR-guided SBRT a lever for the high-risk-of-toxicity pt rather than only a convenience.\n\nThe guide could be wrong if large-gland toxicity turns out to be fractionation-dependent. In that case moderate hypofractionation would be the safer default for these pts, and the permissive stance here would need to narrow. The excerpt was truncated before the high-risk, ADT and IBD sections, so this read covers only the large-gland, baseline urinary and TURP discussion.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Prescription conventions vary widely (100% isodose with V105% < 20-30% vs 75-85% isodose with Dmax 130-140%), so dose comparisons across series need care. Large glands are supported mainly by retrospective data, since PACE-B had only 5% ≥80 mL; spacer, bladder filling and MR guidance (MIRAGE) are the stated mitigations."
-            },
-            "open_questions": [
-              "Is large-gland GU toxicity specific to SBRT fractionation?",
-              "Does MR-guided SBRT reduce GU toxicity in large glands?"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": "curative",
-            "methodology": "consensus-guideline",
-            "content_type": "review",
-            "discussed_trials": [
-              "PACE-B",
-              "MIRAGE"
-            ],
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT01584258",
-                "brief_title": "Prostate Advances in Comparative Evidence",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 2205,
-                "primary_completion_date": "2025-12",
-                "brief_summary": "This study is an international multicentre randomised study of low, intermediate, and high risk prostate cancer and is composed of three parallel randomisation schemes based on applicability of surgery as a treatment for the patient and risk group. Low and intermediate risk patients, for whom surgery is a consideration, are randomised to either prostatectomy or prostate SBRT. Low and intermediate risk patients, for whom surgery is not a consideration, are randomised to either conventionally…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Prostatectomy",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Conventionally Fractionated Prostate Radiotherapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Prostate SBRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion critieria (all arms):\n\n* Histological confirmation of prostate adenocarcinoma within the last 18 months (unless on active surveillance and not clinically indicated)\n* Men aged ≥18 years at randomisation\n* WHO performance status 0 - 2\n* Patients considered candidates for surgery are…",
-                "answers_question": "Is large-gland GU toxicity specific to SBRT fractionation?",
-                "relevance_phrase": "randomizes prostate SBRT vs conventional fractionation"
-              },
-              {
-                "nct": "NCT07276438",
-                "brief_title": "Image-Guidance and Online Adaptation With Stereotactic Body Radiation Therapy for the Treatment of Localized Prostate Cancer, MANTICORE Trial",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 186,
-                "primary_completion_date": "2031-12",
-                "brief_summary": "This clinical trial studies the side effects of image-guidance and online adaptation with stereotactic body radiation therapy (SBRT) for the treatment of patients with prostate adenocarcinoma that has not spread to other parts of the body (localized). Image-guided SBRT is a standard treatment for localized prostate cancer. This treatment uses imaging of the cancer within the body to define and localize the area to be treated with the radiation. Imaging can be obtained using either computed…",
-                "conditions": [
-                  "Localized Prostate Adenocarcinoma",
-                  "Stage I Prostate Cancer AJCC v8",
-                  "Stage II Prostate Cancer AJCC v8",
-                  "Stage III Prostate Cancer AJCC v8"
-                ],
-                "interventions": [
-                  {
-                    "name": "Biospecimen Collection",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "Computed Tomography",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "CT-guided Stereotactic Body Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Inter-fraction Adaptation of Treatment Plan",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Magnetic Resonance Imaging",
-                    "type": "PROCEDURE"
-                  },
-                  {
-                    "name": "MRI-guided Stereotactic Body Radiation Therapy",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Survey Administration",
-                    "type": "OTHER"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18\n* Histologically confirmed, clinically localized adenocarcinoma of the prostate\n* Staging workup as recommended by the National Comprehensive Cancer Network (NCCN) on the basis of risk grouping\n\n  * Advanced imaging studies (i.e. prostate-specific membrane antigen…",
-                "answers_question": "Does MR-guided SBRT reduce GU toxicity in large glands?",
-                "relevance_phrase": "CT- vs MRI-guided SBRT arms, side-effect focus"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "prostate SBRT urinary toxicity",
-                "MRI-guided prostate radiotherapy"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 37,
-              "fetched_at": "2026-11-09T09:05:46.088Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 227
-              }
-            ],
-            "meeting": null
-          },
-          {
-            "name": "ESTRO ACROP Delphi: salvage SBRT for intraprostatic relapse",
-            "tldr": "Consensus on only 14/40 items (35%) after 3 Delphi rounds; dose, fractionation, biopsy need and cumulative OAR constraints remain unresolved.",
-            "details": [
-              "🔍 3-round Delphi, Jul-Dec 2019; 18/33 invited salvage SBRT authors (54.5%), all completed every round",
-              "🔍 Consensus defined as >80% agreement; major agreement 65-80%; divided <65%",
-              {
-                "text": "📊 Consensus by questionnaire section",
-                "table": {
-                  "columns": [
-                    "Section",
-                    "Consensus items",
-                    "Kendall's W",
-                    "Agreement"
-                  ],
-                  "rows": [
-                    [
-                      "Patient selection",
-                      "6/19",
-                      "0.17",
-                      "Weak"
-                    ],
-                    [
-                      "Imaging + biopsy",
-                      "3/7",
-                      "0.34",
-                      "Moderate"
-                    ],
-                    [
-                      "Dosimetry (CTV + OARs)",
-                      "5/14",
-                      "0.12",
-                      "Very weak"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📊 Consensus reached on",
-                "subdetails": [
-                  "Age not a selection criterion (>80%)",
-                  "ECOG 0-1 (94%)",
-                  "Prior ADT not a contraindication",
-                  "CTV = mpMRI GTV + adaptive margin",
-                  "No concomitant ADT with salvage SBRT",
-                  "Phoenix definition valid for follow-up after re-RT",
-                  "Primary RT dose factored into salvage dose",
-                  "Metastatic disease excluded before salvage"
-                ]
-              },
-              "📊 Major agreement: ≥2 yr minimum interval from primary RT; dose prescribed to the isodose",
-              "📊 Schedules in use: 5-6 fx up to about 35 Gy (30-35 Gy and >35 Gy most frequent)",
-              {
-                "text": "⚠️ Divided opinion persisted on",
-                "subdetails": [
-                  "Prior toxicity threshold: 56% exclude after G2+, rest after G3+",
-                  "Biopsy always needed: only 22%",
-                  "Salvage dose higher, lower or same vs primary",
-                  "Fractionation schedule",
-                  "Cumulative CTV and OAR dose constraints",
-                  "Max T, Gleason and PSA for selection"
-                ]
-              },
-              "⚠️ Imaging: choline PET 89% vs PSMA-PET 28%; rounds closed before most PSMA-PET data published",
-              "⚠️ Panel Europe-weighted: only 2 of 18 from outside Europe (US)"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": null,
-            "tweet_ids": [
-              1000000226
-            ],
-            "slug": "estro-acrop-salvage-sbrt-delphi",
-            "significance": "The dosimetric section, at Kendall's W 0.12, is where the panel agreed least: no consensus on salvage dose relative to primary, fractionation, or cumulative rectum/bladder limits. What it does fix is the target and sequencing: focal CTV of mpMRI GTV plus an adaptive margin, no concurrent ADT, and a 2-year minimum interval from primary RT.",
-            "monday_clinic": "In an M0, ECOG 0-1 man with intraprostatic relapse ≥2 years after primary RT, this expert opinion supports focal SBRT without concurrent ADT as a reasonable option; it does not tell you the dose, fractionation, cumulative OAR limits, or whether imaging alone can stand in for biopsy.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "ESTRO ACROP **Delphi consensus**, 40-item questionnaire in **3 rounds** (Jul 22 to Dec 16, 2019). Items with **>80% agreement** were retired as consensus; an EAU-nominated urologist sat on the reviewing committee."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Panel of **18 of 33** invited authors of salvage SBRT papers (54.5%), all completing every round. **12/18** work in centres treating >2,000 pts/yr; only 2 practise outside Europe."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Consensus on a **focal CTV (mpMRI GTV + adaptive margin)**, dose prescribed to the isodose, and **no concomitant ADT**. Schedules in use were **5-6 fx up to about 35 Gy**, but the panel did not agree on a recommended fractionation or on dose relative to the primary course."
-              },
-              {
-                "label": "Results",
-                "body": "**14/40** items reached consensus (35%), half of them in round 1; consensus or major agreement on **27/40** (68%). Agreement was highest for imaging/staging (W 0.34) and lowest for dosimetry (**W 0.12**)."
-              },
-              {
-                "label": "vs leading data",
-                "body": "The Uro-GEC-ESTRO salvage brachytherapy Delphi split on whole-gland vs focal targets and mandated histology; this panel agreed on focal GTV-based CTV but split on biopsy. The Italian AIRO PROLAPSE survey leaned toward concurrent ADT, which this panel rejected."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents intraprostatic relapse after prior definitive prostate RT, metastatic disease excluded, ECOG 0-1. Does not represent prostate-bed recurrence after RP or nodal/distant relapse."
-              },
-              {
-                "label": "Limitations",
-                "body": "Rounds closed before most PSMA-PET data appeared, so the 28% PSMA-PET endorsement is dated. Panellists were selected as authors of the mostly retrospective, short-follow-up series the consensus draws on, which risks circular endorsement."
-              },
-              {
-                "label": "Discussion",
-                "body": "The unresolved items (biopsy, dose, cumulative OAR constraints) are the ones a prospective protocol has to fix first. The ongoing trials cited already disagree with each other on interval (2 vs 4 yr) and on whole-gland vs partial CTV."
-              }
-            ],
-            "interpretation": "The value of this document lies less in what the panel agreed on than in where it could not agree. Most of the consensus items describe things a careful radiation oncologist would already do before re-irradiating a prostate: exclude metastatic disease, restrict to ECOG 0-1, do not treat early relapses, and use the Phoenix definition in follow-up. The section that matters most for planning, dose and organs at risk, produced the weakest concordance of the three, with a Kendall's W of 0.12. The panel could not say whether the salvage dose should be higher, lower or equal to the primary course, could not settle on a fractionation, and could not agree on a cumulative constraint for rectum, bladder, femoral heads or penile bulb. Anyone starting a salvage SBRT program will therefore still be choosing those parameters from single-institution experience.\n\nTwo positions do carry practical weight. The first is the focal target: CTV defined as the mpMRI GTV plus an adaptive margin. That departs from the Uro-GEC-ESTRO brachytherapy Delphi, which split on whole-gland versus partial targets, and it sits alongside the Corkum systematic review the authors cite, which found no gain in local control or bRFS from whole-prostate re-irradiation and less severe late toxicity with partial re-treatment. The second is the rejection of concurrent ADT, framed explicitly as a way to delay ADT and its quality-of-life cost. The Italian PROLAPSE survey leaned the other way, which shows how far practice varies even within one national community.\n\nMethodology should temper confidence in several ways. The panel was drawn from authors of the salvage SBRT literature, which the discussion itself describes as retrospective with short follow-up; experts endorsing the approach they publish on is a structural bias of this design. The questionnaire was adapted from a brachytherapy instrument and, by the authors' account, built mainly from clinical experience because the data were thin. Timing matters too: the low PSMA-PET endorsement (28% vs 89% for choline PET) reflects rounds that closed before most PSMA-PET detection data were published, so a reader should not take it as a current imaging position.\n\nThe biopsy split is the most consequential open question. Guidelines and the MASTER meta-analysis keep histology as the filter against radiological false positives, while only 22% of this panel called biopsy always necessary. The PICTURE data cited (mpMRI avoiding repeat biopsy in 14% with 97% detection of clinically significant disease) were not generated in the post-RT setting, so they support the question rather than answer it. The consensus is a reasonable scaffold for trial eligibility; it is not evidence that salvage SBRT controls disease, which still rests on the retrospective series and the ongoing prospective protocols.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The dosimetric section, at Kendall's W 0.12, is where the panel agreed least: no consensus on salvage dose relative to primary, fractionation, or cumulative rectum/bladder limits. What it does fix is the target and sequencing: focal CTV of mpMRI GTV plus an adaptive margin, no concurrent ADT, and a 2-year minimum interval from primary RT."
-            },
-            "open_questions": [
-              "Optimal salvage SBRT dose and fractionation relative to the primary course",
-              "Can PSMA-PET/mpMRI replace biopsy before prostate re-irradiation?",
-              "Cumulative OAR constraints for prostate re-irradiation"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": "consensus-guideline",
-            "content_type": "review",
-            "discussed_trials": [
-              "NRG/RTOG 0526",
-              "MASTER",
-              "PICTURE",
-              "PROLAPSE"
-            ],
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT06201078",
-                "brief_title": "Stereotactic Re-irradiation of Local Recurrences of Prostate Cancer After Radiotherapy",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 55,
-                "primary_completion_date": "2029-12",
-                "brief_summary": "The goal of this clinical study is to evaluate the toxicity and efficacy of re-irradiation using focal stereotactic body radiotherapy (SBRT) in patients with local recurrence of prostate cancer after definitive or post-operative radiotherapy.\n\nThe main question is the tolerance of such treatment, concerning the incidence of Grade ≥ 2 and Grade ≥ 3 GU and GI toxicity. Also the efficacy of SBRT will be measured in terms of Biochemical Control with other secondary endpoints which include:…",
-                "conditions": [
-                  "Local Recurrence of Malignant Tumor of Prostate",
-                  "Radiotherapy"
-                ],
-                "interventions": [
-                  {
-                    "name": "Stereotactic Body Radiotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Local recurrence of prostate cancer after definitive radiotherapy\n\n   1. biopsy proven or/and\n   2. Consistent MRI and PET-PSMA results and PSA growth dynamics\n2. Time since primary radiotherapy - at least 2 years\n3. Good performance status (ZUBROD 0-1)\n\n   * If the results…",
-                "answers_question": "Can PSMA-PET/mpMRI replace biopsy before prostate re-irradiation?",
-                "relevance_phrase": "phase 2 SBRT reRT; biopsy or MRI+PSMA-PET eligible"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "prostate reirradiation stereotactic",
-                "PSMA PET recurrent prostate radiotherapy"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 26,
-              "fetched_at": "2026-11-09T09:06:01.364Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 226
-              }
-            ],
-            "meeting": null
-          },
-          {
-            "name": "ASCO guideline: imaging for advanced prostate cancer",
-            "tldr": "NGI should be offered when salvage RT is contemplated after RP (evidence high, strong). Withhold it when no salvage local therapy is planned.",
-            "details": [
-              "🧭 ASCO guideline (JCO 2020), endorsed by ASTRO, AUA, SNMMI, ACR, SAR, SUO",
-              "🔍 Systematic review of literature 2013 to Aug 2018: 35 studies (17 systematic reviews ± M-A, 18 primary)",
-              "🔍 NGI defined as PSMA (68Ga/18F ligands), 11C-choline, 18F-fluciclovine PET/CT, PET/MRI, WB-MRI, 18F-NaF PET/CT",
-              {
-                "text": "📊 NGI recommendations by disease state (Rec 4.3 to 4.11; 4.1 to 4.2 not in source excerpt)",
-                "table": {
-                  "columns": [
-                    "Scenario",
-                    "NGI recommendation",
-                    "Evidence quality",
-                    "Strength"
-                  ],
-                  "rows": [
-                    [
-                      "Rising PSA post-RP, neg conventional imaging, no salvage planned (4.3)",
-                      "Should not be offered",
-                      "Low",
-                      "Moderate"
-                    ],
-                    [
-                      "Rising PSA post-RP, salvage RT contemplated (4.4)",
-                      "Should be offered",
-                      "High",
-                      "Strong"
-                    ],
-                    [
-                      "Rising PSA post-RT, salvage not planned (4.5)",
-                      "Should not be offered, except IRB trial",
-                      "Intermediate",
-                      "Moderate"
-                    ],
-                    [
-                      "Rising PSA post-RT, salvage local/regional therapy contemplated (4.6)",
-                      "Supported; may guide management",
-                      "Intermediate",
-                      "Moderate"
-                    ],
-                    [
-                      "Hormone-sensitive, metastatic on conventional imaging (4.7)",
-                      "Potential role to clarify burden",
-                      "Intermediate",
-                      "Moderate"
-                    ],
-                    [
-                      "Nonmetastatic CRPC (4.8)",
-                      "Only if care change contemplated",
-                      "Weak",
-                      "Moderate"
-                    ],
-                    [
-                      "Metastatic CRPC, PSA progression (4.9)",
-                      "Conventional imaging; PSA alone not reason to switch",
-                      "Intermediate",
-                      "Strong"
-                    ],
-                    [
-                      "Metastatic CRPC, high suspicion, neg conventional imaging (4.10)",
-                      "Could be contemplated, ideally trial",
-                      "Insufficient",
-                      "Weak"
-                    ],
-                    [
-                      "Metastatic CRPC, radiographic progression on conventional imaging (4.11)",
-                      "Not routinely offered",
-                      "Insufficient",
-                      "Moderate"
-                    ]
-                  ]
-                }
-              },
-              "📊 Habl et al: 59% had RT plan changed and 43% stage change from 68Ga-PSMA PET/CT",
-              "📊 Albisinni et al: 76% (99 of 131) had treatment plan changed by 68Ga results",
-              "⚠️ Evidence base is detection and management-change data, not outcome data; no survival benefit shown for NGI-guided care",
-              "⚠️ Literature cutoff Aug 2018 predates most prospective PSMA PET data; PSMA listed only 'where available'",
-              "⚠️ Rec 4.7: NGI may shift intent from oligometastatic multimodality to systemic alone; stage migration risk for MDT selection"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": null,
-            "tweet_ids": [
-              1000000225
-            ],
-            "slug": "asco-advanced-prostate-imaging-guideline",
-            "significance": "The only high-evidence, strong recommendation is NGI before contemplated salvage RT after RP (4.4), and Habl et al reported 59% of RT plans changed by 68Ga-PSMA PET/CT. Post-RT rising PSA without salvage intent gets the opposite call (4.5), so imaging should follow the salvage decision, not precede it.",
-            "monday_clinic": "In post-RP rising PSA with negative conventional imaging where salvage RT is on the table, this supports NGI first; it does not support NGI for men not candidates for, or unwilling to receive, salvage therapy.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "ASCO expert panel with ASTRO, AUA, SNMMI, ACR, SAR and SUO. **Systematic review 2013 to Aug 2018**, 35 studies: 17 systematic reviews ± meta-analysis and 18 primary articles."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Men with advanced prostate cancer: newly diagnosed clinical high-risk, suspected or confirmed metastatic, recurrent, or progressive on treatment, including **nonmetastatic CRPC** and **metastatic CRPC**."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "For men in whom **salvage radiotherapy is contemplated**, NGI should be offered (Rec 4.4; evidence high, strength strong). Habl et al reported **59%** RT plan changes from 68Ga-PSMA PET/CT."
-              },
-              {
-                "label": "Results",
-                "body": "Conventional imaging (CT, bone scan, prostate MRI) and/or NGI per scenario. NGI is **not offered** absent salvage intent after RP (4.3) or RT (4.5), and not routinely offered for radiographic progression in mCRPC (4.11)."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Evidence is drawn from detection-rate and diagnostic-accuracy meta-analyses of choline, fluciclovine, acetate and 68Ga-PSMA PET. It contains no randomized trial of NGI-guided treatment with clinical outcome endpoints."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents men with advanced prostate cancer where imaging informs salvage or systemic decisions. Does not represent men with no planned change in management, where NGI is advised against."
-              },
-              {
-                "label": "Limitations",
-                "body": "Literature closes Aug 2018, before the prospective PSMA PET era matured. Much of the recommendation set is **informal consensus** with benefits/harms ratio uncertain."
-              },
-              {
-                "label": "Discussion",
-                "body": "The guideline makes imaging conditional on a salvage or care-change decision, not a reflex to rising PSA. It does not settle whether NGI-driven stage migration improves outcomes, especially for oligometastatic MDT selection (4.7)."
-              }
-            ],
-            "interpretation": "The organizing principle here is that next-generation imaging earns its place only when the result can change what happens next. Nearly every recommendation is gated on intent: offer NGI when salvage radiotherapy or another salvage local therapy is contemplated, and withhold it when no such therapy is planned. That framing is sensible because the evidence base cannot support anything more ambitious. The 35 included studies measure detection rates, sensitivity and specificity, and the proportion of plans changed. None measures whether patients imaged with NGI live longer or stay progression-free longer than those imaged conventionally. A management change is not a benefit until a downstream trial shows it.\n\nFor the radiation oncologist, the load-bearing recommendation is 4.4. It is the only one rated high evidence quality with strong strength, and it covers the most common referral: rising PSA after prostatectomy with negative conventional imaging and salvage RT under consideration. The primary data in the review make clear why the panel was confident here: Habl et al reported a changed RT plan in 59% of patients and a changed stage in 43% after 68Ga-PSMA PET/CT. Changing the plan is a statement about target volume and possibly about intent. Whether the extra nodal or distant findings justify extending fields, boosting, or abandoning salvage is exactly what the guideline does not settle.\n\nThe asymmetry between the post-prostatectomy and post-radiotherapy scenarios deserves attention. After RT, NGI is supported only when salvage local or regional therapy is contemplated (4.6, intermediate evidence, moderate strength), and is actively discouraged outside a trial when it is not (4.5). That is coherent with the gating principle. It also places the burden on the clinician to decide salvage candidacy before imaging, which in practice often runs in the other direction.\n\nRecommendation 4.7 is the one most likely to age poorly. For hormone-sensitive disease already metastatic on conventional imaging, the panel acknowledges NGI may move a patient from multimodality oligometastatic management to systemic therapy alone. That is stage migration with direct consequences for metastasis-directed RT eligibility, yet the trials defining oligometastatic benefit selected patients on conventional imaging. Applying PSMA-defined burden to thresholds validated on bone scan and CT is a translation the guideline flags only as 'prospective data are limited'.\n\nVintage is the main reason to read this guideline as a floor rather than a ceiling. The search closes in August 2018, and PSMA ligands appear 'where available', listed alongside choline and fluciclovine rather than above them. A reader applying it now should treat the scenario gating as durable and the tracer hierarchy as superseded. The castration-resistant recommendations (4.8 to 4.11) rest on weak or insufficient evidence and largely defer to conventional imaging and the PCWG3 principle that PSA progression alone should not drive a therapy change.",
-            "relevant_specialties": [
-              "radonc",
-              "medonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Rec 4.4 (high evidence, strong) backs NGI before salvage RT after RP, with 59% RT plan changes and 43% stage changes in Habl et al. For post-RT BCR, NGI is supported only when salvage local or regional therapy is contemplated (4.6, moderate).",
-              "medonc": "In metastatic CRPC, PSA progression alone should not drive a therapy switch, and conventional imaging stays the serial comparator (4.9, strong). In nonmetastatic CRPC, NGI is reserved for when a care change is contemplated (4.8), and evidence is weak."
-            },
-            "open_questions": [
-              "Does NGI-guided salvage RT improve outcomes beyond plan change?",
-              "Do PSMA-defined oligometastatic thresholds transfer MDT benefit?",
-              "Role of NGI in nmCRPC management"
-            ],
-            "consort": null,
-            "modality": null,
-            "intent": null,
-            "methodology": "consensus-guideline",
-            "content_type": "review",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT04794777",
-                "brief_title": "Comparing \"Salvage\" Radiotherapy and Individualized PSMA PET/CT Targeted Treatment in With Relapsing Prostate Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 450,
-                "primary_completion_date": "2027-10",
-                "brief_summary": "Less than 50% of patients receiving salvage radiation therapy (SRT) to the pelvis as treatment for prostate cancer relapsing after surgery will achieve undetectable Prostate Specific Antigen (PSA) levels. Despite SRT, two-thirds of patients will again develop elevated PSA, 20% will have distant metastases, and 10% will die from prostate cancer within 10 years. The reason for this is probably preexisting distant metastasis and lymph node metastasises which need to better targeted directly.…",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Individualised therapy",
-                    "type": "COMBINATION_PRODUCT"
-                  },
-                  {
-                    "name": "Standard salvage therapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Patients previously treated for prostate cancer with radical prostatectomy and now having a biochemical recurrence (BCR) defined as: PSA \\>0.2 \\<2.0 ng/mL, and increasing measured twice.\n* Multidisciplinary conference (MDK) decision to offer the patient SRT\n* Signed Informed…",
-                "answers_question": "Does NGI-guided salvage RT improve outcomes beyond plan change?",
-                "relevance_phrase": "phase 3 PSMA-individualized vs standard SRT post-RP"
-              },
-              {
-                "nct": "NCT04619069",
-                "brief_title": "Intermittent Androgen Deprivation Therapy With or Without Stereotactic Body Radiotherapy for Molecularly Identified Hormone Sensitive Oligometastatic Prostate Cancer",
-                "overall_status": "ACTIVE_NOT_RECRUITING",
-                "phase": [
-                  "PHASE1",
-                  "PHASE2"
-                ],
-                "enrollment_count": 60,
-                "primary_completion_date": "2030-12",
-                "brief_summary": "This study is evaluating whether adding stereotactic radiotherapy (a new, more focused type of radiotherapy) to treat all the tumours that are present will improve outcomes or not compared to drugs alone for patients who are negative on conventional imaging and positive on PSMA PET scan",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "SBRT",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Hormone therapy",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Age \\> 18 years.\n2. Able to provide informed consent.\n3. Histologic diagnosis of prostate adenocarcinoma.\n4. ECOG performance status 0-1.\n5. Stage IV hormone sensitive, synchronous or metachronous oligometastatic prostate cancer as detected by PSMA PET-CT scan with no…",
-                "answers_question": "Do PSMA-defined oligometastatic thresholds transfer MDT benefit?",
-                "relevance_phrase": "IADT ± SBRT, PSMA+ but CI-negative oligomet HSPC"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "PSMA PET salvage radiotherapy",
-                "PSMA oligometastatic prostate radiotherapy",
-                "PSMA PET castration-resistant nonmetastatic"
-              ],
-              "queries_failed": [
-                {
-                  "term": "PSMA PET castration-resistant nonmetastatic",
-                  "reason": "empty"
-                }
-              ],
-              "candidates_returned": 37,
-              "fetched_at": "2026-11-09T09:06:36.872Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 225
               }
             ],
             "meeting": null
