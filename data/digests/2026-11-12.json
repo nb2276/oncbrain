@@ -1,682 +1,97 @@
 {
   "date": "2026-11-12",
   "conference": null,
-  "generated_at": 1794474564074,
+  "generated_at": 1794560769289,
   "digest": {
-    "top_line": "ASTRO brain mets guideline: SRS strongly recommended for up to 4 intact mets (ECOG 0-2), conditionally for 5-10; size-tiered SRS dose grid and HA-WBRT plus memantine codified.",
-    "tldr": "A guideline-and-consensus day, no new outcome data. ASTRO (CNS) and ESTRO (spine) codify SRS/SBRT dose by lesion size and BED10, with 2x12Gy conditionally preferred for painful spine mets. Sacral SBRT contouring and pelvic SABR re-RT consensus both left gaps: CTV kappa 0.59, and no agreement on cumulative OAR limits or re-RT interval.",
+    "top_line": "ASTRO brain mets guideline: SRS strong for ECOG 0-2 with up to 4 intact mets, conditional for 5-10; HA-WBRT plus memantine strong when WBRT used.",
+    "tldr": "Guideline and consensus day, no new efficacy readouts; CNS and oligo-mets carried it. ASTRO grades SRS strong for up to 4 brain mets, conditional for 5-10; ESTRO conditionally prefers 2x12Gy for painful vertebral mets. Common gap: dose/fractionation and re-RT rest on retrospective data or opinion, and the pelvic SABR re-RT Delphi split on cumulative OAR constraints.",
     "sites": [
       {
-        "disease_site": "oligo-mets",
-        "intro": "Spine SBRT gets an ESTRO dose and technique framework (above 1x18Gy equivalent, PTV margin ≤3mm) plus the first sacrum-specific contouring consensus.",
-        "studies": [
-          {
-            "name": "International consensus: target volume delineation for sacral metastases and spinal SBRT",
-            "tldr": "CTV kappa 0.59 vs GTV 0.73 across 9 experts contouring 10 sacral metastasis cases; compartment-based CTV rules and an eight-segment sacral map proposed.",
-            "details": [
-              "🔍 9 experts (8 RO, 1 neurosurgeon) from 9 international centres contoured GTV, CTV and neural elements on 10 sacral metastasis cases",
-              "🔍 Panel experience: >7850 spine SBRT cases, median 13 yrs (range 7-18) treating spine SBRT",
-              "🔍 Agreement by STAPLE at an 80% confidence level, kappa corrected for chance agreement",
-              "📊 GTV kappa 0.73 (range 0.59-0.83), substantial agreement",
-              "📊 CTV kappa 0.59 (range 0.41-0.70), moderate agreement",
-              "⚠️ Lowest CTV agreement: Case 2 (kappa = 0.41) and Case 4 (kappa = 0.48), ala disease encroaching on VB and posterior elements",
-              {
-                "text": "🔍 How experts built the CTV",
-                "table": {
-                  "columns": [
-                    "Approach",
-                    "Experts",
-                    "Extent"
-                  ],
-                  "rows": [
-                    [
-                      "Anatomic compartment",
-                      "6/9",
-                      "Whole GTV compartment plus adjacent compartment(s), or at least 3 to 5 mm into adjacent bone"
-                    ],
-                    [
-                      "Limited margin",
-                      "2",
-                      "3 to 5 mm into adjacent bone"
-                    ],
-                    [
-                      "No margin",
-                      "1",
-                      "CTV = GTV"
-                    ]
-                  ]
-                }
-              },
-              "📊 Modified STAPLE CTV accepted by consensus in 9 of 10 cases; Case 5 predominant only (6 of 9, 67%)",
-              {
-                "text": "🔍 Key CTV rules stated in text",
-                "subdetails": [
-                  "Include the whole involved compartment plus the adjacent marrow space at risk",
-                  "GTV in any part of the S1 ala: CTV starts at the superior S1 ala",
-                  "Uninvolved ala included prophylactically: visible ossification line may limit CTV size",
-                  "Involved ala: ossification line is not a barrier, do not trim CTV to it",
-                  "Thecal sac contoured to inferior S5 VB as cauda equina surrogate"
-                ]
-              },
-              "🔍 New sacral classification system: 8 segments (VB, left/right anterior and posterior ala, left/right lamina, spinous process)",
-              "⚠️ Bone-confined disease only; epidural or paraspinal extension, re-irradiation and postoperative sacrum not addressed",
-              "⚠️ No sacrum-specific pattern-of-failure data behind the rules; no external validation",
-              "🔗 Extends the Cox et al. and Redmond et al. mobile-spine contouring guidelines, which did not cover the sacrum"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1016/j.radonc.2019.11.026",
-            "tweet_ids": [
-              1000000250
-            ],
-            "slug": "sacral-mets-spine-sbrt-target-volume-consensus",
-            "verdict": {
-              "soc_implication": "consensus",
-              "rationale": "Expert contouring consensus from 10 cases and 9 experts; agreement measures panel coherence, not outcomes. No sacral pattern-of-failure or external validation.",
-              "audience": "Sacral metastases confined to bone, SBRT candidates"
-            },
-            "significance": "The rule that changes contours is the S1 ala exception: any GTV in the S1 ala starts the CTV above the S1 VB, and an involved ala's ossification line is not a barrier. Disagreement concentrated at ala lesions abutting posterior elements (CTV kappa 0.41, 0.48), so that boundary stays physician judgment.",
-            "monday_clinic": "In bone-confined sacral metastases planned for SBRT, this gives a compartment-based CTV template keyed to the sacral classification system; it does not extend to epidural or paraspinal extension, re-irradiation, or the postoperative sacrum.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "International expert contouring exercise: **8 radiation oncologists and 1 neurosurgeon** from 9 academic centres independently contoured GTV, CTV and neural elements on **10 sacral metastasis cases** previously treated with SBRT. Agreement by STAPLE at 80% confidence with kappa statistics; acceptance of the modified consensus contour voted per case (consensus defined as >75% of experts)."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Cases chosen to represent a range of tumour sizes and locations across S1 to S5, from midline VB lesions to ala disease with foraminal or epidural extension. Planning CT fused with T1, T2 and T1 post-gadolinium MRI per SPINO guidelines."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "**Compartmental CTV**: the involved compartment plus adjacent marrow at risk, mapped to an eight-segment sacral classification system. **S1 ala exception**: any S1 ala GTV starts the CTV at the superior S1 ala. Thecal sac contoured to the **inferior S5 VB** as cauda equina surrogate; lumbosacral nerve roots per Yi et al., typically restricted to no hot spots."
-              },
-              {
-                "label": "Results",
-                "body": "**GTV kappa 0.73** (range 0.59-0.83), **CTV kappa 0.59** (range 0.41-0.70), P < .001 for all cases. Modified STAPLE CTV reached consensus acceptance in **9 of 10 cases**; Case 5 was predominant (6 of 9, 67%)."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Mirrors the compartmental logic of the Cox et al. (intact) and Redmond et al. (postoperative) mobile-spine guidelines, which left out the sacrum. A cited imaging-based sacral SBRT series reported cumulative LC **86.5% at 1 year and 78.7% at 2 years**, median time to local recurrence 4.7 months."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents sacral metastases confined to bone treated with de novo SBRT. Does not represent epidural or paraspinal extension, re-irradiation, or the postoperative sacrum."
-              },
-              {
-                "label": "Limitations",
-                "body": "Three experts preferred a **0-5 mm isotropic margin** over the compartmental approach, citing nerve root and bowel toxicity and sacral insufficiency fracture risk. Dose and fractionation are not specified in the main text, and OAR constraints sit in the supplement."
-              },
-              {
-                "label": "Discussion",
-                "body": "The sacral classification system is the durable product: it gives a common language for reporting sacral volumes and failures. Whether compartmental expansion improves sacral LC, or only adds toxicity, **remains untested**."
-              }
-            ],
-            "interpretation": "This paper fills a defined gap. The mobile-spine consensus contours, Cox et al. for intact disease and Redmond et al. for the postoperative spine, left the sacrum out, and no sacrum-specific pattern-of-failure analysis exists. What it supplies is a vocabulary, the eight-segment sacral classification system, plus CTV rules derived from expert contours. It does not supply outcome data. Read it as a standardization instrument: its value lies less in whether each rule is optimal than in making sacral SBRT volumes reportable in a shared language, so that future failure analyses can be pooled across centres.\n\nThe agreement numbers carry a predictable shape. GTV agreement (kappa 0.73) exceeded CTV agreement (kappa 0.59), as expected when one volume is defined by imaging and the other encodes judgment about microscopic spread. The informative part is where agreement broke down. Cases 2 and 4, with kappas of 0.41 and 0.48, were ala lesions encroaching on the vertebral body and posterior elements. That is exactly where the compartmental approach pushes the CTV toward nerve roots and bowel, and it is where three experts preferred a 0 to 5 mm isotropic margin, citing nerve root and bowel toxicity and sacral insufficiency fracture. So the consensus is firmest for central vertebral body lesions, where the decision is easy, and weakest at the lateral and posterior boundary, where it matters.\n\nThe acceptance vote should also be weighed carefully. Consensus in 9 of 10 cases sounds decisive, but the panel voted on a contour derived from its own submissions. That shows the panel is internally coherent. It does not show that the contours are correct. Highly significant kappa p-values only establish that agreement beat chance, a low bar for nine experienced academic spine SBRT clinicians. The panel was also narrow: all academic, with dedicated spine SBRT programmes, and the 10 cases were selected for representativeness rather than accrued consecutively. The core anatomic argument, that the fused sacrum lacks the disc barrier thought to limit spread in the mobile spine, is plausible, but the authors call the supporting literature sparse. The S1 ala exception and the refusal to use an involved ala's ossification line as a boundary are reasoning from anatomy, not from failure data.\n\nScope is the biggest constraint on transfer. The rules cover bone-confined disease only, excluding epidural extension, paraspinal disease, re-irradiation and the postoperative sacrum. Yet the authors' own review of a sacral SBRT series describes bulkier disease at presentation, with progression in the vertebral body together with paraspinal tissue, followed by isolated epidural progression, as the dominant failure patterns. That series reported cumulative LC of 86.5% at 1 year and 78.7% at 2 years. The scenarios this guideline excludes may therefore account for much of the sacral failure burden, and the margins for them remain individual judgment.\n\nThe rules would be wrong if sacral failures turn out to be mainly epidural or paraspinal rather than marrow-contiguous. In that case, compartmental bony expansion would add plexopathy and fracture risk without improving local control. The classification system is what makes that question testable. The practical read is to adopt the nomenclature for reporting, use the CTV rules for bone-confined disease, and treat the ala and posterior-element boundary as unresolved.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The S1 ala exception changes contours: any GTV in the S1 ala starts the CTV above the S1 VB, and an involved ala's ossification line is not a barrier. CTV agreement was lowest for ala lesions abutting posterior elements (kappa 0.41, 0.48), so that boundary stays physician judgment."
-            },
-            "open_questions": [
-              "Sacrum-specific pattern of failure after SBRT",
-              "Sacral plexus and nerve root dose tolerance",
-              "CTV for epidural or paraspinal sacral extension"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": "consensus-guideline",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "sacral metastases SBRT",
-                "spine metastases stereotactic epidural"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 11,
-              "fetched_at": "2026-11-12T09:07:34.582Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 250
-              }
-            ],
-            "meeting": null
-          },
-          {
-            "name": "ESTRO Clinical Practice Guideline: SBRT for Spine Metastases",
-            "tldr": "22 recommendations, 5 statements: spine SBRT dose above 1x18Gy (BED10=50Gy10) for LC; 2x12Gy conditionally preferred for painful mets; PTV margin ≤3mm.",
-            "details": [
-              "🔍 ESTRO guideline built on a PRISMA systematic review, Jan 2005-Sep 2021 (RTOG 0631 added Apr 2023)",
-              "🔍 22 recommendations + 5 statements; consensus threshold ≥75% panel agreement",
-              {
-                "text": "📐 Dose and fractionation recommendations",
-                "subdetails": [
-                  "Prescription above 1x18Gy equivalent (BED10=50Gy10) for durable LC",
-                  "De novo high-dose schedules: 1x20Gy, 1x24Gy, 2x12Gy, 3x10Gy, 5x7Gy; expected LC 80-90% at 1-2y",
-                  "2x12Gy conditionally recommended as preferred palliative SBRT schedule",
-                  "16 or 18Gy x1 not recommended over 1x8Gy when pain relief or QoL is the goal"
-                ]
-              },
-              {
-                "text": "🔍 Patient selection for SBRT",
-                "subdetails": [
-                  "Not frankly unstable (SINS >12 excluded)",
-                  "Bilsky 0-1, up to 3 contiguous vertebral segments in the volume",
-                  "Prolonged life expectancy with durable control intended",
-                  "Surgical stabilization assessment if SINS 7-12, especially 13-18",
-                  "SBRT not recommended in symptomatic MSCC"
-                ]
-              },
-              {
-                "text": "🔍 Technique recommendations",
-                "subdetails": [
-                  "Sim CT slice ≤1.5mm co-registered to T1 and T2 MRI",
-                  "GTV/CTV to PTV margin ≤3mm, minimum PTV margin 1mm",
-                  "Intensity-modulated delivery; online IGRT before each fraction",
-                  "Cord PRV prioritized over target coverage",
-                  "GTV coverage prioritized over nerve root sparing"
-                ]
-              },
-              {
-                "text": "📊 Randomized SBRT vs CRT pain trials cited",
-                "table": {
-                  "columns": [
-                    "Trial",
-                    "SBRT",
-                    "CRT",
-                    "Pain result"
-                  ],
-                  "rows": [
-                    [
-                      "Sprave, rand phase II (n=55)",
-                      "24Gy/1fx",
-                      "30Gy/10fx",
-                      "Response 6mo 73.7% vs 35%, p=0.015"
-                    ],
-                    [
-                      "CCTG SC.24 phase II/III",
-                      "24Gy/2fx (n=114)",
-                      "20Gy/5fx (n=115)",
-                      "CR 3mo 35% vs 14%, p=0.0002"
-                    ],
-                    [
-                      "RTOG 0631 phase 3 (n=339, 2:1)",
-                      "16 or 18Gy/1fx",
-                      "8Gy/1fx",
-                      "Response 3mo 41.3% vs 60.5%, favoring CRT"
-                    ],
-                    [
-                      "ROBOMET phase III, abstract (n=126)",
-                      "20Gy/1fx",
-                      "8Gy/1fx",
-                      "CR 1mo 37% vs 25%, ns (ITT)"
-                    ]
-                  ]
-                }
-              },
-              "🔗 SC.24 Sunnybrook subcohort (137 pts): 2y local failure 14.8% vs 35.6%, SBRT vs CRT, p<0.001",
-              {
-                "text": "📊 Vertebral fracture statements (KQ4)",
-                "table": {
-                  "columns": [
-                    "Statement",
-                    "Level of evidence"
-                  ],
-                  "rows": [
-                    [
-                      "Fractionated SBRT: no increased VCF risk vs CRT",
-                      "High"
-                    ],
-                    [
-                      "Single-fraction >20Gy: increased VCF vs CRT and vs fractionated SBRT",
-                      "High"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📊 Toxicity benchmarks cited",
-                "subdetails": [
-                  "VCF 6-14% in two large multicenter analyses",
-                  "Myelopathy 0.4% in pooled analysis of >1,000 de novo pts",
-                  "HyTEC cord Dmax for <5% risk: 12.4-14.0Gy in 1fx up to 25.3-28.8Gy in 5fx",
-                  "Pain flare 43% vs 33%, SBRT vs CRT; routine prophylactic steroids not recommended"
-                ]
-              },
-              "⚠️ Panel: 10 radonc, 1 spinal neurosurgeon, 3 physicists, 1 RTT; no medical oncologist listed",
-              "⚠️ Re-irradiation and symptomatic MSCC excluded from scope"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1016/j.radonc.2023.109966",
-            "tweet_ids": [
-              1000000249
-            ],
-            "slug": "estro-spine-sbrt-guideline",
-            "verdict": {
-              "soc_implication": "consensus",
-              "rationale": "ESTRO practice guideline from a PRISMA systematic review with ≥75% panel consensus; most recommendations rest on moderate or expert-opinion evidence, not new outcome data.",
-              "audience": "Unirradiated spine mets, solid tumors, no symptomatic MSCC"
-            },
-            "significance": "The dose floor is the actionable line: above 1x18Gy (BED10=50Gy10), with 2x12Gy preferred for painful mets, because RTOG 0631's 16 or 18Gy single fraction lost to 8Gy on 3mo pain response (41.3% vs 60.5%). Single fractions >20Gy carry high-level VCF evidence, so 24Gy x1 for oligomets trades LC against fracture.",
-            "monday_clinic": "In an unirradiated painful spine met that is not frankly unstable, Bilsky 0-1, up to 3 contiguous segments, with prolonged life expectancy, this supports considering SBRT over conventional RT; it does not extend to symptomatic MSCC, re-irradiation, or short life expectancy, where conventional RT stays preferred.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "ESTRO clinical practice guideline built on a PRISMA systematic review of PubMed, Embase and Cochrane (Jan 2005-Sep 2021), with RTOG 0631 added Apr 2023. ASTRO methodology graded evidence and recommendation strength; **≥75% agreement** defined consensus."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Vertebral metastases from solid malignancies, painful or oligometastatic, previously unirradiated. **Re-irradiation and symptomatic MSCC excluded** from scope."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "**Dose above 1x18Gy (BED10=50Gy10)** for durable LC; **2x12Gy conditionally preferred** palliative schedule. PTV margin ≤3mm (minimum 1mm), intensity-modulated delivery, daily IGRT, cord PRV prioritized over coverage."
-              },
-              {
-                "label": "Safety",
-                "body": "VCF is the most frequent AE (6-14% in two multicenter analyses); **single fractions >20Gy raise VCF risk** (high-level evidence). Myelopathy 0.4% in a pooled de novo series of >1,000 pts; routine prophylactic steroids for pain flare **not recommended**."
-              },
-              {
-                "label": "vs leading data",
-                "body": "The pain recommendation leans on **SC.24** (24Gy/2fx vs 20Gy/5fx: CR 35% vs 14%, p=0.0002). **RTOG 0631** (16 or 18Gy x1 vs 8Gy x1) showed no pain gain, which the panel reads as a dose-floor problem rather than a failure of technique."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents unirradiated spine mets that are not frankly unstable, Bilsky 0-1, up to 3 contiguous segments, with prolonged life expectancy. Does not represent re-irradiation, symptomatic MSCC, or short life expectancy where conventional RT is preferred."
-              },
-              {
-                "label": "Limitations",
-                "body": "Search closed Sep 2021 apart from RTOG 0631; ROBOMET is abstract-only and the TwiCs trial was underpowered with non-standardized dosing. Panel is radonc-weighted with one spine surgeon and no medical oncologist, yet addresses concurrent targeted/IO toxicity."
-              },
-              {
-                "label": "Discussion",
-                "body": "Dose, not technique, organizes the document: low single-fraction SBRT matched or trailed 8Gy, while higher doses improved CR and LC at a fracture cost. 2-5 fraction schedules are the hedge where fracture management capacity is limited."
-              }
-            ],
-            "interpretation": "The guideline's center of gravity is a dose argument, and the randomized data under it are less uniform than the recommendations read. SC.24 carries the pain recommendation: 24Gy in 2 fractions beat 20Gy in 5 on 3-month complete response (35% vs 14%), and the Sunnybrook subcohort extended the advantage into local failure and re-irradiation. RTOG 0631, the largest trial, went the other way, with 16 or 18Gy single-fraction SBRT showing no pain improvement over 8Gy and a higher response rate with conventional RT. The panel reconciles the two by dose rather than by technique, which is why the floor sits above 1x18Gy and why 16 or 18Gy single fraction is explicitly not recommended as a replacement for 8Gy when pain relief is the goal. That reading is coherent, but it is an inference across trials with different populations, pain definitions and fractionation, not a head-to-head dose comparison.\n\nThe oligometastatic case is thinner. The 80-95% LC at 1-2 years from the systematic review is drawn largely from non-randomized series, and the one randomized dose comparison cited (24Gy single fraction vs 27Gy in 3 fractions, 117 pts, 56% spinal) favored the higher single dose for local control. The guideline sets that directly against its fracture statements: single fractions above 20Gy carry a high-level association with VCF versus both CRT and fractionated SBRT, while fractionated SBRT does not raise fracture risk over CRT. The consequence is a choice the document deliberately leaves to institutions. 24Gy in 1 fraction buys local control at a fracture cost, and 2 to 5 fraction schedules are the hedge for centers less able to manage fractures.\n\nSelection criteria do much of the work and deserve more weight than the dose tables. Only 2% of SC.24 SBRT pts had high-grade epidural disease, and RTOG 0631 mandated a 3mm cord gap. The recommended population (not frankly unstable, Bilsky 0-1, up to 3 contiguous segments, prolonged life expectancy) mirrors who was actually studied, and the guideline states plainly that conventional RT remains preferred for short life expectancy, inability to tolerate MRI or immobilization, or pain too severe to wait for MR-based planning. Separation surgery followed by SBRT is described as an emerging trend, not endorsed broadly, which is the appropriate weight given no randomized data were cited for it.\n\nThe technical recommendations (MRI-based delineation, ≤1.5mm simulation slices, PTV margin ≤3mm with a 1mm minimum, cord PRV prioritized over coverage, daily image guidance) are framed as the conditions under which the existing evidence base should reproduce, including technology the trials predate. Their value is in drawing a boundary: a center that cannot hold an end-to-end tolerance under 2mm sits outside that evidence base whatever dose it prescribes.\n\nWhat the document cannot settle is whether 2x12Gy, the conditionally preferred palliative schedule, transfers beyond the high-volume programs that generated SC.24, and how SBRT interacts with concurrent targeted therapy or immunotherapy, where the recommendation is only to discuss the risk with the treating medical oncologist. Re-irradiation and symptomatic MSCC, two of the harder spine decisions in practice, are outside its scope entirely.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The dose floor is the actionable line: above 1x18Gy (BED10=50Gy10), with 2x12Gy preferred for painful mets, because RTOG 0631's 16 or 18Gy single fraction trailed 8Gy on 3mo pain response (41.3% vs 60.5%). Single fractions >20Gy carry high-level VCF evidence, so 24Gy x1 for oligomets trades LC against fracture."
-            },
-            "open_questions": [
-              "Does 2x12Gy transfer beyond high-volume SC.24-type centers?",
-              "Spine SBRT safety with concurrent targeted therapy or immunotherapy",
-              "Role of separation surgery before SBRT in high-grade epidural disease"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": "consensus-guideline",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT05178472",
-                "brief_title": "Vertebroplasty With Radiation Therapy for Spine Metastatic Cancer Patients With Indeterminate Lesion (SINS Criteria)",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 200,
-                "primary_completion_date": "2026-12",
-                "brief_summary": "This clinical trial studies the side effects of stereotactic radiosurgery and how well it works with or without vertebroplasty, separation surgery, or immunotherapy in patients with cancer that is radiation resistant and has spread to the spine (spinal metastases). Spinal metastases are rapidly progressive, have poor prognosis, are extremely difficult to treat, and can effect patient quality of life and overall health. Immunotherapy is a type of standard of care therapy to boost or restore the…",
-                "conditions": [
-                  "Hematopoietic and Lymphoid Cell Neoplasm",
-                  "Malignant Solid Neoplasm",
-                  "Metastatic Malignant Neoplasm in the Spine"
-                ],
-                "interventions": [
-                  {
-                    "name": "Immunotherapy",
-                    "type": "OTHER"
-                  },
-                  {
-                    "name": "Stereotactic Radiosurgery",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Vertebroplasty",
-                    "type": "PROCEDURE"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* At least 18 years of age and older with indeterminate Spine Metastasis.\n* All patients with histology that requires stereotactic RT as a part of their treatment.\n* Eastern Cooperative Oncology Group (ECOG) performance status =\\< 2\n* Disease visualized by CT or MRI\n* Prior…",
-                "answers_question": "Spine SBRT safety with concurrent targeted therapy or immunotherapy",
-                "relevance_phrase": "spine SRS ± immunotherapy, side effects tracked"
-              },
-              {
-                "nct": "NCT06165419",
-                "brief_title": "Definitive Radiation for High-Risk Spine Metastases",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE2"
-                ],
-                "enrollment_count": 26,
-                "primary_completion_date": "2026-05",
-                "brief_summary": "This study is looking at whether patients with cancer that has aggressively spread to the spine can be treated with stereotactic body radiation therapy only and avoid a large spine surgery",
-                "conditions": [
-                  "Metastatic Cancer",
-                  "Metastatic Lung Cancer",
-                  "Metastatic Breast Cancer",
-                  "Metastatic Tumor",
-                  "Metastatic Tumor of Bone",
-                  "Metastatic Tumor to the Spine",
-                  "Spine Metastases",
-                  "Metastasis"
-                ],
-                "interventions": [
-                  {
-                    "name": "SBRT to the spine",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Eligible patients must have:\n\n* Any pathologically proven solid tumor diagnosis not of central nervous system origin with radiographic or pathologic evidence of metastatic disease\n* Metastatic spine involvement documented by imaging\n* Involvement of maximum 3 contiguous vertebral bodies at the…",
-                "answers_question": "Role of separation surgery before SBRT in high-grade epidural disease",
-                "relevance_phrase": "phase 2 SBRT alone to avoid surgery, high-risk spine mets"
-              },
-              {
-                "nct": "NCT07809672",
-                "brief_title": "Efficacy and Safety of Stereotactic Body Radiation Therapy for Spinal Metastases With Bilsky Grade 1c-3",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 50,
-                "primary_completion_date": "2028-09",
-                "brief_summary": "This prospective, multicenter, single-arm phase II clinical trial is designed to enroll patients with spinal metastases classified as Bilsky grade 1c-3 who will receive stereotactic body radiation therapy (SBRT). The objective of this study is to assess the efficacy and safety of SBRT in the treatment of spinal metastases with epidural spinal cord compression (Bilsky grade 1c-3).",
-                "conditions": [
-                  "Stereotactic Body Radiation Therapy (SBRT)",
-                  "Spinal Metastases"
-                ],
-                "interventions": [
-                  {
-                    "name": "SBRT",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* · Participants must be capable of understanding and voluntarily signing the written informed consent form;· Age ≥ 18 years;· (ECOG) performance status score ≤ 3;· The primary tumor is histologically or cytologically confirmed as a solid malignant tumor (excluding multiple…",
-                "answers_question": "Role of separation surgery before SBRT in high-grade epidural disease",
-                "relevance_phrase": "single-arm SBRT alone in Bilsky 1c-3 epidural disease"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "spine metastases stereotactic radiotherapy",
-                "spine SBRT immunotherapy",
-                "separation surgery spine stereotactic"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 23,
-              "fetched_at": "2026-11-12T09:08:07.278Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 249
-              }
-            ],
-            "meeting": null
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "multi-site",
-        "intro": null,
-        "studies": [
-          {
-            "name": "International Delphi consensus: pelvic SABR re-irradiation",
-            "tldr": "66% of statements reached consensus among 21-23 international radiation oncologists; interval since prior RT, lesion number/size and cumulative OAR limits stayed unresolved.",
-            "details": [
-              "🔍 3-round Delphi, 23 radiation oncologists in Round 1 (56% of 41 invited); 21 and 22 in Rounds 2-3",
-              "🔍 Panel weighted to GU: 19 (83%) GU, 11 (48%) lower GI, 8 (35%) gyn subspecialty interest",
-              "🔍 44 statements after Round 1; 29 reached consensus in Round 2, 15 re-presented in Round 3",
-              {
-                "text": "📊 Panel agreement on selected statements (values from the paper's text)",
-                "table": {
-                  "columns": [
-                    "Statement",
-                    "Agreement",
-                    "Consensus"
-                  ],
-                  "rows": [
-                    [
-                      "SABR re-RT not usually appropriate with direct luminal OAR invasion",
-                      "90%",
-                      "Yes"
-                    ],
-                    [
-                      "May not be appropriate with luminal OAR contact (no invasion)",
-                      "50%",
-                      "No"
-                    ],
-                    [
-                      "Minimum 12 mo since prior pelvic RT",
-                      "43%",
-                      "No"
-                    ],
-                    [
-                      "PTV point max dose not to exceed 140%",
-                      "73%",
-                      "No"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📊 Patient-selection statements that reached consensus",
-                "subdetails": [
-                  "Alternative to surgical exenteration after MDT discussion",
-                  "May be considered with extra-pelvic oligometastatic disease controllable by MDT",
-                  "Feasibility weighs lesion number, target size, location and OAR proximity",
-                  "Minimum WHO PS 2 (or equivalent)",
-                  "Expected/transient prior acute RT toxicity does not in itself preclude re-RT"
-                ]
-              },
-              "📐 Agreed fractionation: 30-37.5 Gy in 5-6 fx or 21-27 Gy in 3 fx, alternate days",
-              "📐 Delivery agreement: IMRT (or similar high-conformity) plus daily online volumetric or fiducial verification",
-              "⚠️ Proposed cumulative OAR constraints (AAPM TG-101 5-fx limits used cumulatively) did not reach consensus",
-              "⚠️ Agreement measures expert opinion; no control or toxicity outcomes were generated by this study"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1016/j.radonc.2021.09.010",
-            "tweet_ids": [
-              1000000248
-            ],
-            "slug": "pelvic-sabr-reirradiation-delphi",
-            "verdict": {
-              "soc_implication": "consensus",
-              "rationale": "Delphi panel output: agreement percentages measure expert opinion, not outcomes. Frames practice where no randomised re-irradiation data exist; key dosimetric questions explicitly unresolved.",
-              "audience": "Pelvic recurrence after prior pelvic RT, SABR re-irradiation candidates"
-            },
-            "significance": "The transferable piece is the agreed technique: 30-37.5 Gy in 5-6 fx or 21-27 Gy in 3 fx on alternate days, IMRT, daily volumetric verification. Luminal OAR contact split the panel at 50% while direct invasion was a 90% exclusion, so contact cases remain judgment calls without a consensus fallback.",
-            "monday_clinic": "In a pt with pelvic recurrence after prior pelvic RT, no direct luminal OAR invasion, and WHO PS 2 or better, this supports SABR re-irradiation as an MDT option alongside exenteration; it does not settle the interval since prior RT or cumulative OAR limits.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Three-round **international Delphi**; Round 1 opened 27/10/2020, Round 3 closed 22/03/2021. 44 statements after Round 1, **29 reached consensus in Round 2**, 15 re-presented in Round 3."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Panel of radiation/clinical oncologists who had published on pelvic SABR re-irradiation or were judged international experts; one per research group. **23 of 41 invited** joined Round 1; median 10 cases/yr per participant (range 10-100). Subspecialty interest **GU 19 (83%)**, lower GI 11 (48%), gyn 8 (35%)."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Agreed schedules: **30-37.5 Gy in 5-6 fx or 21-27 Gy in 3 fx**, alternate days. Agreement also covered IMRT-level conformity and **daily online volumetric or fiducial verification**. The 140% PTV point-max cap reached only 73%; 1 participant favoured 115-125%."
-              },
-              {
-                "label": "Results",
-                "body": "**66% of statements reached consensus**, covering definition, patient selection, set-up, delineation, planning and delivery. **No consensus** on minimum interval since prior RT (43% for 12 mo), maximum lesion number/size, or cumulative OAR constraints."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Sits beside the ESTRO ACROP Delphi on salvage SBRT for intraprostatic relapse, which addresses a narrower prostate-only scenario. A thoracic re-irradiation Delphi hit the same wall: no agreed quantified dose overlap to define re-irradiation."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents SABR re-irradiation of pelvic recurrence after prior pelvic RT, with an MDT and an experienced physics/RTT team. Does not represent conventionally fractionated or hyperfractionated pelvic re-irradiation, or cases with direct luminal OAR invasion."
-              },
-              {
-                "label": "Limitations",
-                "body": "The panel is **GU-dominant**, so transfer to gyn and rectal recurrences rests on fewer voices. Optimal OAR constraints were borrowed from **de novo AAPM TG-101 limits used cumulatively**, not from re-irradiation outcome data."
-              },
-              {
-                "label": "Discussion",
-                "body": "The selection and technique framework is usable now. The unresolved items (interval, lesion count/size, cumulative constraints with recovery) are the ones that set the dose actually deliverable, so the core dosimetric decision remains **case-by-case**."
-              }
-            ],
-            "interpretation": "This document is most useful where it agrees and most informative where it does not. The areas of agreement are largely procedural: who belongs in the MDT, how to immobilise and prepare bladder and rectum, which imaging to fuse, which OARs to contour, and that IMRT-level conformity and daily volumetric verification are expected. Almost nobody practicing pelvic SABR re-irradiation would argue with any of that, and the high agreement reflects how uncontroversial it is. The agreed fractionation range, 30-37.5 Gy in 5-6 fractions or 21-27 Gy in 3 fractions on alternate days, is the closest the paper comes to a dosimetric anchor, and it gives departments a defensible default to point to.\n\nThe failures to agree carry more information. The panel could not settle a minimum interval since prior RT (43% backed 12 months), a cap on lesion number or size, or cumulative OAR constraints. Those are exactly the parameters that decide whether a meaningful re-irradiation dose can be delivered at all. The comments on the interval statement are telling: several participants argued that previously delivered OAR dose and primary disease type matter more than elapsed time, which amounts to saying the question is posed on the wrong axis. Similarly, direct luminal OAR invasion drew 90% agreement as a contraindication, yet contact without invasion split the panel at 50%, with lower total dose, compromised PTV coverage, or close intra/inter-fraction monitoring offered as workarounds. Contact is the common clinical scenario, so the gap sits where the reader most needs guidance.\n\nThe constraint problem reflects the evidence base. The proposed optimal constraints were the AAPM TG-101 de novo 5-fraction limits applied cumulatively, and the less conservative published approaches cited in Table 4 come from small retrospective series: Abusaris et al reported no grade 3+ toxicity at median 15 months follow-up, and Smith et al one grade 3 pain event at median 24.5 months. Short follow-up in re-irradiated bowel and sacral plexus is precisely where late events would hide, so the reluctance to endorse higher cumulative limits with assumed tissue recovery is defensible rather than timid.\n\nPanel composition should temper how a reader applies this outside prostate. Most participants listed a GU interest, fewer lower GI, fewer still gyn, and the organisers were UK-based. A gyn reader facing a sidewall recurrence after prior brachytherapy is working in territory the panel covered thinly, and the brachytherapy overlap statement did not settle either. Response was also modest, with 23 of 41 invited joining Round 1, so the panel is a self-selected subset of an already selected expert pool.\n\nWhat would make this obsolete is prospective outcome data with recorded cumulative OAR doses, which the panel itself endorsed collecting. Until then, the practical read is that the technique framework and patient-selection gates are a reasonable floor, and the cumulative constraint and interval decisions remain a per-case dosimetric judgment that no consensus currently backs.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The agreed technique is the transferable piece: 30-37.5 Gy in 5-6 fx or 21-27 Gy in 3 fx on alternate days, IMRT, daily volumetric verification. Luminal OAR contact split the panel at 50% versus a 90% exclusion for direct invasion, leaving contact cases without consensus backing."
-            },
-            "open_questions": [
-              "Minimum safe interval between pelvic RT courses",
-              "Cumulative OAR EQD2 limits allowing for tissue recovery",
-              "Maximum lesion number and size for pelvic SABR re-irradiation"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": "consensus-guideline",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "pelvic reirradiation stereotactic",
-                "reirradiation SBRT pelvic recurrence"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 3,
-              "fetched_at": "2026-11-12T09:07:33.622Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 248
-              }
-            ],
-            "meeting": null
-          }
-        ],
-        "open_questions": null
-      },
-      {
         "disease_site": "cns",
-        "intro": null,
+        "intro": "ASTRO extends SRS to 5-10 intact mets on conditional, low-QoE grounds, anchored by JLGK0901.",
         "studies": [
           {
-            "name": "ASTRO Clinical Practice Guideline: RT for Brain Metastases",
-            "tldr": "SRS strongly recommended for up to 4 intact brain mets (ECOG 0-2), conditionally for 5-10; size-tiered SRS dose grid and HA-WBRT plus memantine codified.",
+            "name": "ASTRO Clinical Practice Guideline: Radiation Therapy for Brain Metastases",
+            "tldr": "SRS strongly recommended for ECOG 0-2 with up to 4 intact mets, conditional for 5-10; HA-WBRT plus memantine strong when WBRT is used.",
             "details": [
-              "🔍 ASTRO task force guideline, 4 KQs: intact and resected brain mets from nonhematologic solid tumors",
-              "🔍 Built on AHRQ systematic review, 97 studies; literature end extended to Sept 2020",
+              "🔍 ASTRO task force guideline, 4 key questions; AHRQ systematic review, 97 studies, literature through Sept 2020",
               {
-                "text": "📊 KQ1 intact brain mets: recommendation by scenario",
+                "text": "🔍 KQ1 intact brain mets: recommendation grid (Table 3)",
                 "table": {
                   "columns": [
                     "Scenario",
                     "Recommendation",
-                    "Strength"
+                    "Strength",
+                    "QoE"
                   ],
                   "rows": [
                     [
                       "ECOG 0-2, up to 4 intact mets",
                       "SRS",
-                      "Strong"
+                      "Strong",
+                      "High"
                     ],
                     [
                       "ECOG 0-2, 5-10 intact mets",
                       "SRS",
-                      "Conditional"
+                      "Conditional",
+                      "Low"
                     ],
-                    [
-                      "11 to 15 mets",
-                      "Not extended (only 10 pts in supporting series)",
-                      "No recommendation"
-                    ],
-                    [
-                      "Symptomatic, candidate for local + CNS-active systemic tx",
-                      "Upfront local therapy",
-                      "Strong"
-                    ],
-                    [
-                      "Asymptomatic, eligible for CNS-active systemic tx",
-                      "MDT decision on safe deferral of local therapy",
-                      "Conditional"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📊 KQ1 SRS dose-fractionation by intact met diameter",
-                "table": {
-                  "columns": [
-                    "Diameter",
-                    "SRS regimen",
-                    "Strength"
-                  ],
-                  "rows": [
                     [
                       "<2 cm",
-                      "SF 2000-2400 cGy; MF 2700 cGy/3 fx or 3000 cGy/5 fx if V12 Gy >10 cm3",
-                      "Strong"
+                      "Single-fraction SRS 2000-2400 cGy",
+                      "Strong",
+                      "Moderate"
                     ],
                     [
                       "≥2 to <3 cm",
-                      "SF 1800 cGy or MF 2700 cGy/3 fx or 3000 cGy/5 fx",
-                      "Conditional"
+                      "SF 1800 cGy or multifraction (2700 cGy/3 fx, 3000 cGy/5 fx)",
+                      "Conditional",
+                      "Low"
                     ],
                     [
                       "≥3 to 4 cm",
-                      "MF preferred; SF up to 1500 cGy if chosen",
-                      "Conditional"
+                      "Multifraction SRS (2700 cGy/3 fx, 3000 cGy/5 fx)",
+                      "Conditional",
+                      "Not attributable in source extract"
                     ],
                     [
                       ">4 cm",
-                      "Surgery; if not feasible, MF over SF",
-                      "Conditional"
+                      "Surgery; if not feasible, multifraction over SF SRS",
+                      "Conditional",
+                      "Not attributable in source extract"
                     ],
                     [
-                      ">6 cm",
-                      "SRS discouraged (implementation remark)",
-                      "Not graded"
+                      "Symptomatic, CNS-active systemic candidate",
+                      "Upfront local therapy",
+                      "Strong",
+                      "Not attributable in source extract"
+                    ],
+                    [
+                      "Asymptomatic, CNS-active systemic eligible",
+                      "MDT decision on deferring local therapy",
+                      "Conditional",
+                      "Not attributable in source extract"
                     ]
                   ]
                 }
               },
-              "📐 QoE: High for SRS in up to 4 mets; Low for 5-10 mets",
               {
-                "text": "📊 Other KQs (resected, WBRT, palliative)",
+                "text": "📊 Other strong recommendations (abstract)",
                 "subdetails": [
-                  "Resected mets: SRS strongly recommended to improve local control",
-                  "Favorable prognosis, ineligible for surgery/SRS: WBRT (eg 3000 cGy in 10 fx) recommended",
-                  "Favorable prognosis receiving WBRT: hippocampal avoidance + memantine strongly recommended",
-                  "HA not appropriate for mets near hippocampi or leptomeningeal disease",
-                  "Poor prognosis: early palliative care strongly recommended",
-                  "Mass effect and/or >4 cm: neurosurgery discussion conditionally recommended"
+                  "Resected mets: SRS to improve local control",
+                  "Favorable prognosis receiving WBRT: hippocampal avoidance and memantine",
+                  "Poor prognosis: early palliative care for symptoms and caregiver support"
                 ]
               },
-              "🔗 Size grid descends from RTOG 90-05 MTDs: 2400, 1800, 1500 cGy for ≤2, 2.1-3, 3.1-4 cm",
-              "📐 BED10 ≥5000 cGy associated with improved LC in a multi-institutional retrospective analysis",
-              "🔗 5-10 met rec rests on JLGK0901: noninferior post-SRS survival vs 2-4 mets, cumulative volume ≤15 cm3",
-              "⚠️ No randomized or prospective controlled data on SRS dose or fractionation",
-              "⚠️ NCT01592968 (SRS vs WBRT, 5-15 intact mets) final report unpublished at guideline development",
-              "🔍 SRS alone requires MRI every 2-3 mo for 1-2 yr, then every 4-6 mo"
+              "🔍 Favorable prognosis, ineligible for surgery/SRS: WBRT (eg, 3000 cGy in 10 fx) recommended as primary treatment",
+              "📊 Postop cavity SRS vs observation: surgical bed control 72% vs 43% at 12 mo",
+              "⚠️ Nodular meningeal disease after cavity SRS reported up to 28% at 1 yr; preop SRS under investigation",
+              "🔗 JLGK0901 (prospective observational) underpins 5-10 mets: post-SRS survival noninferior vs 2-4 mets",
+              "⚠️ 11-15 mets not covered: supporting retrospective series had only 10 such pts",
+              "🔗 RTOG 90-05 MTDs 2400/1800/1500 cGy for ≤2, 2.1-3, 3.1-4 cm anchor single-fraction dosing",
+              "⚠️ No prospective comparative data on SRS dose/fractionation; BED10 ≥5000 cGy link is retrospective",
+              "⚠️ No randomized data on deferring local therapy for CNS-active systemics; up to 40% progress early without response"
             ],
             "figures": [],
             "nct": null,
@@ -687,61 +102,57 @@
             "slug": "astro-brain-mets-rt-guideline",
             "verdict": {
               "soc_implication": "consensus",
-              "rationale": "Society guideline graded by modified Delphi over an AHRQ review; no new outcome data. Dose-fractionation and 5-10 met SRS rows rest on Low QoE.",
-              "audience": "Intact or resected brain mets from nonhematologic solid tumors"
+              "rationale": "Guideline grading, not an outcome. Strong grades rest on RCTs in 1-4 mets; 5-10 mets, SRS dosing and systemic-therapy deferral rest on low-quality or observational evidence.",
+              "audience": "Adults with intact or resected brain mets from nonhematologic solid tumors"
             },
-            "significance": "The dose grid is the RT payload: SF 2000-2400 cGy for <2 cm (Strong), SF 1800 cGy or 2700/3 or 3000/5 for ≥2 to <3 cm, multifraction for ≥3 to 4 cm. No randomized fractionation data exist, so thresholds rest on RTOG 90-05 MTDs and a BED10 ≥5000 cGy retrospective association.",
-            "monday_clinic": "In ECOG 0-2 pts with 5-10 intact brain mets, this conditionally supports SRS alone over WBRT; it does not extend to 11 to 15 mets, where the panel withheld a recommendation.",
+            "significance": "The size-indexed dosing is the transferable piece: single-fraction 2000-2400 cGy under 2 cm, multifraction (2700 cGy/3 or 3000 cGy/5) at 3-4 cm, with BED10 ≥5000 cGy tied to better local control. After resection, cavity SRS carries nodular meningeal risk up to 28% at 1 yr, the reason preop SRS is being tested.",
+            "monday_clinic": "In ECOG 0-2 pts with 5-10 intact brain mets, this supports SRS alone as a conditional option over WBRT; it does not extend to 11-15 mets, where the supporting series held only 10 pts.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "ASTRO task force guideline addressing **4 key questions**, built on an AHRQ systematic review of **97 studies**. Consensus by modified Delphi: **≥75%** agreement threshold (**≥90%** for expert opinion recommendations)."
+                "body": "ASTRO task force guideline built on an **AHRQ systematic review** (97 studies, literature extended to Sept 2020). Recommendations graded by **strength and QoE**; consensus by modified Delphi with a **≥75%** agreement threshold (≥90% for expert opinion)."
               },
               {
                 "label": "Population & inclusion",
-                "body": "**Intact and resected brain metastases from nonhematologic solid tumors** in adults. Small cell lung cancer excluded from the KQ1 RCT evidence base."
+                "body": "Radiotherapeutic management of **intact and resected brain mets from nonhematologic solid tumors**. Small cell lung cancer excluded from the KQ1 RCTs; CNS-active systemic therapy and surgery deferred to the ASCO/SNO/ASTRO guideline."
               },
               {
                 "label": "Radiotherapy",
-                "body": "SF SRS **2000-2400 cGy** for <2 cm; SF **1800 cGy** or MF **2700 cGy/3 fx** or **3000 cGy/5 fx** for ≥2 to <3 cm; **multifraction** for ≥3 to 4 cm. WBRT example **3000 cGy in 10 fractions**, with **hippocampal avoidance** for favorable prognosis."
-              },
-              {
-                "label": "Endpoints",
-                "body": "Outcomes weighed: intracranial control, PFS, OS, neurocognitive function and patient-reported outcomes; **symptomatic radionecrosis** for KQ4."
+                "body": "**<2 cm:** SF SRS 2000-2400 cGy (strong). **≥2 to <3 cm:** SF 1800 cGy or 2700 cGy/3 fx or 3000 cGy/5 fx (conditional). **≥3 to 4 cm:** multifraction preferred; SF up to 1500 cGy if chosen. SRS **>6 cm discouraged**. WBRT example 3000 cGy in 10 fx with **hippocampal avoidance** for favorable prognosis."
               },
               {
                 "label": "vs leading data",
-                "body": "SRS-alone rows rest on five RCTs of local therapy with or without WBRT in 1 to 3 mets (one allowing 4), where WBRT improved intracranial control without a survival gain; **N0574** showed worse neurocognition and QoL with SRS plus WBRT. The 5-10 row rests on **JLGK0901**, an observational count-stratum comparison, not a WBRT comparison."
+                "body": "SRS-alone grade rests on 5 RCTs in 1 to 3 (one up to 4) mets, with **N0574** showing worse neurocognition and QoL after SRS plus WBRT. The 5-10 extension leans on **JLGK0901**; dosing descends from **RTOG 90-05**. NCT01592968 (SRS vs WBRT, 5-15 mets) and **CCTG CE.7** (SRS vs HA-WBRT plus memantine) were unreported."
               },
               {
                 "label": "Applies to",
-                "body": "Represents ECOG 0-2 pts with intact or resected brain mets from nonhematologic solid tumors. Does not represent pts with 11 to 15 mets, mets >6 cm, or hematologic malignancies."
+                "body": "Represents ECOG 0-2 pts with up to 10 intact brain mets or a resected met, plus favorable-prognosis pts needing WBRT. Does not represent pts with 11-15 mets, SCLC, or hematologic primaries."
               },
               {
                 "label": "Limitations",
-                "body": "Literature cutoff **Sept 2020** predates NCT01592968, CCTG CE.7 and the DFCI SRS vs HA-WBRT plus memantine trials. The panel overrode AHRQ conclusions it deemed incongruent with practice by adding neurocognitive and QoL outcomes AHRQ had excluded."
+                "body": "Literature closes Sept 2020, before the 5-15 mets phase III and CE.7 read out. Several Table 3 QoE grades and the KQ2 table are not cleanly attributable in the source extract."
               },
               {
                 "label": "Discussion",
-                "body": "Deferral of local therapy for asymptomatic pts on CNS-active systemic therapy has **no randomized evidence**; cited response rates of approximately 30% to 75% come from trials that largely excluded symptomatic or steroid-requiring pts, and up to 40% show early progression without response."
+                "body": "The document draws its firmest line at **4 mets**, softens at 5-10, and stops at 10. Deferral of local therapy for CNS-active systemics is a **conditional MDT call**, and its failure mode (local progression in existing lesions) returns to the RT clinic."
               }
             ],
-            "interpretation": "The core of this guideline is a reweighting of the WBRT question around neurocognition rather than survival. Its anchor is a set of five RCTs of local therapy with or without WBRT, all in 1 to 3 brain mets (one allowing 4), in which adding WBRT improved intracranial control without improving survival, with N0574 showing worse neurocognitive deterioration and QoL from the combination. That evidence is consistent and long-standing, which is why SRS for up to 4 intact mets carries the only Strong/High grade in KQ1. Nothing here challenges it; the guideline codifies a decade of drift away from WBRT.\n\nThe more consequential content sits in the rows with weaker grading. Extending SRS to 5-10 intact mets rests on JLGK0901, a prospective observational study comparing count strata within an SRS-treated cohort, not a randomized comparison against WBRT, plus retrospective survival data. The panel was disciplined about the boundary: it declined to extend the recommendation to 11 to 15 mets because only 10 pts in the supporting retrospective series fell in that band, and it flagged a Japanese series suggesting the worse survival seen with 5 to 15 mets might be driven by the highest-count subgroup. The conditional grade is honest. A reader treating a pt in the 5-10 band with SRS is inside the guideline but on a Low-quality evidence base, and the randomized answer, NCT01592968 comparing SRS with WBRT in 5 to 15 mets, was not available to the panel.\n\nThe dose-fractionation grid deserves the most skepticism from an RT reader. The guideline itself states that no randomized or prospective controlled study has compared clinical outcomes by SRS dose and fractionation. The size thresholds descend from RTOG 90-05, a phase 1 MTD study in pts previously treated with focal RT or WBRT, and the multifraction preference above 2 cm comes from retrospective series and a BED10 ≥5000 cGy association. These are sensible defaults rather than tested thresholds, and a lesion straddling a size cut next to the brainstem or optic apparatus remains a judgment call the grid does not resolve.\n\nThe systemic-therapy recommendations are expert-driven by necessity. There is no randomized evidence on upfront vs deferred RT for pts starting immunotherapy or CNS-active targeted agents, and the response data the panel cites come from trials that mostly excluded symptomatic or steroid-requiring pts and enrolled small-volume disease. Recommending upfront local therapy for symptomatic mets follows from that exclusion, not from a head-to-head result, and the deferral option for asymptomatic pts is appropriately conditional on surveillance access and salvage capacity.\n\nWhat would make parts of this wrong: if CCTG CE.7 or the DFCI trial shows HA-WBRT plus memantine is neurocognitively comparable to SRS in higher-count disease, the 5-10 SRS row weakens. If prospective deferral data show early progression approaching the up-to-40% rate the panel cites, the asymptomatic deferral window narrows. The Sept 2020 literature cutoff means the guideline predates several trials it names as pending, and its own commitment to replacement or reaffirmation within 5 years of publication is the clock to watch.",
+            "interpretation": "The guideline's weight sits on one well-populated question and several thin ones. SRS alone for up to 4 intact metastases in ECOG 0-2 pts earns a strong grade with high-quality evidence because 5 RCTs, N0574 among them, converged on the same trade: adding WBRT buys intracranial control, does not buy survival, and costs neurocognition. Everything outside that boundary is graded more cautiously, and the useful exercise for a reader is to notice exactly where the panel drew its lines and why.\n\nThe 5-10 extension rests on JLGK0901, a prospective observational registry, plus retrospective support, which is why it is conditional with low quality of evidence. The refusal to extend to 11-15 metastases is the most instructive call in the document. A large multi-institution series did include such pts, but only 10 of them, against 190 with 5-10 and 882 with 2-4. Reading an essentially empty subgroup as evidence of equivalence would have been easy; the panel declined. The guideline also predates the final report of the phase III SRS vs WBRT trial in 5-15 metastases (NCT01592968) and CCTG CE.7, which tests SRS against HA-WBRT plus memantine, a comparator the earlier SRS trials never faced. Either could move the 5-10 and 11-15 boundary, and the annual review cycle exists to absorb exactly that.\n\nThe dosing guidance is tidy but evidentially soft. No prospective comparative study has tested SRS dose or fractionation. The size thresholds descend from RTOG 90-05, a dose-escalation study in pts who had all received prior focal RT or WBRT, plus retrospective series showing poor control with 1500 to 1800 cGy single fraction for lesions of 2 cm or more. The BED10 ≥5000 cGy association comes from a retrospective multi-institution analysis. These are sensible anchors, but the 2-3 cm and 3-4 cm grades should be read as consensus built on retrospective data, not as demonstrated superiority of multifraction regimens.\n\nThe resected-cavity section carries a tension the recommendation does not resolve. Postoperative SRS is strongly recommended on randomized data, with surgical bed control of 72% vs 43% at 12 months against observation, yet the same move away from WBRT exposed nodular meningeal disease, reported as high as 28% at 1 year and associated with poor survival. Preoperative SRS is the obvious candidate fix, but its support so far is a retrospective comparison, which is why it sits as investigational rather than preferred.\n\nThe systemic-therapy recommendations are the weakest by the guideline's own account. There is no randomized comparison of upfront vs deferred local therapy with CNS-active agents, CNS response rates span roughly 30% to 75%, and up to 40% of pts progress early without any response. Upfront local therapy for symptomatic disease is graded strong; deferral in asymptomatic pts is a conditional judgment on lesion size, location, eloquence and access to surveillance. For an RT reader, the practical point is that the deferral decision is shared with medical oncology, but its predominant failure pattern, local progression in pre-existing lesions, lands back in the radiation clinic, often at a larger size where single-fraction SRS is no longer the preferred tool.",
             "relevant_specialties": [
               "radonc",
               "medonc",
               "surgonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The size-tiered SRS grid (SF 2000-2400 cGy <2 cm, SF 1800 cGy or 2700/3 or 3000/5 for ≥2 to <3 cm, multifraction ≥3 to 4 cm) and BED10 ≥5000 cGy anchor rest on phase 1 MTDs and retrospective data. SRS for 5-10 mets is conditional; HA plus memantine is the strongly recommended WBRT default.",
-              "medonc": "Symptomatic brain mets get upfront local therapy before immunotherapy or CNS-active targeted agents (Strong). Deferral is a conditional MDT option only for asymptomatic pts, weighing size, location, number, expected CNS response and access to close surveillance and salvage.",
-              "surgonc": "Surgery is conditionally recommended for intact mets >4 cm, with neurosurgery discussion suggested for any lesion causing mass effect regardless of size. After resection, cavity SRS is strongly recommended to improve local control, making postoperative RT referral the default."
+              "radonc": "Size-indexed dosing is the transferable piece: SF 2000-2400 cGy under 2 cm, multifraction (2700 cGy/3 or 3000 cGy/5) at 3-4 cm, and BED10 ≥5000 cGy tied to better local control. SRS alone stays conditional at 5-10 mets and is not extended to 11-15.",
+              "medonc": "Deferring local therapy for CNS-active systemic therapy is a conditional option only in asymptomatic pts; symptomatic mets get a strong recommendation for upfront local therapy. CNS response rates span roughly 30% to 75%, up to 40% progress early, and no randomized trial compares deferral with SRS.",
+              "surgonc": "Intact mets >4 cm carry a conditional recommendation for surgery, and neurosurgical discussion is suggested for any lesion causing mass effect regardless of size. After resection, cavity SRS is strongly recommended, but nodular meningeal disease up to 28% at 1 yr is driving study of preop SRS."
             },
             "open_questions": [
-              "SRS vs WBRT outcomes for 5-15 intact brain mets",
-              "SRS vs HA-WBRT plus memantine for neurocognition",
-              "Safe deferral of local therapy with CNS-active systemic therapy"
+              "SRS vs HA-WBRT plus memantine for 5-15 brain mets",
+              "Safety of deferring local therapy with CNS-active systemic therapy",
+              "Preop vs postop SRS for nodular meningeal disease"
             ],
             "consort": null,
             "modality": "radiation",
@@ -749,34 +160,6 @@
             "methodology": "consensus-guideline",
             "significance_perspective": "Radiation oncology",
             "related_trials": [
-              {
-                "nct": "NCT05378633",
-                "brief_title": "The CyberChallenge Trial How Much is Too Much - What is the Role of Cyberknife Radiosurgery in Patients With Multiple Brain Metastases?",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 190,
-                "primary_completion_date": "2027-02",
-                "brief_summary": "Patients suffering from malignancies in advanced stages often develop brain metastases, which limit both the life span and the quality of life.\n\nTherapy options for multiple brain metastases may vary and range from stereotactic radiosurgery (SRS), whole-brain radiotherapy (WBRT), chemotherapy, immunotherapy to palliative best supportive care. Especially the efficacy and toxicity of SRS compared to WBRT in patients with extensive brain metastases (\\>4) is not yet clear but of incremental…",
-                "conditions": [
-                  "Brain Metastases",
-                  "Nsclc"
-                ],
-                "interventions": [
-                  {
-                    "name": "SRS",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Whole Brain Radiotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* histologically confirmed malignant illness\n* 4-15 suspect intracranial lesions, taking into consideration all available MRI series\n* age ≥ 18 years of age\n* For women with childbearing potential, (and men) adequate contraception.\n* Ability of subject to understand character…",
-                "answers_question": "SRS vs WBRT outcomes for 5-15 intact brain mets",
-                "relevance_phrase": "SRS vs WBRT, 4-15 intracranial lesions"
-              },
               {
                 "nct": "NCT04804644",
                 "brief_title": "Testing if High Dose Radiation Only to the Sites of Brain Cancer Compared to Whole Brain Radiation That Avoids the Hippocampus is Better at Preventing Loss of Memory and Thinking Ability",
@@ -824,8 +207,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically (histologically or cytologically) proven diagnosis of small cell lung cancer within 5 years of registration. If the original histologic proof of malignancy is greater than 5 years, then pathological (i.e., more recent) confirmation is required (e.g., from a…",
-                "answers_question": "SRS vs HA-WBRT plus memantine for neurocognition",
-                "relevance_phrase": "phase 3 SCLC: SRS vs HA-WBRT+memantine, cognition"
+                "answers_question": "SRS vs HA-WBRT plus memantine for 5-15 brain mets",
+                "relevance_phrase": "phase 3 SRS vs HA-WBRT + memantine in SCLC brain mets"
               },
               {
                 "nct": "NCT03550391",
@@ -855,36 +238,8 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Patients must have 5 or more brain metastases as counted on a T1 contrast enhanced MRI obtained ≤ 30 days from randomization (maximum 15 brain metastases).\n* Patients must have a pathological diagnosis (cytological or histological) of a non-hematopoietic malignancy.\n* The…",
-                "answers_question": "SRS vs HA-WBRT plus memantine for neurocognition",
-                "relevance_phrase": "phase 3 SRS vs HA-WBRT+memantine, 5-15 mets"
-              },
-              {
-                "nct": "NCT05522660",
-                "brief_title": "Immunotherapy or Targeted Therapy With or Without Stereotactic Radiosurgery for Patients With Brain Metastases From Melanoma or Non-small Cell Lung Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 180,
-                "primary_completion_date": "2026-09",
-                "brief_summary": "The primary objective of the study is to assess the efficacy in terms of CNS-specific PFS of the combination of standard systemic treatment plus SRS vs. standard systemic treatment alone in patients with newly diagnosed and untreated (except for surgery) asymptomatic or oligosymptomatic brain metastases from melanoma or NSCLC. This proposed randomised phase III clinical study addresses one of the most controversial issues in the current approach to patients with brain mets: the timing of SRS in…",
-                "conditions": [
-                  "Non-Small Cell Lung Cancer",
-                  "Melanoma"
-                ],
-                "interventions": [
-                  {
-                    "name": "Stereotactic radiosurgery",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Immune checkpoint inhibitor",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Most important inclusion criteria:\n\n* Newly diagnosed, previously untreated (except for surgery, see below) asymptomatic or oligo-symptomatic brain metastases, e.g., controlled symptomatic seizure disorder. Note: patients with neurological symptoms or signs that require more than a stable dose of 4…",
-                "answers_question": "Safe deferral of local therapy with CNS-active systemic therapy",
-                "relevance_phrase": "phase 3 ICI/targeted ± SRS, melanoma/NSCLC, CNS-PFS"
+                "answers_question": "SRS vs HA-WBRT plus memantine for 5-15 brain mets",
+                "relevance_phrase": "phase 3 SRS vs HA-WBRT + memantine, 5-15 mets"
               },
               {
                 "nct": "NCT03340129",
@@ -918,19 +273,74 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Female or male patients, ≥18 years of age.\n2. Signed, written, informed consent.\n3. AJCC Stage IV \\[any T, any N, M1d (0) or M1D(1)\\] histologically confirmed cutaneous, acral or mucosal unresectable melanoma or unknown primary melanoma and at least 1 radiological definitive…",
-                "answers_question": "Safe deferral of local therapy with CNS-active systemic therapy",
-                "relevance_phrase": "ipi-nivo ± SRT, untreated melanoma brain mets"
+                "answers_question": "Safety of deferring local therapy with CNS-active systemic therapy",
+                "relevance_phrase": "ipi/nivo ± SRT, untreated asymptomatic melanoma BM"
+              },
+              {
+                "nct": "NCT05522660",
+                "brief_title": "Immunotherapy or Targeted Therapy With or Without Stereotactic Radiosurgery for Patients With Brain Metastases From Melanoma or Non-small Cell Lung Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 180,
+                "primary_completion_date": "2027-06",
+                "brief_summary": "The primary objective of the study is to assess the efficacy in terms of CNS-specific PFS of the combination of standard systemic treatment plus SRS vs. standard systemic treatment alone in patients with newly diagnosed and untreated (except for surgery) asymptomatic or oligosymptomatic brain metastases from melanoma or NSCLC. This proposed randomised phase III clinical study addresses one of the most controversial issues in the current approach to patients with brain mets: the timing of SRS in…",
+                "conditions": [
+                  "Non-Small Cell Lung Cancer",
+                  "Melanoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic radiosurgery",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Immune checkpoint inhibitor",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Most important inclusion criteria:\n\n* Newly diagnosed, previously untreated (except for surgery, see below) asymptomatic or oligo-symptomatic brain metastases, e.g., controlled symptomatic seizure disorder. Note: patients with neurological symptoms or signs that require more than a stable dose of 4…",
+                "answers_question": "Safety of deferring local therapy with CNS-active systemic therapy",
+                "relevance_phrase": "phase 3 ICI/targeted tx ± SRS, CNS-PFS endpoint"
+              },
+              {
+                "nct": "NCT05124236",
+                "brief_title": "Trial of Preoperative Radiosurgery Versus Postoperative Stereotactic Radiotherapy for Resectable Brain Metastases",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 200,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "The research question is whether a single fraction of preoperative radiosurgery can reduce the incidence of leptomeningeal disease 12 months following resection of a brain metastasis (BM) as compared with 5 fractions of postoperative stereotactic radiotherapy.",
+                "conditions": [
+                  "Brain Metastases, Adult"
+                ],
+                "interventions": [
+                  {
+                    "name": "preoperative radiosurgery",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "postoperative hypofractionated stereotactic radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Provision of signed and dated informed consent form\n2. Stated willingness to comply with all study procedures and availability for the duration of the study\n3. Age ≥18\n4. Karnofsky performance status ≥60\n5. Histological diagnosis of a malignant primary or metastatic…",
+                "answers_question": "Preop vs postop SRS for nodular meningeal disease",
+                "relevance_phrase": "preop SRS vs postop SRT, 12-mo LMD incidence"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "radiosurgery multiple brain metastases",
-                "hippocampal avoidance memantine radiosurgery",
-                "brain metastases radiosurgery immunotherapy"
+                "radiosurgery hippocampal avoidance memantine",
+                "brain metastases radiosurgery immunotherapy",
+                "preoperative radiosurgery brain metastases"
               ],
               "queries_failed": [],
-              "candidates_returned": 32,
-              "fetched_at": "2026-11-12T09:07:57.628Z",
+              "candidates_returned": 29,
+              "fetched_at": "2026-11-13T09:04:02.947Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -945,49 +355,841 @@
         "open_questions": null
       },
       {
-        "disease_site": "skin",
-        "intro": null,
+        "disease_site": "oligo-mets",
+        "intro": "Two spine SBRT documents: ESTRO grades selection and dosing, and an international panel carries mobile-spine compartment CTV logic to the sacrum.",
         "studies": [
           {
-            "name": "GEC-ESTRO HNS critical review: skin superficial brachytherapy with flaps and customized moulds",
-            "tldr": "Prescription >5 mm deep judged acceptable for selected large NMSC using tailored bolus; at 5 mm depth, 5→10 mm bolus cut skin Dmax 187%→148%.",
+            "name": "International consensus on target volume delineation for sacral metastases and spinal SBRT",
+            "tldr": "Kappa 0.73 for GTV and 0.59 for CTV across 9 experts and 10 cases; consensus compartment-based sacral CTV built on a new eight-segment classification.",
             "details": [
-              "🔍 PRISMA systematic review, PubMed through 31 May 2019; HDR Ir-192 superficial BT for NMSC",
-              "🔍 Evidence base: retrospective single-centre series, case studies, surveys; no clinical trial data available",
+              "🔍 Eight radiation oncologists + one neurosurgeon, 9 international centres, independently contoured 10 sacral SBRT cases",
+              "🔍 Panel: >7850 spine SBRT cases collectively, median 13 yr spine SBRT experience (range 7-18)",
+              "📐 Agreement scored with STAPLE; consensus contours generated at 80% confidence level",
               {
-                "text": "🧭 Current guidelines vs HNS WG position",
+                "text": "📊 Inter-expert contour agreement (STAPLE)",
                 "table": {
                   "columns": [
-                    "Parameter",
-                    "ACROP / ABS / GEB guidance",
-                    "HNS WG position"
+                    "Metric",
+                    "GTV",
+                    "CTV"
                   ],
                   "rows": [
                     [
-                      "Max prescription depth",
-                      "5 mm",
-                      ">5 mm acceptable in selected large tumours if interstitial BT or EBRT not viable"
+                      "Kappa (range)",
+                      "0.73 (0.59-0.83)",
+                      "0.59 (0.41-0.70)"
                     ],
                     [
-                      "Bolus thickness",
-                      "Catheters ideally 5 mm from skin (ACROP, ABS)",
-                      "Boli of different thicknesses acceptable to optimize plan"
+                      "Mean sensitivity (range)",
+                      "0.70 (0.54-0.87)",
+                      "0.55 (0.44-0.64)"
                     ],
                     [
-                      "Skin surface Dmax",
-                      "125% flaps, 140% custom moulds (ABS, GEB)",
-                      "No PROM-based value can be recommended"
+                      "Agreement level",
+                      "Substantial",
+                      "Moderate"
+                    ]
+                  ]
+                }
+              },
+              "📊 Most CTV variability in Case 2 (kappa 0.41) and Case 4 (kappa 0.48), ala lesions encroaching VB/posterior elements",
+              "📊 Modified STAPLE CTV accepted by consensus in 9 of 10 cases; Case 5 predominant only, 6/9 (67%)",
+              {
+                "text": "🔍 Experts' own CTV approach",
+                "subdetails": [
+                  "6/9: anatomic compartment approach",
+                  "2: limited 3 to 5 mm margin into adjacent bone",
+                  "1: no GTV-to-CTV margin"
+                ]
+              },
+              {
+                "text": "🔍 Sacral classification system (SCS), eight segments",
+                "subdetails": [
+                  "1 vertebral body",
+                  "2 left anterior ala · 3 left posterior ala",
+                  "4 left lamina · 5 spinous process · 6 right lamina",
+                  "7 right posterior ala · 8 right anterior ala"
+                ]
+              },
+              {
+                "text": "🔍 Key CTV and OAR rules",
+                "subdetails": [
+                  "Entire GTV compartment plus adjacent marrow compartment at risk",
+                  "Superior/inferior extent set by vertebral levels",
+                  "Any S1 ala involvement: CTV starts at superior S1 ala",
+                  "Ala ossification line may cap CTV only when GTV spares the ala",
+                  "Thecal sac contoured to inferior S5 as cauda equina surrogate"
+                ]
+              },
+              "🔗 Extends compartmental logic of mobile-spine SBRT consensus (Cox et al., Redmond et al.), which excluded the sacrum",
+              "🔗 Cited sacral SBRT series: cumulative LC 86.5% at 1 yr, 78.7% at 2 yr",
+              "⚠️ No sacrum-specific pattern-of-failure data underpin the CTV",
+              "⚠️ Three experts preferred isotropic 0-5 mm margin over nerve root, bowel, insufficiency fracture concerns",
+              "⚠️ Bone-confined disease only; not epidural/paraspinal extension, re-irradiation, or postop"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.radonc.2019.11.026",
+            "tweet_ids": [
+              1000000250
+            ],
+            "slug": "sacral-mets-spine-sbrt-target-volume-consensus",
+            "verdict": {
+              "soc_implication": "consensus",
+              "rationale": "Expert contouring consensus, 9 experts on 10 cases; agreement is opinion against opinion, not outcome. No sacrum-specific pattern-of-failure data underpin it; external validation pending.",
+              "audience": "Bone-confined sacral metastases, de novo SBRT (not re-RT or postop)"
+            },
+            "significance": "Compartmental, not margin-based: entire GTV compartment plus the adjacent marrow compartment at risk, with the ala ossification line usable to cap the CTV only when the GTV spares the ala, and any S1 ala involvement starting the CTV above the S1 VB. Thecal sac contoured to inferior S5 stands in for the cauda equina.",
+            "monday_clinic": "In bone-confined sacral metastases planned for de novo SBRT, this supports an SCS compartment-based CTV over an isotropic margin; it does not extend to epidural or paraspinal extension, re-irradiation, or the postoperative sacrum.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "International expert contouring exercise: **8 radiation oncologists + 1 neurosurgeon**, 9 centres, >7850 spine SBRT cases collectively, median 13 yr experience. Independent GTV/CTV contours on CT fused with T1, T2 and T1 post-gadolinium MRI; agreement by STAPLE at 80% confidence, kappa-scored."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**10 previously treated sacral metastasis cases**, selected for a range of size and location across S1 to S5, including ala, foraminal and epidural extension. Only experts at academic centres with a dedicated spine SBRT programme took part."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "CTV covers the **entire compartment holding the GTV plus the adjacent marrow compartment at risk**, mapped to SCS segments, with superior/inferior extent set by vertebral levels; **any S1 ala involvement** starts the CTV at the superior S1 ala. The ala ossification line may cap the CTV only when the GTV spares the ala. **Thecal sac to inferior S5** as cauda equina surrogate; lumbosacral plexus nerve roots per Yi et al."
+              },
+              {
+                "label": "Results",
+                "body": "Modified STAPLE CTV reached **consensus in 9 of 10 cases**; Case 5 predominant only at 6/9 (67%). RO STAPLE and NS CTV volumes did not differ."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Carries the compartmental CTV of the mobile-spine SBRT consensus guidelines (Cox et al. intact, Redmond et al. postoperative) into the sacrum, which those guidelines left out. ISRS guidelines support spine SBRT for specific indications but give no sacrum-specific contouring."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents bone-confined sacral metastases treated with de novo SBRT. Does not represent epidural or paraspinal extension, re-irradiation, or the postoperative sacrum."
+              },
+              {
+                "label": "Limitations",
+                "body": "Ten cases chosen to be representative, not consecutive, and the panel is academic-only. Experts endorsed a hand-modified average of their own contours, so **9/10 consensus is partly self-confirming**."
+              },
+              {
+                "label": "Discussion",
+                "body": "The lasting value is a shared classification that makes sacral pattern-of-failure analysis possible; it does not show compartment CTVs beat limited margins for local control. The cited sacral series' **78.7% LC at 2 yr** is the benchmark SCS-coded failure data would need to move."
+              }
+            ],
+            "interpretation": "This is the sacral sequel to the mobile-spine SBRT contouring consensus work (Cox et al. for intact disease, Redmond et al. postoperatively), and its main contribution is a vocabulary rather than a validated target. The eight-segment sacral classification gives centres a shared way to describe where disease sits and what was covered, which is a precondition for any pattern-of-failure analysis. The CTV rules themselves transplant the compartment logic from the mobile spine, and that transplant deserves scrutiny. In the mobile spine the disc space plausibly limits craniocaudal spread, which is part of why a vertebral-level boundary feels natural. The sacrum has only fibrocartilage remnants, and the authors concede the contiguous bone may lack that protection. Yet the recommended superior and inferior extent is still set by vertebral levels, with the S1 ala as the only stated exception. Whether that is adequate is exactly what nobody yet knows.\n\nThe agreement figures should be read for what they measure. A GTV kappa of 0.73 and CTV kappa of 0.59 show that nine experienced academic contourers converge on ten selected cases; they say nothing about whether the converged contour is the right one. The acceptance step compounds this, because experts were asked to endorse a hand-edited average of their own contours, so consensus in 9 of 10 cases is partly self-confirming. The more informative signal is where agreement broke down. Cases 2 and 4 (kappa 0.41 and 0.48) were ala lesions encroaching on the vertebral body and posterior elements. That is the anatomy where a compartment CTV grows largest, and where three experts preferred an isotropic 0-5 mm margin, citing nerve root, bowel and insufficiency fracture risk. The guideline is least settled exactly where it changes the plan most.\n\nThe outcome context is thin. The one sacrum-specific imaging series the authors cite reported cumulative local control of 86.5% at 1 year and 78.7% at 2 years, with failure most often in the vertebral body together with paraspinal tissue, then isolated epidural progression. If that pattern holds, a bone-confined compartment CTV addresses the first failure mode only in part and the epidural mode not at all, and the recommendations explicitly exclude epidural and paraspinal extension. The population this document governs is therefore the subset least likely to fail in the ways already described.\n\nFor a radiation oncologist the practical value is standardisation for trials and multi-institution audit, not a demonstrated gain in control. Adopting it for bone-confined de novo disease is reasonable because the alternative is no shared rule at all; the toxicity cost of larger ala-inclusive volumes is the open trade. Two findings would show it wrong: a failure series with marginal recurrences clustered across vertebral levels (the CTV is too short craniocaudally), or one showing no excess failures with limited margins (the CTV is larger than it needs to be). The classification system is what makes either analysis possible, and that is the part of this paper most likely to last.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Compartmental, not margin-based: entire GTV compartment plus adjacent marrow compartment, ala ossification line usable as a cap only when the GTV spares the ala, and S1 ala involvement starting the CTV above the S1 VB. Thecal sac to inferior S5 sets the cauda equina surrogate."
+            },
+            "open_questions": [
+              "Does compartment-based sacral CTV improve local control vs limited margins?",
+              "Sacral plexus and nerve root dose tolerance with SBRT",
+              "Insufficiency fracture risk with larger ala-inclusive CTVs"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "consensus-guideline",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "sacral metastases stereotactic radiotherapy",
+                "spine SBRT plexopathy",
+                "spine SBRT vertebral fracture"
+              ],
+              "queries_failed": [
+                {
+                  "term": "spine SBRT plexopathy",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 9,
+              "fetched_at": "2026-11-13T09:04:21.642Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 250
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "ESTRO Clinical Practice Guideline: SBRT for Spine Metastases",
+            "tldr": "22 recommendations, 5 statements (≥75% consensus): SBRT above 1x18Gy equivalent (BED10=50Gy10), 2x12Gy conditionally preferred for painful vertebral metastases; mostly moderate/expert-opinion evidence.",
+            "details": [
+              "🔍 Built on a PRISMA systematic review, Jan 2005 to Sep 2021, with RTOG 0631 added April 2023",
+              "🔍 Voting panel: 10 rad oncs, 1 spinal neurosurgeon, 3 physicists, 1 RTT (2 residents non-voting)",
+              "🔍 Scope excludes re-irradiation and symptomatic metastatic spinal cord compression",
+              {
+                "text": "📊 Randomized SBRT vs CRT pain trials the panel weighed",
+                "table": {
+                  "columns": [
+                    "Trial",
+                    "SBRT",
+                    "CRT",
+                    "N",
+                    "Pain result (SBRT vs CRT)"
+                  ],
+                  "rows": [
+                    [
+                      "Sprave, randomized phase II",
+                      "24Gy/1fx",
+                      "30Gy/10fx",
+                      "55",
+                      "Response 6mo 73.7% vs 35%, p=0.015 (3mo p=0.13)"
+                    ],
+                    [
+                      "CCTG SC.24, phase II/III",
+                      "24Gy/2fx",
+                      "20Gy/5fx",
+                      "114 vs 115",
+                      "Complete response 3mo 35% vs 14%, p=0.0002"
+                    ],
+                    [
+                      "NRG/RTOG 0631, phase 3",
+                      "16 or 18Gy/1fx",
+                      "8Gy/1fx",
+                      "339 (2:1)",
+                      "Response 3mo 41.3% vs 60.5%, favoring CRT"
+                    ],
+                    [
+                      "ROBOMET, phase III (abstract only)",
+                      "20Gy/1fx",
+                      "8Gy/1fx",
+                      "126",
+                      "CR 1mo 37% vs 25% ns (ITT); 3mo per-protocol 54% vs 31%, p=0.048"
+                    ],
+                    [
+                      "TwiCs randomized trial",
+                      "18Gy/1, 30Gy/3, 35Gy/5",
+                      "8Gy/1, 20Gy/5, 30Gy/10",
+                      "110",
+                      "No benefit at 3mo; not spine-specific, underpowered"
                     ]
                   ]
                 }
               },
               {
-                "text": "📊 Bolus thickness at 5 mm prescription depth, 6×6 cm² CTV, TG-43 TPS (Fig 3)",
+                "text": "🔍 Selection for SBRT over CRT in painful vertebral metastases (KQ1)",
+                "subdetails": [
+                  "Not frankly unstable (SINS greater than 12 excluded)",
+                  "No or minimal epidural disease (Bilsky 0-1)",
+                  "Up to 3 contiguous vertebral segments in the treatment volume",
+                  "Prolonged life expectancy with durable local control intended",
+                  "CRT preferred: short life expectancy, can't tolerate MRI/immobilization, uncontrolled pain on oral analgesia"
+                ]
+              },
+              {
+                "text": "💊 Dose and fractionation (KQ2)",
+                "subdetails": [
+                  "Prescription above the equivalent of 1x18Gy (BED10=50Gy10)",
+                  "De novo high-dose schedules: 1x20Gy, 1x24Gy, 2x12Gy, 3x10Gy, 5x7Gy",
+                  "Expected LC 80-90% at 1-2 years with these schedules",
+                  "2x12Gy conditionally recommended as preferred palliative SBRT schedule",
+                  "1x16 or 1x18Gy not recommended over 1x8Gy when pain/QoL is the primary goal"
+                ]
+              },
+              "📊 SC.24 Sunnybrook sub-cohort (137 pts): 2yr local failure 14.8% vs 35.6%, p<0.001, SBRT vs CRT",
+              "📊 Same sub-cohort: re-RT 2.2% vs 15.8% at 1 yr (p=0.002); all G3 fractures (n=5) in SBRT arm",
+              "📊 Randomized 24Gy/1fx vs 27Gy/3fx in 117 oligometastatic pts (56% spinal): better LC with single fraction",
+              {
+                "text": "📐 Graded recommendations and statements with unambiguous grading (KQ1, KQ4)",
                 "table": {
                   "columns": [
-                    "Bolus",
-                    "Skin Dmax",
-                    "R100-R50"
+                    "KQ",
+                    "Item",
+                    "Strength",
+                    "Evidence"
+                  ],
+                  "rows": [
+                    [
+                      "1",
+                      "Baseline + post-SBRT pain scoring (BPI, VAS or NRS)",
+                      "Strong",
+                      "High"
+                    ],
+                    [
+                      "1",
+                      "Consider SBRT in selected painful vertebral metastases",
+                      "Conditional",
+                      "Moderate"
+                    ],
+                    [
+                      "4",
+                      "Pre-SBRT SINS assessment",
+                      "Strong",
+                      "High"
+                    ],
+                    [
+                      "4",
+                      "Surgical stabilization review if SINS 7-12, especially 13-18",
+                      "Strong",
+                      "Expert opinion"
+                    ],
+                    [
+                      "4",
+                      "Pre-SBRT Bilsky grading",
+                      "Strong",
+                      "Moderate"
+                    ],
+                    [
+                      "4",
+                      "No SBRT in symptomatic MSCC",
+                      "Strong",
+                      "High"
+                    ],
+                    [
+                      "4",
+                      "Myelopathy mitigation: MRI/CT myelo cord, PRV, cord over coverage",
+                      "Strong",
+                      "High"
+                    ],
+                    [
+                      "4",
+                      "GTV coverage over nerve root sparing",
+                      "Strong",
+                      "High"
+                    ],
+                    [
+                      "4",
+                      "No routine prophylactic steroids for pain flare",
+                      "Conditional",
+                      "Moderate"
+                    ],
+                    [
+                      "4",
+                      "Statement: fractionated SBRT, no VCF excess vs CRT",
+                      "Statement",
+                      "High"
+                    ],
+                    [
+                      "4",
+                      "Statement: single fraction >20Gy, more VCF vs CRT and fractionated SBRT",
+                      "Statement",
+                      "High"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📐 HyTEC cord Dmax (thecal sac as PRV) keeping myelopathy risk under 5%",
+                "table": {
+                  "columns": [
+                    "Fractions",
+                    "Cord Dmax"
+                  ],
+                  "rows": [
+                    [
+                      "1",
+                      "12.4-14.0Gy"
+                    ],
+                    [
+                      "2",
+                      "17.0-19.3Gy"
+                    ],
+                    [
+                      "3",
+                      "20.3-23.1Gy"
+                    ],
+                    [
+                      "4",
+                      "23.0-26.2Gy"
+                    ],
+                    [
+                      "5",
+                      "25.3-28.8Gy"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "⚠️ Toxicity benchmarks cited",
+                "subdetails": [
+                  "VCF 6-14% in two large multicenter analyses; single fraction >20-24Gy raises it",
+                  "Myelopathy 0.4% in pooled de novo series of >1,000 pts",
+                  "Pain flare 43% vs 33%, SBRT vs CRT (meta-analysis of RCTs)",
+                  "Plexopathy: 14 events in 13 of 447 pts after 18-26Gy single fraction"
+                ]
+              },
+              {
+                "text": "🔍 Technique requirements (KQ3)",
+                "subdetails": [
+                  "Sim CT slice ≤1.5mm, co-registered to T1 and T2 MRI",
+                  "GTV/CTV to PTV margin ≤3mm, minimum 1mm",
+                  "Dose grid <1.5mm; type C algorithm, else type B",
+                  "End-to-end tolerance under 2mm; IMRT, VMAT, tomotherapy or robotic delivery",
+                  "Rigid mask above cervicothoracic junction (e.g. T4 and above)",
+                  "6DoF conditionally recommended, verification imaging after pitch/roll corrections"
+                ]
+              },
+              "⚠️ LC expectation inconsistent: narrative cites 80-95% at 1-2 yrs, the recommendation states 80-90%",
+              "⚠️ High-grade epidural disease left open; only 2% of SC.24 SBRT pts had Bilsky 2-3",
+              "⚠️ No medical oncologist voted, yet the panel issues an IO/targeted-therapy toxicity recommendation"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.radonc.2023.109966",
+            "tweet_ids": [
+              1000000249
+            ],
+            "slug": "estro-spine-sbrt-guideline",
+            "verdict": {
+              "soc_implication": "consensus",
+              "rationale": "Clinical practice guideline: 22 recommendations, 5 statements at ≥75% panel agreement. Authors state most rest on moderate or expert-opinion evidence, few randomized trials underneath.",
+              "audience": "Vertebral metastases from solid malignancies; excludes re-RT and symptomatic MSCC"
+            },
+            "significance": "The guideline splits single fraction by dose: 1x16 or 1x18Gy is not recommended over 1x8Gy for pain, while single fraction >20Gy carries a VCF penalty fractionated SBRT avoids. That leaves 2x12Gy as the conditionally preferred palliative schedule, with the floor for durable LC set above 1x18Gy equivalent (BED10=50Gy10).",
+            "monday_clinic": "In a pt with painful vertebral metastases from a solid primary, Bilsky 0-1, not frankly unstable, up to 3 contiguous segments and prolonged life expectancy, this supports considering SBRT over conventional RT; it does not extend to short life expectancy, symptomatic MSCC, or re-irradiation.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "ESTRO clinical practice guideline built on a **PRISMA systematic review** (PubMed, Embase, Cochrane; Jan 2005 to Sep 2021, RTOG 0631 added April 2023). Grading followed the **ASTRO methodology**; consensus required **≥75% agreement**, yielding **22 recommendations and 5 statements** across four key questions."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Vertebral metastases from **solid malignancies**, painful or oligometastatic. SBRT selection gate: **not frankly unstable (SINS greater than 12 excluded), Bilsky 0-1, up to 3 contiguous segments, prolonged life expectancy**. Re-irradiation and symptomatic MSCC are out of scope."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Prescription **above 1x18Gy equivalent (BED10=50Gy10)**; de novo schedules 1x20Gy, 1x24Gy, 2x12Gy, 3x10Gy, 5x7Gy. **2x12Gy conditionally preferred** for palliation; 1x16 or 1x18Gy **not recommended** over 1x8Gy when pain/QoL is the goal. PTV margin **≤3mm (minimum 1mm)**, MRI-fused sim CT ≤1.5mm, intensity-modulated delivery, cord dose prioritized over target coverage."
+              },
+              {
+                "label": "Safety",
+                "body": "VCF is the dominant event at **6-14%**, rising with single fraction **>20-24Gy**; fractionated SBRT shows **no VCF excess vs CRT** (high-level statement). Myelopathy **0.4%** in >1,000 pooled de novo pts; pain flare **43% vs 33%** vs CRT, but routine steroid prophylaxis is **not recommended** (conditional)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The pain recommendations reconcile **CCTG SC.24** (24Gy/2fx beat 20Gy/5fx on complete response, 35% vs 14%) with **RTOG 0631** (16 or 18Gy/1fx lost to 8Gy, 41.3% vs 60.5%) by reading both as schedule-specific. ROBOMET and the Sprave phase II sit in support but were abstract-only or underpowered."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents de novo vertebral metastases from solid malignancies, painful or oligometastatic, meeting SINS/Bilsky/extent selection. Does not represent re-irradiation, symptomatic metastatic spinal cord compression, or short-life-expectancy pts needing only short-term pain control."
+              },
+              {
+                "label": "Limitations",
+                "body": "The **LC benefit** rests on a single-center SC.24 sub-cohort (137 pts), and the narrative's 80-95% LC range does not match the recommendation's 80-90%. The search closed Sep 2021 with one trial added later, and **no medical oncologist voted** on the concurrent IO/targeted-therapy recommendation."
+              },
+              {
+                "label": "Discussion",
+                "body": "The practical output is a fractionation hierarchy: 2-5 fractions for most, single fraction >20Gy only where fracture management is available. **High-grade epidural disease** (separation surgery, cord-constraint dose escalation) stays unresolved and outside the evidence base."
+              }
+            ],
+            "interpretation": "The guideline's most useful move is refusing to treat single-fraction spine SBRT as one intervention. RTOG 0631 and CCTG SC.24 are routinely cited against each other: the first found worse pain response with 16 or 18Gy in one fraction than with 8Gy, the second more complete responses with 24Gy in 2 fractions than with 20Gy in 5. The panel reads both as dose-and-schedule results rather than a verdict on the technique, recommending against 16 or 18Gy as a substitute for 8Gy when pain is the goal and conditionally preferring 2x12Gy. That reconciliation is defensible, but the two trials also differ in endpoint (overall pain response vs complete response), in the conventional comparator, and in epidural disease mandates, with RTOG 0631 requiring a 3mm cord gap and SC.24 excluding only symptomatic compression. Attributing the divergence purely to dose is an interpretive choice, not something either trial tested.\n\nOn local control, the evidence is thinner than the confident dose floor suggests. The threshold above 1x18Gy equivalent rests on a dose-response pattern across largely retrospective series and one randomized comparison of 24Gy single fraction against 27Gy in 3 fractions in oligometastatic pts, only 56% of whom had spinal lesions. The SC.24 local failure advantage, 14.8% vs 35.6% at 2 years, comes from a single-center sub-cohort of 137 randomized pts, not the full trial. That supports practice but should not be read as settled, and the guideline itself quotes its LC expectation as 80-95% in the narrative and 80-90% in the recommendation.\n\nThe tension the panel names honestly is fracture. Very high single-fraction doses buy LC at a VCF cost, and fractionated SBRT carries a high-level statement of no VCF excess over conventional RT. Read together, the dose and toxicity sections push most pts toward 2 to 5 fractions, with single fraction above 20Gy reserved for centers prepared to manage fractures. That is the decision a radiation oncologist actually changes on Monday.\n\nTransferability is narrower than the title implies. The selection gate (not frankly unstable, Bilsky 0-1, up to 3 contiguous segments, prolonged life expectancy) mirrors trial eligibility, so the pain and LC benefits apply cleanly only there. High-grade epidural disease, the setting where a less invasive alternative to separation surgery would matter most, sits outside the evidence; only 2% of SC.24 SBRT pts had Bilsky 2 or 3. The technical recommendations are framed as reproducing the conditions under which trial outcomes were achieved, not as tested against alternatives, which is reasonable but means a center departing from them is extrapolating.\n\nWhat would move this read: replication of 2-fraction SBRT outcomes outside high-volume centers, and prospective toxicity data for SBRT with concurrent immunotherapy or targeted agents, an area the panel flags as uncertain without a medical oncologist among its voting members.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Single fraction is split by dose: 1x16 or 1x18Gy is not recommended over 1x8Gy for pain, and single fraction >20Gy carries a VCF penalty fractionated SBRT avoids. 2x12Gy becomes the conditionally preferred palliative schedule, with PTV margin ≤3mm and cord dose prioritized over coverage."
+            },
+            "open_questions": [
+              "Optimal management of high-grade epidural disease (Bilsky 2-3)",
+              "Spine SBRT toxicity with concurrent immunotherapy or targeted therapy",
+              "Single-fraction >20Gy LC gain vs vertebral fracture cost"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "consensus-guideline",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT02713269",
+                "brief_title": "Thermal Ablation and Spine Stereotactic Radiosurgery in Treating Patients With Spine Metastases at Risk for Compressing the Spinal Cord",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 60,
+                "primary_completion_date": "2027-10",
+                "brief_summary": "This phase II clinical trial studies how well thermal ablation and spine stereotactic radiosurgery work in treating patients with cancer that has spread to the spine (spine metastases) and is at risk for compressing the spinal cord. Thermal ablation uses a laser to heat tumor tissue and helps to shrink the tumor by destroying tumor cells. Stereotactic radiosurgery delivers a large dose of radiation in a short time precisely to the tumor, sparing healthy surrounding tissue. Combining thermal…",
+                "conditions": [
+                  "Malignant Digestive System Neoplasm",
+                  "Metastatic Head and Neck Carcinoma",
+                  "Metastatic Kidney Carcinoma",
+                  "Metastatic Malignant Neoplasm in the Spine",
+                  "Metastatic Malignant Neoplasm of Unknown Primary",
+                  "Metastatic Melanoma",
+                  "Prostate Carcinoma Metastatic in the Bone",
+                  "Sarcoma",
+                  "Solid Neoplasm",
+                  "Spinal Cord Compression",
+                  "Stage IV Breast Cancer AJCC v6 and v7",
+                  "Stage IV Lung Non-Small Cell Cancer AJCC v7",
+                  "Thyroid Gland Carcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Computed Tomography",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Quality-of-Life Assessment",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Questionnaire Administration",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Stereotactic Radiosurgery",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Thermal Ablation Therapy",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion:\n\n* At least 18 years of age.\n* Histologic diagnosis of solid malignant tumor (not one of the more radiosensitive histologic subtypes, see Exclusion Criteria), including but not limited to non-small cell lung cancer, breast, prostate, renal cell, melanoma, gastrointestinal, sarcoma,…",
+                "answers_question": "Optimal management of high-grade epidural disease (Bilsky 2-3)",
+                "relevance_phrase": "laser ablation + spine SRS for cord-threatening mets"
+              },
+              {
+                "nct": "NCT06204315",
+                "brief_title": "Risk Adapted Spinal Cord/Cauda Constraint Relaxation for High-risk Patients With Metastatic Epidural Spinal Cord Compression Undergoing Spine Stereotactic Radiosurgery",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 60,
+                "primary_completion_date": "2027-12",
+                "brief_summary": "To learn about the safety of a procedure called cord dose escalated spine stereotactic radiosurgery (CDE-SSRS) in patients with MESCC.",
+                "conditions": [
+                  "Spinal Cord",
+                  "Metastatic Epidural",
+                  "Spine Stereotactic"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic Radiosurgery",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Greater than or equal to 18 years old\n2. Radiographically documented spinal metastasis on spine MRI within 4 weeks of registration\n3. Proximity of spinal metastasis to spinal cord or cauda equina which precludes achieving a GTV Dmin of at least 14 Gy per the PI\n4. All…",
+                "answers_question": "Optimal management of high-grade epidural disease (Bilsky 2-3)",
+                "relevance_phrase": "cord dose-escalated spine SRS in high-risk MESCC"
+              },
+              {
+                "nct": "NCT05178472",
+                "brief_title": "Vertebroplasty With Radiation Therapy for Spine Metastatic Cancer Patients With Indeterminate Lesion (SINS Criteria)",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 200,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "This clinical trial studies the side effects of stereotactic radiosurgery and how well it works with or without vertebroplasty, separation surgery, or immunotherapy in patients with cancer that is radiation resistant and has spread to the spine (spinal metastases). Spinal metastases are rapidly progressive, have poor prognosis, are extremely difficult to treat, and can effect patient quality of life and overall health. Immunotherapy is a type of standard of care therapy to boost or restore the…",
+                "conditions": [
+                  "Hematopoietic and Lymphoid Cell Neoplasm",
+                  "Malignant Solid Neoplasm",
+                  "Metastatic Malignant Neoplasm in the Spine"
+                ],
+                "interventions": [
+                  {
+                    "name": "Immunotherapy",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Stereotactic Radiosurgery",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Vertebroplasty",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* At least 18 years of age and older with indeterminate Spine Metastasis.\n* All patients with histology that requires stereotactic RT as a part of their treatment.\n* Eastern Cooperative Oncology Group (ECOG) performance status =\\< 2\n* Disease visualized by CT or MRI\n* Prior…",
+                "answers_question": "Spine SBRT toxicity with concurrent immunotherapy or targeted therapy",
+                "relevance_phrase": "spine SRS side effects with or without immunotherapy"
+              },
+              {
+                "nct": "NCT04218617",
+                "brief_title": "Single- vs. Two-Fraction Spine Stereotactic Radiosurgery for the Treatment of Vertebral Metastases",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 130,
+                "primary_completion_date": "2027-01",
+                "brief_summary": "Spine radiosurgery (SRS) utilizes advanced treatment planning with focused x-rays to deliver one to four high dose treatments to the spine to help relieve pain and/or neurologic symptoms. Spine SRS uses special equipment to position the participant and guide the focused beams toward the area to be treated and away from normal tissue.\n\nOne of the side effects of spine SRS is the development of vertebral compression fractures, many of which are not painful. The goal of this study is to compare…",
+                "conditions": [
+                  "Spine Metastases",
+                  "Spine Stereotactic Radiosurgery (sSRS)"
+                ],
+                "interventions": [
+                  {
+                    "name": "Diagnostic MRI",
+                    "type": "DEVICE"
+                  },
+                  {
+                    "name": "Planning MRI",
+                    "type": "DEVICE"
+                  },
+                  {
+                    "name": "Simulation CT",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "QOL assessment",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Brief pain inventory (BPI)",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "sSRS in 1 fraction",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "sSRS in 2 fraction",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Karnofsky Performance Status (KPS) ≥ 70\n* RPA class 1 (KPS \\>70 AND controlled systemic disease) or RPA Class 2 (KPS \\>70, uncontrolled systemic disease OR KPS ≤70, age ≥54, no visceral metastases)44 (see Appendix II)\n* Vertebral metastases from C3 to L5 based on bone scan,…",
+                "answers_question": "Single-fraction >20Gy LC gain vs vertebral fracture cost",
+                "relevance_phrase": "1 vs 2 fraction spine SRS, VCF risk focus"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "spine stereotactic epidural compression",
+                "stereotactic radiotherapy immunotherapy spine metastases",
+                "spine SBRT fractionation"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 14,
+              "fetched_at": "2026-11-13T09:04:56.594Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 249
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "multi-site",
+        "intro": "Pelvic SABR re-RT Delphi agreed on schedules and IMRT with daily verification, but not on interval (43%) or cumulative OAR limits.",
+        "studies": [
+          {
+            "name": "International Delphi consensus for pelvic SABR re-irradiation",
+            "tldr": "66% of statements reached consensus among 23 international radiation oncologists; no agreement on a 12-month interval (43%) or cumulative OAR constraints.",
+            "details": [
+              "🔍 3-round international Delphi; 44 practice statements generated after Round 1",
+              "📊 Round 2: 29 statements reached consensus; 15 re-presented in Round 3",
+              {
+                "text": "🔍 Panel composition",
+                "subdetails": [
+                  "23 radiation oncologists in Round 1 (56% of 41 invited); 21 in Round 2, 22 in Round 3",
+                  "Countries: Italy 6, USA 5, UK 4, Canada 2, Switzerland 2, France 1, South Korea 1",
+                  "Sub-specialty: GU 19 (83%), lower GI 11 (48%), gyn 8 (35%)",
+                  "Median 10 cases/yr per participant (range 10–100)"
+                ]
+              },
+              {
+                "text": "📊 Where the panel agreed and where it split (from text + consensus summary)",
+                "table": {
+                  "columns": [
+                    "Topic",
+                    "Status"
+                  ],
+                  "rows": [
+                    [
+                      "Definition: overlap with prior pelvic dose risking excess OAR dose/toxicity",
+                      "Consensus"
+                    ],
+                    [
+                      "Alternative to surgical exenteration after MDT discussion",
+                      "Consensus"
+                    ],
+                    [
+                      "With extra-pelvic oligometastases controllable by MDT",
+                      "Consensus"
+                    ],
+                    [
+                      "Not usually appropriate with direct luminal OAR invasion",
+                      "Consensus (90%)"
+                    ],
+                    [
+                      "May not be appropriate with luminal/critical OAR contact",
+                      "No consensus (50%)"
+                    ],
+                    [
+                      "Minimum 12 months since prior pelvic RT",
+                      "No consensus (43%)"
+                    ],
+                    [
+                      "Caps: ≤3 lesions, ≤6 cm per lesion",
+                      "No consensus"
+                    ],
+                    [
+                      "30–37.5 Gy/5–6 fx or 21–27 Gy/3 fx, alternate days",
+                      "Agreement"
+                    ],
+                    [
+                      "IMRT + daily volumetric or fiducial verification",
+                      "Agreement"
+                    ],
+                    [
+                      "PTV point Dmax ≤140% of prescription",
+                      "No consensus (73%)"
+                    ],
+                    [
+                      "Cumulative OAR constraints",
+                      "No consensus"
+                    ]
+                  ]
+                }
+              },
+              "📊 PET-CT recommended by 19 (83%); 3 (13%) thought MRI unnecessary for nodal staging",
+              "🔗 Optimal cumulative constraints apply AAPM TG-101 5-fraction de novo SABR limits cumulatively",
+              "🔗 As with a prior thoracic re-RT expert study, no consensus on a quantified dose-overlap threshold",
+              "⚠️ Organisers selected the experts; participants were offered authorship",
+              "⚠️ GU-dominant panel (83%): gyn and rectal statements rest on fewer voices",
+              "⚠️ Agreement threshold for consensus not stated in source excerpt"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.radonc.2021.09.010",
+            "tweet_ids": [
+              1000000248
+            ],
+            "slug": "pelvic-sabr-reirradiation-delphi",
+            "verdict": {
+              "soc_implication": "consensus",
+              "rationale": "Delphi of 23 invited radiation oncologists; output is expert agreement, not outcome data. The dose-limiting questions (re-RT interval, cumulative OAR constraints) stayed unresolved.",
+              "audience": "Pelvic lesion after prior pelvic RT, dose overlap with OARs"
+            },
+            "significance": "The agreed schedules (30–37.5 Gy/5–6 fx or 21–27 Gy/3 fx, alternate days), IMRT and daily volumetric or fiducial verification are the technique layer you can borrow. Dosimetry stayed unresolved: cumulative OAR constraints, PTV Dmax ≤140% (73%) and a 12-month interval (43%). The recovery assumption in each plan is still an institutional call.",
+            "monday_clinic": "In a pt with a pelvic lesion overlapping prior pelvic RT dose, this supports SABR re-irradiation as an MDT-discussed alternative to exenteration, including with controllable extra-pelvic oligometastases; it does not extend to lesions directly invading a luminal OAR.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "**3-round international Delphi**, Round 1 opened 27/10/2020 and Round 3 closed 22/03/2021. **44 practice statements** after Round 1; 29 reached consensus in Round 2 and 15 were re-presented in Round 3. Led by a UK organising group with pelvic SABR re-irradiation experience."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Panel of radiation/clinical oncologists who had published on pelvic SABR re-irradiation or were judged international experts by the organisers, **one per research group**. **23 of 41 invited (56%)** joined Round 1; 21 and 22 took part in Rounds 2 and 3."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Agreed schedules: **30–37.5 Gy in 5–6 fractions or 21–27 Gy in 3 fractions, alternate days**. Agreement also on IMRT or similar high-conformity planning, daily online volumetric or fiducial verification, MRI/PET-CT co-registration where it helps delineation, and TG-263 nomenclature. A PTV point maximum ≤140% **did not reach consensus (73%)**."
+              },
+              {
+                "label": "Results",
+                "body": "**66% of statements reached consensus** overall. Consensus was not reached on the minimum interval between courses, maximum lesion number/size, or **cumulative OAR constraints**."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Sits alongside the ESTRO ACROP Delphi on salvage SBRT for intraprostatic relapse, which the paper cites, but covers the whole pelvis. Its suggested optimal constraints apply **AAPM TG-101** de novo SABR limits cumulatively; less conservative options draw on the Abusaris, Smith and Paradis series."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents pts with a pelvic target after prior pelvic RT where overlapping dose could push an OAR past tolerance, including those with controllable extra-pelvic oligometastatic disease. Does not represent lesions directly invading a luminal OAR, where the panel judged SABR re-irradiation not usually appropriate."
+              },
+              {
+                "label": "Limitations",
+                "body": "Organisers chose the experts and participants were offered authorship, which pulls toward a shared prior. A **GU-dominant panel (83%)** and a median caseload of 10/yr (range 10–100) leave gyn and rectal statements on a thinner base. The agreement threshold for consensus is not given in the source excerpt."
+              },
+              {
+                "label": "Discussion",
+                "body": "Agreement covers technique and selection boundaries carried over from de novo SABR. What stays open is the dosimetric core of re-irradiation: **how much recovery to assume, after what interval, and which cumulative constraint to honour**, which the authors name as research priorities."
+              }
+            ],
+            "interpretation": "A Delphi panel measures where experts already agree, so its value lies less in the statements that passed than in the line it draws between technique, where practice has converged, and dosimetry, where it has not. Here the convergence is on the parts of pelvic SABR re-irradiation borrowed from de novo SABR: IMRT or similar high-conformity planning, daily online volumetric or fiducial verification, image co-registration for delineation, reproducible supine immobilisation, and alternate-day schedules of 30–37.5 Gy in 5–6 fractions or 21–27 Gy in 3 fractions. Few re-irradiation programmes would dispute any of that. Agreement on it mostly confirms that the panel shares a technical vocabulary.\n\nThe questions that decide whether a plan is safe did not reach consensus. The panel could not agree on a 12-month minimum interval from prior pelvic RT (43%), on caps for lesion number or size, on a 140% PTV point maximum (73%), or on cumulative OAR constraints. The comments on the interval are revealing: participants argued that previously delivered OAR doses and primary disease type mattered more than elapsed time. That position is coherent, but it moves the decision onto the cumulative constraint, which is exactly the other place the panel split. The reader gets a framework whose technical layer is settled and whose dose ceiling is not.\n\nRead the constraint material with that in mind. The suggested optimal constraints apply AAPM TG-101 five-fraction de novo limits cumulatively. The less conservative options draw on the Abusaris, Smith and Paradis series plus illustrative AAPM recovery assumptions. Those are small retrospective experiences and a physics consult framework, not dose-response data for re-irradiated pelvic bowel or bladder. The table itself warns that the conservative approach may prevent delivery of a meaningful re-irradiation dose. Recovery allowances that differ by source make any single number look more certain than it is.\n\nTwo selection boundaries carry more weight than the rest. Direct invasion of a luminal OAR drew 90% agreement that SABR re-irradiation is not usually appropriate, while mere contact split the panel at 50%. A few participants offered a lower total dose, compromised PTV coverage, or close intra/inter-fraction monitoring as alternatives. That gap is where many real cases sit, and the paper offers no consensus for it. The statement with the largest clinical consequence positions SABR re-irradiation as an alternative to exenteration after MDT review. It rests on opinion, not comparative outcome data.\n\nOn methodology, the organisers built the panel from published or reputationally recognised experts, one per research group, and offered participants authorship. That design maximises expertise but also pulls toward a shared prior. The panel was weighted toward GU practice (83%), with fewer gynaecological and lower GI members, and median annual volume was 10 cases. Statements about rectal or gynaecological re-irradiation therefore stand on a thinner base than GU cases. The excerpt does not give the agreement threshold used to declare consensus, which matters when an item at 73% failed.\n\nThe authors' own reading is the right one: the agreed statements are a starting checklist, and the unresolved ones mark the research agenda. The panel also endorsed prospective recording of outcomes and toxicity. That is what would eventually turn the interval and constraint questions from opinion into data.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Agreed technique layer: 30–37.5 Gy/5–6 fx or 21–27 Gy/3 fx on alternate days, with IMRT and daily volumetric or fiducial verification. The dose ceiling is still open (cumulative OAR constraints, PTV Dmax ≤140% at 73%, 12-month interval at 43%), so recovery assumptions remain an institutional decision."
+            },
+            "open_questions": [
+              "Minimum safe interval between pelvic RT courses",
+              "Validated cumulative OAR constraints with recovery assumptions",
+              "SABR re-irradiation vs exenteration outcomes"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "consensus-guideline",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT04695782",
+                "brief_title": "Pencil Beam Proton Therapy for Pelvic Recurrences in Rectal Cancer Patients Previously Treated With Radiotherapy",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 65,
+                "primary_completion_date": "2025-10",
+                "brief_summary": "Study design:\n\nA prospective phase II, non-randomized observational study of dose-escalated pencil beam proton therapy re-irradiation for pelvic recurrences from rectal cancer.\n\nRe-irradiation is either a part of neo-adjuvant treatment or as a definitive treatment strategy for un-resectable recurrences.",
+                "conditions": [
+                  "Rectal Cancer Recurrent"
+                ],
+                "interventions": [
+                  {
+                    "name": "Pencil beam proton radiotherapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* • Locally recurrent rectal cancer.\n\n  * Bioptically verified (adenocarcinoma )\n  * Available dose plan from primary radiotherapy\n  * Previous pelvic RT (\\>30Gy EQD2)\n  * Evaluated in MDT-conferences (Herlev, Aarhus)\n  * Age\\>18 years\n  * PS 0-2\n  * Adequate organ function\n  *…",
+                "answers_question": "Validated cumulative OAR constraints with recovery assumptions",
+                "relevance_phrase": "pelvic re-RT after >30Gy EQD2; prior dose plan required"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "pelvic reirradiation SBRT",
+                "reirradiation pelvis toxicity",
+                "reirradiation recurrent rectal cancer"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 17,
+              "fetched_at": "2026-11-13T09:04:45.162Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 248
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "skin",
+        "intro": "GEC-ESTRO review accepts >5 mm prescription depth with thicker bolus in selected large NMSC; retrospective evidence only.",
+        "studies": [
+          {
+            "name": "GEC-ESTRO HNS critical review: skin superficial brachytherapy with flaps and customized moulds",
+            "tldr": "Thicker bolus permits >5 mm prescription depth: at 5 mm depth, 10 vs 5 mm bolus cuts surface Dmax 148% vs 187%; no dose-PROM data.",
+            "details": [
+              "📊 WG position: >5 mm prescription depth acceptable in selected large NMSC when interstitial BT or EBRT not viable",
+              "🔍 PRISMA review, PubMed to 31 May 2019, HDR Ir-192 superficial BT with flaps or moulds",
+              "⚠️ Evidence base is retrospective series, case reports and surveys; no clinical trial data",
+              {
+                "text": "📊 Bolus thickness at fixed 5 mm prescription depth, 6×6 cm CTV (TG-43 plan, Oncentra)",
+                "table": {
+                  "columns": [
+                    "Bolus thickness",
+                    "Surface Dmax",
+                    "R100 - R50"
                   ],
                   "rows": [
                     [
@@ -1008,23 +1210,46 @@
                   ]
                 }
               },
-              "📊 Trade-off: thicker bolus lowers surface Dmax but widens dose spread beyond CTV",
-              "🔗 Jaberi (Co-60): at 10 mm prescription, mould 5→20 mm cut surface dose 250%→150%",
               {
-                "text": "🔗 Published practice beyond the 5 mm depth limit",
-                "subdetails": [
-                  "Scalp SCC prescribed to 20 mm (Semrau)",
-                  "Exophytic necrotic cheek SCC to 15 mm",
-                  "Tumours up to 10 mm (Kalaghchi, Lancellotta, Chan)",
-                  "Up to 9 mm (Jumeau)",
-                  "ABS survey: 2/16 centres to 7 and 8 mm"
-                ]
+                "text": "🔍 Guideline limits vs published practice",
+                "table": {
+                  "columns": [
+                    "Parameter",
+                    "Guideline (ACROP / ABS / GEB)",
+                    "Published practice"
+                  ],
+                  "rows": [
+                    [
+                      "Prescription depth",
+                      "Max 5 mm",
+                      "Up to 20 mm (scalp SCC); 15 mm (cheek SCC); 9-10 mm in several series"
+                    ],
+                    [
+                      "Surface Dmax",
+                      "125% flaps, 140% moulds (ABS, GEB)",
+                      "125%-150% (16-centre survey); up to 200% (Kuncman)"
+                    ],
+                    [
+                      "Bolus thickness",
+                      "Ideally 5 mm from skin",
+                      "2.5-15 mm (6 Canadian centres); 10, 15 or 20 mm (Somanchi)"
+                    ]
+                  ]
+                }
               },
-              "📐 Dmax as % ignores fractionation: EQD2 at 150% Dmax spans 121.5 to 189 Gy across ACROP schedules (α/β 3)",
-              "⚠️ No published series links Dmax, prescription depth, or bolus thickness to toxicity or cosmesis",
-              "⚠️ Deep-prescription series never report that subcohort's share or separate outcomes",
-              "⚠️ All series used TG-43; MC deviations up to 5% with Freiburg flaps (Vijande)",
-              "⚠️ No reviewed paper defines how Dmax was computed; value depends on DVH bins and sample points"
+              "🔗 Jaberi (Co-60): at 10 mm depth, mould 5 → 20 mm cuts surface dose 250% → 150%",
+              "⚠️ Thicker bolus flattens gradient: dose spreads further beyond the CTV",
+              "⚠️ No published link between 125%-140% Dmax, 5 mm depth or 5 mm bolus and PROMs",
+              "📐 At 150% Dmax, EQD2 (a/b 3 Gy) spans 121.5 to 189 Gy across ACROP schedules (55% difference)",
+              {
+                "text": "⚠️ Dosimetry uncertainty in Dmax itself",
+                "subdetails": [
+                  "All included studies used TG-43, which ignores missing scatter",
+                  "MC deviation below 3% at 5 mm depth (Granero)",
+                  "Up to 5% with Freiburg flaps from air between spheres (Vijande)",
+                  "No reviewed paper defined how Dmax was calculated (bins, sample points)"
+                ]
+              }
             ],
             "figures": [],
             "nct": null,
@@ -1035,57 +1260,53 @@
             "slug": "gec-estro-skin-brachytherapy-moulds-flaps",
             "verdict": {
               "soc_implication": "consensus",
-              "rationale": "Working-group critical review of retrospective series and surveys; no trial data, and the group declines to propose any new PROM-based Dmax or depth threshold.",
-              "audience": "Large NMSC infiltrating >5 mm, interstitial BT or EBRT not viable"
+              "rationale": "Working-group position from retrospective series and surveys, no trials or dose-PROM data. Widens indications to >5 mm depth in selected cases; sets no new constraint.",
+              "audience": "Large NMSC extending >5 mm deep, interstitial BT or EBRT not viable"
             },
-            "significance": "The planning lever is bolus thickness, not the depth ceiling: at 5 mm depth on a 6×6 cm² CTV, going from 5 to 10 mm bolus cut skin Dmax 187% to 148% while R100-R50 widened 16.0 to 18.7 mm. With EQD2 at a 150% Dmax spanning 121.5 to 189 Gy across ACROP schedules, a flat percentage cap is a weak surface constraint.",
-            "monday_clinic": "In large NMSC infiltrating beyond 5 mm where interstitial BT or EBRT is not viable, this supports mould or flap BT with thicker or variable bolus to hold surface Dmax down; it does not extend to tumours suited to interstitial BT or EBRT.",
+            "significance": "At 5 mm depth on a 6×6 cm CTV, thickening bolus from 5 to 10 mm drops surface Dmax from 187% to 148% while widening R100-R50 from 16.0 to 18.7 mm. A percentage Dmax cap also ignores fractionation: at 150% Dmax, EQD2 (a/b 3 Gy) spans 121.5 to 189 Gy across ACROP schedules, so any skin constraint has to be read per schedule.",
+            "monday_clinic": "In a large NMSC infiltrating beyond 5 mm where interstitial BT or EBRT is not an option, this supports mould or flap BT with thicker bolus as acceptable practice rather than declining BT; it does not relax the 5 mm envelope for routine superficial lesions.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "**PRISMA systematic review** by the GEC-ESTRO H&N and Skin Working Group, PubMed search through **31 May 2019**, plus a theoretical TG-43 planning exercise (Oncentra Brachy, Ir-192 HDR) on 6×6 and 10×10 cm² CTVs."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Clinical studies of **NMSC superficial HDR Ir-192 BT** with flaps or custom moulds; conference papers, surveys, case reports and reviews included, English only."
+                "body": "GEC-ESTRO H&N and Skin Working Group critical review, PRISMA search of PubMed to **31 May 2019**, English only. Included conference papers, surveys, case reports and reviews of NMSC superficial HDR Ir-192 BT. Paired with a TG-43 planning exercise on **6×6 and 10×10 cm** CTVs at depths of 3, 5, 10 and 20 mm."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Planning model used parallel catheters at 1 cm spacing, 2 mm source step, prescription depths of 3, 5, 10 and 20 mm crossed with bolus of 3, 5, 10 and 20 mm. ACROP-listed mould/flap schedules range from 17-18 × 3 Gy to 8 × 5 Gy twice daily."
+                "body": "Guidelines cap prescription depth at **5 mm**; ABS and GEB cap surface Dmax at **125% for flaps, 140% for custom moulds**, with catheters ideally 5 mm from skin. ACROP schedules for moulds/flaps: 17–18 × 3 Gy, 10–12 × 4 Gy, 10–12 × 5 Gy, 8 × 5 Gy BID."
               },
               {
                 "label": "Results",
-                "body": "Thicker bolus **lowers surface Dmax at the cost of a shallower gradient**; the bolus × Dmax × R100-R50 trade is tabulated above for the 5 mm depth case."
+                "body": "Clinical series have prescribed beyond 5 mm: up to **20 mm** (scalp SCC), 15 mm (cheek SCC), 10 mm (Kalaghchi, Lancellotta, Chan), 9 mm (Jumeau). In the ABS survey **2 of 16** centres treated to 7 and 8 mm; in a Canadian survey only **3/6** centres used a Dmax metric."
               },
               {
                 "label": "vs leading data",
-                "body": "GEC-ESTRO ACROP, ABS, AAPM and GEB guidance converge on a **5 mm prescription ceiling** and ABS/GEB on **125% (flaps) / 140% (moulds)** surface Dmax. The ABS Dmax limit was modelled on its APBI consensus, where skin is an OAR rather than the target. Zaorsky's meta-analysis (EBRT 9965 vs BT 553 pts) favoured BT cosmesis but carried no bolus or Dmax data."
+                "body": "Sits against the GEC-ESTRO ACROP, ABS consensus, AAPM and GEB/SEOR-SEFM skin BT guidance, all built on expert practice. The Zaorsky meta-analysis (EBRT 9965 vs BT 553 pts) favored BT cosmesis but carried no bolus, gradient or prescription-point data, so it cannot validate any of these limits."
               },
               {
                 "label": "Applies to",
-                "body": "Represents large NMSC extending >5 mm below the skin surface where interstitial BT or EBRT is not an option. Does not represent standard thin lesions within current guideline limits or tumours suited to interstitial BT or EBRT."
+                "body": "Represents large NMSC extending more than 5 mm from the skin surface, treated with HDR Ir-192 superficial BT via flaps or moulds when interstitial BT or EBRT are not viable. Does not represent routine lesions inside the 5 mm guideline envelope or interstitial skin BT."
               },
               {
                 "label": "Limitations",
-                "body": "Dosimetry is TG-43 without scatter correction, with MC deviations up to 5% for flaps. Skin toxicity shows a volume and layer effect that a single surface Dmax point cannot capture, and telangiectasia needs **2-3 yr** follow-up to assess."
+                "body": "Deep-prescription series never report what fraction of pts were treated beyond 5 mm or their separate outcomes. Dmax is a single point, sensitive to DVH sampling settings, and the skin shows a volume effect, so a point constraint may not track toxicity at all."
               },
               {
                 "label": "Discussion",
-                "body": "The 5 mm and 125-140% limits are **not tied to PROMs** in any published series, and deviating centres report similar results. The group calls for standardized dosimetry reporting and homogeneous multicentre data via the **COBRA** project before revising thresholds."
+                "body": "Bolus thickness lets depth and surface hot spot be set independently, at the cost of a **shallower gradient** into deeper tissue, analogous to IMRT vs conformal. The WG declines to propose new Dmax or depth values and routes the question to the COBRA multicentre data project and a standardized reporting dataset."
               }
             ],
-            "interpretation": "The working group is not overturning the 5 mm prescription-depth ceiling so much as exposing what holds it up. The ACROP, ABS and GEB documents agree on that ceiling and on surface Dmax caps of 125% for flaps and 140% for moulds, yet the review finds no published series tying either figure to local control, toxicity or cosmesis. The caps read as inherited convention. The ABS skin Dmax limit followed the template of its APBI consensus, where skin is an organ at risk sitting over a deeper target. In NMSC the skin is the target, so a tight surface cap risks underdosing tumour rather than protecting normal tissue.\n\nThe planning exercise is the part a physicist and radiation oncologist can use tomorrow. On a theoretical 6×6 cm² CTV prescribed at 5 mm, replacing the standard 5 mm bolus with 10 mm drops surface Dmax from 187% to 148%, while the 100% to 50% isodose separation widens from 16.0 to 18.7 mm. That is the bargain IMRT strikes against conformal RT: a cooler surface bought with more low-dose spread. The model also shows that a textbook 5 mm bolus at 5 mm depth does not meet the 125%-140% caps, which raises the question of how often current limits are actually being met. These are TG-43 numbers without scatter correction, and the review cites deviations up to 5% against Monte Carlo for flaps, so the absolute percentages carry calculation error. The direction of the bolus effect is geometric, though, and should survive a model-based algorithm.\n\nThe clinical support for prescribing deeper is thin in a specific way. Series reporting depths of 9, 10, 15 or 20 mm describe good control and cosmesis, but none separates the deep-prescription pts or states what share of the cohort they were. A reader cannot tell whether the favourable outcomes belong to the deep cases or are carried by the shallow majority. Surveys showing 2 of 16 ABS centres working past 5 mm, and Canadian centres treating depth as only a relative contraindication, establish that the practice exists, not that it is safe. The fractionation argument compounds the problem: at a 150% hotspot, the ACROP mould and flap schedules map to EQD2 anywhere from 121.5 to 189 Gy, so one percentage cap does not describe one biological exposure.\n\nWhat the position moves is narrow. For a large NMSC infiltrating beyond 5 mm where interstitial BT and EBRT are not options, surface BT with tailored or 3D-printed bolus becomes a defensible plan rather than an off-guideline one. The thin lesion within current limits is untouched, and no new Dmax number is licensed; the group explicitly declines to propose one. The real weight of this paper rests on COBRA producing homogeneous dosimetry linked to outcomes, because until then Dmax itself is unstable: none of the reviewed papers says how it was computed, and DVH bin and sample settings shift it. The position would be wrong if thick-bolus deep plans turn out to trade surface reactions for higher dose in the hypodermal layers, a shift the review itself flags and that a skin-surface point metric would never detect.",
+            "interpretation": "The useful contribution here is not the literature census, which the authors themselves describe as retrospective and thin, but the argument that prescription depth and surface hot spot are separable. The 5 mm depth ceiling shared by ACROP, ABS, AAPM and GEB guidance reads best as a proxy: with catheters resting on a standard 5 mm bolus, prescribing deeper drives surface dose up steeply, so the depth cap functions as a skin-dose cap by another name. The planning exercise makes the mechanism explicit. Once bolus thickness becomes a free variable, the inverse square law lets the 100% isodose reach deeper tissue while the surface maximum stays contained. The working group's acceptance of deeper prescriptions in selected large tumours follows from that physics, not from new outcome data.\n\nThe price is a flatter gradient, and the paper is candid about it. Moving the source away from skin spreads dose further past the CTV, the same bargain made going from conformal RT to IMRT. For a lesion over cartilage, bone or near the orbit, the widened R100-R50 is the parameter that should govern bolus choice, and the review explicitly warns against stacking bolus when it pushes dose into a nearby OAR. A planner building a nasal or periorbital mould should treat gradient and OAR dose, rather than surface Dmax, as the binding constraint once the bolus is thickened.\n\nOn confidence: every limit in current skin BT guidance rests on single-centre retrospective series, case reports and surveys, and the reviewers found no study relating Dmax, depth or bolus thickness to toxicity or cosmesis beyond dose per fraction and treated volume. That cuts in both directions. The existing limits are not shown to protect anyone, but relaxing them is not shown to be safe either; the series treating to 9, 10, 15 or 20 mm report good outcomes without isolating the deep-prescription subset. The endorsement is therefore a permission granted in the absence of harm signals, not a demonstrated equivalence.\n\nTwo methodological points deserve more weight than they receive in the conclusions. A percentage Dmax constraint ignores fractionation, and across the ACROP schedules the same 150% surface maximum maps to EQD2 between 121.5 and 189 Gy, so a single cap is not one biological constraint. And Dmax as reported depends on DVH sampling settings and on TG-43 assumptions that ignore missing scatter at the surface. Point Dmax may simply be the wrong quantity to constrain, and the authors' preference for a small-volume surface metric is the more defensible direction.\n\nWhat would make the position wrong: if pooled registry data, with COBRA as the named vehicle, showed more late skin or deep-tissue morbidity in deep-prescription cases at matched surface Dmax, the extra low-gradient dose below the target would be the obvious suspect, and thicker bolus would have traded a visible hot spot for a hidden one. Until that data exists, the practical shift is narrow. For a large NMSC otherwise headed to EBRT or no local therapy, mould BT with thickened bolus becomes a defensible option, planned against gradient and adjacent organ dose rather than a fixed depth ceiling.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The planning lever is bolus thickness, not the depth ceiling: at 5 mm depth on a 6×6 cm² CTV, going from 5 to 10 mm bolus cut skin Dmax 187% to 148% while R100-R50 widened 16.0 to 18.7 mm. EQD2 at a 150% Dmax spanning 121.5 to 189 Gy across ACROP schedules makes a flat percentage cap a weak surface constraint."
+              "radonc": "At 5 mm depth on a 6×6 cm CTV, thickening bolus from 5 to 10 mm drops surface Dmax from 187% to 148% while widening R100-R50 from 16.0 to 18.7 mm. A percentage Dmax cap ignores fractionation: at 150% Dmax, EQD2 spans 121.5 to 189 Gy across ACROP schedules."
             },
             "open_questions": [
-              "Does skin surface Dmax predict toxicity or cosmesis in superficial BT?",
-              "Separate outcomes for prescription depth beyond 5 mm",
-              "Fractionation-aware surface dose constraint for moulds and flaps"
+              "Outcomes for the subset prescribed beyond 5 mm depth",
+              "Dmax constraint tied to PROMs rather than expert practice",
+              "Small-volume surface metric vs point Dmax for toxicity prediction"
             ],
             "consort": null,
             "modality": "radiation",
@@ -1095,17 +1316,12 @@
             "related_trials": null,
             "related_trials_provenance": {
               "queries_fired": [
-                "skin brachytherapy toxicity",
-                "nonmelanoma skin cancer brachytherapy"
+                "skin cancer brachytherapy",
+                "skin brachytherapy cosmesis"
               ],
-              "queries_failed": [
-                {
-                  "term": "nonmelanoma skin cancer brachytherapy",
-                  "reason": "empty"
-                }
-              ],
-              "candidates_returned": 13,
-              "fetched_at": "2026-11-12T09:09:02.609Z",
+              "queries_failed": [],
+              "candidates_returned": 22,
+              "fetched_at": "2026-11-13T09:05:46.320Z",
               "rerank_outcome": "abstained"
             },
             "source_ids": [
