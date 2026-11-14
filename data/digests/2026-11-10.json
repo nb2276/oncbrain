@@ -11,87 +11,6 @@
         "intro": "TEC-series reviews: de novo cord Dmax limits by fraction number, pediatric vs adult late-effect risk by organ, and the vascular-injury rationale above ~10 Gy/fraction.",
         "studies": [
           {
-            "name": "Modeling clinical outcomes in radiotherapy: NTCP, TCP and the TECs",
-            "tldr": "Personal review of TCP/NTCP outcome modeling and the AAPM/ASTRO TEC projects (QUANTEC, HyTEC, PENTEC); no effect size reported in source.",
-            "details": [
-              "🔍 Narrative review by a single author (Medical Physics, 2023), not a outcomes report",
-              "🔍 Frames RT planning as balancing high TCP against low NTCP",
-              "🔍 Core gap named: dosimetric and clinical correlates of desired outcomes rarely unified",
-              {
-                "text": "🔗 TEC projects discussed (AAPM + ASTRO)",
-                "subdetails": [
-                  "QUANTEC: normal tissue effects in the clinic",
-                  "HyTEC: hypofractionated treatment effects",
-                  "PENTEC: pediatric normal tissue effects"
-                ]
-              },
-              "🔍 Draws on in-house institutional data analysis and the author's TEC participation",
-              "⚠️ Abstract only in source; no dose constraints, model parameters or NTCP/TCP values reported",
-              "⚠️ Perspective piece by a TEC participant; no systematic search or pooled analysis described"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": null,
-            "tweet_ids": [
-              1000000242
-            ],
-            "slug": "tecs-ntcp-tcp-modeling",
-            "significance": "This is a field history of where the dose-volume constraints in daily planning come from: the QUANTEC, HyTEC and PENTEC efforts, by a contributor to them. Useful as background on the limits of TCP/NTCP modeling. The abstract carries no specific constraint or model value, so nothing here changes a planning decision directly.",
-            "monday_clinic": null,
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Single-author **narrative review** in Medical Physics (2023) drawing on in-house data analysis and participation in the AAPM/ASTRO TEC projects."
-              },
-              {
-                "label": "Discussion",
-                "body": "Argues that pairing **high TCP with low NTCP** is hard because the dosimetric and clinical correlates of outcomes are rarely understood together. Positions **QUANTEC, HyTEC and PENTEC** as the field's attempts to consolidate that evidence."
-              },
-              {
-                "label": "Limitations",
-                "body": "Source is the abstract only. **No constraints, model parameters or outcome rates** are given, so no specific planning threshold can be drawn from it."
-              }
-            ],
-            "interpretation": null,
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "This gives the background behind the normal tissue constraints used in planning: QUANTEC for conventional fractionation, HyTEC for hypofractionation and PENTEC for pediatrics. It is context for weighing model-based TCP/NTCP tradeoffs. The abstract states no specific constraint or value."
-            },
-            "open_questions": [
-              "How to unify dosimetric and clinical outcome correlates in NTCP/TCP models",
-              "Validity of normal tissue constraints under hypofractionation and in pediatrics"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": null,
-            "content_type": "review",
-            "discussed_trials": [
-              "QUANTEC",
-              "HyTEC",
-              "PENTEC"
-            ],
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [],
-              "queries_failed": [],
-              "candidates_returned": 0,
-              "fetched_at": "2026-11-12T09:09:56.686Z",
-              "rerank_outcome": "skipped"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 242
-              }
-            ],
-            "meeting": null
-          },
-          {
             "name": "Biological principles of SBRT/SRS: indirect cell death",
             "tldr": "Narrative review: doses above ~10 Gy/fraction cause tumor vascular injury and secondary cell death, plus enhanced antitumor immunity, beyond direct cell kill.",
             "details": [
@@ -216,123 +135,6 @@
               {
                 "type": "paper",
                 "id": 240
-              }
-            ],
-            "meeting": null
-          },
-          {
-            "name": "Late effects of RT in children vs adults: QUANTEC, HyTEC, PENTEC",
-            "tldr": "No effect size reported in source; pediatric NTCP similar to adults for brain necrosis, optic, parotid, liver, greater for neurocognition, cerebrovascular, lactation, lower for ovary.",
-            "details": [
-              "🔍 Review: compares PENTEC (pediatric) with adult QUANTEC and HyTEC on content, oversight, support, scope, literature-review method",
-              {
-                "text": "📊 Pediatric vs adult late-effect risk by organ/endpoint (direction only, no NTCP values in source)",
-                "table": {
-                  "columns": [
-                    "Child vs adult risk",
-                    "Organ / endpoint"
-                  ],
-                  "rows": [
-                    [
-                      "Similar",
-                      "Brain (necrosis), optic apparatus, parotid, liver"
-                    ],
-                    [
-                      "Greater",
-                      "Brain (neurocognition), cerebrovascular, breast (lactation)"
-                    ],
-                    [
-                      "Perhaps slightly less",
-                      "Lung"
-                    ],
-                    [
-                      "Less",
-                      "Ovary"
-                    ],
-                    [
-                      "Relevant only in children",
-                      "Musculoskeletal maldevelopment, teeth, breast development, reproductive organs"
-                    ]
-                  ]
-                }
-              },
-              {
-                "text": "📊 Within the pediatric range (incl. adolescence), younger age shifts risk",
-                "subdetails": [
-                  "Younger = greater risk: hearing, brain (neurocognition)",
-                  "Younger = lesser risk: ovary, thyroid"
-                ]
-              },
-              "⚠️ Child vs adult NTCP confounded by treatment paradigm: cancer types, prescribed dose, fields, chemo agents",
-              "⚠️ Unresolved whether age should be modeled continuously or by grouping (infant through older adult)",
-              "⚠️ Abstract only: no dose-volume constraints or NTCP estimates reported in source"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": null,
-            "tweet_ids": [
-              1000000241
-            ],
-            "slug": "pentec-children-vs-adults-late-effects",
-            "significance": "Adult QUANTEC/HyTEC limits are not a safe proxy in children for neurocognition, cerebrovascular injury, or breast lactation, where pediatric risk is greater; for brain necrosis, optic apparatus, parotid, and liver the risk appears similar. Within pediatrics, younger age raises hearing and neurocognitive risk but lowers ovarian and thyroid risk, so age gates which constraint set to trust.",
-            "monday_clinic": null,
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Review comparing **PENTEC** with adult-focused **QUANTEC** and **HyTEC** on content, oversight, support, scope, and literature-review method, then summarizing organ-specific PENTEC findings against adult NTCP estimates."
-              },
-              {
-                "label": "Results",
-                "body": "Children show **similar** risk for brain necrosis, optic apparatus, parotid, liver; **greater** for neurocognition, cerebrovascular, lactation; **less** for ovary; perhaps slightly less for lung. Maldevelopment of musculoskeletal tissue, teeth, breast, and reproductive organs is relevant only in children."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents dose-volume risk estimation for pediatric and adolescent RT relative to adult NTCP data. Does not represent quantitative constraints, which the source abstract does not report."
-              },
-              {
-                "label": "Limitations",
-                "body": "Age effects are entangled with cancer type, prescribed dose, fields, and chemotherapy, so apparent age differences may reflect treatment paradigm rather than tissue sensitivity. Optimal age modeling (continuous vs grouped) is unsettled."
-              },
-              {
-                "label": "Discussion",
-                "body": "The read is directional: it flags which adult limits transfer to children and which do not, but the magnitude of the age gap per organ is not in the source text and needs the organ-specific PENTEC reports."
-              }
-            ],
-            "interpretation": null,
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Adult QUANTEC/HyTEC limits are not a safe proxy in children for neurocognition, cerebrovascular injury, or lactation, where pediatric risk is greater. Younger age raises hearing and neurocognitive risk but lowers ovarian and thyroid risk, so patient age gates which constraint set applies."
-            },
-            "open_questions": [
-              "Age as a continuous variable vs age groupings in NTCP models?",
-              "How much of the child vs adult gap is treatment-paradigm confounding?"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": null,
-            "content_type": "review",
-            "discussed_trials": [
-              "QUANTEC",
-              "HyTEC",
-              "PENTEC"
-            ],
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [],
-              "queries_failed": [],
-              "candidates_returned": 0,
-              "fetched_at": "2026-11-12T09:10:10.294Z",
-              "rerank_outcome": "skipped"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 241
               }
             ],
             "meeting": null
@@ -2556,53 +2358,24 @@
     ],
     "meta": {
       "clusters_total": 13,
-      "studies_analyzed": 13,
-      "dropped": [],
+      "studies_analyzed": 11,
+      "dropped": [
+        {
+          "slug": "tecs-ntcp-tcp-modeling",
+          "name": "Modeling clinical outcomes in radiotherapy: NTCP, TCP and the TECs",
+          "reason": "suppressed via override"
+        },
+        {
+          "slug": "pentec-children-vs-adults-late-effects",
+          "name": "Late effects of RT in children vs adults: QUANTEC, HyTEC, PENTEC",
+          "reason": "suppressed via override"
+        }
+      ],
       "ocr_available": true
     }
   },
   "bookmarks": [],
   "papers": [
-    {
-      "id": 242,
-      "pmid": null,
-      "doi": "10.1002/mp.16274",
-      "pmc_id": null,
-      "title": "Modeling clinical outcomes in radiotherapy: NTCP, TCP and the “TECs”",
-      "authors": [
-        "Yorke, Ellen"
-      ],
-      "journal": "Medical Physics",
-      "pub_date": "2023-02-21",
-      "abstract": "Abstract Radiation therapy is a double‐edged sword which damages both tumor and normal cells. Achieving treatments with high tumor control probability (TCP) yet low normal tissue complication probability (NTCP) is often a struggle because we rarely have a unified understanding of the dosimetric and clinical correlates of the desired outcomes. I am fortunate to have participated in some of these struggles, including analyzing and using in‐house data and being involved in the AAPM and ASTRO “TEC” projects—QUANTEC (Quantitatie Analysis of Normal Tissue Effects in the Clinic), HyTEC (Hypofractionated Treatment Effects in the Clinic) and PENTEC (Pediatric Normal Tissue Effects in the Clinic).",
-      "pdf_path": null,
-      "source_url": "https://doi.org/10.1002/mp.16274",
-      "note": null,
-      "resolved_from_review": false
-    },
-    {
-      "id": 241,
-      "pmid": null,
-      "doi": "10.1016/j.ijrobp.2023.08.066",
-      "pmc_id": null,
-      "title": "Comparison of Risks of Late Effects From Radiation Therapy in Children Versus Adults: Insights From the QUANTEC, HyTEC, and PENTEC Efforts",
-      "authors": [
-        "Milano, Michael T.",
-        "Marks, Lawrence B.",
-        "Olch, Arthur J.",
-        "Yorke, Ellen D.",
-        "Jackson, Andrew",
-        "Bentzen, Søren M.",
-        "Constine, Louis S."
-      ],
-      "journal": "International Journal of Radiation Oncology*Biology*Physics",
-      "pub_date": "2024-06",
-      "abstract": "Pediatric Normal Tissue Effects in the Clinic (PENTEC) seeks to refine quantitative radiation dose-volume relationships for normal-tissue complication probabilities (NTCPs) in survivors of pediatric cancer. This article summarizes the evolution of PENTEC and compares it with similar adult-focused efforts (eg, Quantitative Analysis of Normal Tissue Effects in the Clinic [QUANTEC] and Hypofractionated Treatment Effects in the Clinic [HyTEC]) with respect to content, oversight, support, scope, and methodology of literature review. It then summarizes key organ-specific findings from PENTEC in an attempt to compare NTCP estimates in children versus adults. In brief, select normal-tissue risks within developing organs and tissues (eg, maldevelopment of musculoskeletal tissue, teeth, breasts, and reproductive organs) are primarily relevant only in children. For some organs and tissues, children appear to have similar (eg, brain for necrosis, optic apparatus, parotid gland, liver), greater (eg, brain for neurocognition, cerebrovascular, breast for lactation), less (ovary), or perhaps slightly less (eg, lung) risks of toxicity versus adults. Similarly, even within the broad pediatric age range (including adolescence), for some endpoints, younger children have greater (eg, hearing and brain for neurocognition) or lesser (eg, ovary, thyroid) risks of radiation-associated toxicities. NTCP comparisons in adults versus children are often confounded by marked differences in treatment paradigms that expose normal tissues to radiation (ie, cancer types, prescribed radiation therapy dose and fields, and chemotherapy agents used). To add to the complexity, it is unclear if age is best analyzed as a continuous variable versus with age groupings (eg, infants, young children, adolescents, young adults, middle-aged adults, older adults). Further work is needed to better understand the complex manner in which age and developmental status affect risk.",
-      "pdf_path": null,
-      "source_url": "https://doi.org/10.1016/j.ijrobp.2023.08.066",
-      "note": null,
-      "resolved_from_review": false
-    },
     {
       "id": 240,
       "pmid": null,
