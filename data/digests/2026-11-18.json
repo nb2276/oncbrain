@@ -1,0 +1,1537 @@
+{
+  "date": "2026-11-18",
+  "conference": null,
+  "generated_at": 1795079618944,
+  "digest": {
+    "top_line": "HyTEC brain SRS: 1fx V12 (incl. target) 5/10/>15 cc → ~10%/15%/20% symptomatic RN; 3fx V18 <30 cc and V23 <7 cc → <10%.",
+    "tldr": "HyTEC carries the day: AAPM pooled SRS/SBRT data add tumor control to QUANTEC-style toxicity limits, with V12-anchored brain RN risk and <1% RION at 10 Gy/1 fx, 20 Gy/3 fx, 25 Gy/5 fx in pts without prior RT. In prostate, Decipher and PAM50 are proposed for choosing ADT intensity, now tested prospectively in NRG GU009 and GU006.",
+    "sites": [
+      {
+        "disease_site": "multi-site",
+        "intro": null,
+        "studies": [
+          {
+            "name": "HyTEC overview: high dose per fraction hypofractionated treatment effects",
+            "tldr": "7 NTCP and 9 TCP papers across 6 anatomic sites: AAPM pools SRS/SBRT dose-volume-outcome data, adding tumor control to QUANTEC-style toxicity estimates.",
+            "details": [
+              "🔍 AAPM WGSBRT literature-pooling initiative; reports published in the Red Journal by AAPM/ASTRO agreement",
+              "🔍 6 anatomic sites: cranial, head and neck, thoracic, abdominal, pelvic, spinal",
+              {
+                "text": "🔗 HyTEC vs prior dose-volume guidance",
+                "table": {
+                  "columns": [
+                    "Characteristic",
+                    "Emami et al",
+                    "QUANTEC",
+                    "HyTEC"
+                  ],
+                  "rows": [
+                    [
+                      "Scope",
+                      "26 normal tissues/organs",
+                      "16 normal organs",
+                      "7 NTCP organ papers; 9 TCP disease-site papers"
+                    ],
+                    [
+                      "3D data available",
+                      "Minimal",
+                      "More/moderate (studies span ≈ 18 years)",
+                      "Moderate but rapidly increasing"
+                    ],
+                    [
+                      "Format",
+                      "Uniform risk levels (TD 5/5, 50/5); uniform 1/3, 2/3, 3/3 organ irradiation",
+                      "Nonuniform risk across organs; range of dose-volume metrics",
+                      "Nonuniform risk across organs; range of dose-volume metrics"
+                    ]
+                  ]
+                }
+              },
+              "📐 Clinical data favored over model-based estimates when both were available",
+              {
+                "text": "📐 Planning details carried in the summary-table footnotes",
+                "subdetails": [
+                  "Prostate SBRT: reviewed Rx 35–40 Gy in 4–5 fx; many series treated every other day",
+                  "Prostate: heterogeneous planning common; mean Rx isodose line 85%, most 70%–90%",
+                  "Spine: Dmin >14–15 Gy single-fraction equivalent or GTV D95 >18.3 Gy/1 fx may track control better than Rx",
+                  "Brain: GTV→PTV expansion 0–3 mm, median 1 mm in reviewed studies",
+                  "HCC: sparing ≥800 cm3 to ≤18 Gy in 3 fx suggested (Son et al)"
+                ]
+              },
+              "⚠️ NTCP entries largely assume no prior RT; reirradiation scenarios flagged separately",
+              "⚠️ Prior whole-brain RT appears to raise brainstem risk with subsequent SRS/fSRS",
+              "⚠️ Actuarial LC censored at death may overstate control in metastatic pts",
+              "⚠️ Short survival after SBRT may understate long-term NTCP",
+              "⚠️ Adult data almost exclusively; pediatric dose-volume effects deferred to PENTEC"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              1000000279
+            ],
+            "slug": "hytec-overview",
+            "significance": "The transferable RT detail sits in the footnotes: spine control may track GTV D95 >18.3 Gy/1 fx or Dmin >14–15 Gy better than nominal Rx, and prostate constraints come from heterogeneous plans (mean Rx isodose 85%). Constraints mostly assume an unirradiated field, so reirradiation and pediatric cases need the organ-specific papers.",
+            "monday_clinic": null,
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Literature pooling by the **AAPM WGSBRT** within the Biological Effects Sub-Committee, using publications with a minimal data set (dose schedule, prescription practice, critical-structure dose, outcome). Output: **7 NTCP and 9 TCP papers** across 6 sites, plus vision papers on immunomodulation, indirect cell death and modelling."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**NTCP** (organ-specific toxicity) and **TCP**, mostly 1-5 year local control. Clinical values were preferred over model-based estimates where both existed."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Successor to **Emami et al** and **QUANTEC**, both built mainly for conventional fractionation and, for QUANTEC, focused on NTCP. HyTEC adds **tumor control**, and sits alongside AAPM TG-101 SBRT constraints rather than replacing them."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents adults treated with SRS/SBRT/SABR, with NTCP entries mostly for pts without prior RT. Does not represent children (PENTEC) or most reirradiation scenarios."
+              },
+              {
+                "label": "Limitations",
+                "body": "Source series are mostly retrospective, with inconsistent dose specification, segmentation and outcome definitions. Pooling across schedules relies on the **linear-quadratic model**, which the authors call simplistic, and imaging-defined local recurrence plus favorable selection may inflate TCP."
+              },
+              {
+                "label": "Discussion",
+                "body": "The authors argue dose-volume-outcome reporting has **not improved enough since QUANTEC** to support clean pooling. Their remedy is discrete capture via EHRs, planning systems, CTCAE grading, TG-263 naming and contouring atlases, an infrastructure argument rather than a result."
+              }
+            ],
+            "interpretation": "HyTEC is best read as the SBRT-era counterpart to QUANTEC rather than as new evidence. Its value is consolidation: it takes a literature that grew quickly and unevenly and turns it into dose-volume-outcome tables a planner can consult. Emami et al offered uniform TD 5/5 and TD 50/5 estimates for partial and whole organ irradiation, drawn largely from expert opinion, and QUANTEC moved to organ-specific dose-volume metrics from CT-era data. HyTEC's main conceptual addition is pairing tumor control with toxicity. That pairing matters for SBRT in particular, because the case for high dose per fraction has rested on local control, and a constraint table with no control table invites a planner to trade away the effect that justified the technique.\n\nHow much confidence a reader places in any entry should depend on how it was generated. The authors pooled published reports that met a minimal data threshold and preferred clinical over modelled values. Even so, the underlying series are mostly retrospective, dose specification and segmentation vary across institutions, and pooling across schedules leans on the linear-quadratic model, which the authors themselves call simplistic at these doses. On the TCP side the bias runs in one direction. Actuarial local control that censors at death, in a population where systemic progression and local regrowth are probably linked, will tend to overstate control, and so will imaging-based calls of recurrence and favorable selection. Treat the TCP estimates as upper bounds for an unselected metastatic population.\n\nOn the NTCP side the practical boundary is prior RT. Most entries assume an unirradiated field, and the footnotes flag specific interactions, such as prior whole-brain RT raising brainstem risk with later SRS. Short survival among many SBRT pts also means late toxicity may be undercounted. That cuts against leaning on these values for oligometastatic or curative-intent pts who will live long enough to express late effects.\n\nSeveral of the most transferable details sit in footnotes rather than headline values. For spine, a minimum tumor dose or GTV D95 may predict control better than the nominal prescription, which moves attention from the prescription to target coverage. For prostate, the pooled series often used heterogeneous plans with a mean prescription isodose of 85%, so the reported toxicity came with intentional intraprostatic hot spots. A homogeneous plan to the same prescription is a different treatment, and borrowing the constraints without the dose distribution is an extrapolation.\n\nWhat HyTEC does not settle is whether these estimates hold prospectively. The authors' own conclusion is that reporting has not improved enough since QUANTEC to allow cleaner pooling. Their proposed remedy, discrete capture from EHRs, planning systems and standardized toxicity grading, is an argument about infrastructure, not a finding. Pediatric pts are out of scope and deferred to PENTEC.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The transferable RT detail sits in the footnotes: spine control may track GTV D95 >18.3 Gy/1 fx or Dmin >14–15 Gy better than nominal Rx, and prostate constraints come from heterogeneous plans (mean Rx isodose 85%). Reirradiation and pediatric cases need the organ-specific papers."
+            },
+            "open_questions": [
+              "Do pooled SBRT constraints hold for reirradiation?",
+              "Prospective validation of pooled SBRT TCP/NTCP estimates"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": null,
+            "content_type": "review",
+            "discussed_trials": [
+              "QUANTEC",
+              "PENTEC"
+            ],
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05189054",
+                "brief_title": "Safety and Efficacy of SBRT in the Reirradiation for Ultra-central Thoracic Malignant Tumors",
+                "overall_status": "RECRUITING",
+                "phase": null,
+                "enrollment_count": 40,
+                "primary_completion_date": "2025-04",
+                "brief_summary": "The reirradiation of thoracic tumor is difficult. The possibility of surgery or re course radiotherapy is very small. In the NCCN guideline, only systemic treatment is recommended. However, the effective rate of systemic treatment is low. SBRT has the characteristics of high dose in tumor target area and low dose in surrounding normal tissues. In theory, SBRT is more conducive to the protection of normal tissues and can potentially be used in the salvage treatment of recurrent lesions after…",
+                "conditions": [
+                  "Stereotactic Body Radiation Therapy",
+                  "Irradiation; Reaction",
+                  "Thoracic Tumor",
+                  "Recurrent Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "stereotacitic body radiation therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Pathological diagnosis is malignant tumor.\n* The location of the target lesion belongs to the ultra-central type of chest.\n* The target lesion had a history of radiotherapy, and the lesion diameter is ≤ 5cm.\n* There is no extensive systemic metastasis or although there is…",
+                "answers_question": "Do pooled SBRT constraints hold for reirradiation?",
+                "relevance_phrase": "ultra-central thoracic SBRT reRT safety cohort"
+              },
+              {
+                "nct": "NCT06558175",
+                "brief_title": "Reirradiation Dose Escalation in Thoracic Cancers",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE1"
+                ],
+                "enrollment_count": 48,
+                "primary_completion_date": "2026-10",
+                "brief_summary": "This is a study involving patients with recurrence, metastasis, or new primary malignancies in the thorax requiring radiation and who have previously received radiotherapy to the thorax, where re-irradiation is expected to exceed the dose constraints used for de novo treatments.\n\nCurrently, when this group of patients needs another set of radiotherapy, there is a dose limitation based on a percentage of the previous treatment's dose. However, this dose often limits the effectiveness of repeated…",
+                "conditions": [
+                  "Thoracic Cancer",
+                  "Lung Cancer",
+                  "Esophageal Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "stereotactic body radiation therapy (SBRT)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically (histologically or cytologically) proven diagnosis of malignancy, with disease in the thorax requiring re-irradiation for any treatment intent. This may include primary lung cancer of any type, esophageal cancer, recurrences, and/or metastasis from any primary.…",
+                "answers_question": "Do pooled SBRT constraints hold for reirradiation?",
+                "relevance_phrase": "phase 1 thoracic SBRT reRT dose escalation"
+              },
+              {
+                "nct": "NCT02278744",
+                "brief_title": "Trial for Salvage Re-Irradiation of Metastatic Spine Lesions Using Single-Fraction Stereotactic Radiosurgery",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE1"
+                ],
+                "enrollment_count": 9,
+                "primary_completion_date": "2027-10",
+                "brief_summary": "This is a phase I clinical trial investigating the use of single fraction re-irradiation following local progression of spine and cauda equina (L2 to sacrum) lesions that have previously received radiation therapy. Patients will be treated with single-fraction radiation therapy at 3 dose levels using image-guided stereotactic radiosurgery techniques.",
+                "conditions": [
+                  "Metastatic Spine Lesions"
+                ],
+                "interventions": [
+                  {
+                    "name": "single-fraction radiation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "MRI and/or CT",
+                    "type": "DEVICE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients must have histologic or cytologic proof of a non-hematologic malignancy confirmed by MSKCC pathologic review\n* Patients must have radiographic evidence of malignancy in the spine or cauda equina region (L2 to sacrum) which is suitable for radiation therapy\n* Patients…",
+                "answers_question": "Do pooled SBRT constraints hold for reirradiation?",
+                "relevance_phrase": "phase 1 single-fraction spine SRS reRT, 3 dose levels"
+              },
+              {
+                "nct": "NCT07039968",
+                "brief_title": "Standard Dose Versus High Dose Stereotactic Spine Radiosurgery for Metastatic Spinal Neoplasms",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 196,
+                "primary_completion_date": "2035-06",
+                "brief_summary": "The goal of this clinical trial is to learn if a higher dose of Stereotactic Spine Radiosurgery (SSRS), an advanced radiation technique, is better for treating cancer that has spread to the spine (spinal metastases). The study will also learn about the safety of using a higher dose.\n\nThe main questions it aims to answer are:\n\nDoes a higher radiation dose lead to fewer treatment failures (meaning the tumor growing back or causing serious side effects) one year after treatment? What are the side…",
+                "conditions": [
+                  "Spinal Neoplasms"
+                ],
+                "interventions": [
+                  {
+                    "name": "Spine Stereotactic Radiosurgery (SSRS)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Patients with a histologic diagnosis of non-hematopoietic malignancy\n2. Radiographic evidence of localized spine metastases without leptomeningeal involvement or intramedullary lesion\n3. Maximum four separate sites with a maximal involvement of two continuous vertebral…",
+                "answers_question": "Prospective validation of pooled SBRT TCP/NTCP estimates",
+                "relevance_phrase": "rand phase 2 spine SRS dose arms, 1y failure endpoint"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "stereotactic reirradiation toxicity"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 20,
+              "fetched_at": "2026-11-19T09:11:12.616Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 279
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "gyn",
+        "intro": "Teaching talk, not a readout; the case of IMRT over 3D for pelvic EBRT rests on TIME-C patient-reported bowel outcomes.",
+        "studies": [
+          {
+            "name": "Early stage endometrial cancer (Mayo Clinic Arizona talk)",
+            "tldr": "Stage- and grade-driven adjuvant algorithm for early endometrial cancer: observation, vaginal cuff brachy, or pelvic EBRT, with IMRT favored over 3D per TIME-C.",
+            "details": [
+              "🔍 Case: FIGO stage IB (pT1bN0M0) endometrioid, grade 3, 72% myometrial invasion, LVSI-, 0/3 LN",
+              "🔍 Staged by robot-assisted TAH/BSO/SLNB; margins negative, no cervical stromal involvement",
+              {
+                "text": "📊 Adjuvant framework by FIGO 2009 stage and grade (endometrioid)",
+                "table": {
+                  "columns": [
+                    "Stage / grade",
+                    "Adjuvant rec"
+                  ],
+                  "rows": [
+                    [
+                      "IA, grade I-II, no LVSI",
+                      "Consider observation"
+                    ],
+                    [
+                      "IA grade III, or IB grade I-II",
+                      "Consider vaginal cuff brachy"
+                    ],
+                    [
+                      "IB, grade III",
+                      "Pelvic EBRT"
+                    ],
+                    [
+                      "II",
+                      "Pelvic EBRT + vaginal cuff brachy boost"
+                    ],
+                    [
+                      "III-IV",
+                      "ChemoRT, chemo alone, or RT alone +/- brachy"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "🔍 High-intermediate risk (HIR) definitions differ by trial",
+                "table": {
+                  "columns": [
+                    "Trial",
+                    "HIR definition"
+                  ],
+                  "rows": [
+                    [
+                      "GOG99",
+                      "Age ≥70 + 1 factor, ≥50 + 2, or any age + 3; factors grade 2-3, LVI, IC"
+                    ],
+                    [
+                      "PORTEC-1",
+                      "2/3 of: age >60, invasion >50%, grade 3"
+                    ],
+                    [
+                      "PORTEC-2",
+                      "Age >60 and IC grade 1-2, or IB grade 3; IIA any age; grade 3 with >1/2 invasion excluded"
+                    ],
+                    [
+                      "GOG249",
+                      "Age ≥70 + 1, ≥50 + 2, ≥18 + 3 factors; grade 2-3, LVSI, >50% myometrium"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📊 RTOG 1203 (TIME-C), patient-reported bowel events, IMRT vs 3D conformal",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "IMRT",
+                    "3D conformal",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "Diarrhea, 5 weeks",
+                      "33.7%",
+                      "51.9%",
+                      "p=.01"
+                    ],
+                    [
+                      "Fecal incontinence, 5 weeks",
+                      "1.1%",
+                      "9.3%",
+                      "p=.04"
+                    ],
+                    [
+                      "Diarrhea, 1 yr",
+                      "5.8%",
+                      "15.1%",
+                      "p=0.4"
+                    ],
+                    [
+                      "Antidiarrheal meds, 1 yr",
+                      "4.6%",
+                      "13%",
+                      "p=.03"
+                    ]
+                  ]
+                }
+              },
+              "⚠️ Slide prints 1 yr diarrhea as p=0.4 yet lists it as an IMRT decrease",
+              "⚠️ PORTEC-2 excluded grade 3 with >1/2 invasion, the case's own cell",
+              "🔍 Surgery: TAH/BSO for apparent stage I; SLNB slowly becoming standard of care",
+              {
+                "text": "🔍 Late RT effects and follow-up",
+                "subdetails": [
+                  "Late: vaginal stenosis, vaginal dryness",
+                  "Rare: cystitis, proctitis, sacral insufficiency fracture, bowel obstruction, fistula",
+                  "Dilator: consider 1-3 x week for 10 minutes",
+                  "Exam every 3-6 months for 2-3 yrs, then every 6 months to 5 years"
+                ]
+              }
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              1000000278
+            ],
+            "slug": "early-stage-endometrial-cancer-talk",
+            "significance": "The framework's stage IB grade 3 cell, the case shown, sits outside PORTEC-2, which excluded grade 3 with >1/2 invasion, so the talk shows no randomized brachy-vs-EBRT comparison there. When pelvic fields are used, TIME-C's patient-reported bowel data (diarrhea at 5 weeks 33.7% vs 51.9%) support IMRT over 3D.",
+            "monday_clinic": "In SLN-negative, LVSI-negative FIGO 2009 stage IB grade 3 endometrioid disease, this talk's framework assigns pelvic EBRT delivered with IMRT; it does not address molecularly classified or non-endometrioid stage I disease.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Radiotherapy",
+                "body": "**Pelvic EBRT** for stage IB grade III and stage II (plus **vaginal cuff brachy boost** for stage II); vaginal cuff brachy alone for stage IA grade III or IB grade I-II. IMRT favored over 3D conformal on TIME-C bowel PROs."
+              },
+              {
+                "label": "vs leading data",
+                "body": "HIR thresholds come from GOG99, PORTEC-1, PORTEC-2 and GOG249, which use **different age cut points and factor counts**. Stage III-IV options are listed without the randomized chemoRT-vs-chemo trials that frame that choice."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents surgically staged early-stage endometrioid endometrial cancer under FIGO 2009. Does not represent molecularly classified disease or serous / clear cell histology, which the algorithm does not separate."
+              },
+              {
+                "label": "Discussion",
+                "body": "A teaching grid that compresses the PORTEC/GOG-era consensus into one table. The **stage IB grade 3** assignment and the absence of molecular class are where a current reader would most need to overlay newer data."
+              }
+            ],
+            "interpretation": "This deck is a teaching framework rather than new evidence, and its value is compression: one grid that maps FIGO 2009 stage, grade and histology onto observation, vaginal cuff brachytherapy, pelvic EBRT, or combined therapy. That grid reflects the consensus built through the PORTEC and GOG trials, in which adjuvant pelvic RT reduced pelvic recurrence in intermediate-risk disease without a convincing survival gain, and PORTEC-2 then moved most high-intermediate pts from pelvic EBRT to vaginal brachytherapy alone.\n\nThe weakest join is the cell the case lands in. Stage IB grade 3 endometrioid disease is assigned pelvic EBRT, yet the PORTEC-2 definition reproduced on the slide excludes grade 3 with >1/2 invasion, so the trial that legitimized brachytherapy alone never tested this patient. The HIR slide also shows that high-intermediate risk is not one population: GOG99, PORTEC-1, PORTEC-2 and GOG249 each draw the line with different age cut points and factor counts, so a patient can be HIR under one definition and not another. GOG249, which tested pelvic RT against vaginal brachytherapy plus chemotherapy in early high-intermediate and high-risk disease, is listed only for its definition; its result is the comparison most relevant to this case and is not on the slides.\n\nThe larger gap is molecular. The deck carries Type I/II histology and mentions TP53 and MMR biology in passing, but the algorithm does not use them. Molecular class (POLE-mutant, MMRd, TP53-abnormal, no specific molecular profile) now reassigns adjuvant intensity in exactly this stage I grade 3 group, with POLE-mutant tumors candidates for de-escalation and TP53-abnormal tumors for escalation, and later staging revisions fold that biology into the stage itself. A reader applying this grid today would need to overlay molecular class before choosing between brachytherapy, pelvic EBRT, and systemic therapy.\n\nThe technique slide is the most transferable piece. TIME-C is a randomized comparison, and its patient-reported bowel endpoints at 5 weeks favor IMRT for pelvic fields, which is the argument for IMRT whenever pelvic EBRT is chosen. The 1 yr diarrhea line, though, is printed as p=0.4 while being listed among the IMRT reductions; that is either a slide typo or a nonsignificant difference, and it should be checked against the primary report before being cited. The follow-up schedule and dilator guidance are practical but rest on practice convention rather than trial data, and the talk presents them as such.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The stage IB grade 3 cell assigned pelvic EBRT sits outside PORTEC-2, which excluded grade 3 with >1/2 invasion, so no randomized brachy-vs-EBRT data back it here. When pelvic fields are used, TIME-C bowel PROs (diarrhea at 5 weeks 33.7% vs 51.9%) favor IMRT over 3D."
+            },
+            "open_questions": [
+              "How does molecular class change adjuvant RT for stage IB grade 3 endometrioid?",
+              "Vaginal brachy vs pelvic EBRT for stage IB grade 3 disease"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": null,
+            "content_type": "presentation",
+            "discussed_trials": [
+              "GOG99",
+              "PORTEC-1",
+              "PORTEC-2",
+              "GOG249",
+              "RTOG 1203",
+              "TIME-C"
+            ],
+            "presentation": {
+              "speaker": "Justin Anderson, MD",
+              "summary": "The speaker walks a stage IB grade 3 endometrioid case through workup, surgical staging and adjuvant selection. The framework assigns adjuvant therapy by FIGO 2009 stage, grade and histology: observation for low-grade stage IA without LVSI, vaginal cuff brachytherapy for intermediate cells, pelvic EBRT for stage IB grade 3, and EBRT plus brachy boost for stage II. High-intermediate risk is defined through the competing GOG99, PORTEC-1, PORTEC-2 and GOG249 criteria. For pelvic fields the talk argues IMRT over 3D, resting on RTOG 1203 (TIME-C) patient-reported bowel outcomes.",
+              "critique": [
+                "The algorithm runs on FIGO 2009 stage, grade and Type I/II histology; molecular class (POLE, MMRd, TP53-abnormal) does not enter, though it now shifts adjuvant intensity in exactly the stage I grade 3 cell the case occupies.",
+                "Stage IB grade 3 is assigned pelvic EBRT, but the PORTEC-2 definition on the slide excludes grade 3 with >1/2 invasion, so the talk offers no randomized brachy-vs-EBRT data for its own case.",
+                "GOG249 appears only as an HIR definition; its comparison of pelvic RT against vaginal brachy plus chemo, the data closest to this case, is not presented, and the four HIR definitions shown disagree on who qualifies.",
+                "The TIME-C slide lists diarrhea at 1 yr (5.8% vs 15.1%, p=0.4) among IMRT reductions; as printed that difference is nonsignificant, so either the slide carries a typo or the claim overreaches."
+              ]
+            },
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05179447",
+                "brief_title": "PROfiling Based Endometrial Cancer Adjuvant Therapy",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 590,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "This is a prospective, multicenter, randomized phase III trial among women with endometrioid adenocarcinoma with high-intermediate and intermediate risk features to investigate the role of integrated genomic-pathologic classification to determine if participants should receive no adjuvant therapy, vaginal brachytherapy, external beam radiotherapy or chemo-radiation therapy based on molecular features as compared to standard radiation therapy.",
+                "conditions": [
+                  "Endometrial Cancer Stage I",
+                  "Endometrial Cancer Stage II"
+                ],
+                "interventions": [
+                  {
+                    "name": "Vaginal brachytherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "External beam radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Observation",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Chemoradiation therapy",
+                    "type": "COMBINATION_PRODUCT"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Surgery consisting of a total abdominal or laparoscopic hysterectomy, bilateral salpingectomy, pelvic lymphadenectomy or sentinel lymph node mapping and dissection, with or without para-aortic lymphadenectomy, oophorectomy\n2. Histologically confirmed endometrioid type…",
+                "answers_question": "How does molecular class change adjuvant RT for stage IB grade 3 endometrioid?",
+                "relevance_phrase": "randomized molecular-guided vs standard adjuvant RT"
+              },
+              {
+                "nct": "NCT05524389",
+                "brief_title": "Study of Early Stage Endometrial Cancer Based on Molecular Classification and Traditional Risk Stratification to Guide Adjuvant Radiotherapy Decisions",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 624,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "The purpose of this study is to compare the efficacy and toxicity of early stage endometrial cancer based on molecular classification and conventional risk stratification adjuvant therapy decision-making, and to provide high-quality evidence-based medical evidence for individualized adjuvant therapy selection under the guidance of fine stratification system of endometrial cancer.",
+                "conditions": [
+                  "Endometrial Cancer",
+                  "Adjuvant Radiotherapy",
+                  "Molecular Classification"
+                ],
+                "interventions": [
+                  {
+                    "name": "Vaginal brachytherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Pelvic external beam radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Observation",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Chemotherapy",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Women aged 18-75.\n2. Patients with newly histologically confirmed Endometrioid adenocarcinoma.\n3. ECOG score 0-2\n4. Surgery consisting of a total hysterectomy and bilateral salpingo-oophorectomy, pelvic lymphadenectomy or sentinel lymph node biopsy, with or without…",
+                "answers_question": "How does molecular class change adjuvant RT for stage IB grade 3 endometrioid?",
+                "relevance_phrase": "ph3 molecular vs conventional risk-guided adjuvant RT"
+              },
+              {
+                "nct": "NCT05640999",
+                "brief_title": "Adjuvant Therapy in POLE-Mutated and p53-Wildtype/NSMP Early Stage Endometrial Cancer RAINBO BLUE & TAPER",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 393,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "This protocol tests de-escalated adjuvant treatment in patients with POLE-mutated or p53wt/NSMP (p53 wildtype/no specific molecular profile) early-stage endometrial cancer (EC). Patients may be enrolled in one of two sub-studies\n\n* EN10.A/RAINBO BLUE: POLE-mutated EC\n* EN10.B/TAPER: p53 wildtype / NSMP EC",
+                "conditions": [
+                  "Endometrial Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Vaginal brachytherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Adjuvant radiotherapy (EBRT +/- brachytherapy)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Observation",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Patients must have had surgery consisting of hysterectomy and bilateral salpingo-oophorectomy. Lymph node dissection can be performed as per institutional standards. There must be no macroscopic residual disease after surgery.\n* Patients must have histologically confirmed…",
+                "answers_question": "How does molecular class change adjuvant RT for stage IB grade 3 endometrioid?",
+                "relevance_phrase": "de-escalated RT in POLE-mut and p53wt/NSMP early EC"
+              },
+              {
+                "nct": "NCT05655260",
+                "brief_title": "PErsonalized TReatment for Endometrial Carcinoma",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 300,
+                "primary_completion_date": "2028-12",
+                "brief_summary": "The goal of this clinical trial is to compare the efficacy of adjuvant therapies in women with stage I-II molecular integrated high-intermediate or high-risk endometrial carcinoma. Specifically, the invesigators want to compare:\n\n* Chemotherapy vs. chemoradiotherapy in p53 abn subtype and nonendometrioid carcinomas.\n* Vaginal brachytherapy vs. whole pelvic radiotherapy in the MMR-D molecular subgroup.\n* Vaginal brachytherapy vs. whole pelvic radiotherapy in the NSMP molecular subgroup.",
+                "conditions": [
+                  "Endometrial Adenocarcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Comparison of chemotherapy vs. chemoradiotherapy",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Comparison of VBT vs. WPRT",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age 18 to 100 years\n* WHO performance status 0 to 2\n* Stage I-II molecular integrated high-intermediate or high-risk endometrial carcinoma\n\nExclusion Criteria:\n\n* Age \\<18 years or \\>100 years\n* WHO performance status \\>2\n* Uterine sarcoma\n* A history of malignancy within 5…",
+                "answers_question": "Vaginal brachy vs pelvic EBRT for stage IB grade 3 disease",
+                "relevance_phrase": "VBT vs WPRT within MMRd and NSMP subgroups, stage I-II"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "endometrial cancer molecular radiotherapy",
+                "endometrial cancer vaginal brachytherapy"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 34,
+              "fetched_at": "2026-11-19T09:11:31.487Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 278
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "cns",
+        "intro": "Two HyTEC SRS tolerance papers; optic limits hold only without prior RT, and no NTCP model was possible after prior RT.",
+        "studies": [
+          {
+            "name": "HyTEC: SRS dose/volume tolerances of the brain",
+            "tldr": "Brain mets: 1fx V12 (incl. target) 5/10/>15 cc → ~10%/15%/20% symptomatic RN; 3fx V18 <30 cc and V23 <7 cc → <10%.",
+            "details": [
+              {
+                "text": "📊 1fx SRS for brain mets: symptomatic RN by V12 (including target volume)",
+                "table": {
+                  "columns": [
+                    "V12 (incl. target), 1fx",
+                    "Approx. symptomatic RN risk"
+                  ],
+                  "rows": [
+                    [
+                      "5 cc",
+                      "~10%"
+                    ],
+                    [
+                      "10 cc",
+                      "~15%"
+                    ],
+                    [
+                      ">15 cc",
+                      "~20%"
+                    ]
+                  ]
+                }
+              },
+              "📊 3fx fSRS for brain mets: normal-brain V18 <30 cc and V23 <7 cc → <10% RN risk",
+              "📊 AVM SRS: modestly lower symptomatic RN than brain mets at equivalent V12",
+              {
+                "text": "📐 Pooled NTCP model parameters (single-fraction equivalent, α/β=2 Gy)",
+                "table": {
+                  "columns": [
+                    "Endpoint / pooled data",
+                    "Metric",
+                    "Vx,50 (95% CI)",
+                    "γ50 (95% CI)",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "Edema or necrosis, 5 studies",
+                      "V12 incl. GTV",
+                      "63.2 (49.2–97.0)",
+                      "0.87 (0.74–1.03)",
+                      "<0.001"
+                    ],
+                    [
+                      "G1–3 edema or necrosis, 3 studies",
+                      "V14",
+                      "45.8 (33.0–106.2)",
+                      "0.88 (0.68–1.11)",
+                      "0.003"
+                    ],
+                    [
+                      "G3 path-confirmed necrosis, 3 studies",
+                      "V14",
+                      "42.6 (33.8–75.5)",
+                      "1.58 (1.17–2.09)",
+                      "<0.001"
+                    ]
+                  ]
+                }
+              },
+              "🔍 AAPM HyTEC pooled review: 51 reports, 9,828 pts, 13,913 targets (~7,814 unique pts)",
+              "🔍 NTCP modelling limited to 5 studies with per-target dose, volume and outcome",
+              "🔍 Excluded cohorts made up solely of glioma, meningioma, vestibular schwannoma or brainstem targets",
+              {
+                "text": "🔗 RTOG 90-05 (recurrent, previously irradiated mets + gliomas): crude G≥3 neurotoxicity by diameter",
+                "table": {
+                  "columns": [
+                    "Max diameter",
+                    "Peripheral dose",
+                    "Crude G≥3 neurotoxicity"
+                  ],
+                  "rows": [
+                    [
+                      "≤2.0 cm",
+                      "24 Gy",
+                      "10%"
+                    ],
+                    [
+                      "2.1–3.0 cm",
+                      "18 Gy",
+                      "20%"
+                    ],
+                    [
+                      "3.1–4.0 cm",
+                      "15 Gy",
+                      "14%"
+                    ]
+                  ]
+                }
+              },
+              "🔗 Cleveland Clinic (896 pts, 3,034 mets ≤2 cm): >1 cm → 2.1-fold necrosis, 4.8-fold symptomatic necrosis",
+              "⚠️ Crude, not actuarial, risks; median RN onset roughly a year after SRS/fSRS",
+              "⚠️ RN vs progression: imaging sensitivity ~60–80%; most diagnoses imaging-only"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.ijrobp.2020.08.013",
+            "tweet_ids": [
+              1000000280
+            ],
+            "slug": "hytec-brain-srs",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Pooled retrospective crude rates; heterogeneous endpoints and volume definitions (tissue vs brain Vx); RN rarely path-confirmed. Models partly descriptive, not validated predictors.",
+              "audience": "Brain mets or AVM treated with 1-5 fraction SRS/fSRS"
+            },
+            "significance": "The thresholds use V12 including target, and definitions diverge: for a 2.5 cm target, brain V12 7.4 cc vs tissue V12 15.6 cc in the authors' example. A brain-minus-GTV readout run against these numbers understates exposure, and on the steep part of the curve about 1 cc of volume uncertainty moves risk by about 5%.",
+            "monday_clinic": "In a brain met whose single-fraction plan carries a V12 including target of 10 cc or more, this pooled data puts symptomatic RN at roughly 15% to 20% and supports fractionated SRS as the lower-risk option; it does not extend to brainstem targets or glioma.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "AAPM HyTEC working group pooled review of PubMed reports 1995-2016 plus one 2018 study: **51 reports**, 9,828 pts and 13,913 targets, ~7,814 unique pts after overlap. NTCP models were fit only to the **5 studies** reporting per-target dose, volume and outcome."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Mostly AVM (an estimated 3,848 pts with 3,858 AVMs) and brain mets (3,966 pts with 7,903 mets). Cohorts made up **solely** of glioma, meningioma (edema), vestibular schwannoma or brainstem targets were excluded. 10 studies included SRS to a resection cavity."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Single-fraction SRS and 2-5 fraction fSRS (GK and CK in the modelled series). Multi-fraction doses converted to single-fraction equivalent with LQ, **α/β=2 Gy**."
+              },
+              {
+                "label": "Endpoints",
+                "body": "Heterogeneous: any RN, symptomatic RN, edema, neurologic complications, and **G3 pathologically confirmed necrosis**. Crude rather than actuarial risks used throughout."
+              },
+              {
+                "label": "Results",
+                "body": "fSRS **appears to reduce RN risk for larger treatment volumes** relative to SRS. AVM ran modestly lower than brain mets at equivalent V12."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Single-institution series (Flickinger, Korytko, Blonigen, Minniti, Sneed) each tied V10-V12 to necrosis; this pools them and adds fSRS models. RTOG 90-05 set dose by lesion diameter, which HyTEC replaces with **normal-tissue dose-volume**."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents brain mets or AVM treated with 1-5 fraction SRS/fSRS, with V12 read as including the target. Does not represent brainstem targets, glioma, meningioma or vestibular schwannoma."
+              },
+              {
+                "label": "Limitations",
+                "body": "Bin medians were estimated from bin midpoints, and V10/V14 were converted to V12. Korytko's risks ran **substantially higher** than other series and were modelled separately. Vx was per lesion in some series and per patient in others."
+              },
+              {
+                "label": "Discussion",
+                "body": "Risk rises continuously with dose-volume rather than at a single threshold, so the volume definition on the planning readout matters as much as the number. Standardized dosimetric and toxicity reporting is the stated prerequisite for refining these models."
+              }
+            ],
+            "interpretation": "The practical value of this report is that it turns a set of loosely compatible single-institution series into a dose-volume vocabulary a planner can use. The abstract's single-fraction anchors (V12 including target of 5, 10 and >15 cc mapping to roughly 10%, 15% and 20% symptomatic radionecrosis) are what most clinics will carry away. They sit comfortably beside the Flickinger and Korytko work that first tied V10 to V12 exposure to necrosis, and they finish moving the field away from the RTOG 90-05 habit of setting dose by lesion diameter. What the report adds over those series is the multi-fraction side: 3-fraction normal-brain constraints of V18 <30 cc and V23 <7 cc, and the authors' conclusion that fractionation appears to lower risk once treatment volumes get large.\n\nConfidence should be tempered by how the data were assembled. Risks are crude, not actuarial, in a population where median time to necrosis is roughly a year and many pts with brain mets do not live through that window. Crude rates in a short-survival cohort will understate the risk carried by a long survivor, and long survivors are exactly the pts in whom necrosis costs the most. Bin medians were estimated from midpoints, V10 and V14 were converted to V12, and the endpoint ranged from any imaging change to pathologically confirmed G3 necrosis. The authors call several fitted curves descriptive rather than predictive. The largest outlier, Korytko, ran substantially higher than the other series and had to be modelled separately, which suggests that in places the spread between studies is as large as the dose-volume effect being estimated.\n\nThe diagnostic problem cuts both ways. Imaging sensitivity for separating necrosis from progression sits on the order of 60-80%, and few series had pathology. Some events counted as necrosis are tumor, and some progression calls are necrosis. This report cannot tell you which direction the net bias runs, and that uncertainty widens as immunotherapy changes the imaging appearance of both.\n\nThe volume definition is the quieter trap. Series reported tissue, normal-tissue or brain Vx, and some counted per lesion while others counted per patient. A clinic that applies the single-fraction thresholds to a brain-minus-GTV metric, or to a per-lesion volume in a multi-met plan, is applying a constraint to a quantity the model was not fit on.\n\nWhat this leaves open: whether the curves hold for resection-cavity SRS, which only a minority of series addressed; whether concurrent immunotherapy shifts risk at a given V12; and how far the fSRS models generalize, since the pooled multi-fraction modelling rests largely on the Inoue and Peng series. The report is best read as a calibration of current practice rather than new evidence that should move it, and as an argument that dose-volume and toxicity reporting has to be standardized before the next pooled analysis can do better.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The thresholds use V12 including target, and for a 2.5 cm target brain V12 7.4 cc vs tissue V12 15.6 cc in the authors' example. A brain-minus-GTV readout understates exposure, and on the steep part of the curve about 1 cc of volume uncertainty moves risk by about 5%."
+            },
+            "open_questions": [
+              "Do V12 thresholds hold for resection-cavity SRS?",
+              "Does concurrent immunotherapy shift RN risk at a given V12?",
+              "Validated 5-fraction fSRS constraints for large brain mets"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "meta-analysis",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT04114981",
+                "brief_title": "Single Fraction Stereotactic Radiosurgery or Three to Five Fraction Stereotactic Radiosurgery in Treating Patients With Brain Metastasis That Has Been Removed by Surgery",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 242,
+                "primary_completion_date": "2025-12",
+                "brief_summary": "This phase III trial studies how well single fraction stereotactic radiosurgery works compared with fractionated stereotactic radiosurgery in treating patients with cancer that has spread to the brain from other parts of the body (brain metastases) and has been removed by surgery (resected). Single fraction stereotactic radiosurgery is a specialized radiation therapy that delivers a single, high dose of radiation directly to the tumor and may cause less damage to normal tissue. Fractionated…",
+                "conditions": [
+                  "Metastatic Malignant Neoplasm in the Brain"
+                ],
+                "interventions": [
+                  {
+                    "name": "Single Fraction Stereotactic Radiosurgery",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Fractionated Stereotactic Radiosurgery",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Quality-of-Life Assessment",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Questionnaire Administration",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\nPRE-REGISTRATION:\n\n* Pathology from the resected brain metastasis must be consistent with a non-central nervous system primary site. Patients with or without active disease outside the nervous system are eligible (including patients with unknown primaries), as long as the…",
+                "answers_question": "Do V12 thresholds hold for resection-cavity SRS?",
+                "relevance_phrase": "phase 3 1fx SRS vs fSRS to resected cavity"
+              },
+              {
+                "nct": "NCT05703269",
+                "brief_title": "Comparing Single vs Multiple Dose Radiation for Cancer Patients With Brain Metastasis and Receiving Immunotherapy",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 58,
+                "primary_completion_date": "2028-03",
+                "brief_summary": "This study is designed to see if we can lower the chance of side effects from radiation in patients with breast, kidney, small cell lung cancer, non-small cell lung cancer or melanoma that has spread to the brain and who are also being treated with immunotherapy, specifically immune checkpoint inhibitor (ICI) therapy. This study will compare the usual care treatment of single fraction stereotactic radiosurgery (SSRS) given on one day versus fractionated stereotactic radiosurgery (FSRS), which…",
+                "conditions": [
+                  "NSCLC",
+                  "Renal Cell Carcinoma",
+                  "Breast Carcinoma",
+                  "Melanoma",
+                  "Brain Metastases, Adult",
+                  "Non-small Cell Lung Cancer",
+                  "SCLC",
+                  "Small-cell Lung Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "single fraction stereotactic radiosurgery (SSRS)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "fractionated stereotactic radiosurgery (FSRS)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* At least one intact brain metastasis or resection cavity ≥ 2 cm in diameter or ≥ 4 cc volume.\n\n  * Patients at initial diagnosis of brain metastases and patients with known brain metastasis treated with systemic therapy alone are eligible.\n  * Patients who have previously…",
+                "answers_question": "Does concurrent immunotherapy shift RN risk at a given V12?",
+                "relevance_phrase": "SSRS vs FSRS in pts on ICI; side-effect reduction aim"
+              },
+              {
+                "nct": "NCT05346367",
+                "brief_title": "Improving Therapeutic Ratio With Hypo Fractionated Stereotactic Radiotherapy for Brain Metastases",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 130,
+                "primary_completion_date": "2027-03",
+                "brief_summary": "Randomized phase II trial. The study aims to investigate a different and potentially safer radio therapeutic treatment method for brain metastases. The current standard of stereotactic radiotherapy (SRT) in one or three fractions is compared to fractionated stereotactic radiotherapy (fSRT) in five fractions.",
+                "conditions": [
+                  "Brain Metastases"
+                ],
+                "interventions": [
+                  {
+                    "name": "SRT",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "fSRT",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years\n* At least one brain metastasis of large cell cancer suitable for SRT\n* Karnofsky Performance Status ≥ 70\n* Ability to provide written informed consent\n* New brain metastases during follow-up after surgery allowed (when outside of resection cavity area)\n* New…",
+                "answers_question": "Validated 5-fraction fSRS constraints for large brain mets",
+                "relevance_phrase": "rand phase II 1 or 3fx SRT vs 5fx fSRT, safety aim"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "radiosurgery resection cavity brain metastases",
+                "radiosurgery immunotherapy radiation necrosis",
+                "fractionated stereotactic radiosurgery brain metastases"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 26,
+              "fetched_at": "2026-11-19T09:11:44.858Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 280
+              }
+            ],
+            "meeting": null
+          },
+          {
+            "name": "HyTEC: SRS dose tolerances of the optic pathways",
+            "tldr": "<1% RION at optic apparatus max point dose 10 Gy/1 fx, 20 Gy/3 fx, 25 Gy/5 fx in pts without prior RT; 34 studies, 1,578 pts.",
+            "details": [
+              "📊 <1% RION at max point dose 10 Gy/1 fx, 20 Gy/3 fx, 25 Gy/5 fx (no prior RT)",
+              {
+                "text": "📊 Calculated NTCP tolerance doses, optic apparatus max point dose, no prior RT (Table 3)",
+                "table": {
+                  "columns": [
+                    "Model · NTCP risk",
+                    "EQD2 α/β 1.6 (Gy)",
+                    "1 fx SRS (Gy)",
+                    "3 fx fSRS (Gy)",
+                    "5 fx fSRS (Gy)"
+                  ],
+                  "rows": [
+                    [
+                      "All studies · 1%",
+                      "46.0",
+                      "12.1",
+                      "20.0",
+                      "25.1"
+                    ],
+                    [
+                      "All studies · 2%",
+                      "59.1",
+                      "13.8",
+                      "23.0",
+                      "28.9"
+                    ],
+                    [
+                      "All studies · 5%",
+                      "79.0",
+                      "16.1",
+                      "26.9",
+                      "33.9"
+                    ],
+                    [
+                      "Single-fraction SRS only · 1%",
+                      "32.2",
+                      "10.0",
+                      "n/a",
+                      "n/a"
+                    ],
+                    [
+                      "Single-fraction SRS only · 2%",
+                      "39.2",
+                      "11.1",
+                      "n/a",
+                      "n/a"
+                    ],
+                    [
+                      "Single-fraction SRS only · 5%",
+                      "60.7",
+                      "14.0",
+                      "n/a",
+                      "n/a"
+                    ]
+                  ]
+                }
+              },
+              "🔍 Pooled analysis of published reports: 34 studies, 1,578 pts, PubMed 1990 to Jun 2015 (AAPM WGSBRT)",
+              {
+                "text": "📊 Crude RION rates by era and prior RT",
+                "subdetails": [
+                  "1997+ studies, no prior RT: <1% (9 of 1224)",
+                  "1997+ SRS 9 of 959 vs fSRS 1 of 265, p=0.7",
+                  "1997+ studies, prior RT: 11% (7 of 61), p<0.00001 vs no prior RT",
+                  "Pre-1997 studies, no prior RT: 8.5%; 3.6% excluding the VEP-endpoint study (p=0.002 vs 1997+)"
+                ]
+              },
+              "📐 KM stratified at 12 Gy single-fraction (EQD2 45.3 Gy, α/β 1.6): lower RION risk below 12 Gy",
+              "🔗 vs QUANTEC: RION negligible below 8 Gy single-fraction max dose, rising to 10% at 12-15 Gy",
+              "⚠️ Non-event doses mostly reported only as medians or quartiles; likelihood fit may overweight events",
+              "⚠️ RION definitions varied; Leber's VEP-inclusive endpoint gave 23% at median max dose ~15 Gy",
+              "⚠️ No NTCP model possible after prior RT: too few pts, events, and details"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.ijrobp.2018.01.053",
+            "tweet_ids": [
+              1000000281
+            ],
+            "slug": "hytec-optic-pathways-srs",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Aggregate published-report data; non-event doses mostly medians, RION definitions heterogeneous, and multi-fraction limits depend on α/β 1.6 conversion from sparse fSRS events.",
+              "audience": "Peri-optic skull base tumors, 1-5 fx SRS/fSRS, no prior RT"
+            },
+            "significance": "The single-fraction-only fit is the conservative read: 1% RION at 10.0 Gy and 5% at 14.0 Gy max point dose, against 12.1 Gy for 1% once fSRS series are pooled in. The 3- and 5-fraction limits (20 and 25 Gy) rest on 265 fSRS pts with 1 event, converted at α/β 1.6, so they gate peri-optic fSRS planning less firmly than the single-fraction number.",
+            "monday_clinic": "In peri-optic pituitary adenoma, cavernous sinus meningioma or craniopharyngioma without prior RT, this supports SRS or 2-5 fx fSRS within the HyTEC point-dose limits at <1% RION risk; it does not extend to re-irradiation, where crude RION was 11% and no NTCP model could be fit.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Pooled analysis of published reports (PubMed 1990 to Jun 2015) from the AAPM Working Group on Stereotactic Body Radiotherapy: **34 studies, 1,578 pts**. Max dose known for every RION event, but non-event doses mostly available only as medians or quartiles. **Probit NTCP model** fit to 1997+ studies, no prior RT."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Pituitary adenoma, cavernous sinus meningioma, craniopharyngioma and malignant skull base tumors after SRS or 2-5 fx fSRS. Excluded optic nerve sheath tumors, optic gliomas, ocular/uveal melanoma, and studies not separating tumor progression from RION. **Prior resection 76%**, **prior RT 6%**."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Dose metric is **optic apparatus maximum point dose**, generally a small volume (<0.035 cc per TG101). Multi-fraction doses converted at **α/β 1.6 Gy**. LINAC, Gamma Knife and CyberKnife series; delivery system showed no effect on RION."
+              },
+              {
+                "label": "Endpoints",
+                "body": "RION scored as loss of visual acuity, visual field change and/or blindness, using varied scales (LENT SOMA, CTCAE v3, CTCAE v4) or unspecified symptom reporting."
+              },
+              {
+                "label": "Results",
+                "body": "In 1997+ studies without prior RT, crude RION **<1% (9 of 1224)**, with SRS 9 of 959 vs fSRS 1 of 265 (p=0.7). Prior RT: **11% (7 of 61)**, p<0.00001. Prior resection did not correlate with RION (p=0.66)."
+              },
+              {
+                "label": "vs leading data",
+                "body": "QUANTEC found RION negligible below **8 Gy** single-fraction max dose, rising to 10% at 12-15 Gy. HyTEC puts 1% risk at **10.0 Gy** (single-fraction model) or **12.1 Gy** (all studies), modestly more permissive. Mayo's >300-pt no-prior-RT experience had 1 RION event, at 12.8 Gy."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents pts with peri-optic skull base tumors and no prior RT receiving 1-5 fx SRS or fSRS. Does not represent re-irradiation, primary optic nerve or orbital tumors, or stereotactic RT beyond 5 fractions."
+              },
+              {
+                "label": "Limitations",
+                "body": "The 1997 era split was chosen after inspecting the data to isolate early high-toxicity studies. Planning-system dose calculations may differ by ~10%, optic apparatus contouring varies, and subjective symptom capture likely undercounts RION. Dose-volume data were too sparse to model."
+              },
+              {
+                "label": "Discussion",
+                "body": "Supports a single-fraction point limit near **10 Gy** rather than a strict 8 Gy cap when target coverage is at stake. The multi-fraction limits are less certain, and volume dependence is open: a Mayo series of 133 pts with no RION had median volumes above 10 and 12 Gy of 1.6 and 0.1 mm3."
+              }
+            ],
+            "interpretation": "The practical question this paper answers is how far a radiosurgeon has to hold the optic apparatus away from a peri-optic target. The long-standing reference was QUANTEC: negligible risk under 8 Gy in a single fraction, climbing to 10% in the 12-15 Gy range, and several institutions adopted 8 Gy as their working cap. HyTEC's pooled estimate is more permissive, placing 1% RION at 10.0 Gy when the model uses single-fraction data alone and at 12.1 Gy when hypofractionated series are folded in. For a meningioma lying against the chiasm, the difference between an 8 Gy and a 10 Gy point limit can decide whether the target is covered or a sliver is deliberately underdosed, so the direction of the revision matters more than its size.\n\nHow much confidence to place in these numbers depends on which number. The single-fraction estimate draws on most of the data and involves no dose conversion; the Mayo experience of more than 300 pts without prior RT, with one event at 12.8 Gy, is consistent with it. The 3- and 5-fraction limits are weaker. They come from 265 fSRS pts with 1 event, and they are reached through an α/β of 1.6 Gy, so a reader skeptical of the LQ model in the stereotactic range should treat 20 Gy in 3 fractions and 25 Gy in 5 as extrapolations rather than observations. That the all-studies fit is more permissive than the single-fraction fit suggests the converted multi-fraction data move the curve, and the conservative fit is the one with less modelling between dose and event.\n\nThe method carries a structural bias the authors name themselves. Every RION event arrives with its own maximum dose, but most pts without an event appear only as a cohort median or quartile. A likelihood fit cannot see that some non-event pts sat near the event doses, so it overweights the events and returns a conservative curve; the inverse-variance alternative trades that bias for lost dose resolution. Add heterogeneous endpoints (one series using visual evoked potentials reported 23%), inconsistent contouring of a structure a few millimetres across, planning-system dose differences of perhaps 10%, and largely subjective symptom capture likely to miss events, and the curves are best read as an envelope rather than a dose-response measured in any single cohort.\n\nThe era split does more work than it first appears to. Pre-1997 studies had a crude RION rate of 8.5% without prior RT, against under 1% in later series, and the boundary was drawn after looking at the data to separate the early high-toxicity reports. The modern-era model is the relevant one for current practice, but it also inherits whatever selection put the early studies on the wrong side of that line. Delivery platform made no difference, which supports carrying the limits across Gamma Knife, CyberKnife and LINAC practice.\n\nWhat the paper leaves untouched is the patient who most needs a number. Prior RT carried an 11% crude rate (7 of 61) against under 1% without it, and the data were too thin to fit any model. Volume effects are also unresolved: the Mayo parasellar series found very small volumes above 10 and 12 Gy (1.6 and 0.1 mm3) on sides that never developed RION, hinting that a small hot spot may be tolerable, but nothing here quantifies that. For re-irradiation and for dose-volume constraints, this analysis is a starting point, not an answer.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The single-fraction-only fit is the conservative read: 1% RION at 10.0 Gy and 5% at 14.0 Gy max point dose, against 12.1 Gy once fSRS series are pooled in. The 20 and 25 Gy multi-fraction limits rest on 265 fSRS pts with 1 event, converted at α/β 1.6."
+            },
+            "open_questions": [
+              "Safe optic apparatus dose after prior RT",
+              "Volume-based optic constraints vs max point dose",
+              "Validity of α/β 1.6 conversion for fSRS limits"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "meta-analysis",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [
+                "reirradiation skull base stereotactic",
+                "optic neuropathy radiosurgery",
+                "hypofractionated radiosurgery meningioma"
+              ],
+              "queries_failed": [
+                {
+                  "term": "reirradiation skull base stereotactic",
+                  "reason": "empty"
+                },
+                {
+                  "term": "optic neuropathy radiosurgery",
+                  "reason": "empty"
+                }
+              ],
+              "candidates_returned": 2,
+              "fetched_at": "2026-11-19T09:11:57.933Z",
+              "rerank_outcome": "abstained"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 281
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "prostate",
+        "intro": "Talk, not a readout: classifier prognostic data are strong, but predictive value for ADT with RT awaits GU009 and GU006.",
+        "studies": [
+          {
+            "name": "Genomic testing for therapy selection in prostate cancer (Feng)",
+            "tldr": "Decipher and PAM50 subtyping may select who needs ADT with salvage RT or gains more from apalutamide; prospective NRG trials now test this.",
+            "details": [
+              "🔍 Framework: genomic classifiers flag poor-prognosis disease and are now built into phase III trials, newly diagnosed and recurrent",
+              {
+                "text": "📊 Pooled RTOG 92-02 / 94-13 / 99-02 (RT ± ADT): GC score independently prognostic",
+                "subdetails": [
+                  "DM HR 1.24 (1.12 - 1.38) per 0.1 unit GC, p<0.001",
+                  "Independent for DM, BF and OS when baseline clinical variables were accounted for"
+                ]
+              },
+              "🔍 PREDICT-RT (NRG GU009): previously untreated high-risk (NCCN), Primary Endpoint: MFS, sample size 2478",
+              {
+                "text": "🔍 PREDICT-RT randomizes ADT intensity within Decipher strata",
+                "table": {
+                  "columns": [
+                    "Decipher score",
+                    "Arm 1",
+                    "Arm 2"
+                  ],
+                  "rows": [
+                    [
+                      "Low or Intermed",
+                      "RT + intermed term ADT",
+                      "RT + LTADT"
+                    ],
+                    [
+                      "High",
+                      "RT + LTADT",
+                      "RT + LTADT + abi/apalutamide"
+                    ]
+                  ]
+                }
+              },
+              "🔗 RTOG 9601 parent: salvage RT + bicalutamide (2 years) vs placebo, n=760, median f/u 13 years, OS HR 0.77, p=0.04",
+              {
+                "text": "📊 RTOG 9601 Decipher MVA (JAMA Oncology 2021): GC and treatment effect by endpoint",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "GC per 0.1 unit HR (95% CI)",
+                    "p",
+                    "Treatment vs placebo HR (95% CI)",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "DM",
+                      "1.17 (1.05 - 1.32)",
+                      "0.006",
+                      "0.62 (0.39 - 0.97)",
+                      "0.037"
+                    ],
+                    [
+                      "PCSM",
+                      "1.39 (1.20 - 1.63)",
+                      "<0.001",
+                      "0.53 (0.30 - 0.92)",
+                      "0.024"
+                    ],
+                    [
+                      "OS",
+                      "1.17 (1.06 - 1.29)",
+                      "0.002",
+                      "0.82 (0.57 - 1.19)",
+                      "0.293"
+                    ]
+                  ]
+                }
+              },
+              "📊 Low Decipher risk groups: smaller absolute benefit from hormone therapy with salvage RT; per-group 12-year values not in source text",
+              "📊 SPARTAN nmCRPC: 233 pts with archived samples profiled; high and low Decipher both benefited from apalutamide, high benefited more",
+              "⚠️ SPARTAN biopsy preceded randomization by median ~ 6 years",
+              "🔗 PAM50 Luminal B prostate cancers showed the greatest ADT response in matched cohorts (Zhao, JAMA Oncology 2017)",
+              {
+                "text": "🔍 NRG GU006: tests Luminal B as a predictive marker for apalutamide with salvage RT",
+                "subdetails": [
+                  "Post-RP PSA ≥0.1 and ≤1.0 ng/mL plus ≥1 risk feature",
+                  "Risk features: Gleason 4+3 or greater, persistent PSA after RP, pT3",
+                  "Stratified Luminal B vs non-Luminal B",
+                  "Salvage RT + 6 months placebo vs salvage RT + 6 months apalutamide",
+                  "Accrued faster than expected"
+                ]
+              },
+              "⚠️ Slides show prognostic HRs; no biomarker-by-treatment interaction test for ADT benefit in source text"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              1000000277
+            ],
+            "slug": "feng-genomic-testing-prostate-talk",
+            "significance": "Two RT decisions are in play: ADT duration with definitive RT, where PREDICT-RT tests intermediate-term ADT for low or intermediate Decipher, and whether to add ADT to salvage RT, where RTOG 9601 suggests smaller absolute benefit at low Decipher. Neither is settled until those trials and NRG GU006 read out.",
+            "monday_clinic": "In post-RP PSA recurrence going to salvage RT, a low Decipher score is evidence context for a smaller absolute hormone-therapy gain; it does not yet support shortening ADT with definitive RT for NCCN high-risk disease, which PREDICT-RT is testing.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Applies to",
+                "body": "Represents high-risk localized and **post-RP PSA-recurrent** prostate cancer treated with RT ± ADT, plus **nmCRPC** for apalutamide. Does not represent mHSPC, for which no biomarker results are shown on the slides."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The prognostic layer rests on archived tissue from **RTOG 92-02, 94-13, 99-02 and 9601**, and the nmCRPC layer on **SPARTAN**. CHAARTED, TITAN, STAMPEDE, ENZAMET and ENZARAD are listed as profiled trials, with no results on the slides."
+              },
+              {
+                "label": "Discussion",
+                "body": "The case for Decipher as a **prognostic** tool within NCCN risk groups is strong; the case for it as a **predictive** tool for ADT is still the hypothesis that **PREDICT-RT** and **NRG GU006** are built to test."
+              }
+            ],
+            "interpretation": "The talk's core move is to treat a prognostic classifier as a candidate treatment-selection tool, and the evidence shown supports the first role far better than the second. The pooled RTOG 92-02, 94-13 and 99-02 analysis and the RTOG 9601 analysis both show GC score carrying information beyond clinical variables for distant metastasis. That is the strongest layer of the argument: it comes from archived tissue of randomized trials with long follow-up, which is about as good as retrospective biomarker work gets in prostate cancer.\n\nThe step from prognosis to prediction is where a radiation oncologist should slow down. The 9601 slides frame the result as a smaller absolute benefit from hormone therapy in low Decipher groups. Any prognostic marker produces that pattern: when baseline risk is lower, the same relative effect yields a smaller absolute gain. It is a fair basis for a shared decision about omitting hormone therapy in a low-risk salvage pt, but it is not evidence that the relative effect differs by genomic risk, and the slides as captured show no interaction test. The SPARTAN analysis has the same shape: both high and low Decipher pts benefited from apalutamide, high more. In nmCRPC that ranks expected benefit; it does not identify a group to spare.\n\nTransferability is the next question. The 9601 hormone arm was bicalutamide, not GnRH-based ADT, and the definitive-RT cohorts predate modern imaging. A low Decipher score in a pt staged with PSMA PET may not mean the same thing as one in a conventionally staged cohort, and the talk does not address that shift.\n\nThe prospective trials are the honest answer to these gaps, and the talk presents them that way. PREDICT-RT randomizes within Decipher strata in both directions, de-intensifying to intermediate-term ADT for low or intermediate scores and adding abi/apalutamide to long-term ADT for high scores, with MFS as the primary endpoint. That design tests whether the classifier can safely move the ADT duration decision with definitive RT, the RT-adjacent decision with the most toxicity at stake. NRG GU006 is more ambitious: it stratifies on a candidate predictive marker, PAM50 Luminal B, carried over from breast cancer logic, with salvage RT plus 6 months of apalutamide or placebo.\n\nUntil those trials read out, Decipher refines risk estimates within NCCN groups and informs absolute-benefit conversations, while ADT de-intensification for high-risk definitive RT stays untested. The fast GU006 accrual shows strong demand from pts and physicians for a test that lets pts skip hormones, which is exactly why the bar for calling a marker predictive should stay high.",
+            "relevant_specialties": [
+              "radonc",
+              "medonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Decipher could move two RT-adjacent calls: ADT duration with definitive RT (PREDICT-RT tests intermediate-term ADT for low or intermediate scores) and adding ADT to salvage RT (RTOG 9601, NRG GU006). Current data support risk refinement, not ADT de-intensification.",
+              "medonc": "In SPARTAN, high-Decipher nmCRPC pts gained more from apalutamide, but low-Decipher pts benefited too, so the score ranks benefit rather than excluding anyone. PREDICT-RT tests adding abi/apalutamide to long-term ADT in high-Decipher pts."
+            },
+            "open_questions": [
+              "Does low Decipher safely de-intensify ADT with definitive RT?",
+              "Does Luminal B subtype predict apalutamide benefit with salvage RT?",
+              "How do genomic classifiers perform in PSMA PET-staged pts?"
+            ],
+            "consort": null,
+            "modality": null,
+            "intent": null,
+            "methodology": null,
+            "content_type": "presentation",
+            "discussed_trials": [
+              "RTOG 92-02",
+              "RTOG 94-13",
+              "RTOG 99-02",
+              "PREDICT-RT",
+              "NRG GU009",
+              "NRG/RTOG 9601",
+              "SPARTAN",
+              "NRG GU006"
+            ],
+            "presentation": {
+              "speaker": "Felix Feng",
+              "summary": "The speaker argued that genomic classifiers, mainly Decipher, carry prognostic information beyond clinical variables across RTOG definitive-RT and salvage-RT trials and in SPARTAN, and that this should shape ADT and ARSI decisions. In RTOG 9601, low Decipher scores tracked with a smaller absolute benefit from hormone therapy with salvage RT. The framework then moves to predictive markers: PAM50 Luminal B subtype, borrowed from breast cancer, showed the greatest ADT response. The talk closed on prospective validation, with PREDICT-RT randomizing ADT intensity by Decipher score and NRG GU006 testing apalutamide with salvage RT stratified by Luminal B status.",
+              "critique": [
+                "Smaller absolute ADT benefit in low-Decipher pts is what any prognostic marker produces at lower baseline risk; the slides show no treatment-by-biomarker interaction, so predictive value for ADT is not shown.",
+                "In SPARTAN, high and low Decipher pts both benefited from apalutamide, so the 233-pt analysis ranks expected benefit rather than identifying anyone to spare.",
+                "The RTOG 9601 hormone arm was bicalutamide, not GnRH-based ADT, so carrying the Decipher-guided ADT decision to modern salvage regimens is an assumption.",
+                "All validation cohorts were conventionally staged archived tissue; the talk does not address how genomic risk groups behave once PSMA PET restages pts."
+              ]
+            },
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05050084",
+                "brief_title": "Two Studies for Patients With Unfavorable Intermediate Risk Prostate Cancer Testing Less Intense Treatment for Patients With a Low Gene Risk Score and Testing a More Intense Treatment for Patients With a Higher Gene Risk Score, The Guidance Trial",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 2050,
+                "primary_completion_date": "2026-11",
+                "brief_summary": "This phase III trial uses the Decipher risk score to guide therapy selection. Decipher score is based on the activity of 22 genes in prostate tumor and may predict how likely it is for recurrent prostate cancer to spread (metastasize) to other parts of the body. Decipher score in this study is used for patient selection and the two variations of treatment to be studied: intensification for higher Decipher score or de-intensification for low Decipher score. Patients with higher Decipher risk…",
+                "conditions": [
+                  "Prostate Adenocarcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Bicalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Buserelin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Darolutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Degarelix",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Flutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Goserelin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Histrelin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Leuprolide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Relugolix",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Triptorelin",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically (histologically or cytologically) proven diagnosis of adenocarcinoma of the prostate within 270 days prior to registration\n* Unfavorable intermediate risk prostate cancer, defined as having ALL the following bulleted criteria:\n\n  * Has at least one intermediate…",
+                "answers_question": "Does low Decipher safely de-intensify ADT with definitive RT?",
+                "relevance_phrase": "phase 3 UIR, de-intensification for low Decipher score"
+              },
+              {
+                "nct": "NCT05169970",
+                "brief_title": "A Study of Stereotactic Body Radiation Therapy (SBRT) Without Androgen Deprivation Therapy (ADT) in People With Unfavorable Intermediate-Risk Prostate Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 222,
+                "primary_completion_date": "2027-12",
+                "brief_summary": "The researchers are doing this study to find out if stereotactic body radiation therapy (SBRT) without androgen deprivation therapy (ADT) is an effective treatment approach for people with unfavorable intermediate-risk prostate. The researchers will see whether SBRT can prevent participants' cancer from coming back and/or spreading to other parts of the body. In addition, they will look closely at how safe and effective it is to rely on Decipher test results for determining which patients would…",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic Body Radiation Therapy (SBRT)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Stereotactic Body Radiation Therapy (SBRT)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically proven diagnosis of prostate adenocarcinoma within 12 months of enrollment\n* Unfavorable intermediate risk prostate cancer by NCCN 2021 risk stratification guidelines, including any of the following clinicopathologic features:\n* Gleason Score 4+3\n* ≥ 50% biopsy…",
+                "answers_question": "Does low Decipher safely de-intensify ADT with definitive RT?",
+                "relevance_phrase": "phase 2 UIR SBRT without ADT, Decipher-guided"
+              },
+              {
+                "nct": "NCT04513717",
+                "brief_title": "Two Studies for Patients With High Risk Prostate Cancer Testing Less Intense Treatment for Patients With a Low Gene Risk Score and Testing a More Intense Treatment for Patients With a High Gene Risk Score, The PREDICT-RT Trial",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 2753,
+                "primary_completion_date": "2033-12",
+                "brief_summary": "This phase III trial compares less intense hormone therapy and radiation therapy to usual hormone therapy and radiation therapy in treating patients with high risk prostate cancer and low gene risk score. This trial also compares more intense hormone therapy and radiation therapy to usual hormone therapy and radiation therapy in patients with high risk prostate cancer and high gene risk score. Apalutamide may help fight prostate cancer by blocking the use of androgen by the tumor cells.…",
+                "conditions": [
+                  "Prostate Adenocarcinoma",
+                  "Stage III Prostate Cancer AJCC v8",
+                  "Stage IVA Prostate Cancer AJCC v8"
+                ],
+                "interventions": [
+                  {
+                    "name": "Apalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Bicalutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Biospecimen Collection",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Bone Scan",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Buserelin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Computed Tomography",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Degarelix",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Flutamide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Goserelin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Histrelin",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Leuprolide",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Magnetic Resonance Elastography",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Positron Emission Tomography",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Quality-of-Life Assessment",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Questionnaire Administration",
+                    "type": "OTHER"
+                  },
+                  {
+                    "name": "Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Relugolix",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Triptorelin",
+                    "type": "DRUG"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* PRIOR TO STEP 1 REGISTRATION\n* Pathologically proven diagnosis of adenocarcinoma of prostate cancer within 180 days prior to registration\n* High-risk disease defined as having at least one or more of the following:\n\n  * PSA \\> 20 ng/mL prior to starting ADT\n\n    * Note:…",
+                "answers_question": "Does low Decipher safely de-intensify ADT with definitive RT?",
+                "relevance_phrase": "phase 3 high-risk, less intense ADT+RT if low gene risk"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "Decipher prostate radiotherapy",
+                "apalutamide salvage radiotherapy",
+                "genomic classifier PSMA prostate"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 31,
+              "fetched_at": "2026-11-19T09:13:00.835Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 277
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      }
+    ],
+    "meta": {
+      "clusters_total": 5,
+      "studies_analyzed": 5,
+      "dropped": [],
+      "ocr_available": true
+    }
+  },
+  "bookmarks": [],
+  "papers": [
+    {
+      "id": 281,
+      "pmid": null,
+      "doi": "10.1016/j.ijrobp.2018.01.053",
+      "pmc_id": null,
+      "title": "Single- and Multi-Fraction Stereotactic Radiosurgery Dose Tolerances of the Optic Pathways",
+      "authors": [
+        "Milano, Michael T.",
+        "Grimm, Jimm",
+        "Soltys, Scott G.",
+        "Yorke, Ellen",
+        "Moiseenko, Vitali",
+        "Tomé, Wolfgang A.",
+        "Sahgal, Arjun",
+        "Xue, Jinyu",
+        "Ma, Lijun",
+        "Solberg, Timothy D.",
+        "Kirkpatrick, John P.",
+        "Constine, Louis S.",
+        "Flickinger, John C.",
+        "Marks, Lawrence B.",
+        "El Naqa, Issam"
+      ],
+      "journal": "International Journal of Radiation Oncology*Biology*Physics",
+      "pub_date": "2021-05",
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/cns/2021-milano-single-multi-fraction-stereotactic-radiosurgery-dose.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    },
+    {
+      "id": 280,
+      "pmid": null,
+      "doi": "10.1016/j.ijrobp.2020.08.013",
+      "pmc_id": null,
+      "title": "Single- and Multifraction Stereotactic Radiosurgery Dose/Volume Tolerances of the Brain",
+      "authors": [
+        "Milano, Michael T.",
+        "Grimm, Jimm",
+        "Niemierko, Andrzej",
+        "Soltys, Scott G.",
+        "Moiseenko, Vitali",
+        "Redmond, Kristin J.",
+        "Yorke, Ellen",
+        "Sahgal, Arjun",
+        "Xue, Jinyu",
+        "Mahadevan, Anand",
+        "Muacevic, Alexander",
+        "Marks, Lawrence B.",
+        "Kleinberg, Lawrence R."
+      ],
+      "journal": "International Journal of Radiation Oncology*Biology*Physics",
+      "pub_date": "2021-05",
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/cns/2021-milano-single-multifraction-stereotactic-radiosurgery-dose.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    },
+    {
+      "id": 279,
+      "pmid": null,
+      "doi": "10.1016/j.ijrobp.2020.10.039",
+      "pmc_id": null,
+      "title": "High Dose per Fraction, Hypofractionated Treatment Effects in the Clinic (HyTEC): An Overview",
+      "authors": [
+        "Grimm, Jimm",
+        "Marks, Lawrence B.",
+        "Jackson, Andrew",
+        "Kavanagh, Brian D.",
+        "Xue, Jinyu",
+        "Yorke, Ellen"
+      ],
+      "journal": "International Journal of Radiation Oncology*Biology*Physics",
+      "pub_date": "2021-05",
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/multi-site/2021-grimm-high-dose-per-fraction-hypofractionated-treatment.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    },
+    {
+      "id": 278,
+      "pmid": null,
+      "doi": "10.1097/aog.0b013e3182605bf1",
+      "pmc_id": null,
+      "title": "Endometrial Cancer",
+      "authors": [
+        "Sorosky, Joel I."
+      ],
+      "journal": "Obstetrics &amp; Gynecology",
+      "pub_date": "2012-08",
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/gyn/2012-sorosky-endometrial-cancer.pdf",
+      "source_url": null,
+      "note": "Slide deck from a talk (presentation), not a study report.",
+      "resolved_from_review": false
+    },
+    {
+      "id": 277,
+      "pmid": null,
+      "doi": null,
+      "pmc_id": null,
+      "title": "Genomic Testing for Therapy Selection in Prostate Cancer",
+      "authors": [
+        "Felix Feng"
+      ],
+      "journal": null,
+      "pub_date": "2021-04-20",
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/prostate/2021-feng-genomic-testing-therapy-selection-prostate-cancer.pdf",
+      "source_url": null,
+      "note": "Slide deck from a talk (presentation), not a study report.",
+      "resolved_from_review": false
+    }
+  ]
+}
