@@ -1,473 +1,90 @@
 {
   "date": "2026-11-19",
   "conference": null,
-  "generated_at": 1795079824934,
+  "generated_at": 1795165630573,
   "digest": {
-    "top_line": "HyTEC prostate SBRT: 5-yr TCP 95% at EQD2 90 Gy (36.1 Gy/5 fx) low-intermediate risk vs 102 Gy (38.7 Gy/5 fx) high risk, 4,821 pts.",
-    "tldr": "Five AAPM HyTEC pooled dose-response models, all study-level, none randomised. Prostate carries the most actionable dose targets: 36.1 Gy/5 fx for 95% TCP in low-intermediate risk, rectal C39Gy ≥40% for late ≥G3 bowel (OR 8.7). Stage I NSCLC maximal LC at PTV-periphery 50±1 Gy/5fx; recurrent previously-irradiated H&N reirradiation suggested at 40 to 50 Gy/5fx.",
+    "top_line": "HyTEC prostate SBRT TCP: EQD2 90 Gy (36.1 Gy/5fx) → 95% 5-yr TCP in low-intermediate risk; high risk needs EQD2 102 Gy (38.7 Gy/5fx).",
+    "tldr": "HyTEC/AAPM SBRT dose-response day across prostate, thoracic, liver and H&N, all pooled modeling of published series, no randomised data. Prostate led: 36.1 Gy/5fx → 95% 5-yr TCP in low-intermediate risk; urethra Dmax ≥47 Gy and rectal C39Gy ≥40% flag late toxicity. Stage I NSCLC LC plateaus at 50±1 Gy/5fx PTV periphery.",
     "sites": [
       {
-        "disease_site": "hepatobiliary",
-        "intro": "Liver SBRT GI risk modeled on Rx dose only; pooled series reported no stomach, duodenum or bowel doses.",
+        "disease_site": "prostate",
+        "intro": "Two HyTEC prostate SBRT reviews: modeled TCP dose thresholds by risk group plus dose-volume toxicity constraints, neither from randomised data.",
         "studies": [
           {
-            "name": "HyTEC Liver SBRT Dose-Volume Effects",
-            "tldr": "Pooled probit NTCP: G≥2 GI D50 48.0 Gy, G≥3 GI D50 87.1 Gy by Rx dose; no significant liver-enzyme dose response vs MLD (P = .10).",
+            "name": "Heterogeneous-dosing Prostate SBRT, 5-year Outcomes",
+            "tldr": "Urethra Dmax ≥47 Gy → late ≥G2 GU OR 4.2; rectal C39Gy ≥40% → ≥G3 GI OR 8.7 (HyTEC review; Fuller 5-yr data absent).",
             "details": [
-              "🔍 Pooled study-level review of liver SBRT series in PubMed through May 2014",
-              "🔍 Studies were included only if they reported both toxicity and dose-volume data",
-              "🔍 Probit NTCP fit by maximum likelihood, using physical dose rather than BED",
+              "⚠️ Source mismatch: title/DOI cite Fuller et al (Eur Urol Oncol 2018); full text is Wang et al HyTEC prostate SBRT toxicity review (IJROBP)",
+              "⚠️ No heterogeneous-dosing trial efficacy or 5-yr outcomes in source text; no effect size reported for that trial",
+              "🔍 AAPM working group review of prostate SBRT reports 2001-2018; SBRT defined as ≤5 fx",
+              "🔍 Excluded series <40 pts (except sexual outcomes), SBRT boost, proton, non-English, acute-only",
               {
-                "text": "📊 Probit fit parameters by endpoint (95% CI)",
+                "text": "📐 NTCP-derived dose thresholds (authors' refits of published patient data)",
+                "table": {
+                  "columns": [
+                    "Endpoint (series)",
+                    "Dose metric",
+                    "OR (95% CI)",
+                    "p"
+                  ],
+                  "rows": [
+                    [
+                      "Late ≥G2 urinary (UCSF, 38 Gy/4 fx)",
+                      "Urethra Dmax ≥47 Gy (5-fx equiv)",
+                      "4.2 (1.2-15.0)",
+                      "0.04"
+                    ],
+                    [
+                      "Late ≥G3 bowel (multicenter, 45-50 Gy/5 fx)",
+                      "Rectal circumference C39Gy ≥40%",
+                      "8.7 (1.3-59.4)",
+                      "0.02"
+                    ],
+                    [
+                      "EPIC incontinence MID (UCLA, 40 Gy/5 fx)",
+                      "Bladder mean ≥17 Gy",
+                      "7.7 (1.3-45.0)",
+                      "0.008"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📊 Prescription dose vs late toxicity (Sunnybrook series)",
                 "table": {
                   "columns": [
                     "Endpoint",
-                    "Events/pts",
-                    "D50 (Gy)",
-                    "γ50",
-                    "D10 / D20 (Gy)"
+                    "35 Gy",
+                    "40 Gy"
                   ],
                   "rows": [
                     [
-                      "G≥3 liver enzymes (vs MLD)",
-                      "17/288",
-                      "40.8 (25.5-∞)",
-                      "0.95 (0.58–1.44)",
-                      "not reported"
+                      "RTOG ≥G2 late urinary",
+                      "5%",
+                      "48%"
                     ],
                     [
-                      "G≥2 general GI (vs Rx dose)",
-                      "99/278",
-                      "48.0 (43.6–65.9)",
-                      "0.83 (0.37–1.31)",
-                      "18.4 / 28.6"
-                    ],
-                    [
-                      "G≥3 general GI (vs Rx dose)",
-                      "25/399",
-                      "87.1 (69.1–194.4)",
-                      "1.22 (0.78–1.68)",
-                      "50.6 / 63.1"
+                      "CTCAE ≥G2 hematochezia",
+                      "8%",
+                      ">20%"
                     ]
                   ]
                 }
               },
-              "📊 Liver enzyme fit (5 studies) was not significant (P = .10), so dose independence can't be excluded",
-              "📊 A mean Rx dose of 50 Gy in 3-6 fx kept the modeled G≥3 GI risk below 10%",
-              "📊 In series planning with ≥700 cm³ to ≥15 or ≥17 Gy, G≥3 GI was 9.3% (11 of 118), 68% CI 6.6% to 12.8%",
+              "📊 Heterogeneity: UCSF hotspot-heavy plans had more CTCAE G2-3 urinary toxicity; no effect size reported in source",
+              "📊 At 50 Gy/5 fx: 6 of 61 pts (10%) CTCAE G3-4 rectal toxicity, 5 needing colostomy",
               {
-                "text": "🔗 QUANTEC MLD limits fall under a 20% probability of G3 enzyme toxicity on this fit",
+                "text": "📊 Non-dosimetric risk factors",
                 "subdetails": [
-                  "Primary liver cancer: 13 Gy (3 fx), 18 Gy (6 fx)",
-                  "Metastases: 15 Gy (3 fx), 20 Gy (6 fx)"
-                ]
-              },
-              {
-                "text": "⚠️ Grade 5 liver failure was reported in 3 series but not modeled",
-                "subdetails": [
-                  "Bujold: 3 of 102 HCC",
-                  "Barney: 1 of 9",
-                  "Andolino: 4 of 8 HCC pts with baseline CP ≥8"
-                ]
-              },
-              "⚠️ GI risk was modeled on Rx dose because stomach, duodenum and bowel doses weren't reported",
-              "⚠️ Primary and metastatic disease were pooled, although mets were reported to tolerate RT better"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": null,
-            "tweet_ids": [
-              1000000282
-            ],
-            "slug": "hytec-liver-sbrt",
-            "verdict": {
-              "soc_implication": "methodologically-limited",
-              "rationale": "Study-level pooled NTCP from heterogeneous series. Rx dose stands in for GI organ dose, primaries and mets are pooled, and the liver-enzyme fit is nonsignificant.",
-              "audience": "Liver SBRT, mostly 3-6 fx, for HCC, IHC or liver metastases"
-            },
-            "significance": "The dose response appeared in GI toxicity, not in liver enzymes. G≥2 GI had a D10 of 18.4 Gy, and a mean Rx of 50 Gy in 3-6 fx kept G≥3 GI under 10%. Because Rx dose stood in for gastric and duodenal dose, central tumors near the hilum (reported to carry higher GI risk) still need organ-specific constraints.",
-            "monday_clinic": "In HCC or liver mets planned for 3-6 fx SBRT, this supports QUANTEC MLD limits as the liver-enzyme constraint. It does not address liver-function decline in CP ≥8 HCC, where one series saw liver failure in 4 of 8 pts.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "HyTEC **quantitative review** of PubMed liver SBRT series through May 2014, with **study-level** toxicity rates fit to **probit** dose-response models by maximum likelihood. For overlapping reports, only the most recent series with the endpoint was kept. CIs come from profile likelihood and a 2000-sample bootstrap."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "Series of **HCC, IHC and liver metastases**, alone or mixed, with Child-Pugh A through C represented. Inclusion required **both toxicity and dose-volume data**."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "Mostly **3 to 6 fx**; Goodman used single-fraction treatment. Doses were usually prescribed to cover the PTV with the **70% to 85% isodose line**, with motion management and per-fraction image guidance. Modeling used **physical dose, not BED**."
-              },
-              {
-                "label": "Endpoints",
-                "body": "Three modeled endpoints: **G≥3 liver enzyme elevation vs MLD**, **G≥2 general GI vs Rx dose** and **G≥3 general GI vs Rx dose**. General GI combined fatigue, nausea, diarrhea, gastritis, ulcers, GI pain and colitis."
-              },
-              {
-                "label": "Results",
-                "body": "The **liver enzyme fit was not significant (P = .10)**, and the 95% CI for its D50 had no upper bound. Both GI fits were **statistically significant**. Parameters are in the table above."
-              },
-              {
-                "label": "Safety",
-                "body": "Child-Pugh decline after SBRT was reported in **10% to 30%** of pts with primary liver cancer. **Grade 5 liver failure** appeared in 3 series and was linked to worse baseline Child-Pugh status, progression of tumor vascular thrombosis and heavy prior systemic therapy."
-              },
-              {
-                "label": "vs leading data",
-                "body": "The review **reaffirms QUANTEC** MLD limits (13 Gy/3 fx and 18 Gy/6 fx for primary disease; 15 Gy/3 fx and 20 Gy/6 fx for mets), placing them under a **20%** modeled G3 enzyme risk. For **liver-function decline** in HCC, it points to Velec's MLD **<18 Gy (6 fx)** instead."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents pts receiving 3-6 fx liver SBRT for HCC, IHC or liver metastases. Does not represent CP ≥8 HCC, where liver failure rather than enzyme elevation drove the reported grade 5 events."
-              },
-              {
-                "label": "Limitations",
-                "body": "Son's MLD **included the GTV**, unlike every other series, and Lee's data point may have **skewed** the liver fit. Liver-function decline and liver failure **were not modeled**, and series published after May 2014 are absent."
-              },
-              {
-                "label": "Discussion",
-                "body": "The useful output is the **GI curve**, which is a prescription-dose proxy and not an organ constraint. On the liver side, the review **reaffirms rather than refines** existing limits. Its more durable contribution may be the proposed **reporting standard** (full absolute DVHs, liver minus GTV, baseline ALBI and Child-Pugh), which would allow future pooling."
-              }
-            ],
-            "interpretation": "This report reduces a decade of heterogeneous single-institution liver SBRT series to three probit curves, and they carry unequal weight. The liver curve is the weakest. With 17 events across 288 pts in five series, the fit could not reject a model with no dose dependence. That does not show that mean liver dose is irrelevant. It shows that grade ≥3 transaminase elevation is a coarse endpoint, that the MLD spread across series is narrow, and that baseline liver function varies enough to swamp a dose signal at this sample size. The endpoint that actually harms cirrhotic pts, Child-Pugh decline and liver failure, was too inconsistently reported to model at all. The grade 5 events the authors describe clustered in pts with worse baseline function, including 4 of 8 with CP ≥8 in one series. A reader should take the liver result as 'no evidence against QUANTEC', not as evidence for it.\n\nThe GI curves reached statistical significance, but the x-axis is the prescription dose, not the dose to stomach, duodenum or bowel. That substitution holds only if prescription isodoses and lesion geometry are similar across series, which the authors assume more than demonstrate. Central lesions near the hilum, reported to carry higher GI risk, are exactly where Rx dose and duodenal dose separate. The general GI endpoint also lumps fatigue and nausea with ulceration and colitis. The low G≥2 D10 probably reflects that composite more than mucosal injury, so it should not be read as a constraint for a hollow viscus. The G≥3 D50 has an upper confidence bound near 194 Gy, which reflects sparse events, not tolerance.\n\nAgainst QUANTEC, this is a confirmation built on overlapping assumptions rather than an independent test. The QUANTEC MLD limits land under a 20% modeled enzyme risk. Series that planned with 700 cm³ spared to 15 or 17 Gy reported G≥3 GI of 9.3%. Huang's HCC cohort under the same 700 cm³ rule still saw G≥2 GI of 28%, a reminder that a liver-sparing rule says little about adjacent bowel. For liver-function decline in HCC, the authors defer to Velec's MLD <18 Gy (6 fx), an admission that the enzyme endpoint is not the one that matters for cirrhotic pts.\n\nPooling primaries with metastases probably biases the curves in both directions. Pts with mets usually have a larger reserve of healthy liver, so a pooled curve likely overstates their risk and understates the risk in small cirrhotic livers. Using physical dose across single-fraction and 6-fraction schedules adds further noise. Two things could make the GI fits misleading: if the series at higher prescriptions also treated more peripheral lesions, or if a single outlier series drives the slope, as the authors suspect Lee's did for the liver curve.\n\nIn practice, nothing here should move a constraint you already use. What it supports is the reporting agenda: absolute DVHs, liver minus GTV, organ doses at small absolute volumes, and baseline and follow-up Child-Pugh and ALBI. Without those, the next pooled analysis will face the same ceiling.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "The GI curve, not the liver curve, carries the dose signal. A mean Rx of 50 Gy in 3-6 fx kept G≥3 GI under 10%, but that was modeled on Rx dose, so central lesions near the hilum still need gastric and duodenal constraints. On the liver side, the review reaffirms QUANTEC MLD limits rather than refining them."
-            },
-            "open_questions": [
-              "Toxicity differences between liver mets, HCC and IHC",
-              "GI organ-specific dose limits beyond prescription dose",
-              "Validated MLD limit for liver-function decline in HCC"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": null,
-            "methodology": "meta-analysis",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": [
-              {
-                "nct": "NCT06899152",
-                "brief_title": "HepQuant: Study to Assess the Role of Blood-based Biomarkers and Quantitative MR Imaging for Patients Receiving Radiation Therapy for Liver Cancer",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "NA"
-                ],
-                "enrollment_count": 40,
-                "primary_completion_date": "2031-07",
-                "brief_summary": "This is a pilot and feasibility study assessing the role of quantitative multiparametric MRI and blood-based biomarkers for the measurement of liver function in patients receiving radiation therapy for liver cancer, including hepatocellular carcinoma (HCC), cholangiocarcinoma, or liver metastases regardless of primary histology, that are undergoing photon radiation either in the de-novo or re-irradiation setting. The goal of this study is to prospectively evaluate the feasibility of using…",
-                "conditions": [
-                  "Liver Cancer",
-                  "Hepatocellular Carcinoma",
-                  "Hepatocellular Cancer",
-                  "Cholangiocarcinoma",
-                  "Liver Metastases"
-                ],
-                "interventions": [
-                  {
-                    "name": "HepQuant DuO",
-                    "type": "DIAGNOSTIC_TEST"
-                  },
-                  {
-                    "name": "Multiparametric MRI Scans",
-                    "type": "OTHER"
-                  }
-                ],
-                "eligibility_brief": "The following criteria must be met for subjects to be considered for the trial. Additional exclusion criteria must be met for subjects interested in the HepQuant subset of the trial. The first 20 qualifying subjects will be enrolled for the additional HepQuant test.\n\nInclusion Criteria:\n\n* Age \\>…",
-                "answers_question": "Toxicity differences between liver mets, HCC and IHC",
-                "relevance_phrase": "post-RT liver function in HCC, cholangio and liver mets"
-              }
-            ],
-            "related_trials_provenance": {
-              "queries_fired": [
-                "SBRT liver metastases",
-                "stereotactic radiotherapy hepatocellular"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 33,
-              "fetched_at": "2026-11-19T09:15:12.398Z",
-              "rerank_outcome": "picked_N"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 282
-              }
-            ],
-            "meeting": null
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "thoracic",
-        "intro": "Stage I T1-T2 NSCLC dose targets from pooled TCP fits; no model fit well by χ2/ndf, regrowth best.",
-        "studies": [
-          {
-            "name": "HyTEC Local Control After SBRT for Stage I NSCLC",
-            "tldr": "Pooled TCP modeling of 46 SBRT series predicts maximal LC at PTV-periphery 43±1 Gy/3fx, 47±1 Gy/4fx, 50±1 Gy/5fx in T1-T2 stage I NSCLC.",
-            "details": [
-              "🔍 Systematic review: 160 SBRT articles identified (published through May 2014), 46 met quality criteria",
-              "🔍 3268 pts treated at ≥6 Gy/fx, plus 211 pts from 3 studies at 3-4 Gy/fx added to fit the shoulder",
-              {
-                "text": "🔍 Exclusions",
-                "subdetails": [
-                  "Series with fewer than 10 pts",
-                  "Tumor stage higher than T2",
-                  "Oligometastatic disease to the lung"
-                ]
-              },
-              "📊 1, 2, 3 and 5yr TCP for T1, T2 and T1+T2 fit to LQ, USC and regrowth models as a function of BED",
-              "📐 None of the three models fit well by χ2/ndf; regrowth gave the best fit",
-              "📐 Regrowth α/β approximately 25 Gy (T1), 19 Gy (T2), 21 Gy (T1+T2 combined)",
-              {
-                "text": "📊 Required physical dose (Gy) for maximal TCP by model and stage (PTV dose = PTV covered by 80% isodose line)",
-                "table": {
-                  "columns": [
-                    "Model · stage",
-                    "Dose point",
-                    "3 fx",
-                    "4 fx",
-                    "5 fx"
-                  ],
-                  "rows": [
-                    [
-                      "Regrowth T1",
-                      "PTV",
-                      "42±1",
-                      "46±1",
-                      "48±1"
-                    ],
-                    [
-                      "Regrowth T2",
-                      "PTV",
-                      "45±1",
-                      "50±1",
-                      "53±1"
-                    ],
-                    [
-                      "Regrowth T1+T2",
-                      "PTV",
-                      "43±1",
-                      "47±1",
-                      "50±1"
-                    ],
-                    [
-                      "LQ T1+T2",
-                      "PTV",
-                      "44±1",
-                      "47±1",
-                      "50±1"
-                    ],
-                    [
-                      "USC T1+T2",
-                      "PTV",
-                      "44±1",
-                      "47±1",
-                      "50±1"
-                    ],
-                    [
-                      "Regrowth T1",
-                      "Isocenter",
-                      "52±1",
-                      "57±1",
-                      "60±1"
-                    ],
-                    [
-                      "Regrowth T2",
-                      "Isocenter",
-                      "56±1",
-                      "62±1",
-                      "66±1"
-                    ],
-                    [
-                      "Regrowth T1+T2",
-                      "Isocenter",
-                      "54±1",
-                      "59±1",
-                      "63±1"
-                    ],
-                    [
-                      "LQ T1+T2",
-                      "Isocenter",
-                      "55±1",
-                      "59±1",
-                      "63±1"
-                    ],
-                    [
-                      "USC T1+T2",
-                      "Isocenter",
-                      "55±1",
-                      "59±1",
-                      "63±1"
-                    ]
-                  ]
-                }
-              },
-              "🔗 Historic conventional RT (2-3 Gy/fx to ≈54-60 Gy): long-term LC ≈30-70%, OS ≈15-30%",
-              "⚠️ Censoring intercurrent deaths may leave a healthier evaluable subset, so 1-3yr actuarial LC may be overestimated",
-              "⚠️ LC mostly called radiographically; post-SBRT fibrosis and early FDG uptake can mask or mimic recurrence",
-              "⚠️ Most series reported outcomes only up to 3yr; OS collected but not modeled",
-              "⚠️ Surgical series count lobar and hilar/mediastinal failure as local failure, so LC vs surgery is not like-for-like"
-            ],
-            "figures": [],
-            "nct": null,
-            "doi": "10.1016/j.ijrobp.2019.03.045",
-            "tweet_ids": [
-              1000000283
-            ],
-            "slug": "hytec-lung-sbrt-local-control",
-            "verdict": {
-              "soc_implication": "methodologically-limited",
-              "rationale": "Study-level fit across 46 published prospective and retrospective series, not IPD; authors report none of the three TCP models fit the data well.",
-              "audience": "Medically inoperable stage I NSCLC (T1-T2, ≤5 cm), SBRT candidates"
-            },
-            "significance": "The usable output is Table 2: maximal LC needs physical dose of 43±1, 47±1 and 50±1 Gy at the PTV periphery (80% isodose) in 3, 4 and 5 fx, with T2 needing more (45±1/50±1/53±1 Gy) than T1 (42±1/46±1/48±1 Gy). That argues for stage-adapted prescription, not de-escalation.",
-            "monday_clinic": "In medically inoperable peripheral T1-T2 stage I NSCLC, this supports SBRT in 3-5 fx within the modeled PTV-periphery dose band over lower doses; it does not extend to central tumors or tumors >5 cm.",
-            "primary_endpoint": null,
-            "analysis_sections": [
-              {
-                "label": "Design",
-                "body": "Systematic review with study-level TCP modeling: PubMed search identified **160** SBRT series for stage I NSCLC through May 2014, and **46** met quality criteria (N≥10, dose homogeneity, follow-up, LC reported). Retrospective series were admitted if they met the same criteria."
-              },
-              {
-                "label": "Population & inclusion",
-                "body": "**Medically inoperable stage I NSCLC, T1-T2.** Series with fewer than 10 pts, stage above T2, or lung oligometastases were excluded. Typical selection in included series: FEV1 < 1.2 liters or DLCO < 50%, staged by CT and/or PET-CT, with suspected nodal involvement excluded."
-              },
-              {
-                "label": "Radiotherapy",
-                "body": "3268 pts were treated at **≥6 Gy/fx**, and 3 studies (211 pts) at 3-4 Gy/fx were added to anchor the shoulder of the curve. Described ITV-to-PTV margins were 3-8 mm axial and 5-10 mm cranio-caudal, with CTV = GTV and no margin per ICRU 62."
-              },
-              {
-                "label": "Endpoints",
-                "body": "**Local control** (no local progression at the primary on CT or PET-CT) at 1, 2, 3 and 5 yr. OS was collected but **not modeled** because reporting was inconsistent, and distant failure was not recorded."
-              },
-              {
-                "label": "Results",
-                "body": "**No model fit well** by χ2/ndf; regrowth fit best, with α/β approximately **25 Gy (T1), 19 Gy (T2), 21 Gy (combined)**. LQ and USC fits reached nearly the same required doses as regrowth for T1+T2."
-              },
-              {
-                "label": "vs leading data",
-                "body": "Historic conventionally fractionated RT (2-3 Gy/fx to ≈54-60 Gy) gave long-term LC of ≈30-70% and OS of ≈15-30%, and the ablative 3-5 fx regimens modeled here sit on the plateau of the TCP curve. Comparisons with surgery are not like-for-like, because surgical series count lobar and hilar/mediastinal failure as local failure."
-              },
-              {
-                "label": "Applies to",
-                "body": "Represents medically inoperable, mostly peripheral T1-T2 stage I NSCLC ≤5 cm treated with 3-5 fx SBRT. Does not represent central tumors, tumors >5 cm, or node-positive disease."
-              },
-              {
-                "label": "Limitations",
-                "body": "In a comorbid cohort, censoring intercurrent deaths likely **inflates 1-3yr actuarial LC**. Radiographic LC calls are confounded by post-SBRT fibrosis and early FDG uptake, and most series stop at 3 yr. The literature window closes in May 2014."
-              },
-              {
-                "label": "Discussion",
-                "body": "The steep modeled dose-response supports keeping the PTV-periphery dose in the **43-50 Gy band in 3-5 fx** rather than de-escalating, and the model predicts no LC gain above it. T2 tumors need more dose than T1 at every fraction number, which favors stage-adapted prescription."
-              }
-            ],
-            "interpretation": "This pooled analysis matters more for its shape than for any single parameter. Across 46 published series of medically inoperable stage I NSCLC, modeled tumor control rises steeply with physical dose and then flattens, and three structurally different radiobiological models put that shoulder in nearly the same place. For combined T1 and T2 tumors, the regrowth model places the dose for maximal control at 43±1 Gy to the PTV periphery in 3 fractions, and the LQ and USC models at 44±1 Gy. All three agree on 47±1 Gy in 4 fractions and 50±1 Gy in 5. The authors say plainly that none of the models fits well by χ2/ndf. That candor makes the convergence the real finding: when models disagree on mechanics but agree on the dose needed to reach the plateau, the dose recommendation is more credible than any fitted constant behind it.\n\nThe fitted α/β ratios, approximately 25 Gy for T1 and 19 Gy for T2 under the regrowth model, are better read as fitting parameters than as tumor biology. They absorb whatever the classical framework fails to capture at ablative dose per fraction. A high α/β also flattens the penalty for spreading dose across more fractions, which fits the modest step in required physical dose from 3 to 5 fractions. In practice, this supports choosing fraction number on proximity to organs at risk rather than on expected control, provided total dose stays in the modeled band.\n\nThe stage split is the most actionable detail, and it is easy to miss in the combined headline. Under the regrowth fit, T2 tumors need 45±1 Gy at the PTV in 3 fractions versus 42±1 Gy for T1, and 53±1 versus 48±1 Gy in 5 fractions. If the model is even roughly right, a single prescription for all stage I tumors underdoses larger lesions or overdoses smaller ones. It argues for stage-adapted dosing rather than a uniform schedule.\n\nSeveral methodological choices should temper confidence, and most push in one direction. The data are study-level, not patient-level, so each series contributes one dose and one control rate despite heterogeneous prescription conventions and dose-calculation methods. That heterogeneity is why the authors' reporting recommendations ask for algorithm, heterogeneity correction and prescription point. Censoring intercurrent deaths in a comorbid population likely inflates actuarial local control, because pts who died with occult progression drop out as controlled. Radiographic assessment through post-SBRT fibrosis and early FDG avidity adds noise in both directions. Most series stop at 3 years. The shoulder is anchored partly by 211 pts from three studies at 3-4 Gy per fraction, inserted because intermediate-dose data were sparse, so the region of the curve that sets the threshold is also the region with the least data.\n\nWhat the analysis does not settle is just as clear. It is silent on central tumors and on tumors larger than 5 cm, which were underrepresented and carry less favorable outcomes. It cannot support a comparison with resection, because surgical series define local failure more broadly. And with literature closing in May 2014, it predates contemporary motion management and dose-calculation practice. Read correctly, it gives prospective dose-adaptation trials a defensible floor to test against.",
-            "relevant_specialties": [
-              "radonc"
-            ],
-            "significance_by_specialty": {
-              "radonc": "Table 2 is the read: maximal LC needs 43±1, 47±1 and 50±1 Gy at the PTV periphery (80% isodose) in 3, 4 and 5 fx, and T2 needs more than T1 at every fraction number (53±1 vs 48±1 Gy in 5 fx). That supports stage-adapted prescription over a uniform or de-escalated schedule."
-            },
-            "open_questions": [
-              "Does stage-adapted dosing (higher for T2) improve LC prospectively?",
-              "Optimal SBRT dose for central tumors and tumors >5 cm",
-              "True LC once competing-risk censoring is accounted for"
-            ],
-            "consort": null,
-            "modality": "radiation",
-            "intent": "curative",
-            "methodology": "meta-analysis",
-            "significance_perspective": "Radiation oncology",
-            "related_trials": null,
-            "related_trials_provenance": {
-              "queries_fired": [
-                "SBRT early stage lung dose",
-                "central lung SBRT"
-              ],
-              "queries_failed": [],
-              "candidates_returned": 37,
-              "fetched_at": "2026-11-19T09:15:31.302Z",
-              "rerank_outcome": "abstained"
-            },
-            "source_ids": [
-              {
-                "type": "paper",
-                "id": 283
-              }
-            ],
-            "meeting": null
-          }
-        ],
-        "open_questions": null
-      },
-      {
-        "disease_site": "prostate",
-        "intro": "Two HyTEC prostate SBRT reviews: TCP dose targets by risk group, and normal-tissue dose-volume thresholds for rectum, bladder, urethra.",
-        "studies": [
-          {
-            "name": "HyTEC Prostate SBRT Normal Tissue Dose-Toxicity (Heterogeneous-dosing Phase 2)",
-            "tldr": "Rectal C39Gy ≥40% predicted late ≥G3 bowel toxicity (OR 8.7, AUC 0.83); urethra Dmax ≥47 Gy predicted ≥G2 urinary (OR 4.2) in 4-5 fx SBRT.",
-            "details": [
-              "⚠️ Source record mismatch: metadata cites Fuller phase 2 (Eur Urol Oncol 2018); full text is Wang et al HyTEC review",
-              "🔍 AAPM HyTEC review of prostate SBRT series, PubMed 2001-2018; NTCP refits on four series with dose/volume data",
-              {
-                "text": "📊 Dose thresholds associated with late toxicity, NTCP refits (5-fx physical dose)",
-                "table": {
-                  "columns": [
-                    "Organ · endpoint",
-                    "Series",
-                    "Threshold",
-                    "OR (95% CI)",
-                    "p",
-                    "Model AUC"
-                  ],
-                  "rows": [
-                    [
-                      "Rectum · late ≥G3 bowel",
-                      "Kim (multicenter), 91 pts",
-                      "C39Gy ≥ 40%",
-                      "8.7 (1.3-59.4)",
-                      "0.02",
-                      "0.83"
-                    ],
-                    [
-                      "Bladder · EPIC incontinence MID",
-                      "Qi (UCLA), 86 pts, 40 Gy/5 fx",
-                      "Mean ≥ 17 Gy",
-                      "7.7 (1.3-45.0)",
-                      "0.008",
-                      "0.63"
-                    ],
-                    [
-                      "Urethra · late ≥G2 urinary",
-                      "Zhang (UCSF), 78 pts, 38 Gy/4 fx",
-                      "Dmax ≥ 47 Gy",
-                      "4.2 (1.2-15.0)",
-                      "0.04",
-                      "0.61"
-                    ]
-                  ]
-                }
-              },
-              "📊 Rectum V50Gy model: TD50 5.9cc (5.1-7.1), AUC 0.93",
-              "📊 Urethra 20% G2 risk level: D1cc 47 Gy, D0.1cc 49 Gy, Dmax 50 Gy (5 fx)",
-              "📊 50 Gy/5 fx escalation: 6 of 61 (10%) CTCAE G3-4 rectal toxicity, 5 needed colostomy",
-              "📊 Sunnybrook: RTOG ≥G2 late urinary 5% at 35 Gy vs 48% at 40 Gy",
-              {
-                "text": "🔍 Non-dosimetric toxicity modifiers",
-                "subdetails": [
+                  "Prostate >60 cc: late G2-3 urinary 15% vs 8%",
                   "Prior TURP: late G2-3 hematuria 21% vs 2%",
-                  "Prostate > vs ≤ 60 cc: late G2-3 urinary 15% vs 8%",
-                  "Anticoagulants: ≥G2 late hematochezia 47% vs 18%",
-                  "QD vs QOD (Stanford): late G1-2 urinary 56% vs 17%, bowel 44% vs 5%; learning-curve confounded"
+                  "QD vs QOD (Stanford): late G1-2 urinary 56% vs 17%, bowel 44% vs 5%",
+                  "Anticoagulants: ≥G2 late hematochezia 47% vs 18%"
                 ]
               },
-              "⚠️ Bladder 17 Gy cutpoint chosen to maximize the OR; optimistic until externally validated",
-              "⚠️ Urethral models discriminate poorly: AUC 0.60, 0.62, 0.61 for D1cc, D0.1cc, Dmax"
+              "🔗 2018 ASTRO/ASCO/AUA guideline advised Rx ≤36.25 Gy; authors read ≥G3 risk as low up to 40 Gy",
+              "⚠️ QD vs QOD gap may reflect early-era learning curve, per authors",
+              "⚠️ Thin events (Kim: 6 events) give wide ORs; authors state firm constraints cannot be made"
             ],
             "figures": [],
             "nct": null,
@@ -477,58 +94,58 @@
             ],
             "slug": "hytec-prostate-sbrt-normal-tissue",
             "verdict": {
-              "soc_implication": "consensus",
-              "rationale": "Working-group review with NTCP refits of four series; output is planning objectives, and authors state firm dose/volume recommendations cannot be made. No efficacy endpoint.",
-              "audience": "Low-intermediate risk prostate cancer, 4-5 fx photon SBRT"
+              "soc_implication": "unclear",
+              "rationale": "Full text is the HyTEC prostate SBRT toxicity review (Wang et al), not the Fuller heterogeneous-dosing trial; no trial outcomes to classify.",
+              "audience": "Low-intermediate risk localized prostate cancer"
             },
-            "significance": "Model discrimination splits by organ. Rectal models reached AUC 0.83 (C39Gy) and 0.93 (V50Gy), urethral refits reached only 0.60, 0.62 and 0.61, and the 17 Gy bladder cutpoint was picked to maximize its OR. The rectal high-dose limits are the ones backed by evidence. The urethral and bladder thresholds are planning goals.",
-            "monday_clinic": "In low-intermediate risk prostate cancer planned for 5-fraction photon SBRT, this supports rectal high-dose limits as the best-grounded planning objective, with urethral and bladder thresholds as softer goals; it does not extend to SBRT boost, salvage after prior RT, or proton plans.",
+            "significance": "The heterogeneity signal transfers: UCSF plans with larger hotspots carried more G2-3 urinary toxicity, and urethra Dmax ≥47 Gy (5-fx equivalent) tracked late ≥G2 urinary toxicity (OR 4.2). For CyberKnife plans prescribed to low isodose lines, prescription isodose and OAR Dmax may matter as much as nominal Rx dose.",
+            "monday_clinic": "In low-intermediate risk prostate cancer considered for 4-5 fx SBRT, a prostate >60 cc, prior TURP, or anticoagulant use flags higher late urinary or bowel risk in this review; it says nothing about cancer control or the Fuller heterogeneous-dosing outcomes.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "AAPM working group (HyTEC) review of prostate SBRT series published **2001-2018** via PubMed search, limited to analyses of late urinary, bowel or sexual toxicity/QOL. **Four** series with patient-level dose/volume data were refit with probit or LKB NTCP models."
+                "body": "Systematic PubMed review of prostate SBRT reports from **2001-2018** by an AAPM working group (HyTEC series), with NTCP modeling on the **4 studies** that published dose/outcome data. **Not** the Fuller heterogeneous-dosing trial named in the metadata."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Mostly **low-intermediate risk** prostate cancer treated with photon SBRT in 5 or fewer fractions. Excluded: series under 40 pts (except sexual outcomes), SBRT boost, proton series, non-English and acute-only reports."
+                "body": "Mostly **low-intermediate risk** prostate cancer. Excluded series with **<40 pts** (except sexual outcomes), SBRT boost, proton series, non-English reports and acute-only toxicity."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Outside early dose-escalation work, prescriptions were **35-40 Gy in 4-5 fractions**, all with daily image guidance (CyberKnife fiducial tracking, Calypso, or pre-treatment fiducial imaging). The UCSF 4-fraction data were converted to 5-fraction equivalent dose with α/β=3 Gy."
+                "body": "SBRT defined as **≤5 fractions**; reviewed regimens mostly **35-40 Gy in 4-5 fx**. All used daily image guidance (CyberKnife fiducial tracking, Calypso, pretreatment fiducial imaging)."
               },
               {
-                "label": "Results",
-                "body": "Rectal high-dose metrics gave the strongest models (V50Gy AUC **0.93**). The bladder mean-dose association held for **incontinence QOL only**. Obstruction/irritation (p=0.36) and bowel QOL (p=0.40) models were not significant."
+                "label": "Safety",
+                "body": "At the **50 Gy/5 fx** dose level, 6 of 61 pts (10%) had CTCAE G3-4 rectal toxicity, 5 needing temporary or permanent colostomy. Sexual outcomes tracked baseline patient factors, **not** penile bulb dose."
               },
               {
                 "label": "vs leading data",
-                "body": "HYPO-RT-PC is cited for similar cancer control and toxicity with a 7-fraction regimen vs conventional fractionation. PACE and NRG-GU005 are named as the ongoing SBRT vs conventional comparisons. The ASTRO/ASCO/AUA guideline advised against doses above **36.25 Gy**, but the authors judge severe toxicity risk low up to **40 Gy**."
+                "body": "Sits beneath the **2018 ASTRO/ASCO/AUA** guideline, which advised against Rx above **36.25 Gy** and favored QOD delivery; the authors read ≥G3 risk as low up to **40 Gy**. Efficacy vs conventional fractionation is deferred to **PACE** and **NRG-GU005**, with HYPO-RT-PC cited for 7-fx parity."
               },
               {
                 "label": "Applies to",
-                "body": "Represents low-intermediate risk prostate cancer treated with 4-5 fraction photon SBRT under daily image guidance. Does not represent SBRT boost, salvage after prior RT, or proton therapy."
+                "body": "Represents 4-5 fx photon SBRT in low-intermediate risk prostate cancer. Does not represent SBRT boost, salvage after prior RT, proton plans, or cancer-control outcomes."
               },
               {
                 "label": "Limitations",
-                "body": "Few events and **data-driven cutpoints** give wide intervals that will likely shrink on validation. Toxicity scales (RTOG, CTCAE, EPIC, IPSS) and definitions of 'late' varied across series, so the data could not be pooled."
+                "body": "Mixed scales (RTOG, CTCAE v3/v4, EPIC, IPSS) and late windows from 3 months to years block pooling. NTCP fits rest on few events (Kim: **6 events**, OR CI 1.3-59.4), and the authors state **firm constraints cannot be made**."
               },
               {
                 "label": "Discussion",
-                "body": "Planning objectives should include at minimum a **Dmax or similar high-dose constraint**, plus a moderate-dose constraint to cover volume effects. Holding **rectum Dmax to the prescription dose** is the main bowel lever. For urinary toxicity, prostate size, baseline symptoms and prior TURP count as much as OAR dose."
+                "body": "High-dose OAR metrics recur across urinary and bowel domains, so the authors set a Dmax-type constraint plus a moderate-dose volume limit as the minimum. Prescription isodose line and plan heterogeneity may weigh as much as nominal Rx, which bears directly on heterogeneous-dosing SBRT."
               }
             ],
-            "interpretation": "This report is most useful as a ranking of which prostate SBRT constraints rest on outcome data and which rest on convention. The authors say plainly that firm tolerance doses cannot be set, and the modeling supports that claim unevenly across organs. The rectal analysis is the strongest part. In the Kim dose-escalation series, circumferential and volumetric high-dose metrics separated pts with severe bowel toxicity from those without (AUC 0.83 for C39Gy, 0.93 for V50Gy), and the clinical anchor is clear: colostomies occurred at the 50 Gy level. That gives a rectal high-dose cap, such as holding rectum Dmax at the prescription dose, the clearest evidence of any constraint here.\n\nThe urethral and bladder results deserve more caution than their p-values suggest. Urethral models refit from the UCSF 4-fraction data discriminated barely better than chance (AUC 0.60, 0.62, 0.61). The original authors had found no Dmax association at all, and the Dmax ≥47 Gy signal appeared only after reanalysis and conversion with an assumed α/β of 3 Gy. The bladder mean-dose threshold of 17 Gy was chosen because it maximized the odds ratio, which is the standard recipe for an optimistic estimate, and its interval (1.3-45.0) is wide. Neither threshold should be treated as a tolerance. Both are reasonable planning goals that need external validation in cohorts with prospectively collected DVHs.\n\nThe prescription-dose question is where the report speaks most directly to current practice. The ASTRO/ASCO/AUA guideline steered away from doses above 36.25 Gy because of higher grade 1-2 toxicity. The Sunnybrook contrast (5% vs 48% late ≥G2 urinary at 35 vs 40 Gy) supports that caution for mild to moderate effects. Even so, the authors judge grade 3 or higher risk to be low up to 40 Gy, and they argue that OAR dose and prescription isodose line may matter as much as the nominal prescription. That argument targets heterogeneous CyberKnife plans with larger hotspots. It moves the escalation debate away from the prescribed dose and toward what the plan delivers to the urethra and rectal wall.\n\nThe non-dosimetric findings carry less weight. The Stanford QD vs QOD contrast is tangled up with an early institutional learning curve. The anticoagulant, TURP and gland-size associations come from single-institution series with uncontrolled selection. Toxicity scales and definitions of late effects varied widely, which is why the authors did not attempt pooling.\n\nWhat could make these thresholds wrong is mostly motion and delineation. Planned OAR dose at simulation may not match delivered dose once bladder and rectal filling vary. Spacers, MRI-based urethral contouring, and SBRT boost or salvage settings fall outside the data entirely. PACE and NRG-GU005 should supply prospective toxicity data. The authors also ask that every series report at least OAR maximum and D1cc, and that is the practical step that would let these models be tested.",
+            "interpretation": null,
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The authors judge severe toxicity risk low up to 40 Gy despite the guideline's 36.25 Gy ceiling, and they weigh OAR dose and prescription isodose line as heavily as the nominal prescription. For heterogeneous CyberKnife plans, urethral hotspot control and a rectal Dmax held at prescription matter more than the prescription number."
+              "radonc": "Urethra Dmax ≥47 Gy (OR 4.2), rectal C39Gy ≥40% (OR 8.7) and bladder mean ≥17 Gy (OR 7.7) are the modeled high-risk thresholds. The authors' floor is a Dmax-type constraint plus a moderate-dose volume limit, with plan heterogeneity and prescription isodose weighed alongside Rx dose."
             },
             "open_questions": [
+              "Optimal SBRT dose fractionation and QD vs QOD vs weekly delivery",
               "OAR constraints for SBRT boost or salvage after prior RT",
-              "Do spacers or MRI urethral contouring shift these thresholds?",
-              "QD vs QOD vs weekly delivery and late toxicity"
+              "Does hydrogel spacer reduce rectal toxicity with prostate SBRT?"
             ],
             "consort": null,
             "modality": "radiation",
@@ -536,6 +153,56 @@
             "methodology": null,
             "significance_perspective": "Radiation oncology",
             "related_trials": [
+              {
+                "nct": "NCT03561961",
+                "brief_title": "Prostate Radiotherapy Comparing Moderate and Extreme Hypo-fractionation (PRIME Trial)",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 526,
+                "primary_completion_date": "2024-09",
+                "brief_summary": "Aim: The aim of the study is to compare the efficacy with SBRT and moderate hypo-fractionation in high risk and node positive prostate cancer\n\nPRIMARY STUDY OBJECTIVES: To assess whether extreme hypo-fractionation with SBRT in high risk prostate cancer is non inferior to moderately hypo-fractionated standard radiotherapy\n\nSTUDY DESIGN: Two arm, Prospective Randomized Trial with a non-inferiority design\n\nTREATMENT REGIMEN: Arm 1-\\[standard arm\\] Moderate hypo-fractionated RT, total dose of 66-68…",
+                "conditions": [
+                  "Prostate Adenocarcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Moderate Hypo-fractionation",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Extreme Hypo-fractionation",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Age: above 18 years.\n2. Participants must be histologically proven, adenocarcinoma prostate\n3. Localised to the prostate or pelvic lymph nodes\n4. High risk prostate cancer as defined by National Comprehensive Cancer Network (NCCN):Gleason score of 8-10, clinical stage T3a or…",
+                "answers_question": "Optimal SBRT dose fractionation and QD vs QOD vs weekly delivery",
+                "relevance_phrase": "SBRT vs moderate hypofx noninferiority, high risk"
+              },
+              {
+                "nct": "NCT06835725",
+                "brief_title": "Phase II Randomized Trial of 2 Versus 5 Fraction Prostate Stereotactic Ablative Radiotherapy for Intermediate Risk Prostate Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 100,
+                "primary_completion_date": "2032-04",
+                "brief_summary": "Prostate cancer is a common cancer, and a significant cause of cancer death in men. There are many potentially curative treatment options for prostate cancers that have not spread. A relatively recent option is called prostate stereotactic ablative radiotherapy (SABR). SABR is a form of external beam radiotherapy, where patients receive a small number (5-7) of treatments (also called fractions) of radiation delivered in a highly accurate and precise fashion. Standard prostate SABR is generally…",
+                "conditions": [
+                  "Prostate CA"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic Body Radiation Therapy (SBRT)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* • Age 18 or older.\n\n  * Able to provide informed consent.\n  * ECOG performance status 0 - 2.\n  * Fit for all protocol treatment and follow-up.\n  * Life Expectancy \\> 5 years.\n  * Histologically confirmed adenocarcinoma of the prostate, NCCN low or intermediate risk, with…",
+                "answers_question": "Optimal SBRT dose fractionation and QD vs QOD vs weekly delivery",
+                "relevance_phrase": "randomized phase 2, 2 vs 5 fx SABR, intermediate risk"
+              },
               {
                 "nct": "NCT06201078",
                 "brief_title": "Stereotactic Re-irradiation of Local Recurrences of Prostate Cancer After Radiotherapy",
@@ -558,7 +225,7 @@
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n1. Local recurrence of prostate cancer after definitive radiotherapy\n\n   1. biopsy proven or/and\n   2. Consistent MRI and PET-PSMA results and PSA growth dynamics\n2. Time since primary radiotherapy - at least 2 years\n3. Good performance status (ZUBROD 0-1)\n\n   * If the results…",
                 "answers_question": "OAR constraints for SBRT boost or salvage after prior RT",
-                "relevance_phrase": "phase 2 focal SBRT re-RT, G≥2/G≥3 GU and GI toxicity"
+                "relevance_phrase": "focal SBRT reRT after prior RT, G≥2 GU/GI tox endpoint"
               },
               {
                 "nct": "NCT04905069",
@@ -580,19 +247,19 @@
                   }
                 ],
                 "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years old.\n* Subjects must have pathologically confirmed (by routine hematoxylin and eosin (H\\&E) staining) invasive adenocarcinoma of the prostate and been planning to undergo SBRT.\n* Subjects must have intermediate risk prostate cancer as defined by the presence of…",
-                "answers_question": "Do spacers or MRI urethral contouring shift these thresholds?",
-                "relevance_phrase": "SpaceOAR Vue with prostate SBRT, late GI toxicity"
+                "answers_question": "Does hydrogel spacer reduce rectal toxicity with prostate SBRT?",
+                "relevance_phrase": "SpaceOAR Vue, late GI tox endpoint with prostate SBRT"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
+                "prostate SBRT fractionation",
                 "prostate SBRT reirradiation",
-                "hydrogel spacer prostate SBRT",
-                "prostate SBRT fractionation schedule"
+                "hydrogel spacer prostate SBRT"
               ],
               "queries_failed": [],
-              "candidates_returned": 19,
-              "fetched_at": "2026-11-19T09:15:46.949Z",
+              "candidates_returned": 30,
+              "fetched_at": "2026-11-20T09:04:45.118Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -604,54 +271,41 @@
             "meeting": null
           },
           {
-            "name": "HyTEC Prostate SBRT Tumor Control Probability",
-            "tldr": "5-yr TCP 95% at EQD2 90 Gy (36.1 Gy/5 fx) for low-intermediate risk vs 102 Gy (38.7 Gy/5 fx) for high risk; 25 cohorts, 4,821 pts.",
+            "name": "Prostate SBRT TCP Modeling and Systematic Review",
+            "tldr": "Low-intermediate risk: EQD2 90 Gy (36.1 Gy/5fx) gives 95% 5-yr TCP; high risk needs EQD2 102 Gy (38.7 Gy/5fx) for 95%.",
             "details": [
+              "🔍 AAPM HyTEC systematic review + Poisson TCP dose-response model; endpoint FFBR",
+              "🔍 25 cohorts, 4,821 pts; literature through March 2018",
               {
-                "text": "📊 5-yr FFBR-based TCP dose targets by risk group (α/β=1.5)",
+                "text": "📊 Modeled 5-yr TCP (FFBR) by risk group, α/β=1.5 Gy",
                 "table": {
                   "columns": [
-                    "TCP target",
-                    "Low-intermediate risk",
-                    "High risk"
+                    "Risk group",
+                    "TCP 90%",
+                    "TCP 95%"
                   ],
                   "rows": [
                     [
-                      "90%",
-                      "EQD2 71 Gy (31.7 Gy/5 fx)",
-                      "EQD2 97 Gy (37.6 Gy/5 fx)"
+                      "Low-intermediate",
+                      "EQD2 71 Gy (31.7 Gy/5fx)",
+                      "EQD2 90 Gy (36.1 Gy/5fx)"
                     ],
                     [
-                      "95%",
-                      "EQD2 90 Gy (36.1 Gy/5 fx)",
-                      "EQD2 102 Gy (38.7 Gy/5 fx)"
+                      "High",
+                      "EQD2 97 Gy (37.6 Gy/5fx)",
+                      "EQD2 102 Gy (38.7 Gy/5fx)"
                     ]
                   ]
                 }
               },
-              "🔍 AAPM HyTEC systematic review plus Poisson TCP dose-response model, series published through March 2018",
-              {
-                "text": "🔍 Risk mix across 4,821 pts (when reported)",
-                "subdetails": [
-                  "Low risk: N=2,235",
-                  "Intermediate risk: N=1,894",
-                  "High risk: N=446"
-                ]
-              },
-              {
-                "text": "🔍 Model fit drew only on cohorts with ≥5 yr f/u",
-                "subdetails": [
-                  "Low-intermediate curve: 9 studies, 1069 pts",
-                  "High-risk curve: 3 studies, 85 pts"
-                ]
-              },
-              "🔍 Regimens 32-50 Gy in 4-5 fx; most prescriptions 35-40 Gy",
-              "📐 BED (α/β=1.5) range 183.1-383.3 Gy",
-              "🔍 All fiducial-guided; 16 cohorts CyberKnife, 7 conventional linac",
-              "⚠️ No reviewed cohort below ~80 Gy EQD2: the 71 Gy (90% TCP) low-intermediate point is model extrapolation",
-              "⚠️ Prescription dose only; no dose-volume data, so intraprostatic dose not modeled",
-              "⚠️ Authors flag the 446 high-risk pts as likely highly selected",
-              "🔗 HYPO-RT-PC: 7-fx SBRT-like regimen gave similar 5-yr control and toxicity vs conventional fractionation"
+              "📊 Risk mix: 2,235 low, 1,894 intermediate, 446 high risk",
+              "💊 Regimens 32-50 Gy in 4-5 fx; most prescriptions 35-40 Gy",
+              "🔍 All fiducial-guided; 16 cohorts Cyberknife, 7 linac",
+              "⚠️ Model fit only to cohorts with ≥5y f/u: 9 studies (1069 pts) low-intermediate, 3 studies (85 pts) high risk",
+              "⚠️ No cohort treated below EQD2 approximately 80 Gy, so the 71 Gy → 90% TCP point is extrapolated",
+              "⚠️ Dose modeled from prescription only, no DVH; target, margin and SV coverage varied widely",
+              "⚠️ Phoenix nadir+2 used in all but 3 cohorts; 2 used PSA decline trends",
+              "🔗 HYPO-RT-PC: 7-fx SBRT-like regimen matched conventional fractionation on control and toxicity at 5 yrs"
             ],
             "figures": [],
             "nct": null,
@@ -662,61 +316,57 @@
             "slug": "hytec-prostate-sbrt-tcp",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Ecological dose-response fit across pooled single-arm cohorts at prescription dose only, without dose-volume data; the high-risk curve rests on 3 studies, 85 pts.",
-              "audience": "Localized prostate cancer, mostly low/intermediate risk (NCCN/D'Amico)"
+              "rationale": "Pooled nonrandomized, mostly single-institution series; dose modeled from prescription only, high-risk curve from 85 pts, low-intermediate 90% point extrapolated below the data.",
+              "audience": "Localized prostate cancer, low/intermediate risk, definitive SBRT ≤5 fx"
             },
-            "significance": "The low-intermediate 90% TCP point (EQD2 71 Gy, 31.7 Gy/5 fx) sits below the ~80 Gy floor of every reviewed cohort, so it is extrapolation, not a de-escalation floor. The data-supported read is 95% TCP at 36.1 Gy/5 fx; the high-risk 38.7 Gy/5 fx target rests on 85 pts.",
-            "monday_clinic": "In low- and intermediate-risk localized prostate cancer planned for 5-fraction SBRT, this supports the 35-40 Gy prescription range on biochemical control grounds; it does not set a dose for high-risk disease or address SBRT as a boost to IMRT.",
+            "significance": "The 90% TCP anchor for low-intermediate risk (EQD2 71 Gy) lies below approximately 80 Gy, a range no reviewed cohort treated, so it is extrapolation. The data-backed read is 36.1 Gy/5fx at 95% TCP, which supports staying in the 35-40 Gy range rather than de-escalating below it.",
+            "monday_clinic": "In low- and intermediate-risk localized prostate cancer, this supports current SBRT prescriptions as sitting near the top of the dose-response curve; it does not extend to high-risk disease, where the fitted curve rests on 85 pts from 3 studies.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "AAPM HyTEC (WGSBRT) **systematic review** of PubMed series through March 2018, with a **Poisson TCP dose-response model** fitted to cohorts with ≥5 yr follow-up. **25 cohorts, 4,821 pts**: 2 registries (RSSR 437, RPCR 1743), 3 multi-institutional, the rest single-institution."
+                "body": "AAPM WGSBRT (HyTEC) **systematic review plus Poisson TCP dose-response model**, endpoint **FFBR** (Phoenix nadir+2 in all but 3 cohorts). PubMed through March 2018; excluded series <40 pts, protons, >5 fx, and <6 Gy/fx."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Definitive SBRT monotherapy (≥6 Gy/fx, ≤5 fx) for localized prostate cancer; series with <40 pts, protons, and non-English reports excluded. Risk mix when reported: **low 2,235, intermediate 1,894, high 446**."
+                "body": "**25 cohorts, 4,821 pts**: 2,235 low, 1,894 intermediate, 446 high risk (NCCN or D'Amico). Two registries (RSSR 437, RPCR 1743), 3 multi-institutional cohorts, the rest single-institution."
               },
               {
                 "label": "Radiotherapy",
-                "body": "**32-50 Gy in 4-5 fx**, most prescriptions 35-40 Gy; BED (α/β=1.5) 183.1-383.3 Gy. All fiducial-based IGRT, 16 cohorts on CyberKnife and 7 on conventional linac."
-              },
-              {
-                "label": "Endpoints",
-                "body": "**FFBR** by Phoenix nadir+2 in all but 3 cohorts, 5-yr values used whenever possible, stratified by NCCN or D'Amico risk group."
+                "body": "Regimens 32-50 Gy in 4-5 fx, total BED (α/β=1.5 Gy) 183.1-383.3 Gy; **most prescriptions 35-40 Gy in 4-5 fx**. All image-guided on implanted fiducials; target definition, PTV margins and SV coverage varied across institutions."
               },
               {
                 "label": "Results",
-                "body": "Low-intermediate curve fitted on **9 studies (1069 pts)**, high-risk curve on **3 studies (85 pts)**. Dose targets by risk group are in the detail table."
+                "body": "Model fit only on cohorts with ≥5y follow-up: **9 studies, 1069 pts** low-intermediate vs **3 studies, 85 pts** high risk."
               },
               {
                 "label": "vs leading data",
-                "body": "Randomized dose-escalation trials set **≥75.6 Gy** conventional EBRT as standard, and nine randomized trials support moderate hypofractionation. HYPO-RT-PC found a 7-fx SBRT-like regimen gave similar 5-yr control and toxicity to conventional fractionation; this model is consistent with that, not a randomized test of it."
+                "body": "Sits beside the conventionally fractionated dose-escalation RCTs that set the **≥75.6 Gy** standard, and HYPO-RT-PC, whose 7-fraction SBRT-like arm matched conventional fractionation on control and toxicity at 5 years. The pooled series here are nonrandomized, so this models dose-response within SBRT rather than comparing SBRT to EBRT."
               },
               {
                 "label": "Applies to",
-                "body": "Represents low- and intermediate-risk localized prostate cancer treated with fiducial-guided 4-5 fx SBRT monotherapy. Does not represent high-risk disease with confidence, proton SBRT, or SBRT as a boost to IMRT."
+                "body": "Represents fiducial-guided, ≤5-fx photon SBRT monotherapy for low- and intermediate-risk localized prostate cancer. Does not represent high-risk disease, protons, SBRT boost after IMRT, or EQD2 below approximately 80 Gy."
               },
               {
                 "label": "Limitations",
-                "body": "Target delineation, **PTV margin and seminal vesicle coverage varied** by institution and are folded into the dose term. Three cohorts used non-Phoenix failure definitions, and every EQD2 value hinges on the **α/β=1.5** assumption."
+                "body": "Dose is **prescription dose only**, with no dose-volume data, so margin and SV-coverage differences are invisible to the model. The low-intermediate 90% TCP point (EQD2 71 Gy) falls in the **region below approximately 80 Gy with no underlying data**."
               },
               {
                 "label": "Discussion",
-                "body": "For low-intermediate risk, 5-fx prescriptions in common use sit high on the modeled TCP curve, with **95% TCP at 36.1 Gy/5 fx**. High-risk dose, durability beyond 5 yr, and SBRT as a boost to IMRT remain open."
+                "body": "Current 35-40 Gy prescriptions sit near the plateau for low-intermediate risk, so **further escalation buys little FFBR** there. High risk demands higher EQD2 for the same TCP, but the curve rests on too few, likely highly selected pts to anchor a prescription."
               }
             ],
-            "interpretation": "This paper is best read as a map of where the prostate SBRT literature sits, not as a dose prescription. Every cohort it pooled was single-arm, and the dose-response curve is fitted across institutions rather than within them. The slope therefore carries whatever else differed between those centers: platform, PTV margin, seminal vesicle coverage, ADT use and length of follow-up. That makes the model ecological, and a dose-response that emerges from it is a hypothesis about dose rather than a measurement of it.\n\nWithin that frame, the low-intermediate risk result is the most defensible. The 95% TCP estimate of 36.1 Gy in 5 fractions sits inside the 35-40 Gy band most series prescribed, so it interpolates through dense data. The 90% estimate is a different kind of number. The authors state that no reviewed cohort had an equivalent dose below approximately 80 Gy, and the 71 Gy EQD2 point falls in the faded, extrapolated part of their own curve. Treating 31.7 Gy in 5 fractions as an acceptable de-escalation floor would take the model somewhere its authors explicitly said not to go.\n\nThe high-risk estimates deserve less weight still. That curve rests on 3 studies and 85 patients with 5-year follow-up, drawn from 446 high-risk patients overall whom the authors themselves describe as likely highly selected. The 37.6 and 38.7 Gy figures are better read as a direction (high-risk disease appears to need more dose for the same biochemical control) than as a target. Whether extra dose is best spent on the prostate, the seminal vesicles or elective nodes is a question this dataset cannot answer, because it reports prescription dose only.\n\nTwo technical choices shape every number. The EQD2 conversion assumed an α/β of 1.5, so the EQD2 values shift if that assumption is wrong, while the physical 5-fraction doses are what a reader actually prescribes. And with most cohorts treated on CyberKnife, delivered intraprostatic dose likely departs from the prescription in ways that vary by institution, which the model cannot see without dose-volume data. The endpoint is also softer than local control: FFBR by Phoenix, with 3 cohorts using other failure definitions and no biopsy-based assessment of the gland.\n\nAgainst the randomized evidence, the model is consistent rather than discordant. Dose-escalation trials established conventional EBRT of at least 75.6 Gy, moderate hypofractionation has nine randomized trials behind it, and HYPO-RT-PC found a 7-fraction regimen comparable to conventional fractionation at 5 years. PACE-B has since tested SBRT against longer schedules in a randomized design. What this paper adds is a cross-cohort sense that the 5-fraction schedules in common use sit high on the TCP curve for low-intermediate risk disease. It does not settle optimal high-risk dose, durability beyond 5 years, or SBRT as a boost to IMRT, and the authors flag all three as open.",
+            "interpretation": "The clinically useful output of this model is narrower than its abstract suggests. For low-intermediate risk, the defensible statement is that prescriptions in the common SBRT window already sit high on the dose-response curve, with EQD2 90 Gy (36.1 Gy in 5 fractions) mapping to 95% TCP at 5 years. The companion statement that EQD2 71 Gy reaches 90% TCP is weaker than it looks, because the figure legend itself concedes that the reviewed cohorts did not treat below approximately 80 Gy EQD2. That lower portion of the curve is the model's shape continued past the data, not an observation, and it should not be read as license to de-escalate below current practice.\n\nThe high-risk curve deserves even more caution. It was fit on 3 studies and 85 pts with at least 5 years of follow-up, drawn from a literature in which high-risk disease made up 446 of 4,821 pts overall. The authors acknowledge these are likely highly selected individuals. A curve built on that base can say that high-risk disease appears to need more dose for the same FFBR, which is biologically plausible, but the specific EQD2 targets of 97 and 102 Gy carry far more uncertainty than their precision implies. Variable ADT use across cohorts compounds this: hormone therapy alongside SBRT will lift FFBR independently of dose, and a prescription-level model cannot separate the two.\n\nMethodologically, the central constraint is that dose enters the model only as prescription dose. Prostate SBRT plans differ in PTV margin, seminal vesicle coverage, prescription isodose and heterogeneity, and the review documents wide institutional variation in all of these. Two plans with the same nominal prescription can deliver quite different doses to the periphery of the gland, where extracapsular disease lives. The α/β of 1.5 Gy assumed for every EQD2 conversion is a further lever: a different value would reshuffle where each regimen falls on the axis. Most cohorts also had short follow-up, and only 5 had a median beyond 5 years, so the late biochemical failures that matter in a slow-growing disease are underrepresented.\n\nAgainst the randomized evidence, this work does a different job. The conventional dose-escalation trials established that more dose improves control, and HYPO-RT-PC showed a 7-fraction SBRT-like schedule matching conventional fractionation at 5 years. This review cannot add comparative evidence, since every input is a nonrandomized series, but it does show that the 5-fraction literature as a whole is consistent with dose-response behavior and that the field converged on prescriptions near the plateau for favorable disease. Randomized SBRT data such as PACE-B postdate the search window and are the right place to test whether those prescriptions hold against conventional or moderate hypofractionation.\n\nFor a radiation oncologist, the practical reading is reassurance about current low-intermediate-risk prescriptions and a warning against treating the high-risk targets or the sub-80 Gy portion of the curve as validated. The questions the authors leave open (durability past 5 years, SBRT as a boost after pelvic IMRT, and MRI-based delineation shrinking the target) are exactly where prescription-only modeling stops being informative.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "The low-intermediate 90% TCP point (EQD2 71 Gy, 31.7 Gy/5 fx) lies below the ~80 Gy floor of every reviewed cohort, so it is extrapolation, not a floor for de-escalation. The data-supported read is 95% TCP at 36.1 Gy/5 fx; the high-risk 38.7 Gy/5 fx target rests on 85 pts."
+              "radonc": "The data-supported point is 36.1 Gy/5fx at 95% TCP for low-intermediate risk; the 90% point at EQD2 71 Gy sits below approximately 80 Gy, where no cohort was treated. High-risk targets (EQD2 97 and 102 Gy) come from 85 pts, too thin to set a prescription."
             },
             "open_questions": [
-              "Durability of biochemical control beyond 5 years across risk groups",
-              "Optimal SBRT dose for high-risk prostate cancer",
-              "Efficacy and safety of SBRT as a boost to IMRT"
+              "Durability of FFBR beyond 5 years across risk groups",
+              "Efficacy and safety of SBRT as a boost to IMRT",
+              "Impact of MRI-based target delineation on control and toxicity"
             ],
             "consort": null,
             "modality": "radiation",
@@ -725,109 +375,88 @@
             "significance_perspective": "Radiation oncology",
             "related_trials": [
               {
-                "nct": "NCT06235697",
-                "brief_title": "Androgen Suppression Combined With Nodal Irradiation and Dose Escalated Prostate Treatment",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 710,
-                "primary_completion_date": "2032-10",
-                "brief_summary": "This study is being done to answer the following question: Is the strategy to give higher doses of radiotherapy treatment over a shorter period of time using special equipment and fewer treatments (also known as Stereotactic Body Radiation Therapy or SBRT) as effective as usual external radiation therapy given with a brachytherapy boost (which involves radiation sources inserted directly into the prostate)?",
-                "conditions": [
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Radiation",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "Radiation SBRT only",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "ADT",
-                    "type": "DRUG"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Histologically confirmed adenocarcinoma of the prostate diagnosed within the last 9 months\n* Participants with unfavourable risk prostate cancer are eligible according to the following NCCN classification guidelines (Version 4.2022 - May 10, 2022):\n\n  •…",
-                "answers_question": "Optimal SBRT dose for high-risk prostate cancer",
-                "relevance_phrase": "phase 3 SBRT alone vs EBRT + brachy boost, unfav risk"
-              },
-              {
-                "nct": "NCT06625970",
-                "brief_title": "Study Evaluating the Efficacy and Safety of Darolutamide and Stereotactic Dose Escalated Radiotherapy in Patients With Localized Prostate Cancer and High-risk Features of Relapse",
-                "overall_status": "RECRUITING",
-                "phase": [
-                  "PHASE3"
-                ],
-                "enrollment_count": 700,
-                "primary_completion_date": "2033-10",
-                "brief_summary": "PEACE 7 is an international, multicenter, randomized, open-label phase III study that aims at evaluating the efficacy and safety of darolutamide and of stereotactic dose escalated prostate radiotherapy in patients with localised prostate cancer and high-risk features of relapse (defined as patients with at least 2 high-risk criteria from National Comprehensive Cancer Network (NCCN) classification) using a factorial (2x2) design.\n\nThe primary objective of this study is to assess the efficacy of…",
-                "conditions": [
-                  "High Risk Prostate Carcinoma",
-                  "Prostate Cancer"
-                ],
-                "interventions": [
-                  {
-                    "name": "Darolutamide",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "Stereotactic Body RadioTherapy (SBRT)",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "ADT (Standard of Care)",
-                    "type": "DRUG"
-                  },
-                  {
-                    "name": "radiotherapy",
-                    "type": "RADIATION"
-                  }
-                ],
-                "eligibility_brief": "Inclusion Criteria:\n\n1. Signed a written informed consent form prior to any trial specific procedures\n\n   Note: In case of physical incapacitation, a trusted representative of their choice, which is not the investigator or sponsor, can sign on the behalf of the patients\n2. Men, 18 years ≤ Age ≤ 80…",
-                "answers_question": "Optimal SBRT dose for high-risk prostate cancer",
-                "relevance_phrase": "phase 3 2x2: stereotactic dose escalation, high-risk"
-              },
-              {
-                "nct": "NCT03778112",
-                "brief_title": "MRI Guided SBRT for Localized Prostate Cancer",
+                "nct": "NCT01508390",
+                "brief_title": "Hypofractionated Stereotactic Body Radiation Therapy as a Boost to the Prostate",
                 "overall_status": "ACTIVE_NOT_RECRUITING",
                 "phase": [
                   "NA"
                 ],
-                "enrollment_count": 54,
-                "primary_completion_date": "2019-03",
-                "brief_summary": "This study utilizes advanced imaging techniques (mpMRI prostate scan) to select and stratify patients for two different radiotherapy regimens based on the presence/absence of identifiable intraprostatic lesions.\n\nIn patients without identifiable prostate cancer lesions, SBRT to the prostate in 5 sessions (fractions) will be administered.\n\nIn patients with MRI-identified lesion(s), pelvic IMRT in 25 fractions will be administered followed by an SBRT prostate boost while simultaneously treating…",
+                "enrollment_count": 35,
+                "primary_completion_date": "2027-12",
+                "brief_summary": "In this study, participants will have standard Androgen Deprivation Therapy and undergo standard external beam radiation therapy to the prostate and at-risk lymph nodes by Intensity Modulated Radiation Therapy. The subsequent \\*boost\\* radiation therapy to the prostate alone will be given using the CyberKnife, rather than using the standard Intensity Modulated Radiation Therapy. This study will also see how CyberKnife affects the quality of the participant's life.",
                 "conditions": [
                   "Prostate Cancer"
                 ],
                 "interventions": [
                   {
-                    "name": "SBRT to whole prostate",
-                    "type": "RADIATION"
-                  },
-                  {
-                    "name": "IMRT followed by mpMRI guided SBRT boost with SIB to intraprostatic lesions",
+                    "name": "CyberKnife Boost",
                     "type": "RADIATION"
                   }
                 ],
-                "eligibility_brief": "Inclusion Criteria:\n\n* Biopsy proven prostate adenocarcinoma within 1 year of randomization\n* NCCN Low to High Risk localized prostate cancer\n* Zubrod Performance Status 0-1 within 60 days prior to registration\n\nExclusion Criteria:\n\n* Prior or concurrent invasive malignancy (except non-melanoma…",
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Histologically proven adenocarcinoma of the prostate\n\n   1. Gleason score (2-10)\n   2. Biopsy within six months of date of registration\n   3. Patient age \\>18 years\n2. Clinical stage (American Joint Committee on Cancer 7th Edition)\n\n   a. T-stage determined by physical exam…",
                 "answers_question": "Efficacy and safety of SBRT as a boost to IMRT",
-                "relevance_phrase": "pelvic IMRT 25 fx then mpMRI-guided SBRT boost arm"
+                "relevance_phrase": "IMRT to prostate + nodes, then CyberKnife SBRT boost"
+              },
+              {
+                "nct": "NCT04997018",
+                "brief_title": "A Study of MRI-guided High-dose Radiation Therapy in Prostate Cancer",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 91,
+                "primary_completion_date": "2027-08",
+                "brief_summary": "One of the usual approaches to treating intermediate-risk prostate cancer is a type of radiation therapy called SBRT (stereotactic body radiation therapy). SBRT delivers higher than standard doses of radiation over a lower number of treatment sessions. However, there is a 20% chance that intermediate-risk prostate cancer will come back after this treatment. The purpose of this study is to find out whether giving an even higher dose (a \"boost\" dose) of radiation directly to the main tumor and…",
+                "conditions": [
+                  "Prostate Cancer"
+                ],
+                "interventions": [
+                  {
+                    "name": "Radiation Therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Intermediate-risk prostate cancer patients will be eligible for this study. Risk groups will be assigned as per NCCN guidelines. Intermediate-risk patients will be defined as:\n\n  * PSA 10-20 ng/ml or\n  * Gleason score = 7 or\n  * Clinical stage T2b/T2c or\n* Additionally,…",
+                "answers_question": "Impact of MRI-based target delineation on control and toxicity",
+                "relevance_phrase": "phase 2 MRI-guided SBRT boost to main tumor, int-risk"
+              },
+              {
+                "nct": "NCT07916779",
+                "brief_title": "Erectile Function PRESERVation in Definitive Radiotherapy for Prostate Cancer by MRI-Enhanced Adaptive Sparing of the Neurovascular Bundle",
+                "overall_status": "NOT_YET_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 48,
+                "primary_completion_date": "2029-12",
+                "brief_summary": "Radiotherapy is a standard and highly effective treatment for prostate cancer that is confined to the prostate gland. One modern approach, called stereotactic body radiotherapy (SBRT), delivers treatment in just five sessions and has been shown to control prostate cancer as well as longer treatment schedules. Large clinical studies have demonstrated excellent cancer control rates after SBRT.\n\nAlthough SBRT is effective, some men experience worsening erectile function after treatment.…",
+                "conditions": [
+                  "Prostate Cancer",
+                  "Localized Prostate Carcinoma",
+                  "Low-Risk Prostate Cancer",
+                  "Intermediate-risk Prostate Cancer",
+                  "Radiation-Induced Erectile Dysfunction",
+                  "Erectile Dysfunction Following Radiation Therapy"
+                ],
+                "interventions": [
+                  {
+                    "name": "Daily Adaptive MR-Enhanced SBRT with Neurovascular Bundle Sparing",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥18 years\n* Histologically confirmed, low- or intermediate risk localized prostate cancer eligible for definitive prostate SBRT according to NCCN criteria as (Appendix 1):\n\n  * cT1-cT2 and\n  * PSA \\<20 ng/ml and\n  * Gleason \\<8\n* At least at one side the DIL ≥5 mm from…",
+                "answers_question": "Impact of MRI-based target delineation on control and toxicity",
+                "relevance_phrase": "MR-adaptive SBRT with neurovascular bundle sparing"
               }
             ],
             "related_trials_provenance": {
               "queries_fired": [
-                "prostate stereotactic radiotherapy",
-                "high-risk prostate SBRT",
-                "prostate SBRT boost"
+                "prostate stereotactic boost",
+                "MRI prostate stereotactic"
               ],
               "queries_failed": [],
-              "candidates_returned": 44,
-              "fetched_at": "2026-11-19T09:15:46.931Z",
+              "candidates_returned": 34,
+              "fetched_at": "2026-11-20T09:04:48.753Z",
               "rerank_outcome": "picked_N"
             },
             "source_ids": [
@@ -843,60 +472,63 @@
       },
       {
         "disease_site": "head-neck",
-        "intro": "Recurrent previously-irradiated H&N: 3-yr LC dose-response, against fatal complications (mainly carotid blowout) in up to 10% to 20%.",
+        "intro": "Reirradiation SBRT for locally recurrent previously irradiated H&N: dose-response supports 40-50 Gy/5fx, with carotid blowout up to 10% to 20%.",
         "studies": [
           {
-            "name": "HyTEC Head and Neck SBRT for Recurrent Previously-Irradiated Disease",
-            "tldr": "3-yr LC 15% at 26.8 Gy vs 40% at 44.4 Gy (5-fx equivalent); 40 to 50 Gy/5fx suggested for SBRT reirradiation of recurrent previously-irradiated H&N.",
+            "name": "HyTEC H&N SBRT Tumor Control (AAPM WG)",
+            "tldr": "3y LC 40% at 44.4 vs 15% at 26.8 Gy 5-fx equivalent (P<.01); 40-50 Gy/5fx suggested for locally recurrent previously irradiated H&N SBRT.",
             "details": [
-              "🔍 AAPM HyTEC systematic review: 8 publications, >300 cases of SBRT reirradiation for locally recurrent previously-irradiated H&N",
-              "🔍 293 articles screened, 25 candidates, 16 not fully evaluable; 8 used for the dose-response model",
+              "🔍 AAPM HyTEC working group systematic review with pooled logistic dose-response modeling",
+              "🔍 8 publications, >300 cases of locally recurrent previously irradiated H&N cancer",
+              "🔍 Doses converted to 5-fx equivalent via LQ (Withers), nominal α/β 10 Gy",
+              "🔍 Only SBRT >6 weeks after primary RT included; boosts and benign tumors excluded",
               {
-                "text": "📊 Model-estimated outcomes by timepoint (5-fraction equivalent doses)",
+                "text": "📊 Model-estimated LC by dose (5-fx equivalent)",
                 "table": {
                   "columns": [
                     "Endpoint",
-                    "Model estimate",
-                    "Dose-response test"
+                    "Lower dose",
+                    "Higher dose",
+                    "Dose-response P"
                   ],
                   "rows": [
                     [
-                      "1-yr LC",
-                      "50% at 25.6 Gy vs 60% at 40.7 Gy",
-                      "Median split P=.069; model P=.096"
+                      "1y LC",
+                      "50% at 25.6 Gy",
+                      "60% at 40.7 Gy",
+                      "Model P=.096, median split P=.069 (ns)"
                     ],
                     [
-                      "2-yr LC",
-                      "50% at 45 Gy",
+                      "3y LC",
+                      "15% at 26.8 Gy",
+                      "40% at 44.4 Gy",
                       "P<.01 (model and median split)"
-                    ],
-                    [
-                      "3-yr LC",
-                      "15% at 26.8 Gy vs 40% at 44.4 Gy; 41% at 45 Gy",
-                      "P<.01 (model and median split)"
-                    ],
-                    [
-                      "2-yr OS",
-                      "47% at 45 Gy",
-                      "Median split P=.13; model P=.060"
                     ]
                   ]
                 }
               },
-              "📊 Superior LC, possibly improved OS, at 35 to 45 Gy (5 fx) vs <30 Gy",
+              "📊 2y LC dose-response also reached P<.01 for model and median split",
+              "📊 2y OS at highest doses almost double the lowest; ns (model P=.060, median split P=.13)",
               {
-                "text": "💊 Volume-adapted dose suggestions (5-fraction equivalent)",
+                "text": "📊 Modeled outcomes at 45 Gy/5fx",
                 "subdetails": [
-                  "Retreatment overall: 40 to 50 Gy",
-                  "Tumors <25 cm3: maximum 45 Gy, given flat dose-response above this level",
-                  "Larger tumors: 45 to 50 Gy, with novel escalation strategies worth exploring"
+                  "2y LC 50%",
+                  "3y LC 41%",
+                  "2y OS 47%"
                 ]
               },
-              "📐 Doses converted to 5-fx equivalent via LQ (α/β 10 Gy); logistic fit, bootstrap CIs (2000 samples)",
-              "⚠️ Fatal complications, mainly carotid blowout, reported in up to 10% to 20% even at lower doses",
-              "⚠️ Rwigema 2011 contributes one-third of pts, so it largely drives the 2- and 3-yr fits",
-              "⚠️ LC and LRC pooled as one endpoint; HPV status, histology, concurrent cetuximab not modeled",
-              "🔍 Every-other-day fractionation linked to lower carotid toxicity; its effect on tumor control is untested"
+              {
+                "text": "🔍 Volume-adapted dose suggestion (not modeled; expert read from Rwigema data)",
+                "subdetails": [
+                  "<25 cm3: maximum 45 Gy/5fx equivalent, flat dose-response above this",
+                  "Larger tumors: 45-50 Gy/5fx equivalent, consider novel escalation strategies"
+                ]
+              },
+              "⚠️ Carotid blowout reported in up to 10% to 20% even at lower doses",
+              "⚠️ Rwigema 2011 contributes one-third of cases, heavily shaping 2y and 3y fits",
+              "⚠️ Better-prognosis pts may have received higher dose; association, not causation",
+              "⚠️ HPV status, histology, concurrent cetuximab, QD vs QoD and tumor volume not modeled",
+              "⚠️ LC definitions mixed local and locoregional failure across series"
             ],
             "figures": [],
             "nct": null,
@@ -907,91 +539,521 @@
             "slug": "hytec-head-neck-sbrt-recurrent",
             "verdict": {
               "soc_implication": "methodologically-limited",
-              "rationale": "Pooled retrospective series with study-level dose averaging. The dose-response may reflect selection (better-prognosis pts dosed higher). LC definitions are heterogeneous. No prospective dose comparison.",
-              "audience": "Unresectable recurrent previously-irradiated H&N cancer, SBRT >6 wk after prior RT"
+              "rationale": "Pooled model of 8 retrospective series; one-third of cases from one institution, LQ-converted representative doses, and possible selection of fitter pts for higher dose confound the dose-response.",
+              "audience": "Unresectable locally recurrent, previously irradiated H&N cancer, SBRT reRT"
             },
-            "significance": "Dose matters for how long control lasts, not for the 1-yr response: the 1-yr LC dose-response did not reach significance (P=.096), while the 2- and 3-yr models reached P<.01. Volume gates the prescription. Below 25 cm3 the response flattens above 45 Gy/5fx, so escalating to 45 to 50 Gy is a question for larger recurrences, weighed against carotid blowout rates of up to 10% to 20%.",
-            "monday_clinic": "In an unresectable in-field recurrence after prior conventional RT, this supports higher over lower SBRT reirradiation doses scaled to tumor volume. It does not extend to SBRT as a boost within 6 weeks of primary RT, primary SBRT, or benign tumors.",
+            "significance": "Durability, not early response, is where dose matters: the 1y fit was flat (P=.096), while 2y and 3y LC tracked dose (P<.01), with 45 Gy/5fx modeled at 41% 3y LC. The WG ties escalation to volume, with a 45 Gy/5fx ceiling for <25 cm3 and 45-50 Gy for larger targets, weighed against carotid blowout in up to 10% to 20% of pts.",
+            "monday_clinic": "In unresectable, previously irradiated locally recurrent H&N cancer being weighed for SBRT reRT, this supports dose escalation over low-dose regimens when durable control is the goal; it does not extend to planned boosts <6 weeks from primary RT, de novo SBRT, or benign tumors.",
             "primary_endpoint": null,
             "analysis_sections": [
               {
                 "label": "Design",
-                "body": "AAPM working group **systematic review with pooled logistic dose-response modeling**. 8 publications and >300 cases were included. 1-, 2- and 3-yr LC and 1- and 2-yr OS came from each report, digitized from KM curves when the time points were not stated."
+                "body": "AAPM HyTEC working group **systematic review** with pooled logistic dose-response modeling (maximum likelihood, bootstrap CIs with 2000 samples). PubMed search identified 293 articles; **8 publications** with usable per-study dose and outcome data were modeled."
               },
               {
                 "label": "Population & inclusion",
-                "body": "Locally recurrent, **previously irradiated malignant H&N** treated with SBRT **more than 6 weeks** after primary RT. Benign tumors were excluded, and the source studies selected unresectable recurrences. HPV status was not available for most studies."
+                "body": "**Locally recurrent, previously irradiated malignant H&N cancer**, largely unresectable, treated with SBRT **>6 weeks** after primary RT. Planned boosts and benign tumors were excluded; HPV status was unavailable for most series."
               },
               {
                 "label": "Radiotherapy",
-                "body": "Mostly CyberKnife with thermoplastic masks. Contemporary series used **GTV-to-PTV expansions of 2 to 6 mm**. All doses were normalized to a **5-fraction equivalent** with the Withers LQ formulation at α/β 10 Gy."
+                "body": "Mostly CyberKnife with thermoplastic mask and 6D skull tracking; contemporary series used GTV-to-PTV expansions of 2 to 6 mm. Each series' weighted PTV marginal dose was converted to a **5-fraction equivalent** at α/β 10 Gy."
               },
               {
                 "label": "Endpoints",
-                "body": "**Primary:** local control and overall survival. Local control here means local or locoregional failure, as each source study defined it."
+                "body": "**Primary endpoints:** local control (local or locoregional, per series) at 1, 2 and 3 years, and OS at 1 and 2 years. KM values were digitized when not stated."
               },
               {
                 "label": "Results",
-                "body": "Dose-response was significant for **2- and 3-yr LC (P<.01)**, not for 1-yr LC or 2-yr OS. The model estimates are in the table above."
+                "body": "Dose-response was **ns at 1y** but reached **P<.01 at 2y and 3y** for LC; the 2y OS trend did not reach significance (model P=.060)."
               },
               {
                 "label": "Safety",
-                "body": "The authors cite a prior phase 1 dose-escalation study and a phase 2 with concurrent systemic therapy in support of the dose range. Other institutions report **fatal complications in up to 10% to 20%**, mainly carotid blowout, even at lower doses."
+                "body": "Carotid blowout syndrome reported in **up to 10% to 20%** of pts even at lower doses. Carotid toxicity risk is lower with non-consecutive-day fractionation; NTCP modeling sits in the companion working group report."
               },
               {
                 "label": "vs leading data",
-                "body": "Surgical salvage remains the standard. The authors describe conventional reirradiation with or without chemotherapy as limited by toxicity and suboptimal outcomes. Rwigema 2011 first showed that larger tumors need higher dose for equivalent 1-yr locoregional control, and this pool extends that across 8 series."
+                "body": "Surgical salvage remains SOC for resectable recurrence; this addresses the unresectable remainder. The pooled curve is anchored by Rwigema 2011 (four dose groups, one-third of cases) and spans Chua's single-fraction series through Lartigau's 36 Gy in 6 fractions with cetuximab in all pts."
               },
               {
                 "label": "Applies to",
-                "body": "Represents unresectable, locally recurrent, previously irradiated malignant H&N treated with SBRT more than 6 weeks after primary RT. Does not represent SBRT as a planned boost, primary SBRT, or benign tumors."
+                "body": "Represents unresectable locally recurrent, previously irradiated malignant H&N cancer treated with SBRT >6 weeks after primary RT. Does not represent planned SBRT boosts, de novo primary SBRT, or benign tumors."
               },
               {
                 "label": "Limitations",
-                "body": "Doses are **planned, not delivered**, and each study's dose is a weighted average weighted by initial N, not by pts at risk. Target coverage, prescription isodose and tumor volume are **outside the model**. Few pts remain at 2 and 3 yrs, which is where the significant fits sit."
+                "body": "Tumor volume, the variable most likely to drive dose need, was **not in the model**, so the volume-adapted dose split is expert judgment. Numbers at risk at 2 and 3 years were not available, so weighting used initial N, and the significant fits rest on the thinnest data."
               },
               {
                 "label": "Discussion",
-                "body": "The steeper slopes at later time points suggest escalation buys **durability of control** more than early response. Whether dose causes better survival or follows it cannot be separated here, and the cetuximab and fractionation-schedule effects remain unquantified."
+                "body": "The signal is that dose buys **durability** of control rather than early response. The upper end of the suggested range for larger tumors sits at or beyond the highest pooled dose group median (44.4 Gy), so it is extrapolation that needs prospective testing against carotid risk."
               }
             ],
-            "interpretation": "The value of this pooled model is less in any single estimate than in giving a heterogeneous literature a common dose axis. SBRT reirradiation for recurrent head and neck cancer grew institution by institution, with single-fraction radiosurgery, five-fraction CyberKnife courses and six-fraction schedules reported side by side, which made it nearly impossible to say whether one center's prescription was more aggressive than another's. Collapsing everything to a 5-fraction equivalent at α/β 10 Gy is crude, and the authors admit it, but it turns a scattered set of case series into something a planner can reason about.\n\nThe pattern of the results deserves more attention than the headline range. At 1 year, the model cannot tell a 25.6 Gy course from a 40.7 Gy course with confidence (P=.096). The signal only appears at 2 and 3 years. One reading is that early response is driven by tumor bulk and biology, and higher dose mainly delays the regrowth that eventually claims most of these pts. That fits the clinical experience that reirradiated tumors often shrink and then come back. If that reading is right, the case for escalation is strongest in pts expected to live long enough to benefit from durability, which is the same group most exposed to late vascular and soft-tissue toxicity.\n\nThe main threat to a causal reading is selection, and the authors name it. Fitter pts with smaller, more favorable recurrences were plausibly offered higher doses, and survival-linked factors such as HPV status, reirradiation interval and concurrent cetuximab were not modeled. The 2-yr OS trend (model P=.060) points the same way as LC, which is what you would expect whether dose drives survival or survival prognosis drives dose. A single series contributing a third of the cases also anchors the late-time-point fits, so the 2- and 3-yr curves are partly one institution's experience re-expressed.\n\nThe volume-stratified suggestion is the most usable output, and it comes from the earlier Rwigema dose-volume data more than from the pooled model, which excludes volume. A flat response above 45 Gy/5fx for tumors under 25 cm3 argues against routine escalation in small recurrences. Escalation into the 45 to 50 Gy range is a hypothesis for bulky disease, not an established gain.\n\nAgainst all this sits the toxicity record. Fatal carotid events reported at up to 10% to 20% in some series, including at modest doses, mean the dose-response for control cannot be read alone. The companion NTCP work and the observation that every-other-day schedules lower carotid risk belong in the same planning decision. The paper settles the direction (sub-30 Gy schemes look inadequate for durable control) but not the ceiling, and a prospective dose-comparison or volume-stratified trial is what would test whether the modeled gain survives randomization.",
+            "interpretation": "The working group's central claim is narrower than the headline dose range suggests. At 1 year the pooled curve does not separate dose levels with confidence (model P=.096), and only at 2 and 3 years does local control track dose (P<.01). Biologically that pattern is plausible: most recurrences may respond early regardless of dose, with the difference between regimens showing up as durability, which is the endpoint that matters for a patient who survives long enough to fail locally. Statistically it means the significant fits rest on the thinnest part of the data. Numbers at risk at 2 and 3 years are far smaller than at baseline and were not reported by most series, so the authors weighted by initial analyzable N, which overstates the information carried by the later timepoints.\n\nThe dose axis is itself a construction. Each series contributes one representative dose, converted to a 5-fraction equivalent with the linear-quadratic model at a nominal α/β of 10 Gy. At SBRT dose per fraction that conversion is the weakest link, and the authors concede it is likely a gross oversimplification. A single-fraction series and a six-fraction cetuximab series sit on the same axis only through that assumption. Rwigema 2011 contributes about one-third of the cases and four of the dose points, so the shape of the later curves is in large part one institution's experience, with its own selection, imaging and response criteria.\n\nConfounding by indication is the larger threat. The authors flag that better-prognosis patients may have been treated more aggressively, so the OS trend (almost double at the highest doses, but not reaching significance) cannot be read as dose causing survival, and the same caution applies with less force to local control. HPV status, histology, concurrent cetuximab, every-other-day versus daily fractionation and tumor volume were all unmodeled. Volume matters most: the underlying Rwigema data indicate larger tumors need more dose for equivalent control, and a pooled curve that ignores volume could partly be a volume curve if smaller targets clustered in the higher-dose series.\n\nWhat the analysis does move is the choice between low-dose SBRT and the 40 to 50 Gy 5-fraction equivalent range. For a patient with an unresectable in-field recurrence and a life expectancy long enough for durable control to matter, it is the best pooled argument against staying under 30 Gy. The volume-adapted split (a 45 Gy ceiling for small targets, 45 to 50 Gy for larger ones) is an expert reading rather than a model output, and the upper end sits at or beyond the highest dose group median in the pooled series (44.4 Gy), so it extrapolates past most of the evidence.\n\nToxicity is the counterweight the model leaves out. Carotid blowout has been reported in up to 10% to 20% of patients even at lower doses, so the escalation argument holds only with careful carotid-aware planning, and the cited data favouring non-consecutive-day delivery for carotid risk have not been tested for their effect on tumor control. The conclusion would be wrong if a prospective series at the recommended doses, with volume and selection controlled, failed to beat low-dose control at 2 to 3 years, or bought that control at a carotid cost that offsets it.",
             "relevant_specialties": [
               "radonc"
             ],
             "significance_by_specialty": {
-              "radonc": "Dose matters for how long control lasts, not for the 1-yr response: 1-yr LC dose-response P=.096, while the 2- and 3-yr models reached P<.01. Below 25 cm3 the response flattens above 45 Gy/5fx, so escalating to 45 to 50 Gy is a question only for larger recurrences, weighed against fatal carotid events of up to 10% to 20%."
+              "radonc": "Durability, not early response, is where dose matters: 1y LC was flat across doses (P=.096) while 2y and 3y LC tracked dose (P<.01), with 45 Gy/5fx modeled at 41% 3y LC. Escalation is volume-gated (45 Gy/5fx ceiling for <25 cm3) and weighed against carotid blowout in up to 10% to 20%."
             },
             "open_questions": [
-              "Does escalation above 45 Gy/5fx help tumors larger than 25 cm3?",
-              "Does concurrent cetuximab add to SBRT reirradiation control?",
-              "Every-other-day vs daily fractionation effect on tumor control"
+              "Does concurrent systemic therapy shift the SBRT reRT dose-response?",
+              "Prospective validation of 40-50 Gy/5fx for recurrent H&N",
+              "Optimal dose for recurrent tumors >25 cm3"
             ],
             "consort": null,
             "modality": "radiation",
             "intent": null,
             "methodology": "meta-analysis",
             "significance_perspective": "Radiation oncology",
-            "related_trials": null,
+            "related_trials": [
+              {
+                "nct": "NCT03546582",
+                "brief_title": "SBRT +/- Pembrolizumab in Patients With Local-Regionally Recurrent or Second Primary Head and Neck Carcinoma",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 86,
+                "primary_completion_date": "2027-07",
+                "brief_summary": "This phase II trial with a safety run-in component will evaluate whether the addition of pembrolizumab to Stereotactic Body Radiation Therapy (SBRT) re-irradiation will improve the progression-free survival for patients with recurrent or new second primary Head and Neck Squamous Cell Carcinoma (HNSCC).",
+                "conditions": [
+                  "Head and Neck Squamous Cell Carcinoma (HNSCC)"
+                ],
+                "interventions": [
+                  {
+                    "name": "Pembrolizumab",
+                    "type": "DRUG"
+                  },
+                  {
+                    "name": "Stereotactic Body Radiation Therapy (SBRT)",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Pathologically (histologically or cytologically) confirmed diagnosis of locoregional recurrent or any new primary squamous cell carcinoma of the head and neck (including of the nasopharynx or paranasal sinus) that is not amenable to curative resection.\n\n  * Patients for whom…",
+                "answers_question": "Does concurrent systemic therapy shift the SBRT reRT dose-response?",
+                "relevance_phrase": "ph2 SBRT reRT ± pembrolizumab, recurrent HNSCC, PFS"
+              }
+            ],
             "related_trials_provenance": {
               "queries_fired": [
-                "stereotactic reirradiation head neck",
-                "cetuximab SBRT recurrent head neck"
+                "SBRT reirradiation head neck",
+                "stereotactic reirradiation recurrent head neck"
               ],
-              "queries_failed": [
-                {
-                  "term": "cetuximab SBRT recurrent head neck",
-                  "reason": "empty"
-                }
-              ],
+              "queries_failed": [],
               "candidates_returned": 6,
-              "fetched_at": "2026-11-19T09:16:44.364Z",
-              "rerank_outcome": "abstained"
+              "fetched_at": "2026-11-20T09:05:12.495Z",
+              "rerank_outcome": "picked_N"
             },
             "source_ids": [
               {
                 "type": "paper",
                 "id": 286
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "thoracic",
+        "intro": "Stage I NSCLC SBRT: modeled LC plateau doses by T stage and prescription point (PTV periphery vs isocenter).",
+        "studies": [
+          {
+            "name": "HyTEC Stage I NSCLC SBRT Local Control",
+            "tldr": "Modeled LC plateau at PTV periphery: 43±1 Gy/3 fx, 47±1 Gy/4 fx, 50±1 Gy/5 fx across 46 pooled SBRT series in stage I NSCLC.",
+            "details": [
+              "🔍 160 published SBRT series for stage I NSCLC screened (PubMed through May 2014)",
+              "🔍 46 studies met quality criteria; series with <10 pts, >T2, or oligometastatic disease excluded",
+              {
+                "text": "🔍 Pooled cohort by dose per fraction",
+                "subdetails": [
+                  "≥6 Gy/fx: 3268 pts",
+                  "3-4 Gy/fx: 211 pts from 3 studies, included to anchor the curve shoulder"
+                ]
+              },
+              "📊 1, 2, 3 and 5 yr LC fitted against BED with LQ, USC and regrowth models",
+              "📐 None of the models fit well by χ2/ndf; the regrowth model fit best",
+              "📐 Regrowth-fitted α/β ~25 Gy (T1), 19 Gy (T2), 21 Gy (T1+T2)",
+              {
+                "text": "📊 Regrowth model: dose needed to reach max TCP, by T stage and prescription point",
+                "table": {
+                  "columns": [
+                    "T stage / point",
+                    "3 fx",
+                    "4 fx",
+                    "5 fx"
+                  ],
+                  "rows": [
+                    [
+                      "T1, PTV (80% isodose)",
+                      "42±1 Gy",
+                      "46±1 Gy",
+                      "48±1 Gy"
+                    ],
+                    [
+                      "T2, PTV (80% isodose)",
+                      "45±1 Gy",
+                      "50±1 Gy",
+                      "53±1 Gy"
+                    ],
+                    [
+                      "T1+T2, PTV (80% isodose)",
+                      "43±1 Gy",
+                      "47±1 Gy",
+                      "50±1 Gy"
+                    ],
+                    [
+                      "T1, isocenter",
+                      "52±1 Gy",
+                      "57±1 Gy",
+                      "60±1 Gy"
+                    ],
+                    [
+                      "T2, isocenter",
+                      "56±1 Gy",
+                      "62±1 Gy",
+                      "66±1 Gy"
+                    ],
+                    [
+                      "T1+T2, isocenter",
+                      "54±1 Gy",
+                      "59±1 Gy",
+                      "63±1 Gy"
+                    ]
+                  ]
+                }
+              },
+              "📊 LQ and USC models give near-identical T1+T2 PTV doses: 44±1, 47±1, 50±1 Gy for 3/4/5 fx",
+              "🔗 vs historic conventional RT (2-3 Gy/fx to ≈54-60 Gy): long-term LC ≈30-70%, OS ≈15-30%",
+              {
+                "text": "⚠️ Measurement caveats on the pooled LC",
+                "subdetails": [
+                  "Competing non-cancer deaths censored, so actuarial 1-3 yr LC may overestimate true LC",
+                  "LC mostly radiographic; post-SBRT fibrosis and early FDG uptake confound recurrence calls",
+                  "Most series report LC only to 3 yr; OS collected but not modeled",
+                  "Surgical series count intralobar and nodal failures as local, so LC isn't comparable to resection"
+                ]
+              }
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1016/j.ijrobp.2019.03.045",
+            "tweet_ids": [
+              1000000283
+            ],
+            "slug": "hytec-lung-sbrt-local-control",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Study-level pooled modeling, not patient-level data; none of three TCP models fit well, and plateau doses are model outputs never tested prospectively.",
+              "audience": "Medically inoperable stage I NSCLC, T1-T2, node-negative"
+            },
+            "significance": "Prescription convention gates transfer: the modeled LC plateau is 43, 47 and 50 Gy (±1) to the PTV periphery in 3, 4 and 5 fx but 54, 59 and 63 Gy at isocenter. T2 needs 45, 50 and 53 Gy at the PTV vs 42, 46 and 48 Gy for T1, so one size-blind schedule sits closer to the margin for T2.",
+            "monday_clinic": "In a medically inoperable, node-negative peripheral T1-T2 NSCLC planned for 3-5 fx SBRT, this places the LC plateau at PTV-periphery doses of 43-50 Gy, higher for T2; it does not extend to central or >5 cm tumors, which the pooled series underrepresent.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Systematic review of **160** published SBRT series (PubMed through May 2014) with **46** meeting quality criteria (N, dose homogeneity, follow-up, LC reporting). Study-level LC fitted to LQ, USC and regrowth TCP models as a function of BED."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Stage I NSCLC, T1-T2, largely **medically inoperable**. Series with <10 pts, tumors above T2, or oligometastatic lung disease excluded. **3268 pts** at ≥6 Gy/fx plus **211 pts** at 3-4 Gy/fx from 3 studies."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "SBRT/SABR in 3-5 fx; doses modeled both at isocenter and at the PTV covered by the **80% isodose line**. Typical ITV-to-PTV expansions 3-8 mm axial and 5-10 mm cranio-caudal."
+              },
+              {
+                "label": "Endpoints",
+                "body": "Actuarial **local control** at 1, 2, 3 and 5 yr, defined as no local progression on CT or PET-CT. OS collected but not modeled; distant failure not recorded."
+              },
+              {
+                "label": "Results",
+                "body": "**Regrowth model fit best**, though none fit well. Fitted α/β ~25 Gy (T1), 19 Gy (T2), 21 Gy (T1+T2); dose to max TCP by stage and prescription point in the table above."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Historic conventional RT at 2-3 Gy/fx to ≈54-60 Gy gave long-term LC ≈30-70% and OS ≈15-30%, so the **steep dose-response** to ablative dosing is the anchor. ASTRO guidance conditionally extends SBRT to inoperable tumors >5 cm, a group this pooled data underrepresents."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents medically inoperable, node-negative T1-T2 NSCLC treated with 3-5 fx SBRT, mostly peripheral lesions ≤5 cm. Does not represent central or >5 cm tumors, or operable pts."
+              },
+              {
+                "label": "Limitations",
+                "body": "Censoring competing deaths in a frail cohort and radiographic LC calls after SBRT fibrosis both bias LC upward. Most series stop at 3 yr, and the literature ends May 2014."
+              },
+              {
+                "label": "Discussion",
+                "body": "The value is a **dose ceiling**: the curve locates where added dose stops buying LC, reframing escalation beyond it as toxicity cost. The **reporting standards** (dose algorithm, heterogeneity correction, GTV D95%, elapsed days) target the data heterogeneity behind the poor model fits."
+              }
+            ],
+            "interpretation": "The useful output here is not the claim that stage I NSCLC responds to SBRT, which nobody disputes, but a dose-response curve that locates a plateau. Pooling 46 series and fitting LC against BED, the regrowth model places maximal LC at 43, 47 and 50 Gy (each ±1) to the PTV periphery for 3, 4 and 5 fractions. Against the historic conventionally fractionated benchmark the authors cite, with long-term LC of ≈30-70%, the steepness of the curve and the gain from ablative dosing are not in question. What the curve adds is a ceiling: it implies that above those doses a typical peripheral T1-T2 lesion gains little further control, which reframes escalation as a toxicity cost rather than a control gain.\n\nThree features should temper how literally a planner takes the numbers. First, by the authors' own goodness-of-fit metric none of the three models fit well; regrowth was the best of a weak set, and its fitted α/β (~25 Gy for T1, ~19 Gy for T2) sits far above the value conventionally assumed for tumor. That matters because BED-based equivalence between schedules depends on exactly that parameter. Second, the inputs are study-level actuarial LC, not patient-level data, so within-series dose spread, tumor location and histology are averaged away. Third, the endpoint leans optimistic: competing non-cancer deaths are censored in a frail inoperable cohort, and radiographic assessment after SBRT is confounded by fibrosis and early FDG uptake. Both biases push reported LC upward and could make the plateau appear to arrive at a lower dose than it truly does.\n\nThe most practical point is the gap between isocenter and periphery. The same regrowth T1+T2 fit corresponds to 54, 59 and 63 Gy at isocenter with the 80% isodose covering the PTV, so a schedule quoted without its normalization convention cannot be placed on this curve, and two centers with the same nominal prescription may sit at different points on it. The T1/T2 split also matters: T2 needs 45, 50 and 53 Gy at the PTV versus 42, 46 and 48 Gy for T1, consistent with the lower fitted α/β for T2. A department running one schedule for every peripheral stage I lesion is, on this model, closer to the margin for its T2 tumors than for its T1 tumors.\n\nWhat it does not settle is substantial. Central tumors and lesions above 5 cm were underrepresented and carry less favorable SBRT outcomes, so the plateau doses should not be carried over to them. OS was collected but inconsistently reported and not modeled, so nothing here speaks to survival tradeoffs at the plateau. Comparison with resection remains unequal, since surgical series count intralobar and nodal recurrences as local failure. The reporting standards table may prove the more durable contribution: the weak model fits are plausibly in part a data problem, and a future pooled analysis improves only if series report prescription physics, heterogeneity correction and target coverage consistently.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Prescription convention gates transfer: the modeled LC plateau is 43, 47 and 50 Gy (±1) to the PTV periphery in 3, 4 and 5 fx but 54, 59 and 63 Gy at isocenter. T2 needs 45, 50 and 53 Gy at the PTV vs 42, 46 and 48 Gy for T1, so one size-blind schedule sits closer to the margin for T2."
+            },
+            "open_questions": [
+              "Does dose above the modeled plateau add LC for T2 tumors?",
+              "Dose-response for central and >5 cm tumors",
+              "Validation of plateau doses in patient-level prospective data"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": "curative",
+            "methodology": "meta-analysis",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT07718672",
+                "brief_title": "Hotspot Stereotactic Ablative Radiotherapy Versus Traditional Stereotactic Ablative Radiotherapy for the Treatment of Early-Stage Non-Small Cell Lung Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE2"
+                ],
+                "enrollment_count": 200,
+                "primary_completion_date": "2029-06",
+                "brief_summary": "This clinical trial compares stereotactic ablative radiotherapy (SBRT) with hot spots to standard of care SBRT for the treatment of patients with early-stage non-small cell lung cancer. SBRT with hot spots intentionally makes sure the tumor gets a higher radiation dose during treatment. This potentially may result in better control of the tumor, but also more side effects. SBRT with or without hot spots may be more effective in treating patients with early-stage non-small cell lung cancer,…",
+                "conditions": [
+                  "Early Stage Lung Non-Small Cell Carcinoma",
+                  "Stage I Lung Cancer AJCC v8",
+                  "Stage II Lung Cancer AJCC v8"
+                ],
+                "interventions": [
+                  {
+                    "name": "Biospecimen Collection",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Computed Tomography",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Lymph Node Biopsy",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Positron Emission Tomography",
+                    "type": "PROCEDURE"
+                  },
+                  {
+                    "name": "Stereotactic Body Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Stereotactic Body Radiation Therapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Survey Administration",
+                    "type": "OTHER"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n* Age ≥ 18 years\n* Have an Eastern Cooperative Oncology Group (ECOG) performance status of ≤ 2\n* Diagnosed with T1-3N0 biopsy-proven NSCLC of the lung. Multiple primary lung tumors are allowed; however, each lesion requires histologic confirmation\n* Metachronous lung tumors as…",
+                "answers_question": "Does dose above the modeled plateau add LC for T2 tumors?",
+                "relevance_phrase": "phase 2 hotspot vs standard SBRT, T1-3N0 NSCLC"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "SBRT stage I NSCLC",
+                "central lung SBRT"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 38,
+              "fetched_at": "2026-11-20T09:05:12.500Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 283
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "hepatobiliary",
+        "intro": "Liver SBRT: G≥3 GI risk <10% at mean Rx 50 Gy in 3 to 6 fx; QUANTEC MLD limits judged still reasonable.",
+        "studies": [
+          {
+            "name": "HyTEC Liver SBRT Dose-Volume Effects",
+            "tldr": "Grade ≥3 GI D50 87.1 Gy and D10 50.6 Gy (Rx dose); liver-enzyme fit not significant (P = .10); QUANTEC MLD limits judged still reasonable.",
+            "details": [
+              "🔍 Pooled study-level review of published liver SBRT series; PubMed search through May 2014",
+              "🔍 Probit NTCP fits by maximum likelihood; physical dose used, no BED conversion",
+              "🔍 HCC, IHC and liver mets pooled; mostly 3 to 6 fx, one single-fraction series",
+              {
+                "text": "📊 Pooled dose-response parameters by endpoint (Table 3)",
+                "table": {
+                  "columns": [
+                    "Endpoint",
+                    "Events/pts",
+                    "D50 (95% CI)",
+                    "γ50 (95% CI)",
+                    "D10 / D20"
+                  ],
+                  "rows": [
+                    [
+                      "G≥3 liver enzymes (vs MLD)",
+                      "17/288",
+                      "40.8 Gy (25.5-∞)",
+                      "0.95 (0.58-1.44)",
+                      "not reported"
+                    ],
+                    [
+                      "G≥2 general GI (vs Rx dose)",
+                      "99/278",
+                      "48.0 Gy (43.6-65.9)",
+                      "0.83 (0.37-1.31)",
+                      "18.4 / 28.6 Gy"
+                    ],
+                    [
+                      "G≥3 general GI (vs Rx dose)",
+                      "25/399",
+                      "87.1 Gy (69.1-194.4)",
+                      "1.22 (0.78-1.68)",
+                      "50.6 / 63.1 Gy"
+                    ]
+                  ]
+                }
+              },
+              "📐 Liver-enzyme model: no dose response established (P = .10), 5 studies",
+              "📊 Mean Rx 50 Gy in 3 to 6 fx → G≥3 general GI risk <10%",
+              "📊 Series using the ≥700 cm3 sparing guideline (15 or 17 Gy): G≥3 GI 9.3% (11 of 118), 68% CI 6.6% to 12.8%",
+              {
+                "text": "🔗 vs QUANTEC MLD limits: G3 liver-enzyme risk <20% probability",
+                "subdetails": [
+                  "Primary liver: 13 Gy (3 fx), 18 Gy (6 fx)",
+                  "Liver mets: 15 Gy (3 fx), 20 Gy (6 fx)"
+                ]
+              },
+              "⚠️ Rx dose stands in for duodenal, gastric and bowel dose; OAR DVHs not available",
+              "⚠️ General GI is a composite including fatigue and nausea, not organ-specific injury",
+              {
+                "text": "⚠️ Liver failure not modeled (inconsistent reporting)",
+                "subdetails": [
+                  "Bujold: 3 of 102 HCC pts died of liver failure without progression",
+                  "Andolino: liver failure in 4 of 8 HCC pts with baseline CP ≥8"
+                ]
+              }
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              1000000282
+            ],
+            "slug": "hytec-liver-sbrt",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Study-level pooled data; prescription dose stands in for GI organ dose, physical dose without BED, and the liver-enzyme dose-response fit failed (P = .10).",
+              "audience": "Liver SBRT for HCC, IHC or liver mets, mostly 3 to 6 fx"
+            },
+            "significance": "The usable planning number is GI, not liver: mean Rx 50 Gy in 3 to 6 fx kept modeled G≥3 GI risk <10%, and series using the ≥700 cm3 sparing guideline carried 9.3% G≥3 GI. Because the GI model runs on Rx dose, not duodenal or gastric DVH, it does not replace organ-level constraints for a central or hilar target.",
+            "monday_clinic": "In HCC or liver-met pts planned for 3 to 6 fx liver SBRT, this supports keeping QUANTEC MLD limits as the liver-enzyme guardrail; it does not address Child-Pugh decline or liver failure, which it did not model.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Quantitative review pooling published liver SBRT series that reported **both toxicity and dose-volume data** (PubMed through May 2014). **Probit NTCP** fits by maximum likelihood, profile-likelihood parameter CIs, bootstrap curve CIs (2000 samples). Overlapping cohorts reduced to the most recent report."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "HCC, IHC and liver metastases, **pooled**; metastatic and primary cohorts could not be modeled separately for lack of data. Fractionation concentrated at **3 to 6 fx**, plus one single-fraction series (Goodman)."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Prescription typically covered the PTV with the **70% to 85% isodose line**, with 4DCT, abdominal compression or active breathing control for motion and fiducial tracking in some series. GTV excluded from the MLD calculation in all series except Son."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**G≥3 liver enzymes** (≥5x ULN ALT/AST, CTCAE v4.0) vs MLD; **G≥2 and G≥3 general GI** (fatigue, nausea, diarrhea, gastritis, ulcers, GI pain, colitis) vs Rx dose. Child-Pugh decline, RILD and liver failure too inconsistently reported to model."
+              },
+              {
+                "label": "Results",
+                "body": "Only the GI fits reached statistical significance; the liver-enzyme model could not exclude dose-independent risk (**P = .10**), possibly skewed by the Lee et al outlier."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Reaffirms the **QUANTEC** liver MLD limits (13 Gy/3 fx and 18 Gy/6 fx primary; 15 Gy/3 fx and 20 Gy/6 fx mets) as carrying G3 enzyme risk **<20%**. Velec et al suggested MLD **<18 Gy (6 fx)** when liver-function decline in HCC is the endpoint."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents liver SBRT in 3 to 6 fx for HCC, IHC or liver mets planned on physical dose. Does not represent reirradiation, organ-level GI constraints, or liver-function decline in cirrhotic pts."
+              },
+              {
+                "label": "Limitations",
+                "body": "Liver-enzyme model rests on **5 studies and 17/288 events**. The general GI composite counts fatigue alongside ulceration, softening the G≥2 curve. The 700 cm3 pooled rate carries only a 68% CI."
+              },
+              {
+                "label": "Discussion",
+                "body": "The paper reaffirms existing limits more than it derives new ones; its durable output is a **reporting standard** (liver minus GTV volumes, absolute DVHs, baseline CP and ALBI, explicit liver-failure reporting) that would let organ-level models replace Rx-dose surrogates."
+              }
+            ],
+            "interpretation": "This is less a test of a hypothesis than an audit of whether the liver SBRT literature through 2014 could support dose-response modeling at all, and the answer splits by endpoint. For liver enzymes, the one endpoint where liver-specific dosimetry (MLD of liver minus GTV) was available, the probit fit failed: the model could not reject dose independence (P = .10), and the upper confidence bound on D50 runs to infinity. The tempting read is that MLD does not matter for SBRT. The better read is that 17 events across 288 pts in 5 series cannot resolve a dose response, particularly with metastatic and cirrhotic livers pooled and one series computing MLD with the GTV included.\n\nThe GI models did reach statistical significance, but they are built on the prescription dose rather than the dose to duodenum, stomach or bowel. That substitution is the central weakness. Two lesions prescribed the same dose can sit abutting the duodenum or well away from it, and the prescription carries none of that geometry. The G≥2 D10 of 18.4 Gy, a prescription well below the ablative range, mostly signals that the endpoint is soft: fatigue and nausea are counted alongside ulceration and colitis. The G≥3 model is more useful, and its anchor, mean Rx 50 Gy in 3 to 6 fx carrying under 10% risk, is a defensible population-level statement. It describes average geometry, though, and a central lesion near the hilum, which the authors flag as higher GI risk, is exactly where an average misleads.\n\nAgainst QUANTEC, the paper reaffirms rather than revises. The QUANTEC MLD limits sit where the fitted enzyme curve stays below 20% probability, but because that curve is not statistically established, the reaffirmation rests partly on the absence of contrary evidence. The 700 cm3 sparing rule fares similarly: widely used as a planning heuristic, not analyzable here, represented only by a pooled 9.3% G≥3 GI rate (11 of 118) from series that used it. Velec et al's MLD limit of <18 Gy in 6 fx for liver-function decline in HCC points to the endpoint that matters most in cirrhotic pts and that this analysis could not model.\n\nLiver failure, the endpoint that kills, sits outside the models entirely: 3 deaths among 102 HCC pts in one series, and failure in 4 of 8 pts starting at CP ≥8 in another. Those numbers argue that baseline liver function, not MLD, dominates risk in the worst-functioning livers, and a pooled study-level framework cannot see it. Modeling physical dose without BED conversion across single-fraction through 6 fx regimens also flattens real biological differences.\n\nWhat would make the GI conclusions wrong is a modern series with organ-level DVHs showing that duodenal or gastric hot spots, not prescription, drive ulceration; Rx-based limits would then be a coincidence of typical lesion geometry rather than a constraint. The reporting standards the authors lay out (liver minus GTV volumes, absolute DVHs, baseline Child-Pugh and ALBI, explicit grading and cause of liver failure) are arguably the paper's most lasting contribution, because they define the data that would let the next analysis replace surrogates with organ dose.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "For constraint-setting, the GI fits are the actionable output: mean Rx 50 Gy in 3 to 6 fx modeled G≥3 GI risk <10%. The liver-enzyme model never established a dose response (P = .10), so QUANTEC MLD limits are reaffirmed rather than refined, and central tumors near the hilum still need organ-level GI planning."
+            },
+            "open_questions": [
+              "Organ-level duodenal and gastric constraints for liver SBRT",
+              "Toxicity differences between HCC, IHC and liver metastases",
+              "MLD limits for Child-Pugh decline in cirrhotic HCC"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "meta-analysis",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT04745390",
+                "brief_title": "Standard Versus Radiobiologically-Guided Dose Selected SBRT in Liver Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 110,
+                "primary_completion_date": "2026-04",
+                "brief_summary": "Radiation is a standard treatment option for patients with liver cancer. Unfortunately, the tumour grows after radiation in many patients and radiation can harm normal tissues. A new treatment using a specialized radiation procedure called Stereotactic body radiotherapy (SBRT) may increase the chance to control liver cancer and reduce the chance of harm to normal tissues. SBRT allows radiation treatments to be focused more precisely, and be delivered more accurately than with older treatments.…",
+                "conditions": [
+                  "Hepatocellular Carcinoma",
+                  "Liver Metastases"
+                ],
+                "interventions": [
+                  {
+                    "name": "Radiation therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Eligible patients include patients with any of the following:\n\n   * Primary hepatobiliary cancer confirmed pathologically or,\n   * Non-lymphoma liver metastases confirmed pathologically or,\n   * Radiographic liver lesions most consistent with metastases, in a patient with…",
+                "answers_question": "MLD limits for Child-Pugh decline in cirrhotic HCC",
+                "relevance_phrase": "standard vs radiobiology-guided SBRT dose, HCC + mets"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "liver SBRT gastrointestinal toxicity",
+                "stereotactic radiotherapy liver metastases",
+                "hepatocellular carcinoma SBRT liver function"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 40,
+              "fetched_at": "2026-11-20T09:06:31.927Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 282
               }
             ],
             "meeting": null

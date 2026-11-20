@@ -1,0 +1,696 @@
+{
+  "date": "2026-11-20",
+  "conference": null,
+  "generated_at": 1795165778927,
+  "digest": {
+    "top_line": "HyTEC liver SBRT: 3-yr LC 86% primary vs 76% mets; mets gain with BED >100 Gy10 (3-yr 93% vs 65%), no dose-response in primaries.",
+    "tldr": "Three pooled HyTEC/ReTEC modeling papers on RT dose constraints. None reports a new trial. Liver SBRT supports BED >100 Gy10 for mets but not primaries. A spinal cord reirradiation model suggests >50% recovery within 1 yr (95% CI 31%-95%), but current limits stand. A methods primer warns that test choice, parameter coupling and extrapolation shift NTCP constraints.",
+    "sites": [
+      {
+        "disease_site": "multi-site",
+        "intro": null,
+        "studies": [
+          {
+            "name": "A Primer on Dose-Response Data Modeling in Radiation Therapy",
+            "tldr": "HyTEC methods primer: in a 13/96 G2+ pneumonitis vs MLD example, it shows how test choice, parameter coupling and extrapolation distort NTCP constraints.",
+            "details": [
+              "🔍 Methods review from the HyTEC group; it reports no new clinical result",
+              "🔍 Worked example: G2+ radiation pneumonitis vs mean lung dose (MLD), pooled from 2 published series",
+              "📊 Example dataset: 13/96 (13.5%) G2+ RP; median MLD 3.05 Gy",
+              {
+                "text": "📐 Modeling steps applied to the lung example",
+                "table": {
+                  "columns": [
+                    "Step",
+                    "Method",
+                    "Worked-example output"
+                  ],
+                  "rows": [
+                    [
+                      "Best-fit parameters",
+                      "Maximum likelihood, logistic model",
+                      "MLL -31.41"
+                    ],
+                    [
+                      "Parameter CIs",
+                      "Profile likelihood (MLL minus 1.92)",
+                      "D50 5.05-9.04; γ50 0.73-1.77"
+                    ],
+                    [
+                      "Is there a dose-response?",
+                      "Likelihood ratio vs flat average-risk line",
+                      "LL(Pave) -38.07; difference 6.66, p=0.0003"
+                    ],
+                    [
+                      "Prediction CIs",
+                      "Bootstrap resampling, 2000 histories",
+                      "68% and 95% bands"
+                    ],
+                    [
+                      "Clinical check",
+                      "NPV at 10% acceptable-risk cutoff (MLD=3.27 Gy)",
+                      "NPV 52/56=92.9%"
+                    ]
+                  ]
+                }
+              },
+              "⚠️ Median-split p ranged from 0.070 (Fisher exact) to 0.002 (Wilcoxon, assumptions unchecked)",
+              "📐 Rule of thumb is ≥10 events per parameter (≥20 for 2-parameter logistic). The example has 13",
+              "⚠️ D50 and γ50 are coupled ('banana' iso-LL contours), so a rectangle built from the separate CIs misstates joint uncertainty",
+              "⚠️ With low-event (spinal cord) or high-control (prostate TCP) data, predictions depend heavily on γ50",
+              "⚠️ A cut-point constraint encodes a chosen risk tolerance (e.g. 20% symptomatic pneumonitis, 0.1% myelitis), not a universal limit",
+              "🔍 Converting MLD to EQD2 is non-linear and needs full DVH data. Authors ask that both physical dose and EQD2 be reported"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              1000000287
+            ],
+            "slug": "dose-response-modeling-primer",
+            "significance": "Treat a HyTEC constraint as a risk tolerance read off a curve, not a threshold. In the lung example, a 10% G2+ RP tolerance maps to MLD 3.27 Gy with NPV 92.9%. Where events are rare (cord Dmax) or control is high (prostate TCP), D50/γ50 coupling makes the predicted risk depend heavily on γ50, so a plan near that constraint relies on an extrapolated curve.",
+            "monday_clinic": null,
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Methods review from the HyTEC group. **G2+ radiation pneumonitis vs MLD**, pooled from two published series (**13/96 events**), serves as the worked example for each modeling step."
+              },
+              {
+                "label": "Results",
+                "body": "The logistic fit beat a flat no-relationship line by likelihood ratio (**p=0.0003**). At a **10% acceptable-risk cutoff (MLD=3.27 Gy)**, NPV was **52/56=92.9%**."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Single-metric logistic fits were used instead of volume-effect models (**LKB, relative seriality**) because pooled literature rarely provides full DVH data. That is also why HyTEC SBRT models often fit small-volume cut-points such as D0.1cc or D0.03cc."
+              },
+              {
+                "label": "Discussion",
+                "body": "Fitting a sigmoid does not establish a dose-response. Significance has to be tested against a flat line, and prediction CIs widen **beyond the range of the data**. The authors argue that dose-volume metrics stand in for unmeasured patient and tumor factors, not that they are the **sole determinants** of outcome."
+              },
+              {
+                "label": "Limitations",
+                "body": "The example has **13 events, below the ≥20 desired** for a 2-parameter logistic. The authors state their methods are common practice, **not preferred or recommended**, and pooling is limited to what the literature reports."
+              }
+            ],
+            "interpretation": "Most radiation oncologists meet NTCP models as finished numbers: a cord Dmax, a mean lung dose, a liver mean dose, printed in a constraint table. This primer is useful because it goes through the steps that sit behind those numbers, and each step shows a way the published constraint can carry more certainty than the data support.\n\nThe first point is about detecting a signal at all. In the lung example, the same median split gave p=0.070 by Fisher exact and p=0.002 by a Wilcoxon test whose assumptions were never checked. Neither test is the dose-response. They only suggest whether one is worth modeling. A reader who sees a strong p-value next to a dichotomized dose metric in a retrospective series should ask which test produced it and whether its assumptions were checked.\n\nThe second point, and the one most relevant to SBRT practice, is parameter coupling. D50 and γ50 are not independent. The likelihood surface forms a curved ridge, so the box formed by the two separate CIs does not describe the joint uncertainty. This matters little in the lung example, where incidence spans a broad range. It matters a great deal for spinal cord, where events are rare, and for prostate TCP, where control is high. There most of the data lie far from the 50% point, so the predicted risk depends heavily on γ50. In other words, the constraints used for single-fraction and few-fraction cord dose sit on the least certain part of their own curves, which is why the authors insist on unrounded parameters and on showing confidence bands.\n\nThe third point is clinical. A constraint is a risk tolerance someone chose, not a property of the organ. The 10% G2+ RP tolerance in the example maps to MLD 3.27 Gy with NPV 92.9%, but another tolerance gives a different dose, and the authors say plainly that a pt with life-threatening comorbidity, or a tumor where control dominates, may justify a different point on the curve. Some HyTEC authors chose to show only the confidence bands and omit the fitted line, to avoid implying a dependence the data do not prove.\n\nThe primer does not settle model choice. It uses a single-metric logistic fit by necessity, because pooled literature rarely provides full DVHs, and it defers volume-effect models (LKB, relative seriality) until such data exist. Pooling across fractionation schemes is also unresolved: converting MLD to EQD2 needs the full DVH, so pooled SBRT lung data stay in physical dose. Readers applying HyTEC constraints should treat them as interpolations where data are dense and as extrapolations everywhere else.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Treat a HyTEC constraint as a risk tolerance read off a curve, not a threshold. In the lung example, a 10% G2+ RP tolerance maps to MLD 3.27 Gy with NPV 92.9%. Where events are rare (cord Dmax), D50/γ50 coupling makes the predicted risk depend heavily on γ50, so a plan near that constraint relies on an extrapolated curve."
+            },
+            "open_questions": [
+              "Volume-effect models (LKB, relative seriality) once full DVH datasets are pooled",
+              "Pooling SBRT toxicity data across fraction numbers without full DVH for EQD2",
+              "How much do unmeasured patient factors explain toxicity beyond dose-volume metrics?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": null,
+            "content_type": "review",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": null,
+            "related_trials_provenance": {
+              "queries_fired": [],
+              "queries_failed": [],
+              "candidates_returned": 0,
+              "fetched_at": "2026-11-20T09:08:10.413Z",
+              "rerank_outcome": "skipped"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 287
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "cns",
+        "intro": null,
+        "studies": [
+          {
+            "name": "ReTEC: Spinal Cord Reirradiation Tolerance After SBRT",
+            "tldr": "Pooled Dmax model (282 lesions, six myelopathy cases) suggests >50% cord recovery within 1 yr, but bootstrap 95% CI 31%-95%; current limits stand.",
+            "details": [
+              "📊 NTCP model pooled from 13 papers, 282 lesions, six myelopathy cases",
+              "📊 ML fit: cord recovery >50% in <1 yr, bootstrap 95% CI 31%-95% at 1-yr interval",
+              "📐 Fitted recovery half-time (tRH) 4 mo, Rmax 95% (p<0.01, LRT)",
+              {
+                "text": "📊 Example case (cord Dmax 50 Gy/25 fx, then 15.5 Gy/5 fx at 1 yr): composite cord BED2 by recovery assumption",
+                "table": {
+                  "columns": [
+                    "Recovery assumption",
+                    "Parameters",
+                    "Composite BED2",
+                    "Myelopathy risk"
+                  ],
+                  "rows": [
+                    [
+                      "No recovery",
+                      "None",
+                      "140 Gy",
+                      "<1%"
+                    ],
+                    [
+                      "Nelson 2009",
+                      "33% recovery at 1 yr",
+                      "107 Gy",
+                      "Just below 1%"
+                    ],
+                    [
+                      "ML fit",
+                      "tRH 4 mo, Rmax 95%",
+                      "60 Gy",
+                      "Just less than 1%"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "⚠️ Recovery factor and NTCP curve must be applied as a matched pair",
+                "subdetails": [
+                  "140 Gy no-recovery composite into ML model → 27% risk (wrong)",
+                  "60 Gy ML composite into no-recovery model → <0.001% risk (wrong)",
+                  "Correctly paired: about 1% risk under every recovery model"
+                ]
+              },
+              "🔍 Inclusion: SBRT in ≥1 course, per-course cord Dmax, interval, fractionation or BED; α/β = 2 Gy",
+              "🔗 HyTEC cord limits compatible at ≥12 mo (Nelson 2009 assumptions) and 5-6 mo (ML model)",
+              "⚠️ Dmax-only summation; no voxel-wise composite reirradiation plans found in literature",
+              {
+                "text": "⚠️ Further model limits",
+                "subdetails": [
+                  "Rmax search capped at 95%; ML fit reached the cap",
+                  "Cord and cauda equina not separated (thecal sac often the surrogate)",
+                  "Less than half of spine SBRT pts alive at 1 yr; myelopathy risk may be underestimated",
+                  "Non-SBRT data showed longer recovery times and were excluded"
+                ]
+              }
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": "10.1002/acm2.70557",
+            "tweet_ids": [
+              1000000288
+            ],
+            "slug": "retec-spinal-cord-reirradiation",
+            "verdict": {
+              "soc_implication": "early-signal",
+              "rationale": "Proof-of-concept model fitted to pooled published Dmax data with six events; recovery estimate CI 31%-95%. Authors advise staying within current guidelines pending composite-plan validation.",
+              "audience": "Spine reirradiation, SBRT in ≥1 course, prior cord dose within tolerance"
+            },
+            "significance": "The ML fit (tRH 4 mo, Rmax 95%) implies far more recovery than the 33% Nelson factor, but the 1-yr CI spans 31%-95%, so 33% remains the defensible discount for composite cord dose. The practical trap is coupling: pairing one model's recovery factor with another's NTCP curve moved the same case from about 1% to 27% risk.",
+            "monday_clinic": "In a pt needing spine SBRT reirradiation at least 5 mo after a first course within cord tolerance, this supports existing HyTEC reirradiation cord limits as likely safe; it does not extend to first courses that exceeded tolerance or to re-treatment with no SBRT course.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Pooled NTCP modeling of published spinal cord reirradiation data: **13 papers, 282 lesions, six myelopathy cases**. Raised-exponential recovery model (recovery half-time tRH, maximum recovery Rmax) and logistic dose-response fitted by maximum likelihood, all doses converted to BED2 with **α/β = 2 Gy**."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "Lesions with **SBRT in at least one course**, reported cord Dmax for each course, interval between courses, fractionation or BED, and myelopathy outcome absent progression. Spinal cord and cauda equina included; brainstem and sacral plexus excluded."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "Worked clinical example: 45 Gy/25 fx to T2-T10, then **25 Gy/5 fx** a year later to the relapsed level. With a conservative **33%** recovery, composite five-fraction equivalent cord Dmax was **28 Gy**, within the TG-101 de novo limit of 30 Gy/5 fx."
+              },
+              {
+                "label": "Results",
+                "body": "ML fit **tRH 4 mo, Rmax 95%** (p<0.01, LRT): recovery **>50% in <1 yr**, bootstrap 95% CI **31%-95%** at a 1-yr interval. Each correctly paired model kept the example case near 1% risk."
+              },
+              {
+                "label": "vs leading data",
+                "body": "Recovery is faster and more complete than the **33% at 1 yr** Nelson 2009 assumption behind current practice. HyTEC cord reirradiation limits (Sahgal 2021, 15.5 Gy/5 fx) are compatible at **≥12 mo** under Nelson assumptions and at **5-6 mo** under the ML model."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents spine reirradiation with SBRT in at least one course, prior cord dose within tolerance, interval at least 5 mo. Does not represent first courses that exceeded cord tolerance or conventional-only re-treatment."
+              },
+              {
+                "label": "Limitations",
+                "body": "Rmax ran into its **95% search cap**, so the ceiling was set by design, not data. Cord and cauda were not separable, interval definitions varied across source papers, and competing mortality (less than half alive at 1 yr) may hide late myelopathy."
+              },
+              {
+                "label": "Discussion",
+                "body": "The most usable finding is methodological: recovery factor and dose-response curve are a **matched pair**, and mixing them misstated the same case as 27% or <0.001% risk. Authors advise **remaining within current guidelines** until voxel-wise composite datasets validate or refute the model."
+              }
+            ],
+            "interpretation": "The question here is the one every spine SBRT reirradiation plan turns on: how much of the first course's cord dose can be discounted. Current practice leans on the Nelson 2009 assumption of 33% recovery at 1 yr and on the HyTEC reirradiation limits that grew out of Sahgal 2012. The maximum-likelihood fit in this paper says recovery is faster and more complete than that, with a recovery half-time of 4 mo and Rmax at 95%. Read naively, that would license higher reirradiation cord doses. The authors decline to draw that conclusion, and the data support their restraint.\n\nSix myelopathy events across 282 lesions is a thin base for a two-parameter recovery model stacked on a logistic dose-response fit. The bootstrap interval at a 1-yr gap, 31%-95%, runs from close to the Nelson assumption up to near-complete recovery, so the point estimate cannot tell the current conservative factor apart from the ML one. Rmax also hit its 95% ceiling, which means a design choice constrained the fit rather than the data settling it. Each of these argues for treating the ML parameters as a hypothesis, not a planning input.\n\nThe deeper structural problem is that the model sums point maxima. Without voxel-wise composite plans, the analysis cannot know whether each course's hot spot sat in the same cord segment, and the authors note that hot spots generally fall in different locations. Summed Dmax then plausibly overstates true composite dose in pts who did well, and a model that sees high summed doses without injury will attribute that tolerance to recovery. Competing mortality pushes the same direction: with less than half of spine SBRT pts alive at 1 yr and reirradiation myelopathy latency reported at a median of 6 mo, missed late events would make the cord look more forgiving than it is. Both biases favor apparent recovery, so the true estimate is more likely below the ML point estimate than above it.\n\nThe most usable result for a planner is the warning about parameter coupling. The same example case reads as 27% risk or under 0.001% depending on which recovery factor is paired with which NTCP curve, while each correctly paired model puts it near 1%. Anyone importing a recovery percentage from one paper into a dose-response curve from another is making exactly this error, and it can fail in the dangerous direction. The worked clinical example shows the conservative path: discount by 33%, convert the composite to a five-fraction equivalent, and check it against the TG-101 de novo limit of 30 Gy/5 fx.\n\nNothing in daily planning moves yet. What the model adds is modest reassurance that existing HyTEC limits, at intervals of 12 mo or more under Nelson assumptions, are unlikely to be optimistic, and a hint that intervals of 5-6 mo may also be compatible. The model applies only when the first course stayed within tolerance and the interval was at least 5 mo; it says nothing about a cord already pushed past its limit. Validation needs reirradiation datasets reporting per-course dose distributions, fractionation and intervals for each pt, which prospective protocols such as REPAIR and ReCare could supply. Its main value is as a proposal for that work, not as a new constraint set.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "The ML fit (tRH 4 mo, Rmax 95%) implies far more recovery than the 33% Nelson factor, but the 1-yr CI spans 31%-95%, so 33% remains the defensible discount for composite cord dose. Pairing one model's recovery factor with another's NTCP curve moved the same case from about 1% to 27% risk."
+            },
+            "open_questions": [
+              "Does recovery hold with voxel-wise composite cord dose?",
+              "Safe reirradiation interval below 12 months",
+              "Recovery kinetics after non-SBRT first courses"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "meta-analysis",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT05301101",
+                "brief_title": "High Dose Re-Irradiation Utilizing Advanced Deformable Image Registration (DIR) and Individualized Organ At Risk (OAR) Dose Calculations With Organ Specific Toxicity Analysis",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 120,
+                "primary_completion_date": "2027-07",
+                "brief_summary": "This trial applies a uniform approach to re-irradiation for planning and diagnostic image fusion, dose summation, dose calculations, and follow up for tumor control and detailed toxicity analysis of serial Organs At Risk (OARs). Serial organs include named arteries and nerves, spinal cord, and gastrointestinal tract.",
+                "conditions": [
+                  "Solid Tumor"
+                ],
+                "interventions": [
+                  {
+                    "name": "Re-irradiation",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Provision of signed informed consent\n2. Patients ≥18 years of age receiving definitive or postoperative high dose radiation to volume that includes overlap with previously irradiated OAR(s).\n3. Prior radiation dosimetry must be available.\n4. Participants must have stage I-IV…",
+                "answers_question": "Does recovery hold with voxel-wise composite cord dose?",
+                "relevance_phrase": "DIR-based dose summation with spinal cord toxicity analysis"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "spinal cord reirradiation dose",
+                "spine reirradiation stereotactic"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 7,
+              "fetched_at": "2026-11-20T09:08:46.459Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 288
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      },
+      {
+        "disease_site": "hepatobiliary",
+        "intro": null,
+        "studies": [
+          {
+            "name": "Local Control After SBRT for Liver Tumors (HyTEC)",
+            "tldr": "3-yr LC 86% primary vs 76% metastatic liver tumors; mets better with BED >100 Gy10 (93% vs 65%), no dose-response in primaries.",
+            "details": [
+              "🔍 Pooled reanalysis of 13 published series: 721 tumors in 642 pts",
+              "🔍 Lesion-level LC reconstructed from published KM curves, then aggregated",
+              {
+                "text": "📊 Actuarial LC by tumor type (log-rank P=.011)",
+                "table": {
+                  "columns": [
+                    "Group",
+                    "n",
+                    "1-yr LC",
+                    "2-yr LC",
+                    "3-yr LC"
+                  ],
+                  "rows": [
+                    [
+                      "Primary (HCC + CCA)",
+                      "431",
+                      "93%",
+                      "89%",
+                      "86%"
+                    ],
+                    [
+                      "Liver mets",
+                      "290",
+                      "90%",
+                      "79%",
+                      "76%"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📊 LC by BED (cutoff 100 Gy10)",
+                "table": {
+                  "columns": [
+                    "Group",
+                    "1-yr LC",
+                    "2-yr LC",
+                    "3-yr LC",
+                    "Log-rank P"
+                  ],
+                  "rows": [
+                    [
+                      "Primary, BED ≤100 Gy10",
+                      "94%",
+                      "89%",
+                      "86%",
+                      "P=.972"
+                    ],
+                    [
+                      "Primary, BED >100 Gy10",
+                      "92%",
+                      "89%",
+                      "86%",
+                      "P=.972"
+                    ],
+                    [
+                      "Mets, BED >100 Gy10",
+                      "96%",
+                      "93%",
+                      "93%",
+                      "P<.001"
+                    ],
+                    [
+                      "Mets, BED ≤100 Gy10",
+                      "84%",
+                      "70%",
+                      "65%",
+                      "P<.001"
+                    ]
+                  ]
+                }
+              },
+              {
+                "text": "📐 TCP model, predicted 2-yr LC for liver mets (R2 0.98)",
+                "table": {
+                  "columns": [
+                    "BED",
+                    "Example schedule",
+                    "2-yr LC (95% CI)"
+                  ],
+                  "rows": [
+                    [
+                      "80 Gy10",
+                      "10 Gy × 4",
+                      "70% (64%-77%)"
+                    ],
+                    [
+                      "100 Gy10",
+                      "10 Gy × 5",
+                      "76% (70%-82%)"
+                    ],
+                    [
+                      "180 Gy10",
+                      "20 Gy × 3",
+                      "90% (85%-95%)"
+                    ]
+                  ]
+                }
+              },
+              "📊 Primaries at BED 60-72 Gy10 (227 lesions): 2-yr LC 90%",
+              "🔍 Median f/u 18 mo primaries (IQR 11-29), 14 mo mets (IQR 8-23)",
+              "⚠️ Tumor size and histology not modeled; CRC was 56% of mets",
+              "⚠️ KM without competing-risk handling; deaths before local failure censored",
+              "🔗 Yamashita et al (130 pts): LC 64% vs 85% for >30 mm vs ≤30 mm, P=.040"
+            ],
+            "figures": [],
+            "nct": null,
+            "doi": null,
+            "tweet_ids": [
+              1000000289
+            ],
+            "slug": "liver-sbrt-local-control-hytec",
+            "verdict": {
+              "soc_implication": "methodologically-limited",
+              "rationale": "Pooled reconstruction of published KM curves; BED assigned per series, so the dose effect is confounded with tumor size, histology and institution, none modeled.",
+              "audience": "SBRT-treated HCC, cholangiocarcinoma, or liver mets (56% CRC)"
+            },
+            "significance": "Dose escalation pays off for metastases, not primaries. The TCP fit puts 2-yr LC for mets at 70% with 10 Gy × 4, 76% with 10 Gy × 5 and 90% with 20 Gy × 3. Primaries treated to BED 60-72 Gy10 (227 lesions) reached 90% 2-yr LC, so with underlying liver disease the source favors conservative schedules over escalation.",
+            "monday_clinic": "In HCC with underlying liver disease, this supports a moderate-BED schedule as adequate for local control; in a CRC-predominant liver met, it supports aiming for BED >100 Gy10; it does not settle large tumors or non-CRC histologies, since size and histology were never modeled.",
+            "primary_endpoint": null,
+            "analysis_sections": [
+              {
+                "label": "Design",
+                "body": "Pooled analysis of **13 published series** from a PubMed search run Nov 16, 2013 (201 hits, 48 with LC data). Lesion-level LC was **reconstructed from published KM curves** (Guyot method) and aggregated. Series that used a wide BED range without dose-stratified outcomes were excluded."
+              },
+              {
+                "label": "Population & inclusion",
+                "body": "**721 tumors in 642 pts**: HCC from 5 series (n=394), CCA from 2 (n=37), liver mets from 6 (n=290). CRC made up **56% of mets**, ranging from 32% to 100% by series. Bridge-to-transplant series were excluded."
+              },
+              {
+                "label": "Radiotherapy",
+                "body": "SBRT 24-60 Gy in 1-5 fx of 7-26 Gy. BED calculated with α/β=10, **median 88 Gy10** (IQR 72-125). The prescription point varied (isocenter, PTV, 65-80% IDL) and CTV expansions ran 0-10 mm."
+              },
+              {
+                "label": "Endpoints",
+                "body": "**Primary: local control**, per lesion, on serial CT/MRI read by RECIST, mRECIST, WHO or EASL criteria. Actuarial KM, compared by log-rank at a **BED cutoff of 100 Gy10**."
+              },
+              {
+                "label": "Results",
+                "body": "**79 local failures** overall. Mets showed a dose-response by BED (**P<.001**). Primaries showed none across BED 60-180 Gy10 (**P=.972**), including at other cutoffs."
+              },
+              {
+                "label": "vs leading data",
+                "body": "The authors place the metastatic dose-response alongside similar BED effects in primary lung SBRT and in spine metastases. Yamashita et al (130 pts) found no BED effect but did find a size effect (**64% vs 85%** for >30 mm vs ≤30 mm, P=.040); this pool could not test size. NCT01730937 uses NTCP-individualized dosing for primaries."
+              },
+              {
+                "label": "Applies to",
+                "body": "Represents HCC, CCA and CRC-predominant liver mets treated with 1-5 fx SBRT. Does not represent SIRT with 90Y, multifocal disease, or SBRT as a bridge to transplant."
+              },
+              {
+                "label": "Limitations",
+                "body": "The search closed in 2013, before modern series and motion management. Differing prescription points and misread post-SBRT imaging could blur the dose-response. HCC lesions were often pretreated, so a lower viable burden may inflate LC for primaries."
+              },
+              {
+                "label": "Discussion",
+                "body": "For primaries, about half the dataset sat at BED 60-72 Gy10 with **90% 2-yr LC**, which the authors read as support for **8 to 10 Gy × 5** in pts with liver disease. For mets, the TCP fit argues for **BED >100 Gy10**. Neither result shows that SBRT beats other local or systemic therapy; no randomized data exist."
+              }
+            ],
+            "interpretation": "The real finding here is an asymmetry. Primary liver tumors had the same local control whether treated above or below BED 100 Gy10 (3-year 86% in both groups), while metastases showed a steep gradient, and the authors fit a tumor control probability curve to that gradient. A radiation oncologist wants to know whether the asymmetry reflects biology or how the data were pooled, and the design cannot fully answer that.\n\nThe case for biology is reasonable. HCC often reaches SBRT after chemoembolization or other liver-directed therapy, so the viable tumor at treatment may be smaller than it looks on imaging, and the authors offer this explanation themselves. The metastases here are mostly colorectal, a histology the authors note has been relatively resistant to SBRT elsewhere. Radiobiology predicts a steeper dose-response in a less radiosensitive, untreated target, and the metastatic gradient parallels what the authors cite for lung and spine SBRT.\n\nThe case for a pooling artifact is just as strong. The pool deliberately excluded series that used a wide range of BEDs, so each contributing series sits near one dose level. BED therefore behaves almost like a series label. It moves together with institution, country, era, prescription convention (isocenter vs PTV vs a 65% to 80% isodose line), target definition, response criteria, and the colorectal share, which ranged from 32% to 100% across metastatic series. The 3-year contrast of 93% vs 65% for metastases may partly measure which centers escalated dose rather than what escalation does. Tumor size, the covariate most likely to track dose, was unavailable. The one cited series that did examine size (Yamashita et al) found that size mattered where BED did not. Because lesion data were read off published Kaplan-Meier curves rather than taken from records, per-lesion covariates could never be recovered.\n\nTwo biases point in a known direction. Kaplan-Meier local control without competing-risk handling overstates local failure when many pts die first, so the absolute control rates are probably conservative. Whether that bias differs between dose groups depends on survival differences the paper does not report. Post-SBRT liver imaging is also hard to read, and radiation change misread as progression could add noise to either group.\n\nWhat the paper supports is narrower than its TCP curve implies. For primaries, about half the lesions were treated at BED 60 to 72 Gy10 with 90% 2-year control. That is a sensible floor when the liver is the dose-limiting organ and escalation adds hepatic risk. For metastases, the direction (more dose, better control) fits the broader SBRT literature. The specific predictions of 70%, 76% and 90% at BED 80, 100 and 180 Gy10 describe the shape of a cross-series association, not a calibrated map from dose to control. The search closed in 2013, so modern image guidance is not represented. Patient-level data with size and histology would be the real test: if the metastatic gradient survives adjustment, the case for escalation strengthens; if it disappears, the asymmetry came from differences between institutions.",
+            "relevant_specialties": [
+              "radonc"
+            ],
+            "significance_by_specialty": {
+              "radonc": "Dose escalation pays off for metastases, not primaries. The TCP fit puts 2-yr LC for mets at 70% with 10 Gy × 4, 76% with 10 Gy × 5 and 90% with 20 Gy × 3. Primaries at BED 60-72 Gy10 reached 90% 2-yr LC, so with liver disease the source favors conservative schedules."
+            },
+            "open_questions": [
+              "Does tumor size explain the BED effect in liver metastases?",
+              "Is CRC histology driving lower metastatic local control?",
+              "Does liver SBRT improve survival vs other local therapies?"
+            ],
+            "consort": null,
+            "modality": "radiation",
+            "intent": null,
+            "methodology": "meta-analysis",
+            "significance_perspective": "Radiation oncology",
+            "related_trials": [
+              {
+                "nct": "NCT04745390",
+                "brief_title": "Standard Versus Radiobiologically-Guided Dose Selected SBRT in Liver Cancer",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 110,
+                "primary_completion_date": "2026-04",
+                "brief_summary": "Radiation is a standard treatment option for patients with liver cancer. Unfortunately, the tumour grows after radiation in many patients and radiation can harm normal tissues. A new treatment using a specialized radiation procedure called Stereotactic body radiotherapy (SBRT) may increase the chance to control liver cancer and reduce the chance of harm to normal tissues. SBRT allows radiation treatments to be focused more precisely, and be delivered more accurately than with older treatments.…",
+                "conditions": [
+                  "Hepatocellular Carcinoma",
+                  "Liver Metastases"
+                ],
+                "interventions": [
+                  {
+                    "name": "Radiation therapy",
+                    "type": "RADIATION"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Eligible patients include patients with any of the following:\n\n   * Primary hepatobiliary cancer confirmed pathologically or,\n   * Non-lymphoma liver metastases confirmed pathologically or,\n   * Radiographic liver lesions most consistent with metastases, in a patient with…",
+                "answers_question": "Does tumor size explain the BED effect in liver metastases?",
+                "relevance_phrase": "standard vs radiobiology-guided dose, liver mets eligible"
+              },
+              {
+                "nct": "NCT05433701",
+                "brief_title": "Stereotactic Body Radiotherapy Versus Radiofrequency Ablation for Unresectable, Small (≤ 3 cm) HCC",
+                "overall_status": "ACTIVE_NOT_RECRUITING",
+                "phase": [
+                  "NA"
+                ],
+                "enrollment_count": 178,
+                "primary_completion_date": "2026-12",
+                "brief_summary": "Hepatocellular carcinoma (HCC) is the third leading cause of cancer-related mortality and the sixth most prevalent cancer in the world. Standard treatments for early-stage HCCs include resection, liver transplantation, and percutaneous ablation, with 5-year survival rates of over 50 percent. Less than one-third of patients, however, are candidates for hepatic resection, and the use of radiofrequency ablation (RFA) may be significantly limited in cases with unfavorable tumor location and poor…",
+                "conditions": [
+                  "Hepatocellular Carcinoma"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic Body Radiotherapy",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Radiofrequency Ablation",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. patient over the age of 18\n2. primary or recurrent HCC that is not suitable for surgery\n3. HCCs with a longest diameter of ≤3cm and ≤2 lesions\n4. no evidence of intrahepatic or extrahepatic residual disease except for target lesions\n5. Child-Pugh class A or B hepatic…",
+                "answers_question": "Does liver SBRT improve survival vs other local therapies?",
+                "relevance_phrase": "SBRT vs RFA, unresectable HCC ≤3 cm, ≤2 lesions"
+              },
+              {
+                "nct": "NCT07381660",
+                "brief_title": "SBRT Versus Surgical Resection for Small HCC",
+                "overall_status": "RECRUITING",
+                "phase": [
+                  "PHASE3"
+                ],
+                "enrollment_count": 390,
+                "primary_completion_date": "2031-12",
+                "brief_summary": "Hepatocellular carcinoma (HCC) is one of the leading causes of cancer-related incidence and mortality in China and represents a major public health challenge. Surgical resection is the most commonly used curative treatment for HCC and can provide favorable long-term outcomes. However, resection is associated with substantial perioperative morbidity, and its applicability is limited in certain patient populations, including those with recurrent disease, those who have undergone conversion…",
+                "conditions": [
+                  "Hepatocellular Carcinoma (HCC)"
+                ],
+                "interventions": [
+                  {
+                    "name": "Stereotactic body radiotherapy (SBRT)",
+                    "type": "RADIATION"
+                  },
+                  {
+                    "name": "Resection",
+                    "type": "PROCEDURE"
+                  }
+                ],
+                "eligibility_brief": "Inclusion Criteria:\n\n1. Age 18 to 75 years, with no restriction on sex;\n2. Clinically or pathologically diagnosed hepatocellular carcinoma, according to the Guidelines for the Diagnosis and Treatment of Primary Liver Cancer (2024 edition);\n3. A solitary tumor with a maximum diameter of ≤5 cm, for…",
+                "answers_question": "Does liver SBRT improve survival vs other local therapies?",
+                "relevance_phrase": "phase 3 SBRT vs resection, solitary HCC ≤5 cm"
+              }
+            ],
+            "related_trials_provenance": {
+              "queries_fired": [
+                "liver metastases stereotactic radiotherapy",
+                "colorectal liver metastases radiotherapy",
+                "hepatocellular carcinoma stereotactic radiotherapy"
+              ],
+              "queries_failed": [],
+              "candidates_returned": 50,
+              "fetched_at": "2026-11-20T09:09:10.114Z",
+              "rerank_outcome": "picked_N"
+            },
+            "source_ids": [
+              {
+                "type": "paper",
+                "id": 289
+              }
+            ],
+            "meeting": null
+          }
+        ],
+        "open_questions": null
+      }
+    ],
+    "meta": {
+      "clusters_total": 3,
+      "studies_analyzed": 3,
+      "dropped": [],
+      "ocr_available": true
+    }
+  },
+  "bookmarks": [],
+  "papers": [
+    {
+      "id": 289,
+      "pmid": null,
+      "doi": null,
+      "pmc_id": null,
+      "title": "Local Control After Stereotactic Body Radiation Therapy for Liver Tumors",
+      "authors": [
+        "Nitin Ohri",
+        "Wolfgang A. Tomé",
+        "Alejandra Méndez Romero",
+        "Moyed Miften",
+        "Randall K. Ten Haken",
+        "Laura A. Dawson",
+        "Jimm Grimm",
+        "Ellen Yorke",
+        "Andrew Jackson"
+      ],
+      "journal": "Int J Radiat Oncol Biol Phys",
+      "pub_date": null,
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/hepatobiliary/ohri-local-control-stereotactic-body-radiation-therapy-liver.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    },
+    {
+      "id": 288,
+      "pmid": "21587185",
+      "doi": "10.1002/acm2.70557",
+      "pmc_id": null,
+      "title": "Reirradiation treatment effects in the clinic (ReTEC) proposal – proof of concept based on spinal cord dose tolerance for reirradiation with stereotactic body radiotherapy",
+      "authors": [
+        "Grimm, Jimm",
+        "Mahadevan, Anand",
+        "Obayomi‐Davies, Olusola",
+        "Soltys, Scott G.",
+        "Sahgal, Arjun",
+        "Redmond, Kristin J.",
+        "Milano, Michael T.",
+        "Tomé, Wolfgang A.",
+        "Brooks, Kenneth",
+        "Dodd, Scott",
+        "Vargo, John Austin",
+        "Subedi, Gopal",
+        "Xue, Jinyu",
+        "Ebid, Bisher",
+        "Ehret, Felix",
+        "Rhieu, Byung‐Han Andrew",
+        "Fürweger, Christoph",
+        "Grimm, Rachel",
+        "Muacevic, Alexander",
+        "Moiseenko, Vitali",
+        "Kalnicki, Shalom",
+        "McLaughlin, Mark",
+        "Kleinberg, Lawrence R.",
+        "Adler, John R.",
+        "Gibbs, Iris C."
+      ],
+      "journal": "Journal of Applied Clinical Medical Physics",
+      "pub_date": "2026-04",
+      "abstract": "Abstract Background Since the inception of spinal radiosurgery decades ago, the factors influencing spinal cord recovery have remained unclear. Elucidating these factors would aid in reirradiation planning and delivery. We describe modeling reirradiation normal tissue complication probabilities (NTCP) from compiled published data, akin to the collaborative Quantitative Analysis of Normal Tissue Effects in the Clinic (QUANTEC) and High Dose per Fraction, Hypofractionated Treatment Effects in the Clinic (HyTEC) projects. Purpose Simple dose‐time recovery factors for the spinal cord serve as a basis to propose the Reirradiation Treatment Effects in the Clinic (ReTEC) project. ReTEC aims to define human organ recovery factors to convert the total composite dose to an equivalent physical dose compatible with the de novo therapy dose tolerance limits. Additionally, we present a system for automating analyses as well as clinical implementation of radiation dose‐time recovery. Methods Published literature was queried for stereotactic voxel‐wise composite reirradiation plans involving the spinal cord, but none were found. Hence, minimum reporting criteria were used instead: spinal cord maximum dose (Dmax) of each course, time interval between courses, and number of fractions or biologically effective dose, per patient or in sufficiently homogeneous groups of patients. Recovery factors and logistic model parameters were fitted with maximum likelihood techniques. Results An NTCP model was derived from 13 papers with data from 282 lesions, including six myelopathy cases. The model suggested spinal cord recovery of more than 50% in less than 1 year, which is faster and more complete than current clinical practice, but with wide confidence intervals (CI) (bootstrap 95% CI: 31%–95% when the time interval was 1 year). Conclusion Due to limited data, we recommend remaining within current standard guidelines until more comprehensive analyses, optimally under the ReTEC initiative, refute or validate these estimates. ReTEC would require composite plans accounting for differing Dmax locations in each course. Nevertheless, this proof‐of‐concept Dmax model provides insight and serves as a basis to propose ReTEC.",
+      "pdf_path": "data/obsidian/papers/oligo-mets/2026-grimm-reirradiation-treatment-effects-clinic-retec-proposal.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    },
+    {
+      "id": 287,
+      "pmid": null,
+      "doi": "10.1016/j.ijrobp.2020.11.020",
+      "pmc_id": null,
+      "title": "A Primer on Dose-Response Data Modeling in Radiation Therapy",
+      "authors": [
+        "Moiseenko, Vitali",
+        "Marks, Lawrence B.",
+        "Grimm, Jimm",
+        "Jackson, Andrew",
+        "Milano, Michael T.",
+        "Hattangadi-Gluth, Jona A.",
+        "Huynh-Le, Minh-Phuong",
+        "Pettersson, Niclas",
+        "Yorke, Ellen",
+        "El Naqa, Issam"
+      ],
+      "journal": "International Journal of Radiation Oncology*Biology*Physics",
+      "pub_date": "2021-05",
+      "abstract": null,
+      "pdf_path": "data/obsidian/papers/thoracic/2021-moiseenko-primer-dose-response-data-modeling-radiation-therapy.pdf",
+      "source_url": null,
+      "note": null,
+      "resolved_from_review": false
+    }
+  ]
+}
